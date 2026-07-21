@@ -122,7 +122,7 @@ namespace Pinder.Core.Tests
             File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
-            transport.ResponseToReturn = @"{ ""derived_feeling"": ""abandonment issues"", ""defense_reaction"": ""humor"" }";
+            transport.ResponseToReturn = @"{ ""Derived_Feeling"": ""abandonment issues"", ""defense_reaction"": ""humor"", ""extra_note"": ""ignored"" }";
             
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
             var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
@@ -145,6 +145,7 @@ namespace Pinder.Core.Tests
             
             Assert.Equal("abandonment issues", result["derived_feeling"]);
             Assert.Equal("humor", result["defense_reaction"]);
+            Assert.Equal(2, result.Count);
             
             Directory.Delete(testDir, true);
         }
@@ -321,16 +322,15 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task TherapistDiagnosisGenerator_WithValidEmptyJsonObject_ReturnsEmptyDictionaryWithoutThrowing()
+        public async Task TherapistDiagnosisGenerator_WithEmptyJsonObject_RetriesThenThrows()
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
             File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
-            // A well-formed, empty JSON object is the LLM's legitimate way of
-            // saying "this character has no notable psychiatric diagnosis" —
-            // that is success, not a parse failure, and must not throw.
+            // Cognitive subtext requires both diagnosis fields, so an empty
+            // object is a contract violation even though it is valid JSON.
             transport.ResponseToReturn = "{}";
 
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
@@ -339,23 +339,25 @@ namespace Pinder.Core.Tests
             var backstory = new Dictionary<string, BackstoryFact>();
             var stakes = new List<string>();
 
-            var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes));
 
-            Assert.NotNull(result);
-            Assert.Empty(result);
+            Assert.IsType<JsonException>(ex.InnerException);
+            Assert.Contains("derived_feeling", ex.InnerException!.Message);
+            Assert.Equal(3, transport.CallCount);
 
             Directory.Delete(testDir, true);
         }
 
         [Fact]
-        public async Task TherapistDiagnosisGenerator_WithValidJsonButWhitespaceKeysOrValues_TrimsAndFiltersThem()
+        public async Task TherapistDiagnosisGenerator_WithIncompleteJson_RetriesThenThrows()
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
             File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
-            transport.ResponseToReturn = @"{ ""valid_key"": ""  some value with whitespace  "", "" "": ""value with empty key"", ""empty_value"": ""   "" }";
+            transport.ResponseToReturn = @"{ ""derived_feeling"": ""  social exposure  "", ""defense_reaction"": ""   "" }";
             
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
             var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
@@ -363,13 +365,12 @@ namespace Pinder.Core.Tests
             var backstory = new Dictionary<string, BackstoryFact>();
             var stakes = new List<string>();
 
-            // Act
-            var result = await generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes);
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => generator.GenerateAsync("Char", "he/him", "bio", backstory, stakes));
 
-            // Assert
-            Assert.Single(result);
-            Assert.True(result.ContainsKey("valid_key"));
-            Assert.Equal("some value with whitespace", result["valid_key"]);
+            Assert.IsType<JsonException>(ex.InnerException);
+            Assert.Contains("defense_reaction", ex.InnerException!.Message);
+            Assert.Equal(3, transport.CallCount);
             
             Directory.Delete(testDir, true);
         }

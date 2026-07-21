@@ -71,30 +71,12 @@ namespace Pinder.SessionSetup
                     {
                         // The LLM returned the JSON literal `null` (or something that
                         // deserializes to it) rather than an object. That is not the
-                        // same as a legitimate "no notable psychiatric traits" answer
-                        // (which the model expresses as `{}`), so treat it as a
-                        // malformed/contract-violating response and fail loud.
+                        // same as a diagnosis object satisfying the two required
+                        // cognitive-subtext fields, so fail loudly.
                         throw new JsonException("Deserialized diagnosis was null.");
                     }
 
-                    if (dict.Count == 0)
-                    {
-                        // A valid, empty JSON object is a legitimate answer: the
-                        // character genuinely has no notable psychiatric diagnosis.
-                        // This is success, not failure.
-                        return new Dictionary<string, string>();
-                    }
-
-                    // Validate that keys and values are meaningful and non-empty
-                    var validatedDict = new Dictionary<string, string>();
-                    foreach (var kvp in dict)
-                    {
-                        if (!string.IsNullOrWhiteSpace(kvp.Key) && !string.IsNullOrWhiteSpace(kvp.Value))
-                        {
-                            validatedDict[kvp.Key] = kvp.Value.Trim();
-                        }
-                    }
-                    return validatedDict;
+                    return ValidateDiagnosis(dict);
                 }
                 catch (JsonException ex)
                 {
@@ -124,6 +106,29 @@ namespace Pinder.SessionSetup
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
             return JsonSerializer.Deserialize<Dictionary<string, string>>(json, options);
+        }
+
+        private static Dictionary<string, string> ValidateDiagnosis(
+            Dictionary<string, string> diagnosis)
+        {
+            var validated = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in diagnosis)
+            {
+                if (!string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value))
+                    validated[pair.Key.Trim()] = pair.Value.Trim();
+            }
+
+            foreach (var requiredField in new[] { "derived_feeling", "defense_reaction" })
+            {
+                if (!validated.TryGetValue(requiredField, out var value) || string.IsNullOrWhiteSpace(value))
+                    throw new JsonException($"Diagnosis response is missing required field '{requiredField}'.");
+            }
+
+            return new Dictionary<string, string>
+            {
+                ["derived_feeling"] = validated["derived_feeling"],
+                ["defense_reaction"] = validated["defense_reaction"],
+            };
         }
 
         internal static string? ExtractJsonObject(string text)

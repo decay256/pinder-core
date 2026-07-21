@@ -37,6 +37,10 @@
       "minLength": 1,
       "description": "Free-form gender identity string (e.g. \"he/him\", \"they/them\")."
     },
+    "bio": {
+      "type": "string",
+      "description": "Generated public-facing profile bio. Optional on legacy files until synthesis completes."
+    },
     "level": {
       "type": "integer",
       "minimum": 1,
@@ -69,6 +73,23 @@
     "consolidated_backstory": {
       "type": "string",
       "description": "Standardized backstory source generated only from raw backstory fragments before final backstory synthesis."
+    },
+    "stake_lines": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "items": { "type": "string", "minLength": 1 },
+      "description": "Structured psychological stakes used by runtime prompts. Complete synthesized characters contain exactly 15 entries."
+    },
+    "psychiatric_diagnosis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["derived_feeling", "defense_reaction"],
+      "description": "Therapist synthesis required by cognitive subtext when the character is used as the datee.",
+      "properties": {
+        "derived_feeling": { "type": "string", "minLength": 1 },
+        "defense_reaction": { "type": "string", "minLength": 1 }
+      }
     },
     "backstory_categories": {
       "type": "object",

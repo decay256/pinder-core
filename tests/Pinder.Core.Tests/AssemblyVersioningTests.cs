@@ -8,7 +8,7 @@ namespace Pinder.Core.Tests
 {
     public class AssemblyVersioningTests
     {
-        private static readonly Version ExpectedAssemblyVersion = Version.Parse("0.2.14.0");
+        private static readonly Version ExpectedAssemblyVersion = Version.Parse("0.2.15.0");
 
         [Fact]
         public void CoreAssembly_HasCorrectVersion()
