@@ -42,7 +42,7 @@ C:\Users\decay\Documents\Codex\2026-07-07\i-a\outputs\remote-validation.ps1 -Rep
 Runtime/deploy checks on `pinder-prod` should tunnel through OpenClaw:
 
 ```bash
-ssh root@100.73.77.20
+ssh root@100.68.94.112
 ```
 
 ## Commands
