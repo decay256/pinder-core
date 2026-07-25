@@ -79,18 +79,21 @@ namespace Pinder.Core.Conversation
             }
 
             int interestDelta = deliveryStage.FinalInterestDelta;
+            InterestState finalInterestAfterState = TurnOrchestratorHelpers.ResolveInterestState(
+                state,
+                _rules,
+                _onRuleResolution);
 
             // 9. Check interest threshold crossing → narrative beat
             string? narrativeBeat = null;
-            if (rollStage.StateBefore != rollStage.StateAfter)
+            if (rollStage.StateBefore != finalInterestAfterState)
             {
-                narrativeBeat = $"*** Interest state changed to {rollStage.StateAfter} ***";
+                narrativeBeat = $"*** Interest state changed to {finalInterestAfterState} ***";
             }
 
-            // Datee Response and Turn Assembly
-            state.History.Add((player.DisplayName, deliveryStage.DeliveredMessage));
-
-            // Execute Datee Response Stage
+            // Execute Datee Response Stage. DateeContext.ConversationHistory is
+            // prior completed exchanges only; the current event is carried via
+            // PlayerDeliveredMessage until the DATEE reply succeeds.
             var dateeStageResult = await _dateeResponseStage.ExecuteAsync(
                 state,
                 rollStage,
@@ -98,7 +101,8 @@ namespace Pinder.Core.Conversation
                 player,
                 datee,
                 progress,
-                ct).ConfigureAwait(false);
+                ct,
+                finalInterestAfterState).ConfigureAwait(false);
 
             var dateeResponse = dateeStageResult.DateeResponse;
             string dateeMessage = dateeStageResult.DateeMessage;
@@ -108,6 +112,7 @@ namespace Pinder.Core.Conversation
                 : null;
             state.ActiveTell = dateeResponse.DetectedTell;
 
+            state.History.Add((player.DisplayName, deliveryStage.DeliveredMessage));
             state.History.Add((datee.DisplayName, dateeMessage));
 
             state.Traps.AdvanceTurn();

@@ -23,7 +23,11 @@ namespace Pinder.Core.Conversation
         /// <summary>Assembled system prompt for the datee character (this session's own character — not a bleed).</summary>
         public string DateePrompt { get; }
 
-        /// <summary>Conversation history as (sender, text) pairs in order.</summary>
+        /// <summary>
+        /// Prior completed visible exchanges as (sender, text) pairs in order.
+        /// The current delivered player line is supplied separately through
+        /// <see cref="PlayerDeliveredMessage"/> and must not be duplicated here.
+        /// </summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
         /// <summary>The datee's last message, or empty if first turn.</summary>
@@ -35,14 +39,20 @@ namespace Pinder.Core.Conversation
         /// <summary>Current interest meter value.</summary>
         public int CurrentInterest { get; }
 
-        /// <summary>The player's delivered message (post-degradation).</summary>
+        /// <summary>The current player's delivered message (post-degradation).</summary>
         public string PlayerDeliveredMessage { get; }
 
         /// <summary>Interest value before this turn's roll.</summary>
         public int InterestBefore { get; }
 
-        /// <summary>Interest value after this turn's roll.</summary>
+        /// <summary>Final interest value after this turn's roll and delivery-side mutations.</summary>
         public int InterestAfter { get; }
+
+        /// <summary>Typed relationship state before this turn's roll.</summary>
+        public InterestState InterestBeforeState { get; }
+
+        /// <summary>Typed final relationship state after delivery-side interest mutations.</summary>
+        public InterestState InterestAfterState { get; }
 
         /// <summary>Datee's simulated response delay in minutes (from timing profile).</summary>
         public double ResponseDelayMinutes { get; }
@@ -107,7 +117,9 @@ namespace Pinder.Core.Conversation
             bool horninessOverlayApplied = false,
             FailureTier horninessTier = FailureTier.Success,
             ResolvedRevelationTarget? resolvedTarget = null,
-            string? cognitiveSubtext = null)
+            string? cognitiveSubtext = null,
+            InterestState? interestBeforeState = null,
+            InterestState? interestAfterState = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -118,6 +130,8 @@ namespace Pinder.Core.Conversation
             PlayerDeliveredMessage = playerDeliveredMessage ?? throw new System.ArgumentNullException(nameof(playerDeliveredMessage));
             InterestBefore = interestBefore;
             InterestAfter = interestAfter;
+            InterestBeforeState = interestBeforeState ?? new InterestMeter(interestBefore).GetState();
+            InterestAfterState = interestAfterState ?? new InterestMeter(interestAfter).GetState();
             ResponseDelayMinutes = responseDelayMinutes;
             ShadowThresholds = shadowThresholds;
             ActiveTrapInstructions = activeTrapInstructions;

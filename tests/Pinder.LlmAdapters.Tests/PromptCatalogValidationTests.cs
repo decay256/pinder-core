@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Pinder.Core.Conversation;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
@@ -41,6 +42,98 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(
                 "prompt-catalog: missing required key 'stake'. The yaml file is incomplete or missing.",
                 ex.Message);
+        }
+
+        [Fact]
+        public void SessionDocumentBuilder_UsesExplicitlyCapturedCatalog_AfterGlobalChanges()
+        {
+            var promptsRoot = FindPromptsRoot();
+            var capturedRoot = CopyPromptsToTemp(promptsRoot);
+            var globalRoot = CopyPromptsToTemp(promptsRoot);
+            var previous = PromptTemplates.Catalog;
+            try
+            {
+                ReplaceInTemplates(
+                    capturedRoot,
+                    "Generate exactly {options_count} dialogue options for {player_name}.",
+                    "CAPTURED GENERATION for {player_name}: generate {options_count} options.");
+                ReplaceInTemplates(
+                    globalRoot,
+                    "Generate exactly {options_count} dialogue options for {player_name}.",
+                    "NEW GLOBAL GENERATION for {player_name}: generate {options_count} options.");
+                var capturedCatalog = PromptCatalog.LoadFromDirectory(capturedRoot);
+                PromptTemplates.Catalog = PromptCatalog.LoadFromDirectory(globalRoot);
+                var context = new DialogueContext(
+                    playerAvatarPrompt: "player",
+                    dateePrompt: "datee",
+                    conversationHistory: Array.Empty<(string, string)>(),
+                    dateeLastMessage: "",
+                    activeTraps: Array.Empty<string>(),
+                    currentInterest: 10,
+                    playerName: "Ari",
+                    dateeName: "Sam",
+                    availableStats: new[] { Pinder.Core.Stats.StatType.Charm });
+
+                var prompt = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                    context,
+                    capturedCatalog);
+
+                Assert.Contains("CAPTURED GENERATION for Ari", prompt);
+                Assert.DoesNotContain("NEW GLOBAL GENERATION", prompt);
+            }
+            finally
+            {
+                PromptTemplates.Catalog = previous;
+                Directory.Delete(capturedRoot, recursive: true);
+                Directory.Delete(globalRoot, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void ValidateRuntimeCatalog_RejectsMissingOperationalPlaceholder()
+        {
+            var root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                ReplaceInTemplates(root, "{options_list}", "options_list");
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("dialogue-options-instruction", error.Message);
+                Assert.Contains("{options_list}", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void ValidateRuntimeCatalog_RejectsMalformedCharacterDataFraming()
+        {
+            var root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                var path = System.IO.Path.Combine(root, "structural.yaml");
+                var contents = File.ReadAllText(path);
+                Assert.Contains("{self_awareness}", contents);
+                File.WriteAllText(
+                    path,
+                    contents.Replace("{self_awareness}", "self_awareness", StringComparison.Ordinal));
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("character_data_framing", error.Message);
+                Assert.Contains("{self_awareness}", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
         }
 
         [Theory]
@@ -89,6 +182,40 @@ namespace Pinder.LlmAdapters.Tests
             {
                 Directory.Delete(Path, recursive: true);
             }
+        }
+
+        private static string FindPromptsRoot()
+        {
+            string? dir = AppDomain.CurrentDomain.BaseDirectory;
+            while (dir != null)
+            {
+                var candidate = System.IO.Path.Combine(dir, "data", "prompts");
+                if (Directory.Exists(candidate)) return candidate;
+                dir = System.IO.Path.GetDirectoryName(dir);
+            }
+
+            throw new DirectoryNotFoundException("Could not locate bundled data/prompts.");
+        }
+
+        private static string CopyPromptsToTemp(string source)
+        {
+            var destination = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "prompt-generation-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(destination);
+            foreach (var file in Directory.EnumerateFiles(source, "*.yaml"))
+            {
+                File.Copy(file, System.IO.Path.Combine(destination, System.IO.Path.GetFileName(file)));
+            }
+            return destination;
+        }
+
+        private static void ReplaceInTemplates(string root, string oldValue, string newValue)
+        {
+            var path = System.IO.Path.Combine(root, "templates.yaml");
+            var contents = File.ReadAllText(path);
+            Assert.Contains(oldValue, contents);
+            File.WriteAllText(path, contents.Replace(oldValue, newValue, StringComparison.Ordinal));
         }
     }
 }

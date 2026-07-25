@@ -82,13 +82,13 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains($"Current interest: {interest}/25", result);
         }
 
-        // ── Interest 10-14: Unstable agreement ──
+        // ── Interest 10-15: Unstable agreement ──
 
         [Theory]
         [InlineData(10)]
         [InlineData(12)]
-        [InlineData(14)]
-        public void BuildDateePrompt_Interest10To14_UnstableAgreement(int interest)
+        [InlineData(15)]
+        public void BuildDateePrompt_Interest10To15_UnstableAgreement(int interest)
         {
             var ctx = MakeDateeContext(interest);
             var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
@@ -97,13 +97,13 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains($"Current interest: {interest}/25", result);
         }
 
-        // ── Interest 15-20: Deliberate approach ──
+        // ── Interest 16-20: Deliberate approach ──
 
         [Theory]
-        [InlineData(15)]
-        [InlineData(17)]
+        [InlineData(16)]
+        [InlineData(18)]
         [InlineData(20)]
-        public void BuildDateePrompt_Interest15To20_DeliberateApproach(int interest)
+        public void BuildDateePrompt_Interest16To20_DeliberateApproach(int interest)
         {
             var ctx = MakeDateeContext(interest);
             var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
@@ -173,9 +173,19 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDateePrompt_BoundaryAt15_DeliberateNotUnstable()
+        public void BuildDateePrompt_BoundaryAt15_UnstableNotDeliberate()
         {
             var ctx = MakeDateeContext(15);
+            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+
+            Assert.Contains("Unstable agreement", result);
+            Assert.DoesNotContain("Deliberate approach", result);
+        }
+
+        [Fact]
+        public void BuildDateePrompt_BoundaryAt16_DeliberateNotUnstable()
+        {
+            var ctx = MakeDateeContext(16);
             var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
             Assert.Contains("Deliberate approach", result);
@@ -211,8 +221,8 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(5, "Skeptical interest")]
         [InlineData(9, "Skeptical interest")]
         [InlineData(10, "Unstable agreement")]
-        [InlineData(14, "Unstable agreement")]
-        [InlineData(15, "Deliberate approach")]
+        [InlineData(15, "Unstable agreement")]
+        [InlineData(16, "Deliberate approach")]
         [InlineData(20, "Deliberate approach")]
         [InlineData(21, "Almost convinced")]
         [InlineData(24, "Almost convinced")]

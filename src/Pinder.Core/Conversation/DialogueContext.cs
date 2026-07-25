@@ -27,6 +27,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Current interest meter value.</summary>
         public int CurrentInterest { get; }
 
+        /// <summary>Typed relationship state resolved from the current interest before this turn is delivered.</summary>
+        public InterestState CurrentInterestState { get; }
+
         /// <summary>Shadow stat thresholds for the player, or null if not applicable.</summary>
         public Dictionary<ShadowStatType, int>? ShadowThresholds { get; }
 
@@ -123,7 +126,8 @@ namespace Pinder.Core.Conversation
             int? playerHungerForIntimacy = null,
             int? playerTerrorOfRejection = null,
             int? dateeHungerForIntimacy = null,
-            int? dateeTerrorOfRejection = null)
+            int? dateeTerrorOfRejection = null,
+            InterestState? currentInterestState = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -131,6 +135,7 @@ namespace Pinder.Core.Conversation
             DateeLastMessage = dateeLastMessage ?? throw new System.ArgumentNullException(nameof(dateeLastMessage));
             ActiveTraps = activeTraps ?? throw new System.ArgumentNullException(nameof(activeTraps));
             CurrentInterest = currentInterest;
+            CurrentInterestState = currentInterestState ?? new InterestMeter(currentInterest).GetState();
             ShadowThresholds = shadowThresholds;
             CallbackOpportunities = callbackOpportunities;
             HorninessLevel = horninessLevel;

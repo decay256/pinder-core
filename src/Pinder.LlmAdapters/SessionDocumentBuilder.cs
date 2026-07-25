@@ -22,9 +22,11 @@ namespace Pinder.LlmAdapters
         /// Builds the user-message content for GetDialogueOptionsAsync.
         /// Uses [ENGINE — Turn N] injection block format.
         /// </summary>
-        public static string BuildDialogueOptionsPrompt(DialogueContext context)
+        public static string BuildDialogueOptionsPrompt(
+            DialogueContext context,
+            PromptCatalog? promptCatalog = null)
         {
-            var result = BuildDialogueOptionsPromptEx(context);
+            var result = BuildDialogueOptionsPromptEx(context, promptCatalog);
             Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options", result);
             return result.Text;
         }
@@ -33,9 +35,11 @@ namespace Pinder.LlmAdapters
         /// Builds the user-message content for GetDateeResponseAsync.
         /// Uses [ENGINE — DATEE] injection block format.
         /// </summary>
-        public static string BuildDateePrompt(DateeContext context)
+        public static string BuildDateePrompt(
+            DateeContext context,
+            PromptCatalog? promptCatalog = null)
         {
-            var result = BuildDateePromptEx(context);
+            var result = BuildDateePromptEx(context, promptCatalog);
             Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("datee", result);
             return result.Text;
         }
@@ -51,11 +55,17 @@ namespace Pinder.LlmAdapters
             int interestAfter,
             InterestState newState,
             IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
-            string? playerName = null)
+            string? playerName = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (dateeName == null) throw new ArgumentNullException(nameof(dateeName));
 
-            string thresholdInstruction = GetThresholdInstruction(interestBefore, interestAfter, newState, dateeName);
+            string thresholdInstruction = GetThresholdInstruction(
+                interestBefore,
+                interestAfter,
+                newState,
+                dateeName,
+                promptCatalog);
 
             var sb = new StringBuilder();
 
@@ -67,7 +77,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            sb.Append(PromptTemplates.InterestBeatInstruction
+            sb.Append(PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-instruction")
                 .Replace("{datee_name}", dateeName)
                 .Replace("{interest_before}", interestBefore.ToString())
                 .Replace("{interest_after}", interestAfter.ToString())

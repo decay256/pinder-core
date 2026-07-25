@@ -19,25 +19,29 @@ namespace Pinder.LlmAdapters.Anthropic
         private readonly string _model;
         private readonly AnthropicOptions? _options;
         private readonly LlmCallTelemetryOptions? _telemetry;
+        private readonly AnthropicMessageHeadings _messageHeadings;
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned AnthropicClient.</summary>
         public AnthropicTransport(
             string apiKey,
             string model = AnthropicModelIds.DefaultModel,
-            LlmCallTelemetryOptions? telemetry = null)
+            LlmCallTelemetryOptions? telemetry = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _telemetry = telemetry;
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _client = new AnthropicClient(apiKey);
         }
 
         /// <summary>Creates transport from AnthropicOptions with internally-owned AnthropicClient.</summary>
         public AnthropicTransport(
             AnthropicOptions options,
-            LlmCallTelemetryOptions? telemetry = null)
+            LlmCallTelemetryOptions? telemetry = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrWhiteSpace(options.ApiKey))
@@ -45,6 +49,7 @@ namespace Pinder.LlmAdapters.Anthropic
             _model = AnthropicModelIds.ToApiId(options.Model);
             _options = options;
             _telemetry = telemetry;
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _client = new AnthropicClient(options.ApiKey);
         }
 
@@ -53,12 +58,14 @@ namespace Pinder.LlmAdapters.Anthropic
             string apiKey,
             string model,
             System.Net.Http.HttpClient httpClient,
-            LlmCallTelemetryOptions? telemetry = null)
+            LlmCallTelemetryOptions? telemetry = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
             _telemetry = telemetry;
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _client = new AnthropicClient(apiKey, httpClient);
         }
 
@@ -66,7 +73,8 @@ namespace Pinder.LlmAdapters.Anthropic
         public AnthropicTransport(
             AnthropicOptions options,
             System.Net.Http.HttpClient httpClient,
-            LlmCallTelemetryOptions? telemetry = null)
+            LlmCallTelemetryOptions? telemetry = null,
+            PromptCatalog? promptCatalog = null)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
             if (string.IsNullOrWhiteSpace(options.ApiKey))
@@ -74,6 +82,7 @@ namespace Pinder.LlmAdapters.Anthropic
             _model = AnthropicModelIds.ToApiId(options.Model);
             _options = options;
             _telemetry = telemetry;
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _client = new AnthropicClient(options.ApiKey, httpClient);
         }
 
@@ -94,7 +103,7 @@ namespace Pinder.LlmAdapters.Anthropic
             };
 
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
-                _model, maxTokens, systemBlocks, userMessage, temperature);
+                _model, maxTokens, systemBlocks, userMessage, temperature, _messageHeadings);
 
             // #794: forward the engine-level cancellation token to the underlying
             // HTTP call so a mid-turn Cancel() halts the in-flight request.
@@ -116,6 +125,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 temperature,
                 _telemetry,
                 phase,
+                _messageHeadings,
                 ct).ConfigureAwait(false);
         }
 
@@ -147,7 +157,8 @@ namespace Pinder.LlmAdapters.Anthropic
                 request.MaxTokens,
                 systemBlocks,
                 request.UserMessage,
-                request.Temperature);
+                request.Temperature,
+                _messageHeadings);
 
             messagesRequest.Tools = new[]
             {

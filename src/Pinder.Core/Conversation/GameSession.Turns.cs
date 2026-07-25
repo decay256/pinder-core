@@ -135,6 +135,43 @@ namespace Pinder.Core.Conversation
             return new Pinder.Core.Rolls.PerOptionDicePool(optionIndex, values);
         }
 
+        private Pinder.Core.Rolls.PerOptionDicePool ReserveSelectedDicePool(int optionIndex)
+        {
+            if (_ended)
+                throw new GameEndedException(_outcome!.Value);
+
+            if (_currentOptions == null)
+                throw new InvalidOperationException("Must call StartTurnAsync before ResolveTurnAsync.");
+
+            if (optionIndex < 0 || optionIndex >= _currentOptions.Length)
+                throw new ArgumentOutOfRangeException(nameof(optionIndex),
+                    $"Option index {optionIndex} is out of range. Valid range: 0-{_currentOptions.Length - 1}.");
+
+            if (_currentDicePools == null || _currentDicePools.Length != _currentOptions.Length)
+            {
+                _currentDicePools = new Pinder.Core.Rolls.PerOptionDicePool[_currentOptions.Length];
+                for (int i = 0; i < _currentOptions.Length; i++)
+                    _currentDicePools[i] = new Pinder.Core.Rolls.PerOptionDicePool(i);
+            }
+
+            if (_injectedNextPool != null)
+            {
+                var injected = _injectedNextPool;
+                _currentDicePools[optionIndex] = injected;
+                _injectedNextPool = null;
+                return injected;
+            }
+
+            var existing = _currentDicePools[optionIndex];
+            if (existing != null && existing.Count > 0)
+                return existing;
+
+            bool resolveHasDisadvantage = _currentHasDisadvantage;
+            var reserved = FillChosenDicePool(optionIndex, _currentOptions[optionIndex], resolveHasDisadvantage);
+            _currentDicePools[optionIndex] = reserved;
+            return reserved;
+        }
+
         /// <summary>
         /// Resolve a turn after the player selects an option.
         /// Sequences: roll → interest delta → momentum → shadow growth → trap advance → deliver → datee response.
@@ -188,12 +225,50 @@ namespace Pinder.Core.Conversation
         /// trap overlay, horniness overlay, shadow corruption, datee
         /// response). When the token is cancelled mid-turn the engine surfaces
         /// <see cref="OperationCanceledException"/> at the next adapter call;
+        /// if it is cancelled after the working clone completes but before
+        /// parent adoption, the prepared parent state (active turn plus
+        /// selected option's reserved dice pool) is retained for retry.
         /// the post-cancel observable invariants are documented in
         /// <c>docs/development/regression-pins-787.md</c> and locked by the
         /// Phase 0 I6 / F3 invariant tests (#794, prerequisite for the
         /// fast-gameplay scheduler #425).
         /// </summary>
         public async Task<TurnResult> ResolveTurnAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress, CancellationToken ct)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            EnsureTransactionalCloneCompatibility();
+            var selectedPool = ReserveSelectedDicePool(optionIndex);
+            var working = CloneForRequiredTurnTransaction();
+            working.InjectNextDicePool(selectedPool);
+
+            var result = await working.ResolveTurnCoreAsync(
+                optionIndex,
+                progress,
+                ct).ConfigureAwait(false);
+
+            _transactionTestHooks?.BeforeResolveCommit?.Invoke();
+            ct.ThrowIfCancellationRequested();
+
+            AdoptStateFrom(working);
+            _transactionTestHooks?.AfterResolveCommit?.Invoke();
+            return result;
+        }
+
+        private void EnsureTransactionalCloneCompatibility()
+        {
+            ForkableRandom.EnsureCanForkForRequiredTurnTransaction(
+                _steeringEngine.SteeringRngForCloneOnly,
+                nameof(GameSessionConfig.SteeringRng));
+            if (_statDrawRng != null)
+            {
+                ForkableRandom.EnsureCanForkForRequiredTurnTransaction(
+                    _statDrawRng,
+                    nameof(GameSessionConfig.StatDrawRng));
+            }
+        }
+
+        private async Task<TurnResult> ResolveTurnCoreAsync(int optionIndex, System.IProgress<TurnProgressEvent>? progress, CancellationToken ct)
         {
             return await _turnOrchestrator.ResolveTurnAsync(
                 _state,

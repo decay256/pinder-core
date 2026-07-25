@@ -3,6 +3,13 @@
 ## Overview
 The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API clients for integrating large language models into Pinder's conversation game. It defines the structured instruction templates that guide LLM output (dialogue options, datee responses, interest beats) and handles communication with external LLM providers.
 
+> Supersession note (#1332): older entries in this module that describe
+> provider-persistent "stateful conversation mode", `StartConversation`, or
+> `HasActiveConversation` are historical. The current active
+> `IStatefulLlmAdapter` shape is stateless adapter calls with engine-owned
+> semantic history passed as an argument. See
+> [`../specs/issue-1332-datee-prerequisite-architecture.md`](../specs/issue-1332-datee-prerequisite-architecture.md).
+
 ## Key Components
 
 | File | Description |
@@ -17,8 +24,8 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 | `Anthropic/Dto/MessagesRequest.cs` | Request DTO for the Anthropic Messages API |
 | `Anthropic/Dto/MessagesResponse.cs` | Response DTO for the Anthropic Messages API |
 | `Anthropic/Dto/ContentBlock.cs` | Content block DTO for Anthropic message payloads |
-| `src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs` | Interface extending `ILlmAdapter` with `StartConversation(string)` and `HasActiveConversation` for stateful conversation mode |
-| `ConversationSession.cs` | Accumulates user/assistant messages for stateful multi-turn conversations; builds `MessagesRequest` with cached system blocks + full history |
+| `src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs` | Interface extending `ILlmAdapter` with engine-owned DATEE history passed into adapter calls |
+| `ConversationSession.cs` | Legacy Anthropic-native conversation helper; not the current `PinderLlmAdapter` session contract |
 | `GameDefinitionYamlContentTests.cs` (test) | 30 content-validation tests ensuring `game-definition.yaml` has correct structure and Pinder-specific creative content |
 | `ConversationSessionTests.cs` (test) | 16 unit tests for `ConversationSession` construction, append, BuildRequest, and edge cases |
 | `AnthropicLlmAdapterStatefulTests.cs` (test) | 12 tests for stateful adapter behavior across all 4 `ILlmAdapter` methods |
@@ -37,12 +44,7 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 
 - **`DialogueOptionsInstruction`** (`const string`) — §3.2: Instructs the LLM to generate exactly 4 dialogue options tagged with stat, callback, combo, and tell bonus metadata. Includes a voice-check reminder: "Before writing each option, verify: does this sound exactly like the texting style above? If not, rewrite it."
 - **`DateeResponseInstruction`** (`const string`) — §3.5: Instructs the LLM to generate an datee response with optional `[SIGNALS]` block containing TELLs and WEAKNESSes. Includes 10 explicit tell category mappings (behavior → stat) to constrain LLM output. Now embeds a fundamental resistance rule ("Below Interest 25, you are not won over…") and a `{resistance_block}` placeholder filled at runtime by `SessionDocumentBuilder`.
-- **`ResistanceActiveDisengagement`** (`internal const string`) — Interest 0–4: active disengagement descriptor.
-- **`ResistanceSkepticalInterest`** (`internal const string`) — Interest 5–9: skeptical interest descriptor.
-- **`ResistanceUnstableAgreement`** (`internal const string`) — Interest 10–14: unstable agreement descriptor.
-- **`ResistanceDeliberateApproach`** (`internal const string`) — Interest 15–20: deliberate approach descriptor.
-- **`ResistanceAlmostConvinced`** (`internal const string`) — Interest 21–24: almost convinced descriptor.
-- **`ResistanceDissolved`** (`internal const string`) — Interest 25: resistance dissolved descriptor.
+- **Semantic relationship narrative/resistance prompts** (`data/prompts/templates.yaml`) — All seven `InterestState` values have configured narrative and resistance keys. `Interested` covers Interest 10–15 and uses unstable-agreement resistance; `VeryIntoIt` covers Interest 16–20 and uses deliberate-approach resistance. DATEE prompt trace spans point at the selected semantic YAML key.
 - **`InterestBeatInstruction`** (`const string`) — §3.8: Generates narrative beats when interest crosses a threshold.
 - **`InterestBeatAbove15`** (`internal const string`) — Sub-instruction for interest rising above 15.
 - **`InterestBeatBelow8`** (`internal const string`) — Sub-instruction for interest dropping below 8.
@@ -58,13 +60,13 @@ The LLM Adapters module (`Pinder.LlmAdapters`) provides prompt templates and API
 
 Returns per-tier datee reaction guidance text for failure degradation. Maps each `FailureTier` value to the corresponding `PromptTemplates.DateeReaction*` constant. Returns `string.Empty` for `FailureTier.None` (success) and for any unrecognized enum value (graceful degradation, no throw).
 
-### `SessionDocumentBuilder.GetResistanceBlock(int interest)` (internal)
+### `SessionDocumentBuilder.GetResistanceBlock(int interest, InterestState interestState)` (internal)
 
-Returns a resistance descriptor string for the given interest level. Selects one of six `PromptTemplates.Resistance*` constants based on interest bands (0–4, 5–9, 10–14, 15–20, 21–24, 25) and formats it as `"Current interest: {interest}/25. Resistance level: {descriptor}"`. Values below 0 are treated as 0; values above 25 are treated as 25.
+Returns a resistance descriptor string for the typed relationship state supplied by the engine and formats it as `"Current interest: {interest}/25. Resistance level: {descriptor}"`. The compatibility `GetResistanceBlock(int)` wrapper resolves the canonical `InterestState` and delegates to the typed overload.
 
 ### `SessionDocumentBuilder.BuildDateePrompt(DateeContext)`
 
-Builds the user-message content for `GetDateeResponseAsync` (§3.5). Assembles conversation history, interest state, optional trap/shadow blocks, and the final `DateeResponseInstruction`. The resistance block is injected into `DateeResponseInstruction` by replacing the `{resistance_block}` placeholder with the output of `GetResistanceBlock(context.InterestAfter)`. Section order: CONVERSATION HISTORY → PLAYER'S LAST MESSAGE (with optional tier label) → FAILURE CONTEXT (conditional, on non-None `DeliveryTier`) → INTEREST CHANGE → RESPONSE TIMING → CURRENT INTEREST STATE → ACTIVE TRAP INSTRUCTIONS (conditional) → SHADOW STATE (conditional) → DateeResponseInstruction (with embedded FUNDAMENTAL RULE + resistance block). When `context.DeliveryTier != FailureTier.None`, the "PLAYER'S LAST MESSAGE" heading includes the tier name (e.g. "delivered after a CATASTROPHE") and a "FAILURE CONTEXT" section is injected containing the per-tier reaction guidance from `GetDateeReactionGuidance()`. On success (`FailureTier.None`), the prompt is identical to pre-#493 behavior.
+Builds the user-message content for `GetDateeResponseAsync` (§3.5). Assembles prior completed visible exchanges from `DateeContext.ConversationHistory`, the current delivered event from `DateeContext.PlayerDeliveredMessage`, typed final interest state from `DateeContext.InterestAfterState`, optional trap/shadow blocks, and the final `DateeResponseInstruction`. The relationship narrative and resistance block are selected by the typed state and annotated with their semantic YAML keys. Section order remains the active DATEE order documented in tests. When `context.DeliveryTier != FailureTier.None`, the "PLAYER'S LAST MESSAGE" heading includes the tier name and a "FAILURE CONTEXT" section is injected containing the per-tier reaction guidance from `GetDateeReactionGuidance()`. On success (`FailureTier.None`), no failure section is injected.
 
 ### `SessionDocumentBuilder.BuildDialogueOptionsPrompt(DialogueContext)`
 
@@ -75,15 +77,21 @@ Builds the user message content for dialogue option generation. When `context.Da
 ```csharp
 public interface IStatefulLlmAdapter : ILlmAdapter
 {
-    void StartConversation(string systemPrompt);
-    bool HasActiveConversation { get; }
+    Task<StatefulDateeResult> GetDateeResponseAsync(
+        DateeContext context,
+        IReadOnlyList<ConversationMessage> history,
+        CancellationToken cancellationToken = default);
+
+    Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default);
+    Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default);
+    Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default);
 }
 ```
 
-- Extends `ILlmAdapter` — implementors must also satisfy the four `ILlmAdapter` methods.
-- `StartConversation` initializes an internal conversation session. Calling again replaces the previous session (no error).
-- `HasActiveConversation` returns `false` before `StartConversation`, `true` after.
-- Lives in `Pinder.Core` (zero NuGet dependencies — pure interface). Implemented by `AnthropicLlmAdapter` (and modern `PinderLlmAdapter`); not implemented by `NullLlmAdapter`.
+- Extends `ILlmAdapter` - implementors must also satisfy the base adapter methods.
+- The DATEE history is owned by `GameSessionState` and supplied on each call.
+- Implementations must not retain DATEE-session state across calls.
+- Lives in `Pinder.Core` (zero NuGet dependencies - pure interface). Implemented by `PinderLlmAdapter`; `NullLlmAdapter` implements the test/fallback shape.
 
 ### `ILlmAdapter.ApplyFailureCorruptionAsync` (Pinder.Core.Interfaces)
 
@@ -113,9 +121,9 @@ Applies a config-driven failure corruption instruction prompt to a message when 
   - If the adapter invocation throws an exception (excluding `OperationCanceledException` under cancellation), returns an empty or unmodified string, or detects LLM refusal (e.g., matching phrases like `"I can't"`, `"I cannot"`, `"inappropriate"`, or `"I'd be happy to help"`), it fires an `OnOverlayDegraded` event to capture the degradation state.
   - In `DeliveryStage.ExecuteAsync`, if the asynchronous operation does not produce a valid mutated message, it falls back gracefully to the deterministic static overlay rendering via `DeliveryOverlay.Apply(...)`.
 
-### `ConversationSession` (public sealed class)
+### `ConversationSession` (Legacy Anthropic Helper)
 
-Accumulates user/assistant messages for stateful multi-turn conversations with the Anthropic Messages API. System blocks are set once at construction; messages grow unbounded as turns are played.
+Accumulates user/assistant messages for the legacy Anthropic Messages API adapter path. It is not the current DATEE session contract. Current production session continuity is engine-owned: `GameSessionState.DateeHistory` remains the semantic snapshot/resimulation ledger, and `GameSessionState.History` remains the canonical visible transcript. `DateeContext.ConversationHistory` contains prior completed visible exchanges; the current delivered player line is supplied separately as `PlayerDeliveredMessage`.
 
 - **`SystemBlocks`** (`ContentBlock[]`) — Single-element array containing the system prompt as a `ContentBlock` with `Type = "text"`, `Text = systemPrompt`, and `CacheControl = { Type = "ephemeral" }`. Set at construction, immutable thereafter.
 - **`Messages`** (`IReadOnlyList<Message>`) — Read-only view of all accumulated messages in append order.
@@ -128,6 +136,8 @@ Accumulates user/assistant messages for stateful multi-turn conversations with t
 
 - **`HasActiveConversation`** (`bool`, read-only) — `true` when a `ConversationSession` is active; `false` otherwise. When `true`, all four `ILlmAdapter` methods route through the accumulated session.
 - **`StartConversation(string systemPrompt)`** — Creates a new `ConversationSession` and stores it in the internal `_session` field. Replaces any existing session (no error). Throws `ArgumentException` if `systemPrompt` is null or whitespace. Implements `IStatefulLlmAdapter.StartConversation`.
+
+Historical note (#1332): the preceding Anthropic-specific member list describes the older adapter-retained conversation path. It is not the active `IStatefulLlmAdapter` contract. New work must use engine-owned history passed into `PinderLlmAdapter` instead of resurrecting `StartConversation` / `HasActiveConversation`.
 
 ### `AnthropicOptions` (public sealed class)
 - `string? DebugDirectory` — (New in #534) When set, the adapter writes raw request/response JSON payloads per LLM call and a rolling `session-summary.json` containing token usage metrics.
@@ -183,7 +193,7 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 
 ## Architecture Notes
 
-- **Template-based prompting:** All LLM instructions are static `const string` fields with `{placeholder}` tokens. `SessionDocumentBuilder` fills these at runtime with session-specific data (player name, datee name, interest levels, etc.).
+- **Template-based prompting:** Prompt prose is loaded from `data/prompts/*.yaml` through `PromptCatalog` and uses `{placeholder}` tokens. `SessionDocumentBuilder` fills these at runtime with session-specific data (player name, datee name, interest levels, etc.).
 - **Structured output:** Templates enforce strict output formats (e.g., `[SIGNALS]`, `[STAT: X]` tags) so responses can be parsed deterministically. (Note: The `[RESPONSE]` wrapper for main messages was removed, and the LLM now outputs the message text directly.)
 - **Tell category constraint:** The `DateeResponseInstruction` explicitly lists which datee behaviors map to which stat categories, preventing the LLM from inventing arbitrary tell associations. This was added to close a gap where the LLM was guessing which tells to produce.
 - **Character-voiced interest beats:** `GetInterestChangeBeatAsync` injects the datee's system prompt as a system block (via `CacheBlockBuilder.BuildDateeOnlySystemBlocks`) when `InterestChangeContext.DateePrompt` is non-empty. This ensures §3.8 interest change beats are generated in the datee's voice rather than generic narration. When no prompt is provided, no system blocks are sent (backward-compatible).
@@ -192,8 +202,9 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 - **Active tell exploitation:** When an datee reveals a vulnerability (via a Tell), the tell is retained in `GameSession` and passed into `DialogueContext.ActiveTell`. `SessionDocumentBuilder.BuildDialogueOptionsPrompt` uses this to inject a `TELL DETECTED` directive demanding that one of the generated options explicitly capitalize on the vulnerability, creating mechanical follow-through on the "read."
 - **Datee resistance framing:** `DateeResponseInstruction` now contains a fundamental resistance rule stating the datee is not won over below Interest 25. A `{resistance_block}` placeholder is filled at runtime by `GetResistanceBlock()`, which selects from six archetype-independent resistance postures (Active disengagement → Skeptical interest → Unstable agreement → Deliberate approach → Almost convinced → Resistance dissolved). The resistance system is purely prompt-engineering — no game mechanics or DTOs were changed. It complements the existing `GetInterestBehaviourBlock()` (which describes engagement behavior like reply speed/length) by framing the datee's *opposition posture*.
 - **Failure degradation legibility:** When a player's roll fails, `DateeContext.DeliveryTier` (set from `rollResult.Tier` in `GameSession.ResolveTurnAsync`) carries the `FailureTier` enum value into `BuildDateePrompt`. The method injects a "FAILURE CONTEXT" section with tier-specific guidance from `GetDateeReactionGuidance()`, so the datee LLM reacts proportionally to how badly the message was corrupted — from slight coolness (Fumble) to secondhand embarrassment (Legendary). Guidance text avoids fourth-wall-breaking language (no "failed", "rolled", etc.). On success (`FailureTier.None`), no failure section is injected. Note: the spec proposed a `PromptTemplates.GetDateeFailureGuidance()` method and "DELIVERY NOTE" section name; the implementation places the method on `SessionDocumentBuilder.GetDateeReactionGuidance()` and uses the section name "FAILURE CONTEXT".
-- **Stateful conversation mode:** `AnthropicLlmAdapter` supports an optional stateful mode activated by `StartConversation(systemPrompt)`. When active (`HasActiveConversation == true`), all four `ILlmAdapter` methods follow a shared pattern: (1) build user content via `SessionDocumentBuilder` (same as stateless), (2) append user message to `ConversationSession`, (3) build request via `_session.BuildRequest()` (includes system blocks + ALL accumulated messages), (4) send via `_client.SendMessagesAsync()`, (5) append raw assistant response to session, (6) parse and return. System blocks come from the `ConversationSession` (set at construction), not from `CacheBlockBuilder`. When no session is active, all methods execute the original stateless code path with no conditional logic overhead. The Anthropic Messages API is stateless (full history must be sent each call), so `ConversationSession` accumulates messages client-side. Messages grow unbounded within a session (acceptable for ~20-turn games within Anthropic's 200k token window). `ConversationSession` does not enforce user/assistant alternation — the caller is responsible. The class is not thread-safe; it is designed for sequential use within one `GameSession`.
-- **Session system prompt assembly:** `SessionSystemPromptBuilder.Build` produces a structured 5-section system prompt combining game-level creative direction (`GameDefinition`) with per-character profile prompts. This replaces the placeholder concatenation (player + `\n\n---\n\n` + datee) used in the initial `GameSession` wiring (#542). The output is passed to `IStatefulLlmAdapter.StartConversation()` to initialize a stateful conversation session. Production composition loads `GameDefinition` from YAML via `LoadFrom()` and passes/registers that resolver explicitly; `PinderDefaults` is reserved for tests and tooling. The YAML parsing uses `YamlDotNet 16.3.0` (same version as `Pinder.Rules`), added only to `Pinder.LlmAdapters.csproj` — `Pinder.Core` remains dependency-free.
+- **Historical stateful conversation mode:** The retired `AnthropicLlmAdapter` path used `StartConversation(systemPrompt)`, `HasActiveConversation`, and an adapter-retained `ConversationSession` to resend accumulated messages to the stateless Anthropic Messages API. This describes historical behavior only. The active `PinderLlmAdapter` contract retains no provider conversation: `GameSessionState` owns history and supplies the relevant context on every adapter call.
+- **Session system prompt assembly:** Historical #542 wiring passed a combined `SessionSystemPromptBuilder.Build` result to `IStatefulLlmAdapter.StartConversation()`. The active builder instead produces role-specific prompts with `BuildPlayerAvatar` and `BuildDatee`; these are compiled per operation by `PinderLlmAdapter`, with engine-owned context/history supplied as call inputs. Production composition still loads `GameDefinition` from YAML via `LoadFrom()` and passes/registers that resolver explicitly; `PinderDefaults` is reserved for tests and tooling. `Pinder.Core` remains dependency-free.
+- **Current session ownership (#1332/#1348):** `GameSessionState.DateeHistory` carries semantic DATEE messages for snapshot/resimulation, while `GameSessionState.History` remains the canonical gameplay transcript. `PinderLlmAdapter.GetDateeResponseAsync(DateeContext, history, ct)` receives the semantic history but does not prepend it when `DateeContext` already contains the rendered transcript. For DATEE prompts, `DateeContext.ConversationHistory` is prior completed visible exchanges only, and `PlayerDeliveredMessage` is the current event. The player/DATEE visible-history pair is appended together only after DATEE generation succeeds. `SessionSystemPromptBuilder` produces role-specific system prompts: `BuildPlayerAvatar` for avatar operations and `BuildDatee` for DATEE operations.
 - **Debug payload logging:** `AnthropicOptions` exposes an optional `DebugDirectory`. When set, `AnthropicLlmAdapter` writes exactly what is sent to and received from the Anthropic API to disk (`turn-XX-callType-request.json` and `-response.json`). It also accumulates token and cache performance metrics via thread-safe tracking, outputting a rolling `session-summary.json` file. This allows inspection of raw LLM interaction and prompt caching behavior without modifying game logic.
 - **Config-driven failure corruption overlays:** When standard option rolls fail, instead of immediately applying the deterministic static `DeliveryOverlay.Apply` rules, the system queries the config for stat-specific failure instructions. If found, it routes them to `ILlmAdapter.ApplyFailureCorruptionAsync` for a highly creative and context-aware failure rewrite, preserving the player's archetype voice. It guarantees robustness by falling back to the static deterministic overlay whenever the LLM fails, cancels, gets empty output, or issues standard refusals.
 - **Provider abstraction:** The Anthropic-specific code is isolated in its own subdirectory. The adapter pattern allows swapping LLM providers without changing prompt templates or game logic.
@@ -217,3 +228,4 @@ The prompt includes an explicit "ONLY" constraint with 10 behavior-to-stat mappi
 | 2026-04-06 | #534 | Added `--debug` flag support to `session-runner` via `AnthropicOptions.DebugDirectory`. `AnthropicLlmAdapter` now intercepts and writes `turn-{turn:D2}-{callType}-request.json` and `response.json` for every API call, plus a `session-summary.json` tracking cumulative input/output and cache tokens. Validated thread-safe stat tracking with 100-thread concurrent test. |
 | 2026-04-07 | #647 | Active tell options — `DialogueContext` gains `ActiveTell` property. `GameSession.StartTurnAsync` passes `_activeTell` into context. `SessionDocumentBuilder.BuildDialogueOptionsPrompt` injects a `TELL DETECTED` directive if an active tell exists, forcing the LLM to craft one option that exploits the revealed vulnerability. |
 | 2026-07-05 | #1311 | Restored config-driven LLM failure corruption prompts by implementing `ApplyFailureCorruptionAsync` on `ILlmAdapter`/`PinderLlmAdapter` and wiring it into `DeliveryStage.ExecuteAsync` with robust fallback to `DeliveryOverlay.Apply` and exception handling properties. |
+| 2026-07-25 | #1335 | Supersedes the #490/#544 raw numeric relationship prompt split for active DATEE prompt selection. `DateeContext.InterestAfterState` selects semantic narrative/resistance YAML keys for all seven `InterestState` values. Interest 15 remains `Interested` and uses lower narrative plus unstable-agreement resistance; Interest 16 begins `VeryIntoIt` and uses upper narrative plus deliberate-approach resistance. |

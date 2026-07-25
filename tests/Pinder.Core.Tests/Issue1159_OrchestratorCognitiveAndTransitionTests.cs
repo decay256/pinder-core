@@ -93,6 +93,26 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public async Task StartTurn_PresentDiagnosisBlankDefenseReaction_ThrowsTypedFailure()
+        {
+            var session = MakeSession(
+                new CapturingLlm(),
+                dateeDiagnosis: new Dictionary<string, string>
+                {
+                    { TherapistDiagnosisContract.DerivedFeelingKey, "abandonment" },
+                    { TherapistDiagnosisContract.DefenseReactionKey, "   " },
+                });
+
+            var ex = await Assert.ThrowsAsync<CognitiveSubtextException>(
+                () => session.StartTurnAsync());
+
+            Assert.Equal(TherapistDiagnosisContract.DefenseReactionKey, ex.MissingField);
+            Assert.Equal("Sable", ex.DateeName);
+            Assert.Equal(0, ex.TurnNumber);
+            Assert.Equal("missing_diagnosis_field", ex.Reason);
+        }
+
+        [Fact]
         public async Task StartTurn_MissingDiagnosis_ThrowsTypedFailure()
         {
             var session = MakeSession(new CapturingLlm(), dateeDiagnosis: null);
@@ -157,8 +177,9 @@ namespace Pinder.Core.Tests
         {
             return new Dictionary<string, string>
             {
-                { "derived_feeling", "abandonment" },
-                { "defense_reaction", "deflection" }
+                { TherapistDiagnosisContract.DerivedFeelingKey, "abandonment" },
+                { TherapistDiagnosisContract.DefenseReactionKey, "deflection" },
+                { "legacy_regeneration_note", "runtime ignores extras" },
             };
         }
     }

@@ -6,6 +6,30 @@ using Pinder.LlmAdapters.Anthropic.Dto;
 namespace Pinder.LlmAdapters.Anthropic
 {
     /// <summary>
+    /// Immutable stateful-context headings captured with one creative
+    /// configuration generation.
+    /// </summary>
+    public sealed class AnthropicMessageHeadings
+    {
+        private AnthropicMessageHeadings(string previousContext, string currentTurn)
+        {
+            PreviousContext = previousContext;
+            CurrentTurn = currentTurn;
+        }
+
+        public string PreviousContext { get; }
+        public string CurrentTurn { get; }
+
+        public static AnthropicMessageHeadings Capture(PromptCatalog? catalog = null)
+        {
+            var capturedCatalog = PromptCatalog.ResolveCatalogOrThrow(catalog);
+            return new AnthropicMessageHeadings(
+                PromptTemplates.GetCatalogString(capturedCatalog, "stateful-previous-context-heading"),
+                PromptTemplates.GetCatalogString(capturedCatalog, "stateful-current-turn-heading"));
+        }
+    }
+
+    /// <summary>
     /// Encapsulates the logic for constructing Anthropic API MessagesRequest objects
     /// and attaching tool definitions.
     /// </summary>
@@ -27,15 +51,17 @@ namespace Pinder.LlmAdapters.Anthropic
             int maxTokens,
             ContentBlock[] systemBlocks,
             string userContent,
-            double temperature)
+            double temperature,
+            AnthropicMessageHeadings headings)
         {
+            if (headings == null) throw new ArgumentNullException(nameof(headings));
             var request = new MessagesRequest
             {
                 Model = model,
                 MaxTokens = maxTokens,
                 Temperature = temperature,
                 System = systemBlocks,
-                Messages = BuildMessages(userContent)
+                Messages = BuildMessages(userContent, headings)
             };
 
             ApplyThinkingConfigIfApplicable(request);
@@ -83,12 +109,15 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Parses a flattened user message context string and builds the array of Message objects
         /// with cache_control: ephemeral annotations on the system prompt and historical context inputs.
         /// </summary>
-        public static Message[] BuildMessages(string userMessage)
+        public static Message[] BuildMessages(
+            string userMessage,
+            AnthropicMessageHeadings headings)
         {
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
+            if (headings == null) throw new ArgumentNullException(nameof(headings));
 
-            string previousContextHeading = PromptTemplates.StatefulPreviousContextHeading;
-            string currentTurnHeading = PromptTemplates.StatefulCurrentTurnHeading;
+            string previousContextHeading = headings.PreviousContext;
+            string currentTurnHeading = headings.CurrentTurn;
             if (!userMessage.StartsWith(previousContextHeading, StringComparison.Ordinal))
             {
                 return new[]

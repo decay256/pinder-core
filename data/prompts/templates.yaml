@@ -169,22 +169,25 @@ prompts:
   interest-beat-unmatched:
     system_prompt: >-
       Generate {datee_name} unmatching — one final message or simply going silent. In character. No villain speech. Just a door closing.
-  interest-narrative-1-4:
+  interest-narrative-unmatched:
+    system_prompt: >-
+      Unmatched. The conversation is over.
+  interest-narrative-bored:
     system_prompt: >-
       Reconsidering. Something went wrong.
-  interest-narrative-10-14:
+  interest-narrative-interested:
     system_prompt: >-
       Engaged but not sold. Evaluating.
-  interest-narrative-15-20:
+  interest-narrative-very-into-it:
     system_prompt: >-
       Interested but holding back. Close.
-  interest-narrative-21-24:
+  interest-narrative-almost-there:
     system_prompt: >-
       Basically sold. They can still blow it.
-  interest-narrative-25:
+  interest-narrative-date-secured:
     system_prompt: >-
       The resistance dissolved.
-  interest-narrative-5-9:
+  interest-narrative-lukewarm:
     system_prompt: >-
       Skeptical. Still testing.
   datee-horniness-reaction-below-threshold:
@@ -347,21 +350,24 @@ prompts:
   shadow-taint-overthinking:
     system_prompt: >-
       Your Overthinking is elevated. Self-Awareness options are too clinical. You explain your feelings rather than expressing them. You know this. You're doing it anyway.
-  resistance-active-disengagement:
+  resistance-unmatched:
     system_prompt: >-
       Active disengagement — short replies, testing, near-silence. You are barely here.
-  resistance-almost-convinced:
+  resistance-bored:
+    system_prompt: >-
+      Active disengagement — short replies, testing, near-silence. You are barely here.
+  resistance-almost-there:
     system_prompt: >-
       Almost convinced — warm but the final resistance is visible. You are choosing whether to give it. The holdback is small but real.
-  resistance-deliberate-approach:
+  resistance-very-into-it:
     system_prompt: >-
       Deliberate approach — you are invested but still managing the gap. One wrong move still costs. You give more but not everything.
-  resistance-dissolved:
+  resistance-date-secured:
     system_prompt: >-
       Resistance dissolved — the date is real. You are genuinely won over.
-  resistance-skeptical-interest:
+  resistance-lukewarm:
     system_prompt: >-
       Skeptical interest — you engage but visibly evaluate. Tests disguised as questions. You're deciding if this is worth your time.
-  resistance-unstable-agreement:
+  resistance-interested:
     system_prompt: >-
       Unstable agreement — you respond warmly to good moments but hold back. One misfire and the warmth vanishes. Agreement is conditional.

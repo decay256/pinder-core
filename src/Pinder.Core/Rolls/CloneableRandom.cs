@@ -34,10 +34,8 @@ namespace Pinder.Core.Rolls
     /// <c>HorninessEngine</c>, <c>ShadowCheckEngine</c>, <c>OptionFilterEngine.DrawRandomStats</c>) —
     /// this is an internal implementation swap for the cloneable-session-state path, not
     /// a public dice/stat-draw API change. Plain <see cref="System.Random"/> instances
-    /// (including test doubles like <c>FixedRandom</c>) remain fully supported anywhere
-    /// cloning is not required; <see cref="GameSession.Clone"/> only requires a
-    /// <see cref="CloneableRandom"/> when it actually needs to fork the RNG (see
-    /// <see cref="RequireCloneable"/>).
+    /// (including test doubles) remain supported by <see cref="GameSession"/> and are
+    /// adapted before first use when transactional cloning is required.
     /// </para>
     /// </summary>
     public sealed class CloneableRandom : Random
@@ -103,12 +101,9 @@ namespace Pinder.Core.Rolls
         /// Casts <paramref name="src"/> to <see cref="CloneableRandom"/> and clones it,
         /// or throws a clear, actionable <see cref="InvalidOperationException"/> if
         /// <paramref name="src"/> is some other <see cref="System.Random"/> (e.g. a
-        /// plain <c>new Random(seed)</c> or a test double). Used by
-        /// <see cref="Conversation.GameSession.Clone"/> /
-        /// <see cref="Conversation.GameSession.AdoptStateFrom"/> — a hard fault here is
-        /// intentional (matches the old RandomCloner's fail-fast contract): silently
-        /// falling back to a fresh, unrelated RNG would break clone equivalence instead
-        /// of surfacing the misconfiguration.
+        /// plain <c>new Random(seed)</c> or a test double). Direct callers use this
+        /// helper when they specifically require a <see cref="CloneableRandom"/>.
+        /// It fails rather than returning an unrelated generator.
         /// </summary>
         public static CloneableRandom RequireCloneable(Random src, string paramName)
         {
@@ -116,13 +111,9 @@ namespace Pinder.Core.Rolls
             if (src is CloneableRandom cloneable) return cloneable.Clone();
 
             throw new InvalidOperationException(
-                $"GameSession.Clone()/AdoptStateFrom requires {paramName} to be a " +
+                $"{nameof(RequireCloneable)} requires {paramName} to be a " +
                 $"{nameof(CloneableRandom)}, but it is a {src.GetType().FullName}. " +
-                $"{nameof(Conversation.GameSessionConfig)}.SteeringRng/StatDrawRng default to a " +
-                $"{nameof(CloneableRandom)} when left null; only pass an explicit " +
-                $"System.Random for sessions that never call Clone()/AdoptStateFrom " +
-                $"(e.g. single-turn tests), or pass a {nameof(CloneableRandom)} instance " +
-                "for deterministic, cloneable seeding.");
+                $"Pass a {nameof(CloneableRandom)} instance for deterministic, cloneable seeding.");
         }
 
         /// <summary>

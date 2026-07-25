@@ -186,13 +186,13 @@ namespace Pinder.Core.Conversation
             _globalDcBias = config.GlobalDcBias;
             _shadowDcBias = config.ShadowDcBias;
             _horninessDcBias = config.HorninessDcBias;
-            // #790/#425 follow-up (audit 2026-07-10): default to a CloneableRandom (not a
-            // plain System.Random) so the fast-gameplay scheduler's session forking
-            // (GameSession.Clone / AdoptStateFrom) works without reflecting into
-            // System.Random's private internals. Callers that inject an explicit
-            // steeringRng and never clone the session may still pass any Random.
-            var steeringRng = config.SteeringRng ?? new CloneableRandom();
-            _statDrawRng = config.StatDrawRng;
+            // Explicit System.Random remains a supported public configuration shape.
+            // Adapt it before any engine consumption so required-turn transactions can
+            // fork and retry without advancing the parent's observable RNG cursor.
+            var steeringRng = ForkableRandom.Adapt(config.SteeringRng ?? new CloneableRandom());
+            _statDrawRng = config.StatDrawRng != null
+                ? ForkableRandom.Adapt(config.StatDrawRng)
+                : null;
             _statDeliveryInstructions = config.StatDeliveryInstructions;
             _onTextLayerNoop = config.OnTextLayerNoop;
             _onShadowFilterTrace = config.OnShadowFilterTrace;
@@ -269,12 +269,29 @@ namespace Pinder.Core.Conversation
 
         private TurnOrchestrator BuildTurnOrchestrator()
         {
+            return BuildTurnOrchestrator(
+                _shadowGrowthEvaluator,
+                _xpRecorder,
+                _steeringEngine,
+                _horninessEngine,
+                _shadowCheckEngine,
+                _statDrawRng);
+        }
+
+        private TurnOrchestrator BuildTurnOrchestrator(
+            ShadowGrowthEvaluator? shadowGrowthEvaluator,
+            SessionXpRecorder xpRecorder,
+            SteeringEngine steeringEngine,
+            HorninessEngine horninessEngine,
+            ShadowCheckEngine shadowCheckEngine,
+            Random? statDrawRng)
+        {
             var rollResolutionStage = new RollResolutionStage(
                 _dice,
                 _trapRegistry,
                 _rules,
-                _shadowGrowthEvaluator,
-                _xpRecorder,
+                shadowGrowthEvaluator,
+                xpRecorder,
                 _globalDcBias,
                 _activeTrapInterestPenalty,
                 _onRuleResolution);
@@ -282,9 +299,9 @@ namespace Pinder.Core.Conversation
             var deliveryStage = new DeliveryStage(
                 _llm,
                 _rules,
-                _steeringEngine,
-                _horninessEngine,
-                _shadowCheckEngine,
+                steeringEngine,
+                horninessEngine,
+                shadowCheckEngine,
                 _statDeliveryInstructions,
                 _onTextLayerNoop,
                 _onDiagnostic,
@@ -296,7 +313,7 @@ namespace Pinder.Core.Conversation
                 _llm,
                 _dice,
                 _rules,
-                _statDrawRng,
+                statDrawRng,
                 rollResolutionStage,
                 deliveryStage,
                 dateeResponseStage,

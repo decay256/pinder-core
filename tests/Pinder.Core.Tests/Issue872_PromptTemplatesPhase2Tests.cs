@@ -43,11 +43,11 @@ namespace Pinder.Core.Tests
             // Spot-check a few representative keys.
             Assert.Contains("dialogue-options-instruction", names);
             Assert.Contains("default-clean", names);
-            Assert.Contains("interest-narrative-25", names);
+            Assert.Contains("interest-narrative-date-secured", names);
             Assert.Contains("engine-options-block", names);
             Assert.Contains("cold-opener-rule", names);
             Assert.Contains("player-transition-directive", names);
-            Assert.Contains("resistance-skeptical-interest", names);
+            Assert.Contains("resistance-lukewarm", names);
             Assert.Contains("sim_agent_icon_weakness", names);
         }
     }

@@ -42,7 +42,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             var systemBlocksTurn1 = CacheBlockBuilder.BuildPlayerAvatarOnlySystemBlocks(avatarSpec);
             var requestTurn1 = AnthropicRequestBuilders.BuildMessagesRequest(
                 model: "claude", maxTokens: 1024, systemBlocks: systemBlocksTurn1,
-                userContent: "deliver turn 1", temperature: 0.7);
+                userContent: "deliver turn 1", temperature: 0.7,
+                headings: AnthropicMessageHeadings.Capture());
 
             // Turn 2 (repeated delivery): prior avatar history replayed via
             // ConversationSession, SAME cached system prefix re-supplied.
@@ -79,7 +80,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void BuildMessages_SingleTurn_ReturnsPlainStringMessage()
         {
             var userMessage = "Hello from player";
-            var messages = AnthropicRequestBuilders.BuildMessages(userMessage);
+            var messages = AnthropicRequestBuilders.BuildMessages(
+                userMessage,
+                AnthropicMessageHeadings.Capture());
 
             Assert.Single(messages);
             Assert.Equal("user", messages[0].Role);
@@ -98,7 +101,9 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                               "[CURRENT TURN]\n" +
                               "Let's play a game!";
 
-            var messages = AnthropicRequestBuilders.BuildMessages(userMessage);
+            var messages = AnthropicRequestBuilders.BuildMessages(
+                userMessage,
+                AnthropicMessageHeadings.Capture());
 
             // Expecting:
             // Message 0 (PLAYER/user): "Hello there"

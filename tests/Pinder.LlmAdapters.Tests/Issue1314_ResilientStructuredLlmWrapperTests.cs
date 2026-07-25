@@ -79,6 +79,16 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void ContractViolationBackoff_UsesExactExponentialSchedule()
+        {
+            Assert.Equal(0, PinderLlmAdapter.GetContractViolationBackoffDelayMs(0, 1));
+            Assert.Equal(100, PinderLlmAdapter.GetContractViolationBackoffDelayMs(100, 1));
+            Assert.Equal(200, PinderLlmAdapter.GetContractViolationBackoffDelayMs(100, 2));
+            Assert.Equal(400, PinderLlmAdapter.GetContractViolationBackoffDelayMs(100, 3));
+            Assert.Equal(int.MaxValue, PinderLlmAdapter.GetContractViolationBackoffDelayMs(int.MaxValue, 2));
+        }
+
+        [Fact]
         public async Task GetDialogueOptionsAsync_ThreeTransientViolations_RecoversOnFinalRetry()
         {
             // Arrange

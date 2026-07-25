@@ -43,43 +43,48 @@ namespace Pinder.SessionSetup
             string consolidatedPersonality,
             CancellationToken cancellationToken = default)
         {
-            string llmResponse = string.Empty;
-            FormatException? lastParseFailure = null;
             var profile = BuildProfile(backstory, consolidatedPersonality);
-            for (int attempt = 1; attempt <= MaxAttempts; attempt++)
-            {
-                var stakeGenerator = new LlmStakeGenerator(
-                    _transport,
-                    streamingTransport: null,
-                    options: null,
-                    catalog: _catalog);
-                llmResponse = await stakeGenerator.GenerateAsync(
-                    characterName,
-                    profile,
-                    cancellationToken).ConfigureAwait(false);
+            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<List<string>, StakeRejection>(
+                MaxAttempts,
+                async (attempt, attemptCancellationToken) =>
+                {
+                    var stakeGenerator = new LlmStakeGenerator(
+                        _transport,
+                        streamingTransport: null,
+                        options: null,
+                        catalog: _catalog);
+                    string llmResponse = await stakeGenerator.GenerateAsync(
+                        characterName,
+                        profile,
+                        attemptCancellationToken).ConfigureAwait(false);
 
-                try
-                {
-                    var list = LlmStakeGenerator.ParseCanonicalStakeBullets(llmResponse);
-                    if (list.Count != 15)
+                    try
                     {
-                        throw new FormatException(
-                            $"Expected exactly 15 psychological stake items, got {list.Count}.");
+                        var list = LlmStakeGenerator.ParseCanonicalStakeBullets(llmResponse);
+                        if (list.Count != 15)
+                        {
+                            throw new FormatException(
+                                $"Expected exactly 15 psychological stake items, got {list.Count}.");
+                        }
+                        return SemanticOutputRecoveryAttemptResult<List<string>, StakeRejection>.Accepted(list);
                     }
-                    return list;
-                }
-                catch (FormatException ex)
-                {
-                    lastParseFailure = ex;
-                    if (attempt == MaxAttempts)
-                        break;
-                }
+                    catch (FormatException ex)
+                    {
+                        return SemanticOutputRecoveryAttemptResult<List<string>, StakeRejection>.Rejected(
+                            new StakeRejection(llmResponse, ex));
+                    }
+                },
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (recovery.IsAccepted)
+            {
+                return recovery.AcceptedValue;
             }
 
-            lastParseFailure ??= new FormatException("Stake generation did not return a parseable 15-item list.");
+            var finalRejection = recovery.Exhaustion.FinalRejection;
             try
             {
-                throw lastParseFailure;
+                throw finalRejection.Failure;
             }
             catch (FormatException ex)
             {
@@ -88,7 +93,7 @@ namespace Pinder.SessionSetup
                     LlmDiagnosticFormatter.GeneratedTextFailure(
                         "Failed to parse canonical 15-item stake bullet list from LLM response.",
                         LlmPhase.Synthesis,
-                        llmResponse),
+                        finalRejection.GeneratedText),
                     ex);
             }
         }
@@ -102,6 +107,19 @@ namespace Pinder.SessionSetup
             sb.AppendLine("CONSOLIDATED PERSONALITY:");
             sb.Append(consolidatedPersonality);
             return sb.ToString();
+        }
+
+        private sealed class StakeRejection
+        {
+            public StakeRejection(string generatedText, FormatException failure)
+            {
+                GeneratedText = generatedText;
+                Failure = failure;
+            }
+
+            public string GeneratedText { get; }
+
+            public FormatException Failure { get; }
         }
     }
 }

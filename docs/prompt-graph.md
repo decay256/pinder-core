@@ -1,5 +1,10 @@
 # Prompt Graph: The Two-Session Model
 
+> Supersession note (#1332): in current code, "session" means an
+> engine-owned, role-isolated prompt pipeline. It does not mean provider-side
+> persistent conversation state. The authoritative ownership contract is
+> [`docs/specs/issue-1332-datee-prerequisite-architecture.md`](specs/issue-1332-datee-prerequisite-architecture.md).
+
 The Pinder conversation pipeline uses a **Two-Session Model** (implemented via a shared Game-Master / Puppeteer orchestrator). This isolates the player character's internal monologue and options generation from the datee's context, preventing "voice bleed" where one character starts sounding like the other, and keeping the player's unchosen options hidden from the datee's history.
 
 ## High-Level Flow
@@ -7,7 +12,7 @@ The Pinder conversation pipeline uses a **Two-Session Model** (implemented via a
 ```text
 ┌─────────────────┐       ┌─────────────────┐
 │ Avatar Session  │       │ Datee Session   │
-│ (Stateful GM)   │       │ (Stateful GM)   │
+│ (Role Pipeline) │       │ (Role Pipeline) │
 └────────┬────────┘       └────────┬────────┘
          │                         │
          │                         │
@@ -32,13 +37,13 @@ The Pinder conversation pipeline uses a **Two-Session Model** (implemented via a
          ├─────────────────────────►
          │                         │
          │                         ▼
-         │                 [6] GetDateeResponseAsync
-         │                 (Reads delivered message)
+        │                 [6] GetDateeResponseAsync
+        │                 (Prior history + current delivered message)
          │                         │
          ◄─────────────────────────┤
          │                         │
          ▼                         ▼
-  History Append            History Append
+        └────────── History append: player/DATEE pair after success
 ```
 
 ## 1. Avatar Session (Player Side)
@@ -54,7 +59,7 @@ As of the #1125 delivery collapse, **there is no creative `DeliverMessageAsync` 
 - The player picks an option.
 - The chosen option's full line is taken verbatim on a success.
 - On a failure, the line is degraded deterministically via `DeliveryOverlay.Apply` (based on the failure tier).
-- **Clean History Rule**: Only the final committed line persists in the avatar's conversation history. The datee only ever sees this final committed line.
+- **Clean History Rule**: Only the final delivered line can become visible history. During DATEE generation it is supplied once as the current event, then the player/DATEE visible-history pair is appended only after the DATEE reply succeeds.
 
 ## 3. Ephemeral Overlays
 
@@ -70,7 +75,7 @@ These calls are stateless string-in/string-out transformations. They do not main
 ## 4. Datee Session
 
 The **Datee Session** generates the datee's response to the player's delivered message.
-- **Context**: Datee's system prompt, datee's resistance level, full conversation history, the player's *final delivered message* (with any failure/overlay contexts attached as metadata).
+- **Context**: Datee's system prompt, datee's resistance level, prior completed visible exchanges, the player's *final delivered message* as the current event (with any failure/overlay contexts attached as metadata).
 - **Bleed Isolation**: The datee session is completely isolated from the avatar session. It never sees the avatar's internal states, unchosen options, or the original pristine intended text (if it was degraded/corrupted). It only sees what was actually "sent".
 
 ## Related Specs

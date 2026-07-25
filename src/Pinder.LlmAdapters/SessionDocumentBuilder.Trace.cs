@@ -12,9 +12,15 @@ namespace Pinder.LlmAdapters
 {
     public static partial class SessionDocumentBuilder
     {
-        private static string GetTemplateSource(string key)
+        private static string GetTemplateSource(PromptCatalog? promptCatalog, string key)
         {
-            return PromptTemplates.Catalog?.TryGet(key)?.SourceFile ?? "data/prompts/templates.yaml";
+            return PromptCatalog.ResolveCatalogOrThrow(promptCatalog).TryGet(key)?.SourceFile
+                ?? "data/prompts/templates.yaml";
+        }
+
+        private static string GetTemplate(PromptCatalog? promptCatalog, string key)
+        {
+            return PromptTemplates.GetCatalogString(promptCatalog, key);
         }
 
         private static string RenderTemplate(string template, IReadOnlyDictionary<string, string> values)
@@ -26,7 +32,8 @@ namespace Pinder.LlmAdapters
             AnnotatedStringBuilder sb,
             string template,
             string templateKey,
-            IReadOnlyDictionary<string, (string Value, string SourceFile, string Key)> values)
+            IReadOnlyDictionary<string, (string Value, string SourceFile, string Key)> values,
+            PromptCatalog? promptCatalog)
         {
             int position = 0;
             while (position < template.Length)
@@ -45,7 +52,7 @@ namespace Pinder.LlmAdapters
 
                 if (nextPlaceholder == null)
                 {
-                    sb.Append(template.Substring(position), GetTemplateSource(templateKey), templateKey);
+                    sb.Append(template.Substring(position), GetTemplateSource(promptCatalog, templateKey), templateKey);
                     break;
                 }
 
@@ -53,7 +60,7 @@ namespace Pinder.LlmAdapters
                 {
                     sb.Append(
                         template.Substring(position, nextIndex - position),
-                        GetTemplateSource(templateKey),
+                        GetTemplateSource(promptCatalog, templateKey),
                         templateKey);
                 }
 
@@ -67,17 +74,21 @@ namespace Pinder.LlmAdapters
             AnnotatedStringBuilder sb,
             Dictionary<ShadowStatType, int>? thresholds,
             string headingKey,
-            string heading)
+            string heading,
+            PromptCatalog? promptCatalog)
         {
             if (thresholds == null || thresholds.Count == 0) return false;
 
             var keys = GetActiveShadowTaintKeys(thresholds).ToList();
             if (keys.Count == 0) return false;
 
-            sb.AppendLine(heading, GetTemplateSource(headingKey), headingKey);
+            sb.AppendLine(heading, GetTemplateSource(promptCatalog, headingKey), headingKey);
             foreach (var key in keys)
             {
-                sb.AppendLine(GetShadowTaintTemplate(key), GetTemplateSource(key), key);
+                sb.AppendLine(
+                    GetTemplate(promptCatalog, key),
+                    GetTemplateSource(promptCatalog, key),
+                    key);
             }
 
             return true;
@@ -99,21 +110,6 @@ namespace Pinder.LlmAdapters
                 yield return "shadow-taint-overthinking";
         }
 
-        private static string GetShadowTaintTemplate(string key)
-        {
-            switch (key)
-            {
-                case "shadow-taint-madness": return PromptTemplates.ShadowTaintMadness;
-                case "shadow-taint-despair": return PromptTemplates.ShadowTaintDespair;
-                case "shadow-taint-denial": return PromptTemplates.ShadowTaintDenial;
-                case "shadow-taint-fixation": return PromptTemplates.ShadowTaintFixation;
-                case "shadow-taint-dread": return PromptTemplates.ShadowTaintDread;
-                case "shadow-taint-overthinking": return PromptTemplates.ShadowTaintOverthinking;
-                default:
-                    throw new InvalidOperationException($"Unknown shadow taint prompt key '{key}'.");
-            }
-        }
-
         /// <summary>
         /// Builds the user-message content for GetDialogueOptionsAsync and returns the trace data.
         /// </summary>
@@ -123,7 +119,9 @@ namespace Pinder.LlmAdapters
         /// and trailing static instructions contain positional back-references. Changing this order breaks rendered semantics.
         /// See docs/prompt-cache-ordering.md and pinning tests for details.</para>
         /// </remarks>
-        public static PromptTraceResult BuildDialogueOptionsPromptEx(DialogueContext context)
+        public static PromptTraceResult BuildDialogueOptionsPromptEx(
+            DialogueContext context,
+            PromptCatalog? promptCatalog = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
@@ -206,7 +204,12 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            if (AppendShadowTaintBlock(sb, context.ShadowThresholds, "shadow-state-heading", PromptTemplates.ShadowStateHeading))
+            if (AppendShadowTaintBlock(
+                sb,
+                context.ShadowThresholds,
+                "shadow-state-heading",
+                GetTemplate(promptCatalog, "shadow-state-heading"),
+                promptCatalog))
             {
                 sb.AppendLine();
             }
@@ -216,14 +219,20 @@ namespace Pinder.LlmAdapters
             // 0-based, end-of-turn-incremented counter (issue #1155).
             if (context.ConversationHistory.Count == 0)
             {
-                sb.AppendLine(PromptTemplates.ColdOpenerRule, GetTemplateSource("cold-opener-rule"), "cold-opener-rule");
+                sb.AppendLine(
+                    GetTemplate(promptCatalog, "cold-opener-rule"),
+                    GetTemplateSource(promptCatalog, "cold-opener-rule"),
+                    "cold-opener-rule");
                 sb.AppendLine();
             }
 
             // Turn 3+ pivot directive
             if (context.CurrentTurn >= 3)
             {
-                sb.AppendLine(PromptTemplates.PivotDirective, GetTemplateSource("pivot-directive"), "pivot-directive");
+                sb.AppendLine(
+                    GetTemplate(promptCatalog, "pivot-directive"),
+                    GetTemplateSource(promptCatalog, "pivot-directive"),
+                    "pivot-directive");
                 sb.AppendLine();
             }
 
@@ -240,18 +249,18 @@ namespace Pinder.LlmAdapters
 
                 int referencedCount = context.StakeLines.Length - untouchedIndices.Count;
                 string stakeCoverageSummary = RenderTemplate(
-                    PromptTemplates.StakeCoverageSummary,
+                    GetTemplate(promptCatalog, "stake-coverage-summary"),
                     new Dictionary<string, string>
                     {
                         { "referenced_count", referencedCount.ToString() },
                         { "untouched_count", untouchedIndices.Count.ToString() },
                     });
-                sb.AppendLine(stakeCoverageSummary, GetTemplateSource("stake-coverage-summary"), "stake-coverage-summary");
+                sb.AppendLine(stakeCoverageSummary, GetTemplateSource(promptCatalog, "stake-coverage-summary"), "stake-coverage-summary");
                 if (untouchedIndices.Count > 0)
                 {
                     sb.AppendLine(
-                        PromptTemplates.StakeCoverageUntouchedDirective,
-                        GetTemplateSource("stake-coverage-untouched-directive"),
+                        GetTemplate(promptCatalog, "stake-coverage-untouched-directive"),
+                        GetTemplateSource(promptCatalog, "stake-coverage-untouched-directive"),
                         "stake-coverage-untouched-directive");
                     foreach (int idx in untouchedIndices)
                     {
@@ -263,8 +272,8 @@ namespace Pinder.LlmAdapters
                 else
                 {
                     sb.AppendLine(
-                        PromptTemplates.StakeCoverageAllReferencedDirective,
-                        GetTemplateSource("stake-coverage-all-referenced-directive"),
+                        GetTemplate(promptCatalog, "stake-coverage-all-referenced-directive"),
+                        GetTemplateSource(promptCatalog, "stake-coverage-all-referenced-directive"),
                         "stake-coverage-all-referenced-directive");
                 }
                 sb.AppendLine();
@@ -281,7 +290,7 @@ namespace Pinder.LlmAdapters
             if (context.PlayerHungerForIntimacy.HasValue && context.DateeHungerForIntimacy.HasValue)
             {
                 hfiLine = RenderTemplate(
-                    PromptTemplates.EngineStateHfiLine,
+                    GetTemplate(promptCatalog, "engine-state-hfi-line"),
                     new Dictionary<string, string>
                     {
                         { "player_hfi", context.PlayerHungerForIntimacy.Value.ToString() },
@@ -293,7 +302,7 @@ namespace Pinder.LlmAdapters
             if (context.PlayerTerrorOfRejection.HasValue && context.DateeTerrorOfRejection.HasValue)
             {
                 torLine = RenderTemplate(
-                    PromptTemplates.EngineStateTorLine,
+                    GetTemplate(promptCatalog, "engine-state-tor-line"),
                     new Dictionary<string, string>
                     {
                         { "player_tor", context.PlayerTerrorOfRejection.Value.ToString() },
@@ -305,7 +314,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
             {
                 cognitiveSubtextLine = RenderTemplate(
-                    PromptTemplates.EngineStateCognitiveSubtextLine,
+                    GetTemplate(promptCatalog, "engine-state-cognitive-subtext-line"),
                     new Dictionary<string, string>
                     {
                         { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
@@ -318,14 +327,14 @@ namespace Pinder.LlmAdapters
             {
                 var target = context.ResolvedTarget.Value;
                 transitionTargetLine = RenderTemplate(
-                    PromptTemplates.EngineStateTransitionTargetLine,
+                    GetTemplate(promptCatalog, "engine-state-transition-target-line"),
                     new Dictionary<string, string>
                     {
                         { "transition_target", target.StemText ?? string.Empty },
                         { "transition_scope", "the final option" },
                     });
                 transitionStyleLine = RenderTemplate(
-                    PromptTemplates.EngineStateTransitionStyleLine,
+                    GetTemplate(promptCatalog, "engine-state-transition-style-line"),
                     new Dictionary<string, string>
                     {
                         { "transition_style", target.TransitionStyle ?? string.Empty },
@@ -334,24 +343,25 @@ namespace Pinder.LlmAdapters
             }
 
             // [ENGINE — Turn N] injection block
-            string engineOptionsSource = GetTemplateSource("engine-options-block");
+            string engineOptionsSource = GetTemplateSource(promptCatalog, "engine-options-block");
             AppendAnnotatedTemplate(
                 sb,
-                PromptTemplates.EngineOptionsBlock,
+                GetTemplate(promptCatalog, "engine-options-block"),
                 "engine-options-block",
                 new Dictionary<string, (string Value, string SourceFile, string Key)>
                 {
                     { "{turn}", (context.CurrentTurn.ToString(), engineOptionsSource, "engine-options-block") },
                     { "{player_name}", (playerName, engineOptionsSource, "engine-options-block") },
                     { "{game_state}", (gameState.ToString().TrimEnd(), engineOptionsSource, "engine-options-block") },
-                    { "{hfi_line}", (hfiLine, GetTemplateSource("engine-state-hfi-line"), "engine-state-hfi-line") },
-                    { "{tor_line}", (torLine, GetTemplateSource("engine-state-tor-line"), "engine-state-tor-line") },
-                    { "{cognitive_subtext_line}", (cognitiveSubtextLine, GetTemplateSource("engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
-                    { "{transition_target_line}", (transitionTargetLine, GetTemplateSource("engine-state-transition-target-line"), "engine-state-transition-target-line") },
-                    { "{transition_style_line}", (transitionStyleLine, GetTemplateSource("engine-state-transition-style-line"), "engine-state-transition-style-line") },
+                    { "{hfi_line}", (hfiLine, GetTemplateSource(promptCatalog, "engine-state-hfi-line"), "engine-state-hfi-line") },
+                    { "{tor_line}", (torLine, GetTemplateSource(promptCatalog, "engine-state-tor-line"), "engine-state-tor-line") },
+                    { "{cognitive_subtext_line}", (cognitiveSubtextLine, GetTemplateSource(promptCatalog, "engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
+                    { "{transition_target_line}", (transitionTargetLine, GetTemplateSource(promptCatalog, "engine-state-transition-target-line"), "engine-state-transition-target-line") },
+                    { "{transition_style_line}", (transitionStyleLine, GetTemplateSource(promptCatalog, "engine-state-transition-style-line"), "engine-state-transition-style-line") },
                     { "{options_count}", (optionsCountStr, engineOptionsSource, "engine-options-block") },
                     { "{options_format_list}", (optionsFormatListStr, engineOptionsSource, "engine-options-block") },
-                });
+                },
+                promptCatalog);
 
             sb.AppendLine();
             sb.AppendLine();
@@ -361,18 +371,18 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException("AvailableStats cannot be null or empty.");
             string availableStatsStr = string.Join(", ", Array.ConvertAll(context.AvailableStats, StatNameNormalizer.ToWireToken));
 
-            string dialogueOptionsInstruction = PromptTemplates.DialogueOptionsInstruction
+            string dialogueOptionsInstruction = GetTemplate(promptCatalog, "dialogue-options-instruction")
                 .Replace("{player_name}", playerName)
                 .Replace("{available_stats}", availableStatsStr)
                 .Replace("{options_count}", optionsCountStr)
                 .Replace("{options_list}", optionsListStr);
-            sb.Append(dialogueOptionsInstruction, GetTemplateSource("dialogue-options-instruction"), "dialogue-options-instruction");
+            sb.Append(dialogueOptionsInstruction, GetTemplateSource(promptCatalog, "dialogue-options-instruction"), "dialogue-options-instruction");
             sb.AppendLine();
             sb.AppendLine();
-            string structuredJsonInstruction = PromptTemplates.DialogueOptionsStructuredJsonInstruction
+            string structuredJsonInstruction = GetTemplate(promptCatalog, "dialogue-options-structured-json-instruction")
                 .Replace("{available_stats}", availableStatsStr)
                 .Replace("{options_count}", optionsCountStr);
-            sb.Append(structuredJsonInstruction, GetTemplateSource("dialogue-options-structured-json-instruction"), "dialogue-options-structured-json-instruction");
+            sb.Append(structuredJsonInstruction, GetTemplateSource(promptCatalog, "dialogue-options-structured-json-instruction"), "dialogue-options-structured-json-instruction");
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }
@@ -394,7 +404,9 @@ namespace Pinder.LlmAdapters
         /// and trailing static instructions contain positional back-references. Changing this order breaks rendered semantics.
         /// See docs/prompt-cache-ordering.md and pinning tests for details.</para>
         /// </remarks>
-        public static PromptTraceResult BuildDateePromptEx(DateeContext context)
+        public static PromptTraceResult BuildDateePromptEx(
+            DateeContext context,
+            PromptCatalog? promptCatalog = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
@@ -419,7 +431,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
                 sb.AppendLine();
                 sb.AppendLine("FAILURE CONTEXT");
-                sb.AppendLine(GetDateeReactionGuidance(context.DeliveryTier));
+                sb.AppendLine(GetDateeReactionGuidance(context.DeliveryTier, promptCatalog));
             }
             else
             {
@@ -431,12 +443,19 @@ namespace Pinder.LlmAdapters
 
             if (context.HorninessOverlayApplied)
             {
-                string horninessGuidance = GetHorninessReactionGuidance(context.InterestAfter, context.HorninessOverlayApplied, context.HorninessTier);
+                string horninessGuidance = GetHorninessReactionGuidance(
+                    context.InterestAfter,
+                    context.HorninessOverlayApplied,
+                    context.HorninessTier,
+                    promptCatalog);
                 string templateKey = context.InterestAfter < HorninessWarmthThreshold 
                     ? "datee-horniness-reaction-below-threshold" 
                     : "datee-horniness-reaction-high-interest";
                 sb.AppendLine("HORNINESS REACTION GUIDANCE");
-                sb.AppendLine(horninessGuidance, GetTemplateSource(templateKey), "datee-horniness-reaction");
+                sb.AppendLine(
+                    horninessGuidance,
+                    GetTemplateSource(promptCatalog, templateKey),
+                    "datee-horniness-reaction");
                 sb.AppendLine();
             }
 
@@ -445,7 +464,7 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
             {
                 dateeCognitiveSubtextLine = RenderTemplate(
-                    PromptTemplates.EngineStateCognitiveSubtextLine,
+                    GetTemplate(promptCatalog, "engine-state-cognitive-subtext-line"),
                     new Dictionary<string, string>
                     {
                         { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
@@ -458,14 +477,14 @@ namespace Pinder.LlmAdapters
             {
                 var target = context.ResolvedTarget.Value;
                 dateeTransitionTargetLine = RenderTemplate(
-                    PromptTemplates.EngineStateTransitionTargetLine,
+                    GetTemplate(promptCatalog, "engine-state-transition-target-line"),
                     new Dictionary<string, string>
                     {
                         { "transition_target", target.StemText ?? string.Empty },
                         { "transition_scope", "the datee response" },
                     });
                 dateeTransitionStyleLine = RenderTemplate(
-                    PromptTemplates.EngineStateTransitionStyleLine,
+                    GetTemplate(promptCatalog, "engine-state-transition-style-line"),
                     new Dictionary<string, string>
                     {
                         { "transition_style", target.TransitionStyle ?? string.Empty },
@@ -473,21 +492,24 @@ namespace Pinder.LlmAdapters
                     });
             }
 
-            string interestNarrative = PromptTemplates.GetInterestNarrative(context.InterestAfter);
-            string engineDateeSource = GetTemplateSource("engine-datee-block");
+            InterestState dateeInterestState = context.InterestAfterState;
+            string interestNarrativeKey = PromptTemplates.GetInterestNarrativeKey(dateeInterestState);
+            string interestNarrative = GetTemplate(promptCatalog, interestNarrativeKey);
+            string engineDateeSource = GetTemplateSource(promptCatalog, "engine-datee-block");
             AppendAnnotatedTemplate(
                 sb,
-                PromptTemplates.EngineDateeBlock,
+                GetTemplate(promptCatalog, "engine-datee-block"),
                 "engine-datee-block",
                 new Dictionary<string, (string Value, string SourceFile, string Key)>
                 {
                     { "{datee_name}", (dateeName, engineDateeSource, "engine-datee-block") },
                     { "{interest}", (context.InterestAfter.ToString(), engineDateeSource, "engine-datee-block") },
-                    { "{interest_narrative}", (interestNarrative, engineDateeSource, "engine-datee-block") },
-                    { "{cognitive_subtext_line}", (dateeCognitiveSubtextLine, GetTemplateSource("engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
-                    { "{transition_target_line}", (dateeTransitionTargetLine, GetTemplateSource("engine-state-transition-target-line"), "engine-state-transition-target-line") },
-                    { "{transition_style_line}", (dateeTransitionStyleLine, GetTemplateSource("engine-state-transition-style-line"), "engine-state-transition-style-line") },
-                });
+                    { "{interest_narrative}", (interestNarrative, GetTemplateSource(promptCatalog, interestNarrativeKey), interestNarrativeKey) },
+                    { "{cognitive_subtext_line}", (dateeCognitiveSubtextLine, GetTemplateSource(promptCatalog, "engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
+                    { "{transition_target_line}", (dateeTransitionTargetLine, GetTemplateSource(promptCatalog, "engine-state-transition-target-line"), "engine-state-transition-target-line") },
+                    { "{transition_style_line}", (dateeTransitionStyleLine, GetTemplateSource(promptCatalog, "engine-state-transition-style-line"), "engine-state-transition-style-line") },
+                },
+                promptCatalog);
             sb.AppendLine();
 
             sb.AppendLine();
@@ -507,7 +529,12 @@ namespace Pinder.LlmAdapters
                 }
             }
 
-            if (AppendShadowTaintBlock(sb, context.ShadowThresholds, "datee-shadow-state-heading", PromptTemplates.DateeShadowStateHeading))
+            if (AppendShadowTaintBlock(
+                sb,
+                context.ShadowThresholds,
+                "datee-shadow-state-heading",
+                GetTemplate(promptCatalog, "datee-shadow-state-heading"),
+                promptCatalog))
             {
                 sb.AppendLine();
             }
@@ -521,7 +548,11 @@ namespace Pinder.LlmAdapters
 
             sb.AppendLine();
 
-            string resistanceBlock = GetResistanceBlock(context.InterestAfter);
+            string resistanceKey = PromptTemplates.GetResistanceKey(dateeInterestState);
+            string resistanceBlock = GetResistanceBlock(
+                context.InterestAfter,
+                dateeInterestState,
+                promptCatalog);
 
             int ceiling = ComputeResponseCeiling(context.PlayerDeliveredMessage.Length);
             string lengthHint =
@@ -530,10 +561,16 @@ namespace Pinder.LlmAdapters
                 $"The texting-style length axis in your system prompt is a stylistic guideline, NOT a hard engine cap — " +
                 $"the engine-specified ceiling above takes precedence over any style axis that would run longer.";
 
-            string dateeResponseInstruction = PromptTemplates.DateeResponseInstruction
-                .Replace("{resistance_block}", resistanceBlock)
-                .Replace("{length_hint}", lengthHint);
-            sb.Append(dateeResponseInstruction, GetTemplateSource("datee-response-instruction"), "datee-response-instruction");
+            AppendAnnotatedTemplate(
+                sb,
+                GetTemplate(promptCatalog, "datee-response-instruction"),
+                "datee-response-instruction",
+                new Dictionary<string, (string Value, string SourceFile, string Key)>
+                {
+                    { "{resistance_block}", (resistanceBlock, GetTemplateSource(promptCatalog, resistanceKey), resistanceKey) },
+                    { "{length_hint}", (lengthHint, GetTemplateSource(promptCatalog, "datee-response-instruction"), "datee-response-instruction") },
+                },
+                promptCatalog);
 
             return new PromptTraceResult(sb.ToString(), sb.Spans);
         }

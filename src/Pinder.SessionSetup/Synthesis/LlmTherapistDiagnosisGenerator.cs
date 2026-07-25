@@ -49,43 +49,50 @@ namespace Pinder.SessionSetup
                 { "stakes", JsonSerializer.Serialize(stakeLines) }
             });
 
-            string llmResponse = string.Empty;
-            Exception? lastParseFailure = null;
-            for (int attempt = 1; attempt <= MaxAttempts; attempt++)
-            {
-                llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
-                    "diagnosis",
-                    _transport,
-                    systemPrompt,
-                    userPrompt,
-                    entry.Temperature!.Value,
-                    entry.MaxTokens!.Value,
-                    LlmPhase.Synthesis,
-                    _onDiagnostic,
-                    cancellationToken).ConfigureAwait(false);
-
-                try
+            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<Dictionary<string, string>, DiagnosisRejection>(
+                MaxAttempts,
+                async (attempt, attemptCancellationToken) =>
                 {
-                    var dict = ParseDiagnosisJson(llmResponse);
-                    if (dict == null)
+                    string llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
+                        "diagnosis",
+                        _transport,
+                        systemPrompt,
+                        userPrompt,
+                        entry.Temperature!.Value,
+                        entry.MaxTokens!.Value,
+                        LlmPhase.Synthesis,
+                        _onDiagnostic,
+                        attemptCancellationToken).ConfigureAwait(false);
+
+                    try
                     {
-                        // The LLM returned the JSON literal `null` (or something that
-                        // deserializes to it) rather than an object. That is not the
-                        // same as a diagnosis object satisfying the two required
-                        // cognitive-subtext fields, so fail loudly.
-                        throw new JsonException("Deserialized diagnosis was null.");
-                    }
+                        var dict = ParseDiagnosisJson(llmResponse);
+                        if (dict == null)
+                        {
+                            // The LLM returned the JSON literal `null` (or something that
+                            // deserializes to it) rather than an object. That is not the
+                            // same as a diagnosis object satisfying the two required
+                            // cognitive-subtext fields, so fail loudly.
+                            throw new JsonException("Deserialized diagnosis was null.");
+                        }
 
-                    return ValidateDiagnosis(dict);
-                }
-                catch (JsonException ex)
-                {
-                    lastParseFailure = ex;
-                    if (attempt == MaxAttempts)
-                        break;
-                }
+                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>.Accepted(
+                            ValidateDiagnosis(dict));
+                    }
+                    catch (JsonException ex)
+                    {
+                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>.Rejected(
+                            new DiagnosisRejection(llmResponse, ex));
+                    }
+                },
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (recovery.IsAccepted)
+            {
+                return recovery.AcceptedValue;
             }
 
+            var finalRejection = recovery.Exhaustion.FinalRejection;
             // Fail-loud by propagating the failure with structural context,
             // mirroring LlmSequentialStakeGenerator: a malformed/unparseable
             // diagnosis response is a genuine generation failure, not a
@@ -94,8 +101,8 @@ namespace Pinder.SessionSetup
                 LlmDiagnosticFormatter.GeneratedTextFailure(
                     "Failed to parse diagnosis JSON from LLM response.",
                     LlmPhase.Synthesis,
-                    llmResponse),
-                lastParseFailure ?? new JsonException("Diagnosis generation did not return a parseable JSON object."));
+                    finalRejection.GeneratedText),
+                finalRejection.Failure);
         }
 
         internal static Dictionary<string, string>? ParseDiagnosisJson(string llmResponse)
@@ -111,24 +118,36 @@ namespace Pinder.SessionSetup
         private static Dictionary<string, string> ValidateDiagnosis(
             Dictionary<string, string> diagnosis)
         {
-            var validated = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var normalized = NormalizeGeneratedDiagnosis(diagnosis);
+            var validation = TherapistDiagnosisContract.ValidateRequiredFields(normalized);
+            if (!validation.IsValid)
+            {
+                var violation = validation.Violation!;
+                throw new JsonException(
+                    $"Diagnosis response violates contract: code={violation.Code}; field='{violation.Field}'. {violation.Message}");
+            }
+
+            return normalized;
+        }
+
+        private static Dictionary<string, string> NormalizeGeneratedDiagnosis(
+            Dictionary<string, string> diagnosis)
+        {
+            var generatedFields = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             foreach (var pair in diagnosis)
             {
-                if (!string.IsNullOrWhiteSpace(pair.Key) && !string.IsNullOrWhiteSpace(pair.Value))
-                    validated[pair.Key.Trim()] = pair.Value.Trim();
+                if (!string.IsNullOrWhiteSpace(pair.Key))
+                    generatedFields[pair.Key.Trim()] = (pair.Value ?? string.Empty).Trim();
             }
 
-            foreach (var requiredField in new[] { "derived_feeling", "defense_reaction" })
+            var selected = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (string requiredField in TherapistDiagnosisContract.RequiredFields)
             {
-                if (!validated.TryGetValue(requiredField, out var value) || string.IsNullOrWhiteSpace(value))
-                    throw new JsonException($"Diagnosis response is missing required field '{requiredField}'.");
+                if (generatedFields.TryGetValue(requiredField, out var value))
+                    selected[requiredField] = value;
             }
 
-            return new Dictionary<string, string>
-            {
-                ["derived_feeling"] = validated["derived_feeling"],
-                ["defense_reaction"] = validated["defense_reaction"],
-            };
+            return selected;
         }
 
         internal static string? ExtractJsonObject(string text)
@@ -194,6 +213,19 @@ namespace Pinder.SessionSetup
             }
 
             return null;
+        }
+
+        private sealed class DiagnosisRejection
+        {
+            public DiagnosisRejection(string generatedText, JsonException failure)
+            {
+                GeneratedText = generatedText;
+                Failure = failure;
+            }
+
+            public string GeneratedText { get; }
+
+            public JsonException Failure { get; }
         }
     }
 }

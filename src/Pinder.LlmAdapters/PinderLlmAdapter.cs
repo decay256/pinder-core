@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,141 +69,129 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var gameDef = RequireGameDefinition();
-            var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
+            var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+                context,
+                _options.PromptCatalog);
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
-            int attempt = 0;
             int maxAttempts = GetContractViolationAttemptLimit();
-
-            while (true)
-            {
-                attempt++;
-                try
+            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<DialogueOption[], LlmContractException>(
+                maxAttempts,
+                async (attempt, attemptCancellationToken) =>
                 {
-                    DialogueOption[] parsedOptions;
-                    if (_transport is IStructuredLlmTransport structuredTransport)
+                    try
                     {
-                        var request = DialogueOptionsStructuredContract.CreateRequest(
-                            systemPrompt,
-                            userContent,
-                            temperature,
-                            _options.MaxTokens,
-                            context,
-                            GetExpectedDialogueOptionCount(context, gameDef));
-                        var structuredResponse = await SendStructuredWithDiagnosticsAsync(
-                                structuredTransport,
-                                request,
-                                LlmPhase.DialogueOptions,
-                                context.CurrentTurn,
-                                ct)
-                            .ConfigureAwait(false);
-                        try
+                        DialogueOption[] parsedOptions;
+                        if (_transport is IStructuredLlmTransport structuredTransport)
                         {
-                            if (structuredResponse.UsedNativeStructuredOutput)
-                            {
-                                parsedOptions = DialogueOptionsStructuredContract.ParseStrict(
-                                    structuredResponse.JsonText,
-                                    context.AvailableStats,
-                                    gameDef.MaxDialogueOptions,
-                                    out string? errorCode,
-                                    out string? errorMessage,
-                                    out int parsedCount,
-                                    out int expectedCount);
-
-                                if (errorCode != null)
-                                {
-                                    throw CreateDialogueOptionsContractException(
-                                        errorCode,
-                                        errorMessage!,
-                                        "StructuredDialogueOptionsParser",
-                                        expectedCount,
-                                        parsedCount,
-                                        context.CurrentTurn,
-                                        structuredResponse.Provider,
-                                        structuredResponse.Model);
-                                }
-                            }
-                            else
-                            {
-                                parsedOptions = ParseDialogueOptionsFromTextOrJson(
-                                    structuredResponse.JsonText,
-                                    context,
-                                    gameDef);
-                            }
-
-                            structuredResponse.ReportValidation("accepted");
-                        }
-                        catch (LlmContractException ex)
-                        {
-                            structuredResponse.ReportValidation("rejected", ex.Reason);
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            structuredResponse.ReportValidation("rejected", ex.GetType().Name);
-                            throw;
-                        }
-                    }
-                    else
-                    {
-                        var responseText = await SendWithDiagnosticsAsync(
-                                _transport,
+                            var request = DialogueOptionsStructuredContract.CreateRequest(
                                 systemPrompt,
                                 userContent,
                                 temperature,
                                 _options.MaxTokens,
-                                LlmPhase.DialogueOptions,
-                                context.CurrentTurn,
-                                ct)
-                            .ConfigureAwait(false);
+                                context,
+                                GetExpectedDialogueOptionCount(context, gameDef));
+                            var structuredResponse = await SendStructuredWithDiagnosticsAsync(
+                                    structuredTransport,
+                                    request,
+                                    LlmPhase.DialogueOptions,
+                                    context.CurrentTurn,
+                                    attemptCancellationToken)
+                                .ConfigureAwait(false);
+                            try
+                            {
+                                if (structuredResponse.UsedNativeStructuredOutput)
+                                {
+                                    parsedOptions = DialogueOptionsStructuredContract.ParseStrict(
+                                        structuredResponse.JsonText,
+                                        context.AvailableStats,
+                                        gameDef.MaxDialogueOptions,
+                                        out string? errorCode,
+                                        out string? errorMessage,
+                                        out int parsedCount,
+                                        out int expectedCount);
 
-                        parsedOptions = ParseDialogueOptionsFromTextOrJson(
-                            responseText,
-                            context,
-                            gameDef);
+                                    if (errorCode != null)
+                                    {
+                                        throw CreateDialogueOptionsContractException(
+                                            errorCode,
+                                            errorMessage!,
+                                            "StructuredDialogueOptionsParser",
+                                            expectedCount,
+                                            parsedCount,
+                                            context.CurrentTurn,
+                                            structuredResponse.Provider,
+                                            structuredResponse.Model);
+                                    }
+                                }
+                                else
+                                {
+                                    parsedOptions = ParseDialogueOptionsFromTextOrJson(
+                                        structuredResponse.JsonText,
+                                        context,
+                                        gameDef);
+                                }
+
+                                structuredResponse.ReportValidation("accepted");
+                            }
+                            catch (LlmContractException ex)
+                            {
+                                structuredResponse.ReportValidation("rejected", ex.Reason);
+                                throw;
+                            }
+                            catch (Exception ex)
+                            {
+                                structuredResponse.ReportValidation("rejected", ex.GetType().Name);
+                                throw;
+                            }
+                        }
+                        else
+                        {
+                            var responseText = await SendWithDiagnosticsAsync(
+                                    _transport,
+                                    systemPrompt,
+                                    userContent,
+                                    temperature,
+                                    _options.MaxTokens,
+                                    LlmPhase.DialogueOptions,
+                                    context.CurrentTurn,
+                                    attemptCancellationToken)
+                                .ConfigureAwait(false);
+
+                            parsedOptions = ParseDialogueOptionsFromTextOrJson(
+                                responseText,
+                                context,
+                                gameDef);
+                        }
+
+                        // #950: warn when the option generator skips all stake content.
+                        // Lightweight check: split stake lines on sentence/clause boundaries,
+                        // discard fragments shorter than 8 chars, look for any fragment in any option.
+                        if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
+                        {
+                            WarnIfStakeSkipped(context, parsedOptions);
+                        }
+
+                        return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Accepted(parsedOptions);
                     }
-
-                    // #950: warn when the option generator skips all stake content.
-                    // Lightweight check: split stake lines on sentence/clause boundaries,
-                    // discard fragments shorter than 8 chars, look for any fragment in any option.
-                    if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
+                    catch (LlmContractException ex)
                     {
-                        WarnIfStakeSkipped(context, parsedOptions);
+                        return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Rejected(ex);
                     }
+                },
+                delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
+                    GetContractViolationBackoffDelayMs(_options.ContractViolationBackoffMs, attempt)),
+                onRejected: rejection => NotifyContractViolation(rejection.Rejection),
+                cancellationToken: ct).ConfigureAwait(false);
 
-                    return parsedOptions;
-                }
-                catch (LlmContractException ex)
-                {
-                    var violation = new LlmContractViolation(
-                        phase: ex.Phase,
-                        reason: ex.Reason,
-                        provider: ex.Provider,
-                        model: ex.Model,
-                        parserName: ex.ParserName,
-                        expectedOptionCount: ex.ExpectedOptionCount,
-                        parsedOptionCount: ex.ParsedOptionCount,
-                        optionCount: ex.OptionCount,
-                        signalCount: ex.SignalCount,
-                        sessionId: ex.SessionId,
-                        turnId: ex.TurnId
-                    );
-
-                    _options.OnLlmContractViolation?.Invoke(violation);
-
-                    if (attempt >= maxAttempts)
-                    {
-                        throw;
-                    }
-
-                    int delayMs = GetContractViolationBackoffDelayMs(attempt);
-                    if (delayMs > 0)
-                    {
-                        await Task.Delay(delayMs, ct).ConfigureAwait(false);
-                    }
-                }
+            if (recovery.IsAccepted)
+            {
+                return recovery.AcceptedValue;
             }
+
+            ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
+            throw recovery.Exhaustion.FinalRejection;
         }
 
         /// <inheritdoc />
@@ -225,114 +214,103 @@ namespace Pinder.LlmAdapters
             if (history == null) throw new ArgumentNullException(nameof(history));
 
             var gameDef = RequireGameDefinition();
-            var userContent = SessionDocumentBuilder.BuildDateePrompt(context);
+            var userContent = SessionDocumentBuilder.BuildDateePrompt(
+                context,
+                _options.PromptCatalog);
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
 
-            int attempt = 0;
             int maxAttempts = GetContractViolationAttemptLimit();
+            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<StatefulDateeResult, LlmContractException>(
+                maxAttempts,
+                async (attempt, attemptCancellationToken) =>
+                {
+                    try
+                    {
+                        // DateeContext.ConversationHistory is the authoritative transcript
+                        // and BuildDateePrompt renders it into userContent. Prefixing the
+                        // separate engine-owned DateeHistory here would include each prior
+                        // full prompt again and cause nested, quadratic prompt growth.
+                        string responseText = await SendWithDiagnosticsAsync(
+                                _transport,
+                                systemPrompt,
+                                userContent,
+                                temperature,
+                                _options.MaxTokens,
+                                LlmPhase.OpponentResponse,
+                                context.CurrentTurn,
+                                attemptCancellationToken)
+                            .ConfigureAwait(false);
 
-            while (true)
+                        if (string.IsNullOrWhiteSpace(responseText))
+                        {
+                            throw new LlmContractException(
+                                phase: "datee_response",
+                                reason: "empty_output",
+                                message: "LLM datee_response output is empty or whitespace.",
+                                provider: null,
+                                model: null,
+                                parserName: "StrictDateeResponseParser",
+                                expectedOptionCount: null,
+                                parsedOptionCount: null,
+                                optionCount: null,
+                                signalCount: 0,
+                                sessionId: null,
+                                turnId: context.CurrentTurn
+                            );
+                        }
+
+                        var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
+                        if (validationResult == DateeSignalsValidationResult.MalformedSignals)
+                        {
+                            throw new LlmContractException(
+                                phase: "datee_response",
+                                reason: "malformed_signals",
+                                message: $"LLM datee_response has malformed signals block: {errorDetail}",
+                                provider: null,
+                                model: null,
+                                parserName: "StrictDateeResponseParser",
+                                expectedOptionCount: null,
+                                parsedOptionCount: null,
+                                optionCount: null,
+                                signalCount: null,
+                                sessionId: null,
+                                turnId: context.CurrentTurn
+                            );
+                        }
+
+                        var parsed = DateeResponseParsers.ParseDateeResponseText(
+                            responseText,
+                            GetDiagnosticSink(),
+                            requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
+
+                        // Keep dialogue history semantic: never persist the generated
+                        // prompt document as though it were a player message.
+                        var newEntries = new ConversationMessage[]
+                        {
+                            ConversationMessage.User(context.PlayerDeliveredMessage),
+                            ConversationMessage.Assistant(responseText ?? string.Empty),
+                        };
+                        return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
+                            new StatefulDateeResult(parsed, newEntries));
+                    }
+                    catch (LlmContractException ex)
+                    {
+                        return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Rejected(ex);
+                    }
+                },
+                delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
+                    GetContractViolationBackoffDelayMs(_options.ContractViolationBackoffMs, attempt)),
+                onRejected: rejection => NotifyContractViolation(rejection.Rejection),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            if (recovery.IsAccepted)
             {
-                attempt++;
-                try
-                {
-                    // DateeContext.ConversationHistory is the authoritative transcript
-                    // and BuildDateePrompt renders it into userContent. Prefixing the
-                    // separate engine-owned DateeHistory here would include each prior
-                    // full prompt again and cause nested, quadratic prompt growth.
-                    string responseText = await SendWithDiagnosticsAsync(
-                            _transport,
-                            systemPrompt,
-                            userContent,
-                            temperature,
-                            _options.MaxTokens,
-                            LlmPhase.OpponentResponse,
-                            context.CurrentTurn,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-
-                    if (string.IsNullOrWhiteSpace(responseText))
-                    {
-                        throw new LlmContractException(
-                            phase: "datee_response",
-                            reason: "empty_output",
-                            message: "LLM datee_response output is empty or whitespace.",
-                            provider: null,
-                            model: null,
-                            parserName: "StrictDateeResponseParser",
-                            expectedOptionCount: null,
-                            parsedOptionCount: null,
-                            optionCount: null,
-                            signalCount: 0,
-                            sessionId: null,
-                            turnId: context.CurrentTurn
-                        );
-                    }
-
-                    var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
-                    if (validationResult == DateeSignalsValidationResult.MalformedSignals)
-                    {
-                        throw new LlmContractException(
-                            phase: "datee_response",
-                            reason: "malformed_signals",
-                            message: $"LLM datee_response has malformed signals block: {errorDetail}",
-                            provider: null,
-                            model: null,
-                            parserName: "StrictDateeResponseParser",
-                            expectedOptionCount: null,
-                            parsedOptionCount: null,
-                            optionCount: null,
-                            signalCount: null,
-                            sessionId: null,
-                            turnId: context.CurrentTurn
-                        );
-                    }
-
-                    var parsed = DateeResponseParsers.ParseDateeResponseText(
-                        responseText,
-                        GetDiagnosticSink(),
-                        requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
-
-                    // Keep dialogue history semantic: never persist the generated
-                    // prompt document as though it were a player message.
-                    var newEntries = new ConversationMessage[]
-                    {
-                        ConversationMessage.User(context.PlayerDeliveredMessage),
-                        ConversationMessage.Assistant(responseText ?? string.Empty),
-                    };
-                    return new StatefulDateeResult(parsed, newEntries);
-                }
-                catch (LlmContractException ex)
-                {
-                    var violation = new LlmContractViolation(
-                        phase: ex.Phase,
-                        reason: ex.Reason,
-                        provider: ex.Provider,
-                        model: ex.Model,
-                        parserName: ex.ParserName,
-                        expectedOptionCount: ex.ExpectedOptionCount,
-                        parsedOptionCount: ex.ParsedOptionCount,
-                        optionCount: ex.OptionCount,
-                        signalCount: ex.SignalCount,
-                        sessionId: ex.SessionId,
-                        turnId: ex.TurnId
-                    );
-
-                    _options.OnLlmContractViolation?.Invoke(violation);
-
-                    if (attempt >= maxAttempts)
-                    {
-                        throw;
-                    }
-
-                    int delayMs = GetContractViolationBackoffDelayMs(attempt);
-                    if (delayMs > 0)
-                    {
-                        await Task.Delay(delayMs, cancellationToken).ConfigureAwait(false);
-                    }
-                }
+                return recovery.AcceptedValue;
             }
+
+            ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
+            throw recovery.Exhaustion.FinalRejection;
         }
 
         /// <inheritdoc />
@@ -349,7 +327,8 @@ namespace Pinder.LlmAdapters
                 context.InterestAfter,
                 context.NewState,
                 context.ConversationHistory,
-                context.PlayerName);
+                context.PlayerName,
+                _options.PromptCatalog);
 
             // Use datee system prompt if provided, otherwise skip system prompt
             string systemPrompt = string.IsNullOrWhiteSpace(context.DateePrompt)
@@ -788,14 +767,14 @@ namespace Pinder.LlmAdapters
                 : gameDef.MaxDialogueOptions;
         }
 
-        private static void AppendConfiguredConversationHistory(
+        private void AppendConfiguredConversationHistory(
             StringBuilder sb,
             IReadOnlyList<(string Sender, string Text)> history)
         {
-            sb.AppendLine(PromptTemplates.ConversationHistoryHeading);
+            sb.AppendLine(GetPrompt("conversation-history-heading"));
             if (history == null || history.Count == 0)
             {
-                sb.AppendLine(PromptTemplates.ConversationHistoryEmpty);
+                sb.AppendLine(GetPrompt("conversation-history-empty"));
                 return;
             }
 
@@ -1020,19 +999,40 @@ namespace Pinder.LlmAdapters
             handler?.Invoke(evt);
         }
 
+        private void NotifyContractViolation(LlmContractException ex)
+        {
+            var violation = new LlmContractViolation(
+                phase: ex.Phase,
+                reason: ex.Reason,
+                provider: ex.Provider,
+                model: ex.Model,
+                parserName: ex.ParserName,
+                expectedOptionCount: ex.ExpectedOptionCount,
+                parsedOptionCount: ex.ParsedOptionCount,
+                optionCount: ex.OptionCount,
+                signalCount: ex.SignalCount,
+                sessionId: ex.SessionId,
+                turnId: ex.TurnId
+            );
+
+            _options.OnLlmContractViolation?.Invoke(violation);
+        }
+
         private int GetContractViolationAttemptLimit()
         {
             return Math.Max(0, _options.MaxContractViolationRetries) + 1;
         }
 
-        private int GetContractViolationBackoffDelayMs(int completedAttemptCount)
+        internal static int GetContractViolationBackoffDelayMs(
+            int baseDelayMs,
+            int completedAttemptCount)
         {
-            if (_options.ContractViolationBackoffMs <= 0)
+            if (baseDelayMs <= 0)
             {
                 return 0;
             }
 
-            var delay = _options.ContractViolationBackoffMs * Math.Pow(2, completedAttemptCount - 1);
+            var delay = baseDelayMs * Math.Pow(2, completedAttemptCount - 1);
             return delay >= int.MaxValue ? int.MaxValue : (int)delay;
         }
 
@@ -1107,7 +1107,7 @@ namespace Pinder.LlmAdapters
             return PromptCatalog.Substitute(template, values).Trim();
         }
 
-        private static string FormatConversationHistory(IEnumerable<(string Sender, string Text)> history)
+        private string FormatConversationHistory(IEnumerable<(string Sender, string Text)> history)
         {
             var sb = new StringBuilder();
             bool hasEntries = false;
@@ -1119,7 +1119,12 @@ namespace Pinder.LlmAdapters
 
             return hasEntries
                 ? sb.ToString().TrimEnd()
-                : PromptTemplates.ConversationHistoryEmpty;
+                : GetPrompt("conversation-history-empty");
+        }
+
+        private string GetPrompt(string key)
+        {
+            return PromptTemplates.GetCatalogString(_options.PromptCatalog, key);
         }
 
         private Action<OperationalDiagnosticEvent>? GetDiagnosticSink()

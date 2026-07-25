@@ -22,6 +22,12 @@ namespace Pinder.LlmAdapters
         public StatDeliveryInstructions? StatDeliveryInstructions { get; set; }
 
         /// <summary>
+        /// Immutable prompt catalog captured by the host for this adapter's
+        /// operation or session generation.
+        /// </summary>
+        public PromptCatalog? PromptCatalog { get; set; }
+
+        /// <summary>
         /// Directory for debug transcript output. When null, debug logging is disabled.
         /// </summary>
         public string? DebugDirectory { get; set; }

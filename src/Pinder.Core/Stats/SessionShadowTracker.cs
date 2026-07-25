@@ -18,9 +18,9 @@ namespace Pinder.Core.Stats
     public sealed class SessionShadowTracker
     {
         private StatBlock _baseStats;
-        private readonly Dictionary<ShadowStatType, int> _deltas;
-        private readonly List<string> _growthEvents;
-        private readonly List<ShadowGrowthEffect> _growthEffects;
+        private Dictionary<ShadowStatType, int> _deltas;
+        private List<string> _growthEvents;
+        private List<ShadowGrowthEffect> _growthEffects;
 
         /// <summary>
         /// Wraps an immutable StatBlock for mutable shadow tracking.
@@ -234,6 +234,18 @@ namespace Pinder.Core.Stats
             copy._growthEvents.AddRange(_growthEvents);
             copy._growthEffects.AddRange(_growthEffects);
             return copy;
+        }
+
+        /// <summary>
+        /// Atomically adopts an already-independent clone while preserving this
+        /// tracker's identity for hosts that retain the configured instance.
+        /// </summary>
+        internal void AdoptPreparedClone(SessionShadowTracker prepared)
+        {
+            _baseStats = prepared._baseStats;
+            _deltas = prepared._deltas;
+            _growthEvents = prepared._growthEvents;
+            _growthEffects = prepared._growthEffects;
         }
     }
 }

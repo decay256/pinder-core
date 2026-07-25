@@ -24,7 +24,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 maxTokens: 1024,
                 systemBlocks,
                 userContent,
-                temperature: 0.7);
+                temperature: 0.7,
+                headings: AnthropicMessageHeadings.Capture());
 
             // Assert
             Assert.Equal("claude-opus-4-8", request.Model);
@@ -48,7 +49,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 maxTokens: 1024,
                 systemBlocks,
                 userContent,
-                temperature: 0.7);
+                temperature: 0.7,
+                headings: AnthropicMessageHeadings.Capture());
 
             // Assert
             Assert.NotNull(request.Thinking);
@@ -65,7 +67,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void BuildMessagesRequest_OmitsTemperature_ForOpus48(string modelSpec)
         {
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
-                modelSpec, maxTokens: 1024, Array.Empty<ContentBlock>(), "hello", temperature: 0.7);
+                modelSpec, maxTokens: 1024, Array.Empty<ContentBlock>(), "hello", temperature: 0.7,
+                headings: AnthropicMessageHeadings.Capture());
 
             // Temperature must be null so it serializes out of the request body entirely
             // (claude-opus-4-8 returns HTTP 400 `temperature is deprecated for this model`).
@@ -78,7 +81,8 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void BuildMessagesRequest_KeepsTemperature_ForModelsThatAcceptIt(string modelSpec)
         {
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
-                modelSpec, maxTokens: 1024, Array.Empty<ContentBlock>(), "hello", temperature: 0.7);
+                modelSpec, maxTokens: 1024, Array.Empty<ContentBlock>(), "hello", temperature: 0.7,
+                headings: AnthropicMessageHeadings.Capture());
 
             Assert.Equal(0.7, request.Temperature);
         }

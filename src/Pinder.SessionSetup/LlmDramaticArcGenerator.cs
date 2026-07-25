@@ -85,75 +85,92 @@ namespace Pinder.SessionSetup
                 ? _options.MaxTokens
                 : entry.MaxTokens!.Value;
 
-            string lastFailureCode = "invalid_output";
-            for (int attempt = 1; attempt <= _options.MaxValidationAttempts; attempt++)
+            if (_options.MaxValidationAttempts <= 0)
             {
-                string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
-                InMemoryPromptTraceService.Instance.RecordTrace(
-                    "dramatic-arc-system",
-                    new PromptTraceResult(
-                        systemPrompt,
-                        new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
-                InMemoryPromptTraceService.Instance.RecordTrace(
-                    "dramatic-arc-user",
-                    new PromptTraceResult(
-                        userMessage,
-                        new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
+                _options.OnDegraded?.Invoke(
+                    SetupGenerationResult.DegradedFailure("dramatic_arc", "invalid_output"));
+                throw new InvalidOperationException(
+                    $"dramatic_arc output failed validation after {_options.MaxValidationAttempts} attempts: " +
+                    "expected 3-5 complete sentences of plain prose.");
+            }
 
-                string response;
-                try
+            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<string, DramaticArcRejection>(
+                _options.MaxValidationAttempts,
+                async (attempt, attemptCancellationToken) =>
                 {
-                    response = await LlmOptionalTextGeneration.RunAsync(
-                            "dramatic_arc",
-                            _transport,
+                    string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
+                    InMemoryPromptTraceService.Instance.RecordTrace(
+                        "dramatic-arc-system",
+                        new PromptTraceResult(
                             systemPrompt,
+                            new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
+                    InMemoryPromptTraceService.Instance.RecordTrace(
+                        "dramatic-arc-user",
+                        new PromptTraceResult(
                             userMessage,
-                            entry,
-                            LlmPhase.DramaticArc,
-                            temperature,
-                            GeneratorDefaultConfigs.DramaticArc.Temperature,
-                            maxTokens,
-                            GeneratorDefaultConfigs.DramaticArc.MaxTokens,
-                            onDegraded: null,
-                            _options.OnDiagnostic,
-                            LlmOptionalTextGeneration.CancellationBehavior.Throw,
-                            cancellationToken,
-                            passCancellationTokenToTransport: true)
-                        .ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    throw;
-                }
-                catch (LlmTransportException)
-                {
-                    if (_options.OnDegraded != null)
+                            new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
+
+                    string response;
+                    try
                     {
-                        _options.OnDegraded.Invoke(
-                            SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
-                        return string.Empty;
+                        response = await LlmOptionalTextGeneration.RunAsync(
+                                "dramatic_arc",
+                                _transport,
+                                systemPrompt,
+                                userMessage,
+                                entry,
+                                LlmPhase.DramaticArc,
+                                temperature,
+                                GeneratorDefaultConfigs.DramaticArc.Temperature,
+                                maxTokens,
+                                GeneratorDefaultConfigs.DramaticArc.MaxTokens,
+                                onDegraded: null,
+                                _options.OnDiagnostic,
+                                LlmOptionalTextGeneration.CancellationBehavior.Throw,
+                                attemptCancellationToken,
+                                passCancellationTokenToTransport: true)
+                            .ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (LlmTransportException)
+                    {
+                        if (_options.OnDegraded != null)
+                        {
+                            _options.OnDegraded.Invoke(
+                                SetupGenerationResult.DegradedFailure("dramatic_arc", "transport_error"));
+                            return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Accepted(string.Empty);
+                        }
+
+                        throw;
                     }
 
-                    throw;
-                }
+                    string trimmed = (response ?? string.Empty).Trim();
+                    if (string.IsNullOrEmpty(trimmed))
+                    {
+                        return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Rejected(
+                            new DramaticArcRejection("empty_output"));
+                    }
 
-                string trimmed = (response ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(trimmed))
-                {
-                    lastFailureCode = "empty_output";
-                    continue;
-                }
+                    if (IsCompleteDramaticArc(trimmed))
+                    {
+                        return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Accepted(trimmed);
+                    }
 
-                if (IsCompleteDramaticArc(trimmed))
-                {
-                    return trimmed;
-                }
+                    return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Rejected(
+                        new DramaticArcRejection("invalid_output"));
+                },
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                lastFailureCode = "invalid_output";
+            if (recovery.IsAccepted)
+            {
+                return recovery.AcceptedValue;
             }
 
             _options.OnDegraded?.Invoke(
-                SetupGenerationResult.DegradedFailure("dramatic_arc", lastFailureCode));
+                SetupGenerationResult.DegradedFailure("dramatic_arc", recovery.Exhaustion.FinalRejection.FailureCode));
             throw new InvalidOperationException(
                 $"dramatic_arc output failed validation after {_options.MaxValidationAttempts} attempts: " +
                 "expected 3-5 complete sentences of plain prose.");
@@ -220,6 +237,16 @@ namespace Pinder.SessionSetup
             /// Opt-in operational diagnostic sink. Null keeps diagnostics disabled.
             /// </summary>
             public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
+        }
+
+        private sealed class DramaticArcRejection
+        {
+            public DramaticArcRejection(string failureCode)
+            {
+                FailureCode = failureCode;
+            }
+
+            public string FailureCode { get; }
         }
     }
 }

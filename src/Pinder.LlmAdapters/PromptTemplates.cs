@@ -24,21 +24,46 @@ namespace Pinder.LlmAdapters
         /// After Phase 5 there is no const fallback — every property
         /// throws when the catalog is null.
         /// </summary>
-        public static PromptCatalog? Catalog { get; set; }
+        private static PromptCatalog? _catalog;
+
+        public static PromptCatalog? Catalog
+        {
+            get => _catalog;
+            set
+            {
+                if (value != null)
+                {
+                    value.ValidateRuntimeCatalog();
+                }
+
+                _catalog = value;
+            }
+        }
 
         // ── helpers ───────────────────────────────────────────────────────────
 
-        private static string GetCatalogString(string key)
+        internal static string GetCatalogString(PromptCatalog? catalog, string key)
         {
-            var catalog = Catalog
+            var activeCatalog = catalog ?? Catalog
                 ?? throw new InvalidOperationException(
                     "PromptTemplates.Catalog is not wired. Call PromptWiring.Wire() at startup.");
-            var entry = catalog.TryGet(key)
+            var entry = activeCatalog.TryGet(key)
                 ?? throw new InvalidOperationException(
                     $"prompt-catalog: missing required key '{key}'. The yaml file is incomplete or missing.");
             return entry.SystemPrompt
                 ?? throw new InvalidOperationException(
                     $"prompt-catalog: key '{key}' has no system_prompt. Check the yaml file.");
+        }
+
+        private static string GetCatalogString(string key)
+        {
+            return GetCatalogString(null, key);
+        }
+
+        public static void ValidateCatalog(PromptCatalog catalog)
+        {
+            if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+            catalog.ValidateRuntimeCatalog();
         }
 
         // ── §3.2 — Dialogue options instruction ─────────────────────────────
@@ -132,17 +157,19 @@ namespace Pinder.LlmAdapters
 
         // ── Resistance descriptors ──────────────────────────────────────────
 
-        internal static string ResistanceActiveDisengagement => GetCatalogString("resistance-active-disengagement");
+        internal static string ResistanceUnmatched => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.Unmatched));
 
-        internal static string ResistanceSkepticalInterest => GetCatalogString("resistance-skeptical-interest");
+        internal static string ResistanceBored => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.Bored));
 
-        internal static string ResistanceUnstableAgreement => GetCatalogString("resistance-unstable-agreement");
+        internal static string ResistanceLukewarm => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.Lukewarm));
 
-        internal static string ResistanceDeliberateApproach => GetCatalogString("resistance-deliberate-approach");
+        internal static string ResistanceInterested => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.Interested));
 
-        internal static string ResistanceAlmostConvinced => GetCatalogString("resistance-almost-convinced");
+        internal static string ResistanceVeryIntoIt => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.VeryIntoIt));
 
-        internal static string ResistanceDissolved => GetCatalogString("resistance-dissolved");
+        internal static string ResistanceAlmostThere => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.AlmostThere));
+
+        internal static string ResistanceDateSecured => GetCatalogString(GetResistanceKey(Pinder.Core.Conversation.InterestState.DateSecured));
 
         // ── Per-tier datee reaction guidance ─────────────────────────────
 
@@ -170,31 +197,83 @@ namespace Pinder.LlmAdapters
 
         // ── Interest narrative bands ────────────────────────────────────────
 
-        internal static string InterestNarrative_1_4 => GetCatalogString("interest-narrative-1-4");
+        internal static string InterestNarrativeUnmatched => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.Unmatched));
 
-        internal static string InterestNarrative_5_9 => GetCatalogString("interest-narrative-5-9");
+        internal static string InterestNarrativeBored => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.Bored));
 
-        internal static string InterestNarrative_10_14 => GetCatalogString("interest-narrative-10-14");
+        internal static string InterestNarrativeLukewarm => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.Lukewarm));
 
-        internal static string InterestNarrative_15_20 => GetCatalogString("interest-narrative-15-20");
+        internal static string InterestNarrativeInterested => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.Interested));
 
-        internal static string InterestNarrative_21_24 => GetCatalogString("interest-narrative-21-24");
+        internal static string InterestNarrativeVeryIntoIt => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.VeryIntoIt));
 
-        internal static string InterestNarrative_25 => GetCatalogString("interest-narrative-25");
+        internal static string InterestNarrativeAlmostThere => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.AlmostThere));
+
+        internal static string InterestNarrativeDateSecured => GetCatalogString(GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState.DateSecured));
 
         /// <summary>
         /// Returns the interest narrative string for a given interest level.
         /// Six configurable bands as specified in §544.
         /// </summary>
+        internal static string GetInterestNarrativeKey(Pinder.Core.Conversation.InterestState state)
+        {
+            switch (state)
+            {
+                case Pinder.Core.Conversation.InterestState.Unmatched:
+                    return "interest-narrative-unmatched";
+                case Pinder.Core.Conversation.InterestState.Bored:
+                    return "interest-narrative-bored";
+                case Pinder.Core.Conversation.InterestState.Lukewarm:
+                    return "interest-narrative-lukewarm";
+                case Pinder.Core.Conversation.InterestState.Interested:
+                    return "interest-narrative-interested";
+                case Pinder.Core.Conversation.InterestState.VeryIntoIt:
+                    return "interest-narrative-very-into-it";
+                case Pinder.Core.Conversation.InterestState.AlmostThere:
+                    return "interest-narrative-almost-there";
+                case Pinder.Core.Conversation.InterestState.DateSecured:
+                    return "interest-narrative-date-secured";
+                default:
+                    throw new InvalidOperationException($"Unknown interest state '{state}'.");
+            }
+        }
+
+        internal static string GetInterestNarrative(Pinder.Core.Conversation.InterestState state)
+        {
+            return GetCatalogString(GetInterestNarrativeKey(state));
+        }
+
         internal static string GetInterestNarrative(int interest)
         {
-            if (interest >= 25) return InterestNarrative_25;
-            if (interest >= 21) return InterestNarrative_21_24;
-            if (interest >= 15) return InterestNarrative_15_20;
-            if (interest >= 10) return InterestNarrative_10_14;
-            if (interest >= 5) return InterestNarrative_5_9;
-            if (interest >= 1) return InterestNarrative_1_4;
-            return "Unmatched. The conversation is over.";
+            return GetInterestNarrative(new Pinder.Core.Conversation.InterestMeter(interest).GetState());
+        }
+
+        internal static string GetResistanceKey(Pinder.Core.Conversation.InterestState state)
+        {
+            switch (state)
+            {
+                case Pinder.Core.Conversation.InterestState.Unmatched:
+                    return "resistance-unmatched";
+                case Pinder.Core.Conversation.InterestState.Bored:
+                    return "resistance-bored";
+                case Pinder.Core.Conversation.InterestState.Lukewarm:
+                    return "resistance-lukewarm";
+                case Pinder.Core.Conversation.InterestState.Interested:
+                    return "resistance-interested";
+                case Pinder.Core.Conversation.InterestState.VeryIntoIt:
+                    return "resistance-very-into-it";
+                case Pinder.Core.Conversation.InterestState.AlmostThere:
+                    return "resistance-almost-there";
+                case Pinder.Core.Conversation.InterestState.DateSecured:
+                    return "resistance-date-secured";
+                default:
+                    throw new InvalidOperationException($"Unknown interest state '{state}'.");
+            }
+        }
+
+        internal static string GetResistanceDescriptor(Pinder.Core.Conversation.InterestState state)
+        {
+            return GetCatalogString(GetResistanceKey(state));
         }
 
         // ── [ENGINE] block format templates ─────────────────────────────────

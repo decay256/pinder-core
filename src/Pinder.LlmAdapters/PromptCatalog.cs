@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Pinder.Core.Prompts;
 using YamlDotNet.RepresentationModel;
 
 namespace Pinder.LlmAdapters
@@ -54,6 +55,122 @@ namespace Pinder.LlmAdapters
     public sealed class PromptCatalog
     {
         private readonly IReadOnlyDictionary<string, PromptEntry> _entries;
+
+        private static readonly string[] RuntimeSystemPromptKeys =
+        {
+            "dialogue-options-instruction",
+            "datee-response-instruction",
+            "interest-beat-instruction",
+            "interest-beat-above15",
+            "interest-beat-below8",
+            "interest-beat-date-secured",
+            "interest-beat-unmatched",
+            "interest-beat-generic",
+            "pivot-directive",
+            "cold-opener-rule",
+            "stake-coverage-summary",
+            "stake-coverage-untouched-directive",
+            "stake-coverage-all-referenced-directive",
+            "player-transition-directive",
+            "datee-transition-directive",
+            "cognitive-subtext-directive",
+            "stateful-previous-context-heading",
+            "stateful-current-turn-heading",
+            "engine-state-hfi-line",
+            "engine-state-tor-line",
+            "engine-state-cognitive-subtext-line",
+            "engine-state-transition-target-line",
+            "engine-state-transition-style-line",
+            "conversation-history-heading",
+            "conversation-history-empty",
+            "dialogue-options-structured-json-instruction",
+            "shadow-state-heading",
+            "datee-shadow-state-heading",
+            "shadow-taint-madness",
+            "shadow-taint-despair",
+            "shadow-taint-denial",
+            "shadow-taint-fixation",
+            "shadow-taint-dread",
+            "shadow-taint-overthinking",
+            "datee-reaction-fumble",
+            "datee-reaction-misfire",
+            "datee-reaction-trope-trap",
+            "datee-reaction-catastrophe",
+            "datee-reaction-legendary",
+            "datee-horniness-reaction-below-threshold",
+            "datee-horniness-reaction-high-interest",
+            "datee-horniness-tier-intensity-fumble",
+            "datee-horniness-tier-intensity-misfire",
+            "datee-horniness-tier-intensity-trope-trap",
+            "datee-horniness-tier-intensity-catastrophe",
+            "interest-narrative-unmatched",
+            "interest-narrative-bored",
+            "interest-narrative-lukewarm",
+            "interest-narrative-interested",
+            "interest-narrative-very-into-it",
+            "interest-narrative-almost-there",
+            "interest-narrative-date-secured",
+            "resistance-unmatched",
+            "resistance-bored",
+            "resistance-lukewarm",
+            "resistance-interested",
+            "resistance-very-into-it",
+            "resistance-almost-there",
+            "resistance-date-secured",
+            "engine-options-block",
+            "engine-datee-block",
+        };
+
+        private static readonly string[] RuntimeCompletePromptKeys =
+        {
+            "backstory",
+            "dramatic_arc",
+            "outfit",
+            "stake",
+            "backstory_consolidation",
+            "bio",
+            "personality_consolidation",
+            "diagnosis",
+            "character_generate",
+        };
+
+        private static readonly RuntimeTokenContract[] RuntimeTokenContracts =
+        {
+            SystemTokens("dialogue-options-instruction", "options_count", "player_name", "available_stats", "options_list"),
+            SystemTokens("datee-response-instruction", "resistance_block", "length_hint"),
+            SystemTokens("interest-beat-instruction", "datee_name", "interest_before", "interest_after", "threshold_instruction"),
+            SystemTokens("interest-beat-above15", "datee_name"),
+            SystemTokens("interest-beat-below8", "datee_name"),
+            SystemTokens("interest-beat-date-secured", "datee_name"),
+            SystemTokens("interest-beat-unmatched", "datee_name"),
+            SystemTokens("interest-beat-generic", "datee_name"),
+            SystemTokens("stake-coverage-summary", "referenced_count", "untouched_count"),
+            SystemTokens("player-transition-directive", "player_name", "stem_text", "transition_style"),
+            SystemTokens("datee-transition-directive", "stem_text", "transition_style"),
+            SystemTokens("cognitive-subtext-directive", "cognitive_subtext"),
+            SystemTokens("engine-state-hfi-line", "player_hfi", "datee_hfi"),
+            SystemTokens("engine-state-tor-line", "player_tor", "datee_tor"),
+            SystemTokens("engine-state-cognitive-subtext-line", "cognitive_subtext"),
+            SystemTokens("engine-state-transition-target-line", "transition_target", "transition_scope"),
+            SystemTokens("engine-state-transition-style-line", "transition_scope", "transition_style"),
+            SystemTokens("dialogue-options-structured-json-instruction", "options_count", "available_stats"),
+            SystemTokens("engine-options-block", "turn", "player_name", "game_state", "hfi_line", "tor_line",
+                "cognitive_subtext_line", "transition_target_line", "transition_style_line", "options_count", "options_format_list"),
+            SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative",
+                "cognitive_subtext_line", "transition_target_line", "transition_style_line"),
+            UserTokens("backstory", "characterName", "genderIdentity", "bio", "consolidated_backstory", "consolidated_personality"),
+            UserTokens("dramatic_arc", "playerName", "playerStake", "playerBio", "dateeName", "dateeStake", "dateeBio"),
+            UserTokens("outfit", "playerName", "playerItems", "dateeName", "dateeItems"),
+            UserTokens("stake", "character_profile"),
+            UserTokens("backstory_consolidation", "game_system_prompt", "characterName", "genderIdentity",
+                "bio", "stats", "backstory_fragments", "texting_style"),
+            UserTokens("bio", "characterName", "genderIdentity", "backstory", "stakes", "diagnosis"),
+            UserTokens("personality_consolidation", "game_system_prompt", "characterName", "genderIdentity",
+                "bio", "stats", "personality_fragments", "texting_style"),
+            UserTokens("diagnosis", "backstory", "stakes"),
+            SystemTokens("character_generate", "items_catalogue", "anatomy_parameters"),
+            UserTokens("character_generate", "existing_library", "smart_initialization"),
+        };
 
         private PromptCatalog(IReadOnlyDictionary<string, PromptEntry> entries)
         {
@@ -118,6 +235,89 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException($"prompt-catalog: key '{key}' has no max_tokens. Check the yaml file.");
 
             return entry;
+        }
+
+        /// <summary>
+        /// Validates every prompt contract required by production gameplay,
+        /// generation, synthesis, and character-card compilation.
+        /// </summary>
+        public void ValidateRuntimeCatalog()
+        {
+            foreach (string key in RuntimeSystemPromptKeys)
+            {
+                RequireField(key, useSystemPrompt: true);
+            }
+
+            foreach (string key in RuntimeCompletePromptKeys)
+            {
+                RequireCompleteEntry(
+                    key,
+                    $"prompt-catalog: missing required runtime prompt key '{key}'. The yaml file is incomplete or missing.");
+            }
+
+            foreach (var contract in RuntimeTokenContracts)
+            {
+                string template = contract.UseSystemPrompt
+                    ? RequireField(contract.Key, useSystemPrompt: true).SystemPrompt!
+                    : RequireField(contract.Key, useSystemPrompt: false).UserTemplate!;
+
+                foreach (string token in contract.Tokens)
+                {
+                    string placeholder = "{" + token + "}";
+                    if (template.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+                    {
+                        string field = contract.UseSystemPrompt ? "system_prompt" : "user_template";
+                        throw new InvalidOperationException(
+                            $"prompt-catalog: key '{contract.Key}' {field} must include required token '{placeholder}'.");
+                    }
+                }
+            }
+
+            PromptBuilder.ValidateStructuralPromptContracts(
+                key => TryGet(key)?.SystemPrompt,
+                key =>
+                {
+                    var entry = TryGet(key);
+                    return entry == null
+                        ? null
+                        : new StructuralPromptResult(entry.SystemPrompt, entry.SourceFile);
+                });
+        }
+
+        private PromptEntry RequireField(string key, bool useSystemPrompt)
+        {
+            var entry = TryGet(key)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{key}'. The yaml file is incomplete or missing.");
+            string? value = useSystemPrompt ? entry.SystemPrompt : entry.UserTemplate;
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                string field = useSystemPrompt ? "system_prompt" : "user_template";
+                throw new InvalidOperationException(
+                    $"prompt-catalog: runtime prompt key '{key}' has no {field}. Check the yaml file.");
+            }
+
+            return entry;
+        }
+
+        private static RuntimeTokenContract SystemTokens(string key, params string[] tokens)
+            => new RuntimeTokenContract(key, useSystemPrompt: true, tokens);
+
+        private static RuntimeTokenContract UserTokens(string key, params string[] tokens)
+            => new RuntimeTokenContract(key, useSystemPrompt: false, tokens);
+
+        private sealed class RuntimeTokenContract
+        {
+            public RuntimeTokenContract(string key, bool useSystemPrompt, string[] tokens)
+            {
+                Key = key;
+                UseSystemPrompt = useSystemPrompt;
+                Tokens = tokens;
+            }
+
+            public string Key { get; }
+            public bool UseSystemPrompt { get; }
+            public string[] Tokens { get; }
         }
 
         /// <summary>

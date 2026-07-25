@@ -180,9 +180,45 @@ A single turn flows through two phases: `StartTurnAsync` (generate options) and 
 
 11. **Shadow growth** — `EvaluatePerTurnShadowGrowth()` evaluates 15+ triggers: Nat 1 → paired shadow +1, same stat 3× → Fixation +1, Charm 3× → Madness +1, RIZZ failures → Despair, etc. Also evaluates reductions (combo success → Madness −1, Honesty success at high interest → Denial −1).
 
-12. **Datee response** — Build `DateeContext` with full conversation history, interest narrative, resistance level, delivery tier, shadow taint. Call `ILlmAdapter.GetDateeResponseAsync()` → returns message + optional weakness window + tell.
+12. **Datee response** — Build `DateeContext` with prior completed visible exchanges, the current delivered player message as `PlayerDeliveredMessage`, interest narrative, resistance level, delivery tier, shadow taint. Call `ILlmAdapter.GetDateeResponseAsync()` -> returns message + optional weakness window + tell. After DATEE generation succeeds, append the player/DATEE visible-history pair together.
 
 13. **Cleanup** — Advance trap timers. Increment turn. Clear stored options. Return `TurnResult` with roll, messages, interest delta, shadow events, combo/callback/tell info.
+
+### Required-turn transaction boundary
+
+`GameSession.ResolveTurnAsync` is the public transaction boundary for a required
+DATEE turn. Its observable ordering is part of the Core contract:
+
+1. **Validate before preparation.** Cancellation, active-turn/option validity,
+   and transaction RNG compatibility are checked before reserving dice. An
+   incompatible RNG therefore cannot leave prepared state behind.
+2. **Reserve on the parent.** The selected option's per-option dice pool is
+   reserved on the parent session. This reservation is intentionally visible
+   prepared state: retrying the same option reuses the pool, while retrying a
+   different option reserves that option's own pool.
+3. **Mutate only the working clone.** Roll resolution, delivery, DATEE response,
+   invariants, XP, shadows, combo, momentum, traps, histories, and RNG/evaluator
+   advancement occur on a complete working clone. Failure before adoption
+   discards those mutations and leaves the parent at the prepared state from
+   step 2.
+4. **Check cancellation immediately before adoption.** Cancellation observed
+   here discards the working clone. This is the last cancellation point that
+   can prevent commit.
+5. **Linearize at adoption.** Adoption prepares every operation that may throw,
+   then replaces the parent's mutable state through a no-throw assignment
+   section. This adoption is the transaction's linearization point: observers
+   see either prepared parent state or the complete resolved state, never a
+   partially adopted turn.
+6. **Treat post-adoption cancellation as committed.** Once adoption has
+   linearized, cancellation does not roll the turn back and the completed
+   `TurnResult` is returned.
+
+Explicit `System.Random` configuration remains supported for this single
+required-turn rollback path through an internal replay journal. That journal is
+operation-shaped and is not an independent RNG fork. Public speculative
+`GameSession.Clone()` siblings therefore require `CloneableRandom`; sessions
+configured with an arbitrary `System.Random` fail fast when public cloning is
+requested.
 
 ## 4. Key Interfaces
 
@@ -190,6 +226,12 @@ The engine deliberately exposes narrow, single-responsibility interfaces so
 different consumers (CLI sim runner, web API, tests) can plug in adapters
 without reaching into implementation details. The canonical extension points
 are:
+
+> DATEE emotional-reaction prerequisite note (#1332): the current
+> `IStatefulLlmAdapter` contract is engine-owned history passed into adapter
+> calls, not provider-persistent session state. See
+> [`docs/specs/issue-1332-datee-prerequisite-architecture.md`](specs/issue-1332-datee-prerequisite-architecture.md)
+> before adding DATEE direction or changing session/history ownership.
 
 | Interface | Owner | Purpose |
 |---|---|---|
@@ -233,11 +275,14 @@ Core abstraction for all LLM interactions. Stateless per-call.
 
 ### IStatefulLlmAdapter : ILlmAdapter
 
-Extends ILlmAdapter with persistent datee session for memory continuity across turns. Options and delivery remain stateless to prevent voice bleed between player/datee roles.
+Extends ILlmAdapter with engine-owned DATEE history passed as a method argument.
+The active contract is stateless in the adapter: implementations must not retain
+provider-persistent DATEE session fields across calls. Options, overlays, and
+DATEE performance remain role-isolated prompt pipelines to prevent voice bleed.
 
 | Method | Purpose |
 |---|---|
-| `StartDateeSession(systemPrompt)` | Initialize persistent datee conversation |
+| `GetDateeResponseAsync(DateeContext, history, ct)` | Generate DATEE reply from the current context and engine-owned semantic history |
 | `GetSteeringQuestionAsync(SteeringContext)` | Generate steering question after successful roll |
 
 **Implementations:** `PinderLlmAdapter` (in Pinder.LlmAdapters)
@@ -469,7 +514,7 @@ Option-generation and this commit step execute on an ephemeral branch. Only the 
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Datee system prompt, full history, player's delivered message (with any failure/overlay contexts), interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level (Datee Session) |
+| **Context** | Datee system prompt, prior completed visible history, current player's delivered message (with any failure/overlay contexts), interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level (Datee Session) |
 | **Returns** | `DateeResponse` — message text + optional `WeaknessWindow` + optional `Tell` |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDateePrompt()` |
 

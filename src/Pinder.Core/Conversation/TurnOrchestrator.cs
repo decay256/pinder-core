@@ -196,6 +196,10 @@ namespace Pinder.Core.Conversation
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             string playerArchetypeDirective = player.ActiveArchetype?.Directive;
+            InterestState preTurnInterestState = TurnOrchestratorHelpers.ResolveInterestState(
+                state,
+                _rules,
+                _onRuleResolution);
 
             // Draw N random stats for this turn's options
             var allStats = new[] { StatType.Charm, StatType.Rizz, StatType.Honesty, StatType.Chaos, StatType.Wit, StatType.SelfAwareness };
@@ -237,7 +241,8 @@ namespace Pinder.Core.Conversation
                 playerHungerForIntimacy: playerHfi,
                 playerTerrorOfRejection: playerTor,
                 dateeHungerForIntimacy: dateeHfi,
-                dateeTerrorOfRejection: dateeTor);
+                dateeTerrorOfRejection: dateeTor,
+                currentInterestState: preTurnInterestState);
 
             // Get dialogue options from LLM
             string dialogueCallId = OperationalDiagnostics.CreateCallId();
@@ -362,22 +367,14 @@ namespace Pinder.Core.Conversation
 
         private static string BuildCognitiveSubtext(CharacterProfile datee, int turnNumber)
         {
-            if (datee.PsychiatricDiagnosis == null)
+            var validation = TherapistDiagnosisContract.ValidateRequiredFields(datee.PsychiatricDiagnosis);
+            if (!validation.IsValid)
             {
-                throw new CognitiveSubtextException("derived_feeling", datee.DisplayName, turnNumber);
+                throw new CognitiveSubtextException(validation.Violation!.Field, datee.DisplayName, turnNumber);
             }
 
-            if (!datee.PsychiatricDiagnosis.TryGetValue("derived_feeling", out var feeling) ||
-                string.IsNullOrWhiteSpace(feeling))
-            {
-                throw new CognitiveSubtextException("derived_feeling", datee.DisplayName, turnNumber);
-            }
-
-            if (!datee.PsychiatricDiagnosis.TryGetValue("defense_reaction", out var defense) ||
-                string.IsNullOrWhiteSpace(defense))
-            {
-                throw new CognitiveSubtextException("defense_reaction", datee.DisplayName, turnNumber);
-            }
+            string feeling = datee.PsychiatricDiagnosis![TherapistDiagnosisContract.DerivedFeelingKey];
+            string defense = datee.PsychiatricDiagnosis[TherapistDiagnosisContract.DefenseReactionKey];
 
             return feeling.ToUpperInvariant() + " + " + defense.ToUpperInvariant();
         }

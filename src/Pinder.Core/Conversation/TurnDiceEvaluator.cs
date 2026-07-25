@@ -32,9 +32,9 @@ namespace Pinder.Core.Conversation
             IRuleResolver? rules = null)
         {
             // 1. Roll dice
-            var chosenPool = state.InjectedNextPool != null
-                ? state.InjectedNextPool
-                : FillChosenDicePool(optionIndex, chosenOption, resolveHasDisadvantage, state.CurrentHasAdvantage, state.Traps, dice);
+            var chosenPool = state.InjectedNextPool
+                ?? TryGetReservedDicePool(state, optionIndex)
+                ?? FillChosenDicePool(optionIndex, chosenOption, resolveHasDisadvantage, state.CurrentHasAdvantage, state.Traps, dice);
             state.InjectedNextPool = null; // single-use
             if (state.CurrentDicePools != null && optionIndex >= 0 && optionIndex < state.CurrentDicePools.Length)
                 state.CurrentDicePools[optionIndex] = chosenPool;
@@ -68,6 +68,15 @@ namespace Pinder.Core.Conversation
             }
 
             return (rollResult, resolveDice);
+        }
+
+        private static PerOptionDicePool? TryGetReservedDicePool(GameSessionState state, int optionIndex)
+        {
+            if (state.CurrentDicePools == null || optionIndex < 0 || optionIndex >= state.CurrentDicePools.Length)
+                return null;
+
+            var reserved = state.CurrentDicePools[optionIndex];
+            return reserved != null && reserved.Count > 0 ? reserved : null;
         }
 
         private static PerOptionDicePool FillChosenDicePool(

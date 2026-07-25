@@ -82,15 +82,15 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         // ═══════════════════════════════════════════════════════════
-        // AC3: Interest 10-14 — Warmth with holdback
+        // AC3: Interest 10-15 — Warmth with holdback
         // ═══════════════════════════════════════════════════════════
 
-        // Fails if: the 10-14 band uses wrong descriptor or boundary is off-by-one
+        // Fails if: the 10-15 state uses wrong descriptor or boundary is off-by-one
         [Theory]
         [InlineData(10)]
         [InlineData(12)]
-        [InlineData(14)]
-        public void AC3_Interest10To14_ShowsUnstableAgreement(int interest)
+        [InlineData(15)]
+        public void AC3_Interest10To15_ShowsUnstableAgreement(int interest)
         {
             var ctx = MakeContext(interest);
             var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
@@ -103,7 +103,7 @@ namespace Pinder.LlmAdapters.Tests
         // AC4: Interest 21-24 — Subtle but present resistance
         // ═══════════════════════════════════════════════════════════
 
-        // Fails if: the 21-24 band is merged into the 15-20 band or uses wrong descriptor
+        // Fails if: the 21-24 band is merged into the 16-20 band or uses wrong descriptor
         [Theory]
         [InlineData(21)]
         [InlineData(22)]
@@ -165,15 +165,15 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         // ═══════════════════════════════════════════════════════════
-        // Interest 15-20 — VeryIntoIt / Deliberate approach
+        // Interest 16-20 — VeryIntoIt / Deliberate approach
         // ═══════════════════════════════════════════════════════════
 
-        // Fails if: 15-20 band merged into 10-14 or 21-24
+        // Fails if: 16-20 state merged into 10-15 or 21-24
         [Theory]
-        [InlineData(15)]
+        [InlineData(16)]
         [InlineData(18)]
         [InlineData(20)]
-        public void Interest15To20_ShowsDeliberateApproach(int interest)
+        public void Interest16To20_ShowsDeliberateApproach(int interest)
         {
             var ctx = MakeContext(interest);
             var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
@@ -229,15 +229,15 @@ namespace Pinder.LlmAdapters.Tests
 
         // Fails if: boundary at 15 uses wrong band
         [Fact]
-        public void Boundary_14to15_TransitionsFromUnstableToDeliberate()
+        public void Boundary_15to16_TransitionsFromUnstableToDeliberate()
         {
-            var result14 = SessionDocumentBuilder.GetResistanceBlock(14);
             var result15 = SessionDocumentBuilder.GetResistanceBlock(15);
+            var result16 = SessionDocumentBuilder.GetResistanceBlock(16);
 
-            Assert.Contains("Unstable agreement", result14);
-            Assert.DoesNotContain("Unstable agreement", result15);
-            Assert.Contains("Deliberate approach", result15);
-            Assert.DoesNotContain("Deliberate approach", result14);
+            Assert.Contains("Unstable agreement", result15);
+            Assert.DoesNotContain("Unstable agreement", result16);
+            Assert.Contains("Deliberate approach", result16);
+            Assert.DoesNotContain("Deliberate approach", result15);
         }
 
         // Fails if: boundary at 21 uses wrong band
@@ -325,8 +325,8 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(5, "Skeptical interest")]
         [InlineData(9, "Skeptical interest")]
         [InlineData(10, "Unstable agreement")]
-        [InlineData(14, "Unstable agreement")]
-        [InlineData(15, "Deliberate approach")]
+        [InlineData(15, "Unstable agreement")]
+        [InlineData(16, "Deliberate approach")]
         [InlineData(20, "Deliberate approach")]
         [InlineData(21, "Almost convinced")]
         [InlineData(24, "Almost convinced")]
@@ -371,12 +371,12 @@ namespace Pinder.LlmAdapters.Tests
             var band0 = SessionDocumentBuilder.GetResistanceBlock(0);
             var band5 = SessionDocumentBuilder.GetResistanceBlock(5);
             var band10 = SessionDocumentBuilder.GetResistanceBlock(10);
-            var band15 = SessionDocumentBuilder.GetResistanceBlock(15);
+            var band16 = SessionDocumentBuilder.GetResistanceBlock(16);
             var band21 = SessionDocumentBuilder.GetResistanceBlock(21);
             var band25 = SessionDocumentBuilder.GetResistanceBlock(25);
 
             // All should be different
-            var blocks = new[] { band0, band5, band10, band15, band21, band25 };
+            var blocks = new[] { band0, band5, band10, band16, band21, band25 };
             for (int i = 0; i < blocks.Length; i++)
             {
                 for (int j = i + 1; j < blocks.Length; j++)

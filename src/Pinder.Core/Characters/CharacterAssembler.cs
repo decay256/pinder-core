@@ -29,11 +29,16 @@ namespace Pinder.Core.Characters
     {
         private readonly IItemRepository    _items;
         private readonly IAnatomyRepository _anatomy;
+        private readonly Func<string, string?>? _archetypeBehaviorResolver;
 
-        public CharacterAssembler(IItemRepository items, IAnatomyRepository anatomy)
+        public CharacterAssembler(
+            IItemRepository items,
+            IAnatomyRepository anatomy,
+            Func<string, string?>? archetypeBehaviorResolver = null)
         {
             _items   = items   ?? throw new ArgumentNullException(nameof(items));
             _anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
+            _archetypeBehaviorResolver = archetypeBehaviorResolver;
         }
 
         /// <summary>
@@ -249,7 +254,9 @@ namespace Pinder.Core.Characters
 
             // --- 7. Resolve active archetype ------------------------------------
 
-            ActiveArchetype activeArchetype = archetypesEnabled ? ResolveActiveArchetype(ranked, characterLevel) : null;
+            ActiveArchetype activeArchetype = archetypesEnabled
+                ? ResolveActiveArchetype(ranked, characterLevel, _archetypeBehaviorResolver)
+                : null;
 
             // --- 8. Return FragmentCollection -------------------------------------
 
@@ -276,6 +283,12 @@ namespace Pinder.Core.Characters
         internal static ActiveArchetype ResolveActiveArchetype(
             IReadOnlyList<(string Archetype, int Count)> ranked,
             int characterLevel)
+            => ResolveActiveArchetype(ranked, characterLevel, null);
+
+        internal static ActiveArchetype ResolveActiveArchetype(
+            IReadOnlyList<(string Archetype, int Count)> ranked,
+            int characterLevel,
+            Func<string, string?>? archetypeBehaviorResolver)
         {
             if (ranked == null || ranked.Count == 0)
                 return null;
@@ -295,7 +308,7 @@ namespace Pinder.Core.Characters
                     var def = ArchetypeCatalog.GetByName(entry.Archetype);
                     if (def != null && def.IsEligibleAtLevel(characterLevel))
                     {
-                        string behavior = ArchetypeCatalog.GetBehavior(entry.Archetype);
+                        string behavior = ResolveArchetypeBehavior(entry.Archetype, archetypeBehaviorResolver);
                         return new ActiveArchetype(entry.Archetype, behavior, entry.Count, totalCount);
                     }
                 }
@@ -303,8 +316,16 @@ namespace Pinder.Core.Characters
 
             // Fallback: use the highest-count archetype overall
             var top = ranked[0];
-            string topBehavior = ArchetypeCatalog.GetBehavior(top.Archetype);
+            string topBehavior = ResolveArchetypeBehavior(top.Archetype, archetypeBehaviorResolver);
             return new ActiveArchetype(top.Archetype, topBehavior, top.Count, totalCount);
+        }
+
+        private static string ResolveArchetypeBehavior(
+            string archetypeName,
+            Func<string, string?>? archetypeBehaviorResolver)
+        {
+            var resolved = archetypeBehaviorResolver?.Invoke(archetypeName);
+            return resolved ?? ArchetypeCatalog.GetBehavior(archetypeName);
         }
     }
 }

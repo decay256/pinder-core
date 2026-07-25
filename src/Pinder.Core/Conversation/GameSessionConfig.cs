@@ -52,8 +52,10 @@ namespace Pinder.Core.Conversation
         public int HorninessDcBias { get; }
 
         /// <summary>
-        /// Optional RNG for the steering roll. When null, a new System.Random is used.
-        /// Inject a seeded Random for deterministic test scenarios.
+        /// Optional RNG for the steering roll. When null, an engine-owned cloneable RNG
+        /// is used. Explicit System.Random instances support required-turn rollback via
+        /// transaction replay, but public independent session clones require
+        /// <see cref="CloneableRandom"/>.
         /// </summary>
         public Random? SteeringRng { get; }
 
@@ -80,9 +82,9 @@ namespace Pinder.Core.Conversation
         /// stat pool each turn. Distinct from <see cref="SteeringRng"/> so that tests
         /// which inject a tightly-queued <see cref="Random"/> for steering rolls are
         /// not perturbed by unrelated stat-draw calls.
-        /// When null, <c>OptionFilterEngine</c> falls back to a fresh <see cref="Random"/>
-        /// (legacy non-deterministic behaviour). Inject a seeded RNG for test fixture
-        /// reproducibility (issue #130).
+        /// When null, <c>OptionFilterEngine</c> retains its fresh-Random legacy behavior.
+        /// Explicit instances support required-turn rollback via transaction replay, but
+        /// public independent session clones require <see cref="CloneableRandom"/>.
         /// </summary>
         public Random? StatDrawRng { get; }
 

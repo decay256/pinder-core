@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -116,6 +118,49 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Contains("\"cache_control\"", handler.LastRequestBody);
             Assert.Contains("\"type\":\"ephemeral\"", handler.LastRequestBody);
             Assert.Contains("sysprompt-value", handler.LastRequestBody);
+        }
+
+        [Fact]
+        public async Task ExistingTransport_UsesCapturedHeadings_AfterGlobalCatalogReplacement()
+        {
+            string capturedRoot = CopyPromptsToTemp();
+            string replacementRoot = CopyPromptsToTemp();
+            var previousCatalog = PromptTemplates.Catalog;
+            try
+            {
+                ReplaceHeading(capturedRoot, "[PREVIOUS CONVERSATION CONTEXT]", "[CAPTURED HISTORY]");
+                ReplaceHeading(capturedRoot, "[CURRENT TURN]", "[CAPTURED TURN]");
+                ReplaceHeading(replacementRoot, "[PREVIOUS CONVERSATION CONTEXT]", "[REPLACEMENT HISTORY]");
+                ReplaceHeading(replacementRoot, "[CURRENT TURN]", "[REPLACEMENT TURN]");
+
+                var capturedCatalog = PromptCatalog.LoadFromDirectory(capturedRoot);
+                var replacementCatalog = PromptCatalog.LoadFromDirectory(replacementRoot);
+                var handler = new CapturingHandler(
+                    "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"ok\"}]}");
+                using var http = new HttpClient(handler);
+                using var transport = new AnthropicTransport(
+                    TestApiKey,
+                    TestModel,
+                    http,
+                    promptCatalog: capturedCatalog);
+
+                PromptTemplates.Catalog = replacementCatalog;
+
+                await transport.SendAsync(
+                    "system",
+                    "[CAPTURED HISTORY]\n[PLAYER] hello\n[DATEE] hi\n[CAPTURED TURN]\nnext");
+
+                var request = JObject.Parse(handler.LastRequestBody!);
+                Assert.Equal(3, request["messages"]!.Count());
+                Assert.Equal("hello", request["messages"]![0]!["content"]![0]!["text"]!.Value<string>());
+                Assert.Equal("next", request["messages"]![2]!["content"]![0]!["text"]!.Value<string>());
+            }
+            finally
+            {
+                PromptTemplates.Catalog = previousCatalog;
+                Directory.Delete(capturedRoot, recursive: true);
+                Directory.Delete(replacementRoot, recursive: true);
+            }
         }
 
         [Fact]
@@ -238,6 +283,38 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
                 playerAvatarRoleDescription: "player avatar",
                 dateeRoleDescription: "datee",
                 improvementPrompt: improvementPrompt);
+        }
+
+        private static string CopyPromptsToTemp()
+        {
+            string? directory = AppDomain.CurrentDomain.BaseDirectory;
+            while (directory != null)
+            {
+                string source = Path.Combine(directory, "data", "prompts");
+                if (Directory.Exists(source))
+                {
+                    string destination = Path.Combine(
+                        Path.GetTempPath(),
+                        "anthropic-captured-catalog-" + Guid.NewGuid().ToString("N"));
+                    Directory.CreateDirectory(destination);
+                    foreach (string file in Directory.EnumerateFiles(source, "*.yaml"))
+                    {
+                        File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
+                    }
+                    return destination;
+                }
+                directory = Path.GetDirectoryName(directory);
+            }
+
+            throw new DirectoryNotFoundException("Could not locate bundled data/prompts.");
+        }
+
+        private static void ReplaceHeading(string root, string current, string replacement)
+        {
+            string path = Path.Combine(root, "templates.yaml");
+            string contents = File.ReadAllText(path);
+            Assert.Contains(current, contents);
+            File.WriteAllText(path, contents.Replace(current, replacement, StringComparison.Ordinal));
         }
     }
 }

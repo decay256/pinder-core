@@ -44,10 +44,15 @@ namespace Pinder.Core.Conversation
             CharacterProfile player,
             CharacterProfile datee,
             System.IProgress<TurnProgressEvent>? progress,
-            CancellationToken ct)
+            CancellationToken ct,
+            InterestState? finalInterestAfterState = null)
         {
+            int finalInterestAfter = state.Interest.Current;
+            InterestState resolvedFinalInterestAfterState =
+                finalInterestAfterState ?? new InterestMeter(finalInterestAfter).GetState();
+
             // Compute response delay
-            double responseDelayMinutes = datee.Timing.ComputeDelay(state.Interest.Current, rollStage.ResolveDice);
+            double responseDelayMinutes = datee.Timing.ComputeDelay(finalInterestAfter, rollStage.ResolveDice);
 
             // Generate datee response
             var dateeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
@@ -69,10 +74,10 @@ namespace Pinder.Core.Conversation
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
                 activeTraps: GameSessionHelpers.GetActiveTrapNames(state.Traps),
-                currentInterest: state.Interest.Current,
+                currentInterest: finalInterestAfter,
                 playerDeliveredMessage: deliveryStage.DeliveredMessage,
                 interestBefore: rollStage.InterestBefore,
-                interestAfter: rollStage.InterestAfter,
+                interestAfter: finalInterestAfter,
                 responseDelayMinutes: responseDelayMinutes,
                 activeTrapInstructions: dateeTrapInstructions,
                 playerName: player.DisplayName,
@@ -88,7 +93,9 @@ namespace Pinder.Core.Conversation
                 horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
                 horninessTier: deliveryStage.HorninessCheckResult.Tier,
                 resolvedTarget: state.CurrentResolvedTarget,
-                cognitiveSubtext: state.CurrentCognitiveSubtext);
+                cognitiveSubtext: state.CurrentCognitiveSubtext,
+                interestBeforeState: rollStage.StateBefore,
+                interestAfterState: resolvedFinalInterestAfterState);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 

@@ -66,17 +66,27 @@ namespace Pinder.Core.Conversation
 
         internal static InterestState ResolveInterestState(GameSessionState state, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
         {
+            return ResolveInterestState(state.Interest.Current, state.Interest, rules, onRuleResolution);
+        }
+
+        internal static InterestState ResolveInterestState(int interest, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution = null)
+        {
+            return ResolveInterestState(interest, null, rules, onRuleResolution);
+        }
+
+        private static InterestState ResolveInterestState(int interest, InterestMeter? currentMeter, IRuleResolver? rules, Action<RuleResolutionTraceEvent>? onRuleResolution)
+        {
             if (rules != null)
             {
-                var resolved = rules.GetInterestState(state.Interest.Current);
+                var resolved = rules.GetInterestState(interest);
                 if (resolved.HasValue)
                 {
                     onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "resolver", resolverConfigured: true, numericValue: null, stateValue: resolved.Value.ToString()));
                     return resolved.Value;
                 }
-                ThrowIfFallbackDisallowed(rules, "interest_state", $"interest={state.Interest.Current}");
+                ThrowIfFallbackDisallowed(rules, "interest_state", $"interest={interest}");
             }
-            InterestState fallback = state.Interest.GetState();
+            InterestState fallback = currentMeter != null ? currentMeter.GetState() : new InterestMeter(interest).GetState();
             onRuleResolution?.Invoke(new RuleResolutionTraceEvent("interest_state", "hardcoded_fallback", resolverConfigured: rules != null, numericValue: null, stateValue: fallback.ToString()));
             return fallback;
         }

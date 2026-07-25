@@ -23,8 +23,8 @@ namespace Pinder.Core.Conversation
         // cached just like the datee session — the engine owns this list and
         // threads it through the stateful avatar adapter overload on each turn.
         public List<ConversationMessage> AvatarHistory { get; internal set; } = new List<ConversationMessage>();
-        public HashSet<int> SpentBackstoryIndices { get; } = new HashSet<int>();
-        public HashSet<int> SpentStakeIndices { get; } = new HashSet<int>();
+        public HashSet<int> SpentBackstoryIndices { get; internal set; } = new HashSet<int>();
+        public HashSet<int> SpentStakeIndices { get; internal set; } = new HashSet<int>();
         public string? PreviousPhase { get; set; }
         public int PreviousResolvedIndex { get; set; }
         public ResolvedRevelationTarget? CurrentResolvedTarget { get; set; }
@@ -115,57 +115,57 @@ namespace Pinder.Core.Conversation
         public void AdoptStateFrom(GameSessionState src)
         {
             if (src == null) throw new ArgumentNullException(nameof(src));
+            AdoptPreparedClone(src.Clone());
+        }
 
-            Interest = src.Interest.Clone();
-            Traps = src.Traps.Clone();
-            History.Clear(); History.AddRange(src.History);
-            DateeHistory.Clear(); DateeHistory.AddRange(src.DateeHistory);
-            AvatarHistory.Clear(); AvatarHistory.AddRange(src.AvatarHistory);
+        internal void AdoptPreparedClone(GameSessionState prepared)
+        {
+            if (prepared == null) throw new ArgumentNullException(nameof(prepared));
 
-            SpentBackstoryIndices.Clear();
-            foreach (var idx in src.SpentBackstoryIndices) SpentBackstoryIndices.Add(idx);
-            SpentStakeIndices.Clear();
-            foreach (var idx in src.SpentStakeIndices) SpentStakeIndices.Add(idx);
-            PreviousPhase = src.PreviousPhase;
-            PreviousResolvedIndex = src.PreviousResolvedIndex;
-            CurrentResolvedTarget = src.CurrentResolvedTarget;
-            CurrentCognitiveSubtext = src.CurrentCognitiveSubtext;
-            ComboTracker = src.ComboTracker.Clone();
-            Topics.Clear(); Topics.AddRange(src.Topics);
-            XpLedger = src.XpLedger.Clone();
-            PlayerShadows = src.PlayerShadows?.Clone();
-            DateeShadows = src.DateeShadows?.Clone();
-
-            MomentumStreak = src.MomentumStreak;
-            PendingMomentumBonus = src.PendingMomentumBonus;
-            TurnNumber = src.TurnNumber;
-            Ended = src.Ended;
-            Outcome = src.Outcome;
-            RizzCumulativeFailureCount = src.RizzCumulativeFailureCount;
-            HorninessRoll = src.HorninessRoll;
-            HorninessTimeModifier = src.HorninessTimeModifier;
-            SessionHorniness = src.SessionHorniness;
-            PendingCritAdvantage = src.PendingCritAdvantage;
-            LastStatUsed = src.LastStatUsed;
-            ActiveWeakness = src.ActiveWeakness;
-            ActiveTell = src.ActiveTell;
-            ShadowDisadvantagedStats = src.ShadowDisadvantagedStats != null
-                ? new HashSet<StatType>(src.ShadowDisadvantagedStats)
-                : null;
-            CurrentShadowThresholds = src.CurrentShadowThresholds != null
-                ? new Dictionary<ShadowStatType, int>(src.CurrentShadowThresholds)
-                : null;
-
-            CurrentOptions = src.CurrentOptions != null
-                ? (DialogueOption[])src.CurrentOptions.Clone()
-                : null;
-            CurrentHasAdvantage = src.CurrentHasAdvantage;
-            CurrentHasDisadvantage = src.CurrentHasDisadvantage;
-            CurrentDicePools = src.CurrentDicePools != null
-                ? (Pinder.Core.Rolls.PerOptionDicePool[])src.CurrentDicePools.Clone()
-                : null;
-            InjectedNextPool = src.InjectedNextPool;
-            SpeculativeWasteTracker = src.SpeculativeWasteTracker.Clone();
+            Interest = prepared.Interest;
+            Traps = prepared.Traps;
+            History = prepared.History;
+            DateeOutfitDescription = prepared.DateeOutfitDescription;
+            DateeHistory = prepared.DateeHistory;
+            AvatarHistory = prepared.AvatarHistory;
+            SpentBackstoryIndices = prepared.SpentBackstoryIndices;
+            SpentStakeIndices = prepared.SpentStakeIndices;
+            PreviousPhase = prepared.PreviousPhase;
+            PreviousResolvedIndex = prepared.PreviousResolvedIndex;
+            CurrentResolvedTarget = prepared.CurrentResolvedTarget;
+            CurrentCognitiveSubtext = prepared.CurrentCognitiveSubtext;
+            if (PlayerShadows != null && prepared.PlayerShadows != null)
+                PlayerShadows.AdoptPreparedClone(prepared.PlayerShadows);
+            else
+                PlayerShadows = prepared.PlayerShadows;
+            if (DateeShadows != null && prepared.DateeShadows != null)
+                DateeShadows.AdoptPreparedClone(prepared.DateeShadows);
+            else
+                DateeShadows = prepared.DateeShadows;
+            ComboTracker = prepared.ComboTracker;
+            Topics = prepared.Topics;
+            RizzCumulativeFailureCount = prepared.RizzCumulativeFailureCount;
+            MomentumStreak = prepared.MomentumStreak;
+            PendingMomentumBonus = prepared.PendingMomentumBonus;
+            TurnNumber = prepared.TurnNumber;
+            Ended = prepared.Ended;
+            Outcome = prepared.Outcome;
+            XpLedger = prepared.XpLedger;
+            ActiveWeakness = prepared.ActiveWeakness;
+            ActiveTell = prepared.ActiveTell;
+            SessionHorniness = prepared.SessionHorniness;
+            HorninessRoll = prepared.HorninessRoll;
+            HorninessTimeModifier = prepared.HorninessTimeModifier;
+            PendingCritAdvantage = prepared.PendingCritAdvantage;
+            LastStatUsed = prepared.LastStatUsed;
+            ShadowDisadvantagedStats = prepared.ShadowDisadvantagedStats;
+            CurrentShadowThresholds = prepared.CurrentShadowThresholds;
+            CurrentOptions = prepared.CurrentOptions;
+            CurrentHasAdvantage = prepared.CurrentHasAdvantage;
+            CurrentHasDisadvantage = prepared.CurrentHasDisadvantage;
+            CurrentDicePools = prepared.CurrentDicePools;
+            InjectedNextPool = prepared.InjectedNextPool;
+            SpeculativeWasteTracker = prepared.SpeculativeWasteTracker;
         }
 
         public void RestoreFromSnapshot(ResimulateData data, ITrapRegistry trapRegistry)

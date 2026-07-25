@@ -66,9 +66,12 @@ namespace Pinder.Core.Prompts
         /// delegate is not wired or the key is missing — after Phase 5
         /// there are no const fallbacks.
         /// </summary>
-        private static (string Content, string SourceFile) GetHeaderEx(string key)
+        private static (string Content, string SourceFile) GetHeaderEx(
+            string key,
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
         {
-            var lookup = StructuralFragmentLookup
+            var lookup = structuralFragmentLookup ?? StructuralFragmentLookup
                 ?? throw new InvalidOperationException(
                     $"PromptBuilder.StructuralFragmentLookup is not wired. " +
                     $"Call PromptWiring.Wire() at startup. (key: '{key}')");
@@ -82,9 +85,10 @@ namespace Pinder.Core.Prompts
             string content = value;
 
             string sourceFile = "data/prompts/structural.yaml";
-            if (StructuralFragmentLookupEx != null)
+            var lookupEx = structuralFragmentLookupEx ?? StructuralFragmentLookupEx;
+            if (lookupEx != null)
             {
-                var result = StructuralFragmentLookupEx(key);
+                var result = lookupEx(key);
                 if (result != null && !string.IsNullOrWhiteSpace(result.SourceFile))
                 {
                     sourceFile = result.SourceFile!;
@@ -166,9 +170,11 @@ namespace Pinder.Core.Prompts
         /// byte-preserving: each recovered label is emitted in the exact
         /// same position as the legacy per-key headers.
         /// </summary>
-        private static CardFraming GetCardFraming()
+        private static CardFraming GetCardFraming(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
         {
-            var framing = GetHeaderEx(CharacterCardFramingKey);
+            var framing = GetHeaderEx(CharacterCardFramingKey, structuralFragmentLookup, structuralFragmentLookupEx);
             // Split on LF, tolerating CRLF, and drop a single trailing
             // blank line if the yaml block scalar produced one.
             var lines = framing.Content.Replace("\r\n", "\n").Split('\n');
@@ -192,9 +198,11 @@ namespace Pinder.Core.Prompts
         /// Load fixed labels and typed-value templates for the variable
         /// character data block.
         /// </summary>
-        private static CharacterDataFraming GetCharacterDataFraming()
+        private static CharacterDataFraming GetCharacterDataFraming(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
         {
-            var framing = GetHeaderEx(CharacterDataFramingKey);
+            var framing = GetHeaderEx(CharacterDataFramingKey, structuralFragmentLookup, structuralFragmentLookupEx);
             var lines = framing.Content.Replace("\r\n", "\n").Split('\n');
             int count = lines.Length;
             while (count > 0 && lines[count - 1].Length == 0) count--;
@@ -220,6 +228,21 @@ namespace Pinder.Core.Prompts
             RequireToken(labels[11], "{self_awareness}");
 
             return new CharacterDataFraming(labels, framing.SourceFile);
+        }
+
+        /// <summary>
+        /// Validates the structural prompt fields using the same parsing and
+        /// token contracts used by <see cref="BuildSystemPrompt"/>.
+        /// </summary>
+        public static void ValidateStructuralPromptContracts(
+            Func<string, string?> structuralFragmentLookup,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
+        {
+            if (structuralFragmentLookup == null)
+                throw new ArgumentNullException(nameof(structuralFragmentLookup));
+
+            _ = GetCardFraming(structuralFragmentLookup, structuralFragmentLookupEx);
+            _ = GetCharacterDataFraming(structuralFragmentLookup, structuralFragmentLookupEx);
         }
 
         private static void RequireToken(string template, string token)
@@ -269,9 +292,25 @@ namespace Pinder.Core.Prompts
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
             IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
-            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null)
+            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null,
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
+            TextingStyleConflicts? textingStyleConflicts = null)
         {
-            return BuildSystemPromptEx(displayName, genderIdentity, bioOneLiner, fragments, activeTraps, characterIdSeed, archetypesEnabled, consolidatedPersonality, generatedBackstory, generatedPsychiatricDiagnosis).Text;
+            return BuildSystemPromptEx(
+                displayName,
+                genderIdentity,
+                bioOneLiner,
+                fragments,
+                activeTraps,
+                characterIdSeed,
+                archetypesEnabled,
+                consolidatedPersonality,
+                generatedBackstory,
+                generatedPsychiatricDiagnosis,
+                structuralFragmentLookup,
+                structuralFragmentLookupEx,
+                textingStyleConflicts).Text;
         }
 
         /// <summary>
@@ -287,7 +326,10 @@ namespace Pinder.Core.Prompts
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
             IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
-            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null)
+            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null,
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
+            TextingStyleConflicts? textingStyleConflicts = null)
         {
             if (displayName  == null) throw new ArgumentNullException(nameof(displayName));
             if (genderIdentity == null) throw new ArgumentNullException(nameof(genderIdentity));
@@ -299,8 +341,8 @@ namespace Pinder.Core.Prompts
             // #1154: the constant section framing now lives in ONE collapsed
             // field (character_card_framing); split it back into the 7 labels
             // and emit them in the EXACT same byte positions as before.
-            var framing = GetCardFraming();
-            var dataFraming = GetCharacterDataFraming();
+            var framing = GetCardFraming(structuralFragmentLookup, structuralFragmentLookupEx);
+            var dataFraming = GetCharacterDataFraming(structuralFragmentLookup, structuralFragmentLookupEx);
             string srcFile = framing.SourceFile;
             const string srcKey = CharacterCardFramingKey;
             string dataSrcFile = dataFraming.SourceFile;
@@ -355,7 +397,9 @@ namespace Pinder.Core.Prompts
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
             AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
-                fragments.TextingStyleSources, characterIdSeed));
+                fragments.TextingStyleSources,
+                characterIdSeed,
+                textingStyleConflicts ?? TextingStyleAggregator.ConflictCatalog ?? TextingStyleConflicts.Empty));
             sb.AppendLine();
 
             if (archetypesEnabled)

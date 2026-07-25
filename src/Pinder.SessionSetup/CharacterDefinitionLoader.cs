@@ -48,13 +48,14 @@ namespace Pinder.SessionSetup
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
             bool archetypesEnabled = false,
-            ITimingRepository? timingRepo = null)
+            ITimingRepository? timingRepo = null,
+            PromptRuntimeBinding? promptRuntimeBinding = null)
         {
             if (!File.Exists(jsonPath))
                 throw new FileNotFoundException($"Character definition file not found: {jsonPath}", jsonPath);
 
             string json = File.ReadAllText(jsonPath);
-            return Parse(json, itemRepo, anatomyRepo, archetypesEnabled, timingRepo);
+            return Parse(json, itemRepo, anatomyRepo, archetypesEnabled, timingRepo, promptRuntimeBinding);
         }
 
         /// <summary>
@@ -159,13 +160,14 @@ namespace Pinder.SessionSetup
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
             bool archetypesEnabled = false,
-            ITimingRepository? timingRepo = null)
+            ITimingRepository? timingRepo = null,
+            PromptRuntimeBinding? promptRuntimeBinding = null)
         {
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
             if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
 
             CharacterDefinition def = ParseDefinition(json);
-            return Assemble(def, itemRepo, anatomyRepo, archetypesEnabled, timingRepo);
+            return Assemble(def, itemRepo, anatomyRepo, archetypesEnabled, timingRepo, promptRuntimeBinding);
         }
 
         /// <summary>
@@ -179,13 +181,17 @@ namespace Pinder.SessionSetup
             IItemRepository itemRepo,
             IAnatomyRepository anatomyRepo,
             bool archetypesEnabled = false,
-            ITimingRepository? timingRepo = null)
+            ITimingRepository? timingRepo = null,
+            PromptRuntimeBinding? promptRuntimeBinding = null)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             if (itemRepo == null) throw new ArgumentNullException(nameof(itemRepo));
             if (anatomyRepo == null) throw new ArgumentNullException(nameof(anatomyRepo));
 
-            var assembler = new CharacterAssembler(itemRepo, anatomyRepo);
+            var assembler = new CharacterAssembler(
+                itemRepo,
+                anatomyRepo,
+                promptRuntimeBinding?.ArchetypeBehaviorResolver);
             TimingProfile? baseTimingProfile = ResolveBaseTimingProfile(def, timingRepo);
             var fragments = assembler.Assemble(
                 def.Items,
@@ -209,7 +215,10 @@ namespace Pinder.SessionSetup
                 archetypesEnabled: archetypesEnabled,
                 consolidatedPersonality: def.ConsolidatedPersonality,
                 generatedBackstory: def.Backstory,
-                generatedPsychiatricDiagnosis: def.PsychiatricDiagnosis);
+                generatedPsychiatricDiagnosis: def.PsychiatricDiagnosis,
+                structuralFragmentLookup: promptRuntimeBinding?.StructuralFragmentLookup,
+                structuralFragmentLookupEx: promptRuntimeBinding?.StructuralFragmentLookupEx,
+                textingStyleConflicts: promptRuntimeBinding?.TextingStyleConflicts);
 
             // #907: Use AggregateWithAudit so conflict drops are visible at
             // session-creation time. ConflictCatalog is loaded by PromptWiring.Wire();
@@ -217,7 +226,9 @@ namespace Pinder.SessionSetup
             var aggregationResult = TextingStyleAggregator.AggregateWithAudit(
                 fragments.TextingStyleSources,
                 textingSeed,
-                TextingStyleAggregator.ConflictCatalog ?? TextingStyleConflicts.Empty);
+                promptRuntimeBinding?.TextingStyleConflicts
+                    ?? TextingStyleAggregator.ConflictCatalog
+                    ?? TextingStyleConflicts.Empty);
             foreach (var drop in aggregationResult.Drops)
                 Console.Error.WriteLine(drop.ToString());
             string textingStyle = aggregationResult.Lines.Count == 0

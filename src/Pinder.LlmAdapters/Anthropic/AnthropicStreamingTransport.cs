@@ -109,17 +109,22 @@ namespace Pinder.LlmAdapters.Anthropic
         // sees real (non-zero) numbers for the streaming path.
         private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
         private readonly object _statsLock = new object();
+        private readonly AnthropicMessageHeadings _messageHeadings;
 
         /// <summary>
         /// Creates a transport with an internally-owned <see cref="HttpClient"/>.
         /// </summary>
         /// <param name="apiKey">Anthropic API key. Must not be null/empty/whitespace.</param>
         /// <param name="model">Model identifier (e.g. <c>claude-sonnet-4-20250514</c>).</param>
-        public AnthropicStreamingTransport(string apiKey, string model = AnthropicModelIds.DefaultModel)
+        public AnthropicStreamingTransport(
+            string apiKey,
+            string model = AnthropicModelIds.DefaultModel,
+            PromptCatalog? promptCatalog = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _httpClient = new HttpClient();
             ConfigureHeaders(_httpClient, apiKey);
             _ownsHttpClient = true;
@@ -130,11 +135,16 @@ namespace Pinder.LlmAdapters.Anthropic
         /// (typically for tests with a mock <see cref="HttpMessageHandler"/>).
         /// The supplied client is NOT disposed by <see cref="Dispose"/>.
         /// </summary>
-        public AnthropicStreamingTransport(string apiKey, string model, HttpClient httpClient)
+        public AnthropicStreamingTransport(
+            string apiKey,
+            string model,
+            HttpClient httpClient,
+            PromptCatalog? promptCatalog = null)
         {
             if (string.IsNullOrWhiteSpace(apiKey))
                 throw new ArgumentException("API key must not be null, empty, or whitespace.", nameof(apiKey));
             _model = AnthropicModelIds.ToApiId(model ?? throw new ArgumentNullException(nameof(model)));
+            _messageHeadings = AnthropicMessageHeadings.Capture(promptCatalog);
             _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             ConfigureHeaders(_httpClient, apiKey);
             _ownsHttpClient = false;
@@ -162,7 +172,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 }
             };
             var request = AnthropicRequestBuilders.BuildMessagesRequest(
-                _model, maxTokens, systemBlocks, userMessage, temperature);
+                _model, maxTokens, systemBlocks, userMessage, temperature, _messageHeadings);
 
             return StreamCoreAsync(request, phase, cancellationToken);
         }

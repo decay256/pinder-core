@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 
 namespace Pinder.Core.Interfaces
 {
@@ -40,6 +41,18 @@ namespace Pinder.Core.Interfaces
         /// </summary>
         public LlmFailureKind FailureKind { get; } = LlmFailureKind.Unknown;
 
+        /// <summary>
+        /// Optional provider retry hint for rate-limited calls. A null value
+        /// means the caller should use its normal fallback retry policy.
+        /// </summary>
+        public TimeSpan? RetryAfter { get; }
+
+        /// <summary>
+        /// Optional HTTP status returned by the provider. A null value means
+        /// the transport did not preserve a status code.
+        /// </summary>
+        public HttpStatusCode? StatusCode { get; }
+
         public LlmTransportException(string message) : base(message) { }
 
         public LlmTransportException(string message, Exception innerException)
@@ -51,15 +64,51 @@ namespace Pinder.Core.Interfaces
             FailureKind = failureKind;
         }
 
+        public LlmTransportException(string message, LlmFailureKind failureKind, TimeSpan? retryAfter)
+            : base(message)
+        {
+            FailureKind = failureKind;
+            RetryAfter = retryAfter;
+        }
+
+        public LlmTransportException(
+            string message,
+            LlmFailureKind failureKind,
+            HttpStatusCode statusCode,
+            TimeSpan? retryAfter)
+            : base(message)
+        {
+            FailureKind = failureKind;
+            StatusCode = statusCode;
+            RetryAfter = retryAfter;
+        }
+
         public LlmTransportException(string message, LlmFailureKind failureKind, Exception innerException)
             : base(message, innerException)
         {
             FailureKind = failureKind;
         }
 
+        public LlmTransportException(
+            string message,
+            LlmFailureKind failureKind,
+            Exception innerException,
+            TimeSpan? retryAfter)
+            : base(message, innerException)
+        {
+            FailureKind = failureKind;
+            RetryAfter = retryAfter;
+        }
+
         public override string ToString()
         {
-            return $"[TransportFailureDetails] FailureKind: {FailureKind}\n{base.ToString()}";
+            string retryAfter = RetryAfter is null
+                ? string.Empty
+                : $", RetryAfter: {RetryAfter.Value}";
+            string statusCode = StatusCode is null
+                ? string.Empty
+                : $", StatusCode: {(int)StatusCode.Value}";
+            return $"[TransportFailureDetails] FailureKind: {FailureKind}{statusCode}{retryAfter}\n{base.ToString()}";
         }
     }
 }

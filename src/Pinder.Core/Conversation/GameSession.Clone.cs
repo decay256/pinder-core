@@ -61,7 +61,8 @@ namespace Pinder.Core.Conversation
         /// without extending this constructor will fail-fast at test time.
         /// </para>
         /// </summary>
-        private GameSession(GameSession src) : this(src, src._llm) { }
+        private GameSession(GameSession src, bool forRequiredTurnTransaction)
+            : this(src, src._llm, forRequiredTurnTransaction) { }
 
         /// <summary>
         /// #425 (Phase 5): private clone constructor that swaps the LLM
@@ -71,7 +72,10 @@ namespace Pinder.Core.Conversation
         /// a per-branch transport that decorates the shared session
         /// transport with a branch-scoped <c>SnapshotRecordingLlmTransport</c>.
         /// </summary>
-        private GameSession(GameSession src, ILlmAdapter llmOverride)
+        private GameSession(
+            GameSession src,
+            ILlmAdapter llmOverride,
+            bool forRequiredTurnTransaction)
         {
             // ── Shared-by-reference fields (Category B/C: immutable / stateless / pure adapters) ──
             _player          = src._player;
@@ -93,6 +97,7 @@ namespace Pinder.Core.Conversation
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;
             _activeTrapInterestPenalty = src._activeTrapInterestPenalty;
+            _transactionTestHooks = src._transactionTestHooks;
 
             // ── Mutable engine state — deep copies (Category A) ──
             _state           = src._state.Clone();
@@ -106,17 +111,28 @@ namespace Pinder.Core.Conversation
             // Steering RNG is shared between SteeringEngine and HorninessEngine
             // in the public ctor; preserve that shape on the clone.
             //
-            // #790/#425 follow-up (audit 2026-07-10): cloning is now a plain field copy
-            // on CloneableRandom (Pinder.Core.Rolls) — no reflection into System.Random
-            // internals. RequireCloneable fails fast if the configured RNG isn't a
-            // CloneableRandom (see its doc comment for why that's intentional).
-            var clonedSteeringRng = CloneableRandom.RequireCloneable(
-                src._steeringEngine.SteeringRngForCloneOnly, nameof(GameSessionConfig.SteeringRng));
+            // Public speculative clones require truly independent CloneableRandom state.
+            // An explicit System.Random replay journal is only valid for the single
+            // required-turn transaction path, where the working copy is discarded or
+            // adopted rather than allowed to diverge as a sibling branch.
+            var clonedSteeringRng = forRequiredTurnTransaction
+                ? ForkableRandom.ForkForRequiredTurnTransaction(
+                    src._steeringEngine.SteeringRngForCloneOnly,
+                    nameof(GameSessionConfig.SteeringRng))
+                : ForkableRandom.ForkForIndependentClone(
+                    src._steeringEngine.SteeringRngForCloneOnly,
+                    nameof(GameSessionConfig.SteeringRng));
             _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null
-                ? CloneableRandom.RequireCloneable(src._statDrawRng, nameof(GameSessionConfig.StatDrawRng))
+                ? forRequiredTurnTransaction
+                    ? ForkableRandom.ForkForRequiredTurnTransaction(
+                        src._statDrawRng,
+                        nameof(GameSessionConfig.StatDrawRng))
+                    : ForkableRandom.ForkForIndependentClone(
+                        src._statDrawRng,
+                        nameof(GameSessionConfig.StatDrawRng))
                 : null;
 
             _turnOrchestrator = BuildTurnOrchestrator();
@@ -174,7 +190,16 @@ namespace Pinder.Core.Conversation
         /// </summary>
         /// <returns>An independent <see cref="GameSession"/> with a deep
         /// copy of every piece of mutable engine state.</returns>
-        public GameSession Clone() => new GameSession(this);
+        /// <exception cref="InvalidOperationException">
+        /// The session uses an explicit <see cref="Random"/> that supports required-turn
+        /// transaction replay but cannot provide independent speculative RNG forks.
+        /// Configure <see cref="CloneableRandom"/> for public speculative cloning.
+        /// </exception>
+        public GameSession Clone()
+        {
+            EnsureIndependentCloneCompatibility();
+            return new GameSession(this, forRequiredTurnTransaction: false);
+        }
 
         /// <summary>
         /// #425 (Phase 5): produce an independent clone whose LLM adapter
@@ -195,7 +220,26 @@ namespace Pinder.Core.Conversation
         public GameSession Clone(ILlmAdapter llm)
         {
             if (llm == null) throw new ArgumentNullException(nameof(llm));
-            return new GameSession(this, llm);
+            EnsureIndependentCloneCompatibility();
+            return new GameSession(this, llm, forRequiredTurnTransaction: false);
+        }
+
+        private GameSession CloneForRequiredTurnTransaction()
+        {
+            return new GameSession(this, forRequiredTurnTransaction: true);
+        }
+
+        private void EnsureIndependentCloneCompatibility()
+        {
+            ForkableRandom.EnsureCanForkForIndependentClone(
+                _steeringEngine.SteeringRngForCloneOnly,
+                nameof(GameSessionConfig.SteeringRng));
+            if (_statDrawRng != null)
+            {
+                ForkableRandom.EnsureCanForkForIndependentClone(
+                    _statDrawRng,
+                    nameof(GameSessionConfig.StatDrawRng));
+            }
         }
 
         /// <summary>
@@ -231,27 +275,46 @@ namespace Pinder.Core.Conversation
         {
             if (src == null) throw new ArgumentNullException(nameof(src));
 
-            // Delegate core mutable state adoption to GameSessionState
-            _state.AdoptStateFrom(src._state);
+            var preparedState = src._state.Clone();
 
-            // Re-initialize/adopt the retained single-responsibility modules
-            _shadowGrowthEvaluator = src._shadowGrowthEvaluator != null && _state.PlayerShadows != null
-                ? src._shadowGrowthEvaluator.Clone(_state.PlayerShadows)
+            var adoptedPlayerShadows = _state.PlayerShadows ?? preparedState.PlayerShadows;
+            var preparedShadowGrowthEvaluator = src._shadowGrowthEvaluator != null && adoptedPlayerShadows != null
+                ? src._shadowGrowthEvaluator.Clone(adoptedPlayerShadows)
                 : null;
-            _xpRecorder      = new SessionXpRecorder(_state.XpLedger, _rules);
+            var preparedXpRecorder = new SessionXpRecorder(preparedState.XpLedger, _rules);
 
             // RNGs (deep-clone to avoid sharing internal state with src). See the clone
             // constructor above for why this no longer reflects into System.Random.
-            var clonedSteeringRng = CloneableRandom.RequireCloneable(
+            var clonedSteeringRng = ForkableRandom.ForkForRequiredTurnTransaction(
                 src._steeringEngine.SteeringRngForCloneOnly, nameof(GameSessionConfig.SteeringRng));
-            _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
-            _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
-            _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
-            _statDrawRng     = src._statDrawRng != null
-                ? CloneableRandom.RequireCloneable(src._statDrawRng, nameof(GameSessionConfig.StatDrawRng))
+            var preparedSteeringEngine = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
+            var preparedHorninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
+            var preparedShadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
+            var preparedStatDrawRng = src._statDrawRng != null
+                ? ForkableRandom.ForkForRequiredTurnTransaction(
+                    src._statDrawRng,
+                    nameof(GameSessionConfig.StatDrawRng))
                 : null;
 
-            _turnOrchestrator = BuildTurnOrchestrator();
+            var preparedTurnOrchestrator = BuildTurnOrchestrator(
+                preparedShadowGrowthEvaluator,
+                preparedXpRecorder,
+                preparedSteeringEngine,
+                preparedHorninessEngine,
+                preparedShadowCheckEngine,
+                preparedStatDrawRng);
+
+            _transactionTestHooks?.BeforeAdoptCommit?.Invoke();
+
+            _state.AdoptPreparedClone(preparedState);
+            _shadowGrowthEvaluator = preparedShadowGrowthEvaluator;
+            _xpRecorder = preparedXpRecorder;
+            _steeringEngine = preparedSteeringEngine;
+            _horninessEngine = preparedHorninessEngine;
+            _shadowCheckEngine = preparedShadowCheckEngine;
+            _statDrawRng = preparedStatDrawRng;
+            _turnOrchestrator = preparedTurnOrchestrator;
         }
+
     }
 }

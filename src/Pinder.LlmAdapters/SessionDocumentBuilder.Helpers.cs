@@ -60,18 +60,23 @@ namespace Pinder.LlmAdapters
             return "Unmatched \U0001f480";
         }
 
-        private static string GetThresholdInstruction(int before, int after, InterestState newState, string dateeName)
+        private static string GetThresholdInstruction(
+            int before,
+            int after,
+            InterestState newState,
+            string dateeName,
+            PromptCatalog? promptCatalog)
         {
             if (newState == InterestState.Unmatched)
-                return PromptTemplates.InterestBeatUnmatched.Replace("{datee_name}", dateeName);
+                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-unmatched").Replace("{datee_name}", dateeName);
             if (newState == InterestState.DateSecured)
-                return PromptTemplates.InterestBeatDateSecured.Replace("{datee_name}", dateeName);
+                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-date-secured").Replace("{datee_name}", dateeName);
             if (after > before && after > 15 && before <= 15)
-                return PromptTemplates.InterestBeatAbove15.Replace("{datee_name}", dateeName);
+                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-above15").Replace("{datee_name}", dateeName);
             if (after < before && after < 8 && before >= 8)
-                return PromptTemplates.InterestBeatBelow8.Replace("{datee_name}", dateeName);
+                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-below8").Replace("{datee_name}", dateeName);
 
-            return PromptTemplates.InterestBeatGeneric.Replace("{datee_name}", dateeName);
+            return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-generic").Replace("{datee_name}", dateeName);
         }
 
         private static string BuildShadowTaintBlock(Dictionary<ShadowStatType, int>? thresholds)
@@ -129,66 +134,70 @@ namespace Pinder.LlmAdapters
         /// Returns a resistance descriptor block based on current interest level.
         /// Below 25, the datee always maintains some form of resistance.
         /// </summary>
-        internal static string GetResistanceBlock(int interest)
+        internal static string GetResistanceBlock(
+            int interest,
+            InterestState interestState,
+            PromptCatalog? promptCatalog = null)
         {
-            string descriptor;
-            if (interest >= 25)
-                descriptor = PromptTemplates.ResistanceDissolved;
-            else if (interest >= 21)
-                descriptor = PromptTemplates.ResistanceAlmostConvinced;
-            else if (interest >= 15)
-                descriptor = PromptTemplates.ResistanceDeliberateApproach;
-            else if (interest >= 10)
-                descriptor = PromptTemplates.ResistanceUnstableAgreement;
-            else if (interest >= 5)
-                descriptor = PromptTemplates.ResistanceSkepticalInterest;
-            else if (interest >= 1)
-                descriptor = PromptTemplates.ResistanceActiveDisengagement;
-            else
-                descriptor = PromptTemplates.ResistanceActiveDisengagement;
+            string descriptor = PromptTemplates.GetCatalogString(
+                promptCatalog,
+                PromptTemplates.GetResistanceKey(interestState));
 
             return $"Current interest: {interest}/25. Resistance level: {descriptor}";
+        }
+
+        internal static string GetResistanceBlock(int interest)
+        {
+            return GetResistanceBlock(interest, new InterestMeter(interest).GetState());
         }
 
         /// <summary>
         /// Returns per-tier datee reaction guidance for failure degradation (#493).
         /// </summary>
-        internal static string GetDateeReactionGuidance(FailureTier tier)
+        internal static string GetDateeReactionGuidance(
+            FailureTier tier,
+            PromptCatalog? promptCatalog = null)
         {
             switch (tier)
             {
-                case FailureTier.Fumble: return PromptTemplates.DateeReactionFumble;
-                case FailureTier.Misfire: return PromptTemplates.DateeReactionMisfire;
-                case FailureTier.TropeTrap: return PromptTemplates.DateeReactionTropeTrap;
-                case FailureTier.Catastrophe: return PromptTemplates.DateeReactionCatastrophe;
-                case FailureTier.Legendary: return PromptTemplates.DateeReactionLegendary;
+                case FailureTier.Fumble: return PromptTemplates.GetCatalogString(promptCatalog, "datee-reaction-fumble");
+                case FailureTier.Misfire: return PromptTemplates.GetCatalogString(promptCatalog, "datee-reaction-misfire");
+                case FailureTier.TropeTrap: return PromptTemplates.GetCatalogString(promptCatalog, "datee-reaction-trope-trap");
+                case FailureTier.Catastrophe: return PromptTemplates.GetCatalogString(promptCatalog, "datee-reaction-catastrophe");
+                case FailureTier.Legendary: return PromptTemplates.GetCatalogString(promptCatalog, "datee-reaction-legendary");
                 default: return string.Empty;
             }
         }
 
-        private static string GetHorninessTierIntensity(Pinder.Core.Rolls.FailureTier tier)
+        private static string GetHorninessTierIntensity(
+            Pinder.Core.Rolls.FailureTier tier,
+            PromptCatalog? promptCatalog)
         {
             switch (tier)
             {
-                case FailureTier.Fumble: return PromptTemplates.DateeHorninessTierIntensityFumble;
-                case FailureTier.Misfire: return PromptTemplates.DateeHorninessTierIntensityMisfire;
-                case FailureTier.TropeTrap: return PromptTemplates.DateeHorninessTierIntensityTropeTrap;
+                case FailureTier.Fumble: return PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-tier-intensity-fumble");
+                case FailureTier.Misfire: return PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-tier-intensity-misfire");
+                case FailureTier.TropeTrap: return PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-tier-intensity-trope-trap");
                 case FailureTier.Catastrophe:
                 case FailureTier.Legendary:
-                    return PromptTemplates.DateeHorninessTierIntensityCatastrophe;
+                    return PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-tier-intensity-catastrophe");
                 default:
                     return string.Empty;
             }
         }
 
-        internal static string GetHorninessReactionGuidance(int interest, bool overlayApplied, Pinder.Core.Rolls.FailureTier tier)
+        internal static string GetHorninessReactionGuidance(
+            int interest,
+            bool overlayApplied,
+            Pinder.Core.Rolls.FailureTier tier,
+            PromptCatalog? promptCatalog = null)
         {
             if (!overlayApplied) return string.Empty;
 
             string band = interest < HorninessWarmthThreshold
-                ? PromptTemplates.DateeHorninessReactionBelowThreshold
-                : PromptTemplates.DateeHorninessReactionHighInterest;
-            string tierIntensity = GetHorninessTierIntensity(tier);
+                ? PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-reaction-below-threshold")
+                : PromptTemplates.GetCatalogString(promptCatalog, "datee-horniness-reaction-high-interest");
+            string tierIntensity = GetHorninessTierIntensity(tier, promptCatalog);
             string composed = $"Current interest: {interest}/25. {band}";
             if (!string.IsNullOrWhiteSpace(tierIntensity))
                 composed += " " + tierIntensity;

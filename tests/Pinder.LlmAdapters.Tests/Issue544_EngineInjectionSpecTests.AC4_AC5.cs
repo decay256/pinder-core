@@ -49,7 +49,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Skeptical", result);
         }
 
-        // Mutation: would catch if boundary 9 was in band 10-14
+        // Mutation: would catch if boundary 9 was in the Interested state
         [Fact]
         public void AC4_InterestNarrative_Band9_UpperBoundary()
         {
@@ -67,7 +67,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Engaged but not sold", result);
         }
 
-        // Mutation: would catch if boundary 14 was in band 15-20
+        // Mutation: would catch if boundary 14 was in the VeryIntoIt state
         [Fact]
         public void AC4_InterestNarrative_Band14_UpperBoundary()
         {
@@ -76,13 +76,13 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Engaged but not sold", result);
         }
 
-        // Mutation: would catch if boundary 15 was in band 10-14
+        // Mutation: would catch if boundary 15 was outside the Interested state
         [Fact]
         public void AC4_InterestNarrative_Band15_LowerBoundary()
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(interestAfter: 15));
-            Assert.Contains("Interested but holding back", result);
+            Assert.Contains("Engaged but not sold", result);
         }
 
         // Mutation: would catch if boundary 20 was in band 21-24
@@ -94,7 +94,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Interested but holding back", result);
         }
 
-        // Mutation: would catch if boundary 21 was in band 15-20
+        // Mutation: would catch if boundary 21 was in the VeryIntoIt state
         [Fact]
         public void AC4_InterestNarrative_Band21_LowerBoundary()
         {

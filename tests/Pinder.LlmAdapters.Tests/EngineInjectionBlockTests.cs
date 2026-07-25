@@ -112,7 +112,8 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(9, "Skeptical")]
         [InlineData(10, "Engaged but not sold")]
         [InlineData(14, "Engaged but not sold")]
-        [InlineData(15, "Interested but holding back")]
+        [InlineData(15, "Engaged but not sold")]
+        [InlineData(16, "Interested but holding back")]
         [InlineData(20, "Interested but holding back")]
         [InlineData(21, "Basically sold")]
         [InlineData(24, "Basically sold")]
@@ -236,15 +237,15 @@ namespace Pinder.LlmAdapters.Tests
         // ═══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void InterestNarrative_AllSixBandsDefined()
+        public void InterestNarrative_AllSevenSemanticStatesDefined()
         {
-            // Verify all 6 band constants exist and are non-empty
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_1_4));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_5_9));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_10_14));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_15_20));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_21_24));
-            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrative_25));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeUnmatched));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeBored));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeLukewarm));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeInterested));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeVeryIntoIt));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeAlmostThere));
+            Assert.False(string.IsNullOrEmpty(PromptTemplates.InterestNarrativeDateSecured));
         }
 
         [Fact]
@@ -252,7 +253,8 @@ namespace Pinder.LlmAdapters.Tests
         {
             Assert.NotEqual(PromptTemplates.GetInterestNarrative(4), PromptTemplates.GetInterestNarrative(5));
             Assert.NotEqual(PromptTemplates.GetInterestNarrative(9), PromptTemplates.GetInterestNarrative(10));
-            Assert.NotEqual(PromptTemplates.GetInterestNarrative(14), PromptTemplates.GetInterestNarrative(15));
+            Assert.Equal(PromptTemplates.GetInterestNarrative(14), PromptTemplates.GetInterestNarrative(15));
+            Assert.NotEqual(PromptTemplates.GetInterestNarrative(15), PromptTemplates.GetInterestNarrative(16));
             Assert.NotEqual(PromptTemplates.GetInterestNarrative(20), PromptTemplates.GetInterestNarrative(21));
             Assert.NotEqual(PromptTemplates.GetInterestNarrative(24), PromptTemplates.GetInterestNarrative(25));
         }

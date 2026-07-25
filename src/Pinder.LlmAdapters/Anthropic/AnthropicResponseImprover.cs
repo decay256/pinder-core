@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.LlmAdapters.Anthropic.Dto;
@@ -26,6 +27,7 @@ namespace Pinder.LlmAdapters.Anthropic
             double temperature,
             LlmCallTelemetryOptions? telemetry = null,
             string? phase = null,
+            AnthropicMessageHeadings? messageHeadings = null,
             CancellationToken ct = default)
         {
             var improvementPrompt = options.GameDefinition?.ImprovementPrompt;
@@ -38,7 +40,8 @@ namespace Pinder.LlmAdapters.Anthropic
                     maxTokens,
                     systemBlocks,
                     originalUserContent,
-                    temperature);
+                    temperature,
+                    messageHeadings ?? throw new ArgumentNullException(nameof(messageHeadings)));
                 improveRequest.Messages = new[]
                 {
                     new Message { Role = "user", Content = originalUserContent },
