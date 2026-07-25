@@ -107,12 +107,13 @@ namespace Pinder.SessionSetup
 
         internal static Dictionary<string, string>? ParseDiagnosisJson(string llmResponse)
         {
-            var json = ExtractJsonObject(llmResponse);
-            if (json == null)
-                throw new JsonException("Diagnosis response did not contain a JSON object.");
+            var extraction = GeneratedJsonObjectExtractor.TryExtractFirstValidObject(llmResponse);
+            if (!extraction.Success)
+                throw new JsonException(
+                    $"Diagnosis response did not contain a valid JSON object. FailureCode={extraction.FailureCode}.");
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(json, options);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(extraction.Json!, options);
         }
 
         private static Dictionary<string, string> ValidateDiagnosis(
@@ -148,71 +149,6 @@ namespace Pinder.SessionSetup
             }
 
             return selected;
-        }
-
-        internal static string? ExtractJsonObject(string text)
-        {
-            if (string.IsNullOrWhiteSpace(text))
-                return null;
-
-            for (int start = text.IndexOf('{'); start >= 0 && start < text.Length; start = text.IndexOf('{', start + 1))
-            {
-                int depth = 0;
-                bool inString = false;
-                bool escaped = false;
-
-                for (int i = start; i < text.Length; i++)
-                {
-                    char c = text[i];
-                    if (inString)
-                    {
-                        if (escaped)
-                        {
-                            escaped = false;
-                        }
-                        else if (c == '\\')
-                        {
-                            escaped = true;
-                        }
-                        else if (c == '"')
-                        {
-                            inString = false;
-                        }
-                        continue;
-                    }
-
-                    if (c == '"')
-                    {
-                        inString = true;
-                        continue;
-                    }
-
-                    if (c == '{')
-                    {
-                        depth++;
-                    }
-                    else if (c == '}')
-                    {
-                        depth--;
-                        if (depth == 0)
-                        {
-                            var candidate = text.Substring(start, i - start + 1);
-                            try
-                            {
-                                using var doc = JsonDocument.Parse(candidate);
-                                if (doc.RootElement.ValueKind == JsonValueKind.Object)
-                                    return candidate;
-                            }
-                            catch (JsonException)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         private sealed class DiagnosisRejection

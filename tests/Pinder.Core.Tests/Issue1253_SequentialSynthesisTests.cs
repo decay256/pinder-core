@@ -223,6 +223,41 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public async Task TherapistDiagnosisGenerator_RootArrayWithDiagnosisObject_RetriesThenThrows()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport
+            {
+                ResponseToReturn = @"[{ ""derived_feeling"": ""social exposure"", ""defense_reaction"": ""preemptive irony"" }]"
+            };
+
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            try
+            {
+                var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                    () => generator.GenerateAsync(
+                        "Char",
+                        "he/him",
+                        "bio",
+                        new Dictionary<string, BackstoryFact>(),
+                        new List<string>()));
+
+                Assert.IsType<JsonException>(ex.InnerException);
+                Assert.Contains("NoValidObject", ex.InnerException!.Message);
+                Assert.Equal(3, transport.CallCount);
+            }
+            finally
+            {
+                Directory.Delete(testDir, true);
+            }
+        }
+
+        [Fact]
         public void TherapistDiagnosisGenerator_WithMissingUserTemplate_ThrowsBeforeLlmCall()
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
