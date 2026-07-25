@@ -1,0 +1,170 @@
+using System;
+using System.Collections.Generic;
+using Pinder.Core.Conversation;
+using Pinder.Core.Stats;
+
+namespace Pinder.LlmAdapters
+{
+    /// <summary>
+    /// Stable key derivation and validation for DATEE emotional-reaction
+    /// direction prompts loaded through <see cref="PromptCatalog"/>.
+    /// </summary>
+    public static class EmotionalReactionPromptCatalog
+    {
+        public static IReadOnlyList<string> OutcomeKeys =>
+            StatDeliveryInstructions.OutcomeTierKeys;
+
+        public static readonly IReadOnlyList<string> RelationshipTransitionKeys = Array.AsReadOnly(new[]
+        {
+            "strengthened",
+            "preserved",
+            "damaged",
+            "transformed",
+        });
+
+        private static readonly HashSet<string> OutcomeKeySet =
+            new HashSet<string>(OutcomeKeys, StringComparer.Ordinal);
+
+        private static readonly HashSet<string> RelationshipTransitionKeySet =
+            new HashSet<string>(RelationshipTransitionKeys, StringComparer.Ordinal);
+
+        public static string GetInterestStateMeaningKey(InterestState state)
+        {
+            switch (state)
+            {
+                case InterestState.Unmatched:
+                    return "emotional-reaction-interest-unmatched";
+                case InterestState.Bored:
+                    return "emotional-reaction-interest-bored";
+                case InterestState.Lukewarm:
+                    return "emotional-reaction-interest-lukewarm";
+                case InterestState.Interested:
+                    return "emotional-reaction-interest-interested";
+                case InterestState.VeryIntoIt:
+                    return "emotional-reaction-interest-very-into-it";
+                case InterestState.AlmostThere:
+                    return "emotional-reaction-interest-almost-there";
+                case InterestState.DateSecured:
+                    return "emotional-reaction-interest-date-secured";
+                default:
+                    throw new InvalidOperationException($"Unknown interest state '{state}'.");
+            }
+        }
+
+        public static string GetRelationshipTransitionInstructionKey(string transitionKey)
+        {
+            if (transitionKey is null) throw new ArgumentNullException(nameof(transitionKey));
+            if (!RelationshipTransitionKeySet.Contains(transitionKey))
+            {
+                throw new ArgumentException(
+                    $"Unknown relationship transition key '{transitionKey}'.",
+                    nameof(transitionKey));
+            }
+
+            return "emotional-reaction-transition-" + transitionKey;
+        }
+
+        public static string GetEventMeaningKey(StatType stat, string outcomeKey)
+        {
+            if (outcomeKey is null) throw new ArgumentNullException(nameof(outcomeKey));
+            if (!OutcomeKeySet.Contains(outcomeKey))
+            {
+                throw new ArgumentException(
+                    $"Unknown emotional reaction outcome key '{outcomeKey}'.",
+                    nameof(outcomeKey));
+            }
+
+            return "emotional-reaction-event-" + StatKey(stat) + "-" + outcomeKey;
+        }
+
+        public static string GetInterestStateMeaning(PromptCatalog catalog, InterestState state)
+        {
+            if (catalog is null) throw new ArgumentNullException(nameof(catalog));
+            return RequireSystemPrompt(catalog, GetInterestStateMeaningKey(state));
+        }
+
+        public static string GetRelationshipTransitionInstruction(PromptCatalog catalog, string transitionKey)
+        {
+            if (catalog is null) throw new ArgumentNullException(nameof(catalog));
+            return RequireSystemPrompt(catalog, GetRelationshipTransitionInstructionKey(transitionKey));
+        }
+
+        public static string GetEventMeaning(PromptCatalog catalog, StatType stat, string outcomeKey)
+        {
+            if (catalog is null) throw new ArgumentNullException(nameof(catalog));
+            return RequireSystemPrompt(catalog, GetEventMeaningKey(stat, outcomeKey));
+        }
+
+        internal static void ValidateRuntimeCatalog(PromptCatalog catalog)
+        {
+            if (catalog is null) throw new ArgumentNullException(nameof(catalog));
+
+            foreach (InterestState state in Enum.GetValues(typeof(InterestState)))
+            {
+                RequireSystemPrompt(catalog, GetInterestStateMeaningKey(state));
+            }
+
+            foreach (string transitionKey in RelationshipTransitionKeys)
+            {
+                string key = GetRelationshipTransitionInstructionKey(transitionKey);
+                string prompt = RequireSystemPrompt(catalog, key);
+                RequirePlaceholder(key, prompt, "prior_relationship");
+                RequirePlaceholder(key, prompt, "resulting_relationship");
+            }
+
+            foreach (StatType stat in Enum.GetValues(typeof(StatType)))
+            {
+                foreach (string outcomeKey in OutcomeKeys)
+                {
+                    RequireSystemPrompt(catalog, GetEventMeaningKey(stat, outcomeKey));
+                }
+            }
+        }
+
+        private static string RequireSystemPrompt(PromptCatalog catalog, string key)
+        {
+            var entry = catalog.TryGet(key)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{key}'. The yaml file is incomplete or missing.");
+
+            if (string.IsNullOrWhiteSpace(entry.SystemPrompt))
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: runtime prompt key '{key}' has no system_prompt. Check the yaml file.");
+            }
+
+            return entry.SystemPrompt!;
+        }
+
+        private static void RequirePlaceholder(string key, string prompt, string token)
+        {
+            string placeholder = "{" + token + "}";
+            if (prompt.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: key '{key}' system_prompt must include required token '{placeholder}'.");
+            }
+        }
+
+        private static string StatKey(StatType stat)
+        {
+            switch (stat)
+            {
+                case StatType.Charm:
+                    return "charm";
+                case StatType.Rizz:
+                    return "rizz";
+                case StatType.Honesty:
+                    return "honesty";
+                case StatType.Chaos:
+                    return "chaos";
+                case StatType.Wit:
+                    return "wit";
+                case StatType.SelfAwareness:
+                    return "self-awareness";
+                default:
+                    throw new InvalidOperationException($"Unknown stat '{stat}'.");
+            }
+        }
+    }
+}

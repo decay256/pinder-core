@@ -26,11 +26,7 @@ namespace Pinder.Core.Tests
                 name,
                 timing,
                 1,
-                psychiatricDiagnosis: new Dictionary<string, string>
-                {
-                    ["derived_feeling"] = "curious",
-                    ["defense_reaction"] = "guarded",
-                },
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
                 backstory: TestHelpers.MakeBackstory(),
                 stakeLines: TestHelpers.MakeStakeLines());
         }

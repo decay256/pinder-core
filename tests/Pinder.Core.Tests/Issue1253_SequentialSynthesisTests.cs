@@ -57,11 +57,9 @@ namespace Pinder.Core.Tests
                 PassedBio = bio;
                 PassedBackstory = backstory;
                 PassedStakes = stakeLines;
-                var dict = new Dictionary<string, string>
-                {
-                    { "derived_feeling", "anxiety" },
-                    { "defense_reaction", "deflection" }
-                };
+                var dict = CompleteDiagnosisWith(
+                    ("derived_feeling", "anxiety"),
+                    ("defense_reaction", "deflection"));
                 return Task.FromResult(dict);
             }
         }
@@ -122,7 +120,10 @@ namespace Pinder.Core.Tests
             File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
 
             var transport = new FakeLlmTransport();
-            transport.ResponseToReturn = @"{ ""Derived_Feeling"": ""abandonment issues"", ""defense_reaction"": ""humor"", ""extra_note"": ""ignored"" }";
+            transport.ResponseToReturn = DiagnosisJsonWith(
+                ("Derived_Feeling", "abandonment issues"),
+                ("defense_reaction", "humor"),
+                ("extra_note", "ignored"));
             
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
             var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
@@ -145,7 +146,8 @@ namespace Pinder.Core.Tests
             
             Assert.Equal("abandonment issues", result["derived_feeling"]);
             Assert.Equal("humor", result["defense_reaction"]);
-            Assert.Equal(2, result.Count);
+            Assert.Equal(TherapistDiagnosisContract.RequiredFields, result.Keys.ToArray());
+            Assert.DoesNotContain("extra_note", result.Keys);
             
             Directory.Delete(testDir, true);
         }
@@ -159,7 +161,11 @@ namespace Pinder.Core.Tests
 
             var transport = new FakeLlmTransport
             {
-                ResponseToReturn = "Here is the object:\n```json\n{ \"derived_feeling\": \"being left behind\", \"defense_reaction\": \"performative detachment\" }\n```"
+                ResponseToReturn = "Here is the object:\n```json\n" +
+                    DiagnosisJsonWith(
+                        ("derived_feeling", "being left behind"),
+                        ("defense_reaction", "performative detachment")) +
+                    "\n```"
             };
 
             var catalog = PromptCatalog.LoadFromDirectory(testDir);
@@ -176,6 +182,7 @@ namespace Pinder.Core.Tests
 
                 Assert.Equal("being left behind", result["derived_feeling"]);
                 Assert.Equal("performative detachment", result["defense_reaction"]);
+                Assert.Equal(TherapistDiagnosisContract.RequiredFields, result.Keys.ToArray());
                 Assert.Equal(1, transport.CallCount);
             }
             finally
@@ -196,7 +203,9 @@ namespace Pinder.Core.Tests
                 ResponsesToReturn = new Queue<string>(new[]
                 {
                     "I would diagnose this as anxious clowning.",
-                    @"{ ""derived_feeling"": ""social exposure"", ""defense_reaction"": ""preemptive irony"" }"
+                    DiagnosisJsonWith(
+                        ("derived_feeling", "social exposure"),
+                        ("defense_reaction", "preemptive irony"))
                 })
             };
 
@@ -214,6 +223,7 @@ namespace Pinder.Core.Tests
 
                 Assert.Equal("social exposure", result["derived_feeling"]);
                 Assert.Equal("preemptive irony", result["defense_reaction"]);
+                Assert.Equal(TherapistDiagnosisContract.RequiredFields, result.Keys.ToArray());
                 Assert.Equal(2, transport.CallCount);
             }
             finally
@@ -286,7 +296,7 @@ namespace Pinder.Core.Tests
         {
             var backstory = new Dictionary<string, BackstoryFact> { { "f1", new BackstoryFact("S", "D", "S") } };
             var stakes = new List<string> { "Stake line" };
-            var diag = new Dictionary<string, string> { { "derived_feeling", "angst" } };
+            var diag = CompleteDiagnosisWith(("derived_feeling", "angst"));
 
             var def = new CharacterDefinition(
                 schemaVersion: 1,
@@ -408,6 +418,67 @@ namespace Pinder.Core.Tests
             Assert.Equal(3, transport.CallCount);
             
             Directory.Delete(testDir, true);
+        }
+
+        [Fact]
+        public async Task TherapistDiagnosisGenerator_WithMissingEmotionalFormulation_RetriesThenThrows()
+        {
+            var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
+            Directory.CreateDirectory(testDir);
+            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.7\n    max_tokens: 1024\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+
+            var transport = new FakeLlmTransport();
+            transport.ResponseToReturn = DiagnosisJsonWithout("self_awareness_reaction");
+
+            var catalog = PromptCatalog.LoadFromDirectory(testDir);
+            var generator = new LlmTherapistDiagnosisGenerator(transport, catalog);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => generator.GenerateAsync(
+                    "Char",
+                    "he/him",
+                    "bio",
+                    new Dictionary<string, BackstoryFact>(),
+                    new List<string>()));
+
+            Assert.IsType<JsonException>(ex.InnerException);
+            Assert.Contains("self_awareness_reaction", ex.InnerException!.Message);
+            Assert.Equal(3, transport.CallCount);
+
+            Directory.Delete(testDir, true);
+        }
+
+        private static Dictionary<string, string> CompleteDiagnosisWith(
+            params (string Key, string Value)[] overrides)
+        {
+            var diagnosis = TherapistDiagnosisContract.RequiredFields.ToDictionary(
+                field => field,
+                field => $"specific formulation for {field}");
+
+            foreach (var entry in overrides)
+                diagnosis[entry.Key] = entry.Value;
+
+            return diagnosis;
+        }
+
+        private static string DiagnosisJsonWith(params (string Key, string Value)[] overrides)
+        {
+            return ToJsonObject(CompleteDiagnosisWith(overrides));
+        }
+
+        private static string DiagnosisJsonWithout(string omittedField)
+        {
+            return ToJsonObject(
+                CompleteDiagnosisWith()
+                    .Where(pair => !string.Equals(pair.Key, omittedField, StringComparison.Ordinal))
+                    .ToDictionary(pair => pair.Key, pair => pair.Value));
+        }
+
+        private static string ToJsonObject(IReadOnlyDictionary<string, string> values)
+        {
+            return "{ " + string.Join(
+                ", ",
+                values.Select(pair => $"\"{pair.Key}\": \"{pair.Value}\"")) + " }";
         }
     }
 }

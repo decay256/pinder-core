@@ -64,7 +64,9 @@ namespace Pinder.Core.Tests
         public async Task StartTurn_FirstTurn_DoesNotPassTransitionTarget()
         {
             var llm = new CapturingLlm();
-            var session = MakeSession(llm, dateeDiagnosis: ValidDiagnosis());
+            var session = MakeSession(
+                llm,
+                dateeDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
 
             await session.StartTurnAsync();
 
@@ -129,7 +131,9 @@ namespace Pinder.Core.Tests
         public async Task StartTurn_DerivesTellAndWeaknessFlagsFromGameState()
         {
             var llm = new CapturingLlm();
-            var session = MakeSession(llm, dateeDiagnosis: ValidDiagnosis());
+            var session = MakeSession(
+                llm,
+                dateeDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
             session.State.ActiveTell = new Tell(StatType.Charm, "safe tell text");
             session.State.ActiveWeakness = new WeaknessWindow(StatType.Chaos, 2);
 
@@ -173,14 +177,5 @@ namespace Pinder.Core.Tests
                 psychiatricDiagnosis: psychiatricDiagnosis);
         }
 
-        private static IReadOnlyDictionary<string, string> ValidDiagnosis()
-        {
-            return new Dictionary<string, string>
-            {
-                { TherapistDiagnosisContract.DerivedFeelingKey, "abandonment" },
-                { TherapistDiagnosisContract.DefenseReactionKey, "deflection" },
-                { "legacy_regeneration_note", "runtime ignores extras" },
-            };
-        }
     }
 }

@@ -1,0 +1,228 @@
+schema_version: 1
+
+# DATEE emotional reaction direction catalog.
+# These prompts describe how the last delivered player message emotionally
+# lands for the recipient. They are consumed as internal direction for the
+# DATEE response pass; they must not draft the DATEE's final reply.
+
+prompts:
+  emotional-reaction-interest-unmatched:
+    system_prompt: >-
+      The recipient has closed the door. Treat any remaining closeness as ended, with no hidden warmth waiting underneath.
+  emotional-reaction-interest-bored:
+    system_prompt: >-
+      The recipient is guarded and nearly gone. Closeness feels unlikely unless the next emotional signal is unusually precise.
+  emotional-reaction-interest-lukewarm:
+    system_prompt: >-
+      The recipient is curious but skeptical. Closeness is possible, yet every signal is still being tested for cost and sincerity.
+  emotional-reaction-interest-interested:
+    system_prompt: >-
+      The recipient is engaged and evaluating. Closeness has begun to feel plausible, but trust is still conditional.
+  emotional-reaction-interest-very-into-it:
+    system_prompt: >-
+      The recipient is drawn in while still protecting themselves. Closeness is active, but one wrong note can make them retreat.
+  emotional-reaction-interest-almost-there:
+    system_prompt: >-
+      The recipient is nearly ready to choose closeness. Resistance is small, specific, and shaped by what still feels risky.
+  emotional-reaction-interest-date-secured:
+    system_prompt: >-
+      The recipient has accepted the closeness as real. Their emotional attention can move from testing to actual meeting.
+
+  emotional-reaction-transition-strengthened:
+    system_prompt: >-
+      The relationship moved from {prior_relationship} toward {resulting_relationship}. Let that strengthened closeness make the recipient more open, but keep the reaction in character and never gush by default.
+  emotional-reaction-transition-preserved:
+    system_prompt: >-
+      The relationship stayed around {resulting_relationship} rather than shifting away from {prior_relationship}. Let the recipient register continuity: the closeness is neither newly won nor newly damaged.
+  emotional-reaction-transition-damaged:
+    system_prompt: >-
+      The relationship moved from {prior_relationship} toward {resulting_relationship}. Let that damage make closeness feel less safe, and translate the cooling through the recipient's own defenses.
+  emotional-reaction-transition-transformed:
+    system_prompt: >-
+      The relationship changed shape from {prior_relationship} toward {resulting_relationship}. Let the recipient feel the new meaning of the closeness, whether it becomes more charged, more fragile, or more complicated.
+
+  emotional-reaction-event-charm-clean:
+    system_prompt: >-
+      You receive the message as easy social timing. It lightly supports closeness without asking you to surrender your guard.
+  emotional-reaction-event-charm-strong:
+    system_prompt: >-
+      You receive the message as confident social timing that makes being near them feel easier. Closeness becomes warmer and less effortful.
+  emotional-reaction-event-charm-critical:
+    system_prompt: >-
+      You receive the message as unusually well judged: graceful, attentive, and hard to dismiss. Closeness feels newly credible.
+  emotional-reaction-event-charm-exceptional:
+    system_prompt: >-
+      You receive the message as perfectly calibrated to the room between you. Closeness feels elegant, safe enough, and unexpectedly alive.
+  emotional-reaction-event-charm-nat20:
+    system_prompt: >-
+      You receive the message as a rare moment of effortless social magic. Closeness feels invited without pressure and almost embarrassingly right.
+  emotional-reaction-event-charm-fumble:
+    system_prompt: >-
+      You receive the message as almost smooth but slightly mistimed. Closeness remains possible, though a tiny awkward edge catches your attention.
+  emotional-reaction-event-charm-misfire:
+    system_prompt: >-
+      You receive the message as trying to be charming while missing your actual temperature. Closeness feels less natural and more managed.
+  emotional-reaction-event-charm-trope_trap:
+    system_prompt: >-
+      You receive the message as dating-app charm you have seen before. Closeness feels generic, as if you could be swapped with anyone.
+  emotional-reaction-event-charm-catastrophe:
+    system_prompt: >-
+      You receive the message as social performance turning visibly wrong. Closeness feels unsafe because the smoothness no longer feels connected to you.
+  emotional-reaction-event-charm-nat1:
+    system_prompt: >-
+      You receive the message as a collapse of social timing so complete it exposes the performance. Closeness freezes into disbelief.
+
+  emotional-reaction-event-rizz-clean:
+    system_prompt: >-
+      You receive the message as mild romantic confidence. It adds a little charge to closeness without making your boundaries feel ignored.
+  emotional-reaction-event-rizz-strong:
+    system_prompt: >-
+      You receive the message as attractive directness that reads mutual rather than needy. Closeness feels warmer and more physical.
+  emotional-reaction-event-rizz-critical:
+    system_prompt: >-
+      You receive the message as desire with unusually good timing. Closeness feels charged, wanted, and still respectful.
+  emotional-reaction-event-rizz-exceptional:
+    system_prompt: >-
+      You receive the message as magnetic attention that makes desire feel specific to you. Closeness becomes more embodied and vivid.
+  emotional-reaction-event-rizz-nat20:
+    system_prompt: >-
+      You receive the message as rare flirtation that makes attraction feel inevitable without force. Closeness feels electric and safe.
+  emotional-reaction-event-rizz-fumble:
+    system_prompt: >-
+      You receive the message as almost flirty but a little exposed. Closeness survives, though the desire feels briefly clumsy.
+  emotional-reaction-event-rizz-misfire:
+    system_prompt: >-
+      You receive the message as desire arriving before enough trust. Closeness feels pressured and your boundaries become more noticeable.
+  emotional-reaction-event-rizz-trope_trap:
+    system_prompt: >-
+      You receive the message as canned flirtation rather than real attraction. Closeness feels cheapened by the performance of desire.
+  emotional-reaction-event-rizz-catastrophe:
+    system_prompt: >-
+      You receive the message as physical pressure badly misreading you. Closeness feels threatened because attraction is being asked for too aggressively.
+  emotional-reaction-event-rizz-nat1:
+    system_prompt: >-
+      You receive the message as a total collapse of erotic judgment. Closeness turns into recoil, embarrassment, or a need for distance.
+
+  emotional-reaction-event-honesty-clean:
+    system_prompt: >-
+      You receive the message as a small truth offered without drama. It gives closeness a little more substance while leaving you room to respond.
+  emotional-reaction-event-honesty-strong:
+    system_prompt: >-
+      You receive the message as clear truth with emotional spine. Closeness feels more trustworthy because the vulnerability is not begging.
+  emotional-reaction-event-honesty-critical:
+    system_prompt: >-
+      You receive the message as a well-placed truth that respects both people. Closeness deepens because candor feels earned.
+  emotional-reaction-event-honesty-exceptional:
+    system_prompt: >-
+      You receive the message as a rare honest moment that is precise, kind, and unhidden. Closeness feels steadier and more real.
+  emotional-reaction-event-honesty-nat20:
+    system_prompt: >-
+      You receive the message as truth arriving with perfect courage and care. Closeness feels disarming because nothing important is being performed.
+  emotional-reaction-event-honesty-fumble:
+    system_prompt: >-
+      You receive the message as truth with a slightly awkward edge. Closeness is still possible, but the delivery asks you to do extra interpretation.
+  emotional-reaction-event-honesty-misfire:
+    system_prompt: >-
+      You receive the message as candor that centers their relief more than your experience. Closeness feels burdened by their need to be seen as honest.
+  emotional-reaction-event-honesty-trope_trap:
+    system_prompt: >-
+      You receive the message as performed vulnerability, the kind that hides behind emotional language. Closeness feels manipulative and less safe.
+  emotional-reaction-event-honesty-catastrophe:
+    system_prompt: >-
+      You receive the message as raw disclosure dropped without consent or care. Closeness feels invaded rather than invited.
+  emotional-reaction-event-honesty-nat1:
+    system_prompt: >-
+      You receive the message as a collapse of trust: truth used badly enough to feel exposing or coercive. Closeness shuts down hard.
+
+  emotional-reaction-event-chaos-clean:
+    system_prompt: >-
+      You receive the message as a small surprising turn that keeps things alive. Closeness feels playful without becoming unstable.
+  emotional-reaction-event-chaos-strong:
+    system_prompt: >-
+      You receive the message as bold spontaneity that understands your edge. Closeness feels more exciting and less predictable.
+  emotional-reaction-event-chaos-critical:
+    system_prompt: >-
+      You receive the message as a brave swerve that opens a new emotional door. Closeness feels risky in a way that may be worth following.
+  emotional-reaction-event-chaos-exceptional:
+    system_prompt: >-
+      You receive the message as perfectly judged disruption: alive, specific, and freeing. Closeness feels newly possible through surprise.
+  emotional-reaction-event-chaos-nat20:
+    system_prompt: >-
+      You receive the message as rare chaos that reveals courage instead of instability. Closeness feels thrilling and strangely trustworthy.
+  emotional-reaction-event-chaos-fumble:
+    system_prompt: >-
+      You receive the message as a little too random, though not fatal. Closeness wobbles while you decide whether the surprise was intentional.
+  emotional-reaction-event-chaos-misfire:
+    system_prompt: >-
+      You receive the message as unpredictability that misses your emotional footing. Closeness feels less stable and you become more watchful.
+  emotional-reaction-event-chaos-trope_trap:
+    system_prompt: >-
+      You receive the message as forced quirkiness, spontaneity performed for effect. Closeness feels artificial because the risk does not reveal anything true.
+  emotional-reaction-event-chaos-catastrophe:
+    system_prompt: >-
+      You receive the message as disruption that breaks the shared frame. Closeness feels unsafe because you cannot tell what they are asking you to stand on.
+  emotional-reaction-event-chaos-nat1:
+    system_prompt: >-
+      You receive the message as a collapse into incoherence or self-indulgent volatility. Closeness turns into alarm and distance.
+
+  emotional-reaction-event-wit-clean:
+    system_prompt: >-
+      You receive the message as a light joke or sharp observation that lands. Closeness gets easier because the shared rhythm has a little sparkle.
+  emotional-reaction-event-wit-strong:
+    system_prompt: >-
+      You receive the message as genuinely funny and attentive. Closeness feels smarter, quicker, and more mutually alive.
+  emotional-reaction-event-wit-critical:
+    system_prompt: >-
+      You receive the message as humor that notices something real without flattening it. Closeness deepens because the play has insight.
+  emotional-reaction-event-wit-exceptional:
+    system_prompt: >-
+      You receive the message as brilliant timing: funny, tender, and exact. Closeness feels effortless because laughter carries recognition.
+  emotional-reaction-event-wit-nat20:
+    system_prompt: >-
+      You receive the message as a rare joke that makes you feel deeply seen. Closeness becomes bright, personal, and hard to resist.
+  emotional-reaction-event-wit-fumble:
+    system_prompt: >-
+      You receive the message as a joke that almost lands but slightly clips the edge. Closeness remains, with a small need to recalibrate.
+  emotional-reaction-event-wit-misfire:
+    system_prompt: >-
+      You receive the message as humor that dodges the emotional point. Closeness feels thinner because cleverness is standing where presence should be.
+  emotional-reaction-event-wit-trope_trap:
+    system_prompt: >-
+      You receive the message as familiar banter armor. Closeness feels blocked because the joke protects them from being more specific.
+  emotional-reaction-event-wit-catastrophe:
+    system_prompt: >-
+      You receive the message as a joke that wounds, trivializes, or badly misreads the moment. Closeness feels bruised and trust drops.
+  emotional-reaction-event-wit-nat1:
+    system_prompt: >-
+      You receive the message as a collapse of comic judgment so bad it changes the room. Closeness turns cold under secondhand embarrassment.
+
+  emotional-reaction-event-self-awareness-clean:
+    system_prompt: >-
+      You receive the message as modest self-understanding that leaves space for you. Closeness feels slightly safer because they can name themselves.
+  emotional-reaction-event-self-awareness-strong:
+    system_prompt: >-
+      You receive the message as reflective clarity with emotional responsibility. Closeness feels more trustworthy because they are not making you carry the insight.
+  emotional-reaction-event-self-awareness-critical:
+    system_prompt: >-
+      You receive the message as self-knowledge that actually changes the exchange. Closeness deepens because the insight is useful, not ornamental.
+  emotional-reaction-event-self-awareness-exceptional:
+    system_prompt: >-
+      You receive the message as unusually mature self-recognition, honest without becoming clinical. Closeness feels grounded and more possible.
+  emotional-reaction-event-self-awareness-nat20:
+    system_prompt: >-
+      You receive the message as rare self-awareness that removes pressure instead of adding it. Closeness feels clear, kind, and unexpectedly safe.
+  emotional-reaction-event-self-awareness-fumble:
+    system_prompt: >-
+      You receive the message as self-reflection with a slight over-explained edge. Closeness remains, but the intimacy feels a little monitored.
+  emotional-reaction-event-self-awareness-misfire:
+    system_prompt: >-
+      You receive the message as analysis replacing contact. Closeness feels more distant because they are explaining themselves instead of meeting you.
+  emotional-reaction-event-self-awareness-trope_trap:
+    system_prompt: >-
+      You receive the message as therapy-speak used as personality. Closeness feels abstract, as if language is substituting for risk.
+  emotional-reaction-event-self-awareness-catastrophe:
+    system_prompt: >-
+      You receive the message as self-analysis that becomes self-absorption. Closeness feels crowded out by their need to narrate themselves.
+  emotional-reaction-event-self-awareness-nat1:
+    system_prompt: >-
+      You receive the message as a collapse into clinical self-display or defensive insight. Closeness shuts down because being understood starts to feel like work.

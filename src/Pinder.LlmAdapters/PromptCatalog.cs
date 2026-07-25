@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Pinder.Core.Characters;
 using Pinder.Core.Prompts;
 using YamlDotNet.RepresentationModel;
 
@@ -273,6 +274,9 @@ namespace Pinder.LlmAdapters
                 }
             }
 
+            ValidateDiagnosisPromptContract(
+                RequireField("diagnosis", useSystemPrompt: true).SystemPrompt!);
+
             PromptBuilder.ValidateStructuralPromptContracts(
                 key => TryGet(key)?.SystemPrompt,
                 key =>
@@ -282,6 +286,21 @@ namespace Pinder.LlmAdapters
                         ? null
                         : new StructuralPromptResult(entry.SystemPrompt, entry.SourceFile);
                 });
+
+            EmotionalReactionPromptCatalog.ValidateRuntimeCatalog(this);
+        }
+
+        private static void ValidateDiagnosisPromptContract(string systemPrompt)
+        {
+            foreach (string field in TherapistDiagnosisContract.RequiredFields)
+            {
+                string jsonKey = "\"" + field + "\"";
+                if (systemPrompt.IndexOf(jsonKey, StringComparison.Ordinal) < 0)
+                {
+                    throw new InvalidOperationException(
+                        $"prompt-catalog: key 'diagnosis' system_prompt must include required JSON key '{field}'.");
+                }
+            }
         }
 
         private PromptEntry RequireField(string key, bool useSystemPrompt)

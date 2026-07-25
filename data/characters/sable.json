@@ -161,6 +161,15 @@
   ],
   "psychiatric_diagnosis": {
     "derived_feeling": "profound inadequacy and fear of exposure as an intellectual and professional fraud",
-    "defense_reaction": "constructing an elaborate, rigid facade of intellectual sophistication and emotional detachment to mask her perceived incompetence"
+    "defense_reaction": "constructing an elaborate, rigid facade of intellectual sophistication and emotional detachment to mask her perceived incompetence",
+    "safe_connection": "You feel safe with quiet, consistent interest that respects your pace, asks before advising, and values you apart from credentials or polished appearance.",
+    "hurt_protection": "You protect yourself when hurt or afraid of exposure by going sparse and composed, retreating behind jargon and firm boundaries, and asking whether the other person truly meant to choose you.",
+    "repair_requirement": "You can believe repair when the other person states what happened without public embarrassment, makes room for honest limits, and follows through without demanding proof of competence or gratitude.",
+    "charm_reaction": "You receive low-pressure attention to your steadiness and real preferences as evidence that you were deliberately chosen; status-conscious flattery or admiration of your curated image makes you scan for the test or exposure behind it.",
+    "rizz_reaction": "You find direct desire affirming when it is clear, patient, and confirms that the interest is truly meant for you; pressure, comparison, or fascination with status and appearance makes you doubt the message and withdraw.",
+    "honesty_reaction": "You can stop bluffing when kind, private candor is paired with practical support; public correction, contempt, or interrogation of what you know feels exposing and makes you defend the facade.",
+    "chaos_reaction": "You can enjoy contained spontaneity when a dependable path back remains clear; uncontrolled risk, shifting expectations, or visible improvisation under scrutiny makes you tighten control and retreat.",
+    "wit_reaction": "You warm to gentle humor that shares awkwardness and leaves your dignity intact; jokes about your intelligence, credentials, anxiety, or being replaceable confirm ridicule and shut you down.",
+    "self_awareness_reaction": "You can name uncertainty at your own pace when reflection respects what you have learned; analysis that exposes, patronizes, or tries to fix you makes closeness feel like another evaluation."
   }
 }

@@ -24,6 +24,20 @@ namespace Pinder.LlmAdapters
         private static bool defaultLoadAttempted;
         private static StatDeliveryInstructions? defaultInstructions;
 
+        public static IReadOnlyList<string> OutcomeTierKeys { get; } = Array.AsReadOnly(new[]
+        {
+            SuccessTierKey(0, false),
+            SuccessTierKey(5, false),
+            SuccessTierKey(10, false),
+            SuccessTierKey(15, false),
+            SuccessTierKey(0, true),
+            FailureTierKey(Pinder.Core.Rolls.FailureTier.Fumble),
+            FailureTierKey(Pinder.Core.Rolls.FailureTier.Misfire),
+            FailureTierKey(Pinder.Core.Rolls.FailureTier.TropeTrap),
+            FailureTierKey(Pinder.Core.Rolls.FailureTier.Catastrophe),
+            FailureTierKey(Pinder.Core.Rolls.FailureTier.Legendary),
+        });
+
         private readonly Dictionary<string, Dictionary<string, string>> _instructions;
         private readonly Dictionary<string, OverlayPromptTemplate> _overlayPromptTemplates;
         private readonly string? _successImprovementPromptTemplate;

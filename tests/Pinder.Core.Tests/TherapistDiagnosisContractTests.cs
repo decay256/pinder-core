@@ -19,6 +19,14 @@ namespace Pinder.Core.Tests
         private static string RepoRoot => TestRepoLocator.RepoRoot;
 
         [Fact]
+        public void RequiredFields_IncludeEmotionalReactionFieldsInLockedOrder()
+        {
+            Assert.Equal(
+                ExpectedDiagnosisFields,
+                TherapistDiagnosisContract.RequiredFields);
+        }
+
+        [Fact]
         public void ValidateRequiredFields_NullDiagnosis_ReportsStableViolation()
         {
             var result = TherapistDiagnosisContract.ValidateRequiredFields(null);
@@ -72,12 +80,7 @@ namespace Pinder.Core.Tests
         public void ValidateRequiredFields_CompleteMapAllowsBoundarySpecificExtras()
         {
             var result = TherapistDiagnosisContract.ValidateRequiredFields(
-                new Dictionary<string, string>
-                {
-                    [TherapistDiagnosisContract.DerivedFeelingKey] = "fear of being ordinary",
-                    [TherapistDiagnosisContract.DefenseReactionKey] = "turns sincerity into a bit",
-                    ["future_regeneration_note"] = "loader/runtime may preserve this flat-map extra",
-                });
+                CompleteDiagnosisWith(("future_regeneration_note", "loader/runtime may preserve this flat-map extra")));
 
             Assert.True(result.IsValid);
             Assert.Null(result.Violation);
@@ -87,9 +90,8 @@ namespace Pinder.Core.Tests
         public void Loader_PreservesStringExtrasForLegacyRegeneration()
         {
             string json = WithDiagnosis(
-                @"""derived_feeling"": ""fear of being ordinary"",
-                  ""defense_reaction"": ""turns sincerity into a bit"",
-                  ""future_regeneration_note"": ""kept""");
+                CompleteDiagnosisJsonProperties(
+                    ("future_regeneration_note", "kept")));
 
             var definition = CharacterDefinitionLoader.ParseDefinition(json);
 
@@ -100,11 +102,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void CharacterDefinitionWriter_OutputKeepsDiagnosisFlatMapSchemaShape()
         {
-            var diagnosis = new Dictionary<string, string>
-            {
-                [TherapistDiagnosisContract.DerivedFeelingKey] = "fear of being ordinary",
-                [TherapistDiagnosisContract.DefenseReactionKey] = "turns sincerity into a bit",
-            };
+            var diagnosis = CompleteDiagnosisWith();
             var definition = new CharacterDefinition(
                 CharacterDefinition.CurrentSchemaVersion,
                 Guid.Parse("550e8400-e29b-41d4-a716-446655440000"),
@@ -157,6 +155,22 @@ namespace Pinder.Core.Tests
             Assert.True(ReadSchemaDiagnosisAdditionalPropertiesIsFalse());
         }
 
+        [Fact]
+        public void DiagnosisPrompt_InstructsActionableCharacterSpecificFormulations()
+        {
+            string systemPrompt = PromptCatalog
+                .LoadFromDirectory(Path.Combine(RepoRoot, "data", "prompts"))
+                .Get("diagnosis")
+                .SystemPrompt!;
+
+            Assert.Contains("second-person", systemPrompt, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("character-specific", systemPrompt, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Do not mention roll tiers", systemPrompt, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Do not write finished datee replies", systemPrompt, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Do not introduce facts", systemPrompt, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("Do not use diagnoses as insults", systemPrompt, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static void AssertViolation(
             IReadOnlyDictionary<string, string>? diagnosis,
             string expectedField,
@@ -168,6 +182,43 @@ namespace Pinder.Core.Tests
             Assert.NotNull(result.Violation);
             Assert.Equal(expectedField, result.Violation!.Field);
             Assert.Equal(expectedCode, result.Violation.Code);
+        }
+
+        private static readonly string[] ExpectedDiagnosisFields =
+        {
+            "derived_feeling",
+            "defense_reaction",
+            "safe_connection",
+            "hurt_protection",
+            "repair_requirement",
+            "charm_reaction",
+            "rizz_reaction",
+            "honesty_reaction",
+            "chaos_reaction",
+            "wit_reaction",
+            "self_awareness_reaction",
+        };
+
+        private static Dictionary<string, string> CompleteDiagnosisWith(
+            params (string Key, string Value)[] extras)
+        {
+            var diagnosis = ExpectedDiagnosisFields.ToDictionary(
+                field => field,
+                field => $"specific formulation for {field}");
+
+            foreach (var extra in extras)
+                diagnosis[extra.Key] = extra.Value;
+
+            return diagnosis;
+        }
+
+        private static string CompleteDiagnosisJsonProperties(
+            params (string Key, string Value)[] extras)
+        {
+            return string.Join(
+                "," + Environment.NewLine,
+                CompleteDiagnosisWith(extras)
+                    .Select(pair => $@"""{pair.Key}"": ""{pair.Value}"""));
         }
 
         private static string WithDiagnosis(string diagnosisProperties)

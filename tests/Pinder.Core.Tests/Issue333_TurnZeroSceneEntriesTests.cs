@@ -152,11 +152,7 @@ namespace Pinder.Core.Tests
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
                 level: 1,
-                psychiatricDiagnosis: new Dictionary<string, string>
-                {
-                    ["derived_feeling"] = "guarded",
-                    ["defense_reaction"] = "deflects",
-                });
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
         }
 
         private sealed class FixedDice : IDiceRoller

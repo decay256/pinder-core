@@ -50,11 +50,28 @@ namespace Pinder.Core.TestCommon
         }
 
         public static IReadOnlyDictionary<string, string> MakePsychiatricDiagnosis()
-            => new Dictionary<string, string>
+        {
+            var valuesByField = new Dictionary<string, string>
             {
-                { "derived_feeling", "fear of being overlooked" },
-                { "defense_reaction", "tests sincerity before trusting it" }
+                { TherapistDiagnosisContract.DerivedFeelingKey, "fear of being overlooked" },
+                { TherapistDiagnosisContract.DefenseReactionKey, "tests sincerity before trusting it" },
+                { TherapistDiagnosisContract.SafeConnectionKey, "consistent reassurance without pressure" },
+                { TherapistDiagnosisContract.HurtProtectionKey, "withdraws behind dry humor when exposed" },
+                { TherapistDiagnosisContract.RepairRequirementKey, "names the rupture and follows through calmly" },
+                { TherapistDiagnosisContract.CharmReactionKey, "softens when warmth feels specific and unforced" },
+                { TherapistDiagnosisContract.RizzReactionKey, "engages when confidence leaves room for choice" },
+                { TherapistDiagnosisContract.HonestyReactionKey, "trust grows when candor is gentle and precise" },
+                { TherapistDiagnosisContract.ChaosReactionKey, "plays along until unpredictability feels unsafe" },
+                { TherapistDiagnosisContract.WitReactionKey, "responds to humor that does not dodge sincerity" },
+                { TherapistDiagnosisContract.SelfAwarenessReactionKey, "opens up when reflection includes accountability" },
             };
+
+            var diagnosis = new Dictionary<string, string>();
+            foreach (string requiredField in TherapistDiagnosisContract.RequiredFields)
+                diagnosis.Add(requiredField, valuesByField[requiredField]);
+
+            return diagnosis;
+        }
 
         public static CharacterProfile MakeCharacterProfile(
             StatBlock stats,

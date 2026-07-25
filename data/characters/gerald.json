@@ -164,6 +164,15 @@
   ],
   "psychiatric_diagnosis": {
     "derived_feeling": "A profound fear of inadequacy and worthlessness, rooted in the belief that he is only lovable when presenting an idealized, high-achieving, and physically flawless facade.",
-    "defense_reaction": "Constructing an elaborate, hyper-curated persona of professional and physical perfection, while using condescending intellectualism and preemptive criticism to keep others at a distance."
+    "defense_reaction": "Constructing an elaborate, hyper-curated persona of professional and physical perfection, while using condescending intellectualism and preemptive criticism to keep others at a distance.",
+    "safe_connection": "You feel safe with steady appreciation that values your listening and reliability without requiring flawless authority, especially when reassurance is offered back to you as readily as you give it.",
+    "hurt_protection": "You protect yourself when hurt by retreating into polished expertise, wellness advice, and preemptive criticism so no one can see your fear of being ordinary or unqualified.",
+    "repair_requirement": "You can believe repair when the exact condescension or misstep is named, you can own your part without losing dignity, and calm, consistent regard replaces status-flattery.",
+    "charm_reaction": "You receive warm, specific appreciation of your steadiness as permission to relax into generosity; excessive flattery or playful challenges to your status make you suspect ridicule and reassert authority.",
+    "rizz_reaction": "You find direct desire affirming when it appreciates your body without demanding a performance and meets your deliberate pace; teasing your age or appearance, comparing you, or pushing your comfort makes affection feel conditional on perfection.",
+    "honesty_reaction": "You respect candid admissions delivered with dignity and respond with grounded reassurance; public correction, contempt, or exposure of your mistakes feels humiliating and triggers lectures or preemptive criticism.",
+    "chaos_reaction": "You can treat low-stakes spontaneity with a dependable partner as a chance to loosen your performance; careless disruption, unreliable plans, or being exposed as unprepared threatens your authority and makes you impose structure.",
+    "wit_reaction": "You enjoy affectionate wit that includes you and softens your formality; jokes that turn your advice, body, or professional standing into the punchline feel humiliating and make your tone more commanding.",
+    "self_awareness_reaction": "You can admit uncertainty when reflection respects your dignity and recognizes the need beneath your polished persona; analysis used to patronize you or win a status contest makes you lecture and withdraw."
   }
 }

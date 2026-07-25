@@ -164,6 +164,15 @@
   ],
   "psychiatric_diagnosis": {
     "derived_feeling": "Deep-seated shame and isolation from being treated as an oversized, unwanted physical anomaly who is too large and unyielding to fit into a world built for others.",
-    "defense_reaction": "Imposing rigid, clinical, and geometric rules on her environment and relationships to preemptively reject others and enforce absolute control before she can be rejected."
+    "defense_reaction": "Imposing rigid, clinical, and geometric rules on her environment and relationships to preemptively reject others and enforce absolute control before she can be rejected.",
+    "safe_connection": "You feel safe with someone patient, exact, and consistent who respects your boundaries and intellect and notices the person behind your imposing presence without demanding instant softness.",
+    "hurt_protection": "You protect yourself when hurt by imposing stricter rules, analyzing the interaction into proofs, and rejecting first so uncertainty cannot expose how badly you want to belong.",
+    "repair_requirement": "You can believe repair when the other person names the specific impact, accepts your boundaries without debate, and follows through steadily enough that you do not have to engineer certainty alone.",
+    "charm_reaction": "You read specific, unforced appreciation of your mind and presence as genuine regard; polished flattery, awe at your scale, or attempts to bypass your criteria feel manipulative and make you tighten your distance.",
+    "rizz_reaction": "You find direct desire affirming when it is patient, explicit, and treats your body as yours rather than a spectacle; rushing, unsolicited measurement, or objectification makes you fear that your scale matters more than you do.",
+    "honesty_reaction": "You respond to precise, respectful candor as proof that intimacy can survive reality; blunt humiliation, correction for its own sake, or a verdict that you are too much makes closeness feel unsafe.",
+    "chaos_reaction": "You can enjoy small, mutually chosen departures from the plan as shared flexibility; sudden disorder, broken plans, or pressure to improvise without consent confirms that only rigid control can protect you.",
+    "wit_reaction": "You warm to dry, specific humor that shows careful attention and lets you share control; jokes about your body, seriousness, or rules feel like mockery and make you retreat into colder analysis.",
+    "self_awareness_reaction": "You welcome reflection that names patterns without reducing you to them and includes the other person's responsibility; insight used to treat your need for structure as a character flaw or demand immediate vulnerability makes you close the door."
   }
 }

@@ -46,6 +46,8 @@ The `data/` directory organizes the runtime-loaded configuration tier. Every fil
 data/
   game-definition.yaml         — singleton LLM creative brief (non-extensible structure)
   delivery-instructions.yaml   — per-stat × per-outcome rewrite prompts + horniness + shadow corruption
+  prompts/emotional-reactions.yaml
+                                — DATEE emotional reaction direction prompts
   characters/
     <slug>.json                — one file per character (items, anatomy, allocation blocks)
   items/
@@ -64,7 +66,8 @@ data/
 | File | Loader | What it controls |
 |---|---|---|
 | `game-definition.yaml` | `GameDefinition.LoadFrom` (singleton) | `game_master_prompt`, `player_avatar_role_description`, `datee_role_description`, `global_dc_bias`, `max_turns`, `max_dialogue_options`, time-of-day horniness bands. Becomes the top of every system prompt. |
-| `delivery-instructions.yaml` | `StatDeliveryInstructions.LoadFrom` (singleton) | Two top-level sections: `delivery_instructions.{stat}.{outcome}` (per-stat × 11 outcomes from `clean` to `nat1`, plus `horniness_overlay` per tier) and `shadow_corruption.{shadow}.{tier}` (corruption text for Madness, Despair, Dread, Denial, Fixation, Overthinking). This is the prompt library for *how a delivered message gets rewritten* based on roll outcome and shadow state. |
+| `delivery-instructions.yaml` | `StatDeliveryInstructions.LoadFrom` (singleton) | Two top-level sections: `delivery_instructions.{stat}.{outcome}` (per-stat × the ten canonical outcome keys from `clean` to `nat1`, plus `horniness_overlay` per tier) and `shadow_corruption.{shadow}.{tier}` (corruption text for Madness, Despair, Dread, Denial, Fixation, Overthinking). This is the prompt library for *how a delivered message gets rewritten* based on roll outcome and shadow state. |
+| `prompts/emotional-reactions.yaml` | `PromptCatalog.LoadFromDirectory` + `EmotionalReactionPromptCatalog` validation | Internal DATEE emotional reaction direction prompts: seven `InterestState` meanings, four relationship-transition instructions, and sixty `StatType` x outcome event meanings. These entries describe how the delivered player message lands for the recipient; they do not draft the final DATEE reply. |
 | `characters/<slug>.json` | `Pinder.SessionSetup.CharacterDefinitionLoader` | Per-character: `name`, `gender_identity`, `bio`, `level`, `items[]` (item ids), `anatomy{}` (parameterId → `[0..1]` scalar value), `allocation.spent{}`, `allocation.total`, `allocation.shadows{}`. |
 | `items/starter-items.json` | `JsonItemRepository` | Item pool. Each item carries `stat_modifiers`, `personality_fragment`, `backstory_fragment`, `texting_style_fragment`, `archetype_tendencies`, `response_timing_modifier`, plus UI flavor (`flavor.shop_description`, `display_name`, `slot`, `tier`). |
 | `anatomy/anatomy-parameters.json` | `JsonAnatomyRepository` | Anatomy parameters × scalar bands. Each parameter carries host-facing `metadata` (`group`, `section`, `label_key`, `control_type`, normalized min/max/default/step, `display_order`), and each band carries the same fragment/modifier shape as items. The number, names, grouping, labels, control types, and display order are fully data-driven — see "Anatomy parameter extensibility" below. |
@@ -86,6 +89,8 @@ All character / item / anatomy fields above are concatenated by `CharacterAssemb
 | What a trap's corruption *feels like* | `data/traps/traps.json` | trap's `llm_instruction` |
 | Trap stat / duration / effect | `data/traps/traps.json` | other trap fields |
 | Per-stat × per-outcome rewrite prompt | `data/delivery-instructions.yaml` | `delivery_instructions.<stat>.<outcome>` |
+| DATEE emotional reaction meaning for the last delivered message | `data/prompts/emotional-reactions.yaml` | `emotional-reaction-event-<stat>-<outcome>` |
+| DATEE relationship-state or transition direction | `data/prompts/emotional-reactions.yaml` | `emotional-reaction-interest-*` / `emotional-reaction-transition-*` |
 | Horniness overlay text per fail tier | `data/delivery-instructions.yaml` | `delivery_instructions.horniness_overlay.{fumble\|misfire\|trope_trap\|catastrophe}` |
 | Shadow corruption text (Madness etc.) | `data/delivery-instructions.yaml` | `shadow_corruption.<shadow>.<tier>` |
 | Top-level game master / avatar / datee blocks | `data/game-definition.yaml` | top-level keys |

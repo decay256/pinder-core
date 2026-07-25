@@ -64,8 +64,29 @@ data/prompts/
   structural.yaml
   narrative.yaml
   overlay-model-comparison.yaml
+  emotional-reactions.yaml
   stake.yaml
 ```
+
+## Emotional Reaction Direction
+
+`data/prompts/emotional-reactions.yaml` contains the internal DATEE emotional
+reaction direction library for the post-delivery response pass. The catalog is
+keyed by typed engine concepts rather than score math:
+
+- `emotional-reaction-interest-*` describes the seven canonical
+  `InterestState` meanings in prose.
+- `emotional-reaction-transition-*` describes strengthened, preserved, damaged,
+  and transformed relationship transitions. These entries require
+  `{prior_relationship}` and `{resulting_relationship}` placeholders.
+- `emotional-reaction-event-<stat>-<outcome>` describes how the delivered
+  player message emotionally lands for the recipient for every
+  `StatType` x outcome key combination.
+
+The outcome keys intentionally reuse the delivery instruction vocabulary:
+`clean`, `strong`, `critical`, `exceptional`, `nat20`, `fumble`, `misfire`,
+`trope_trap`, `catastrophe`, and `nat1`. These entries are direction prompts,
+not final DATEE replies.
 
 ## Admin-editor wiring
 

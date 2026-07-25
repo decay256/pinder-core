@@ -84,11 +84,32 @@
     "psychiatric_diagnosis": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["derived_feeling", "defense_reaction"],
+      "required": [
+        "derived_feeling",
+        "defense_reaction",
+        "safe_connection",
+        "hurt_protection",
+        "repair_requirement",
+        "charm_reaction",
+        "rizz_reaction",
+        "honesty_reaction",
+        "chaos_reaction",
+        "wit_reaction",
+        "self_awareness_reaction"
+      ],
       "description": "Therapist synthesis required by cognitive subtext when the character is used as the datee.",
       "properties": {
         "derived_feeling": { "type": "string", "minLength": 1 },
-        "defense_reaction": { "type": "string", "minLength": 1 }
+        "defense_reaction": { "type": "string", "minLength": 1 },
+        "safe_connection": { "type": "string", "minLength": 1 },
+        "hurt_protection": { "type": "string", "minLength": 1 },
+        "repair_requirement": { "type": "string", "minLength": 1 },
+        "charm_reaction": { "type": "string", "minLength": 1 },
+        "rizz_reaction": { "type": "string", "minLength": 1 },
+        "honesty_reaction": { "type": "string", "minLength": 1 },
+        "chaos_reaction": { "type": "string", "minLength": 1 },
+        "wit_reaction": { "type": "string", "minLength": 1 },
+        "self_awareness_reaction": { "type": "string", "minLength": 1 }
       }
     },
     "backstory_categories": {

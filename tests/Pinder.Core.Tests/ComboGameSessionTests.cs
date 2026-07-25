@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
@@ -29,18 +28,9 @@ namespace Pinder.Core.Tests
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
                 level: 1,
-                psychiatricDiagnosis: ValidDiagnosis(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
                 backstory: TestHelpers.MakeBackstory(),
                 stakeLines: TestHelpers.MakeStakeLines());
-        }
-
-        private static IReadOnlyDictionary<string, string> ValidDiagnosis()
-        {
-            return new Dictionary<string, string>
-            {
-                ["derived_feeling"] = "curious",
-                ["defense_reaction"] = "guarded",
-            };
         }
 
         /// <summary>

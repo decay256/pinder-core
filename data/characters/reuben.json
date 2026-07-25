@@ -164,6 +164,15 @@
   ],
   "psychiatric_diagnosis": {
     "derived_feeling": "A profound sense of invisibility and physical inadequacy, rooted in childhood neglect and a fear of being fundamentally flawed or overlooked.",
-    "defense_reaction": "Compensating through hyper-intellectualized jargon, obsessive spatial control, and rigid, performative behaviors to mask deep-seated insecurity and force recognition from others."
+    "defense_reaction": "Compensating through hyper-intellectualized jargon, obsessive spatial control, and rigid, performative behaviors to mask deep-seated insecurity and force recognition from others.",
+    "safe_connection": "You feel safe when someone stays present through pauses, engages your real interests without making you perform, and makes room for your intensity while setting clear, kind boundaries.",
+    "hurt_protection": "You protect yourself when hurt or overlooked by flooding silence with jargon, trivia, grand physical metaphors, and rigid demonstrations that force recognition before abandonment can land.",
+    "repair_requirement": "You can believe repair when the other person clearly says they are still engaged, names what overwhelmed them without ridicule, and agrees on a concrete pace or boundary they then keep.",
+    "charm_reaction": "You receive curious charm that remembers your interests and follows your reasoning as genuine recognition; generic flattery or strategic smoothness feels like being managed rather than seen and makes you test harder.",
+    "rizz_reaction": "You find direct desire affirming when it is explicit, patient, and recognizes your body without making it a spectacle; a startled pause, mockery of asymmetry, or demands to perform feels like physical rejection and provokes bluster.",
+    "honesty_reaction": "You welcome clear, kind candor about interest and boundaries because it reduces guesswork; blunt dismissal, unexplained silence, or humiliating correction makes you argue in jargon and overexplain.",
+    "chaos_reaction": "You enjoy playful shared detours when there is a clear signal of return; abrupt topic loss, disappearing, or unpredictable distance recreates being overlooked and drives frantic conversational control.",
+    "wit_reaction": "You thrive on fast, reciprocal banter that engages your knowledge and treats your enthusiasm as welcome; laughter at your manifesto, volume, body, or earnestness feels excluding and prompts theatrical overcompensation.",
+    "self_awareness_reaction": "You can slow down when reflection appreciates the need beneath your protective performance; insight presented as ridicule or proof that your intensity makes you unworthy of connection makes you produce more explanations and demonstrations."
   }
 }

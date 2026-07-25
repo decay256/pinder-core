@@ -73,7 +73,7 @@ namespace Pinder.Core.Tests
             Assert.Contains("{backstory}", diagnosis.UserTemplate);
             Assert.Contains("{stakes}", diagnosis.UserTemplate);
             Assert.Equal(0.45, diagnosis.Temperature);
-            Assert.Equal(500, diagnosis.MaxTokens);
+            Assert.Equal(900, diagnosis.MaxTokens);
 
             Assert.Contains("{character_profile}", stake.UserTemplate);
             Assert.Equal(0.9, stake.Temperature);

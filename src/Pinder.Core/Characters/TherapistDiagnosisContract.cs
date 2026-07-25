@@ -14,6 +14,15 @@ namespace Pinder.Core.Characters
     {
         public const string DerivedFeelingKey = "derived_feeling";
         public const string DefenseReactionKey = "defense_reaction";
+        public const string SafeConnectionKey = "safe_connection";
+        public const string HurtProtectionKey = "hurt_protection";
+        public const string RepairRequirementKey = "repair_requirement";
+        public const string CharmReactionKey = "charm_reaction";
+        public const string RizzReactionKey = "rizz_reaction";
+        public const string HonestyReactionKey = "honesty_reaction";
+        public const string ChaosReactionKey = "chaos_reaction";
+        public const string WitReactionKey = "wit_reaction";
+        public const string SelfAwarenessReactionKey = "self_awareness_reaction";
 
         public const string MissingDiagnosisCode = "diagnosis_missing";
         public const string MissingRequiredFieldCode = "diagnosis_required_field_missing";
@@ -23,6 +32,15 @@ namespace Pinder.Core.Characters
         {
             DerivedFeelingKey,
             DefenseReactionKey,
+            SafeConnectionKey,
+            HurtProtectionKey,
+            RepairRequirementKey,
+            CharmReactionKey,
+            RizzReactionKey,
+            HonestyReactionKey,
+            ChaosReactionKey,
+            WitReactionKey,
+            SelfAwarenessReactionKey,
         };
 
         public static IReadOnlyList<string> RequiredFields { get; } =

@@ -136,6 +136,35 @@ namespace Pinder.LlmAdapters.Tests
             }
         }
 
+        [Fact]
+        public void ValidateRuntimeCatalog_RejectsDiagnosisPromptMissingRequiredField()
+        {
+            var root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                var path = System.IO.Path.Combine(root, "diagnosis.yaml");
+                var contents = File.ReadAllText(path);
+                Assert.Contains("\"self_awareness_reaction\"", contents);
+                File.WriteAllText(
+                    path,
+                    contents.Replace(
+                        "\"self_awareness_reaction\"",
+                        "\"self_awareness_response\"",
+                        StringComparison.Ordinal));
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("diagnosis", error.Message);
+                Assert.Contains("self_awareness_reaction", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
         [Theory]
         [InlineData(
             "user_template: \"USER\"\n    temperature: 0.8\n    max_tokens: 250\n",
