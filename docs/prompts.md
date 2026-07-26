@@ -88,6 +88,13 @@ The outcome keys intentionally reuse the delivery instruction vocabulary:
 `trope_trap`, `catastrophe`, and `nat1`. These entries are direction prompts,
 not final DATEE replies.
 
+`EmotionalReactionEventCompiler` composes these catalog entries with the current
+`DateeContext.EmotionalTurnEvent`, the delivered player message, recent visible
+history, and the datee's generated therapist diagnosis fields. The result is a
+private `PromptTraceResult` for later DATEE emotional direction work. It is not
+an LLM call, does not parse a director response, and is not appended to the
+current visible `BuildDateePromptEx` DATEE performance prompt.
+
 ## Admin-editor wiring
 
 Post-migration, every file in `data/prompts/` is registered in

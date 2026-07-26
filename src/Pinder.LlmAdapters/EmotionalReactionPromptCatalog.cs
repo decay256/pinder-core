@@ -64,6 +64,19 @@ namespace Pinder.LlmAdapters
             return "emotional-reaction-transition-" + transitionKey;
         }
 
+        public static string GetRelationshipTransitionKey(
+            InterestState before,
+            InterestState after)
+        {
+            if (before == after)
+                return "preserved";
+
+            if (after == InterestState.Unmatched || after == InterestState.DateSecured)
+                return "transformed";
+
+            return after > before ? "strengthened" : "damaged";
+        }
+
         public static string GetEventMeaningKey(StatType stat, string outcomeKey)
         {
             if (outcomeKey is null) throw new ArgumentNullException(nameof(outcomeKey));
@@ -119,6 +132,38 @@ namespace Pinder.LlmAdapters
                     RequireSystemPrompt(catalog, GetEventMeaningKey(stat, outcomeKey));
                 }
             }
+
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-compiled-wrapper",
+                "prior_relationship",
+                "resulting_relationship",
+                "transition_meaning",
+                "recipient_event_meaning",
+                "delivered_message",
+                "recent_visible_history",
+                "character_formulation");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-character-success-wrapper",
+                "derived_feeling",
+                "defense_reaction",
+                "stat_reaction",
+                "safe_connection");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-character-failure-wrapper",
+                "derived_feeling",
+                "defense_reaction",
+                "stat_reaction",
+                "hurt_protection",
+                "repair_requirement");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-history-line",
+                "sender",
+                "message");
+            RequireSystemPrompt(catalog, "emotional-reaction-history-empty");
         }
 
         private static string RequireSystemPrompt(PromptCatalog catalog, string key)
@@ -144,6 +189,16 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException(
                     $"prompt-catalog: key '{key}' system_prompt must include required token '{placeholder}'.");
             }
+        }
+
+        private static void RequireSystemPromptWithPlaceholders(
+            PromptCatalog catalog,
+            string key,
+            params string[] tokens)
+        {
+            string prompt = RequireSystemPrompt(catalog, key);
+            foreach (string token in tokens)
+                RequirePlaceholder(key, prompt, token);
         }
 
         private static string StatKey(StatType stat)

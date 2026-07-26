@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -26,16 +27,16 @@ namespace Pinder.LlmAdapters
 
         public static IReadOnlyList<string> OutcomeTierKeys { get; } = Array.AsReadOnly(new[]
         {
-            SuccessTierKey(0, false),
-            SuccessTierKey(5, false),
-            SuccessTierKey(10, false),
-            SuccessTierKey(15, false),
-            SuccessTierKey(0, true),
-            FailureTierKey(Pinder.Core.Rolls.FailureTier.Fumble),
-            FailureTierKey(Pinder.Core.Rolls.FailureTier.Misfire),
-            FailureTierKey(Pinder.Core.Rolls.FailureTier.TropeTrap),
-            FailureTierKey(Pinder.Core.Rolls.FailureTier.Catastrophe),
-            FailureTierKey(Pinder.Core.Rolls.FailureTier.Legendary),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Clean),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Strong),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Critical),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Exceptional),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Nat20),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Fumble),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Misfire),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.TropeTrap),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Catastrophe),
+            RollOutcomeIntensityContract.ToKey(RollOutcomeIntensity.Nat1),
         });
 
         private readonly Dictionary<string, Dictionary<string, string>> _instructions;
@@ -73,11 +74,8 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public static string SuccessTierKey(int beatDcBy, bool isNat20)
         {
-            if (isNat20) return "nat20";
-            if (beatDcBy >= 15) return "exceptional";
-            if (beatDcBy >= 10) return "critical";
-            if (beatDcBy >= 5)  return "strong";
-            return "clean";
+            return RollOutcomeIntensityContract.ToKey(
+                RollOutcomeIntensityContract.FromSuccessMargin(beatDcBy, isNat20));
         }
 
         /// <summary>
@@ -85,15 +83,8 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public static string FailureTierKey(Pinder.Core.Rolls.FailureTier tier)
         {
-            switch (tier)
-            {
-                case Pinder.Core.Rolls.FailureTier.Fumble:     return "fumble";
-                case Pinder.Core.Rolls.FailureTier.Misfire:    return "misfire";
-                case Pinder.Core.Rolls.FailureTier.TropeTrap:  return "trope_trap";
-                case Pinder.Core.Rolls.FailureTier.Catastrophe: return "catastrophe";
-                case Pinder.Core.Rolls.FailureTier.Legendary:  return "nat1";
-                default: return "fumble";
-            }
+            return RollOutcomeIntensityContract.ToKey(
+                RollOutcomeIntensityContract.FromFailureTier(tier));
         }
 
         /// <summary>

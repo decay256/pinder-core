@@ -79,6 +79,27 @@ namespace Pinder.Core.Text
         }
 
         /// <summary>
+        /// Append a traced segment while preserving its spans at the new offset.
+        /// </summary>
+        public AnnotatedStringBuilder Append(PromptTraceResult? value)
+        {
+            if (value == null) return this;
+
+            int offset = _sb.Length;
+            _sb.Append(value.Text);
+            foreach (var span in value.Spans)
+            {
+                _spans.Add(new AnnotatedSpan(
+                    offset + span.Start,
+                    offset + span.End,
+                    span.SourceFile,
+                    span.Key));
+            }
+
+            return this;
+        }
+
+        /// <summary>
         /// Append a string segment followed by a line terminator, with associated source file and key tracking.
         /// </summary>
         public AnnotatedStringBuilder AppendLine(string? value, string? sourceFile, string? key)

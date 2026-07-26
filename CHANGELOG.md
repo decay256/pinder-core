@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.19] - 2026-07-26
+
+- Added the canonical `RollOutcomeIntensity` contract and compact
+  `DateeEmotionalTurnEvent` forwarding for private DATEE emotional reaction
+  input compilation.
+- Added `EmotionalReactionEventCompiler` plus traced YAML wrapper templates for
+  relationship, delivered-message, history, event-meaning, and character
+  formulation composition. The compiled artifact remains private and is not
+  appended to the current DATEE performance prompt.
+
 All notable changes to pinder-core are documented here.
 Format: semver-ish. MAJOR = breaking changes. MINOR = new features. PATCH = fixes.
 

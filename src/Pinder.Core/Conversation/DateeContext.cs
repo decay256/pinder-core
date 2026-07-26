@@ -96,6 +96,12 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public string? CognitiveSubtext { get; }
 
+        /// <summary>
+        /// Compact typed facts for private emotional reaction input compilation.
+        /// Null for legacy callers; compilers that need this data must fail closed.
+        /// </summary>
+        public DateeEmotionalTurnEvent? EmotionalTurnEvent { get; }
+
         public DateeContext(
             string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
@@ -119,7 +125,8 @@ namespace Pinder.Core.Conversation
             ResolvedRevelationTarget? resolvedTarget = null,
             string? cognitiveSubtext = null,
             InterestState? interestBeforeState = null,
-            InterestState? interestAfterState = null)
+            InterestState? interestAfterState = null,
+            DateeEmotionalTurnEvent? emotionalTurnEvent = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -144,6 +151,7 @@ namespace Pinder.Core.Conversation
             HorninessTier = horninessTier;
             ResolvedTarget = resolvedTarget;
             CognitiveSubtext = cognitiveSubtext;
+            EmotionalTurnEvent = emotionalTurnEvent;
         }
     }
 }

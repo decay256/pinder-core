@@ -95,7 +95,11 @@ namespace Pinder.Core.Conversation
                 resolvedTarget: state.CurrentResolvedTarget,
                 cognitiveSubtext: state.CurrentCognitiveSubtext,
                 interestBeforeState: rollStage.StateBefore,
-                interestAfterState: resolvedFinalInterestAfterState);
+                interestAfterState: resolvedFinalInterestAfterState,
+                emotionalTurnEvent: new DateeEmotionalTurnEvent(
+                    rollStage.RollResult.Stat,
+                    RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
+                    datee.PsychiatricDiagnosis));
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
