@@ -4,7 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.LlmAdapters;
 using Xunit;
 
@@ -59,7 +61,11 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: 10,
                 responseDelayMinutes: 0.5,
                 playerName: "P",
-                dateeName: "O"
+                dateeName: "O",
+                emotionalTurnEvent: new DateeEmotionalTurnEvent(
+                    StatType.Honesty,
+                    RollOutcomeIntensity.Strong,
+                    TestHelpers.MakePsychiatricDiagnosis())
             );
 
             // Act & Assert
@@ -128,7 +134,11 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfter: 10,
                 responseDelayMinutes: 0.5,
                 playerName: "P",
-                dateeName: "O"
+                dateeName: "O",
+                emotionalTurnEvent: new DateeEmotionalTurnEvent(
+                    StatType.Honesty,
+                    RollOutcomeIntensity.Strong,
+                    TestHelpers.MakePsychiatricDiagnosis())
             );
 
             // Act & Assert
@@ -150,7 +160,15 @@ namespace Pinder.LlmAdapters.Tests
                 int maxTokens = 1024,
                 string? phase = null,
                 CancellationToken ct = default)
-                => Task.FromResult(_response);
+            {
+                if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+                    return Task.FromResult(ValidDirectorJson);
+
+                return Task.FromResult(_response);
+            }
         }
+
+        private const string ValidDirectorJson =
+            "{\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
     }
 }

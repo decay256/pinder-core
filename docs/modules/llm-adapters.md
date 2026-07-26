@@ -79,8 +79,37 @@ for plain text transports, and validates exactly `primary_emotion`,
 `intensity`, `underlying_feeling`, `interpretation`, `impulse`, `restraint`,
 and `response_posture`. It preserves the compiled annotation source files and
 keys in private request metadata and emits a sanitized terminal diagnostic when
-contract retries are exhausted. It is intentionally not called by the current
-`GetDateeResponseAsync` path.
+contract retries are exhausted.
+
+The production `PinderLlmAdapter.GetDateeResponseAsync(DateeContext, history,
+ct)` boundary now requires `DateeContext.EmotionalTurnEvent`, runs this private
+director exactly once before DATEE performance, and fails closed before any
+visible DATEE call if the event is missing or the director fails/cancels. The
+validated direction is operation-local and reused by the existing DATEE
+performance retry loop. The visible history result still contains only the
+delivered player message and the accepted DATEE raw response. Runtime transcript
+values in the private director packet are JSON string literal encoded in code,
+with trace spans covering the encoded values. The performance attempt rejects
+the sprint-owned private direction header or any of its seven line-leading field
+labels as `private_direction_leak` before response parsing/history construction;
+the existing semantic retry may recover, and diagnostics never include leaked
+content. Matching is ordinal case-insensitive and strips only common leading
+Unicode punctuation, symbol, and whitespace decoration while preserving explicit
+numbered-list handling, exact field prefixes, and the header boundary.
+`EmotionalReactionPromptCatalog` also validates
+the exact protected header and seven label-placeholder lines against the editable
+performance template at startup, preventing config edits from weakening this
+guard while leaving reusable prose in YAML.
+
+### `SessionDocumentBuilder.BuildDateePerformancePromptEx(DateeContext, EmotionalDirectorDirection)` (internal)
+
+Internal DATEE performance prompt builder used only by the production adapter
+path. It preserves the ordinary public `BuildDateePrompt/BuildDateePromptEx`
+shape for prompt callers, inserts the YAML-backed
+`emotional-reaction-performance-direction` block immediately before the final
+`datee-response-instruction`, and traces wrapper prose to
+`data/prompts/emotional-reactions.yaml` while tracing the seven direction field
+values to stable runtime director keys.
 
 ### `SessionDocumentBuilder.BuildDialogueOptionsPrompt(DialogueContext)`
 

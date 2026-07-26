@@ -4,7 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.LlmAdapters;
 using Xunit;
 
@@ -40,6 +42,9 @@ namespace Pinder.LlmAdapters.Tests
                 string? phase = null,
                 CancellationToken ct = default)
             {
+                if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+                    return Task.FromResult(ValidDirectorJson);
+
                 Calls++;
                 UserMessages.Add(userMessage);
                 Phases.Add(phase);
@@ -200,12 +205,13 @@ TELL: Charm (She liked your charm)";
                 dateeLastMessage: "",
                 activeTraps: new string[0],
                 currentInterest: 50,
-                playerDeliveredMessage: "",
+                playerDeliveredMessage: "delivered line",
                 interestBefore: 50,
                 interestAfter: 50,
                 responseDelayMinutes: 0.0,
                 playerName: "Pursuer",
-                dateeName: "TestChar"
+                dateeName: "TestChar",
+                emotionalTurnEvent: MakeEvent()
             );
 
             // Act
@@ -247,12 +253,13 @@ TELL: Charm (She liked your charm)";
                 dateeLastMessage: "",
                 activeTraps: new string[0],
                 currentInterest: 50,
-                playerDeliveredMessage: "",
+                playerDeliveredMessage: "delivered line",
                 interestBefore: 50,
                 interestAfter: 50,
                 responseDelayMinutes: 0.0,
                 playerName: "Pursuer",
-                dateeName: "TestChar"
+                dateeName: "TestChar",
+                emotionalTurnEvent: MakeEvent()
             );
 
             // Act
@@ -290,12 +297,13 @@ TELL: Charm (She liked your charm)";
                 dateeLastMessage: "",
                 activeTraps: new string[0],
                 currentInterest: 50,
-                playerDeliveredMessage: "",
+                playerDeliveredMessage: "delivered line",
                 interestBefore: 50,
                 interestAfter: 50,
                 responseDelayMinutes: 0.0,
                 playerName: "Pursuer",
-                dateeName: "TestChar"
+                dateeName: "TestChar",
+                emotionalTurnEvent: MakeEvent()
             );
 
             // Act & Assert
@@ -386,7 +394,8 @@ TELL: Charm (She liked your charm)";
                 interestAfter: 50,
                 responseDelayMinutes: 0.0,
                 playerName: "Pursuer",
-                dateeName: "TestChar"
+                dateeName: "TestChar",
+                emotionalTurnEvent: MakeEvent()
             );
 
             // Act
@@ -462,8 +471,20 @@ TELL: Charm (She liked your charm)";
                 responseDelayMinutes: 0,
                 playerName: "Pursuer",
                 dateeName: "TestChar",
-                currentTurn: currentTurn);
+                currentTurn: currentTurn,
+                emotionalTurnEvent: MakeEvent());
         }
+
+        private static DateeEmotionalTurnEvent MakeEvent()
+        {
+            return new DateeEmotionalTurnEvent(
+                StatType.Honesty,
+                RollOutcomeIntensity.Strong,
+                TestHelpers.MakePsychiatricDiagnosis());
+        }
+
+        private const string ValidDirectorJson =
+            "{\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         private static int CountOccurrences(string text, string value)
         {

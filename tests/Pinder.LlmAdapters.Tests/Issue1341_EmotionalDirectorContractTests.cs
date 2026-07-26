@@ -286,19 +286,19 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public async Task CurrentDateeResponsePath_RemainsSingleOpponentResponseCallWithNoDirectorCall()
+        public async Task CurrentDateeResponsePath_RunsDirectorThenOpponentResponse()
         {
-            var transport = new CountingTransport("A bounded DATEE reply.");
+            var transport = new CountingTransport(ValidJson(), "A bounded DATEE reply.");
             var adapter = CreateAdapter(transport);
 
             var result = await adapter.GetDateeResponseAsync(
                 MakeContext(),
                 Array.Empty<ConversationMessage>());
 
-            Assert.Equal(1, transport.PlainCalls);
-            Assert.Equal(new[] { LlmPhase.OpponentResponse }, transport.Phases.ToArray());
-            Assert.DoesNotContain("Private emotional director", transport.LastUserMessage, StringComparison.Ordinal);
-            Assert.DoesNotContain("primary_emotion", transport.LastUserMessage, StringComparison.Ordinal);
+            Assert.Equal(2, transport.PlainCalls);
+            Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
+            Assert.Contains("Primary emotion: relieved but cautious", transport.LastUserMessage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Private emotional director source packet", transport.LastUserMessage, StringComparison.Ordinal);
             Assert.Equal("A bounded DATEE reply.", result.Response.MessageText.Trim());
         }
 
@@ -435,8 +435,8 @@ namespace Pinder.LlmAdapters.Tests
 
         private sealed class CountingTransport : PlainQueueTransport
         {
-            public CountingTransport(string response)
-                : base(response)
+            public CountingTransport(params string[] responses)
+                : base(responses)
             {
             }
 

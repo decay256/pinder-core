@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
@@ -76,7 +77,7 @@ namespace Pinder.LlmAdapters
             PromptTraceResult eventMeaning = EntryTrace(
                 catalog,
                 EmotionalReactionPromptCatalog.GetEventMeaningKey(turnEvent.SelectedStat, outcomeKey));
-            PromptTraceResult deliveredMessage = RuntimeTrace(
+            PromptTraceResult deliveredMessage = StructuredLiteralTrace(
                 context.PlayerDeliveredMessage.Trim(),
                 "PlayerDeliveredMessage");
             PromptTraceResult history = CompileHistory(context.ConversationHistory, catalog);
@@ -188,8 +189,8 @@ namespace Pinder.LlmAdapters
                     "emotional-reaction-history-line",
                     new Dictionary<string, PromptTraceResult>
                     {
-                        { "sender", RuntimeTrace(item.Sender ?? string.Empty, "ConversationHistory.Sender") },
-                        { "message", RuntimeTrace(item.Text ?? string.Empty, "ConversationHistory.Text") },
+                        { "sender", StructuredLiteralTrace(item.Sender, "ConversationHistory.Sender") },
+                        { "message", StructuredLiteralTrace(item.Text, "ConversationHistory.Text") },
                     },
                     "sender",
                     "message"));
@@ -226,6 +227,11 @@ namespace Pinder.LlmAdapters
             return new PromptTraceResult(
                 text ?? string.Empty,
                 new[] { new AnnotatedSpan(0, (text ?? string.Empty).Length, RuntimeSource, key) });
+        }
+
+        private static PromptTraceResult StructuredLiteralTrace(string? text, string key)
+        {
+            return RuntimeTrace(JsonConvert.ToString(text ?? string.Empty), key);
         }
 
         private static PromptTraceResult CharacterTrace(string text, string key)

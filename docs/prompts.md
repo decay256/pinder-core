@@ -84,6 +84,9 @@ keyed by typed engine concepts rather than score math:
   `StatType` x outcome key combination.
 - `emotional-reaction-director` owns the private director LLM system/user
   wrapper plus temperature and max-token settings.
+- `emotional-reaction-performance-direction` owns the reusable DATEE performance
+  wrapper that renders the validated director fields before the final DATEE
+  response instruction.
 
 The outcome keys intentionally reuse the delivery instruction vocabulary:
 `clean`, `strong`, `critical`, `exceptional`, `nat20`, `fumble`, `misfire`,
@@ -94,16 +97,38 @@ not final DATEE replies.
 `DateeContext.EmotionalTurnEvent`, the delivered player message, recent visible
 history, and the datee's generated therapist diagnosis fields. The result is a
 private `PromptTraceResult` consumed by
-`PinderLlmAdapter.GenerateEmotionalDirectionAsync`.
+`PinderLlmAdapter.GenerateEmotionalDirectionAsync`. Delivered message and history
+sender/message values are code-owned JSON string literals, so transcript
+newlines and heading-like text remain data inside the private packet. Trace
+spans continue to attribute the complete encoded literals to their runtime keys;
+escaping behavior is not prompt-catalog configuration.
 
 The director operation is callable inside `Pinder.LlmAdapters` and returns a
 validated seven-field private direction object:
 `primary_emotion`, `intensity`, `underlying_feeling`, `interpretation`,
 `impulse`, `restraint`, and `response_posture`. `intensity` describes the
 emotion's strength and movement while `underlying_feeling` identifies the
-feeling beneath it. It is not invoked by the current
-`GetDateeResponseAsync` path and is not appended to the visible
-`BuildDateePromptEx` DATEE performance prompt.
+feeling beneath it.
+
+The production `PinderLlmAdapter.GetDateeResponseAsync(context, history, ct)`
+path treats DATEE response generation as a two-call operation: it requires
+`DateeContext.EmotionalTurnEvent`, runs the private director once, then builds
+the visible DATEE performance prompt with the validated direction. Before
+parsing or constructing history, the performance recovery attempt rejects the
+private direction header and seven labeled field prefixes with the sanitized
+`private_direction_leak` reason. Matching is ordinal case-insensitive after
+normalizing line-leading Unicode punctuation, symbols, and whitespace, including
+Markdown, quotes, inline code, and strikethrough decoration. Numbered-list
+prefixes are handled separately. Exact field prefixes and the header boundary
+remain required to avoid matching ordinary prose. Catalog startup validation
+requires the exact plain header and
+seven `Label: {placeholder}` structural lines in
+`emotional-reaction-performance-direction`; reusable surrounding prose remains
+editable YAML. The public
+ordinary `SessionDocumentBuilder.BuildDateePrompt/BuildDateePromptEx` methods
+remain unchanged for non-production/test prompt callers; the adapter uses an
+internal performance builder so reusable prompt prose stays in YAML and
+director field values are traced to runtime source keys.
 
 ## Admin-editor wiring
 

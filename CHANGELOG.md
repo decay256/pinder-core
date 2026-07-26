@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.2.21] - 2026-07-26
+
+- Wired the private emotional director into the production DATEE response
+  operation. `PinderLlmAdapter.GetDateeResponseAsync(context, history, ct)` now
+  requires `DateeContext.EmotionalTurnEvent`, runs
+  `GenerateEmotionalDirectionAsync` exactly once, and reuses the validated
+  seven-field direction across DATEE performance retries.
+- Added the YAML-backed `emotional-reaction-performance-direction` prompt
+  wrapper and trace attribution for all seven runtime director fields before the
+  final `datee-response-instruction`. The public ordinary
+  `SessionDocumentBuilder.BuildDateePrompt/BuildDateePromptEx` path remains
+  unchanged for non-production/test prompt callers.
+- Preserved DATEE visible history semantics: successful turns append only the
+  delivered player message and accepted visible DATEE response; director failure
+  or cancellation prevents the performance call.
+- Hardened the private director boundary by encoding delivered/history transcript
+  values as JSON string literals and rejecting leaked performance-direction
+  headers or field labels with a sanitized, retryable contract violation before
+  DATEE parsing or history construction.
+- Made private direction leak matching case-insensitive and resilient to common
+  leading Markdown, heading, and list decoration. Runtime prompt validation now
+  fails closed if the editable performance template changes or removes its
+  protected header or seven label-placeholder structural lines.
+- Generalized line-leading leak normalization to Unicode punctuation, symbols,
+  and whitespace, covering inline code, strikethrough, quotes, and parentheses
+  while preserving numbered-list handling and strict label/header boundaries.
+
 ## [0.2.20] - 2026-07-26
 
 - Added the private `emotional_director` LLM phase and internal

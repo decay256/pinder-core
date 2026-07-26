@@ -4,7 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Pinder.LlmAdapters;
 using Xunit;
 
@@ -33,6 +35,9 @@ namespace Pinder.LlmAdapters.Tests
                 CancellationToken ct = default)
             {
                 LastTemperature = temperature;
+                if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+                    return Task.FromResult(ValidDirectorJson);
+
                 return Task.FromResult(_response);
             }
         }
@@ -268,7 +273,11 @@ success_improvement_prompt_template: |-
                     await adapter.GetDateeResponseAsync(new DateeContext(
                         "datee", Array.Empty<(string Sender, string Text)>(), "",
                         Array.Empty<string>(), 10, "hello", 10, 11, 0,
-                        playerName: "Player", dateeName: "Datee"));
+                        playerName: "Player", dateeName: "Datee",
+                        emotionalTurnEvent: new DateeEmotionalTurnEvent(
+                            StatType.Honesty,
+                            RollOutcomeIntensity.Strong,
+                            TestHelpers.MakePsychiatricDiagnosis())));
                     expected = dateeTemperature;
                     break;
                 case "interest_change_beat":
@@ -300,6 +309,9 @@ success_improvement_prompt_template: |-
 
             Assert.Equal(expected, transport.LastTemperature);
         }
+
+        private const string ValidDirectorJson =
+            "{\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         private static string FindRepoFile(params string[] segments)
         {

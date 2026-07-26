@@ -12,6 +12,8 @@ namespace Pinder.LlmAdapters
 {
     public static partial class SessionDocumentBuilder
     {
+        internal const string EmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
+
         private static string GetTemplateSource(PromptCatalog? promptCatalog, string key)
         {
             return PromptCatalog.ResolveCatalogOrThrow(promptCatalog).TryGet(key)?.SourceFile
@@ -408,6 +410,23 @@ namespace Pinder.LlmAdapters
             DateeContext context,
             PromptCatalog? promptCatalog = null)
         {
+            return BuildDateePromptCore(context, emotionalDirection: null, promptCatalog);
+        }
+
+        internal static PromptTraceResult BuildDateePerformancePromptEx(
+            DateeContext context,
+            EmotionalDirectorDirection emotionalDirection,
+            PromptCatalog? promptCatalog = null)
+        {
+            if (emotionalDirection == null) throw new ArgumentNullException(nameof(emotionalDirection));
+            return BuildDateePromptCore(context, emotionalDirection, promptCatalog);
+        }
+
+        private static PromptTraceResult BuildDateePromptCore(
+            DateeContext context,
+            EmotionalDirectorDirection? emotionalDirection,
+            PromptCatalog? promptCatalog)
+        {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
             if (string.IsNullOrEmpty(context.DateeName)) throw new ArgumentException("DateeName cannot be null or empty.");
@@ -560,6 +579,27 @@ namespace Pinder.LlmAdapters
                 $"Do not exceed {ceiling} characters regardless of your texting style. " +
                 $"The texting-style length axis in your system prompt is a stylistic guideline, NOT a hard engine cap — " +
                 $"the engine-specified ceiling above takes precedence over any style axis that would run longer.";
+
+            if (emotionalDirection != null)
+            {
+                AppendAnnotatedTemplate(
+                    sb,
+                    GetTemplate(promptCatalog, "emotional-reaction-performance-direction"),
+                    "emotional-reaction-performance-direction",
+                    new Dictionary<string, (string Value, string SourceFile, string Key)>
+                    {
+                        { "{primary_emotion}", (emotionalDirection.PrimaryEmotion, EmotionalDirectorRuntimeSource, "EmotionalDirector.PrimaryEmotion") },
+                        { "{intensity}", (emotionalDirection.Intensity, EmotionalDirectorRuntimeSource, "EmotionalDirector.Intensity") },
+                        { "{underlying_feeling}", (emotionalDirection.UnderlyingFeeling, EmotionalDirectorRuntimeSource, "EmotionalDirector.UnderlyingFeeling") },
+                        { "{interpretation}", (emotionalDirection.Interpretation, EmotionalDirectorRuntimeSource, "EmotionalDirector.Interpretation") },
+                        { "{impulse}", (emotionalDirection.Impulse, EmotionalDirectorRuntimeSource, "EmotionalDirector.Impulse") },
+                        { "{restraint}", (emotionalDirection.Restraint, EmotionalDirectorRuntimeSource, "EmotionalDirector.Restraint") },
+                        { "{response_posture}", (emotionalDirection.ResponsePosture, EmotionalDirectorRuntimeSource, "EmotionalDirector.ResponsePosture") },
+                    },
+                    promptCatalog);
+                sb.AppendLine();
+                sb.AppendLine();
+            }
 
             AppendAnnotatedTemplate(
                 sb,

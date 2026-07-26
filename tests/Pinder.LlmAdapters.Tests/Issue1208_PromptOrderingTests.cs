@@ -76,12 +76,14 @@ namespace Pinder.LlmAdapters.Tests
             var historySpan = result.Spans.First(s => s.Key == "conversation-history");
             var engineSpan = result.Spans.First(s => s.Key == "engine-options-block");
             var instructionSpan = result.Spans.First(s => s.Key == "dialogue-options-instruction");
+            var structuredJsonSpan = result.Spans.First(s => s.Key == "dialogue-options-structured-json-instruction");
 
             var maxStart = result.Spans.Max(s => s.Start);
-            Assert.Equal(maxStart, instructionSpan.Start);
+            Assert.Equal(maxStart, structuredJsonSpan.Start);
 
             Assert.True(historySpan.Start < engineSpan.Start, "History should precede engine block");
             Assert.True(engineSpan.Start < instructionSpan.Start, "Engine block should precede instructions");
+            Assert.True(instructionSpan.Start < structuredJsonSpan.Start, "Structured JSON instruction should remain the final dialogue-options block");
         }
 
         [Fact]
@@ -95,8 +97,11 @@ namespace Pinder.LlmAdapters.Tests
             var engineSpan = result.Spans.First(s => s.Key == "engine-datee-block");
             var instructionSpan = result.Spans.First(s => s.Key == "datee-response-instruction");
 
-            var maxStart = result.Spans.Max(s => s.Start);
-            Assert.Equal(maxStart, instructionSpan.Start);
+            Assert.DoesNotContain(
+                result.Spans,
+                span => span.Start > instructionSpan.Start
+                    && span.Key != "datee-response-instruction"
+                    && !span.Key.StartsWith("resistance-", StringComparison.Ordinal));
 
             Assert.True(historySpan.Start < engineSpan.Start, "History should precede engine block");
             Assert.True(engineSpan.Start < instructionSpan.Start, "Engine block should precede instructions");

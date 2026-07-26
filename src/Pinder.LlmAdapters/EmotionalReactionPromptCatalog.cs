@@ -164,6 +164,19 @@ namespace Pinder.LlmAdapters
                 "sender",
                 "message");
             RequireSystemPrompt(catalog, "emotional-reaction-history-empty");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-performance-direction",
+                "primary_emotion",
+                "intensity",
+                "underlying_feeling",
+                "interpretation",
+                "impulse",
+                "restraint",
+                "response_posture");
+            EmotionalDirectionLeakGuard.ValidatePerformanceTemplate(
+                RequireSystemPrompt(catalog, "emotional-reaction-performance-direction"),
+                "emotional-reaction-performance-direction");
             RequireCompletePromptWithPlaceholders(
                 catalog,
                 "emotional-reaction-director",

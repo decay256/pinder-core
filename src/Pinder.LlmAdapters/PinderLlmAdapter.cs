@@ -214,9 +214,22 @@ namespace Pinder.LlmAdapters
             if (history == null) throw new ArgumentNullException(nameof(history));
 
             var gameDef = RequireGameDefinition();
-            var userContent = SessionDocumentBuilder.BuildDateePrompt(
+            if (context.EmotionalTurnEvent == null)
+            {
+                throw new InvalidOperationException(
+                    "DateeContext.EmotionalTurnEvent is required for the production DATEE response path.");
+            }
+
+            EmotionalDirectorDirection emotionalDirection = await GenerateEmotionalDirectionAsync(
+                    context,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            PromptTraceResult dateePrompt = SessionDocumentBuilder.BuildDateePerformancePromptEx(
                 context,
+                emotionalDirection,
                 _options.PromptCatalog);
+            InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
+            var userContent = dateePrompt.Text;
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
 
@@ -259,6 +272,8 @@ namespace Pinder.LlmAdapters
                                 turnId: context.CurrentTurn
                             );
                         }
+
+                        EmotionalDirectionLeakGuard.ThrowIfDetected(responseText, context.CurrentTurn);
 
                         var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
                         if (validationResult == DateeSignalsValidationResult.MalformedSignals)
