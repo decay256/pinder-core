@@ -155,6 +155,13 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("\u201cRestraint:\u201d")]
         [InlineData("1. Primary emotion:")]
         [InlineData("\u2605 Primary emotion:")]
+        [InlineData("\u26A0\uFE0F Primary emotion:")]
+        [InlineData("\u200BPrimary emotion:")]
+        [InlineData("\u2060Primary emotion:")]
+        [InlineData("\uFEFFDATEE EMOTIONAL PERFORMANCE DIRECTION")]
+        [InlineData("\u0301Primary emotion:")]
+        [InlineData("1\uFE0F\u20E3 Primary emotion:")]
+        [InlineData("\u2460 Primary emotion:")]
         public async Task PrivateDirectionMarkerInPerformanceResponseRetriesAndPersistsOnlyAcceptedResponse(
             string privateMarker)
         {
@@ -185,6 +192,7 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("intensity matters when you say it like that.")]
         [InlineData("my interpretation is that you meant well.")]
         [InlineData("DATEE EMOTIONAL PERFORMANCE DIRECTIONAL")]
+        [InlineData("1Primary emotion: this is ordinary digit-leading text.")]
         public async Task OrdinaryLookalikesRemainAccepted(string visibleResponse)
         {
             var transport = new RecordingTransport(ValidDirectionJson(), visibleResponse);

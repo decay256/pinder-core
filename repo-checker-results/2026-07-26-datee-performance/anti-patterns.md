@@ -1,0 +1,8 @@
+> Scope: Topic 6 anti-patterns/smells over the explicitly requested DATEE emotional-reaction files, docs, prompts, agent log, build props, and named Pinder.LlmAdapters test files.
+
+### Finding 1: Strict contract regressions still catch any exception type
+**File**: `tests/Pinder.LlmAdapters.Tests/Issue1215_StrictGameplayContractTests.cs:133`
+**Issue**: Several strict-contract tests use `Assert.ThrowsAnyAsync<Exception>` before applying a lenient helper, for example `var ex = await Assert.ThrowsAnyAsync<Exception>(async () => await adapter.GetDialogueOptionsAsync(context));`, and `Test5_DialogueOptions_NoFabrication_NeverReturnsPlaceholder` manually catches `catch (Exception ex) when (ex is not Xunit.Sdk.XunitException)`. The same scoped suite now has adjacent tests that assert `LlmContractException` directly, so this older pattern is broader than the contract it is trying to pin.
+**Impact**: A future implementation could throw the wrong non-Xunit exception type first and still route through the helper instead of failing at the assertion boundary. The helper rejects some obvious wrong types, but the test structure makes the expected exception contract less precise and easier to weaken during later edits.
+**Urgency**: U3 - topic default for a style smell; de-escalation is not needed because this is test-only and does not change production behavior.
+**Fixer-Agent Action Plan**: Replace the `Assert.ThrowsAnyAsync<Exception>` calls in this file with `Assert.ThrowsAsync<LlmContractException>` where the production contract is now explicit, convert the manual try/catch test to the same pattern, and assert stable fields such as `Phase`, `Reason`, and `ParserName` before retaining any message-substring checks.

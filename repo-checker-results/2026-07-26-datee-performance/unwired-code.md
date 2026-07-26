@@ -1,0 +1,9 @@
+> Scope: explicit path scope for Topic 3 unwired-code (22 files)
+
+### Finding 1: Prompt-text accessor methods are bypassed by the production emotional-reaction path
+**File**: `src/Pinder.LlmAdapters/EmotionalReactionPromptCatalog.cs:93`
+**Issue**: `EmotionalReactionPromptCatalog` exposes three public prompt-text accessors:
+`GetInterestStateMeaning(PromptCatalog catalog, InterestState state)`, `GetRelationshipTransitionInstruction(PromptCatalog catalog, string transitionKey)`, and `GetEventMeaning(PromptCatalog catalog, StatType stat, string outcomeKey)`. Repo-wide usage shows production code calls the key helpers instead (`GetInterestStateMeaningKey`, `GetRelationshipTransitionInstructionKey`, `GetRelationshipTransitionKey`, `GetEventMeaningKey`) from `EmotionalReactionEventCompiler`, while these text accessors are not wired into the production compiler/director/performance path; only `GetEventMeaning` is exercised by a catalog test in `tests/Pinder.LlmAdapters.Tests/Issue1339_EmotionalReactionPromptCatalogTests.cs:193`.
+**Impact**: This leaves a public API surface that looks like the runtime way to retrieve emotional-reaction prose, but the actual runtime path bypasses it. Future changes can update compiler behavior, tracing, or validation without touching these wrappers, letting them drift as test-only compatibility code.
+**Urgency**: U3 - topic default; this is maintainability dead surface, not an active production behavior break.
+**Fixer-Agent Action Plan**: Either remove the three accessors and update the `EventMeanings_AreConcreteAndDistinctByStatAndIntensity` test to retrieve entries through `catalog.Get(EmotionalReactionPromptCatalog.GetEventMeaningKey(...)).SystemPrompt`, or make the accessors `internal` and add a production caller if they are intended to remain part of the runtime contract.

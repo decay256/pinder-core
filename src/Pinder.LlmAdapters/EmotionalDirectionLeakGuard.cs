@@ -119,6 +119,29 @@ namespace Pinder.LlmAdapters
 
         private static int GetNumberedListLength(string value, int start)
         {
+            if (start < value.Length && char.IsDigit(value[start]))
+            {
+                int keycapEnd = start + 1;
+                if (keycapEnd < value.Length && value[keycapEnd] == '\uFE0F')
+                    keycapEnd++;
+
+                if (keycapEnd + 1 < value.Length
+                    && value[keycapEnd] == '\u20E3'
+                    && char.IsWhiteSpace(value[keycapEnd + 1]))
+                {
+                    return keycapEnd - start + 1;
+                }
+            }
+
+            if (start < value.Length
+                && CharUnicodeInfo.GetUnicodeCategory(value, start) == UnicodeCategory.OtherNumber)
+            {
+                int numberLength = char.IsSurrogatePair(value, start) ? 2 : 1;
+                int next = start + numberLength;
+                if (next < value.Length && char.IsWhiteSpace(value[next]))
+                    return numberLength;
+            }
+
             int index = start;
             while (index < value.Length && char.IsDigit(value[index]))
                 index++;
@@ -162,6 +185,10 @@ namespace Pinder.LlmAdapters
                 case UnicodeCategory.CurrencySymbol:
                 case UnicodeCategory.ModifierSymbol:
                 case UnicodeCategory.OtherSymbol:
+                case UnicodeCategory.NonSpacingMark:
+                case UnicodeCategory.SpacingCombiningMark:
+                case UnicodeCategory.EnclosingMark:
+                case UnicodeCategory.Format:
                 case UnicodeCategory.SpaceSeparator:
                 case UnicodeCategory.LineSeparator:
                 case UnicodeCategory.ParagraphSeparator:
