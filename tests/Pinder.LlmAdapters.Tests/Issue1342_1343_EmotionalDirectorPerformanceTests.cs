@@ -494,6 +494,7 @@ namespace Pinder.LlmAdapters.Tests
                 responsePosture);
             return new JObject
             {
+                ["schema_version"] = EmotionalDirectorContract.SchemaVersion,
                 ["primary_emotion"] = direction.PrimaryEmotion,
                 ["intensity"] = direction.Intensity,
                 ["underlying_feeling"] = direction.UnderlyingFeeling,

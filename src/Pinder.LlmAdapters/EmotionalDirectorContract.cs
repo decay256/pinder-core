@@ -45,9 +45,22 @@ namespace Pinder.LlmAdapters
 
         private const int MinFieldChars = 3;
         private const int MaxFieldChars = 180;
+        private const string SchemaVersionField = "schema_version";
 
         private static readonly string[] Fields =
         {
+            "primary_emotion",
+            "intensity",
+            "underlying_feeling",
+            "interpretation",
+            "impulse",
+            "restraint",
+            "response_posture",
+        };
+
+        private static readonly string[] RequiredRootFields =
+        {
+            SchemaVersionField,
             "primary_emotion",
             "intensity",
             "underlying_feeling",
@@ -220,7 +233,15 @@ namespace Pinder.LlmAdapters
                 return false;
             }
 
-            if (!HasOnlyProperties(root, out var unexpected, Fields))
+            if (!root.TryGetValue(SchemaVersionField, out var schemaVersionToken)
+                || schemaVersionToken.Type != JTokenType.String
+                || !string.Equals(schemaVersionToken.Value<string>(), SchemaVersion, StringComparison.Ordinal))
+            {
+                errorCode = "invalid_schema_version";
+                return false;
+            }
+
+            if (!HasOnlyProperties(root, out var unexpected, RequiredRootFields))
             {
                 errorCode = "unexpected_field";
                 return false;
@@ -376,6 +397,12 @@ namespace Pinder.LlmAdapters
         private static string BuildJsonSchema()
         {
             var properties = new JObject();
+            properties[SchemaVersionField] = new JObject
+            {
+                ["type"] = "string",
+                ["const"] = SchemaVersion,
+            };
+
             foreach (string field in Fields)
             {
                 properties[field] = new JObject
@@ -390,7 +417,7 @@ namespace Pinder.LlmAdapters
             {
                 ["type"] = "object",
                 ["additionalProperties"] = false,
-                ["required"] = new JArray(Fields),
+                ["required"] = new JArray(RequiredRootFields),
                 ["properties"] = properties,
             };
 

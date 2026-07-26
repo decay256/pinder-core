@@ -97,9 +97,11 @@ prompts:
       Produce one private emotional direction object for the DATEE response planner.
 
       Return only a JSON object with exactly these string fields:
-      primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.
+      schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.
 
-      Each field must be concise, concrete, actionable natural-language prose. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
+      The schema_version field must be exactly "emotional_director.v1".
+
+      The seven director fields must be concise, concrete, actionable natural-language prose. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
     user_template: |-
       Private emotional director source packet:
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.22] - 2026-07-26
+
+- Required generated emotional director JSON to self-identify with root
+  `schema_version: "emotional_director.v1"`. The JSON schema now requires the
+  exact version with a const, and the parser rejects missing, non-string, or
+  mismatched payload versions with `invalid_schema_version` across native
+  structured output and local JSON fallback paths.
+- Updated the YAML-owned `emotional-reaction-director` prompt instruction and
+  focused #1341/#1342/#1343 fixtures to use the eight-field versioned contract.
+
 ## [0.2.21] - 2026-07-26
 
 - Wired the private emotional director into the production DATEE response

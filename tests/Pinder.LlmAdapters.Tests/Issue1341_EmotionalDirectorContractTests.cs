@@ -40,8 +40,24 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("emotional_director", transport.LastStructuredRequest.Metadata["phase"]);
             Assert.Equal("data/prompts/emotional-reactions.yaml", transport.LastStructuredRequest.Metadata["system_prompt_source"]);
             Assert.Equal("data/prompts/emotional-reactions.yaml", transport.LastStructuredRequest.Metadata["user_template_source"]);
-            Assert.Contains("\"primary_emotion\"", transport.LastStructuredRequest.JsonSchema, StringComparison.Ordinal);
-            Assert.Contains("\"intensity\"", transport.LastStructuredRequest.JsonSchema, StringComparison.Ordinal);
+            var schema = JObject.Parse(transport.LastStructuredRequest.JsonSchema);
+            Assert.False(schema.Value<bool>("additionalProperties"));
+            Assert.Equal(
+                new[]
+                {
+                    "schema_version",
+                    "primary_emotion",
+                    "intensity",
+                    "underlying_feeling",
+                    "interpretation",
+                    "impulse",
+                    "restraint",
+                    "response_posture",
+                },
+                schema["required"]!.Values<string>());
+            Assert.Equal(
+                "emotional_director.v1",
+                schema["properties"]!["schema_version"]!.Value<string>("const"));
             Assert.Equal(
                 JoinTraceValues(compiled, span => span.Key),
                 transport.LastStructuredRequest.Metadata["compiled_input_keys"]);
@@ -95,15 +111,19 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData("not json", "no_json_object")]
         [InlineData("[1,2]", "root_nonobject")]
         [InlineData("{", "malformed_json")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""primary_emotion"":""quietly hurt"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "malformed_json")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious""}", "missing_field")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity"",""debug"":""unsafe""}", "unexpected_field")]
-        [InlineData(@"{""primary_emotion"":"" "",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "blank_field")]
-        [InlineData(@"{""primary_emotion"":""x"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "field_too_short")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""analysis: she feels safer"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "meta_language")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""StatType.Honesty rolled 18 against DC 15"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "raw_mechanics")]
-        [InlineData(@"{""primary_emotion"":""<3"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "symbolic_only")]
-        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""That actually means a lot, but I need to know you mean it."",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "drafted_chat_reply")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "malformed_json")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""primary_emotion"":""quietly hurt"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "malformed_json")]
+        [InlineData(@"{""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "invalid_schema_version")]
+        [InlineData(@"{""schema_version"":42,""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "invalid_schema_version")]
+        [InlineData(@"{""schema_version"":""emotional_director.v2"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "invalid_schema_version")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious""}", "missing_field")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity"",""debug"":""unsafe""}", "unexpected_field")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":"" "",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "blank_field")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""x"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "field_too_short")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""analysis: she feels safer"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "meta_language")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""StatType.Honesty rolled 18 against DC 15"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "raw_mechanics")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""<3"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""leans in with a careful question"",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "symbolic_only")]
+        [InlineData(@"{""schema_version"":""emotional_director.v1"",""primary_emotion"":""relieved but cautious"",""intensity"":""moderate and steadily rising"",""underlying_feeling"":""fear of being dismissed"",""interpretation"":""reads it as specific warmth"",""impulse"":""That actually means a lot, but I need to know you mean it."",""restraint"":""keeps the reply tentative but available"",""response_posture"":""turns warmer while still checking sincerity""}", "drafted_chat_reply")]
         public async Task Parser_RejectionMatrix_UsesStableSanitizedReasons(
             string response,
             string expectedReason)
@@ -185,6 +205,31 @@ namespace Pinder.LlmAdapters.Tests
                 () => adapter.GenerateEmotionalDirectionAsync(MakeContext()));
 
             Assert.Equal("field_too_short", ex.Reason);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task StructuredTransport_RejectsInvalidSchemaVersionWithSameReason(bool usedNativeStructuredOutput)
+        {
+            var validations = new List<StructuredLlmValidationResult>();
+            var transport = new StructuredQueueTransport(
+                new StructuredLlmResponse(
+                    ValidJson(schemaVersion: "emotional_director.v2"),
+                    provider: "test",
+                    model: "structured",
+                    usedNativeStructuredOutput: usedNativeStructuredOutput,
+                    validationMode: "test_schema",
+                    validationObserver: validations.Add));
+            var adapter = CreateAdapter(transport);
+
+            var ex = await Assert.ThrowsAsync<LlmContractException>(
+                () => adapter.GenerateEmotionalDirectionAsync(MakeContext()));
+
+            Assert.Equal("invalid_schema_version", ex.Reason);
+            var validation = Assert.Single(validations);
+            Assert.Equal("rejected", validation.Outcome);
+            Assert.Equal("invalid_schema_version", validation.RejectionReason);
         }
 
         [Fact]
@@ -384,10 +429,12 @@ namespace Pinder.LlmAdapters.Tests
         private static string ValidJson(
             string? interpretation = null,
             string? impulse = null,
-            string? primaryEmotion = null)
+            string? primaryEmotion = null,
+            string? schemaVersion = "emotional_director.v1")
         {
             return new JObject
             {
+                ["schema_version"] = schemaVersion,
                 ["primary_emotion"] = primaryEmotion ?? "relieved but cautious",
                 ["intensity"] = "moderate and steadily rising",
                 ["underlying_feeling"] = "fear of being dismissed",
