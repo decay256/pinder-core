@@ -300,11 +300,12 @@ namespace Pinder.LlmAdapters
                             requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
 
                         // Keep dialogue history semantic: never persist the generated
-                        // prompt document as though it were a player message.
+                        // prompt document or hidden signal block as though it were
+                        // visible chat content.
                         var newEntries = new ConversationMessage[]
                         {
                             ConversationMessage.User(context.PlayerDeliveredMessage),
-                            ConversationMessage.Assistant(responseText ?? string.Empty),
+                            ConversationMessage.Assistant(parsed.MessageText),
                         };
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
                             new StatefulDateeResult(parsed, newEntries));

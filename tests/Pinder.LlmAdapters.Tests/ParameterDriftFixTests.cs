@@ -311,7 +311,7 @@ success_improvement_prompt_template: |-
         }
 
         private const string ValidDirectorJson =
-            "{\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
+            "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         private static string FindRepoFile(params string[] segments)
         {

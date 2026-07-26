@@ -127,21 +127,13 @@ namespace Pinder.Core.Conversation
                 {
                     var statefulResult = await statefulLlm.GetDateeResponseAsync(
                         dateeContext,
-                        state.DateeHistory,
+                        new List<ConversationMessage>(state.DateeHistory),
                         ct).ConfigureAwait(false);
                     if (statefulResult == null)
                         throw new InvalidOperationException("LLM adapter returned null stateful datee result");
                     dateeResponse = statefulResult.Response;
                     if (dateeResponse == null)
                         throw new InvalidOperationException("LLM adapter returned null datee response");
-                    if (statefulResult.NewHistoryEntries != null)
-                    {
-                        foreach (var entry in statefulResult.NewHistoryEntries)
-                        {
-                            if (entry != null)
-                                state.DateeHistory.Add(entry);
-                        }
-                    }
                 }
                 else
                 {
@@ -188,6 +180,9 @@ namespace Pinder.Core.Conversation
                     state.TurnNumber);
                 throw;
             }
+
+            state.DateeHistory.Add(ConversationMessage.User(deliveryStage.DeliveredMessage));
+            state.DateeHistory.Add(ConversationMessage.Assistant(dateeResponse.MessageText));
 
             string dateeMessage = dateeResponse.MessageText;
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseCompleted, dateeMessage));

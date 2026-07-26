@@ -45,10 +45,11 @@ namespace Pinder.Core.Interfaces
         /// <param name="cancellationToken">Cooperative cancellation (#794 alignment).</param>
         /// <returns>
         /// A <see cref="StatefulDateeResult"/> bundling the parsed response with
-        /// the new history entries the engine should append to its datee
-        /// history (typically the delivered player dialogue followed by the datee
-        /// response). The engine appends them verbatim and passes the grown list
-        /// in on the next call.
+        /// canonical visible history entries for direct adapter callers. The
+        /// <see cref="Pinder.Core.Conversation.GameSession"/> semantic-history
+        /// commit boundary appends its own canonical pair from the delivered
+        /// player message and parsed visible DATEE response rather than trusting
+        /// adapter-supplied history entries.
         /// </returns>
         Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,

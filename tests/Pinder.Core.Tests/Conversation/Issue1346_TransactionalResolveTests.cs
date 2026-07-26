@@ -770,6 +770,9 @@ namespace Pinder.Core.Tests.Conversation
             private readonly Dictionary<string, Queue<Func<string>>> _responses =
                 new Dictionary<string, Queue<Func<string>>>(StringComparer.Ordinal);
 
+            private const string ValidDirectorJson =
+                "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
+
             public void Queue(string phase, string response)
             {
                 Enqueue(phase, () => response);
@@ -792,6 +795,11 @@ namespace Pinder.Core.Tests.Conversation
                 string key = phase ?? LlmPhase.Unknown;
                 if (!_responses.TryGetValue(key, out var queue) || queue.Count == 0)
                 {
+                    if (string.Equals(key, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+                    {
+                        return Task.FromResult(ValidDirectorJson);
+                    }
+
                     throw new InvalidOperationException($"No scripted LLM response for phase '{key}'.");
                 }
 

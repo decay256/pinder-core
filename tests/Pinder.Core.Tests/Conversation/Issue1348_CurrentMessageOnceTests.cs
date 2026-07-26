@@ -14,6 +14,9 @@ namespace Pinder.Core.Tests.Conversation
 {
     public sealed class Issue1348_CurrentMessageOnceTests
     {
+        private const string ValidDirectorJson =
+            "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
+
         [Fact]
         public async Task DateeTransportPrompt_ContainsCurrentDeliveredMessageExactlyOnce()
         {
@@ -135,7 +138,11 @@ namespace Pinder.Core.Tests.Conversation
 
         private static RecordingLlmTransport QueuedTransport()
         {
-            return new RecordingLlmTransport { DefaultResponse = string.Empty };
+            return new RecordingLlmTransport((phase, systemPrompt, userMessage) =>
+                string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal)
+                    ? ValidDirectorJson
+                    : string.Empty)
+            { DefaultResponse = string.Empty };
         }
 
         private static void QueueTurn(RecordingLlmTransport transport, string delivered, string datee)
@@ -223,6 +230,11 @@ namespace Pinder.Core.Tests.Conversation
                 CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
+                if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+                {
+                    return Task.FromResult(ValidDirectorJson);
+                }
+
                 if (string.Equals(phase, LlmPhase.DateeResponse, StringComparison.Ordinal))
                 {
                     throw new InvalidOperationException("simulated datee failure");

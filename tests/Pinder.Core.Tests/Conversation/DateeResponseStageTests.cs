@@ -86,6 +86,28 @@ namespace Pinder.Core.Tests.Conversation
             }
         }
 
+        private sealed class MutatingStatefulLlm : NullLlmAdapter
+        {
+            public bool MutationSucceeded { get; private set; }
+
+            public override Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> history,
+                CancellationToken cancellationToken = default)
+            {
+                if (history is IList<ConversationMessage> mutable)
+                {
+                    mutable.Add(ConversationMessage.Assistant("PRIVATE MUTATION SENTINEL 1344"));
+                    MutationSucceeded = true;
+                }
+
+                return Task.FromResult(
+                    new StatefulDateeResult(
+                        new DateeResponse("Visible reply"),
+                        Array.Empty<ConversationMessage>()));
+            }
+        }
+
         private static CharacterProfile MakeProfile(string name)
         {
             return TestHelpers.MakeCharacterProfile(
@@ -209,7 +231,7 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         [Fact]
-        public async Task ExecuteAsync_StatefulAdapter_PushesNewHistoryEntries()
+        public async Task ExecuteAsync_StatefulAdapter_AppendsCanonicalVisibleHistoryEntries()
         {
             // Arrange
             var newEntries = new[]
@@ -260,8 +282,82 @@ namespace Pinder.Core.Tests.Conversation
             // Assert
             Assert.Equal("Stateful response", result.DateeMessage);
             Assert.Equal(2, state.DateeHistory.Count);
-            Assert.Equal("User stateful", state.DateeHistory[0].Content);
-            Assert.Equal("Assistant stateful", state.DateeHistory[1].Content);
+            Assert.Equal("Hello!", state.DateeHistory[0].Content);
+            Assert.Equal("Stateful response", state.DateeHistory[1].Content);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_StatefulAdapter_CommitsOnlyCanonicalVisibleHistoryPair()
+        {
+            var adapterSuppliedEntries = new[]
+            {
+                ConversationMessage.User("PRIVATE EVENT ONLY SENTINEL 1344"),
+                ConversationMessage.Assistant(
+                    "Visible parsed reply\n[SIGNALS]\nTELL: Charm (internal)\nPrimary emotion: private"),
+                ConversationMessage.Assistant("duplicate attempt that must not persist")
+            };
+            var mockLlm = new StatefulMockLlm("Visible parsed reply", adapterSuppliedEntries);
+            var stage = new DateeResponseStage(mockLlm);
+            var state = new GameSessionState();
+            state.Interest = new InterestMeter(10);
+            var deliveredMessage = "Hello, this is the delivered player line.";
+
+            await stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = deliveredMessage,
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None);
+
+            Assert.Equal(2, state.DateeHistory.Count);
+            Assert.Equal(ConversationMessage.UserRole, state.DateeHistory[0].Role);
+            Assert.Equal(deliveredMessage, state.DateeHistory[0].Content);
+            Assert.Equal(ConversationMessage.AssistantRole, state.DateeHistory[1].Role);
+            Assert.Equal("Visible parsed reply", state.DateeHistory[1].Content);
+            Assert.DoesNotContain(
+                state.DateeHistory,
+                entry => entry.Content.Contains("PRIVATE EVENT ONLY SENTINEL 1344", StringComparison.Ordinal)
+                    || entry.Content.Contains("[SIGNALS]", StringComparison.OrdinalIgnoreCase)
+                    || entry.Content.Contains("Primary emotion:", StringComparison.OrdinalIgnoreCase)
+                    || entry.Content.Contains("duplicate attempt", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_StatefulAdapter_CannotMutateEngineOwnedHistory()
+        {
+            var llm = new MutatingStatefulLlm();
+            var stage = new DateeResponseStage(llm);
+            var state = new GameSessionState();
+            state.Interest = new InterestMeter(10);
+            state.DateeHistory.Add(ConversationMessage.Assistant("Older visible reply"));
+
+            await stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "Current delivered line",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None);
+
+            Assert.True(llm.MutationSucceeded);
+            Assert.Equal(3, state.DateeHistory.Count);
+            Assert.Equal("Older visible reply", state.DateeHistory[0].Content);
+            Assert.Equal("Current delivered line", state.DateeHistory[1].Content);
+            Assert.Equal("Visible reply", state.DateeHistory[2].Content);
+            Assert.DoesNotContain(
+                state.DateeHistory,
+                entry => entry.Content.Contains("PRIVATE MUTATION", StringComparison.Ordinal));
         }
 
         private static RollStageResult MakeRollStageResult()

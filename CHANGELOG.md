@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.23] - 2026-07-26
+
+- Hardened #1344 DATEE retry/history isolation so successful turns commit only
+  the delivered player message and parsed visible DATEE reply to session
+  history. Adapter-returned private direction, prompt material, signal blocks,
+  failed attempts, or duplicate entries are no longer trusted as canonical
+  `GameSession` history.
+- Preserved director/performance retry shape: director recovery remains scoped
+  to the director call, while DATEE performance retries reuse the one validated
+  direction and expose only the visible parsed response to stateful history
+  callers.
+
 ## [0.2.22] - 2026-07-26
 
 - Required generated emotional director JSON to self-identify with root
