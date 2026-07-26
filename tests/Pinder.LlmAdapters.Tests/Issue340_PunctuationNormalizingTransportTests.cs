@@ -62,6 +62,19 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void Token_usage_is_forwarded_from_inner_transport()
+        {
+            var inner = new RecordingTransport("response");
+            var sut = new PunctuationNormalizingTransport(inner);
+
+            var usage = Assert.IsAssignableFrom<ITokenUsageProvider>(sut).GetSessionUsage();
+
+            Assert.Equal(17, usage.InputTokens);
+            Assert.Equal(9, usage.OutputTokens);
+            Assert.Equal(2, usage.CallCount);
+        }
+
+        [Fact]
         public async Task SendStreamAsync_normalises_each_fragment()
         {
             var fragments = new[] { "hello \u2014 ", "world\u2009\u2014\u2009ok" };
@@ -103,7 +116,7 @@ namespace Pinder.LlmAdapters.Tests
 
         // ── Test transport ───────────────────────────────────────────────
 
-        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
+        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport, ITokenUsageProvider, System.IDisposable
         {
             private readonly string _response;
             private readonly string[]? _fragments;
@@ -148,6 +161,16 @@ namespace Pinder.LlmAdapters.Tests
             public void Dispose()
             {
                 DisposeCount++;
+            }
+
+            public SessionTokenUsage GetSessionUsage()
+            {
+                return new SessionTokenUsage
+                {
+                    InputTokens = 17,
+                    OutputTokens = 9,
+                    CallCount = 2,
+                };
             }
         }
 

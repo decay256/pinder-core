@@ -68,7 +68,7 @@ namespace Pinder.LlmAdapters
     /// fragment whose content rules out a leading tag.
     /// </para>
     /// </remarks>
-    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, System.IDisposable
+    public sealed class ThinkingStrippingLlmTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, ITokenUsageProvider, System.IDisposable
     {
         /// <summary>
         /// Maximum characters to buffer in the streaming code path while
@@ -107,6 +107,18 @@ namespace Pinder.LlmAdapters
         /// was constructed without one.
         /// </summary>
         public IStreamingLlmTransport? InnerStreaming => _innerStreaming;
+
+        /// <inheritdoc />
+        public SessionTokenUsage GetSessionUsage()
+        {
+            if (_inner is ITokenUsageProvider usageProvider)
+            {
+                return usageProvider.GetSessionUsage();
+            }
+
+            throw new System.InvalidOperationException(
+                "The wrapped LLM transport does not expose token usage.");
+        }
 
         public void Dispose()
         {

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -13,13 +15,15 @@ namespace Pinder.LlmAdapters.Anthropic
     /// Thin wrapper — no game logic. Converts (systemPrompt, userMessage) into
     /// an Anthropic MessagesRequest and returns the response text.
     /// </summary>
-    public sealed class AnthropicTransport : ILlmTransport, IStructuredLlmTransport, IDisposable
+    public sealed class AnthropicTransport : ILlmTransport, IStructuredLlmTransport, ITokenUsageProvider, IDisposable
     {
         private readonly AnthropicClient _client;
         private readonly string _model;
         private readonly AnthropicOptions? _options;
         private readonly LlmCallTelemetryOptions? _telemetry;
         private readonly AnthropicMessageHeadings _messageHeadings;
+        private readonly object _statsLock = new object();
+        private readonly List<CallSummaryStat> _callStats = new List<CallSummaryStat>();
         private bool _disposed;
 
         /// <summary>Creates transport with internally-owned AnthropicClient.</summary>
@@ -126,6 +130,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 _telemetry,
                 phase,
                 _messageHeadings,
+                response => CommitUsage(response, phase),
                 ct).ConfigureAwait(false);
         }
 
@@ -201,6 +206,34 @@ namespace Pinder.LlmAdapters.Anthropic
             }
         }
 
+        /// <summary>
+        /// Returns a read-only snapshot of per-call non-streaming token usage
+        /// captured from successful Anthropic Messages responses.
+        /// </summary>
+        public IReadOnlyList<CallSummaryStat> GetCallStats()
+        {
+            lock (_statsLock)
+            {
+                return _callStats.ToArray();
+            }
+        }
+
+        /// <inheritdoc />
+        public SessionTokenUsage GetSessionUsage()
+        {
+            lock (_statsLock)
+            {
+                return new SessionTokenUsage
+                {
+                    InputTokens = _callStats.Sum(s => s.InputTokens),
+                    OutputTokens = _callStats.Sum(s => s.OutputTokens),
+                    CacheReadInputTokens = _callStats.Sum(s => s.CacheReadInputTokens),
+                    CacheCreationInputTokens = _callStats.Sum(s => s.CacheCreationInputTokens),
+                    CallCount = _callStats.Count,
+                };
+            }
+        }
+
         private async Task<MessagesResponse> SendMessagesNormalizedAsync(
             MessagesRequest request,
             CancellationToken ct,
@@ -208,13 +241,15 @@ namespace Pinder.LlmAdapters.Anthropic
         {
             try
             {
-                return await _client.SendMessagesAsync(
+                var response = await _client.SendMessagesAsync(
                     request,
                     ct,
                     _telemetry,
                     provider: "anthropic",
                     model: _model,
                     phase: phase).ConfigureAwait(false);
+                CommitUsage(response, phase);
+                return response;
             }
             catch (OperationCanceledException)
             {
@@ -234,6 +269,29 @@ namespace Pinder.LlmAdapters.Anthropic
             catch (System.Net.Http.HttpRequestException ex)
             {
                 throw new LlmTransportException(ex.Message, LlmFailureKind.Network, ex);
+            }
+        }
+
+        private void CommitUsage(MessagesResponse response, string? phase)
+        {
+            var usage = response?.Usage;
+            if (usage == null)
+            {
+                return;
+            }
+
+            var stat = new CallSummaryStat
+            {
+                Turn = 0,
+                Type = string.IsNullOrWhiteSpace(phase) ? "message" : phase,
+                InputTokens = usage.InputTokens,
+                OutputTokens = usage.OutputTokens,
+                CacheReadInputTokens = usage.CacheReadInputTokens,
+                CacheCreationInputTokens = usage.CacheCreationInputTokens,
+            };
+            lock (_statsLock)
+            {
+                _callStats.Add(stat);
             }
         }
     }

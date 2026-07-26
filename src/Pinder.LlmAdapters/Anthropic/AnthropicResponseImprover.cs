@@ -28,6 +28,7 @@ namespace Pinder.LlmAdapters.Anthropic
             LlmCallTelemetryOptions? telemetry = null,
             string? phase = null,
             AnthropicMessageHeadings? messageHeadings = null,
+            Action<MessagesResponse>? onResponse = null,
             CancellationToken ct = default)
         {
             var improvementPrompt = options.GameDefinition?.ImprovementPrompt;
@@ -57,6 +58,7 @@ namespace Pinder.LlmAdapters.Anthropic
                     provider: "anthropic",
                     model: model,
                     phase: phase).ConfigureAwait(false);
+                onResponse?.Invoke(improveResponse);
 
                 // Try structured tool_use first
                 var toolInput = improveResponse.GetToolInput();

@@ -121,6 +121,43 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         }
 
         [Fact]
+        public async Task SendAsync_ExposesSessionTokenUsageThroughExistingProviderInterface()
+        {
+            var handler = new SequenceCapturingHandler(
+                AnthropicTextResponse("first", inputTokens: 10, outputTokens: 4, cacheReadInputTokens: 3, cacheCreationInputTokens: 2),
+                AnthropicTextResponse("second", inputTokens: 11, outputTokens: 5, cacheReadInputTokens: 7, cacheCreationInputTokens: 1));
+            using var http = new HttpClient(handler);
+            using var transport = new AnthropicTransport(TestApiKey, TestModel, http);
+
+            await transport.SendAsync("system", "user", phase: LlmPhase.EmotionalDirector);
+            await transport.SendAsync("system", "user", phase: LlmPhase.OpponentResponse);
+
+            ITokenUsageProvider usageProvider = transport;
+            SessionTokenUsage usage = usageProvider.GetSessionUsage();
+            Assert.Equal(21, usage.InputTokens);
+            Assert.Equal(9, usage.OutputTokens);
+            Assert.Equal(10, usage.CacheReadInputTokens);
+            Assert.Equal(3, usage.CacheCreationInputTokens);
+            Assert.Equal(2, usage.CallCount);
+            Assert.Equal(24, usage.TotalBilledInput);
+
+            Assert.Collection(
+                transport.GetCallStats(),
+                first =>
+                {
+                    Assert.Equal(LlmPhase.EmotionalDirector, first.Type);
+                    Assert.Equal(10, first.InputTokens);
+                    Assert.Equal(4, first.OutputTokens);
+                },
+                second =>
+                {
+                    Assert.Equal(LlmPhase.OpponentResponse, second.Type);
+                    Assert.Equal(11, second.InputTokens);
+                    Assert.Equal(5, second.OutputTokens);
+                });
+        }
+
+        [Fact]
         public async Task ExistingTransport_UsesCapturedHeadings_AfterGlobalCatalogReplacement()
         {
             string capturedRoot = CopyPromptsToTemp();
@@ -166,8 +203,18 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         [Fact]
         public async Task SendAsync_WithConfiguredImprovementPrompt_PerformsToolBackedImprovementPass()
         {
-            string draftResponse = "{\"id\":\"msg_01\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"text\",\"text\":\"draft line\"}]}";
-            string improvementResponse = "{\"id\":\"msg_02\",\"type\":\"message\",\"role\":\"assistant\",\"content\":[{\"type\":\"tool_use\",\"id\":\"toolu_01\",\"name\":\"submit_improvement\",\"input\":{\"improved\":\"improved line\"}}]}";
+            string draftResponse = AnthropicTextResponse(
+                "draft line",
+                inputTokens: 13,
+                outputTokens: 5,
+                cacheReadInputTokens: 3,
+                cacheCreationInputTokens: 2);
+            string improvementResponse = AnthropicImprovementResponse(
+                "improved line",
+                inputTokens: 21,
+                outputTokens: 8,
+                cacheReadInputTokens: 7,
+                cacheCreationInputTokens: 4);
             var handler = new SequenceCapturingHandler(draftResponse, improvementResponse);
             using var http = new HttpClient(handler);
             using var transport = new AnthropicTransport(new AnthropicOptions
@@ -197,6 +244,13 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             Assert.Equal("assistant", improveRequest["messages"]![1]!.Value<string>("role"));
             Assert.Equal("draft line", improveRequest["messages"]![1]!["content"]!.Value<string>());
             Assert.Equal("Improve the draft and return the final text.", improveRequest["messages"]![2]!["content"]!.Value<string>());
+
+            var usage = ((ITokenUsageProvider)transport).GetSessionUsage();
+            Assert.Equal(34, usage.InputTokens);
+            Assert.Equal(13, usage.OutputTokens);
+            Assert.Equal(10, usage.CacheReadInputTokens);
+            Assert.Equal(6, usage.CacheCreationInputTokens);
+            Assert.Equal(2, usage.CallCount);
         }
 
         [Fact]
@@ -315,6 +369,71 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
             string contents = File.ReadAllText(path);
             Assert.Contains(current, contents);
             File.WriteAllText(path, contents.Replace(current, replacement, StringComparison.Ordinal));
+        }
+
+        private static string AnthropicTextResponse(
+            string text,
+            int inputTokens,
+            int outputTokens,
+            int cacheReadInputTokens,
+            int cacheCreationInputTokens)
+        {
+            return new JObject
+            {
+                ["id"] = "msg_" + text,
+                ["type"] = "message",
+                ["role"] = "assistant",
+                ["content"] = new JArray
+                {
+                    new JObject
+                    {
+                        ["type"] = "text",
+                        ["text"] = text,
+                    },
+                },
+                ["usage"] = new JObject
+                {
+                    ["input_tokens"] = inputTokens,
+                    ["output_tokens"] = outputTokens,
+                    ["cache_read_input_tokens"] = cacheReadInputTokens,
+                    ["cache_creation_input_tokens"] = cacheCreationInputTokens,
+                },
+            }.ToString();
+        }
+
+        private static string AnthropicImprovementResponse(
+            string improved,
+            int inputTokens,
+            int outputTokens,
+            int cacheReadInputTokens,
+            int cacheCreationInputTokens)
+        {
+            return new JObject
+            {
+                ["id"] = "msg_improved",
+                ["type"] = "message",
+                ["role"] = "assistant",
+                ["content"] = new JArray
+                {
+                    new JObject
+                    {
+                        ["type"] = "tool_use",
+                        ["id"] = "toolu_01",
+                        ["name"] = "submit_improvement",
+                        ["input"] = new JObject
+                        {
+                            ["improved"] = improved,
+                        },
+                    },
+                },
+                ["usage"] = new JObject
+                {
+                    ["input_tokens"] = inputTokens,
+                    ["output_tokens"] = outputTokens,
+                    ["cache_read_input_tokens"] = cacheReadInputTokens,
+                    ["cache_creation_input_tokens"] = cacheCreationInputTokens,
+                },
+            }.ToString();
         }
     }
 }

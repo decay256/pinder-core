@@ -58,7 +58,11 @@ namespace Pinder.LlmAdapters
                                     request,
                                     LlmPhase.EmotionalDirector,
                                     context.CurrentTurn,
-                                    attemptCancellationToken)
+                                    attemptCancellationToken,
+                                    attempt,
+                                    maxAttempts,
+                                    DateePrivatePhaseDirector,
+                                    metadata)
                                 .ConfigureAwait(false);
 
                             try
@@ -87,7 +91,11 @@ namespace Pinder.LlmAdapters
                                     maxTokens,
                                     LlmPhase.EmotionalDirector,
                                     context.CurrentTurn,
-                                    attemptCancellationToken)
+                                    attemptCancellationToken,
+                                    attempt,
+                                    maxAttempts,
+                                    DateePrivatePhaseDirector,
+                                    metadata)
                                 .ConfigureAwait(false);
                             direction = ParseEmotionalDirectorOrThrow(
                                 responseText,
@@ -106,7 +114,7 @@ namespace Pinder.LlmAdapters
                 },
                 delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
                     GetContractViolationBackoffDelayMs(_options.ContractViolationBackoffMs, attempt)),
-                onRejected: rejection => NotifyContractViolation(rejection.Rejection),
+                onRejected: rejection => NotifyContractViolation(rejection, DateePrivatePhaseDirector),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (recovery.IsAccepted)
@@ -175,8 +183,8 @@ namespace Pinder.LlmAdapters
                     eventName: "EmotionalDirectorContractExhausted",
                     severity: OperationalDiagnosticSeverity.Error,
                     message: "Private emotional director contract recovery was exhausted.",
-                    exception: finalRejection,
-                    operationKind: LlmPhase.EmotionalDirector,
+                    exception: null,
+                    operationKind: OperationalDiagnosticOperationKind.DateeEmotionalDirector,
                     phaseCode: LlmPhase.EmotionalDirector,
                     lifecycle: OperationalDiagnosticLifecycle.Terminal,
                     outcome: OperationalDiagnosticOutcome.Failed,
@@ -185,6 +193,9 @@ namespace Pinder.LlmAdapters
                     correlationHints: new Dictionary<string, string>(StringComparer.Ordinal)
                     {
                         ["phase"] = LlmPhase.EmotionalDirector,
+                        ["datee_private_phase"] = DateePrivatePhaseDirector,
+                        ["exception_type"] = finalRejection.GetType().Name,
+                        ["failure_kind"] = "contract_violation",
                         ["reason"] = finalRejection.Reason,
                         ["attempt_count"] = attemptCount.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         ["turn"] = turn.ToString(System.Globalization.CultureInfo.InvariantCulture),

@@ -101,6 +101,26 @@ the exact protected header and seven label-placeholder lines against the editabl
 performance template at startup, preventing config edits from weakening this
 guard while leaving reusable prose in YAML.
 
+Operational diagnostics for the private DATEE path use the existing
+`OperationalDiagnosticEvent` sink. Core emits sanitized start, terminal, and
+contract-rejection events with distinct `datee_private_phase` hints (`director`
+or `performance`), attempt counts, elapsed milliseconds, token deltas when the
+transport implements `ITokenUsageProvider`, and prompt source/key identifiers
+such as `emotional-reaction-director`,
+`emotional-reaction-performance-direction`, and YAML source paths. These events
+must not include compiled private packets, director field prose, performance
+prompts, provider response bodies, visible transcript prose, or raw exception
+objects for the private DATEE phases. Core does not persist these diagnostics or
+define log retention/access policy; hosts that attach an `OnDiagnostic` sink own
+storage, retention, operator access, and any export controls for the received
+sanitized metadata.
+
+Token accounting remains on the existing `ITokenUsageProvider` contract.
+Text-transform transport decorators forward usage snapshots from their inner
+transport. Anthropic's optional improvement pass reports its successful response
+through a narrow callback to the owning `AnthropicTransport`, so the same session
+total includes both draft and improvement calls without a second telemetry store.
+
 ### `SessionDocumentBuilder.BuildDateePerformancePromptEx(DateeContext, EmotionalDirectorDirection)` (internal)
 
 Internal DATEE performance prompt builder used only by the production adapter

@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters
     /// buffering — to avoid changing streaming latency characteristics.
     /// </para>
     /// </remarks>
-    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, System.IDisposable
+    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, ITokenUsageProvider, System.IDisposable
     {
         // U+2014 = em-dash, U+2009 = thin-space.
         private const char EmDash    = '\u2014';
@@ -76,6 +76,18 @@ namespace Pinder.LlmAdapters
         /// constructed without one. Same purpose as <see cref="Inner"/>.
         /// </summary>
         public IStreamingLlmTransport? InnerStreaming => _innerStreaming;
+
+        /// <inheritdoc />
+        public SessionTokenUsage GetSessionUsage()
+        {
+            if (_inner is ITokenUsageProvider usageProvider)
+            {
+                return usageProvider.GetSessionUsage();
+            }
+
+            throw new System.InvalidOperationException(
+                "The wrapped LLM transport does not expose token usage.");
+        }
 
         public void Dispose()
         {

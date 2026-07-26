@@ -55,6 +55,7 @@ namespace Pinder.Core.Conversation
         public const string SetupSynthesis = "setup_synthesis";
         public const string DialogueOptions = "dialogue_options";
         public const string DateeResponse = "datee_response";
+        public const string DateeEmotionalDirector = "datee_emotional_director";
         public const string Delivery = "delivery";
         public const string Overlay = "overlay";
         public const string SpeculativeBranch = "speculative_branch";

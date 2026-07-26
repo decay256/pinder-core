@@ -285,8 +285,9 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public async Task Retry_ExhaustionThrowsFinalStableReason()
         {
+            const string privateRejectedDirector = "PRIVATE-DIRECTOR-EXHAUSTION-DO-NOT-LOG-1345";
             var diagnostics = new List<OperationalDiagnosticEvent>();
-            var transport = new PlainQueueTransport("not json", "still not json");
+            var transport = new PlainQueueTransport(privateRejectedDirector, privateRejectedDirector);
             var adapter = CreateAdapter(transport, retries: 1, diagnostics: diagnostics.Add);
 
             var ex = await Assert.ThrowsAsync<LlmContractException>(
@@ -304,13 +305,16 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(OperationalDiagnosticLifecycle.Terminal, terminal.Lifecycle);
             Assert.Equal(OperationalDiagnosticOutcome.Failed, terminal.Outcome);
             Assert.Equal(OperationalDiagnosticFailureClassification.Permanent, terminal.FailureClassification);
+            Assert.Null(terminal.Exception);
+            Assert.Equal(nameof(LlmContractException), terminal.CorrelationHints["exception_type"]);
+            Assert.Equal("contract_violation", terminal.CorrelationHints["failure_kind"]);
             Assert.Equal("no_json_object", terminal.CorrelationHints["reason"]);
             Assert.Equal("2", terminal.CorrelationHints["attempt_count"]);
-            Assert.DoesNotContain("not json", terminal.Message, StringComparison.Ordinal);
+            Assert.DoesNotContain(privateRejectedDirector, terminal.Message, StringComparison.Ordinal);
             Assert.DoesNotContain("visible delivered line", terminal.Message, StringComparison.Ordinal);
             Assert.All(terminal.CorrelationHints.Values, value =>
             {
-                Assert.DoesNotContain("not json", value, StringComparison.Ordinal);
+                Assert.DoesNotContain(privateRejectedDirector, value, StringComparison.Ordinal);
                 Assert.DoesNotContain("visible delivered line", value, StringComparison.Ordinal);
             });
         }

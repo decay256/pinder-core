@@ -66,6 +66,19 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(LlmPhase.Steering, inner.LastPhase);
         }
 
+        [Fact]
+        public void Token_usage_is_forwarded_from_inner_transport()
+        {
+            var inner = new RecordingTransport("response");
+            var sut = new ThinkingStrippingLlmTransport(inner);
+
+            var usage = Assert.IsAssignableFrom<ITokenUsageProvider>(sut).GetSessionUsage();
+
+            Assert.Equal(23, usage.InputTokens);
+            Assert.Equal(11, usage.OutputTokens);
+            Assert.Equal(3, usage.CallCount);
+        }
+
         // ── Streaming decorator behaviour ────────────────────────────────
 
         [Fact]
@@ -282,7 +295,7 @@ namespace Pinder.LlmAdapters.Tests
             return got;
         }
 
-        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport, System.IDisposable
+        private sealed class RecordingTransport : ILlmTransport, IStreamingLlmTransport, ITokenUsageProvider, System.IDisposable
         {
             private readonly string _response;
             private readonly string[]? _fragments;
@@ -327,6 +340,16 @@ namespace Pinder.LlmAdapters.Tests
             public void Dispose()
             {
                 DisposeCount++;
+            }
+
+            public SessionTokenUsage GetSessionUsage()
+            {
+                return new SessionTokenUsage
+                {
+                    InputTokens = 23,
+                    OutputTokens = 11,
+                    CallCount = 3,
+                };
             }
         }
 

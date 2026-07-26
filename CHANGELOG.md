@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.24] - 2026-07-26
+
+- Added sanitized, phase-specific DATEE director and performance diagnostics
+  with retry, latency, provider, model, and token-usage metadata.
+- Kept private emotional direction, drafts, prompt content, provider bodies,
+  and raw exceptions out of operational diagnostic payloads.
+- Preserved token-usage reporting through standard transport decorators and
+  included optional Anthropic improvement calls in usage totals.
+
 ## [0.2.23] - 2026-07-26
 
 - Hardened #1344 DATEE retry/history isolation so successful turns commit only

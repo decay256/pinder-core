@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
@@ -232,6 +233,7 @@ namespace Pinder.LlmAdapters
             var userContent = dateePrompt.Text;
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
+            var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
 
             int maxAttempts = GetContractViolationAttemptLimit();
             var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<StatefulDateeResult, LlmContractException>(
@@ -252,7 +254,11 @@ namespace Pinder.LlmAdapters
                                 _options.MaxTokens,
                                 LlmPhase.OpponentResponse,
                                 context.CurrentTurn,
-                                attemptCancellationToken)
+                                attemptCancellationToken,
+                                attempt,
+                                maxAttempts,
+                                DateePrivatePhasePerformance,
+                                performanceMetadata)
                             .ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(responseText))
@@ -317,7 +323,7 @@ namespace Pinder.LlmAdapters
                 },
                 delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
                     GetContractViolationBackoffDelayMs(_options.ContractViolationBackoffMs, attempt)),
-                onRejected: rejection => NotifyContractViolation(rejection.Rejection),
+                onRejected: rejection => NotifyContractViolation(rejection, DateePrivatePhasePerformance),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (recovery.IsAccepted)
@@ -1034,6 +1040,67 @@ namespace Pinder.LlmAdapters
             _options.OnLlmContractViolation?.Invoke(violation);
         }
 
+        private void NotifyContractViolation(
+            SemanticOutputRecoveryRejection<LlmContractException> rejection,
+            string? dateePrivatePhase)
+        {
+            if (rejection == null) throw new ArgumentNullException(nameof(rejection));
+
+            NotifyContractViolation(rejection.Rejection);
+            EmitContractRejectedDiagnostic(rejection, dateePrivatePhase);
+        }
+
+        private void EmitContractRejectedDiagnostic(
+            SemanticOutputRecoveryRejection<LlmContractException> rejection,
+            string? dateePrivatePhase)
+        {
+            var ex = rejection.Rejection;
+            var hints = BuildDiagnosticHints(
+                ex.Phase,
+                ex.TurnId,
+                rejection.Attempt,
+                rejection.TotalAttempts,
+                dateePrivatePhase,
+                null);
+            hints["reason"] = ex.Reason;
+            hints["will_retry"] = (!rejection.IsFinalAttempt).ToString().ToLowerInvariant();
+            if (!rejection.IsFinalAttempt)
+            {
+                hints["next_attempt"] = (rejection.Attempt + 1).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            if (!string.IsNullOrWhiteSpace(ex.Provider))
+            {
+                hints["provider"] = ex.Provider!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(ex.Model))
+            {
+                hints["model"] = ex.Model!;
+            }
+
+            if (!string.IsNullOrWhiteSpace(ex.ParserName))
+            {
+                hints["parser"] = ex.ParserName!;
+            }
+
+            OperationalDiagnostics.Emit(
+                GetDiagnosticSink(),
+                new OperationalDiagnosticEvent(
+                    "PinderLlmAdapter",
+                    "LlmContractRejected",
+                    OperationalDiagnosticSeverity.Warning,
+                    "LLM output contract violation observed.",
+                    operationKind: MapOperationKind(ex.Phase),
+                    phaseCode: ex.Phase,
+                    lifecycle: OperationalDiagnosticLifecycle.Phase,
+                    outcome: rejection.IsFinalAttempt
+                        ? OperationalDiagnosticOutcome.Failed
+                        : OperationalDiagnosticOutcome.Degraded,
+                    failureClassification: OperationalDiagnosticFailureClassification.Permanent,
+                    correlationHints: hints));
+        }
+
         private int GetContractViolationAttemptLimit()
         {
             return Math.Max(0, _options.MaxContractViolationRetries) + 1;
@@ -1153,15 +1220,23 @@ namespace Pinder.LlmAdapters
             StructuredLlmRequest request,
             string phase,
             int? turnId,
-            CancellationToken ct)
+            CancellationToken ct,
+            int? attempt = null,
+            int? totalAttempts = null,
+            string? dateePrivatePhase = null,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
             var sink = GetDiagnosticSink();
             string callId = OperationalDiagnostics.CreateCallId();
-            var hints = new Dictionary<string, string> { ["phase"] = phase };
-            if (turnId.HasValue)
-            {
-                hints["turn"] = turnId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            }
+            var baseHints = BuildDiagnosticHints(
+                phase,
+                turnId,
+                attempt,
+                totalAttempts,
+                dateePrivatePhase,
+                metadata ?? request.Metadata);
+            baseHints["schema_name"] = request.SchemaName;
+            baseHints["schema_version"] = request.SchemaVersion;
 
             OperationalDiagnostics.Emit(
                 sink,
@@ -1174,11 +1249,18 @@ namespace Pinder.LlmAdapters
                     phaseCode: phase,
                     lifecycle: OperationalDiagnosticLifecycle.Start,
                     callId: callId,
-                    correlationHints: hints));
+                    correlationHints: CloneHints(baseHints)));
 
+            var stopwatch = Stopwatch.StartNew();
+            var tokenUsageBefore = CaptureTokenUsageSnapshot(transport);
             try
             {
                 var result = await transport.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
+                AddStructuredResponseHints(hints, result);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1196,6 +1278,11 @@ namespace Pinder.LlmAdapters
             }
             catch (OperationCanceledException ex)
             {
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
+                AddExceptionTypeHint(hints, ex);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1203,7 +1290,7 @@ namespace Pinder.LlmAdapters
                         "LlmTransportCancelled",
                         OperationalDiagnosticSeverity.Warning,
                         "Structured LLM transport operation was cancelled.",
-                        ex,
+                        ShouldSuppressDiagnosticException(phase, dateePrivatePhase) ? null : ex,
                         MapOperationKind(phase),
                         phase,
                         OperationalDiagnosticLifecycle.Terminal,
@@ -1215,6 +1302,11 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
+                AddExceptionTypeHint(hints, ex);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1222,7 +1314,7 @@ namespace Pinder.LlmAdapters
                         "LlmTransportFailed",
                         OperationalDiagnosticSeverity.Error,
                         "Structured LLM transport operation failed.",
-                        ex,
+                        ShouldSuppressDiagnosticException(phase, dateePrivatePhase) ? null : ex,
                         MapOperationKind(phase),
                         phase,
                         OperationalDiagnosticLifecycle.Terminal,
@@ -1242,18 +1334,21 @@ namespace Pinder.LlmAdapters
             int maxTokens,
             string phase,
             int? turnId,
-            CancellationToken ct)
+            CancellationToken ct,
+            int? attempt = null,
+            int? totalAttempts = null,
+            string? dateePrivatePhase = null,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
             var sink = GetDiagnosticSink();
             string callId = OperationalDiagnostics.CreateCallId();
-            var hints = new Dictionary<string, string>
-            {
-                ["phase"] = phase,
-            };
-            if (turnId.HasValue)
-            {
-                hints["turn"] = turnId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            }
+            var baseHints = BuildDiagnosticHints(
+                phase,
+                turnId,
+                attempt,
+                totalAttempts,
+                dateePrivatePhase,
+                metadata);
 
             OperationalDiagnostics.Emit(
                 sink,
@@ -1266,14 +1361,20 @@ namespace Pinder.LlmAdapters
                     phaseCode: phase,
                     lifecycle: OperationalDiagnosticLifecycle.Start,
                     callId: callId,
-                    correlationHints: hints));
+                    correlationHints: CloneHints(baseHints)));
 
+            var stopwatch = Stopwatch.StartNew();
+            var tokenUsageBefore = CaptureTokenUsageSnapshot(transport);
             try
             {
                 string result = await transport
                     .SendAsync(systemPrompt, userContent, temperature, maxTokens, phase: phase, ct: ct)
                     .ConfigureAwait(false);
 
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1292,6 +1393,11 @@ namespace Pinder.LlmAdapters
             }
             catch (OperationCanceledException ex)
             {
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
+                AddExceptionTypeHint(hints, ex);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1299,7 +1405,7 @@ namespace Pinder.LlmAdapters
                         "LlmTransportCancelled",
                         OperationalDiagnosticSeverity.Warning,
                         "LLM transport operation was cancelled.",
-                        ex,
+                        ShouldSuppressDiagnosticException(phase, dateePrivatePhase) ? null : ex,
                         MapOperationKind(phase),
                         phase,
                         OperationalDiagnosticLifecycle.Terminal,
@@ -1311,6 +1417,11 @@ namespace Pinder.LlmAdapters
             }
             catch (Exception ex)
             {
+                var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
+                var hints = CloneHints(baseHints);
+                AddElapsedHint(hints, stopwatch);
+                AddTokenUsageHints(hints, tokenUsageBefore, tokenUsageAfter);
+                AddExceptionTypeHint(hints, ex);
                 OperationalDiagnostics.Emit(
                     sink,
                     new OperationalDiagnosticEvent(
@@ -1318,7 +1429,7 @@ namespace Pinder.LlmAdapters
                         "LlmTransportFailed",
                         OperationalDiagnosticSeverity.Error,
                         "LLM transport operation failed.",
-                        ex,
+                        ShouldSuppressDiagnosticException(phase, dateePrivatePhase) ? null : ex,
                         MapOperationKind(phase),
                         phase,
                         OperationalDiagnosticLifecycle.Terminal,
@@ -1340,6 +1451,11 @@ namespace Pinder.LlmAdapters
             if (string.Equals(phase, LlmPhase.OpponentResponse, StringComparison.Ordinal))
             {
                 return OperationalDiagnosticOperationKind.DateeResponse;
+            }
+
+            if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.DateeEmotionalDirector;
             }
 
             if (string.Equals(phase, LlmPhase.Delivery, StringComparison.Ordinal))
