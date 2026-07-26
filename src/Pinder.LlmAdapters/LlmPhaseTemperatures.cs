@@ -22,6 +22,9 @@ namespace Pinder.LlmAdapters
         /// <summary>Default temperature for interest change beat generation.</summary>
         public const double InterestChangeBeat = Default;
 
+        /// <summary>Default temperature for private emotional director generation.</summary>
+        public const double EmotionalDirector = 0.35;
+
         /// <summary>Default temperature for success-message improvement.</summary>
         public const double SuccessImprovement = 0.8;
 

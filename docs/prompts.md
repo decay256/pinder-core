@@ -82,6 +82,8 @@ keyed by typed engine concepts rather than score math:
 - `emotional-reaction-event-<stat>-<outcome>` describes how the delivered
   player message emotionally lands for the recipient for every
   `StatType` x outcome key combination.
+- `emotional-reaction-director` owns the private director LLM system/user
+  wrapper plus temperature and max-token settings.
 
 The outcome keys intentionally reuse the delivery instruction vocabulary:
 `clean`, `strong`, `critical`, `exceptional`, `nat20`, `fumble`, `misfire`,
@@ -91,9 +93,17 @@ not final DATEE replies.
 `EmotionalReactionEventCompiler` composes these catalog entries with the current
 `DateeContext.EmotionalTurnEvent`, the delivered player message, recent visible
 history, and the datee's generated therapist diagnosis fields. The result is a
-private `PromptTraceResult` for later DATEE emotional direction work. It is not
-an LLM call, does not parse a director response, and is not appended to the
-current visible `BuildDateePromptEx` DATEE performance prompt.
+private `PromptTraceResult` consumed by
+`PinderLlmAdapter.GenerateEmotionalDirectionAsync`.
+
+The director operation is callable inside `Pinder.LlmAdapters` and returns a
+validated seven-field private direction object:
+`primary_emotion`, `intensity`, `underlying_feeling`, `interpretation`,
+`impulse`, `restraint`, and `response_posture`. `intensity` describes the
+emotion's strength and movement while `underlying_feeling` identifies the
+feeling beneath it. It is not invoked by the current
+`GetDateeResponseAsync` path and is not appended to the visible
+`BuildDateePromptEx` DATEE performance prompt.
 
 ## Admin-editor wiring
 

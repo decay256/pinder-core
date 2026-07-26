@@ -68,6 +68,20 @@ Returns a resistance descriptor string for the typed relationship state supplied
 
 Builds the user-message content for `GetDateeResponseAsync` (§3.5). Assembles prior completed visible exchanges from `DateeContext.ConversationHistory`, the current delivered event from `DateeContext.PlayerDeliveredMessage`, typed final interest state from `DateeContext.InterestAfterState`, optional trap/shadow blocks, and the final `DateeResponseInstruction`. The relationship narrative and resistance block are selected by the typed state and annotated with their semantic YAML keys. Section order remains the active DATEE order documented in tests. When `context.DeliveryTier != FailureTier.None`, the "PLAYER'S LAST MESSAGE" heading includes the tier name and a "FAILURE CONTEXT" section is injected containing the per-tier reaction guidance from `GetDateeReactionGuidance()`. On success (`FailureTier.None`), no failure section is injected.
 
+### `PinderLlmAdapter.GenerateEmotionalDirectionAsync(DateeContext)` (internal)
+
+Private DATEE emotional director operation for #1341. It compiles the #1340
+`DateeContext.EmotionalTurnEvent` artifact, renders the
+`emotional-reaction-director` YAML system/user prompt, sends the primary
+transport under `LlmPhase.EmotionalDirector`, prefers
+`IStructuredLlmTransport` when available, falls back to local JSON extraction
+for plain text transports, and validates exactly `primary_emotion`,
+`intensity`, `underlying_feeling`, `interpretation`, `impulse`, `restraint`,
+and `response_posture`. It preserves the compiled annotation source files and
+keys in private request metadata and emits a sanitized terminal diagnostic when
+contract retries are exhausted. It is intentionally not called by the current
+`GetDateeResponseAsync` path.
+
 ### `SessionDocumentBuilder.BuildDialogueOptionsPrompt(DialogueContext)`
 
 Builds the user message content for dialogue option generation. When `context.DateePrompt` is non-empty, prepends an `DATEE PROFILE` section (labelled "NOT who you are") before the conversation history. When `context.PlayerTextingStyle` is non-empty, injects a `YOUR TEXTING STYLE — follow this exactly, no deviations:` block immediately before the `YOUR TASK` heading. If `PlayerTextingStyle` is empty, the block is omitted entirely. When `context.ActiveTell` is non-null, injects a `TELL DETECTED` directive immediately after the conversation history, instructing the LLM that one option using the tell's stat should explicitly capitalize on the vulnerability. This provides the LLM with datee context without placing the datee's identity in the system prompt, reinforces the player character's unique texting voice, and creates mechanical follow-through for tells.

@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.2.20] - 2026-07-26
+
+- Added the private `emotional_director` LLM phase and internal
+  `PinderLlmAdapter.GenerateEmotionalDirectionAsync` operation. The operation
+  compiles #1340 input, uses structured output when available with plain JSON
+  fallback, validates the seven-field direction contract (including emotion
+  `intensity` and `underlying_feeling`), retries semantic rejections, propagates
+  cancellation, preserves compiled source keys, and emits sanitized terminal
+  diagnostics when retries are exhausted.
+- Added `emotional-reaction-director` prompt catalog entry with
+  temperature/max token settings. The director remains private and is not
+  invoked from the current DATEE response path.
+
 ## [0.2.19] - 2026-07-26
 
 - Added the canonical `RollOutcomeIntensity` contract and compact

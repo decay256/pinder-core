@@ -20,7 +20,7 @@ namespace Pinder.LlmAdapters
     /// This replaces the need for every transport to duplicate game logic.
     /// The transport does ONE thing: (systemPrompt, userMessage) → rawText.
     /// </summary>
-    public sealed class PinderLlmAdapter : IStatefulLlmAdapter, IDisposable
+    public sealed partial class PinderLlmAdapter : IStatefulLlmAdapter, IDisposable
     {
         private const string HorninessOverlayPrompt = "horniness_overlay";
         private const string TrapOverlayPrompt = "trap_overlay";

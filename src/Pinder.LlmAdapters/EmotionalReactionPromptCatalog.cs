@@ -164,6 +164,10 @@ namespace Pinder.LlmAdapters
                 "sender",
                 "message");
             RequireSystemPrompt(catalog, "emotional-reaction-history-empty");
+            RequireCompletePromptWithPlaceholders(
+                catalog,
+                "emotional-reaction-director",
+                "compiled_reaction_input");
         }
 
         private static string RequireSystemPrompt(PromptCatalog catalog, string key)
@@ -199,6 +203,32 @@ namespace Pinder.LlmAdapters
             string prompt = RequireSystemPrompt(catalog, key);
             foreach (string token in tokens)
                 RequirePlaceholder(key, prompt, token);
+        }
+
+        private static void RequireCompletePromptWithPlaceholders(
+            PromptCatalog catalog,
+            string key,
+            params string[] userTokens)
+        {
+            var entry = catalog.RequireCompleteEntry(
+                key,
+                $"prompt-catalog: missing required runtime prompt key '{key}'. The yaml file is incomplete or missing.");
+            foreach (string token in userTokens)
+                RequirePlaceholderInTemplate(key, entry.UserTemplate!, "user_template", token);
+        }
+
+        private static void RequirePlaceholderInTemplate(
+            string key,
+            string template,
+            string field,
+            string token)
+        {
+            string placeholder = "{" + token + "}";
+            if (template.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: key '{key}' {field} must include required token '{placeholder}'.");
+            }
         }
 
         private static string StatKey(StatType stat)
