@@ -249,6 +249,7 @@ namespace Pinder.LlmAdapters
                 compiled.Spans
                     .Select(span => span.SourceFile ?? string.Empty)
                     .Where(source => !string.IsNullOrWhiteSpace(source))
+                    .Where(PromptTraceDiagnosticContract.IsSafeSource)
                     .Distinct(StringComparer.Ordinal)
                     .OrderBy(source => source, StringComparer.Ordinal));
             if (sources.Length > 0)
@@ -261,6 +262,7 @@ namespace Pinder.LlmAdapters
                 compiled.Spans
                     .Select(span => span.Key ?? string.Empty)
                     .Where(key => !string.IsNullOrWhiteSpace(key))
+                    .Where(PromptTraceDiagnosticContract.IsSafeTraceKey)
                     .Distinct(StringComparer.Ordinal)
                     .OrderBy(key => key, StringComparer.Ordinal));
             if (keys.Length > 0)

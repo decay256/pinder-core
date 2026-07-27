@@ -98,6 +98,8 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("data/prompts/emotional-reactions.yaml", directorTerminal.CorrelationHints["system_prompt_source"], StringComparison.Ordinal);
             Assert.Contains("character:psychiatric_diagnosis", directorTerminal.CorrelationHints["compiled_input_sources"], StringComparison.Ordinal);
             Assert.Contains(TherapistDiagnosisContract.DerivedFeelingKey, directorTerminal.CorrelationHints["compiled_input_keys"], StringComparison.Ordinal);
+            Assert.True(directorTerminal.CorrelationHints["compiled_input_keys"].Length > 256);
+            AssertSafePromptTraceHints(directorTerminal);
             Assert.Equal("emotional_director", directorTerminal.CorrelationHints["schema_name"]);
             Assert.Equal(EmotionalDirectorContract.SchemaVersion, directorTerminal.CorrelationHints["schema_version"]);
             Assert.Equal("unit-provider", directorTerminal.CorrelationHints["provider"]);
@@ -119,7 +121,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("2", performanceTerminal.CorrelationHints["total_attempts"]);
             Assert.Equal("datee", performanceTerminal.CorrelationHints["prompt_trace_type"]);
             Assert.Contains("data/prompts/emotional-reactions.yaml", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
+            Assert.Contains("conversation-history", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
             Assert.Contains("emotional-reaction-performance-direction", performanceTerminal.CorrelationHints["prompt_trace_keys"], StringComparison.Ordinal);
+            Assert.True(performanceTerminal.CorrelationHints["prompt_trace_keys"].Length > 256);
+            AssertSafePromptTraceHints(performanceTerminal);
             AssertNonNegativeIntHint(performanceTerminal, "elapsed_ms");
             Assert.Equal("ITokenUsageProvider.session_delta", performanceTerminal.CorrelationHints["token_source"]);
             Assert.Equal("23", performanceTerminal.CorrelationHints["input_tokens"]);
@@ -193,7 +198,19 @@ namespace Pinder.LlmAdapters.Tests
                 EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey,
                 retry.CorrelationHints["prompt_trace_keys"],
                 StringComparison.Ordinal);
+            AssertSafePromptTraceHints(retry);
             Assert.DoesNotContain(rejectedPrivateField, FlattenDiagnostics(diagnostics), StringComparison.Ordinal);
+        }
+
+        private static void AssertSafePromptTraceHints(OperationalDiagnosticEvent diagnostic)
+        {
+            foreach (var hint in diagnostic.CorrelationHints
+                .Where(pair => PromptTraceDiagnosticContract.IsMetadataKey(pair.Key)))
+            {
+                Assert.True(
+                    PromptTraceDiagnosticContract.IsSafe(hint.Key, hint.Value),
+                    $"Unsafe prompt trace hint {hint.Key}={hint.Value}");
+            }
         }
 
         private static PinderLlmAdapter CreateAdapter(

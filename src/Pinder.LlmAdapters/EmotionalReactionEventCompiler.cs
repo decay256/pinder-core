@@ -18,8 +18,9 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public sealed class EmotionalReactionEventCompiler
     {
-        public const string RuntimeSource = "runtime:DateeContext";
-        private const string CharacterDiagnosisSource = "character:psychiatric_diagnosis";
+        public const string RuntimeSource = PromptTraceDiagnosticContract.RuntimeDateeContextSource;
+        private const string CharacterDiagnosisSource =
+            PromptTraceDiagnosticContract.CharacterDiagnosisSource;
         private static readonly Regex PlaceholderRegex =
             new Regex(@"\{(?<token>[a-zA-Z_][a-zA-Z0-9_]*)\}", RegexOptions.Compiled);
 

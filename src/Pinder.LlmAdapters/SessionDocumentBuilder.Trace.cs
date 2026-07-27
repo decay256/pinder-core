@@ -12,7 +12,8 @@ namespace Pinder.LlmAdapters
 {
     public static partial class SessionDocumentBuilder
     {
-        internal const string EmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
+        internal const string EmotionalDirectorRuntimeSource =
+            PromptTraceDiagnosticContract.EmotionalDirectorRuntimeSource;
 
         private static string GetTemplateSource(PromptCatalog? promptCatalog, string key)
         {

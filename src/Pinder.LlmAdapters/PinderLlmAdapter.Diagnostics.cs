@@ -14,18 +14,6 @@ namespace Pinder.LlmAdapters
         private const string DateePrivatePhaseDirector = "director";
         private const string DateePrivatePhasePerformance = "performance";
 
-        private static readonly string[] SafeDiagnosticMetadataKeys = new[]
-        {
-            "prompt_key",
-            "system_prompt_source",
-            "user_template_source",
-            "compiled_input_sources",
-            "compiled_input_keys",
-            "prompt_trace_type",
-            "prompt_trace_sources",
-            "prompt_trace_keys",
-        };
-
         private static Dictionary<string, string> BuildDateePerformanceMetadata(PromptTraceResult trace)
         {
             if (trace == null) throw new ArgumentNullException(nameof(trace));
@@ -59,21 +47,30 @@ namespace Pinder.LlmAdapters
                 metadata[pair.Key] = pair.Value;
 
             metadata["prompt_trace_type"] = traceType;
-            metadata["prompt_trace_sources"] = JoinTraceValues(trace, span => span.SourceFile);
-            metadata["prompt_trace_keys"] = JoinTraceValues(trace, span => span.Key);
+            metadata["prompt_trace_sources"] = JoinTraceValues(
+                trace,
+                span => span.SourceFile,
+                PromptTraceDiagnosticContract.IsSafeSource);
+            metadata["prompt_trace_keys"] = JoinTraceValues(
+                trace,
+                span => span.Key,
+                PromptTraceDiagnosticContract.IsSafeTraceKey);
 
             return metadata;
         }
 
         private static string JoinTraceValues(
             PromptTraceResult trace,
-            Func<AnnotatedSpan, string?> selector)
+            Func<AnnotatedSpan, string?> selector,
+            Func<string, bool> validator)
         {
             return string.Join(
                 ",",
                 trace.Spans
                     .Select(selector)
                     .Where(value => !string.IsNullOrWhiteSpace(value))
+                    .Select(value => value!)
+                    .Where(validator)
                     .Distinct(StringComparer.Ordinal)
                     .OrderBy(value => value, StringComparer.Ordinal));
         }
@@ -124,10 +121,10 @@ namespace Pinder.LlmAdapters
                 return;
             }
 
-            foreach (string key in SafeDiagnosticMetadataKeys)
+            foreach (string key in PromptTraceDiagnosticContract.MetadataKeys)
             {
                 if (metadata.TryGetValue(key, out string value)
-                    && !string.IsNullOrWhiteSpace(value))
+                    && PromptTraceDiagnosticContract.IsSafe(key, value))
                 {
                     hints[key] = value;
                 }
