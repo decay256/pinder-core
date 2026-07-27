@@ -181,6 +181,9 @@ namespace Pinder.LlmAdapters
                 catalog,
                 "emotional-reaction-director",
                 "compiled_reaction_input");
+            RequireSystemPrompt(
+                catalog,
+                EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey);
         }
 
         private static string RequireSystemPrompt(PromptCatalog catalog, string key)

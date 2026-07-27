@@ -31,6 +31,7 @@ namespace Pinder.LlmAdapters
                 promptCompiler.CompileDirector(context);
             string userMessage = prompt.UserPrompt.Text;
             string systemPrompt = prompt.SystemPrompt.Text;
+            string attemptSystemPrompt = systemPrompt;
             double temperature = prompt.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
             int maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
             var metadata = prompt.Metadata;
@@ -46,7 +47,7 @@ namespace Pinder.LlmAdapters
                         if (_transport is IStructuredLlmTransport structuredTransport)
                         {
                             var request = EmotionalDirectorContract.CreateRequest(
-                                systemPrompt,
+                                attemptSystemPrompt,
                                 userMessage,
                                 temperature,
                                 maxTokens,
@@ -83,7 +84,7 @@ namespace Pinder.LlmAdapters
                         {
                             string responseText = await SendWithDiagnosticsAsync(
                                     _transport,
-                                    systemPrompt,
+                                    attemptSystemPrompt,
                                     userMessage,
                                     temperature,
                                     maxTokens,
@@ -107,6 +108,12 @@ namespace Pinder.LlmAdapters
                     }
                     catch (LlmContractException ex)
                     {
+                        if (attempt < maxAttempts)
+                        {
+                            attemptSystemPrompt = promptCompiler.CompileDirectorRetrySystemPrompt(
+                                systemPrompt,
+                                ex.Reason);
+                        }
                         return SemanticOutputRecoveryAttemptResult<EmotionalDirectorDirection, LlmContractException>.Rejected(ex);
                     }
                 },

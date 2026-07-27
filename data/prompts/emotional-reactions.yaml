@@ -101,13 +101,17 @@ prompts:
 
       The schema_version field must be exactly "emotional_director.v1".
 
-      The seven director fields must be concise, concrete, actionable natural-language prose. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
+      The seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
     user_template: |-
       Private emotional director source packet:
 
       {compiled_reaction_input}
     temperature: 0.35
     max_tokens: 500
+
+  emotional-reaction-director-repair-field-too-long:
+    system_prompt: >-
+      A previous emotional direction exceeded the permitted field length. Return a fresh complete object with every direction field 180 characters or fewer. Preserve the emotional meaning, but compress each field to one direct, actionable sentence or phrase.
 
   emotional-reaction-event-charm-clean:
     system_prompt: >-

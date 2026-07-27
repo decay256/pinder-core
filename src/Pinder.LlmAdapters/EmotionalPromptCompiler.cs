@@ -93,6 +93,8 @@ namespace Pinder.LlmAdapters
     public sealed class EmotionalPromptCompiler
     {
         public const string DirectorPromptKey = "emotional-reaction-director";
+        public const string DirectorFieldTooLongRepairPromptKey =
+            "emotional-reaction-director-repair-field-too-long";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
 
         private readonly PromptCatalog _catalog;
@@ -139,6 +141,26 @@ namespace Pinder.LlmAdapters
             CompiledEmotionalDirectorPrompt director = CompileDirector(context);
             PromptTraceResult performance = CompilePerformance(context, direction);
             return new CompiledEmotionalPrompts(director, performance);
+        }
+
+        internal string CompileDirectorRetrySystemPrompt(
+            string baseSystemPrompt,
+            string rejectionReason)
+        {
+            if (!string.Equals(rejectionReason, "field_too_long", StringComparison.Ordinal))
+                return baseSystemPrompt;
+
+            PromptEntry repair = _catalog.TryGet(DirectorFieldTooLongRepairPromptKey)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{DirectorFieldTooLongRepairPromptKey}'. The yaml file is incomplete or missing.");
+            string? repairPrompt = repair.SystemPrompt;
+            if (string.IsNullOrWhiteSpace(repairPrompt))
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: runtime prompt key '{DirectorFieldTooLongRepairPromptKey}' has no system_prompt. Check the yaml file.");
+            }
+
+            return baseSystemPrompt.TrimEnd() + "\n\n" + repairPrompt!.Trim();
         }
 
         private static PromptTraceResult CompileDirectorUserPrompt(

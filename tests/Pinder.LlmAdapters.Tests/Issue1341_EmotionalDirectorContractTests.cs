@@ -58,6 +58,11 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(
                 "emotional_director.v1",
                 schema["properties"]!["schema_version"]!.Value<string>("const"));
+            Assert.All(
+                schema["properties"]!
+                    .Children<JProperty>()
+                    .Where(property => property.Name != "schema_version"),
+                property => Assert.Equal(180, property.Value.Value<int>("maxLength")));
             Assert.Equal(
                 JoinTraceValues(compiled, span => span.Key),
                 transport.LastStructuredRequest.Metadata["compiled_input_keys"]);
@@ -65,6 +70,7 @@ namespace Pinder.LlmAdapters.Tests
                 JoinTraceValues(compiled, span => span.SourceFile),
                 transport.LastStructuredRequest.Metadata["compiled_input_sources"]);
             Assert.Contains("visible delivered line", transport.LastStructuredRequest.UserMessage, StringComparison.Ordinal);
+            Assert.Contains("each 180 characters or fewer", transport.LastStructuredRequest.SystemPrompt, StringComparison.Ordinal);
             Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
             Assert.Equal("moderate and steadily rising", direction.Intensity);
             Assert.Equal("turns warmer while still checking sincerity", direction.ResponsePosture);
@@ -282,6 +288,69 @@ namespace Pinder.LlmAdapters.Tests
             });
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Retry_FieldTooLongAddsCatalogRepairWithoutEchoingRejectedPrivateOutput(
+            bool structured)
+        {
+            const string privateRejectedText = "PRIVATE-OVERLONG-DIRECTOR-DO-NOT-ECHO-";
+            string overlong = privateRejectedText + new string('x', 181);
+            string invalid = ValidJson(interpretation: overlong);
+            var context = MakeContext();
+
+            if (structured)
+            {
+                var transport = new StructuredQueueTransport(
+                    new StructuredLlmResponse(
+                        invalid,
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true),
+                    new StructuredLlmResponse(
+                        ValidJson(),
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true));
+                var adapter = CreateAdapter(transport, retries: 1);
+
+                var direction = await adapter.GenerateEmotionalDirectionAsync(context);
+
+                Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
+                Assert.Equal(2, transport.StructuredCalls);
+                Assert.DoesNotContain(
+                    "A previous emotional direction exceeded the permitted field length.",
+                    transport.StructuredRequests[0].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains(
+                    "A previous emotional direction exceeded the permitted field length.",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains("180 characters or fewer", transport.StructuredRequests[1].SystemPrompt, StringComparison.Ordinal);
+                Assert.DoesNotContain(privateRejectedText, transport.StructuredRequests[1].SystemPrompt, StringComparison.Ordinal);
+                Assert.Equal(transport.StructuredRequests[0].JsonSchema, transport.StructuredRequests[1].JsonSchema);
+                return;
+            }
+
+            var plainTransport = new PlainQueueTransport(invalid, ValidJson());
+            var plainAdapter = CreateAdapter(plainTransport, retries: 1);
+
+            var plainDirection = await plainAdapter.GenerateEmotionalDirectionAsync(context);
+
+            Assert.Equal("relieved but cautious", plainDirection.PrimaryEmotion);
+            Assert.Equal(2, plainTransport.PlainCalls);
+            Assert.DoesNotContain(
+                "A previous emotional direction exceeded the permitted field length.",
+                plainTransport.SystemPrompts[0],
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "A previous emotional direction exceeded the permitted field length.",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.Contains("180 characters or fewer", plainTransport.SystemPrompts[1], StringComparison.Ordinal);
+            Assert.DoesNotContain(privateRejectedText, plainTransport.SystemPrompts[1], StringComparison.Ordinal);
+        }
+
         [Fact]
         public async Task Retry_ExhaustionThrowsFinalStableReason()
         {
@@ -461,6 +530,8 @@ namespace Pinder.LlmAdapters.Tests
             public int PlainCalls { get; private set; }
             public string LastSystemPrompt { get; private set; } = string.Empty;
             public string LastUserMessage { get; private set; } = string.Empty;
+            public List<string> SystemPrompts { get; } = new List<string>();
+            public List<string> UserMessages { get; } = new List<string>();
             public string? LastPhase { get; private set; }
             public double LastTemperature { get; private set; }
             public int LastMaxTokens { get; private set; }
@@ -477,6 +548,8 @@ namespace Pinder.LlmAdapters.Tests
                 PlainCalls++;
                 LastSystemPrompt = systemPrompt;
                 LastUserMessage = userMessage;
+                SystemPrompts.Add(systemPrompt);
+                UserMessages.Add(userMessage);
                 LastPhase = phase;
                 LastTemperature = temperature;
                 LastMaxTokens = maxTokens;
@@ -518,6 +591,8 @@ namespace Pinder.LlmAdapters.Tests
 
             public int StructuredCalls { get; private set; }
             public StructuredLlmRequest? LastStructuredRequest { get; private set; }
+            public List<StructuredLlmRequest> StructuredRequests { get; } =
+                new List<StructuredLlmRequest>();
 
             public Task<StructuredLlmResponse> SendStructuredAsync(
                 StructuredLlmRequest request,
@@ -526,6 +601,7 @@ namespace Pinder.LlmAdapters.Tests
                 ct.ThrowIfCancellationRequested();
                 StructuredCalls++;
                 LastStructuredRequest = request;
+                StructuredRequests.Add(request);
                 return Task.FromResult(_structuredResponses.Dequeue());
             }
         }
