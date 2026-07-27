@@ -109,6 +109,10 @@ prompts:
     temperature: 0.35
     max_tokens: 500
 
+  emotional-reaction-director-repair-contract:
+    system_prompt: >-
+      The previous emotional direction did not satisfy the response contract. Return a fresh complete object with exactly these fields and no others: schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture. Include every field even when the distinction is subtle, and keep each direction concrete, actionable, and consistent with the private source packet.
+
   emotional-reaction-director-repair-field-too-long:
     system_prompt: >-
       A previous emotional direction exceeded the permitted field length. Return a fresh complete object with every direction field 180 characters or fewer. Preserve the emotional meaning, but compress each field to one direct, actionable sentence or phrase.

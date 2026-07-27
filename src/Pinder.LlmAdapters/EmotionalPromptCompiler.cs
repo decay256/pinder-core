@@ -93,6 +93,8 @@ namespace Pinder.LlmAdapters
     public sealed class EmotionalPromptCompiler
     {
         public const string DirectorPromptKey = "emotional-reaction-director";
+        public const string DirectorContractRepairPromptKey =
+            "emotional-reaction-director-repair-contract";
         public const string DirectorFieldTooLongRepairPromptKey =
             "emotional-reaction-director-repair-field-too-long";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
@@ -147,17 +149,20 @@ namespace Pinder.LlmAdapters
             PromptTraceResult baseSystemPrompt,
             string rejectionReason)
         {
-            if (!string.Equals(rejectionReason, "field_too_long", StringComparison.Ordinal))
-                return baseSystemPrompt;
-
-            PromptEntry repair = _catalog.TryGet(DirectorFieldTooLongRepairPromptKey)
+            string repairKey = string.Equals(
+                rejectionReason,
+                "field_too_long",
+                StringComparison.Ordinal)
+                ? DirectorFieldTooLongRepairPromptKey
+                : DirectorContractRepairPromptKey;
+            PromptEntry repair = _catalog.TryGet(repairKey)
                 ?? throw new InvalidOperationException(
-                    $"prompt-catalog: missing required runtime prompt key '{DirectorFieldTooLongRepairPromptKey}'. The yaml file is incomplete or missing.");
+                    $"prompt-catalog: missing required runtime prompt key '{repairKey}'. The yaml file is incomplete or missing.");
             string? repairPrompt = repair.SystemPrompt;
             if (string.IsNullOrWhiteSpace(repairPrompt))
             {
                 throw new InvalidOperationException(
-                    $"prompt-catalog: runtime prompt key '{DirectorFieldTooLongRepairPromptKey}' has no system_prompt. Check the yaml file.");
+                    $"prompt-catalog: runtime prompt key '{repairKey}' has no system_prompt. Check the yaml file.");
             }
 
             var builder = new AnnotatedStringBuilder();
@@ -166,7 +171,7 @@ namespace Pinder.LlmAdapters
             builder.Append(
                 repairPrompt!.Trim(),
                 repair.SourceFile,
-                DirectorFieldTooLongRepairPromptKey);
+                repairKey);
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 

@@ -288,6 +288,51 @@ namespace Pinder.LlmAdapters.Tests
             });
         }
 
+        [Fact]
+        public async Task Retry_MissingFieldAddsCatalogRepairWithoutEchoingRejectedPrivateOutput()
+        {
+            const string privateRejectedText = "PRIVATE-MISSING-DIRECTOR-DO-NOT-ECHO";
+            string invalid =
+                "{\"schema_version\":\"emotional_director.v1\","
+                + "\"primary_emotion\":\"" + privateRejectedText + "\"}";
+            var transport = new StructuredQueueTransport(
+                new StructuredLlmResponse(
+                    invalid,
+                    provider: "test",
+                    model: "structured",
+                    usedNativeStructuredOutput: true),
+                new StructuredLlmResponse(
+                    ValidJson(),
+                    provider: "test",
+                    model: "structured",
+                    usedNativeStructuredOutput: true));
+            var adapter = CreateAdapter(transport, retries: 1);
+
+            var direction = await adapter.GenerateEmotionalDirectionAsync(MakeContext());
+
+            Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
+            Assert.Equal(2, transport.StructuredCalls);
+            Assert.DoesNotContain(
+                "The previous emotional direction did not satisfy the response contract.",
+                transport.StructuredRequests[0].SystemPrompt,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "The previous emotional direction did not satisfy the response contract.",
+                transport.StructuredRequests[1].SystemPrompt,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "response_posture",
+                transport.StructuredRequests[1].SystemPrompt,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                privateRejectedText,
+                transport.StructuredRequests[1].SystemPrompt,
+                StringComparison.Ordinal);
+            Assert.Equal(
+                transport.StructuredRequests[0].JsonSchema,
+                transport.StructuredRequests[1].JsonSchema);
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -367,6 +412,28 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
             Assert.Equal(
                 catalog.Get(EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey).SystemPrompt!.Trim(),
+                repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
+            Assert.Contains(
+                repaired.Spans,
+                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
+        }
+
+        [Fact]
+        public void GenericContractRepairPreservesYamlSpanInCompiledSystemPrompt()
+        {
+            PromptCatalog catalog = BuiltInCatalog();
+            var compiler = new EmotionalPromptCompiler(catalog);
+            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
+
+            var repaired = compiler.CompileDirectorRetrySystemPrompt(
+                initial.SystemPrompt,
+                "missing_field");
+
+            var repairSpan = Assert.Single(repaired.Spans.Where(
+                span => span.Key == EmotionalPromptCompiler.DirectorContractRepairPromptKey));
+            Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
+            Assert.Equal(
+                catalog.Get(EmotionalPromptCompiler.DirectorContractRepairPromptKey).SystemPrompt!.Trim(),
                 repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
             Assert.Contains(
                 repaired.Spans,

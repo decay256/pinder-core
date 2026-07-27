@@ -183,6 +183,9 @@ namespace Pinder.LlmAdapters
                 "compiled_reaction_input");
             RequireSystemPrompt(
                 catalog,
+                EmotionalPromptCompiler.DirectorContractRepairPromptKey);
+            RequireSystemPrompt(
+                catalog,
                 EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey);
         }
 
