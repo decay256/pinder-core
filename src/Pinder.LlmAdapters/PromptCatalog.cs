@@ -502,10 +502,24 @@ namespace Pinder.LlmAdapters
                 }
 
                 string normalizedPath = path.Replace('\\', '/');
-                int idx = normalizedPath.IndexOf("data/prompts", StringComparison.OrdinalIgnoreCase);
-                if (idx >= 0)
+                string[] pathSegments = normalizedPath.Split(
+                    new[] { '/' },
+                    StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i + 1 < pathSegments.Length; i++)
                 {
-                    normalizedPath = normalizedPath.Substring(idx);
+                    if (string.Equals(pathSegments[i], "data", StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(pathSegments[i + 1], "prompts", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string suffix = string.Join(
+                            "/",
+                            pathSegments,
+                            i + 2,
+                            pathSegments.Length - (i + 2));
+                        normalizedPath = suffix.Length == 0
+                            ? "data/prompts"
+                            : "data/prompts/" + suffix;
+                        break;
+                    }
                 }
 
                 origin[name] = path;

@@ -45,6 +45,59 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void LoadFromDirectory_CanonicalizesPromptSourcePrefixAcrossFilesystemCase()
+        {
+            string root = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "prompt-catalog-source-case-" + Guid.NewGuid().ToString("N"));
+            string prompts = System.IO.Path.Combine(root, "Data", "prompts");
+            Directory.CreateDirectory(prompts);
+            File.WriteAllText(
+                System.IO.Path.Combine(prompts, "emotional-reactions.yaml"),
+                "schema_version: 1\nprompts:\n  emotional-reaction-director:\n"
+                + "    system_prompt: \"SYSTEM\"\n");
+            try
+            {
+                var catalog = PromptCatalog.LoadFromDirectory(prompts);
+
+                Assert.Equal(
+                    "data/prompts/emotional-reactions.yaml",
+                    catalog.TryGet("emotional-reaction-director")!.SourceFile);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void LoadFromDirectory_DoesNotTrustPromptSourceSubstringNearMatch()
+        {
+            string root = System.IO.Path.Combine(
+                System.IO.Path.GetTempPath(),
+                "prompt-catalog-source-near-match-" + Guid.NewGuid().ToString("N"));
+            string prompts = System.IO.Path.Combine(root, "metaData", "prompts");
+            string sourceFile = System.IO.Path.Combine(prompts, "emotional-reactions.yaml");
+            Directory.CreateDirectory(prompts);
+            File.WriteAllText(
+                sourceFile,
+                "schema_version: 1\nprompts:\n  emotional-reaction-director:\n"
+                + "    system_prompt: \"SYSTEM\"\n");
+            try
+            {
+                var catalog = PromptCatalog.LoadFromDirectory(prompts);
+
+                Assert.Equal(
+                    sourceFile.Replace('\\', '/'),
+                    catalog.TryGet("emotional-reaction-director")!.SourceFile);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
         public void SessionDocumentBuilder_UsesExplicitlyCapturedCatalog_AfterGlobalChanges()
         {
             var promptsRoot = FindPromptsRoot();
