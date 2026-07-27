@@ -389,6 +389,9 @@ namespace Pinder.SessionSetup
             var anatomy = new Dictionary<string, float>();
             foreach (var kv in prop.EnumerateObject())
             {
+                if (DeprecatedAnatomyFields.IsDeprecated(kv.Name))
+                    continue;
+
                 // v2: float values
                 if (kv.Value.ValueKind == JsonValueKind.Number)
                 {
@@ -408,6 +411,7 @@ namespace Pinder.SessionSetup
                     throw new FormatException($"Character definition field anatomy.{kv.Name} must be a number or boolean, got {DescribeValueKind(kv.Value)}.");
                 }
             }
+            DeprecatedAnatomyFields.StripForLegacyRead(anatomy);
             return anatomy;
         }
 

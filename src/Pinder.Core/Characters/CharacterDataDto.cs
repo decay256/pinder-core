@@ -43,11 +43,6 @@ namespace Pinder.Core.Characters
         public float Gravitatis { get; set; } = 0f;
         public float Venicus    { get; set; } = 0f;
 
-        // ---- Expression (0–100, default 0) ----
-        public float Sad   { get; set; } = 0f;
-        public float Happy { get; set; } = 0f;
-        public float Serius { get; set; } = 0f;
-
         // ---- Skin ----
         /// <summary>Unity Color RGB, each channel [0..1].</summary>
         public float SkinColorR { get; set; } = 0.87f;
@@ -114,11 +109,6 @@ namespace Pinder.Core.Characters
             map["arrugatis"]  = Clamp01(dto.Arrugatis  / 100f);
             map["gravitatis"] = Clamp01(dto.Gravitatis / 100f);
             map["venicus"]    = Clamp01(dto.Venicus     / 100f);
-
-            // Expression
-            map["sad"]    = Clamp01(dto.Sad    / 100f);
-            map["happy"]  = Clamp01(dto.Happy  / 100f);
-            map["serius"] = Clamp01(dto.Serius / 100f);
 
             // Skin — RGB → HSV
             RgbToHsv(dto.SkinColorR, dto.SkinColorG, dto.SkinColorB,

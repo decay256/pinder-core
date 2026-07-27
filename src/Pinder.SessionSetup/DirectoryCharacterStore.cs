@@ -631,6 +631,10 @@ namespace Pinder.SessionSetup
                     throw new FormatException(
                         "Replacement artifact character_id does not match the requested character.");
                 }
+
+                DeprecatedAnatomyFields.ThrowIfJsonRootContainsDeprecatedForWrite(
+                    document.RootElement,
+                    "Replacement artifact");
             }
             catch (JsonException ex)
             {
