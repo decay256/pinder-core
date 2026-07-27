@@ -221,14 +221,15 @@ namespace Pinder.LlmAdapters
                     "DateeContext.EmotionalTurnEvent is required for the production DATEE response path.");
             }
 
+            var emotionalPromptCompiler = new EmotionalPromptCompiler(
+                PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog));
             EmotionalDirectorDirection emotionalDirection = await GenerateEmotionalDirectionAsync(
                     context,
+                    emotionalPromptCompiler,
                     cancellationToken)
                 .ConfigureAwait(false);
-            PromptTraceResult dateePrompt = SessionDocumentBuilder.BuildDateePerformancePromptEx(
-                context,
-                emotionalDirection,
-                _options.PromptCatalog);
+            PromptTraceResult dateePrompt =
+                emotionalPromptCompiler.CompilePerformance(context, emotionalDirection);
             InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
             var userContent = dateePrompt.Text;
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);

@@ -39,7 +39,7 @@ namespace Pinder.Core.Tests.Conversation
                 new EmptyTrapRegistry(),
                 null,
                 null,
-                new SessionXpRecorder(new XpLedger(), null),
+                new SessionXpRecorder(new XpLedger(), TestHelpers.SessionRules),
                 globalDcBias,
                 activeTrapInterestPenalty);
         }

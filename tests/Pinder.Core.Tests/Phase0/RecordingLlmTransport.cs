@@ -27,6 +27,16 @@ namespace Pinder.Core.Tests.Phase0
     /// </summary>
     public sealed class RecordingLlmTransport : ILlmTransport
     {
+        private const string ValidEmotionalDirection =
+            "{\"schema_version\":\"emotional_director.v1\"," +
+            "\"primary_emotion\":\"relieved but cautious\"," +
+            "\"intensity\":\"moderate and steadily rising\"," +
+            "\"underlying_feeling\":\"fear of being dismissed\"," +
+            "\"interpretation\":\"reads the message as specific warmth that is probably meant for them\"," +
+            "\"impulse\":\"leans in with a careful question\"," +
+            "\"restraint\":\"keeps the reply tentative but available\"," +
+            "\"response_posture\":\"turns warmer while still checking sincerity\"}";
+
         public sealed record LlmExchange(
             string Phase,
             string SystemPrompt,
@@ -107,6 +117,10 @@ namespace Pinder.Core.Tests.Phase0
             else if (_defaultResponder != null)
             {
                 response = _defaultResponder(phase, systemPrompt, userMessage) ?? DefaultResponse;
+            }
+            else if (string.Equals(ph, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
+            {
+                response = ValidEmotionalDirection;
             }
             else
             {

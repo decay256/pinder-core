@@ -42,8 +42,9 @@ namespace Pinder.Core.Tests
 
             string content = File.ReadAllText(docPath);
 
-            // Extract tokens ending with .cs
-            var matches = Regex.Matches(content, @"[A-Za-z0-9_./]+\.cs");
+            // Extract standalone C# source references without treating the
+            // ".cs" prefix of a project-file extension as a source filename.
+            var matches = Regex.Matches(content, @"[A-Za-z0-9_./]+\.cs(?![A-Za-z0-9_])");
             var tokens = matches
                 .Cast<Match>()
                 .Select(m => m.Value)

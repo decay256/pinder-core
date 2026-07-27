@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using System.IO;
 using Xunit;
 using Pinder.Core.Characters;
+using Pinder.Core.Data;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
-using Pinder.Core.Conversation;
 using Pinder.LlmAdapters;
 using Pinder.SessionSetup;
 
@@ -292,48 +292,57 @@ namespace Pinder.Core.Tests
         }
         
         [Fact]
-        public void CharacterDefinitionAndProfile_RetainSynthesisFields()
+        public void SynthesisFields_RoundTripThroughWriterLoaderAndAssembly()
         {
-            var backstory = new Dictionary<string, BackstoryFact> { { "f1", new BackstoryFact("S", "D", "S") } };
-            var stakes = new List<string> { "Stake line" };
-            var diag = CompleteDiagnosisWith(("derived_feeling", "angst"));
+            var backstory = new Dictionary<string, BackstoryFact>
+            {
+                { "origin_wound", new BackstoryFact("claims the breakup was mutual", "was suddenly abandoned after moving cities") },
+                { "social_mask", new BackstoryFact("performs breezy confidence", "checks every pause for signs of rejection") }
+            };
+            var stakes = Enumerable.Range(1, 15)
+                .Select(i => $"synthesis stake line {i}")
+                .ToList();
+            var diagnosis = CompleteDiagnosisWith(
+                ("derived_feeling", "old panic that closeness can disappear without warning"),
+                ("defense_reaction", "turns sincerity into a joke before it can hurt"),
+                ("honesty_reaction", "trust grows when candor is gentle and specific"));
 
             var def = new CharacterDefinition(
-                schemaVersion: 1,
+                schemaVersion: CharacterDefinition.CurrentSchemaVersion,
                 characterId: Guid.NewGuid(),
-                name: "Test",
-                genderIdentity: "none",
-                bio: "bio",
-                level: 1,
+                name: "Boundary Test",
+                genderIdentity: "they/them",
+                bio: "public bio",
+                level: 2,
                 items: new List<string>(),
                 anatomy: new Dictionary<string, float>(),
-                allocation: new AllocationBlock(new Dictionary<StatType, int>(), 0, new Dictionary<ShadowStatType, int>()),
-                psychologicalStake: null,
+                allocation: BuildAllocation(),
+                psychologicalStake: "They need steady presence to risk honest attachment.",
                 backstory: backstory,
                 stakeLines: stakes,
-                psychiatricDiagnosis: diag
+                psychiatricDiagnosis: diagnosis,
+                consolidatedPersonality: "Alert, funny, and careful about needing anyone.",
+                consolidatedBackstory: "A move made abandonment feel ordinary, so they narrate pain as control."
             );
 
-            Assert.NotNull(def.Backstory);
-            Assert.True(def.Backstory.ContainsKey("f1"));
-            Assert.Contains("Stake line", def.StakeLines);
-            Assert.Equal("angst", def.PsychiatricDiagnosis["derived_feeling"]);
+            string persisted = CharacterDefinitionWriter.Write(def);
+            var loadedDefinition = CharacterDefinitionLoader.ParseDefinition(persisted);
+            var assembledProfile = CharacterDefinitionLoader.Parse(
+                persisted,
+                LoadItemRepo(),
+                LoadAnatomyRepo());
 
-            var profile = TestHelpers.MakeCharacterProfile(
-                stats: new StatBlock(new Dictionary<StatType, int>(), new Dictionary<ShadowStatType, int>()),
-                assembledSystemPrompt: "prompt",
-                displayName: "Test",
-                timing: new TimingProfile(1, 1f, 1f, "neutral"),
-                level: 1,
-                backstory: backstory,
-                stakeLines: stakes,
-                psychiatricDiagnosis: diag
-            );
+            AssertSynthesisFieldsSurvive(loadedDefinition.Backstory, loadedDefinition.StakeLines, loadedDefinition.PsychiatricDiagnosis);
+            Assert.Equal(def.PsychologicalStake, loadedDefinition.PsychologicalStake);
+            Assert.Equal(def.ConsolidatedPersonality, loadedDefinition.ConsolidatedPersonality);
+            Assert.Equal(def.ConsolidatedBackstory, loadedDefinition.ConsolidatedBackstory);
 
-            Assert.NotNull(profile.Backstory);
-            Assert.True(profile.Backstory.ContainsKey("f1"));
-            Assert.Contains("Stake line", profile.StakeLines);
-            Assert.Equal("angst", profile.PsychiatricDiagnosis["derived_feeling"]);
+            AssertSynthesisFieldsSurvive(assembledProfile.Backstory, assembledProfile.StakeLines, assembledProfile.PsychiatricDiagnosis);
+            Assert.Equal(def.PsychologicalStake, assembledProfile.PsychologicalStake);
+            Assert.Equal(def.ConsolidatedPersonality, assembledProfile.ConsolidatedPersonality);
+            Assert.Equal(def.ConsolidatedBackstory, assembledProfile.ConsolidatedBackstory);
+            Assert.Contains("old panic that closeness can disappear without warning", assembledProfile.AssembledSystemPrompt);
+            Assert.Contains("Alert, funny, and careful about needing anyone.", assembledProfile.AssembledSystemPrompt);
         }
 
         [Fact]
@@ -479,6 +488,56 @@ namespace Pinder.Core.Tests
             return "{ " + string.Join(
                 ", ",
                 values.Select(pair => $"\"{pair.Key}\": \"{pair.Value}\"")) + " }";
+        }
+
+        private static AllocationBlock BuildAllocation()
+        {
+            var spent = Enum.GetValues(typeof(StatType))
+                .Cast<StatType>()
+                .ToDictionary(stat => stat, _ => 0);
+            var shadows = Enum.GetValues(typeof(ShadowStatType))
+                .Cast<ShadowStatType>()
+                .ToDictionary(shadow => shadow, _ => 0);
+            return new AllocationBlock(spent, 0, shadows);
+        }
+
+        private static IItemRepository LoadItemRepo()
+            => new JsonItemRepository(TestRepoLocator.ReadDataFile("items/starter-items.json"));
+
+        private static IAnatomyRepository LoadAnatomyRepo()
+            => new JsonAnatomyRepository(TestRepoLocator.ReadDataFile("anatomy/anatomy-parameters.json"));
+
+        private static void AssertSynthesisFieldsSurvive(
+            IReadOnlyDictionary<string, BackstoryFact>? backstory,
+            IReadOnlyList<string>? stakeLines,
+            IReadOnlyDictionary<string, string>? psychiatricDiagnosis)
+        {
+            Assert.NotNull(backstory);
+            Assert.Collection(
+                backstory!,
+                entry =>
+                {
+                    Assert.Equal("origin_wound", entry.Key);
+                    Assert.Equal("claims the breakup was mutual", entry.Value.BioLie);
+                    Assert.Equal("was suddenly abandoned after moving cities", entry.Value.TragicReality);
+                },
+                entry =>
+                {
+                    Assert.Equal("social_mask", entry.Key);
+                    Assert.Equal("performs breezy confidence", entry.Value.BioLie);
+                    Assert.Equal("checks every pause for signs of rejection", entry.Value.TragicReality);
+                });
+
+            Assert.NotNull(stakeLines);
+            Assert.Equal(15, stakeLines!.Count);
+            Assert.Equal("synthesis stake line 1", stakeLines[0]);
+            Assert.Equal("synthesis stake line 15", stakeLines[14]);
+
+            Assert.NotNull(psychiatricDiagnosis);
+            Assert.Equal(TherapistDiagnosisContract.RequiredFields, psychiatricDiagnosis!.Keys.ToArray());
+            Assert.Equal("old panic that closeness can disappear without warning", psychiatricDiagnosis["derived_feeling"]);
+            Assert.Equal("turns sincerity into a joke before it can hurt", psychiatricDiagnosis["defense_reaction"]);
+            Assert.Equal("trust grows when candor is gentle and specific", psychiatricDiagnosis["honesty_reaction"]);
         }
     }
 }

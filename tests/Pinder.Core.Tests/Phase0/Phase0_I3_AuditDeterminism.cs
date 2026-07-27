@@ -72,7 +72,7 @@ namespace Pinder.Core.Tests.Phase0
             // reintroduces a `delivery` LLM call — would land here and fail this
             // test, prompting an explicit decision instead of a silent leak.
             Assert.Equal(
-                new[] { LlmPhase.DialogueOptions, LlmPhase.DateeResponse },
+                new[] { LlmPhase.DialogueOptions, LlmPhase.EmotionalDirector, LlmPhase.DateeResponse },
                 phases);
             Assert.DoesNotContain(LlmPhase.Delivery, phases);
         }

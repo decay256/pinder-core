@@ -55,7 +55,8 @@ prompts:
                 string result = await describer.GenerateAsync("Alice", playerItems, "Bob", dateeItems);
 
                 Assert.Equal("CUSTOM SYSTEM PROMPT Alice", transport.LastSystemPrompt);
-                Assert.Contains("CUSTOM USER Alice wears - crown\n- cape datee Bob wears - glasses", transport.LastUserMessage);
+                string userMessage = transport.LastUserMessage!.Replace("\r\n", "\n");
+                Assert.Contains("CUSTOM USER Alice wears - crown\n- cape datee Bob wears - glasses", userMessage);
             }
             finally
             {

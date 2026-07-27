@@ -231,7 +231,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurnAsync_DateSecured_Multiplies3xPlusRollXp()
         {
             // Start at interest 24 (AlmostThere), roll success → +1 or more → 25 → DateSecured
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -253,7 +253,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurnAsync_Unmatched_Multiplies1xConversationComplete()
         {
             // Start at interest 1, failure drops to 0 → Unmatched
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -335,7 +335,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurnAsync_GameEndsFirstTurn_BothXpRecorded()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -358,7 +358,7 @@ namespace Pinder.Core.Tests
             var dateeStats = MakeStatBlock(allStats: dateeStatValue);
             var datee = MakeProfile("datee", dateeStats);
 
-            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules);
             return new GameSession(
                 player,
                 datee,
@@ -379,7 +379,7 @@ namespace Pinder.Core.Tests
             var dateeStats = MakeStatBlock(allStats: dateeStatValue);
             var datee = MakeProfile("datee", dateeStats);
 
-            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules);
             return new GameSession(
                 player,
                 datee,

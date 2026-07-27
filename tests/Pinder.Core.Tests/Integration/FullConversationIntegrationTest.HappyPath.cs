@@ -51,6 +51,7 @@ namespace Pinder.Core.Tests.Integration
                 dateeShadows: dateeShadows,
                 startingInterest: 5,  // low start to stay in range with new higher risk bonuses
                 previousOpener: null,
+                rules: TestHelpers.SessionRules,
                 activeTrapInterestPenalty: 0.0);
 
             var trapRegistry = new TestTrapRegistry();

@@ -38,7 +38,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Terminal_DateSecured_Multiplies_CollectedXp_By3x()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, playerStatValue: 3, config: config);
             
             await session.StartTurnAsync();
@@ -58,7 +58,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task Terminal_Unmatched_Is1x_NoBonusEvent()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 2, dateeStatValue: 0, playerStatValue: 3, config: config);
             
             await session.StartTurnAsync();

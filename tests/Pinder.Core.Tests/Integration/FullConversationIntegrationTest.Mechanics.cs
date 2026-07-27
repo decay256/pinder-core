@@ -209,7 +209,8 @@ namespace Pinder.Core.Tests.Integration
                 playerShadows: new SessionShadowTracker(geraldStats),
                 dateeShadows: new SessionShadowTracker(velvetStats),
                 startingInterest: 1,
-                previousOpener: null);
+                previousOpener: null,
+                rules: TestHelpers.SessionRules);
 
             var llm = new ScriptedLlmAdapter(new[]
             {

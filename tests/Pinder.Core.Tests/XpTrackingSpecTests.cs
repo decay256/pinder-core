@@ -223,7 +223,7 @@ namespace Pinder.Core.Tests
             var datee = MakeProfile("datee", dateeStats);
 
             // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
-            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules);
 
             return new GameSession(
                 player,
@@ -246,7 +246,7 @@ namespace Pinder.Core.Tests
             var datee = MakeProfile("datee", dateeStats);
 
             // Clock is required; if caller did not supply a config, provide one with a zero-modifier clock.
-            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock());
+            config = config ?? new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules);
 
             return new GameSession(
                 player,

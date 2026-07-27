@@ -154,11 +154,13 @@ namespace Pinder.LlmAdapters.Tests
             try
             {
                 string path = Path.Combine(root, "emotional-reactions.yaml");
+                string content = File.ReadAllText(path);
+                string newline = content.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
                 File.WriteAllText(
                     path,
-                    File.ReadAllText(path).Replace(
-                        "emotional-reaction-interest-bored:\n    system_prompt:",
-                        "emotional-reaction-interest-bored:\n    user_template:",
+                    content.Replace(
+                        $"emotional-reaction-interest-bored:{newline}    system_prompt:",
+                        $"emotional-reaction-interest-bored:{newline}    user_template:",
                         StringComparison.Ordinal));
                 var catalog = PromptCatalog.LoadFromDirectory(root);
 

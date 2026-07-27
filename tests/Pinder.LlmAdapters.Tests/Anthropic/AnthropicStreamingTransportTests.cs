@@ -191,7 +191,7 @@ namespace Pinder.LlmAdapters.Tests.Anthropic
         public void Constructor_NullHttpClient_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new AnthropicStreamingTransport(TestApiKey, TestModel, null!));
+                new AnthropicStreamingTransport(TestApiKey, TestModel, (HttpClient)null!));
         }
 
         // ─── Dispose ──────────────────────────────────────────────────────

@@ -63,7 +63,8 @@ namespace Pinder.Core.Tests
 
             var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows,
                 previousOpener: previousOpener,
-                startingInterest: startingInterest);
+                startingInterest: startingInterest,
+                rules: TestHelpers.SessionRules);
 
             // Prepend horniness roll (1d10) consumed by constructor
             var wrappedDice = new PrependedDice(5, dice ?? Dice(15, 50));
@@ -84,7 +85,10 @@ namespace Pinder.Core.Tests
             TrapDefinition? trapDef = null)
         {
             playerStats ??= Stats();
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
+                rules: TestHelpers.SessionRules);
 
             // Prepend horniness roll (1d10) consumed by constructor
             var wrappedDice = new PrependedDice(5, dice);

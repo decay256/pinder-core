@@ -415,7 +415,7 @@ namespace Pinder.LlmAdapters
 
         internal static PromptTraceResult BuildDateePerformancePromptEx(
             DateeContext context,
-            EmotionalDirectorDirection emotionalDirection,
+            EmotionalPrivateDirection emotionalDirection,
             PromptCatalog? promptCatalog = null)
         {
             if (emotionalDirection == null) throw new ArgumentNullException(nameof(emotionalDirection));
@@ -424,7 +424,7 @@ namespace Pinder.LlmAdapters
 
         private static PromptTraceResult BuildDateePromptCore(
             DateeContext context,
-            EmotionalDirectorDirection? emotionalDirection,
+            EmotionalPrivateDirection? emotionalDirection,
             PromptCatalog? promptCatalog)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

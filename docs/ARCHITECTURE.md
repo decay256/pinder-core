@@ -43,7 +43,7 @@ These assembly-map invariants — Pinder.Core kernel purity (only framework/BCL-
 
 ### Pinder.Core
 
-The domain kernel. It targets netstandard2.0 and may use narrowly scoped Microsoft BCL-support NuGet packages that are already listed in `Pinder.Core.csproj` (`Microsoft.Bcl.AsyncInterfaces` and `System.Text.Json`). It must not take service, web, provider, rules-engine, or gameplay-framework dependencies, and it must not perform I/O.
+The domain kernel. It targets netstandard2.0 and may use narrowly scoped Microsoft BCL-support NuGet packages that are already listed in `src/Pinder.Core/Pinder.Core.csproj` (`Microsoft.Bcl.AsyncInterfaces` and `System.Text.Json`). It must not take service, web, provider, rules-engine, or gameplay-framework dependencies, and it must not perform I/O.
 
 | Depends on | Microsoft.Bcl.AsyncInterfaces, System.Text.Json |
 |---|---|

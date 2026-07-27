@@ -79,7 +79,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_WithMultipleXpAwards_PopulatesXpBreakdownOnTurnResult()
         {
             // Start at 24 interest, success pushes to 25+ → DateSecured (ends game)
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             

@@ -233,47 +233,53 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public async Task Index_MalformedJsonFiles_Throw()
+        public async Task Index_MalformedJsonFiles_ReturnDiagnostics()
         {
             File.WriteAllText(Path.Combine(_tmpDir, "garbage.json"), "{ this is not json");
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+            var result = await new DirectoryCharacterStore(_tmpDir)
+                .EnumerateArtifactsAsync();
 
-            Assert.Contains("garbage.json", ex.Message);
-            Assert.Contains("malformed JSON", ex.Message);
+            Assert.Empty(result.CharacterIds);
+            var diagnostic = Assert.Single(result.Diagnostics);
+            Assert.Equal("garbage.json", diagnostic.SourceId);
+            Assert.Equal(CharacterStoreDiagnosticCodes.MalformedArtifact, diagnostic.Code);
         }
 
         [Fact]
-        public async Task Index_MissingCharacterId_Throws()
+        public async Task Index_MissingCharacterId_ReturnsDiagnostic()
         {
             File.WriteAllText(Path.Combine(_tmpDir, "missing-id.json"), "{}");
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+            var result = await new DirectoryCharacterStore(_tmpDir)
+                .EnumerateArtifactsAsync();
 
-            Assert.Contains("missing-id.json", ex.Message);
-            Assert.Contains("missing required property 'character_id'", ex.Message);
+            var diagnostic = Assert.Single(result.Diagnostics);
+            Assert.Equal("missing-id.json", diagnostic.SourceId);
+            Assert.Contains("missing required property", diagnostic.Message);
         }
 
         [Fact]
-        public async Task Index_DuplicateCharacterId_Throws()
+        public async Task Index_DuplicateCharacterId_ReturnsPerArtifactDiagnostics()
         {
             var a = NewDefinition(idHex: "11111111-1111-4111-8111-111111111111", name: "A");
             var b = NewDefinition(idHex: "11111111-1111-4111-8111-111111111111", name: "B");
             File.WriteAllText(Path.Combine(_tmpDir, "a.json"), CharacterDefinitionWriter.Write(a));
             File.WriteAllText(Path.Combine(_tmpDir, "b.json"), CharacterDefinitionWriter.Write(b));
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+            var result = await new DirectoryCharacterStore(_tmpDir)
+                .EnumerateArtifactsAsync();
 
-            Assert.Contains("Duplicate character_id", ex.Message);
-            Assert.Contains("a.json", ex.Message);
-            Assert.Contains("b.json", ex.Message);
+            Assert.Empty(result.CharacterIds);
+            Assert.Equal(2, result.Diagnostics.Count);
+            Assert.Contains(result.Diagnostics, item => item.SourceId == "a.json");
+            Assert.Contains(result.Diagnostics, item => item.SourceId == "b.json");
+            Assert.All(result.Diagnostics, item =>
+                Assert.Equal(CharacterStoreDiagnosticCodes.DuplicateCharacterId, item.Code));
         }
 
         [Fact]
-        public async Task Index_ReadIOException_Throws()
+        public async Task Index_ReadIOException_ReturnsDiagnostic()
         {
             var def = NewDefinition();
             File.WriteAllText(Path.Combine(_tmpDir, "unavailable.json"), CharacterDefinitionWriter.Write(def));
@@ -282,13 +288,12 @@ namespace Pinder.Core.Tests
                 _ => throw new IOException("simulated unavailable character file");
             try
             {
-                var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-                    () => new DirectoryCharacterStore(_tmpDir).ListIdsAsync());
+                var result = await new DirectoryCharacterStore(_tmpDir)
+                    .EnumerateArtifactsAsync();
 
-                Assert.Contains("unavailable.json", ex.Message);
-                Assert.Contains("I/O error", ex.Message);
-                var aggregate = Assert.IsType<AggregateException>(ex.InnerException);
-                Assert.IsType<IOException>(Assert.Single(aggregate.InnerExceptions));
+                var diagnostic = Assert.Single(result.Diagnostics);
+                Assert.Equal("unavailable.json", diagnostic.SourceId);
+                Assert.Equal(CharacterStoreDiagnosticCodes.UnreadableArtifact, diagnostic.Code);
             }
             finally
             {

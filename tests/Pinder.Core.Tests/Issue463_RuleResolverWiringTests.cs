@@ -202,7 +202,7 @@ namespace Pinder.Core.Tests
         {
             // Custom success delta of +10 (way above any hardcoded value of +1 to +4)
             var resolver = new StubRuleResolver { SuccessDeltaReturn = 10 };
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 10);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: resolver, startingInterest: 5);
 
             // Nat 20 = guaranteed success
             var dice = new FixedDice(1, 20, 50, 50, 50, 50, 50, 50, 50, 50, 50);
@@ -213,8 +213,8 @@ namespace Pinder.Core.Tests
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
-            // With +10 success delta, interest from 10 should reach cap (25)
-            // Hardcoded nat20 gives +4, so if interest > 20, resolver value was used
+            // With +10 success delta, interest from 5 should exceed 14 without ending the session.
+            // Hardcoded nat20 gives +4, so interest would only reach 9.
             Assert.True(result.StateAfter.Interest > 14,
                 $"Expected interest > 14 with resolver success delta +10, got {result.StateAfter.Interest}");
         }

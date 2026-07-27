@@ -130,7 +130,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_DateSecured_Multiplies3xEndOfGame()
         {
             // Start at 24 interest, success pushes to 25+ → DateSecured
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -152,7 +152,7 @@ namespace Pinder.Core.Tests
         public async Task ResolveTurn_Unmatched_Multiplies1xEndOfGame()
         {
             // Start at 1 interest, failure drops to 0 → Unmatched
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -340,7 +340,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_DateSecuredFinalTurn_XpEarnedIncludesBoth()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -358,7 +358,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_FailurePlusUnmatched_BothXpRecorded()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 1, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 2, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
@@ -377,7 +377,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public async Task ResolveTurn_GameEndsFirstTurn_BothXpTypes()
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24);
+            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 24, rules: TestHelpers.SessionRules);
             var session = MakeSession(diceRoll: 15, dateeStatValue: 0, config: config);
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);

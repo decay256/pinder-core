@@ -21,12 +21,11 @@ namespace Pinder.SessionSetup
     /// <see cref="CharacterDefinition.Name"/> and resolves collisions by
     /// appending a short character_id suffix.
     ///
-    /// Concurrency contract: all mutating operations are serialised through
-    /// a per-instance <see cref="SemaphoreSlim"/>. Reads see a consistent
-    /// index but two stores pointed at the same directory do NOT coordinate
-    /// beyond what the filesystem itself provides (no fcntl locks).
-    /// Single-process, possibly multi-task usage is safe; cross-process is
-    /// not.
+    /// Concurrency contract: each instance serialises its operations through
+    /// a <see cref="SemaphoreSlim"/>. Mutations additionally acquire an
+    /// exclusive lock file shared by every store rooted at this directory,
+    /// then replace artifacts atomically. Multiple processes using this store
+    /// therefore coordinate compare-and-swap, save, and delete operations.
     ///
     /// I/O contract: every method here performs genuine asynchronous disk
     /// I/O (async file streams, async JSON parsing) rather than synchronous
@@ -37,9 +36,13 @@ namespace Pinder.SessionSetup
     /// (cheap, metadata-only) directory listing; the per-file content reads
     /// it drives are fully async.
     /// </summary>
-    public sealed class DirectoryCharacterStore : ICharacterStore
+    public sealed class DirectoryCharacterStore :
+        ICharacterStore,
+        IAtomicCharacterArtifactStore,
+        ICharacterStoreDiagnosticEnumerator
     {
         private const int DefaultBufferSize = 4096;
+        private const string StoreLockFileName = ".pinder-character-store.lock";
 
         private readonly string _directory;
         private readonly SemaphoreSlim _gate = new SemaphoreSlim(1, 1);
@@ -74,10 +77,28 @@ namespace Pinder.SessionSetup
 
         public async Task<IReadOnlyList<string>> ListIdsAsync(CancellationToken ct = default)
         {
+            CharacterStoreEnumeration enumeration =
+                await EnumerateArtifactsAsync(ct).ConfigureAwait(false);
+            return enumeration.CharacterIds;
+        }
+
+        public async Task<CharacterStoreEnumeration> EnumerateArtifactsAsync(
+            CancellationToken ct = default)
+        {
             ct.ThrowIfCancellationRequested();
-            var index = await EnsureIndexAsync(ct).ConfigureAwait(false);
-            IReadOnlyList<string> ids = index.Keys.ToList();
-            return ids;
+            await _gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                IndexScan scan = await ScanIndexLockedAsync(ct).ConfigureAwait(false);
+                _idIndex = scan.Index;
+                return new CharacterStoreEnumeration(
+                    scan.Index.Keys.OrderBy(value => value, StringComparer.Ordinal).ToList(),
+                    scan.Diagnostics);
+            }
+            finally
+            {
+                _gate.Release();
+            }
         }
 
         public async Task<CharacterDefinition?> LoadAsync(string characterId, CancellationToken ct = default)
@@ -106,32 +127,113 @@ namespace Pinder.SessionSetup
             return CharacterDefinitionLoader.ParseDefinition(json);
         }
 
+        public async Task<CharacterArtifact?> ReadArtifactAsync(
+            string characterId,
+            CancellationToken ct = default)
+        {
+            ValidateCharacterIdArgument(characterId);
+            ct.ThrowIfCancellationRequested();
+
+            await _gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                _idIndex = null;
+                var index = await EnsureIndexLockedAsync(ct).ConfigureAwait(false);
+                if (!index.TryGetValue(characterId, out string? path) || !File.Exists(path))
+                    return null;
+
+                byte[] content = await ReadAllBytesAsync(path, ct).ConfigureAwait(false);
+                return new CharacterArtifact(characterId, content);
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
+        public async Task<CharacterArtifact> CompareExchangeArtifactAsync(
+            string characterId,
+            string expectedRevision,
+            byte[] replacementContent,
+            CancellationToken ct = default)
+        {
+            ValidateCharacterIdArgument(characterId);
+            if (string.IsNullOrWhiteSpace(expectedRevision))
+                throw new ArgumentException("Expected revision must not be blank.", nameof(expectedRevision));
+            if (replacementContent == null)
+                throw new ArgumentNullException(nameof(replacementContent));
+            if (replacementContent.Length == 0)
+                throw new ArgumentException("Replacement content must not be empty.", nameof(replacementContent));
+            ValidateReplacementIdentity(characterId, replacementContent);
+            ct.ThrowIfCancellationRequested();
+
+            await _gate.WaitAsync(ct).ConfigureAwait(false);
+            try
+            {
+                System.IO.Directory.CreateDirectory(_directory);
+                using (await AcquireStoreLockAsync(ct).ConfigureAwait(false))
+                {
+                    _idIndex = null;
+                    var index = await EnsureIndexLockedAsync(ct).ConfigureAwait(false);
+                    if (!index.TryGetValue(characterId, out string? path) || !File.Exists(path))
+                        throw new KeyNotFoundException("Character artifact was not found.");
+
+                    byte[] activeContent = await ReadAllBytesAsync(path, ct).ConfigureAwait(false);
+                    string activeRevision = CharacterArtifactRevisions.Compute(activeContent);
+                    if (!string.Equals(
+                            activeRevision,
+                            expectedRevision,
+                            StringComparison.Ordinal))
+                    {
+                        throw new CharacterArtifactRevisionConflictException(
+                            expectedRevision,
+                            activeRevision);
+                    }
+
+                    await AtomicWriteAsync(
+                        path,
+                        replacementContent,
+                        replaceExisting: true,
+                        ct).ConfigureAwait(false);
+                    return new CharacterArtifact(characterId, replacementContent);
+                }
+            }
+            finally
+            {
+                _gate.Release();
+            }
+        }
+
         public async Task SaveAsync(CharacterDefinition def, CancellationToken ct = default)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
             ct.ThrowIfCancellationRequested();
 
             string id = def.CharacterId.ToString("D");
-            string content = CharacterDefinitionWriter.Write(def);
+            byte[] content = Encoding.UTF8.GetBytes(CharacterDefinitionWriter.Write(def));
 
             await _gate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
                 System.IO.Directory.CreateDirectory(_directory);
+                using (await AcquireStoreLockAsync(ct).ConfigureAwait(false))
+                {
+                    _idIndex = null;
 
                 var index = await EnsureIndexLockedAsync(ct).ConfigureAwait(false);
                 if (index.TryGetValue(id, out string? existingPath))
                 {
                     // Overwrite in place — preserves any human-curated
                     // filename slug.
-                    await WriteAllTextAsync(existingPath, content, ct).ConfigureAwait(false);
+                    await AtomicWriteAsync(existingPath, content, true, ct).ConfigureAwait(false);
                     return;
                 }
 
                 string filename = ChooseFilename(def, index);
                 string fullPath = Path.Combine(_directory, filename);
-                await WriteAllTextAsync(fullPath, content, ct).ConfigureAwait(false);
+                await AtomicWriteAsync(fullPath, content, false, ct).ConfigureAwait(false);
                 index[id] = fullPath;
+                }
             }
             finally
             {
@@ -148,6 +250,10 @@ namespace Pinder.SessionSetup
             await _gate.WaitAsync(ct).ConfigureAwait(false);
             try
             {
+                System.IO.Directory.CreateDirectory(_directory);
+                using (await AcquireStoreLockAsync(ct).ConfigureAwait(false))
+                {
+                    _idIndex = null;
                 var index = await EnsureIndexLockedAsync(ct).ConfigureAwait(false);
                 if (!index.TryGetValue(characterId, out string? path))
                     return false;
@@ -157,6 +263,7 @@ namespace Pinder.SessionSetup
 
                 index.Remove(characterId);
                 return true;
+                }
             }
             finally
             {
@@ -199,9 +306,16 @@ namespace Pinder.SessionSetup
         private async Task<Dictionary<string, string>> EnsureIndexLockedAsync(CancellationToken ct)
         {
             if (_idIndex != null) return _idIndex;
+            IndexScan scan = await ScanIndexLockedAsync(ct).ConfigureAwait(false);
+            _idIndex = scan.Index;
+            return _idIndex;
+        }
 
-            var index = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var errors = new List<CharacterIndexValidationError>();
+        private async Task<IndexScan> ScanIndexLockedAsync(CancellationToken ct)
+        {
+            var candidates = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var duplicateIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var diagnostics = new List<CharacterStoreDiagnostic>();
             if (System.IO.Directory.Exists(_directory))
             {
                 foreach (var path in System.IO.Directory.EnumerateFiles(_directory, "*.json"))
@@ -218,48 +332,37 @@ namespace Pinder.SessionSetup
                         await ReadCharacterIdForIndexAsync(path, ct).ConfigureAwait(false);
                     if (idRead.Error != null)
                     {
-                        errors.Add(idRead.Error);
+                        diagnostics.Add(idRead.Error.ToDiagnostic());
                         continue;
                     }
 
                     string id = idRead.CharacterId!;
-                    if (index.TryGetValue(id, out string? existingPath))
+                    if (duplicateIds.Contains(id))
                     {
-                        errors.Add(CharacterIndexValidationError.Duplicate(id, existingPath, path));
+                        diagnostics.Add(CharacterIndexValidationError
+                            .Duplicate(id, path)
+                            .ToDiagnostic());
                         continue;
                     }
 
-                    index.Add(id, path);
+                    if (candidates.TryGetValue(id, out string? existingPath))
+                    {
+                        candidates.Remove(id);
+                        duplicateIds.Add(id);
+                        diagnostics.Add(CharacterIndexValidationError
+                            .Duplicate(id, existingPath)
+                            .ToDiagnostic());
+                        diagnostics.Add(CharacterIndexValidationError
+                            .Duplicate(id, path)
+                            .ToDiagnostic());
+                        continue;
+                    }
+
+                    candidates.Add(id, path);
                 }
             }
 
-            if (errors.Count > 0)
-                throw CreateIndexValidationException(errors);
-
-            _idIndex = index;
-            return index;
-        }
-
-        private InvalidOperationException CreateIndexValidationException(
-            IReadOnlyList<CharacterIndexValidationError> errors)
-        {
-            var message = new StringBuilder();
-            message.Append("DirectoryCharacterStore could not build a valid character index for '");
-            message.Append(_directory);
-            message.Append("'. ");
-            message.Append(errors.Count);
-            message.Append(errors.Count == 1 ? " error was found: " : " errors were found: ");
-            message.Append(string.Join("; ", errors.Select(e => e.Message)));
-
-            var innerExceptions = errors
-                .Where(e => e.Exception != null)
-                .Select(e => e.Exception!)
-                .ToList();
-            Exception? inner = innerExceptions.Count == 0
-                ? null
-                : new AggregateException(innerExceptions);
-
-            return new InvalidOperationException(message.ToString(), inner);
+            return new IndexScan(candidates, diagnostics);
         }
 
         private static async Task<CharacterIndexIdRead> ReadCharacterIdForIndexAsync(
@@ -343,14 +446,29 @@ namespace Pinder.SessionSetup
 
         private sealed class CharacterIndexValidationError
         {
-            private CharacterIndexValidationError(string message, Exception? exception = null)
+            private CharacterIndexValidationError(
+                string path,
+                string code,
+                string message,
+                string? characterId = null)
             {
+                Path = path;
+                Code = code;
                 Message = message;
-                Exception = exception;
+                CharacterId = characterId;
             }
 
+            public string Path { get; }
+            public string Code { get; }
             public string Message { get; }
-            public Exception? Exception { get; }
+            public string? CharacterId { get; }
+
+            public CharacterStoreDiagnostic ToDiagnostic()
+                => new CharacterStoreDiagnostic(
+                    System.IO.Path.GetFileName(Path),
+                    Code,
+                    Message,
+                    CharacterId);
 
             public static CharacterIndexValidationError Malformed(
                 string path,
@@ -358,16 +476,17 @@ namespace Pinder.SessionSetup
                 Exception? exception = null)
             {
                 return new CharacterIndexValidationError(
-                    $"Character file '{path}' is invalid and must be fixed: {reason}",
-                    exception);
+                    path,
+                    CharacterStoreDiagnosticCodes.MalformedArtifact,
+                    $"Character artifact is invalid and must be fixed: {reason}");
             }
 
             public static CharacterIndexValidationError Unreadable(string path, IOException exception)
             {
                 return new CharacterIndexValidationError(
-                    $"Character file '{path}' could not be read because of an I/O error; " +
-                    "retry after the filesystem issue is corrected.",
-                    exception);
+                    path,
+                    CharacterStoreDiagnosticCodes.UnreadableArtifact,
+                    "Character artifact could not be read because of an I/O error.");
             }
 
             public static CharacterIndexValidationError AccessDenied(
@@ -375,20 +494,35 @@ namespace Pinder.SessionSetup
                 UnauthorizedAccessException exception)
             {
                 return new CharacterIndexValidationError(
-                    $"Character file '{path}' could not be read because access was denied; " +
-                    "fix file permissions before rebuilding the index.",
-                    exception);
+                    path,
+                    CharacterStoreDiagnosticCodes.AccessDenied,
+                    "Character artifact could not be read because access was denied.");
             }
 
             public static CharacterIndexValidationError Duplicate(
                 string characterId,
-                string firstPath,
-                string duplicatePath)
+                string path)
             {
                 return new CharacterIndexValidationError(
-                    $"Duplicate character_id '{characterId}' appears in both '{firstPath}' " +
-                    $"and '{duplicatePath}'.");
+                    path,
+                    CharacterStoreDiagnosticCodes.DuplicateCharacterId,
+                    "Character artifact has a duplicate character_id.",
+                    characterId);
             }
+        }
+
+        private sealed class IndexScan
+        {
+            public IndexScan(
+                Dictionary<string, string> index,
+                IReadOnlyList<CharacterStoreDiagnostic> diagnostics)
+            {
+                Index = index;
+                Diagnostics = diagnostics;
+            }
+
+            public Dictionary<string, string> Index { get; }
+            public IReadOnlyList<CharacterStoreDiagnostic> Diagnostics { get; }
         }
 
         // --- raw file I/O (genuinely async) -----------------------------------
@@ -406,16 +540,102 @@ namespace Pinder.SessionSetup
             return text;
         }
 
-        private static async Task WriteAllTextAsync(string path, string content, CancellationToken ct)
+        private static async Task<byte[]> ReadAllBytesAsync(string path, CancellationToken ct)
         {
             await MaybeDelayForTestAsync(ct).ConfigureAwait(false);
 
             using var stream = new FileStream(
-                path, FileMode.Create, FileAccess.Write, FileShare.None, DefaultBufferSize, useAsync: true);
-            using var writer = new StreamWriter(stream, new UTF8Encoding(false));
-            await writer.WriteAsync(content).ConfigureAwait(false);
-            await writer.FlushAsync().ConfigureAwait(false);
+                path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultBufferSize, useAsync: true);
+            using var output = new MemoryStream();
+            await stream.CopyToAsync(output, DefaultBufferSize, ct).ConfigureAwait(false);
             ct.ThrowIfCancellationRequested();
+            return output.ToArray();
+        }
+
+        private static async Task WriteAllBytesAsync(
+            string path,
+            byte[] content,
+            CancellationToken ct)
+        {
+            await MaybeDelayForTestAsync(ct).ConfigureAwait(false);
+            using var stream = new FileStream(
+                path, FileMode.CreateNew, FileAccess.Write, FileShare.None, DefaultBufferSize, useAsync: true);
+            await stream.WriteAsync(content, 0, content.Length, ct).ConfigureAwait(false);
+            await stream.FlushAsync(ct).ConfigureAwait(false);
+        }
+
+        private static async Task AtomicWriteAsync(
+            string path,
+            byte[] content,
+            bool replaceExisting,
+            CancellationToken ct)
+        {
+            string tempPath = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                await WriteAllBytesAsync(tempPath, content, ct).ConfigureAwait(false);
+                ct.ThrowIfCancellationRequested();
+                if (replaceExisting)
+                    File.Replace(tempPath, path, null);
+                else
+                    File.Move(tempPath, path);
+            }
+            finally
+            {
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
+        }
+
+        private async Task<FileStream> AcquireStoreLockAsync(CancellationToken ct)
+        {
+            string path = Path.Combine(_directory, StoreLockFileName);
+            while (true)
+            {
+                ct.ThrowIfCancellationRequested();
+                try
+                {
+                    return new FileStream(
+                        path,
+                        FileMode.OpenOrCreate,
+                        FileAccess.ReadWrite,
+                        FileShare.None,
+                        1,
+                        useAsync: false);
+                }
+                catch (IOException)
+                {
+                    await Task.Delay(20, ct).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static void ValidateCharacterIdArgument(string characterId)
+        {
+            if (string.IsNullOrWhiteSpace(characterId))
+                throw new ArgumentException("characterId must be non-empty.", nameof(characterId));
+        }
+
+        private static void ValidateReplacementIdentity(
+            string characterId,
+            byte[] replacementContent)
+        {
+            try
+            {
+                using var document = JsonDocument.Parse(replacementContent);
+                if (document.RootElement.ValueKind != JsonValueKind.Object
+                    || !document.RootElement.TryGetProperty("character_id", out var id)
+                    || id.ValueKind != JsonValueKind.String
+                    || !string.Equals(id.GetString(), characterId, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new FormatException(
+                        "Replacement artifact character_id does not match the requested character.");
+                }
+            }
+            catch (JsonException ex)
+            {
+                throw new FormatException("Replacement artifact is not valid JSON.", ex);
+            }
         }
 
         private static Task MaybeDelayForTestAsync(CancellationToken ct)

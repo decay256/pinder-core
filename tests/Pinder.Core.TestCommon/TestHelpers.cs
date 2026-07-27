@@ -4,11 +4,14 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
+using Pinder.LlmAdapters;
 
 namespace Pinder.Core.TestCommon
 {
     public static class TestHelpers
     {
+        public static IRuleResolver SessionRules => GameDefinition.PinderDefaults;
+
         /// <summary>
         /// Returns a zero-modifier IGameClock for test isolation.
         /// </summary>
@@ -107,7 +110,7 @@ namespace Pinder.Core.TestCommon
                 textingStyleSources!,
                 genderIdentity,
                 textingStyleLines!,
-                backstory,
+                backstory ?? MakeBackstory(),
                 stakeLines,
                 psychiatricDiagnosis ?? MakePsychiatricDiagnosis(),
                 backstoryFragments,

@@ -111,21 +111,38 @@ namespace Pinder.Core.Tests
 
         [Theory]
         [MemberData(nameof(StarterFiles))]
-        public void StarterFile_OnDisk_HasNoCrlfLineEndings(string slug)
+        public void StarterFile_InGitIndex_HasNoCrlfLineEndings(string slug)
         {
-            // Starter files are committed with LF (the .gitattributes /
-            // schema spec require LF). If a contributor's editor inserted
-            // CRLF, the round-trip test would still pass thanks to
-            // .Replace, but the on-disk file would no longer match the
-            // spec. Catch that here.
-            string path = Path.Combine(RepoRoot, "data", "characters", $"{slug}.json");
-            byte[] bytes = File.ReadAllBytes(path);
+            string relativePath = $"data/characters/{slug}.json";
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "git",
+                WorkingDirectory = RepoRoot,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            psi.ArgumentList.Add("show");
+            psi.ArgumentList.Add($"--no-textconv");
+            psi.ArgumentList.Add($":{relativePath}");
+
+            using var process = System.Diagnostics.Process.Start(psi)!;
+            using var bytes = new MemoryStream();
+            process.StandardOutput.BaseStream.CopyTo(bytes);
+            string stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            Assert.True(
+                process.ExitCode == 0,
+                $"Could not inspect indexed starter file {relativePath}: {stderr}");
 
             // Look for any 0x0D 0x0A pair.
-            for (int i = 0; i + 1 < bytes.Length; i++)
+            byte[] content = bytes.ToArray();
+            for (int i = 0; i + 1 < content.Length; i++)
             {
-                Assert.False(bytes[i] == 0x0D && bytes[i + 1] == 0x0A,
-                    $"{slug}.json contains a CRLF line ending at byte offset {i}; starter files must be LF-only.");
+                Assert.False(content[i] == 0x0D && content[i + 1] == 0x0A,
+                    $"{slug}.json contains a CRLF line ending in the Git index at byte offset {i}; starter files must be LF-only.");
             }
         }
 

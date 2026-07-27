@@ -175,7 +175,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Middle"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Remember opener?", callbackTurnNumber: 0));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -196,7 +196,7 @@ namespace Pinder.Core.Tests
             var llm = new StubLlmAdapter();
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Plain text"));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
             await session.StartTurnAsync();
             var result = await session.ResolveTurnAsync(0);
 
@@ -223,7 +223,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "T2"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Callback to T1", callbackTurnNumber: 1));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             for (int i = 0; i < 3; i++)
             {
@@ -260,7 +260,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Middle"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Callback!", callbackTurnNumber: 0));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -284,7 +284,7 @@ namespace Pinder.Core.Tests
         {
             var dice = new FixedDice(5, 15);
             var llm = new StubLlmAdapter();
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             Assert.Throws<ArgumentNullException>(() => session.AddTopic(null!));
         }
@@ -295,7 +295,7 @@ namespace Pinder.Core.Tests
         {
             var dice = new FixedDice(5, 15);
             var llm = new StubLlmAdapter();
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             var exception = Record.Exception(() => session.AddTopic(new CallbackOpportunity("pizza", 0)));
             Assert.Null(exception);
@@ -368,7 +368,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Middle"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Callback!", callbackTurnNumber: 0));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -404,7 +404,7 @@ namespace Pinder.Core.Tests
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Middle"));
             llm.EnqueueOptions(new DialogueOption(StatType.Charm, "Callback!", callbackTurnNumber: 0));
 
-            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var session = new GameSession(MakeProfile("P"), MakeProfile("O"), llm, dice, new NullTrapRegistry(), new GameSessionConfig(clock: TestHelpers.MakeClock(), rules: TestHelpers.SessionRules));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);

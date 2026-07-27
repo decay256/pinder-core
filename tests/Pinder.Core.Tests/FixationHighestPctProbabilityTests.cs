@@ -197,7 +197,10 @@ namespace Pinder.Core.Tests
             StatBlock dateeStats,
             SessionShadowTracker shadows)
         {
-            var config = new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: shadows);
+            var config = new GameSessionConfig(
+                clock: TestHelpers.MakeClock(),
+                playerShadows: shadows,
+                rules: TestHelpers.SessionRules);
 
             // Prepend a ghost-check dice value
             return new GameSession(

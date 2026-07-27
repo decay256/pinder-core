@@ -8,7 +8,7 @@ using Pinder.Core.Interfaces;
 
 namespace Pinder.LlmAdapters
 {
-    internal sealed class EmotionalDirectorDirection
+    internal sealed class EmotionalDirectorDirection : EmotionalPrivateDirection
     {
         public EmotionalDirectorDirection(
             string primaryEmotion,
@@ -18,23 +18,16 @@ namespace Pinder.LlmAdapters
             string impulse,
             string restraint,
             string responsePosture)
+            : base(
+                primaryEmotion,
+                intensity,
+                underlyingFeeling,
+                interpretation,
+                impulse,
+                restraint,
+                responsePosture)
         {
-            PrimaryEmotion = primaryEmotion;
-            Intensity = intensity;
-            UnderlyingFeeling = underlyingFeeling;
-            Interpretation = interpretation;
-            Impulse = impulse;
-            Restraint = restraint;
-            ResponsePosture = responsePosture;
         }
-
-        public string PrimaryEmotion { get; }
-        public string Intensity { get; }
-        public string UnderlyingFeeling { get; }
-        public string Interpretation { get; }
-        public string Impulse { get; }
-        public string Restraint { get; }
-        public string ResponsePosture { get; }
     }
 
     internal static class EmotionalDirectorContract

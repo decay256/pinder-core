@@ -1,0 +1,245 @@
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
+using Pinder.Core.Text;
+
+namespace Pinder.LlmAdapters
+{
+    /// <summary>
+    /// Public DTO for private emotional direction used to compile the visible performance prompt.
+    /// </summary>
+    public class EmotionalPrivateDirection
+    {
+        public EmotionalPrivateDirection(
+            string primaryEmotion,
+            string intensity,
+            string underlyingFeeling,
+            string interpretation,
+            string impulse,
+            string restraint,
+            string responsePosture)
+        {
+            PrimaryEmotion = primaryEmotion;
+            Intensity = intensity;
+            UnderlyingFeeling = underlyingFeeling;
+            Interpretation = interpretation;
+            Impulse = impulse;
+            Restraint = restraint;
+            ResponsePosture = responsePosture;
+        }
+
+        public string PrimaryEmotion { get; }
+        public string Intensity { get; }
+        public string UnderlyingFeeling { get; }
+        public string Interpretation { get; }
+        public string Impulse { get; }
+        public string Restraint { get; }
+        public string ResponsePosture { get; }
+    }
+
+    /// <summary>
+    /// Non-sending compilation result for the private emotional director request.
+    /// </summary>
+    public sealed class CompiledEmotionalDirectorPrompt
+    {
+        internal CompiledEmotionalDirectorPrompt(
+            PromptTraceResult compiledReactionInput,
+            PromptTraceResult systemPrompt,
+            PromptTraceResult userPrompt,
+            double? temperature,
+            int? maxTokens,
+            IReadOnlyDictionary<string, string> metadata)
+        {
+            CompiledReactionInput = compiledReactionInput;
+            SystemPrompt = systemPrompt;
+            UserPrompt = userPrompt;
+            Temperature = temperature;
+            MaxTokens = maxTokens;
+            Metadata = metadata;
+        }
+
+        public PromptTraceResult CompiledReactionInput { get; }
+        public PromptTraceResult SystemPrompt { get; }
+        public PromptTraceResult UserPrompt { get; }
+        public double? Temperature { get; }
+        public int? MaxTokens { get; }
+        public IReadOnlyDictionary<string, string> Metadata { get; }
+    }
+
+    /// <summary>
+    /// Complete non-sending emotional prompt compilation used by admin previews.
+    /// </summary>
+    public sealed class CompiledEmotionalPrompts
+    {
+        internal CompiledEmotionalPrompts(
+            CompiledEmotionalDirectorPrompt director,
+            PromptTraceResult performancePrompt)
+        {
+            Director = director;
+            PerformancePrompt = performancePrompt;
+        }
+
+        public PromptTraceResult CompiledReactionInput => Director.CompiledReactionInput;
+        public CompiledEmotionalDirectorPrompt Director { get; }
+        public PromptTraceResult PerformancePrompt { get; }
+    }
+
+    /// <summary>
+    /// Compiles emotional director and performance prompts without sending an LLM request.
+    /// </summary>
+    public sealed class EmotionalPromptCompiler
+    {
+        public const string DirectorPromptKey = "emotional-reaction-director";
+        private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
+
+        private readonly PromptCatalog _catalog;
+
+        public EmotionalPromptCompiler(PromptCatalog catalog)
+        {
+            _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+        }
+
+        public CompiledEmotionalDirectorPrompt CompileDirector(DateeContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            PromptEntry prompt = _catalog.RequireCompleteEntry(
+                DirectorPromptKey,
+                "prompt-catalog: missing required runtime prompt key 'emotional-reaction-director'. The yaml file is incomplete or missing.");
+            PromptTraceResult compiledInput = new EmotionalReactionEventCompiler(_catalog).Compile(context);
+            PromptTraceResult systemPrompt = TrimTrace(
+                TraceLiteral(prompt.SystemPrompt!, prompt.SourceFile, DirectorPromptKey));
+            PromptTraceResult userPrompt = CompileDirectorUserPrompt(prompt, compiledInput);
+
+            return new CompiledEmotionalDirectorPrompt(
+                compiledInput,
+                systemPrompt,
+                userPrompt,
+                prompt.Temperature,
+                prompt.MaxTokens,
+                BuildDirectorMetadata(prompt, compiledInput, context));
+        }
+
+        public PromptTraceResult CompilePerformance(
+            DateeContext context,
+            EmotionalPrivateDirection direction)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (direction == null) throw new ArgumentNullException(nameof(direction));
+            return SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, _catalog);
+        }
+
+        public CompiledEmotionalPrompts CompileScenario(
+            DateeContext context,
+            EmotionalPrivateDirection direction)
+        {
+            CompiledEmotionalDirectorPrompt director = CompileDirector(context);
+            PromptTraceResult performance = CompilePerformance(context, direction);
+            return new CompiledEmotionalPrompts(director, performance);
+        }
+
+        private static PromptTraceResult CompileDirectorUserPrompt(
+            PromptEntry prompt,
+            PromptTraceResult compiledInput)
+        {
+            string template = prompt.UserTemplate!;
+            var builder = new AnnotatedStringBuilder();
+            int cursor = 0;
+            int placeholderIndex;
+
+            while ((placeholderIndex = template.IndexOf(
+                CompiledInputPlaceholder,
+                cursor,
+                StringComparison.Ordinal)) >= 0)
+            {
+                builder.Append(
+                    template.Substring(cursor, placeholderIndex - cursor),
+                    prompt.SourceFile,
+                    DirectorPromptKey);
+                builder.Append(compiledInput);
+                cursor = placeholderIndex + CompiledInputPlaceholder.Length;
+            }
+
+            if (cursor == 0)
+            {
+                throw new InvalidOperationException(
+                    "emotional-reaction-director must include {compiled_reaction_input}.");
+            }
+
+            builder.Append(template.Substring(cursor), prompt.SourceFile, DirectorPromptKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+        }
+
+        private static PromptTraceResult TrimTrace(PromptTraceResult trace)
+        {
+            string trimmedText = trace.Text.Trim();
+            int leadingTrimCount = trace.Text.Length - trace.Text.TrimStart().Length;
+            int retainedEnd = leadingTrimCount + trimmedText.Length;
+            AnnotatedSpan[] trimmedSpans = trace.Spans
+                .Select(span => new
+                {
+                    Span = span,
+                    Start = Math.Max(span.Start, leadingTrimCount),
+                    End = Math.Min(span.End, retainedEnd),
+                })
+                .Where(item => item.End > item.Start)
+                .Select(item => new AnnotatedSpan(
+                    item.Start - leadingTrimCount,
+                    item.End - leadingTrimCount,
+                    item.Span.SourceFile,
+                    item.Span.Key))
+                .ToArray();
+
+            return new PromptTraceResult(trimmedText, trimmedSpans);
+        }
+
+        private static PromptTraceResult TraceLiteral(string text, string? sourceFile, string key)
+            => new PromptTraceResult(
+                text,
+                new[] { new AnnotatedSpan(0, text.Length, sourceFile, key) });
+
+        private static IReadOnlyDictionary<string, string> BuildDirectorMetadata(
+            PromptEntry prompt,
+            PromptTraceResult compiled,
+            DateeContext context)
+        {
+            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                { "phase", LlmPhase.EmotionalDirector },
+                { "prompt_key", DirectorPromptKey },
+                { "system_prompt_source", prompt.SourceFile ?? string.Empty },
+                { "user_template_source", prompt.SourceFile ?? string.Empty },
+                { "turn", context.CurrentTurn.ToString(CultureInfo.InvariantCulture) },
+            };
+
+            string sources = string.Join(
+                ",",
+                compiled.Spans
+                    .Select(span => span.SourceFile ?? string.Empty)
+                    .Where(source => !string.IsNullOrWhiteSpace(source))
+                    .Distinct(StringComparer.Ordinal)
+                    .OrderBy(source => source, StringComparer.Ordinal));
+            if (sources.Length > 0)
+            {
+                metadata["compiled_input_sources"] = sources;
+            }
+
+            string keys = string.Join(
+                ",",
+                compiled.Spans
+                    .Select(span => span.Key ?? string.Empty)
+                    .Where(key => !string.IsNullOrWhiteSpace(key))
+                    .Distinct(StringComparer.Ordinal)
+                    .OrderBy(key => key, StringComparer.Ordinal));
+            if (keys.Length > 0)
+            {
+                metadata["compiled_input_keys"] = keys;
+            }
+
+            return metadata;
+        }
+    }
+}

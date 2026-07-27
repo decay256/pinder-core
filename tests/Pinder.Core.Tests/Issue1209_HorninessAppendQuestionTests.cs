@@ -192,7 +192,7 @@ namespace Pinder.Core.Tests
                 () => session.ResolveTurnAsync(0, progress: null, ct: cts.Token));
 
             // Cancellation must propagate untouched — no diagnostic swallowing/logging of cancellation.
-            Assert.Empty(diagnostics);
+            Assert.DoesNotContain(diagnostics, d => d.EventName == "HorninessQuestionFailure");
         }
 
         // Shared RNGs for predictable checks

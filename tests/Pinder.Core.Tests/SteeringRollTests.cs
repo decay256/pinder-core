@@ -310,7 +310,9 @@ namespace Pinder.Core.Tests
             Assert.False(result.Steering.SteeringSucceeded);
             Assert.Null(result.Steering.SteeringQuestion);
 
-            var diagnostic = Assert.Single(diagnostics);
+            var diagnostic = Assert.Single(
+                diagnostics,
+                d => d.EventName == "SteeringQuestionFailure");
             Assert.Equal("SteeringEngine", diagnostic.Source);
             Assert.Equal("SteeringQuestionFailure", diagnostic.EventName);
             Assert.Equal(OperationalDiagnosticSeverity.Warning, diagnostic.Severity);

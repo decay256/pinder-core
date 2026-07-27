@@ -1,41 +1,39 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
-using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters
 {
     public sealed partial class PinderLlmAdapter
     {
-        private const string EmotionalDirectorPromptKey = "emotional-reaction-director";
-
-        internal async Task<EmotionalDirectorDirection> GenerateEmotionalDirectionAsync(
+        internal Task<EmotionalDirectorDirection> GenerateEmotionalDirectionAsync(
             DateeContext context,
             CancellationToken cancellationToken = default)
         {
+            var promptCompiler = new EmotionalPromptCompiler(
+                PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog));
+            return GenerateEmotionalDirectionAsync(context, promptCompiler, cancellationToken);
+        }
+
+        internal async Task<EmotionalDirectorDirection> GenerateEmotionalDirectionAsync(
+            DateeContext context,
+            EmotionalPromptCompiler promptCompiler,
+            CancellationToken cancellationToken = default)
+        {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            if (promptCompiler == null) throw new ArgumentNullException(nameof(promptCompiler));
 
-            var catalog = PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog);
-            var prompt = catalog.RequireCompleteEntry(
-                EmotionalDirectorPromptKey,
-                "prompt-catalog: missing required runtime prompt key 'emotional-reaction-director'. The yaml file is incomplete or missing.");
-
-            var compiled = new EmotionalReactionEventCompiler(catalog).Compile(context);
-            string userMessage = PromptCatalog.Substitute(
-                prompt.UserTemplate!,
-                new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    { "compiled_reaction_input", compiled.Text },
-                }).Trim();
-            string systemPrompt = prompt.SystemPrompt!.Trim();
+            CompiledEmotionalDirectorPrompt prompt =
+                promptCompiler.CompileDirector(context);
+            string userMessage = prompt.UserPrompt.Text;
+            string systemPrompt = prompt.SystemPrompt.Text;
             double temperature = prompt.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
             int maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
-            var metadata = BuildEmotionalDirectorMetadata(prompt, compiled, context);
+            var metadata = prompt.Metadata;
 
             int maxAttempts = GetContractViolationAttemptLimit();
             var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<EmotionalDirectorDirection, LlmContractException>(
@@ -128,47 +126,6 @@ namespace Pinder.LlmAdapters
                 context.CurrentTurn);
             ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
             throw recovery.Exhaustion.FinalRejection;
-        }
-
-        private static Dictionary<string, string> BuildEmotionalDirectorMetadata(
-            PromptEntry prompt,
-            PromptTraceResult compiled,
-            DateeContext context)
-        {
-            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                { "phase", LlmPhase.EmotionalDirector },
-                { "prompt_key", EmotionalDirectorPromptKey },
-                { "system_prompt_source", prompt.SourceFile ?? string.Empty },
-                { "user_template_source", prompt.SourceFile ?? string.Empty },
-                { "turn", context.CurrentTurn.ToString(System.Globalization.CultureInfo.InvariantCulture) },
-            };
-
-            string sources = string.Join(
-                ",",
-                compiled.Spans
-                    .Select(span => span.SourceFile ?? string.Empty)
-                    .Where(source => !string.IsNullOrWhiteSpace(source))
-                    .Distinct(StringComparer.Ordinal)
-                    .OrderBy(source => source, StringComparer.Ordinal));
-            if (sources.Length > 0)
-            {
-                metadata["compiled_input_sources"] = sources;
-            }
-
-            string keys = string.Join(
-                ",",
-                compiled.Spans
-                    .Select(span => span.Key ?? string.Empty)
-                    .Where(key => !string.IsNullOrWhiteSpace(key))
-                    .Distinct(StringComparer.Ordinal)
-                    .OrderBy(key => key, StringComparer.Ordinal));
-            if (keys.Length > 0)
-            {
-                metadata["compiled_input_keys"] = keys;
-            }
-
-            return metadata;
         }
 
         private void EmitEmotionalDirectorExhaustedDiagnostic(

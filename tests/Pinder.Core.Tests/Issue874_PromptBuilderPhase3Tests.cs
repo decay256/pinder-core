@@ -125,7 +125,7 @@ namespace Pinder.Core.Tests
         // ----- StructuralFragmentLookup: catalog-sourced ---------------------
 
         [Fact]
-        public void BuildSystemPrompt_EmitsYamlHeader_WhenLookupIsSet()
+        public void BuildSystemPrompt_EmitsConfiguredHeaders_WhenLookupIsSet()
         {
             var prior = PromptBuilder.StructuralFragmentLookup;
             var catalog = LoadCatalog();
@@ -144,8 +144,7 @@ namespace Pinder.Core.Tests
                 Assert.Contains("TEXTING STYLE", prompt);
                 Assert.Contains("ACTIVE ARCHETYPE", prompt);
 
-                // Lead-in is now the RULES token (structural.yaml structural-lead-in).
-                Assert.Contains("RULES", prompt);
+                Assert.StartsWith("=== CHARACTER DATA ===", prompt);
             }
             finally
             {
