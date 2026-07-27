@@ -30,12 +30,37 @@ namespace Pinder.LlmAdapters
         {
             if (trace == null) throw new ArgumentNullException(nameof(trace));
 
-            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                { "prompt_trace_type", "datee" },
-                { "prompt_trace_sources", JoinTraceValues(trace, span => span.SourceFile) },
-                { "prompt_trace_keys", JoinTraceValues(trace, span => span.Key) },
-            };
+            return BuildPromptTraceMetadata(
+                new Dictionary<string, string>(StringComparer.Ordinal),
+                trace,
+                "datee");
+        }
+
+        private static Dictionary<string, string> BuildEmotionalDirectorMetadata(
+            IReadOnlyDictionary<string, string> baseMetadata,
+            PromptTraceResult systemPrompt)
+        {
+            if (baseMetadata == null) throw new ArgumentNullException(nameof(baseMetadata));
+            if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
+
+            return BuildPromptTraceMetadata(
+                baseMetadata,
+                systemPrompt,
+                "emotional_director");
+        }
+
+        private static Dictionary<string, string> BuildPromptTraceMetadata(
+            IReadOnlyDictionary<string, string> baseMetadata,
+            PromptTraceResult trace,
+            string traceType)
+        {
+            var metadata = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var pair in baseMetadata)
+                metadata[pair.Key] = pair.Value;
+
+            metadata["prompt_trace_type"] = traceType;
+            metadata["prompt_trace_sources"] = JoinTraceValues(trace, span => span.SourceFile);
+            metadata["prompt_trace_keys"] = JoinTraceValues(trace, span => span.Key);
 
             return metadata;
         }

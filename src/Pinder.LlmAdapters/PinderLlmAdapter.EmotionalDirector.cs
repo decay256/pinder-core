@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Text;
 
 namespace Pinder.LlmAdapters
 {
@@ -30,8 +31,8 @@ namespace Pinder.LlmAdapters
             CompiledEmotionalDirectorPrompt prompt =
                 promptCompiler.CompileDirector(context);
             string userMessage = prompt.UserPrompt.Text;
-            string systemPrompt = prompt.SystemPrompt.Text;
-            string attemptSystemPrompt = systemPrompt;
+            PromptTraceResult systemPrompt = prompt.SystemPrompt;
+            PromptTraceResult attemptSystemPrompt = systemPrompt;
             double temperature = prompt.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
             int maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
             var metadata = prompt.Metadata;
@@ -43,15 +44,18 @@ namespace Pinder.LlmAdapters
                 {
                     try
                     {
+                        var attemptMetadata = BuildEmotionalDirectorMetadata(
+                            metadata,
+                            attemptSystemPrompt);
                         EmotionalDirectorDirection direction;
                         if (_transport is IStructuredLlmTransport structuredTransport)
                         {
                             var request = EmotionalDirectorContract.CreateRequest(
-                                attemptSystemPrompt,
+                                attemptSystemPrompt.Text,
                                 userMessage,
                                 temperature,
                                 maxTokens,
-                                metadata);
+                                attemptMetadata);
                             var structuredResponse = await SendStructuredWithDiagnosticsAsync(
                                     structuredTransport,
                                     request,
@@ -61,7 +65,7 @@ namespace Pinder.LlmAdapters
                                     attempt,
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
-                                    metadata)
+                                    attemptMetadata)
                                 .ConfigureAwait(false);
 
                             try
@@ -84,7 +88,7 @@ namespace Pinder.LlmAdapters
                         {
                             string responseText = await SendWithDiagnosticsAsync(
                                     _transport,
-                                    attemptSystemPrompt,
+                                    attemptSystemPrompt.Text,
                                     userMessage,
                                     temperature,
                                     maxTokens,
@@ -94,7 +98,7 @@ namespace Pinder.LlmAdapters
                                     attempt,
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
-                                    metadata)
+                                    attemptMetadata)
                                 .ConfigureAwait(false);
                             direction = ParseEmotionalDirectorOrThrow(
                                 responseText,

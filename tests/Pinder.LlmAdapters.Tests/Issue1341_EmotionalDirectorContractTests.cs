@@ -352,6 +352,28 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void FieldTooLongRepairPreservesYamlSpanInCompiledSystemPrompt()
+        {
+            PromptCatalog catalog = BuiltInCatalog();
+            var compiler = new EmotionalPromptCompiler(catalog);
+            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
+
+            var repaired = compiler.CompileDirectorRetrySystemPrompt(
+                initial.SystemPrompt,
+                "field_too_long");
+
+            var repairSpan = Assert.Single(repaired.Spans.Where(
+                span => span.Key == EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey));
+            Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
+            Assert.Equal(
+                catalog.Get(EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey).SystemPrompt!.Trim(),
+                repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
+            Assert.Contains(
+                repaired.Spans,
+                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
+        }
+
+        [Fact]
         public async Task Retry_ExhaustionThrowsFinalStableReason()
         {
             const string privateRejectedDirector = "PRIVATE-DIRECTOR-EXHAUSTION-DO-NOT-LOG-1345";

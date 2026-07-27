@@ -143,8 +143,8 @@ namespace Pinder.LlmAdapters
             return new CompiledEmotionalPrompts(director, performance);
         }
 
-        internal string CompileDirectorRetrySystemPrompt(
-            string baseSystemPrompt,
+        internal PromptTraceResult CompileDirectorRetrySystemPrompt(
+            PromptTraceResult baseSystemPrompt,
             string rejectionReason)
         {
             if (!string.Equals(rejectionReason, "field_too_long", StringComparison.Ordinal))
@@ -160,7 +160,14 @@ namespace Pinder.LlmAdapters
                     $"prompt-catalog: runtime prompt key '{DirectorFieldTooLongRepairPromptKey}' has no system_prompt. Check the yaml file.");
             }
 
-            return baseSystemPrompt.TrimEnd() + "\n\n" + repairPrompt!.Trim();
+            var builder = new AnnotatedStringBuilder();
+            builder.Append(baseSystemPrompt);
+            builder.Append("\n\n");
+            builder.Append(
+                repairPrompt!.Trim(),
+                repair.SourceFile,
+                DirectorFieldTooLongRepairPromptKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 
         private static PromptTraceResult CompileDirectorUserPrompt(
