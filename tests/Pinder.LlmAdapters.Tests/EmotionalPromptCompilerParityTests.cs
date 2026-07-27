@@ -26,14 +26,15 @@ namespace Pinder.LlmAdapters.Tests
             try
             {
                 string promptPath = Path.Combine(promptsRoot, "emotional-reactions.yaml");
-                string yaml = File.ReadAllText(promptPath);
+                string yaml = File.ReadAllText(promptPath)
+                    .Replace("\r\n", "\n", StringComparison.Ordinal);
                 yaml = yaml.Replace(
                     "system_prompt: |-\n",
-                    "system_prompt: |-\n      \n",
+                    "system_prompt: |-\n\n",
                     StringComparison.Ordinal);
                 yaml = yaml.Replace(
                     "user_template: |-\n",
-                    "user_template: |-\n      \n",
+                    "user_template: |-\n\n",
                     StringComparison.Ordinal);
                 File.WriteAllText(promptPath, yaml);
 
