@@ -101,7 +101,7 @@ prompts:
 
       The schema_version field must be exactly "emotional_director.v1".
 
-      The seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
+      The seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity", never as first-person speech or a quoted reply. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
     user_template: |-
       Private emotional director source packet:
 
@@ -116,6 +116,10 @@ prompts:
   emotional-reaction-director-repair-field-too-long:
     system_prompt: >-
       A previous emotional direction exceeded the permitted field length. Return a fresh complete object with every direction field 180 characters or fewer. Preserve the emotional meaning, but compress each field to one direct, actionable sentence or phrase.
+
+  emotional-reaction-director-repair-drafted-chat-reply:
+    system_prompt: >-
+      The previous object drafted words the DATEE could send instead of private emotional direction. Return a fresh complete object whose fields only describe the DATEE's internal reaction and performance direction. In particular, write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity". Do not use first-person speech, quotations, or any sendable chat sentence in any field.
 
   emotional-reaction-event-charm-clean:
     system_prompt: >-

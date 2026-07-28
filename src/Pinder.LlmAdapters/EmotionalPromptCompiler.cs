@@ -97,6 +97,8 @@ namespace Pinder.LlmAdapters
             "emotional-reaction-director-repair-contract";
         public const string DirectorFieldTooLongRepairPromptKey =
             "emotional-reaction-director-repair-field-too-long";
+        public const string DirectorDraftedChatReplyRepairPromptKey =
+            "emotional-reaction-director-repair-drafted-chat-reply";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
 
         private readonly PromptCatalog _catalog;
@@ -149,12 +151,12 @@ namespace Pinder.LlmAdapters
             PromptTraceResult baseSystemPrompt,
             string rejectionReason)
         {
-            string repairKey = string.Equals(
-                rejectionReason,
-                "field_too_long",
-                StringComparison.Ordinal)
-                ? DirectorFieldTooLongRepairPromptKey
-                : DirectorContractRepairPromptKey;
+            string repairKey = rejectionReason switch
+            {
+                "field_too_long" => DirectorFieldTooLongRepairPromptKey,
+                "drafted_chat_reply" => DirectorDraftedChatReplyRepairPromptKey,
+                _ => DirectorContractRepairPromptKey,
+            };
             PromptEntry repair = _catalog.TryGet(repairKey)
                 ?? throw new InvalidOperationException(
                     $"prompt-catalog: missing required runtime prompt key '{repairKey}'. The yaml file is incomplete or missing.");
