@@ -159,6 +159,26 @@ EXEMPT_CALL_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+LLM_TRANSPORT_DECLARATION_RE = re.compile(
+    r"\b(?:ILlmTransport|IStructuredLlmTransport|IStreamingLlmTransport)\??"
+    r"\s+(?P<receiver>@?[A-Za-z_][A-Za-z0-9_]*)\b",
+)
+
+MODEL_RECEIVER_SINK_CALL_RE = re.compile(
+    r"\b(?P<receiver>@?[A-Za-z_][A-Za-z0-9_]*)\s*\.\s*"
+    r"(?:SendAsync|SendStructuredAsync|SendStreamAsync)\s*\([^;{}]*$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+INTERNAL_MODEL_SINK_CALL_RE = re.compile(
+    r"\bSendWithDiagnosticsAsync\s*\([^;{}]*$",
+    re.IGNORECASE | re.DOTALL,
+)
+
+CLASS_DECLARATION_RE = re.compile(
+    r"\b(?:class|record|struct)\s+(?P<name>[A-Za-z_][A-Za-z0-9_]*)\b",
+)
+
 KEY_OR_LABEL_RE = re.compile(r"^[a-z0-9][a-z0-9_.:/-]*$", re.IGNORECASE)
 PLACEHOLDER_ONLY_RE = re.compile(r"^[A-Z0-9_{} .:/-]+$")
 WORD_RE = re.compile(r"[A-Za-z]{3,}")
@@ -331,6 +351,37 @@ def has_directive_prose(text: str) -> bool:
     return any(re.search(pattern, stripped, re.IGNORECASE) for pattern in DIRECTIVE_PATTERNS)
 
 
+def has_model_facing_prose(text: str) -> bool:
+    stripped = " ".join(text.strip().split())
+    return len(stripped) >= 12 and len(WORD_RE.findall(stripped)) >= 2
+
+
+def declared_transport_receivers(source: str) -> set[str]:
+    return {
+        match.group("receiver")
+        for match in LLM_TRANSPORT_DECLARATION_RE.finditer(source)
+    }
+
+
+def declared_type_names(source: str) -> set[str]:
+    return {
+        match.group("name")
+        for match in CLASS_DECLARATION_RE.finditer(source)
+    }
+
+
+def is_known_model_sink(
+    purpose: str,
+    transport_receivers: set[str],
+    allow_internal_sink: bool,
+) -> bool:
+    receiver_call = MODEL_RECEIVER_SINK_CALL_RE.search(purpose)
+    if receiver_call is not None:
+        return receiver_call.group("receiver") in transport_receivers
+
+    return allow_internal_sink and INTERNAL_MODEL_SINK_CALL_RE.search(purpose) is not None
+
+
 def is_structural_sentinel_exemption(rel: str, text: str) -> bool:
     allowed = STRUCTURAL_SENTINEL_EXEMPTIONS.get(rel)
     if not allowed:
@@ -348,6 +399,8 @@ def classify_literal(
     literal: StringLiteral,
     context: str,
     purpose: str,
+    transport_receivers: set[str],
+    allow_internal_sink: bool,
 ) -> str | None:
     text = literal.text.strip()
     if not text:
@@ -365,6 +418,13 @@ def classify_literal(
     if is_prompt_key_or_label(text):
         return None
 
+    if (
+        has_model_facing_prose(text)
+        and is_known_model_sink(purpose, transport_receivers, allow_internal_sink)
+    ):
+        form = "interpolated" if "$" in literal.prefix else "ordinary"
+        return f"{form} model-facing prompt prose passed directly to model transport"
+
     if has_exempt_purpose(purpose):
         return None
 
@@ -381,18 +441,39 @@ def classify_literal(
 def main() -> int:
     allowlist = load_allowlist()
     violations: list[tuple[str, int, str, str]] = []
+    sources: dict[Path, str] = {
+        path: path.read_text(encoding="utf-8-sig")
+        for path in iter_csharp_files()
+    }
+    receivers_by_type: dict[str, set[str]] = {}
 
-    for path in iter_csharp_files():
+    for source in sources.values():
+        receivers = declared_transport_receivers(source)
+        for type_name in declared_type_names(source):
+            receivers_by_type.setdefault(type_name, set()).update(receivers)
+
+    for path, source in sources.items():
         rel = path.relative_to(REPO_ROOT).as_posix()
         if rel in allowlist:
             continue
 
-        source = path.read_text(encoding="utf-8-sig")
+        type_names = declared_type_names(source)
+        transport_receivers = declared_transport_receivers(source)
+        for type_name in type_names:
+            transport_receivers.update(receivers_by_type.get(type_name, set()))
+        allow_internal_sink = "PinderLlmAdapter" in type_names
         lines = source.splitlines()
         for literal in parse_string_literals(source):
             context = line_window(lines, literal.line)
             purpose = candidate_purpose(source, literal)
-            reason = classify_literal(rel, literal, context, purpose)
+            reason = classify_literal(
+                rel,
+                literal,
+                context,
+                purpose,
+                transport_receivers,
+                allow_internal_sink,
+            )
             if reason is None:
                 continue
             sample = " ".join(literal.text.strip().split())
