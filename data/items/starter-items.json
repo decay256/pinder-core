@@ -1,7 +1,7 @@
 [
   {
     "id": "head_tophat",
-    "display_name": "Top Hat [convergence rehearsal]",
+    "display_name": "Top Hat",
     "slot": "Head",
     "item_type": "accessory",
     "stat_modifiers": {
