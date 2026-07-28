@@ -396,6 +396,75 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain(privateRejectedText, plainTransport.SystemPrompts[1], StringComparison.Ordinal);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Retry_DraftedChatReplyAddsActionableCatalogRepairWithoutEchoingRejectedOutput(
+            bool structured)
+        {
+            const string privateRejectedText =
+                "That actually means a lot, but I need to know you mean it.";
+            string invalid = ValidJson(impulse: privateRejectedText);
+            var context = MakeContext();
+
+            if (structured)
+            {
+                var transport = new StructuredQueueTransport(
+                    new StructuredLlmResponse(
+                        invalid,
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true),
+                    new StructuredLlmResponse(
+                        ValidJson(),
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true));
+                var adapter = CreateAdapter(transport, retries: 1);
+
+                var direction = await adapter.GenerateEmotionalDirectionAsync(context);
+
+                Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
+                Assert.Equal(2, transport.StructuredCalls);
+                Assert.Contains(
+                    "write impulse as a behavioral urge",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains(
+                    "Do not use first-person speech",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    privateRejectedText,
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Equal(
+                    transport.StructuredRequests[0].JsonSchema,
+                    transport.StructuredRequests[1].JsonSchema);
+                return;
+            }
+
+            var plainTransport = new PlainQueueTransport(invalid, ValidJson());
+            var plainAdapter = CreateAdapter(plainTransport, retries: 1);
+
+            var plainDirection = await plainAdapter.GenerateEmotionalDirectionAsync(context);
+
+            Assert.Equal("relieved but cautious", plainDirection.PrimaryEmotion);
+            Assert.Equal(2, plainTransport.PlainCalls);
+            Assert.Contains(
+                "write impulse as a behavioral urge",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "Do not use first-person speech",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                privateRejectedText,
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+        }
+
         [Fact]
         public void FieldTooLongRepairPreservesYamlSpanInCompiledSystemPrompt()
         {
@@ -434,6 +503,28 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
             Assert.Equal(
                 catalog.Get(EmotionalPromptCompiler.DirectorContractRepairPromptKey).SystemPrompt!.Trim(),
+                repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
+            Assert.Contains(
+                repaired.Spans,
+                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
+        }
+
+        [Fact]
+        public void DraftedChatReplyRepairPreservesYamlSpanInCompiledSystemPrompt()
+        {
+            PromptCatalog catalog = BuiltInCatalog();
+            var compiler = new EmotionalPromptCompiler(catalog);
+            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
+
+            var repaired = compiler.CompileDirectorRetrySystemPrompt(
+                initial.SystemPrompt,
+                "drafted_chat_reply");
+
+            var repairSpan = Assert.Single(repaired.Spans.Where(
+                span => span.Key == EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey));
+            Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
+            Assert.Equal(
+                catalog.Get(EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey).SystemPrompt!.Trim(),
                 repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
             Assert.Contains(
                 repaired.Spans,

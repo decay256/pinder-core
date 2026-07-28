@@ -187,6 +187,9 @@ namespace Pinder.LlmAdapters
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey);
+            RequireSystemPrompt(
+                catalog,
+                EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey);
         }
 
         private static string RequireSystemPrompt(PromptCatalog catalog, string key)

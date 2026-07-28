@@ -212,7 +212,7 @@ namespace Pinder.LlmAdapters.Tests
                 .Select(key => (Key: key, Prompt: catalog.Get(key).SystemPrompt!))
                 .ToArray();
 
-            Assert.Equal(80, entries.Length);
+            Assert.Equal(81, entries.Length);
 
             foreach (var entry in entries)
             {
