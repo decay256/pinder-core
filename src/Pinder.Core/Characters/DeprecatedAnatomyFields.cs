@@ -17,21 +17,33 @@ namespace Pinder.Core.Characters
             "serius",
         };
 
-        private static readonly HashSet<string> DeprecatedExpressionTargetSet =
-            new HashSet<string>(DeprecatedExpressionTargetIds, StringComparer.Ordinal);
+        private static readonly string[] DeprecatedWriteOnlyIds =
+        {
+            "sad",
+            "happy",
+            "serius",
+            "venicus",
+            "blemishes",
+        };
+
+        private static readonly HashSet<string> DeprecatedWriteOnlySet =
+            new HashSet<string>(DeprecatedWriteOnlyIds, StringComparer.Ordinal);
 
         public static IReadOnlyList<string> ExpressionTargetIds => DeprecatedExpressionTargetIds;
 
         public static bool IsDeprecated(string fieldName)
         {
-            return DeprecatedExpressionTargetSet.Contains(fieldName);
+            return DeprecatedWriteOnlySet.Contains(fieldName);
         }
 
         public static void StripForLegacyRead(IDictionary<string, float> anatomy)
         {
             if (anatomy == null) throw new ArgumentNullException(nameof(anatomy));
 
-            foreach (string field in DeprecatedExpressionTargetIds)
+            if (anatomy.ContainsKey("venicus") && !anatomy.ContainsKey("veins"))
+                anatomy["veins"] = anatomy["venicus"];
+
+            foreach (string field in DeprecatedWriteOnlyIds)
                 anatomy.Remove(field);
         }
 
@@ -41,7 +53,7 @@ namespace Pinder.Core.Characters
         {
             if (anatomy == null) throw new ArgumentNullException(nameof(anatomy));
 
-            foreach (string field in DeprecatedExpressionTargetIds)
+            foreach (string field in DeprecatedWriteOnlyIds)
             {
                 if (anatomy.ContainsKey(field))
                     ThrowDeprecated(sourceDescription, field);

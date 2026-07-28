@@ -94,6 +94,91 @@ namespace Pinder.Core.Tests
             Assert.Equal(0.44f, def.Anatomy["trunkLengthBase"], precision: 5);
         }
 
+
+        [Fact]
+        public void ParseDefinition_MigratesLegacyVenicusToVeinsWhenVeinsIsMissing()
+        {
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                "\"anatomy\": {}",
+                "\"anatomy\": {\"venicus\": 0.73, \"trunkLengthBase\": 0.44}");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.False(def.Anatomy.ContainsKey("venicus"));
+            Assert.Equal(0.73f, def.Anatomy["veins"], precision: 5);
+            Assert.Equal(0.44f, def.Anatomy["trunkLengthBase"], precision: 5);
+        }
+
+        [Fact]
+        public void ParseDefinition_UsesVeinsWhenBothLegacyVenicusAndCanonicalVeinsArePresent()
+        {
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                "\"anatomy\": {}",
+                "\"anatomy\": {\"venicus\": 0.11, \"veins\": 0.82}");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.False(def.Anatomy.ContainsKey("venicus"));
+            Assert.Equal(0.82f, def.Anatomy["veins"], precision: 5);
+        }
+
+        [Fact]
+        public void ParseDefinition_RemovesLegacyBlemishesOnRead()
+        {
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                "\"anatomy\": {}",
+                "\"anatomy\": {\"blemishes\": 0.66, \"smoothness\": 0.51}");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.False(def.Anatomy.ContainsKey("blemishes"));
+            Assert.Equal(0.51f, def.Anatomy["smoothness"], precision: 5);
+        }
+
+        [Fact]
+        public void ParseDefinition_ParsesTypedSurfaceMaterialContract()
+        {
+            string json = WithAdditionalRootProperty(@"""surface_material"": {
+                ""smoothness"": 51,
+                ""freckles_pattern_id"": ""Freckles_Dots"",
+                ""surface_layers"": [
+                    { ""strength"": 0.25, ""tiling"": 4, ""rotation"": 0.5, ""pattern_id"": ""Wrinkles_Soft"" },
+                    { ""strength"": 1.75, ""tiling"": 32, ""rotation"": 9.5, ""pattern_id"": ""Wrinkles_Fine"" }
+                ]
+            }");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.NotNull(def.SurfaceMaterial);
+            Assert.Equal(51f, def.SurfaceMaterial!.Smoothness, precision: 5);
+            Assert.Equal("Freckles_Dots", def.SurfaceMaterial.FrecklesPatternId);
+            Assert.Equal(2, def.SurfaceMaterial.SurfaceLayers.Count);
+            Assert.Equal(0.25f, def.SurfaceMaterial.SurfaceLayers[0].Strength, precision: 5);
+            Assert.Equal(4f, def.SurfaceMaterial.SurfaceLayers[0].Tiling, precision: 5);
+            Assert.Equal(0.5f, def.SurfaceMaterial.SurfaceLayers[0].Rotation, precision: 5);
+            Assert.Equal("Wrinkles_Soft", def.SurfaceMaterial.SurfaceLayers[0].PatternId);
+        }
+
+        [Fact]
+        public void ParseDefinition_RejectsSurfaceMaterialValuesOutsideAuthoredRanges()
+        {
+            string json = WithAdditionalRootProperty(@"""surface_material"": {
+                ""smoothness"": 101,
+                ""freckles_pattern_id"": ""Freckles_Dots"",
+                ""surface_layers"": [
+                    { ""strength"": 0, ""tiling"": 1, ""rotation"": 0, ""pattern_id"": ""Wrinkles_Soft"" },
+                    { ""strength"": 0, ""tiling"": 1, ""rotation"": 0, ""pattern_id"": ""Wrinkles_Fine"" }
+                ]
+            }");
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionLoader.ParseDefinition(json));
+
+            Assert.Contains("surface_material.smoothness", ex.Message);
+        }
         [Fact]
         public void Load_GeraldDefinition_ProducesValidProfile()
         {

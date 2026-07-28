@@ -108,6 +108,7 @@ namespace Pinder.SessionSetup
 
                 var items = ParseItemIds(root);
                 var anatomy = ParseAnatomySelections(root);
+                var surfaceMaterial = ParseOptionalSurfaceMaterial(root);
                 var allocation = ParseAllocation(root);
 
                 // Issue #779: optional permanent psychological stake.
@@ -145,7 +146,8 @@ namespace Pinder.SessionSetup
                     psychiatricDiagnosis,
                     consolidatedPersonality,
                     consolidatedBackstory,
-                    timingProfileId);
+                    timingProfileId,
+                    surfaceMaterial);
             }
         }
 
@@ -389,9 +391,6 @@ namespace Pinder.SessionSetup
             var anatomy = new Dictionary<string, float>();
             foreach (var kv in prop.EnumerateObject())
             {
-                if (DeprecatedAnatomyFields.IsDeprecated(kv.Name))
-                    continue;
-
                 // v2: float values
                 if (kv.Value.ValueKind == JsonValueKind.Number)
                 {
@@ -415,6 +414,43 @@ namespace Pinder.SessionSetup
             return anatomy;
         }
 
+
+        private static CharacterSurfaceMaterial? ParseOptionalSurfaceMaterial(JsonElement root)
+        {
+            if (!root.TryGetProperty("surface_material", out var prop))
+                return null;
+            if (prop.ValueKind != JsonValueKind.Object)
+                throw new FormatException($"Character definition field surface_material must be an object, got {DescribeValueKind(prop)}.");
+
+            float smoothness = GetRequiredFloat(prop, "smoothness", "surface_material.smoothness");
+            string frecklesPatternId = GetRequiredString(prop, "freckles_pattern_id");
+
+            if (!prop.TryGetProperty("surface_layers", out var layersProp) || layersProp.ValueKind != JsonValueKind.Array)
+                throw new FormatException("Character definition missing required field: surface_material.surface_layers");
+
+            var layers = new List<CharacterSurfaceLayer>();
+            int index = 0;
+            foreach (var layerProp in layersProp.EnumerateArray())
+            {
+                if (layerProp.ValueKind != JsonValueKind.Object)
+                    throw new FormatException($"Character definition field surface_material.surface_layers[{index}] must be an object, got {DescribeValueKind(layerProp)}.");
+                float strength = GetRequiredFloat(layerProp, "strength", $"surface_material.surface_layers[{index}].strength");
+                float tiling = GetRequiredFloat(layerProp, "tiling", $"surface_material.surface_layers[{index}].tiling");
+                float rotation = GetRequiredFloat(layerProp, "rotation", $"surface_material.surface_layers[{index}].rotation");
+                string patternId = GetRequiredString(layerProp, "pattern_id");
+                layers.Add(new CharacterSurfaceLayer(strength, tiling, rotation, patternId));
+                index++;
+            }
+
+            return new CharacterSurfaceMaterial(smoothness, frecklesPatternId, layers);
+        }
+
+        private static float GetRequiredFloat(JsonElement root, string fieldName, string fieldPath)
+        {
+            if (!root.TryGetProperty(fieldName, out var prop) || prop.ValueKind != JsonValueKind.Number)
+                throw new FormatException($"Character definition missing required field: {fieldPath}");
+            return prop.GetSingle();
+        }
         private static AllocationBlock ParseAllocation(JsonElement root)
         {
             if (!root.TryGetProperty("allocation", out var alloc) ||

@@ -99,7 +99,7 @@ namespace Pinder.Core.Prompts
 
         internal static readonly IReadOnlyList<string> RegisterGroup =
             new[] { "skinHue", "skinSat", "skinVal",
-                    "freckles", "blemishes", "veins" };
+                    "freckles", "smoothness", "veins" };
 
         internal static readonly IReadOnlyList<string> PacingGroup =
             new[] { "glansScale", "glansWidth",

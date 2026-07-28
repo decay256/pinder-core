@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Pinder.Core.Characters
@@ -41,7 +42,6 @@ namespace Pinder.Core.Characters
         public float Prepucius  { get; set; } = 0f;
         public float Arrugatis  { get; set; } = 0f;
         public float Gravitatis { get; set; } = 0f;
-        public float Venicus    { get; set; } = 0f;
 
         // ---- Skin ----
         /// <summary>Unity Color RGB, each channel [0..1].</summary>
@@ -49,11 +49,15 @@ namespace Pinder.Core.Characters
         public float SkinColorG { get; set; } = 0.72f;
         public float SkinColorB { get; set; } = 0.63f;
 
-        /// <summary>Freckles intensity 0–100.</summary>
+        /// <summary>Freckles intensity 0-100.</summary>
         public float Freckles  { get; set; } = 0f;
-        /// <summary>Blemishes intensity 0–100.</summary>
-        public float Blemishes { get; set; } = 0f;
-        /// <summary>Vein visibility 0–100.</summary>
+        /// <summary>Shader smoothness/gloss 0-100.</summary>
+        public float Smoothness { get; set; } = CharacterSurfaceMaterial.SmoothnessDefault;
+        /// <summary>Freckles texture pattern id; resolved by the host material catalog.</summary>
+        public string FrecklesPatternId { get; set; } = CharacterSurfaceMaterial.DefaultFrecklesPatternId;
+        /// <summary>Two authored normal-detail layers; resolved by the host material catalog.</summary>
+        public IReadOnlyList<CharacterSurfaceLayer> SurfaceLayers { get; set; } = CharacterSurfaceMaterial.Default.SurfaceLayers;
+        /// <summary>Canonical vascularity control 0-100.</summary>
         public float Veins     { get; set; } = 30f;
 
         /// <summary>Circumcision state.</summary>
@@ -108,7 +112,6 @@ namespace Pinder.Core.Characters
             map["prepucius"]  = Clamp01(dto.Prepucius  / 100f);
             map["arrugatis"]  = Clamp01(dto.Arrugatis  / 100f);
             map["gravitatis"] = Clamp01(dto.Gravitatis / 100f);
-            map["venicus"]    = Clamp01(dto.Venicus     / 100f);
 
             // Skin — RGB → HSV
             RgbToHsv(dto.SkinColorR, dto.SkinColorG, dto.SkinColorB,
@@ -118,13 +121,22 @@ namespace Pinder.Core.Characters
             map["skinVal"] = Clamp01(v);
 
             map["freckles"]  = Clamp01(dto.Freckles  / 100f);
-            map["blemishes"] = Clamp01(dto.Blemishes / 100f);
+            map["smoothness"] = Clamp01(dto.Smoothness / 100f);
             map["veins"]     = Clamp01(dto.Veins     / 100f);
 
             // Bool → 2-band at 0.5
             map["isCircumcised"] = dto.IsCircumcised ? 1.0f : 0.0f;
 
             return map;
+        }
+
+        public static CharacterSurfaceMaterial NormalizeSurfaceMaterial(CharacterDataDto dto)
+        {
+            if (dto == null) throw new ArgumentNullException(nameof(dto));
+            return new CharacterSurfaceMaterial(
+                dto.Smoothness,
+                dto.FrecklesPatternId,
+                dto.SurfaceLayers);
         }
 
         // -------------------------------------------------------------------

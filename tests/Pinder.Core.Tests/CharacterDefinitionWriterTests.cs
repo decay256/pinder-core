@@ -224,6 +224,8 @@ namespace Pinder.Core.Tests
         [InlineData("sad")]
         [InlineData("happy")]
         [InlineData("serius")]
+        [InlineData("venicus")]
+        [InlineData("blemishes")]
         public void Write_RejectsDeprecatedExpressionTargets(string field)
         {
             var def = NewDefinitionWithAnatomy(new Dictionary<string, float>
@@ -239,13 +241,36 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public void Write_SurfaceMaterial_RoundTripsTypedControls()
+        {
+            var def = NewDefinitionWithAnatomy(
+                new Dictionary<string, float> { ["smoothness"] = 0.51f },
+                new CharacterSurfaceMaterial(
+                    51f,
+                    "Freckles_Dots",
+                    new[]
+                    {
+                        new CharacterSurfaceLayer(0.2f, 4f, 0.5f, "Wrinkles_Soft"),
+                        new CharacterSurfaceLayer(1.8f, 32f, 9.5f, "Wrinkles_Fine"),
+                    }));
+
+            string json = CharacterDefinitionWriter.Write(def);
+            var roundTrip = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.NotNull(roundTrip.SurfaceMaterial);
+            Assert.Equal(51f, roundTrip.SurfaceMaterial!.Smoothness, precision: 5);
+            Assert.Equal("Freckles_Dots", roundTrip.SurfaceMaterial.FrecklesPatternId);
+            Assert.Equal("Wrinkles_Fine", roundTrip.SurfaceMaterial.SurfaceLayers[1].PatternId);
+        }
+        [Fact]
         public void Write_NullDef_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 CharacterDefinitionWriter.Write(null!));
         }
         private static CharacterDefinition NewDefinitionWithAnatomy(
-            IReadOnlyDictionary<string, float> anatomy)
+            IReadOnlyDictionary<string, float> anatomy,
+            CharacterSurfaceMaterial? surfaceMaterial = null)
         {
             var spent = new Dictionary<StatType, int>
             {
@@ -269,7 +294,8 @@ namespace Pinder.Core.Tests
                 1,
                 new List<string>(),
                 anatomy,
-                new AllocationBlock(spent, 0, shadows));
+                new AllocationBlock(spent, 0, shadows),
+                surfaceMaterial: surfaceMaterial);
         }
 
     }

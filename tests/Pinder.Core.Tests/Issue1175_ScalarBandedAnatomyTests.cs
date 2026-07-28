@@ -79,12 +79,11 @@ namespace Pinder.Core.Tests
                 Prepucius       = 0f,
                 Arrugatis       = 0f,
                 Gravitatis      = 0f,
-                Venicus         = 0f,
                 SkinColorR      = 0.87f,
                 SkinColorG      = 0.72f,
                 SkinColorB      = 0.63f,
                 Freckles        = 0f,
-                Blemishes       = 0f,
+                Smoothness      = 51f,
                 Veins           = 30f,  // 30/100 = 0.30 → band 2 (0.20-0.50)
                 IsCircumcised   = false  // false → 0.0 → band 0 (uncircumcised)
             };
@@ -149,6 +148,67 @@ namespace Pinder.Core.Tests
             Assert.DoesNotContain(anatomyRepo.GetAll(), p => p.Id == field);
         }
 
+
+        [Fact]
+        public void CharacterDataNormalizer_EmitsCanonicalSurfaceScalarsOnly()
+        {
+            var dto = new CharacterDataDto
+            {
+                Freckles = 70f,
+                Smoothness = 51f,
+                Veins = 83f,
+                FrecklesPatternId = "Freckles_Patches",
+                SurfaceLayers = new[]
+                {
+                    new CharacterSurfaceLayer(0.25f, 4f, 0.5f, "Wrinkles_Soft"),
+                    new CharacterSurfaceLayer(1.75f, 32f, 9.5f, "Wrinkles_Fine"),
+                }
+            };
+
+            var anatomy = CharacterDataNormalizer.Normalize(dto);
+
+            Assert.Equal(0.70f, anatomy["freckles"], precision: 5);
+            Assert.Equal(0.51f, anatomy["smoothness"], precision: 5);
+            Assert.Equal(0.83f, anatomy["veins"], precision: 5);
+            Assert.False(anatomy.ContainsKey("venicus"));
+            Assert.False(anatomy.ContainsKey("blemishes"));
+            Assert.DoesNotContain(anatomy.Keys, key => key.Contains("Pattern"));
+            Assert.DoesNotContain(anatomy.Keys, key => key.StartsWith("surface", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void CharacterDataNormalizer_ExtractsTypedSurfaceMaterialWithAuthoredRanges()
+        {
+            var dto = new CharacterDataDto
+            {
+                Smoothness = 51f,
+                FrecklesPatternId = "Freckles_Fine",
+                SurfaceLayers = new[]
+                {
+                    new CharacterSurfaceLayer(0.25f, 4f, 0.5f, "Wrinkles_Soft"),
+                    new CharacterSurfaceLayer(1.75f, 32f, 9.5f, "Wrinkles_Fine"),
+                }
+            };
+
+            var surface = CharacterDataNormalizer.NormalizeSurfaceMaterial(dto);
+
+            Assert.Equal(51f, surface.Smoothness, precision: 5);
+            Assert.Equal("Freckles_Fine", surface.FrecklesPatternId);
+            Assert.Equal(2, surface.SurfaceLayers.Count);
+            Assert.Equal(32f, surface.SurfaceLayers[1].Tiling, precision: 5);
+            Assert.Equal(9.5f, surface.SurfaceLayers[1].Rotation, precision: 5);
+        }
+
+        [Fact]
+        public void ActiveAnatomyRepository_RetiresLegacyFieldsAndAddsSmoothness()
+        {
+            var anatomyRepo = LoadAnatomyRepo();
+
+            Assert.Null(anatomyRepo.GetParameter("venicus"));
+            Assert.Null(anatomyRepo.GetParameter("blemishes"));
+            Assert.NotNull(anatomyRepo.GetParameter("veins"));
+            Assert.NotNull(anatomyRepo.GetParameter("smoothness"));
+        }
         // ----------------------------------------------------------------
         // BIPOLAR: trunkCurvature normalisation
         // ----------------------------------------------------------------

@@ -211,3 +211,7 @@ The **stats** (Charm, Rizz, Honesty, Chaos, Wit, Self-Awareness) and **shadows**
 |------|-------|---------|
 | 2026-04-07 | #655 | Initial creation — documented two-tier data model and extensibility approach |
 | 2026-04-30 | #812 | Filled in the full configuration map (delivery-instructions, characters, anatomy, timing). Added per-file loader table, quick-reference, and the anatomy parameter extensibility section. Cross-linked to [Unity Integration Guide](unity-integration.md) for engine-host integration. |
+
+### Material-surface character state
+
+surface_material is typed character state, not an extensible anatomy parameter collection. Core validates authored numeric ranges for smoothness and the two normal-detail layers while preserving host-resolved pattern ids as strings. This prevents freckles/surface pattern ids from being forced into scalar anatomy bands and keeps Unity/Web catalog resolution outside the pure engine boundary.

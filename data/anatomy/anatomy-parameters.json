@@ -1123,62 +1123,6 @@
     ]
   },
   {
-    "id": "venicus",
-    "name": "Venicus (Vein Prominence - Age)",
-    "metadata": {
-      "group": "surface",
-      "section": "vascularity",
-      "label_key": "anatomy.venicus.label",
-      "control_type": "slider",
-      "normalized_min": 0,
-      "normalized_max": 1,
-      "normalized_default": 0.5,
-      "normalized_step": 0.01,
-      "display_order": 150
-    },
-    "bands": [
-      {
-        "lower": 0,
-        "upper": 0.05,
-        "personality_fragment": "quiet in this dimension; doesn't feel the need to signal history through appearance",
-        "summary_text": "Venicus (Vein Prominence - Age): minimum range (0-5%)."
-      },
-      {
-        "lower": 0.05,
-        "upper": 0.2,
-        "personality_fragment": "keep your emotions carefully tucked away behind a polite, calm facade, and never let them see you sweat or lose your cool",
-        "archetype_tendencies": [],
-        "summary_text": "Venicus (Vein Prominence - Age): low range (5-20%)."
-      },
-      {
-        "lower": 0.2,
-        "upper": 0.5,
-        "personality_fragment": "respond with a steady, moderate pulse, and express your interest clearly but avoid any sudden bursts of overwhelming enthusiasm",
-        "archetype_tendencies": [],
-        "summary_text": "Venicus (Vein Prominence - Age): moderate range (20-50%)."
-      },
-      {
-        "lower": 0.5,
-        "upper": 0.7,
-        "personality_fragment": "show your excitement with a bit more intensity, and let your sentences get slightly longer and more breathless when they talk about something you love",
-        "archetype_tendencies": [],
-        "summary_text": "Venicus (Vein Prominence - Age): balanced range (50-70%)."
-      },
-      {
-        "lower": 0.7,
-        "upper": 0.95,
-        "personality_fragment": "high-energy vein presence; enthusiasm visible and unfiltered; the vitality is a fact, not a performance",
-        "summary_text": "Venicus (Vein Prominence - Age): high range (70-95%)."
-      },
-      {
-        "lower": 0.95,
-        "upper": 1,
-        "personality_fragment": "very difficult to ignore; has calibrated everything around managing the reaction they produce; mostly successful; occasionally not",
-        "summary_text": "Venicus (Vein Prominence - Age): maximum range (95-100%)."
-      }
-    ]
-  },
-  {
     "id": "skinHue",
     "name": "Skin Hue",
     "metadata": {
@@ -1469,16 +1413,16 @@
     ]
   },
   {
-    "id": "blemishes",
-    "name": "Blemishes",
+    "id": "smoothness",
+    "name": "Smoothness",
     "metadata": {
       "group": "skin",
       "section": "details",
-      "label_key": "anatomy.blemishes.label",
+      "label_key": "anatomy.smoothness.label",
       "control_type": "slider",
       "normalized_min": 0,
       "normalized_max": 1,
-      "normalized_default": 0,
+      "normalized_default": 0.51,
       "normalized_step": 0.01,
       "display_order": 230
     },
@@ -1486,49 +1430,32 @@
       {
         "lower": 0,
         "upper": 0.05,
-        "personality_fragment": "smooth, clear; easy to approach; the surface presents no barriers; people sometimes mistake this for simplicity",
-        "stat_modifiers": {
-          "charm": 1
-        },
-        "summary_text": "Blemishes: minimum range (0-5%)."
+        "summary_text": "Smoothness: minimum gloss range (0-5%)."
       },
       {
         "lower": 0.05,
         "upper": 0.2,
-        "personality_fragment": "disclose your one tiny blemish as if it is a major structural defect, and ask if they can look past your ruined perfection",
-        "summary_text": "Blemishes: low range (5-20%)."
+        "summary_text": "Smoothness: low gloss range (5-20%)."
       },
       {
         "lower": 0.2,
         "upper": 0.5,
-        "personality_fragment": "describe your few blemishes as character marks that prove you have survived the harsh realities of the outside world, and demand some sympathy",
-        "summary_text": "Blemishes: moderate range (20-50%)."
+        "summary_text": "Smoothness: moderate gloss range (20-50%)."
       },
       {
         "lower": 0.5,
         "upper": 0.7,
-        "personality_fragment": "textured skin; the history is visible in the surface; doesn't sand it down for anyone's comfort",
-        "summary_text": "Blemishes: balanced range (50-70%)."
+        "summary_text": "Smoothness: balanced gloss range (50-70%)."
       },
       {
         "lower": 0.7,
         "upper": 0.95,
-        "personality_fragment": "significantly blemished; all the wear is visible; not going to pretend it isn't; the past happened and shows; this is a fact rather than a complaint",
-        "stat_modifiers": {
-          "honesty": 1,
-          "self_awareness": 1
-        },
-        "summary_text": "Blemishes: high range (70-95%)."
+        "summary_text": "Smoothness: high gloss range (70-95%)."
       },
       {
         "lower": 0.95,
         "upper": 1,
-        "personality_fragment": "heavily blemished; by thirty-two they had lived several lives; the surface shows all of it; people ask what happened; the accurate answer is 'a lot'",
-        "stat_modifiers": {
-          "honesty": 2,
-          "rizz": -1
-        },
-        "summary_text": "Blemishes: maximum range (95-100%)."
+        "summary_text": "Smoothness: maximum gloss range (95-100%)."
       }
     ]
   },

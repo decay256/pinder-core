@@ -12,12 +12,12 @@ namespace Pinder.Core.Tests
     public sealed class Issue1329_AnatomyMetadataTests
     {
         [Fact]
-        public void BundledFile_All22ParametersExposeMetadata()
+        public void BundledFile_All21ActiveParametersExposeMetadata()
         {
             var repo = new JsonAnatomyRepository(LoadBundledAnatomyJson());
             var all = repo.GetAll().ToList();
 
-            Assert.Equal(22, all.Count);
+            Assert.Equal(21, all.Count);
 
             foreach (var parameter in all)
             {

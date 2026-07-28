@@ -183,7 +183,7 @@ Unity follow-up: remove the `PromptLookupTable` asset from `p-game` once the DLL
 | Age params | 0–100 float | `/100` |
 | Expression | 0–100 float | `/100` |
 | `skinColor` (RGB) | each channel [0..1] | RGB→HSV → `skinHue/skinSat/skinVal` |
-| `freckles`, `blemishes`, `veins` | 0–100 float | `/100` |
+| `freckles`, `smoothness`, `veins` | 0–100 float | `/100` |
 | `isCircumcised` | bool | `false→0.0`, `true→1.0` |
 
 All values are clamped to [0..1] after normalisation.
@@ -231,3 +231,5 @@ When a Unity id has no core definition at assembly time:
 | pinder-web#947 | Anatomy: admin editor + backend write path for anatomy band fragments |
 | pinder-core#836 | Texting style: slot→axis aggregation rule |
 | pinder-core#907 | Texting style: conflict matrix |
+
+Core now carries surface_material as typed material state: smoothness keeps Unity's 0-100 authored range, freckles_pattern_id is a host-resolved pattern id, and two surface_layers carry strength 0-2, tiling 1-50, rotation 0-10, and pattern ids. Legacy venicus migrates into canonical veins only when veins is absent; legacy blemishes is stripped and rejected on new writes.

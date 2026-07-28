@@ -128,7 +128,7 @@ endings, UTF-8 without BOM, and a single trailing newline.
 Top-level writer order is:
 
 `schema_version`, `character_id`, `name`, `gender_identity`, `bio`, `level`,
-optional `timing_profile_id`, `items`, `anatomy`, `allocation`, optional
+optional `timing_profile_id`, `items`, `anatomy`, optional `surface_material`, `allocation`, optional
 `psychological_stake`, optional `consolidated_personality`, optional
 `consolidated_backstory`, optional `backstory_categories`, optional
 `stake_lines`, optional `psychiatric_diagnosis`.
@@ -151,3 +151,9 @@ between runtime required fields, schema fields, and the diagnosis prompt.
 - #815 - writer and format documentation.
 - #1175 - v2 scalar anatomy.
 - #1244/#1251 - bundled character synthesis and therapist formulation contract.
+
+## Surface Material
+
+surface_material is an optional typed visual-material block for browser/Unity-equivalent material controls that are not categorical anatomy bands. It carries smoothness in Unity's authored 0-100 range, freckles_pattern_id, and exactly two surface_layers with strength 0-2, tiling 1-50, rotation 0-10, and pattern_id. Pattern ids are host-resolved strings and are intentionally not stored in anatomy.
+
+Legacy anatomy fields venicus and blemishes are not active fields. Reads migrate venicus to veins only when veins is missing; new writes containing either field are rejected.

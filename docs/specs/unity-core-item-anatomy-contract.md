@@ -198,9 +198,9 @@ All parameters mirror Unity's `CharacterData.cs` field names verbatim:
 | Trunk | `trunkLengthBase`, `trunkLengthMid`, `trunkLengthTip`, `trunkGirth`, `trunkCurvature` (bipolar) |
 | Glans | `glansScale`, `glansWidth` |
 | Scrotum | `scrotumScale`, `leftTesticleScale`, `rightTesticleScale`, `scrotumDrop` |
-| Age | `prepucius`, `arrugatis`, `gravitatis`, `venicus` |
+| Age | `prepucius`, `arrugatis`, `gravitatis` |
 | Expression | `sad`, `happy`, `serius` |
-| Skin | `skinHue`, `skinSat`, `skinVal`, `freckles`, `blemishes`, `veins`, `isCircumcised` |
+| Skin | `skinHue`, `skinSat`, `skinVal`, `freckles`, `smoothness`, `veins`, `isCircumcised` |
 
 Grooming fields (`hasHair`, `hairLength`, `hair`, `hairColor`) are **cosmetic-only** and excluded from anatomy parameters.
 
@@ -300,3 +300,5 @@ The following Unity fields/concepts are **excluded from pinder-core** and must n
 - **Empty `Waist` / `Body` slots:** No items currently use `Waist` (slot 3) or non-outfit `Body` items. Confirm intent.
 - **Dead `occupiedSlots` field on outfits:** Can be removed from Unity's `AccessoryData` struct.
 - **`vest6` gap:** `vest6` is absent from Unity's catalog. If intentional, no action needed. If a bug, re-add.
+
+Core canonicalization update: veins is the sole vascularity scalar and legacy venicus is read-migrated only as a missing-field fallback. blemishes is retired because the active shader has no blemish channel. Pattern-bearing material controls live in surface_material, outside scalar anatomy bands.
