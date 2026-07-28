@@ -106,9 +106,11 @@ namespace Pinder.LlmAdapters;
 
 public sealed class DirectCallFixture
 {
+    private readonly ILlmTransport _transport;
+
     public object Call(string tone)
     {
-        return transport.SendAsync(
+        return _transport.SendAsync(
             "Treat the recipient's hesitation as protective rather than dismissive, and keep the subtext gentle.",
             $"Write a reply that preserves the established voice while showing {tone} through word choice and pacing.");
     }
@@ -118,6 +120,57 @@ CS
 if (cd "$direct_sink_repo" && bash scripts/check-prompt-content.sh > "$tmp_root/direct-sink.out" 2>&1); then
     echo "FAIL: prompt prose passed directly to model transport was accepted."
     cat "$tmp_root/direct-sink.out"
+    exit 1
+fi
+
+structural_failures=0
+
+novel_prose_repo="$(make_repo novel-prose)"
+cat > "$novel_prose_repo/src/Pinder.LlmAdapters/DeclaredLlmSinkFixture.cs" <<'CS'
+namespace Pinder.LlmAdapters;
+
+public sealed class DeclaredLlmSinkFixture
+{
+    private readonly ILlmTransport _transport;
+
+    public object Call(string emotionalTone)
+    {
+        return _transport.SendAsync(
+            "Keep the reply gentle while allowing the character's hesitation to remain visible.",
+            $"Answer with emotional specificity while preserving {emotionalTone} and the established voice.");
+    }
+}
+CS
+
+if (cd "$novel_prose_repo" && bash scripts/check-prompt-content.sh > "$tmp_root/novel-prose.out" 2>&1); then
+    echo "FAIL: model-facing prose without a recognized directive verb was accepted."
+    cat "$tmp_root/novel-prose.out"
+    structural_failures=$((structural_failures + 1))
+fi
+
+notification_repo="$(make_repo notification-client)"
+cat > "$notification_repo/src/Pinder.LlmAdapters/NotificationFixture.cs" <<'CS'
+namespace Pinder.LlmAdapters;
+
+public sealed class NotificationFixture
+{
+    private readonly INotificationClient _notificationClient;
+
+    public object Notify(string playerName)
+    {
+        return _notificationClient.SendAsync(
+            $"You are back in the game, {playerName}. Open your inbox to see the player's latest message.");
+    }
+}
+CS
+
+if ! (cd "$notification_repo" && bash scripts/check-prompt-content.sh > "$tmp_root/notification.out" 2>&1); then
+    echo "FAIL: unrelated notification SendAsync player copy was treated as an LLM prompt sink."
+    cat "$tmp_root/notification.out"
+    structural_failures=$((structural_failures + 1))
+fi
+
+if [[ "$structural_failures" -ne 0 ]]; then
     exit 1
 fi
 
