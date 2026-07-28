@@ -135,6 +135,9 @@ namespace Pinder.Core.Characters
                 writer.WriteNumber(kv.Key, kv.Value);
             writer.WriteEndObject();
 
+            if (def.SurfaceMaterial != null)
+                WriteSurfaceMaterial(writer, def.SurfaceMaterial);
+
             writer.WriteStartObject("allocation");
             WriteSpent(writer, def.Allocation);
             writer.WriteNumber("unspent_pool", def.Allocation.UnspentPool);
@@ -185,6 +188,25 @@ namespace Pinder.Core.Characters
             writer.WriteEndObject();
         }
 
+
+        private static void WriteSurfaceMaterial(Utf8JsonWriter writer, CharacterSurfaceMaterial surface)
+        {
+            writer.WriteStartObject("surface_material");
+            writer.WriteNumber("smoothness", surface.Smoothness);
+            writer.WriteString("freckles_pattern_id", surface.FrecklesPatternId);
+            writer.WriteStartArray("surface_layers");
+            foreach (var layer in surface.SurfaceLayers)
+            {
+                writer.WriteStartObject();
+                writer.WriteNumber("strength", layer.Strength);
+                writer.WriteNumber("tiling", layer.Tiling);
+                writer.WriteNumber("rotation", layer.Rotation);
+                writer.WriteString("pattern_id", layer.PatternId);
+                writer.WriteEndObject();
+            }
+            writer.WriteEndArray();
+            writer.WriteEndObject();
+        }
         private static void WriteSpent(Utf8JsonWriter writer, AllocationBlock alloc)
         {
             writer.WriteStartObject("spent");

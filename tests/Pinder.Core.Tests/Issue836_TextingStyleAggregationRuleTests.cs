@@ -90,7 +90,7 @@ namespace Pinder.Core.Tests
         // so each of the three tone axes has a contributing source.
         // #1175: now uses Unity param ids with float values [0..1].
         // Stance group: trunkLengthBase, trunkLengthMid, trunkLengthTip, trunkGirth, trunkCurvature
-        // Register group: skinHue, skinSat, skinVal, freckles, blemishes, veins
+        // Register group: skinHue, skinSat, skinVal, freckles, smoothness, veins
         // Pacing group: glansScale, glansWidth, scrotumScale, leftTesticleScale, rightTesticleScale, scrotumDrop, isCircumcised
         private static readonly Dictionary<string, float> AnatomyStack =
             new Dictionary<string, float>
@@ -98,7 +98,7 @@ namespace Pinder.Core.Tests
                 { "trunkLengthBase",  0.18f },  // stance group (band 1 – compact)
                 { "trunkGirth",       0.08f },  // stance group (band 0 – slim)
                 { "veins",            0.08f },  // register group (band 0 – subtle)
-                { "blemishes",        0.05f },  // register group (band 0 – smooth)
+                { "smoothness",        0.51f },  // register group (band 0 – smooth)
                 { "glansScale",       0.50f },  // pacing group (mid band)
                 { "isCircumcised",    0.0f  },  // pacing group (uncircumcised band)
             };

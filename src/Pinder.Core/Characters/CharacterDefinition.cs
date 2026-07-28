@@ -60,6 +60,9 @@ namespace Pinder.Core.Characters
         /// </summary>
         public IReadOnlyDictionary<string, float> Anatomy { get; }
 
+        /// <summary>Typed material-surface controls that are not categorical anatomy bands.</summary>
+        public CharacterSurfaceMaterial? SurfaceMaterial { get; }
+
         /// <summary>Player-authored build-point allocation block.</summary>
         public AllocationBlock Allocation { get; }
 
@@ -97,7 +100,8 @@ namespace Pinder.Core.Characters
             IReadOnlyDictionary<string, string>? psychiatricDiagnosis = null,
             string? consolidatedPersonality = null,
             string? consolidatedBackstory = null,
-            string? timingProfileId = null)
+            string? timingProfileId = null,
+            CharacterSurfaceMaterial? surfaceMaterial = null)
         {
             SchemaVersion = schemaVersion;
             CharacterId = characterId;
@@ -108,6 +112,7 @@ namespace Pinder.Core.Characters
             TimingProfileId = string.IsNullOrWhiteSpace(timingProfileId) ? null : timingProfileId;
             Items = items ?? throw new ArgumentNullException(nameof(items));
             Anatomy = anatomy ?? throw new ArgumentNullException(nameof(anatomy));
+            SurfaceMaterial = surfaceMaterial;
             Allocation = allocation ?? throw new ArgumentNullException(nameof(allocation));
             PsychologicalStake = psychologicalStake;
             Backstory = backstory;

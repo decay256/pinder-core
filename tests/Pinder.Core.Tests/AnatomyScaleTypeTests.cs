@@ -301,8 +301,8 @@ namespace Pinder.Core.Tests
             var repo = new JsonAnatomyRepository(json);
             var all  = repo.GetAll().ToList();
 
-            Assert.True(all.Count >= 22,
-                $"Expected at least 22 anatomy params, got {all.Count}");
+            Assert.True(all.Count >= 21,
+                $"Expected at least 21 anatomy params, got {all.Count}");
 
             foreach (var param in all)
                 Assert.NotEmpty(param.Bands);
