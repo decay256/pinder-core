@@ -109,6 +109,30 @@ namespace Pinder.Core.Tests
             Assert.True(active.SequenceEqual(firstWrite) || active.SequenceEqual(secondWrite));
         }
 
+        [Theory]
+        [InlineData("sad")]
+        [InlineData("happy")]
+        [InlineData("serius")]
+        public async Task CompareExchange_RejectsDeprecatedExpressionTargets(string field)
+        {
+            string path = Path.Combine(_directory, "shared.json");
+            await File.WriteAllTextAsync(path, DefinitionJson(CharacterId, "Original"));
+
+            var store = new DirectoryCharacterStore(_directory);
+            CharacterArtifact artifact = (await store.ReadArtifactAsync(CharacterId))!;
+            string replacement = DefinitionJson(CharacterId, "Bad")
+                .Replace("\"anatomy\": {}", $"\"anatomy\": {{\"{field}\": 0.5}}");
+
+            var ex = await Assert.ThrowsAsync<FormatException>(() =>
+                store.CompareExchangeArtifactAsync(
+                    CharacterId,
+                    artifact.Revision,
+                    Encoding.UTF8.GetBytes(replacement)));
+
+            Assert.Contains($"anatomy.{field}", ex.Message);
+            Assert.Contains("deprecated", ex.Message);
+        }
+
         [Fact]
         public async Task EnumerateArtifacts_ReturnsValidIdsAndPerArtifactDiagnostics()
         {

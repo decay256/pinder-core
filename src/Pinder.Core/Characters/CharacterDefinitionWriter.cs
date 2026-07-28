@@ -62,6 +62,7 @@ namespace Pinder.Core.Characters
         public static string Write(CharacterDefinition def)
         {
             if (def == null) throw new ArgumentNullException(nameof(def));
+            DeprecatedAnatomyFields.ThrowIfPresentForWrite(def.Anatomy);
 
             // Utf8JsonWriter Indented=true defaults: 2-space indent, '\n'
             // newlines on netstandard2.0 / .NET 8. We pin both explicitly

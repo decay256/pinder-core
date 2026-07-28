@@ -80,9 +80,6 @@ namespace Pinder.Core.Tests
                 Arrugatis       = 0f,
                 Gravitatis      = 0f,
                 Venicus         = 0f,
-                Sad             = 0f,   // 0/100 → 0.0 → band 0
-                Happy           = 0f,
-                Serius          = 0f,
                 SkinColorR      = 0.87f,
                 SkinColorG      = 0.72f,
                 SkinColorB      = 0.63f,
@@ -138,6 +135,18 @@ namespace Pinder.Core.Tests
             var prompt = PromptBuilder.BuildSystemPrompt(
                 "TestChar", "he/him", "test bio", fragments, new TrapState());
             Assert.Contains("PERSONALITY", prompt);
+        }
+
+        [Theory]
+        [InlineData("sad")]
+        [InlineData("happy")]
+        [InlineData("serius")]
+        public void DeprecatedExpressionTarget_NotInAnatomyRepository(string field)
+        {
+            var anatomyRepo = LoadAnatomyRepo();
+
+            Assert.Null(anatomyRepo.GetParameter(field));
+            Assert.DoesNotContain(anatomyRepo.GetAll(), p => p.Id == field);
         }
 
         // ----------------------------------------------------------------

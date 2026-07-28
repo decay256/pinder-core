@@ -220,11 +220,57 @@ namespace Pinder.Core.Tests
             Assert.True(posWit < posSelf);
         }
 
+        [Theory]
+        [InlineData("sad")]
+        [InlineData("happy")]
+        [InlineData("serius")]
+        public void Write_RejectsDeprecatedExpressionTargets(string field)
+        {
+            var def = NewDefinitionWithAnatomy(new Dictionary<string, float>
+            {
+                [field] = 0.5f,
+            });
+
+            var ex = Assert.Throws<FormatException>(() =>
+                CharacterDefinitionWriter.Write(def));
+
+            Assert.Contains($"anatomy.{field}", ex.Message);
+            Assert.Contains("deprecated", ex.Message);
+        }
+
         [Fact]
         public void Write_NullDef_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() =>
                 CharacterDefinitionWriter.Write(null!));
         }
+        private static CharacterDefinition NewDefinitionWithAnatomy(
+            IReadOnlyDictionary<string, float> anatomy)
+        {
+            var spent = new Dictionary<StatType, int>
+            {
+                [StatType.Charm] = 1,
+                [StatType.Rizz] = 1,
+                [StatType.Honesty] = 1,
+                [StatType.Chaos] = 1,
+                [StatType.Wit] = 1,
+                [StatType.SelfAwareness] = 1,
+            };
+            var shadows = new Dictionary<ShadowStatType, int>();
+            foreach (ShadowStatType shadow in Enum.GetValues(typeof(ShadowStatType)))
+                shadows[shadow] = 0;
+
+            return new CharacterDefinition(
+                CharacterDefinition.CurrentSchemaVersion,
+                Guid.Parse("550e8400-e29b-41d4-a716-446655440000"),
+                "Deprecated Anatomy",
+                "they/them",
+                "test bio",
+                1,
+                new List<string>(),
+                anatomy,
+                new AllocationBlock(spent, 0, shadows));
+        }
+
     }
 }

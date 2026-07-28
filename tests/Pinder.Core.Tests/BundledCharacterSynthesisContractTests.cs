@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using Pinder.Core.Characters;
 using Pinder.SessionSetup;
 using Xunit;
@@ -40,6 +41,30 @@ namespace Pinder.Core.Tests
                     TherapistDiagnosisContract.RequiredFields,
                     character.PsychiatricDiagnosis!.Keys.Take(
                         TherapistDiagnosisContract.RequiredFields.Count));
+            }
+        }
+
+        [Fact]
+        public void BundledCharactersDoNotPersistDeprecatedExpressionTargets()
+        {
+            var characterDirectory = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "../../../../../data/characters");
+            string[] deprecated = { "sad", "happy", "serius" };
+
+            foreach (var path in Directory.EnumerateFiles(characterDirectory, "*.json"))
+            {
+                if (string.Equals(Path.GetFileName(path), "character-schema.json", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                using var document = JsonDocument.Parse(File.ReadAllText(path));
+                Assert.True(document.RootElement.TryGetProperty("anatomy", out var anatomy));
+                foreach (string field in deprecated)
+                {
+                    Assert.False(
+                        anatomy.TryGetProperty(field, out _),
+                        $"{Path.GetFileName(path)} must not persist deprecated anatomy.{field}.");
+                }
             }
         }
 

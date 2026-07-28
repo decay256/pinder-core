@@ -79,6 +79,22 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public void ParseDefinition_StripsDeprecatedExpressionTargetsFromPersistedAnatomy()
+        {
+            string json = ReplaceOrThrow(
+                ValidV1Json,
+                "\"anatomy\": {}",
+                "\"anatomy\": {\"sad\": 0.11, \"happy\": 0.22, \"serius\": 0.33, \"trunkLengthBase\": 0.44}");
+
+            var def = CharacterDefinitionLoader.ParseDefinition(json);
+
+            Assert.False(def.Anatomy.ContainsKey("sad"));
+            Assert.False(def.Anatomy.ContainsKey("happy"));
+            Assert.False(def.Anatomy.ContainsKey("serius"));
+            Assert.Equal(0.44f, def.Anatomy["trunkLengthBase"], precision: 5);
+        }
+
+        [Fact]
         public void Load_GeraldDefinition_ProducesValidProfile()
         {
             var itemRepo = LoadItemRepo();
