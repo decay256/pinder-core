@@ -301,4 +301,4 @@ The following Unity fields/concepts are **excluded from pinder-core** and must n
 - **Dead `occupiedSlots` field on outfits:** Can be removed from Unity's `AccessoryData` struct.
 - **`vest6` gap:** `vest6` is absent from Unity's catalog. If intentional, no action needed. If a bug, re-add.
 
-Core canonicalization update: eins is the sole vascularity scalar and legacy enicus is read-migrated only as a missing-field fallback. lemishes is retired because the active shader has no blemish channel. Pattern-bearing material controls live in surface_material, outside scalar anatomy bands.
+Core canonicalization update: veins is the sole vascularity scalar and legacy venicus is read-migrated only as a missing-field fallback. blemishes is retired because the active shader has no blemish channel. Pattern-bearing material controls live in surface_material, outside scalar anatomy bands.

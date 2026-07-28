@@ -232,4 +232,4 @@ When a Unity id has no core definition at assembly time:
 | pinder-core#836 | Texting style: slot→axis aggregation rule |
 | pinder-core#907 | Texting style: conflict matrix |
 
-Core now carries surface_material as typed material state: smoothness keeps Unity's 0-100 authored range, reckles_pattern_id is a host-resolved pattern id, and two surface_layers carry strength 0-2, tiling 1-50, rotation 0-10, and pattern ids. Legacy enicus migrates into canonical eins only when eins is absent; legacy lemishes is stripped and rejected on new writes.
+Core now carries surface_material as typed material state: smoothness keeps Unity's 0-100 authored range, freckles_pattern_id is a host-resolved pattern id, and two surface_layers carry strength 0-2, tiling 1-50, rotation 0-10, and pattern ids. Legacy venicus migrates into canonical veins only when veins is absent; legacy blemishes is stripped and rejected on new writes.

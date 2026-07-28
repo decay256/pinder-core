@@ -154,6 +154,6 @@ between runtime required fields, schema fields, and the diagnosis prompt.
 
 ## Surface Material
 
-surface_material is an optional typed visual-material block for browser/Unity-equivalent material controls that are not categorical anatomy bands. It carries smoothness in Unity's authored 0-100 range, reckles_pattern_id, and exactly two surface_layers with strength 0-2, tiling 1-50, rotation 0-10, and pattern_id. Pattern ids are host-resolved strings and are intentionally not stored in natomy.
+surface_material is an optional typed visual-material block for browser/Unity-equivalent material controls that are not categorical anatomy bands. It carries smoothness in Unity's authored 0-100 range, freckles_pattern_id, and exactly two surface_layers with strength 0-2, tiling 1-50, rotation 0-10, and pattern_id. Pattern ids are host-resolved strings and are intentionally not stored in anatomy.
 
-Legacy anatomy fields enicus and lemishes are not active fields. Reads migrate enicus to eins only when eins is missing; new writes containing either field are rejected.
+Legacy anatomy fields venicus and blemishes are not active fields. Reads migrate venicus to veins only when veins is missing; new writes containing either field are rejected.
