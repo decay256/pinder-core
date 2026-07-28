@@ -159,6 +159,11 @@ EXEMPT_CALL_RE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 
+MODEL_SINK_CALL_RE = re.compile(
+    r"\b(?:SendAsync|SendStructuredAsync|SendWithDiagnosticsAsync)\s*\([^;{}]*$",
+    re.IGNORECASE | re.DOTALL,
+)
+
 KEY_OR_LABEL_RE = re.compile(r"^[a-z0-9][a-z0-9_.:/-]*$", re.IGNORECASE)
 PLACEHOLDER_ONLY_RE = re.compile(r"^[A-Z0-9_{} .:/-]+$")
 WORD_RE = re.compile(r"[A-Za-z]{3,}")
@@ -364,6 +369,10 @@ def classify_literal(
 
     if is_prompt_key_or_label(text):
         return None
+
+    if has_directive_prose(text) and MODEL_SINK_CALL_RE.search(purpose):
+        form = "interpolated" if "$" in literal.prefix else "ordinary"
+        return f"{form} model-facing prompt prose passed directly to model transport"
 
     if has_exempt_purpose(purpose):
         return None

@@ -100,6 +100,27 @@ if (cd "$bad_repo" && bash scripts/check-prompt-content.sh > "$tmp_root/bad.out"
     exit 1
 fi
 
+direct_sink_repo="$(make_repo direct-sink)"
+cat > "$direct_sink_repo/src/Pinder.LlmAdapters/DirectCallFixture.cs" <<'CS'
+namespace Pinder.LlmAdapters;
+
+public sealed class DirectCallFixture
+{
+    public object Call(string tone)
+    {
+        return transport.SendAsync(
+            "Treat the recipient's hesitation as protective rather than dismissive, and keep the subtext gentle.",
+            $"Write a reply that preserves the established voice while showing {tone} through word choice and pacing.");
+    }
+}
+CS
+
+if (cd "$direct_sink_repo" && bash scripts/check-prompt-content.sh > "$tmp_root/direct-sink.out" 2>&1); then
+    echo "FAIL: prompt prose passed directly to model transport was accepted."
+    cat "$tmp_root/direct-sink.out"
+    exit 1
+fi
+
 nearby_key_repo="$(make_repo nearby-key)"
 cat > "$nearby_key_repo/src/Pinder.LlmAdapters/NearbyPromptKeyFixture.cs" <<'CS'
 namespace Pinder.LlmAdapters;

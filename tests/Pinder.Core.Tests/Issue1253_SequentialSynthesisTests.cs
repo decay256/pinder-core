@@ -292,20 +292,17 @@ namespace Pinder.Core.Tests
         }
         
         [Fact]
-        public void SynthesisFields_RoundTripThroughWriterLoaderAndAssembly()
+        public async Task SynthesisPipelineResult_RoundTripsThroughDefinitionWriterLoaderAndProfileAssembly()
         {
-            var backstory = new Dictionary<string, BackstoryFact>
-            {
-                { "origin_wound", new BackstoryFact("claims the breakup was mutual", "was suddenly abandoned after moving cities") },
-                { "social_mask", new BackstoryFact("performs breezy confidence", "checks every pause for signs of rejection") }
-            };
-            var stakes = Enumerable.Range(1, 15)
-                .Select(i => $"synthesis stake line {i}")
-                .ToList();
-            var diagnosis = CompleteDiagnosisWith(
-                ("derived_feeling", "old panic that closeness can disappear without warning"),
-                ("defense_reaction", "turns sincerity into a joke before it can hurt"),
-                ("honesty_reaction", "trust grows when candor is gentle and specific"));
+            var pipeline = new SequentialSynthesisPipeline(
+                new FakeBackstoryGenerator(),
+                new FakeStakeGenerator(),
+                new FakeDiagnosisGenerator());
+            var synthesis = await pipeline.SynthesizeAsync(
+                "Boundary Test",
+                "they/them",
+                "public bio",
+                Array.Empty<string>());
 
             var def = new CharacterDefinition(
                 schemaVersion: CharacterDefinition.CurrentSchemaVersion,
@@ -318,9 +315,9 @@ namespace Pinder.Core.Tests
                 anatomy: new Dictionary<string, float>(),
                 allocation: BuildAllocation(),
                 psychologicalStake: "They need steady presence to risk honest attachment.",
-                backstory: backstory,
-                stakeLines: stakes,
-                psychiatricDiagnosis: diagnosis,
+                backstory: synthesis.Backstory,
+                stakeLines: synthesis.StakeLines,
+                psychiatricDiagnosis: synthesis.PsychiatricDiagnosis,
                 consolidatedPersonality: "Alert, funny, and careful about needing anyone.",
                 consolidatedBackstory: "A move made abandonment feel ordinary, so they narrate pain as control."
             );
@@ -332,16 +329,24 @@ namespace Pinder.Core.Tests
                 LoadItemRepo(),
                 LoadAnatomyRepo());
 
-            AssertSynthesisFieldsSurvive(loadedDefinition.Backstory, loadedDefinition.StakeLines, loadedDefinition.PsychiatricDiagnosis);
+            AssertSynthesisFieldsSurvive(
+                synthesis,
+                loadedDefinition.Backstory,
+                loadedDefinition.StakeLines,
+                loadedDefinition.PsychiatricDiagnosis);
             Assert.Equal(def.PsychologicalStake, loadedDefinition.PsychologicalStake);
             Assert.Equal(def.ConsolidatedPersonality, loadedDefinition.ConsolidatedPersonality);
             Assert.Equal(def.ConsolidatedBackstory, loadedDefinition.ConsolidatedBackstory);
 
-            AssertSynthesisFieldsSurvive(assembledProfile.Backstory, assembledProfile.StakeLines, assembledProfile.PsychiatricDiagnosis);
+            AssertSynthesisFieldsSurvive(
+                synthesis,
+                assembledProfile.Backstory,
+                assembledProfile.StakeLines,
+                assembledProfile.PsychiatricDiagnosis);
             Assert.Equal(def.PsychologicalStake, assembledProfile.PsychologicalStake);
             Assert.Equal(def.ConsolidatedPersonality, assembledProfile.ConsolidatedPersonality);
             Assert.Equal(def.ConsolidatedBackstory, assembledProfile.ConsolidatedBackstory);
-            Assert.Contains("old panic that closeness can disappear without warning", assembledProfile.AssembledSystemPrompt);
+            Assert.Contains("anxiety", assembledProfile.AssembledSystemPrompt);
             Assert.Contains("Alert, funny, and careful about needing anyone.", assembledProfile.AssembledSystemPrompt);
         }
 
@@ -508,36 +513,27 @@ namespace Pinder.Core.Tests
             => new JsonAnatomyRepository(TestRepoLocator.ReadDataFile("anatomy/anatomy-parameters.json"));
 
         private static void AssertSynthesisFieldsSurvive(
+            CharacterSynthesisResult expected,
             IReadOnlyDictionary<string, BackstoryFact>? backstory,
             IReadOnlyList<string>? stakeLines,
             IReadOnlyDictionary<string, string>? psychiatricDiagnosis)
         {
             Assert.NotNull(backstory);
-            Assert.Collection(
-                backstory!,
-                entry =>
-                {
-                    Assert.Equal("origin_wound", entry.Key);
-                    Assert.Equal("claims the breakup was mutual", entry.Value.BioLie);
-                    Assert.Equal("was suddenly abandoned after moving cities", entry.Value.TragicReality);
-                },
-                entry =>
-                {
-                    Assert.Equal("social_mask", entry.Key);
-                    Assert.Equal("performs breezy confidence", entry.Value.BioLie);
-                    Assert.Equal("checks every pause for signs of rejection", entry.Value.TragicReality);
-                });
+            Assert.Equal(expected.Backstory.Keys, backstory!.Keys);
+            foreach (var pair in expected.Backstory)
+            {
+                Assert.Equal(pair.Value.BioLie, backstory[pair.Key].BioLie);
+                Assert.Equal(pair.Value.TragicReality, backstory[pair.Key].TragicReality);
+            }
 
             Assert.NotNull(stakeLines);
-            Assert.Equal(15, stakeLines!.Count);
-            Assert.Equal("synthesis stake line 1", stakeLines[0]);
-            Assert.Equal("synthesis stake line 15", stakeLines[14]);
+            Assert.Equal(expected.StakeLines, stakeLines);
 
             Assert.NotNull(psychiatricDiagnosis);
             Assert.Equal(TherapistDiagnosisContract.RequiredFields, psychiatricDiagnosis!.Keys.ToArray());
-            Assert.Equal("old panic that closeness can disappear without warning", psychiatricDiagnosis["derived_feeling"]);
-            Assert.Equal("turns sincerity into a joke before it can hurt", psychiatricDiagnosis["defense_reaction"]);
-            Assert.Equal("trust grows when candor is gentle and specific", psychiatricDiagnosis["honesty_reaction"]);
+            Assert.Equal(expected.PsychiatricDiagnosis.Count, psychiatricDiagnosis.Count);
+            foreach (string field in TherapistDiagnosisContract.RequiredFields)
+                Assert.Equal(expected.PsychiatricDiagnosis[field], psychiatricDiagnosis[field]);
         }
     }
 }
