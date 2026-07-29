@@ -120,6 +120,8 @@ namespace Pinder.LlmAdapters
             "resistance-date-secured",
             "engine-options-block",
             "engine-datee-block",
+            "diagnosis-repair-json",
+            "diagnosis-repair-field",
         };
 
         private static readonly string[] RuntimeCompletePromptKeys =
@@ -159,6 +161,7 @@ namespace Pinder.LlmAdapters
                 "cognitive_subtext_line", "transition_target_line", "transition_style_line", "options_count", "options_format_list"),
             SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative",
                 "cognitive_subtext_line", "transition_target_line", "transition_style_line"),
+            SystemTokens("diagnosis-repair-field", "field"),
             UserTokens("backstory", "characterName", "genderIdentity", "bio", "consolidated_backstory", "consolidated_personality"),
             UserTokens("dramatic_arc", "playerName", "playerStake", "playerBio", "dateeName", "dateeStake", "dateeBio"),
             UserTokens("outfit", "playerName", "playerItems", "dateeName", "dateeItems"),

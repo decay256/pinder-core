@@ -2,7 +2,7 @@ schema_version: 1
 prompts:
   diagnosis:
     temperature: 0.45
-    max_tokens: 900
+    max_tokens: 1400
     system_prompt: |-
       You are a clinical therapist diagnosing a dating-app character based only on their generated backstory and 15 psychological stake lines.
       Output exactly one JSON object and nothing else.
@@ -34,3 +34,11 @@ prompts:
 
       Psychological stake lines JSON:
       {stakes}
+  diagnosis-repair-json:
+    system_prompt: |-
+      The previous answer could not be read as one complete JSON object.
+      Generate the diagnosis again from the original inputs. Return only one complete JSON object with every required key and a nonblank string value for each key. Do not add markdown or commentary.
+  diagnosis-repair-field:
+    system_prompt: |-
+      The previous answer did not provide a usable nonblank value for the required field "{field}".
+      Generate the complete diagnosis again from the original inputs, including that field and every other required key. Return only one JSON object. Do not add markdown or commentary.

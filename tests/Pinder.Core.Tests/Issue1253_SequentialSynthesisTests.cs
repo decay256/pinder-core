@@ -72,6 +72,7 @@ namespace Pinder.Core.Tests
             public int? LastMaxTokens { get; private set; }
             public string? LastPhase { get; private set; }
             public int CallCount { get; private set; }
+            public List<string> SystemPrompts { get; } = new List<string>();
             public string ResponseToReturn { get; set; } = "{}";
             public Queue<string>? ResponsesToReturn { get; set; }
 
@@ -79,6 +80,7 @@ namespace Pinder.Core.Tests
             {
                 CallCount++;
                 LastSystemPrompt = systemPrompt;
+                SystemPrompts.Add(systemPrompt);
                 LastUserMessage = userMessage;
                 LastTemperature = temperature;
                 LastMaxTokens = maxTokens;
@@ -157,7 +159,16 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(
+                Path.Combine(testDir, "diagnosis.yaml"),
+                "schema_version: 1\nprompts:\n" +
+                "  diagnosis:\n" +
+                "    temperature: 0.62\n" +
+                "    max_tokens: 888\n" +
+                "    system_prompt: \"SYSTEM PROMPT\"\n" +
+                "    user_template: \"USER {backstory} - {stakes}\"\n" +
+                "  diagnosis-repair-json:\n" +
+                "    system_prompt: \"The previous answer was not a usable JSON object. Return the complete object again with every required key.\"\n");
 
             var transport = new FakeLlmTransport
             {
@@ -196,7 +207,16 @@ namespace Pinder.Core.Tests
         {
             var testDir = Path.Combine(Directory.GetCurrentDirectory(), "TestData_Prompts_" + Guid.NewGuid());
             Directory.CreateDirectory(testDir);
-            File.WriteAllText(Path.Combine(testDir, "diagnosis.yaml"), "schema_version: 1\nprompts:\n  diagnosis:\n    temperature: 0.62\n    max_tokens: 888\n    system_prompt: \"SYSTEM PROMPT\"\n    user_template: \"USER {backstory} - {stakes}\"");
+            File.WriteAllText(
+                Path.Combine(testDir, "diagnosis.yaml"),
+                "schema_version: 1\nprompts:\n" +
+                "  diagnosis:\n" +
+                "    temperature: 0.62\n" +
+                "    max_tokens: 888\n" +
+                "    system_prompt: \"SYSTEM PROMPT\"\n" +
+                "    user_template: \"USER {backstory} - {stakes}\"\n" +
+                "  diagnosis-repair-json:\n" +
+                "    system_prompt: \"The previous answer was not a usable JSON object. Return the complete object again with every required key.\"\n");
 
             var transport = new FakeLlmTransport
             {
@@ -225,6 +245,11 @@ namespace Pinder.Core.Tests
                 Assert.Equal("preemptive irony", result["defense_reaction"]);
                 Assert.Equal(TherapistDiagnosisContract.RequiredFields, result.Keys.ToArray());
                 Assert.Equal(2, transport.CallCount);
+                Assert.Equal("SYSTEM PROMPT", transport.SystemPrompts[0]);
+                Assert.Contains("not a usable JSON object", transport.SystemPrompts[1]);
+                Assert.DoesNotContain(
+                    "I would diagnose this as anxious clowning.",
+                    transport.SystemPrompts[1]);
             }
             finally
             {
