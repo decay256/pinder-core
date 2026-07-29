@@ -41,6 +41,7 @@ namespace Pinder.SessionSetup
         {
             var entry = _catalog.Get("diagnosis");
             var systemPrompt = entry.SystemPrompt!;
+            var attemptSystemPrompt = systemPrompt;
 
             var userPromptTemplate = entry.UserTemplate!;
             var userPrompt = PromptCatalog.Substitute(userPromptTemplate, new Dictionary<string, string>
@@ -53,16 +54,32 @@ namespace Pinder.SessionSetup
                 MaxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
-                    string llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
-                        "diagnosis",
-                        _transport,
-                        systemPrompt,
-                        userPrompt,
-                        entry.Temperature!.Value,
-                        entry.MaxTokens!.Value,
-                        LlmPhase.Synthesis,
-                        _onDiagnostic,
-                        attemptCancellationToken).ConfigureAwait(false);
+                    string llmResponse;
+                    StructuredLlmResponse? structuredResponse = null;
+                    if (_transport is IStructuredLlmTransport structuredTransport)
+                    {
+                        structuredResponse = await structuredTransport.SendStructuredAsync(
+                            TherapistDiagnosisStructuredContract.CreateRequest(
+                                attemptSystemPrompt,
+                                userPrompt,
+                                entry.Temperature!.Value,
+                                entry.MaxTokens!.Value),
+                            attemptCancellationToken).ConfigureAwait(false);
+                        llmResponse = structuredResponse.JsonText;
+                    }
+                    else
+                    {
+                        llmResponse = await LlmOptionalTextGeneration.SendRequiredAsync(
+                            "diagnosis",
+                            _transport,
+                            attemptSystemPrompt,
+                            userPrompt,
+                            entry.Temperature!.Value,
+                            entry.MaxTokens!.Value,
+                            LlmPhase.Synthesis,
+                            _onDiagnostic,
+                            attemptCancellationToken).ConfigureAwait(false);
+                    }
 
                     try
                     {
@@ -73,18 +90,31 @@ namespace Pinder.SessionSetup
                             // deserializes to it) rather than an object. That is not the
                             // same as a diagnosis object satisfying the two required
                             // cognitive-subtext fields, so fail loudly.
-                            throw new JsonException("Deserialized diagnosis was null.");
+                            throw new DiagnosisContractException(
+                                "root_nonobject",
+                                null,
+                                "Deserialized diagnosis was null.");
                         }
 
-                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>.Accepted(
-                            ValidateDiagnosis(dict));
+                        var accepted = ValidateDiagnosis(dict);
+                        structuredResponse?.ReportValidation("accepted");
+                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>
+                            .Accepted(accepted);
                     }
-                    catch (JsonException ex)
+                    catch (Exception ex) when (ex is JsonException || ex is DiagnosisContractException)
                     {
-                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>.Rejected(
-                            new DiagnosisRejection(llmResponse, ex));
+                        var rejection = DiagnosisRejection.From(ex);
+                        structuredResponse?.ReportValidation("rejected", rejection.Reason);
+                        if (attempt < MaxAttempts)
+                        {
+                            attemptSystemPrompt = BuildRetrySystemPrompt(systemPrompt, rejection);
+                        }
+
+                        return SemanticOutputRecoveryAttemptResult<Dictionary<string, string>, DiagnosisRejection>
+                            .Rejected(rejection);
                     }
                 },
+                onRejected: EmitRejectedDiagnostic,
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             if (recovery.IsAccepted)
@@ -93,27 +123,36 @@ namespace Pinder.SessionSetup
             }
 
             var finalRejection = recovery.Exhaustion.FinalRejection;
-            // Fail-loud by propagating the failure with structural context,
-            // mirroring LlmSequentialStakeGenerator: a malformed/unparseable
-            // diagnosis response is a genuine generation failure, not a
-            // valid empty diagnosis, and must not be silently swallowed.
             throw new InvalidOperationException(
-                LlmDiagnosticFormatter.GeneratedTextFailure(
-                    "Failed to parse diagnosis JSON from LLM response.",
-                    LlmPhase.Synthesis,
-                    finalRejection.GeneratedText),
-                finalRejection.Failure);
+                $"Failed to parse diagnosis JSON from LLM response. " +
+                $"Reason={finalRejection.Reason}; Field={finalRejection.Field ?? "none"}.",
+                new JsonException(
+                    finalRejection.Failure.Message,
+                    finalRejection.Failure));
         }
 
         internal static Dictionary<string, string>? ParseDiagnosisJson(string llmResponse)
         {
             var extraction = GeneratedJsonObjectExtractor.TryExtractFirstValidObject(llmResponse);
             if (!extraction.Success)
-                throw new JsonException(
+                throw new DiagnosisContractException(
+                    "invalid_json",
+                    null,
                     $"Diagnosis response did not contain a valid JSON object. FailureCode={extraction.FailureCode}.");
 
             var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(extraction.Json!, options);
+            try
+            {
+                return JsonSerializer.Deserialize<Dictionary<string, string>>(extraction.Json!, options);
+            }
+            catch (JsonException ex)
+            {
+                throw new DiagnosisContractException(
+                    "invalid_json",
+                    null,
+                    "Diagnosis JSON could not be deserialized into string fields.",
+                    ex);
+            }
         }
 
         private static Dictionary<string, string> ValidateDiagnosis(
@@ -124,7 +163,9 @@ namespace Pinder.SessionSetup
             if (!validation.IsValid)
             {
                 var violation = validation.Violation!;
-                throw new JsonException(
+                throw new DiagnosisContractException(
+                    violation.Code,
+                    violation.Field,
                     $"Diagnosis response violates contract: code={violation.Code}; field='{violation.Field}'. {violation.Message}");
             }
 
@@ -151,17 +192,106 @@ namespace Pinder.SessionSetup
             return selected;
         }
 
+        private string BuildRetrySystemPrompt(string basePrompt, DiagnosisRejection rejection)
+        {
+            string key = rejection.Field == null
+                ? "diagnosis-repair-json"
+                : "diagnosis-repair-field";
+            var repairEntry = _catalog.TryGet(key);
+            string? repairTemplate = repairEntry?.SystemPrompt;
+            if (string.IsNullOrWhiteSpace(repairTemplate))
+            {
+                return basePrompt;
+            }
+
+            string repairPrompt = PromptCatalog.Substitute(
+                repairTemplate!,
+                new Dictionary<string, string>
+                {
+                    ["field"] = rejection.Field ?? string.Empty,
+                });
+            return basePrompt + Environment.NewLine + Environment.NewLine + repairPrompt;
+        }
+
+        private void EmitRejectedDiagnostic(
+            SemanticOutputRecoveryRejection<DiagnosisRejection> rejection)
+        {
+            var hints = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["generator"] = "diagnosis",
+                ["reason"] = rejection.Rejection.Reason,
+                ["attempt"] = rejection.Attempt.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                ["total_attempts"] = rejection.TotalAttempts.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            };
+            if (rejection.Rejection.Field != null)
+            {
+                hints["field"] = rejection.Rejection.Field;
+            }
+
+            OperationalDiagnostics.Emit(
+                _onDiagnostic,
+                new OperationalDiagnosticEvent(
+                    "LlmTherapistDiagnosisGenerator",
+                    "DiagnosisContractRejected",
+                    rejection.IsFinalAttempt
+                        ? OperationalDiagnosticSeverity.Error
+                        : OperationalDiagnosticSeverity.Warning,
+                    "Therapist diagnosis output failed structured validation.",
+                    operationKind: OperationalDiagnosticOperationKind.SetupSynthesis,
+                    phaseCode: LlmPhase.Synthesis,
+                    lifecycle: rejection.IsFinalAttempt
+                        ? OperationalDiagnosticLifecycle.Terminal
+                        : OperationalDiagnosticLifecycle.Phase,
+                    outcome: rejection.IsFinalAttempt
+                        ? OperationalDiagnosticOutcome.Failed
+                        : OperationalDiagnosticOutcome.Degraded,
+                    failureClassification: OperationalDiagnosticFailureClassification.Permanent,
+                    callId: OperationalDiagnostics.CreateCallId(),
+                    correlationHints: hints));
+        }
+
         private sealed class DiagnosisRejection
         {
-            public DiagnosisRejection(string generatedText, JsonException failure)
+            private DiagnosisRejection(string reason, string? field, Exception failure)
             {
-                GeneratedText = generatedText;
+                Reason = reason;
+                Field = field;
                 Failure = failure;
             }
 
-            public string GeneratedText { get; }
+            public string Reason { get; }
 
-            public JsonException Failure { get; }
+            public string? Field { get; }
+
+            public Exception Failure { get; }
+
+            public static DiagnosisRejection From(Exception failure)
+            {
+                if (failure is DiagnosisContractException contract)
+                {
+                    return new DiagnosisRejection(contract.Reason, contract.Field, contract);
+                }
+
+                return new DiagnosisRejection("invalid_json", null, failure);
+            }
+        }
+
+        private sealed class DiagnosisContractException : JsonException
+        {
+            public DiagnosisContractException(
+                string reason,
+                string? field,
+                string message,
+                Exception? innerException = null)
+                : base(message, innerException)
+            {
+                Reason = reason;
+                Field = field;
+            }
+
+            public string Reason { get; }
+
+            public string? Field { get; }
         }
     }
 }
