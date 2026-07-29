@@ -2,7 +2,7 @@ schema_version: 1
 prompts:
   diagnosis:
     temperature: 0.45
-    max_tokens: 1400
+    max_tokens: 2400
     system_prompt: |-
       You are a clinical therapist diagnosing a dating-app character based only on their generated backstory and 15 psychological stake lines.
       Output exactly one JSON object and nothing else.
@@ -21,7 +21,7 @@ prompts:
         "wit_reaction": "second-person prompt prose covering the affirming and threatening meaning of humor and cleverness to this character",
         "self_awareness_reaction": "second-person prompt prose covering the affirming and threatening meaning of reflection and emotional insight to this character"
       }
-      Every value must be character-specific, concise, and directly usable as internal prompt instructions.
+      Every value must be character-specific, directly usable as internal prompt instructions, and one sentence of no more than 35 words.
       Write the nine formulation values as second-person prompt prose addressed to the datee, for example: "You perceive..."
       Each stat reaction must include both how that stat can feel affirming and how it can feel threatening to this character.
       Do not mention roll tiers, roll numbers, enum names, game mechanics, or interest values.
@@ -37,8 +37,8 @@ prompts:
   diagnosis-repair-json:
     system_prompt: |-
       The previous answer could not be read as one complete JSON object.
-      Generate the diagnosis again from the original inputs. Return only one complete JSON object with every required key and a nonblank string value for each key. Do not add markdown or commentary.
+      Generate the diagnosis again from the original inputs. Return only one complete JSON object with every required key and a nonblank string value for each key. Keep every value to one sentence of no more than 35 words. Do not add markdown or commentary.
   diagnosis-repair-field:
     system_prompt: |-
       The previous answer did not provide a usable nonblank value for the required field "{field}".
-      Generate the complete diagnosis again from the original inputs, including that field and every other required key. Return only one JSON object. Do not add markdown or commentary.
+      Generate the complete diagnosis again from the original inputs, including that field and every other required key. Keep every value to one sentence of no more than 35 words. Return only one JSON object. Do not add markdown or commentary.
