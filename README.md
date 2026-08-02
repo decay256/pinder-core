@@ -4,6 +4,10 @@ Pure C# RPG engine for [Pinder](https://github.com/decay256/pinder) — the come
 
 Targets **netstandard2.0** / **C# 8.0**. The core library stays a domain kernel: it may use narrowly scoped Microsoft BCL-support packages required by netstandard2.0, but it does not take service, web, provider, or gameplay-framework dependencies.
 
+Provider-neutral Pi C# adoption is isolated to `Pinder.LlmAdapters`; see
+[`docs/pi-csharp-adoption.md`](docs/pi-csharp-adoption.md) for the pinned-package
+and migration boundary.
+
 ## Assemblies
 
 | Project | Target | Dependencies | Purpose |
