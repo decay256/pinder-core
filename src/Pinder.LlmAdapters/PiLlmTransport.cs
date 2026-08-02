@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
@@ -8,25 +11,37 @@ using Pinder.Core.Interfaces;
 namespace Pinder.LlmAdapters.Pi
 {
     /// <summary>
-    /// Adapts Pinder's existing prompt transport boundary to Pi's provider-neutral model API.
+    /// Adapts Pinder's prompt transport contracts to Pi's provider-neutral model API.
     /// Pinder retains prompt construction and response parsing; Pi owns provider execution.
     /// </summary>
-    public sealed class PiLlmTransport : ILlmTransport
+    public sealed class PiLlmTransport : ILlmTransport, IStreamingLlmTransport,
+        IStructuredLlmTransport, ITokenUsageProvider
     {
         private readonly Model _model;
         private readonly Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> _completeAsync;
+        private readonly Func<Model, Context, ModelsSimpleStreamOptions, AssistantMessageEventStream> _stream;
         private readonly Func<string?, ModelsSimpleStreamOptions>? _optionsFactory;
         private readonly Func<long> _timestampMilliseconds;
+        private readonly Action<AssistantMessage, string?>? _responseObserver;
+        private readonly object _usageSync = new object();
+        private long _inputTokens;
+        private long _outputTokens;
+        private long _cacheReadTokens;
+        private long _cacheWriteTokens;
+        private long _callCount;
 
         public PiLlmTransport(
             ModelsCollection models,
             Model model,
-            Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null)
+            Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
+            Action<AssistantMessage, string?>? responseObserver = null)
             : this(
                 model,
                 (selectedModel, context, options) => models.CompleteSimpleAsync(selectedModel, context, options),
+                (selectedModel, context, options) => models.StreamSimple(selectedModel, context, options),
                 optionsFactory,
-                () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
+                () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                responseObserver)
         {
             if (models == null) throw new ArgumentNullException(nameof(models));
         }
@@ -35,12 +50,28 @@ namespace Pinder.LlmAdapters.Pi
             Model model,
             Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> completeAsync,
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
-            Func<long>? timestampMilliseconds = null)
+            Func<long>? timestampMilliseconds = null,
+            Action<AssistantMessage, string?>? responseObserver = null)
+            : this(model, completeAsync, (_, __, ___) =>
+                throw new InvalidOperationException("No Pi stream delegate was configured."),
+                optionsFactory, timestampMilliseconds, responseObserver)
+        {
+        }
+
+        internal PiLlmTransport(
+            Model model,
+            Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> completeAsync,
+            Func<Model, Context, ModelsSimpleStreamOptions, AssistantMessageEventStream> stream,
+            Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
+            Func<long>? timestampMilliseconds = null,
+            Action<AssistantMessage, string?>? responseObserver = null)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _completeAsync = completeAsync ?? throw new ArgumentNullException(nameof(completeAsync));
+            _stream = stream ?? throw new ArgumentNullException(nameof(stream));
             _optionsFactory = optionsFactory;
             _timestampMilliseconds = timestampMilliseconds ?? (() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+            _responseObserver = responseObserver;
         }
 
         public async Task<string> SendAsync(
@@ -51,44 +82,179 @@ namespace Pinder.LlmAdapters.Pi
             string? phase = null,
             CancellationToken ct = default)
         {
-            if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
-            if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
-            ct.ThrowIfCancellationRequested();
+            Context context = CreateContext(systemPrompt, userMessage);
+            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, ct);
+            AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
+            Observe(response, phase);
+            EnsureSuccess(response, ct, false);
 
-            var context = new Context
+            string text = TextUtilities.ContentText(response.Content);
+            if (string.IsNullOrWhiteSpace(text))
+                throw new InvalidOperationException("Pi model response contained no text content.");
+            return text;
+        }
+
+        public async IAsyncEnumerable<string> SendStreamAsync(
+            string systemPrompt,
+            string userMessage,
+            double temperature = 0.9,
+            int maxTokens = 1024,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default,
+            string? phase = null)
+        {
+            Context context = CreateContext(systemPrompt, userMessage);
+            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, cancellationToken);
+            AssistantMessageEventStream stream = _stream(_model, context, options);
+
+            while (true)
             {
-                SystemPrompt = systemPrompt,
-                Messages = new List<Message>
+                EventReadResult<AssistantMessageEvent> read = await stream.ReadAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (!read.HasValue) break;
+                if (read.Value is TextDeltaEvent delta && delta.Delta.Length > 0) yield return delta.Delta;
+            }
+
+            AssistantMessage response = await stream.Result().ConfigureAwait(false);
+            Observe(response, phase);
+            EnsureSuccess(response, cancellationToken, true);
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredAsync(
+            StructuredLlmRequest request,
+            CancellationToken ct = default)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            Context context = CreateContext(request.SystemPrompt, request.UserMessage);
+            string toolName = NormalizeToolName(request.SchemaName);
+            context.Tools = new List<Tool>
+            {
+                new Tool
                 {
-                    new UserMessage(userMessage, _timestampMilliseconds())
+                    Name = toolName,
+                    Description = "Return the requested structured result.",
+                    Parameters = PiJsonSchemaParser.Parse(request.JsonSchema),
+                    ConstrainedSampling = new JsonSchemaConstrainedSamplingConfig("require")
                 }
             };
 
-            ModelsSimpleStreamOptions options = _optionsFactory?.Invoke(phase) ?? new ModelsSimpleStreamOptions();
-            options.Temperature = temperature;
-            options.MaxTokens = maxTokens;
-            options.CancellationToken = ct;
+            ModelsSimpleStreamOptions options = CreateOptions(request.Phase, request.Temperature, request.MaxTokens, ct);
+            options.Extra["toolChoice"] = "required";
+            var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
+            metadata["schemaName"] = request.SchemaName;
+            metadata["schemaVersion"] = request.SchemaVersion;
+            options.Metadata = metadata;
 
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
-            ct.ThrowIfCancellationRequested();
+            Observe(response, request.Phase);
+            EnsureSuccess(response, ct, false);
 
-            if (response.StopReason == StopReason.Aborted)
+            ToolCall? toolCall = response.Content.OfType<ToolCall>()
+                .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
+            if (toolCall != null)
             {
-                throw new OperationCanceledException(response.ErrorMessage ?? "Pi model request was aborted.", ct);
-            }
-
-            if (response.StopReason == StopReason.Error)
-            {
-                throw new InvalidOperationException(response.ErrorMessage ?? "Pi model request failed.");
+                return new StructuredLlmResponse(
+                    JsonSerializer.Serialize(toolCall.Arguments),
+                    response.Provider.Value,
+                    response.ResponseModel ?? response.Model,
+                    usedNativeStructuredOutput: true,
+                    metadata: request.Metadata,
+                    validationMode: "pi_required_tool");
             }
 
             string text = TextUtilities.ContentText(response.Content);
             if (string.IsNullOrWhiteSpace(text))
-            {
-                throw new InvalidOperationException("Pi model response contained no text content.");
-            }
+                throw new InvalidOperationException("Pi structured response contained neither a tool call nor text.");
+            return new StructuredLlmResponse(
+                text,
+                response.Provider.Value,
+                response.ResponseModel ?? response.Model,
+                usedNativeStructuredOutput: false,
+                metadata: request.Metadata,
+                validationMode: "pi_text_fallback");
+        }
 
-            return text;
+        public SessionTokenUsage GetSessionUsage()
+        {
+            lock (_usageSync)
+            {
+                return new SessionTokenUsage
+                {
+                    InputTokens = ClampToInt(_inputTokens),
+                    OutputTokens = ClampToInt(_outputTokens),
+                    CacheReadInputTokens = ClampToInt(_cacheReadTokens),
+                    CacheCreationInputTokens = ClampToInt(_cacheWriteTokens),
+                    CallCount = ClampToInt(_callCount)
+                };
+            }
+        }
+
+        private Context CreateContext(string systemPrompt, string userMessage)
+        {
+            if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
+            if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
+            return new Context
+            {
+                SystemPrompt = systemPrompt,
+                Messages = new List<Message> { new UserMessage(userMessage, _timestampMilliseconds()) }
+            };
+        }
+
+        private ModelsSimpleStreamOptions CreateOptions(
+            string? phase,
+            double temperature,
+            int maxTokens,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ModelsSimpleStreamOptions options = _optionsFactory?.Invoke(phase) ?? new ModelsSimpleStreamOptions();
+            options.Temperature = temperature;
+            options.MaxTokens = maxTokens;
+            options.CancellationToken = cancellationToken;
+            return options;
+        }
+
+        private void Observe(AssistantMessage response, string? phase)
+        {
+            lock (_usageSync)
+            {
+                _inputTokens += response.Usage.Input;
+                _outputTokens += response.Usage.Output;
+                _cacheReadTokens += response.Usage.CacheRead;
+                _cacheWriteTokens += response.Usage.CacheWrite;
+                _callCount++;
+            }
+            try { _responseObserver?.Invoke(response, phase); }
+            catch { }
+        }
+
+        private static void EnsureSuccess(
+            AssistantMessage response,
+            CancellationToken cancellationToken,
+            bool streaming)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (response.StopReason == StopReason.Aborted)
+                throw new OperationCanceledException(response.ErrorMessage ?? "Pi model request was aborted.", cancellationToken);
+            if (response.StopReason != StopReason.Error) return;
+            string message = response.ErrorMessage ?? "Pi model request failed.";
+            if (streaming) throw new LlmTransportException(message);
+            throw new InvalidOperationException(message);
+        }
+
+        private static string NormalizeToolName(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return "emit_result";
+            char[] result = value.Select(character => char.IsLetterOrDigit(character) || character == '_' || character == '-'
+                ? character : '_').ToArray();
+            string normalized = new string(result).Trim('_');
+            return normalized.Length == 0 ? "emit_result" : normalized;
+        }
+
+        private static int ClampToInt(long value)
+        {
+            if (value <= 0) return 0;
+            return value >= int.MaxValue ? int.MaxValue : (int)value;
         }
     }
 }

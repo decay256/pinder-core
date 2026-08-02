@@ -25,8 +25,8 @@ adapter boundary is proven.
 
 ## Local package policy
 
-The repository vendors immutable `0.1.0-alpha.1` NuGet artifacts from Pi C#
-commit `30e0a044dafd3cd3b0144632cabece943f9671de`. `NuGet.Config` resolves that
+The repository vendors immutable `0.1.0-alpha.2` NuGet artifacts from Pi C#
+commit `55d4395b655fa4c2585290d03fc20a81249a993f`. `NuGet.Config` resolves that
 version from `packages/pi-csharp` and continues to use NuGet.org for existing
 third-party dependencies. Updating Pi requires replacing the artifacts,
 updating every SHA-256 value and the source commit in provenance, then running:
