@@ -265,7 +265,19 @@ namespace Pinder.Core.Conversation
             DialogueOption[] rawOptions;
             try
             {
-                rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
+                if (_llm is ISessionStatefulLlmAdapter sessionLlm
+                    && sessionLlm.SupportsConversationSessions)
+                {
+                    rawOptions = await sessionLlm.GetDialogueOptionsAsync(
+                        context,
+                        new List<ConversationMessage>(state.AvatarHistory),
+                        state.AvatarSessionSnapshot,
+                        ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    rawOptions = await _llm.GetDialogueOptionsAsync(context, ct).ConfigureAwait(false);
+                }
                 OperationalDiagnostics.EmitSucceededTerminal(
                     _onDiagnostic,
                     "TurnOrchestrator",

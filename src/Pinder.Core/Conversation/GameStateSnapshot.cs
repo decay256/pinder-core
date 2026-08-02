@@ -52,6 +52,10 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
 
+        public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; }
+
+        public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; }
+
         public IReadOnlyDictionary<string, int> ShadowValues { get; }
 
         public GameStateSnapshot(
@@ -65,7 +69,9 @@ namespace Pinder.Core.Conversation
             IReadOnlyList<ConversationMessage> dateeHistory = null,
             double ghostProbabilityPerTurn = 0.0,
             IReadOnlyList<ConversationMessage> avatarHistory = null,
-            IReadOnlyDictionary<string, int> shadowValues = null)
+            IReadOnlyDictionary<string, int> shadowValues = null,
+            LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
         {
             Interest = interest;
             State = state;
@@ -78,6 +84,8 @@ namespace Pinder.Core.Conversation
             AvatarHistory = avatarHistory ?? System.Array.Empty<ConversationMessage>();
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
             ShadowValues = shadowValues ?? new Dictionary<string, int>();
+            DateeSessionSnapshot = dateeSessionSnapshot;
+            AvatarSessionSnapshot = avatarSessionSnapshot;
         }
     }
 }

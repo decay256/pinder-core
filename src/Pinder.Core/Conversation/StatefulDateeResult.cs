@@ -31,12 +31,20 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IReadOnlyList<ConversationMessage> NewHistoryEntries { get; }
 
+        public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; }
+
+        public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; }
+
         public StatefulDateeResult(
             DateeResponse response,
-            IReadOnlyList<ConversationMessage> newHistoryEntries)
+            IReadOnlyList<ConversationMessage> newHistoryEntries,
+            LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
         {
             Response = response ?? throw new System.ArgumentNullException(nameof(response));
             NewHistoryEntries = newHistoryEntries ?? throw new System.ArgumentNullException(nameof(newHistoryEntries));
+            DateeSessionSnapshot = dateeSessionSnapshot;
+            AvatarSessionSnapshot = avatarSessionSnapshot;
         }
     }
 }

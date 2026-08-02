@@ -108,6 +108,54 @@ namespace Pinder.Core.Tests.Conversation
             }
         }
 
+        private sealed class SessionStatefulLlm : NullLlmAdapter, ISessionStatefulLlmAdapter
+        {
+            private readonly StatefulDateeResult _result;
+
+            public SessionStatefulLlm(StatefulDateeResult result)
+            {
+                _result = result;
+            }
+
+            public bool SupportsConversationSessions => true;
+            public int LegacyDateeCallCount { get; private set; }
+            public IReadOnlyList<ConversationMessage>? DateeHistorySeen { get; private set; }
+            public IReadOnlyList<ConversationMessage>? AvatarHistorySeen { get; private set; }
+            public LlmConversationSessionSnapshot? DateeSnapshotSeen { get; private set; }
+            public LlmConversationSessionSnapshot? AvatarSnapshotSeen { get; private set; }
+
+            public override Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> history,
+                CancellationToken cancellationToken = default)
+            {
+                LegacyDateeCallCount++;
+                return base.GetDateeResponseAsync(context, history, cancellationToken);
+            }
+
+            public Task<DialogueOption[]> GetDialogueOptionsAsync(
+                DialogueContext context,
+                IReadOnlyList<ConversationMessage> avatarHistory,
+                LlmConversationSessionSnapshot? avatarSession,
+                CancellationToken cancellationToken = default)
+                => Task.FromResult(Array.Empty<DialogueOption>());
+
+            public Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> dateeHistory,
+                IReadOnlyList<ConversationMessage> avatarHistory,
+                LlmConversationSessionSnapshot? dateeSession,
+                LlmConversationSessionSnapshot? avatarSession,
+                CancellationToken cancellationToken = default)
+            {
+                DateeHistorySeen = dateeHistory;
+                AvatarHistorySeen = avatarHistory;
+                DateeSnapshotSeen = dateeSession;
+                AvatarSnapshotSeen = avatarSession;
+                return Task.FromResult(_result);
+            }
+        }
+
         private static CharacterProfile MakeProfile(string name)
         {
             return TestHelpers.MakeCharacterProfile(
@@ -358,6 +406,112 @@ namespace Pinder.Core.Tests.Conversation
             Assert.DoesNotContain(
                 state.DateeHistory,
                 entry => entry.Content.Contains("PRIVATE MUTATION", StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_SessionAdapter_AtomicallyAdoptsSnapshotsAndDualWritesSemanticHistory()
+        {
+            var oldDateeSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"old\":\"datee\"}");
+            var oldAvatarSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"old\":\"avatar\"}");
+            var newDateeSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"new\":\"datee\"}");
+            var newAvatarSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"new\":\"avatar\"}");
+            var llm = new SessionStatefulLlm(new StatefulDateeResult(
+                new DateeResponse("Accepted visible reply"),
+                Array.Empty<ConversationMessage>(),
+                newDateeSnapshot,
+                newAvatarSnapshot));
+            var stage = new DateeResponseStage(llm);
+            var state = new GameSessionState { Interest = new InterestMeter(10) };
+            state.DateeHistory.Add(ConversationMessage.User("Older player line"));
+            state.DateeHistory.Add(ConversationMessage.Assistant("Older DATEE reply"));
+            state.AvatarHistory.Add(ConversationMessage.Assistant("Older player line"));
+            state.AvatarHistory.Add(ConversationMessage.User("Older DATEE reply"));
+            state.DateeSessionSnapshot = oldDateeSnapshot;
+            state.AvatarSessionSnapshot = oldAvatarSnapshot;
+
+            await stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "Current delivered line",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None);
+
+            Assert.Equal(0, llm.LegacyDateeCallCount);
+            Assert.Same(oldDateeSnapshot, llm.DateeSnapshotSeen);
+            Assert.Same(oldAvatarSnapshot, llm.AvatarSnapshotSeen);
+            Assert.Equal(2, llm.DateeHistorySeen!.Count);
+            Assert.Equal(2, llm.AvatarHistorySeen!.Count);
+            Assert.Equal(4, state.DateeHistory.Count);
+            Assert.Equal(ConversationMessage.UserRole, state.DateeHistory[2].Role);
+            Assert.Equal("Current delivered line", state.DateeHistory[2].Content);
+            Assert.Equal(ConversationMessage.AssistantRole, state.DateeHistory[3].Role);
+            Assert.Equal("Accepted visible reply", state.DateeHistory[3].Content);
+            Assert.Equal(4, state.AvatarHistory.Count);
+            Assert.Equal(ConversationMessage.AssistantRole, state.AvatarHistory[2].Role);
+            Assert.Equal("Current delivered line", state.AvatarHistory[2].Content);
+            Assert.Equal(ConversationMessage.UserRole, state.AvatarHistory[3].Role);
+            Assert.Equal("Accepted visible reply", state.AvatarHistory[3].Content);
+            Assert.Same(newDateeSnapshot, state.DateeSessionSnapshot);
+            Assert.Same(newAvatarSnapshot, state.AvatarSessionSnapshot);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_SessionAdapterWithIncompleteSnapshot_DoesNotMutateState()
+        {
+            var oldDateeSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"old\":\"datee\"}");
+            var oldAvatarSnapshot = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"old\":\"avatar\"}");
+            var llm = new SessionStatefulLlm(new StatefulDateeResult(
+                new DateeResponse("Must not commit"),
+                Array.Empty<ConversationMessage>(),
+                oldDateeSnapshot,
+                avatarSessionSnapshot: null));
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var stage = new DateeResponseStage(llm, diagnostics.Add);
+            var state = new GameSessionState { Interest = new InterestMeter(10) };
+            state.DateeHistory.Add(ConversationMessage.Assistant("Existing DATEE history"));
+            state.AvatarHistory.Add(ConversationMessage.User("Existing avatar history"));
+            state.DateeSessionSnapshot = oldDateeSnapshot;
+            state.AvatarSessionSnapshot = oldAvatarSnapshot;
+
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "Must not append",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None));
+
+            Assert.Contains("avatar session snapshot", error.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Single(state.DateeHistory);
+            Assert.Single(state.AvatarHistory);
+            Assert.Same(oldDateeSnapshot, state.DateeSessionSnapshot);
+            Assert.Same(oldAvatarSnapshot, state.AvatarSessionSnapshot);
+            var terminal = Assert.Single(diagnostics.FindAll(
+                d => d.Lifecycle == OperationalDiagnosticLifecycle.Terminal));
+            Assert.Equal(OperationalDiagnosticOutcome.Failed, terminal.Outcome);
         }
 
         private static RollStageResult MakeRollStageResult()

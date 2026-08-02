@@ -16,17 +16,16 @@ namespace Pinder.Core.Tests.Conversation
     /// Issue #1123 — Symmetric two-session GM acceptance tests.
     ///
     /// <para>
-    /// #1125 supersedes the avatar (delivery) <em>session</em>: the delivery LLM
-    /// call was collapsed into the deterministic, non-LLM DeliveryOverlay commit
-    /// step, so there is no longer an avatar GM session, no avatar LLM call, and
-    /// no avatar history accumulation. The clean-history rule the avatar session
-    /// once upheld is now trivially satisfied — only the committed line is
-    /// persisted. These tests are updated to lock the post-#1125 contract:
+    /// #1125 removed the avatar delivery-model call in favor of the deterministic
+    /// DeliveryOverlay commit step. Session-capable adapters may still maintain an
+    /// avatar-perspective semantic session for option generation; these legacy
+    /// adapter tests lock the compatibility contract:
     /// </para>
     /// <list type="number">
     ///   <item><description>
-    ///     <b>No avatar session</b>: <see cref="GameSession.AvatarHistory"/> stays
-    ///     EMPTY across turns and no stateful avatar (delivery) LLM call fires.
+    ///     <b>No delivery-model call</b>: with a legacy stateful adapter,
+    ///     <see cref="GameSession.AvatarHistory"/> stays empty and no avatar
+    ///     delivery LLM call fires.
     ///   </description></item>
     ///   <item><description>
     ///     <b>Datee bleed isolation (unchanged)</b>: the datee session's context
@@ -146,11 +145,10 @@ namespace Pinder.Core.Tests.Conversation
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-        // AC-1 (post-#1125): there is no avatar (delivery) session anymore, so the
-        // engine accumulates NO avatar history across turns and never fires a
-        // stateful avatar call. (Was: avatar history accumulation.)
+        // AC-1 (post-#1125): a legacy adapter gets no avatar delivery call and
+        // does not opt into the new avatar-perspective session mirror.
         [Fact]
-        public async Task AvatarSession_IsGone_NoHistoryAccumulated_NoAvatarCall()
+        public async Task LegacyAdapter_HasNoAvatarHistoryAndNoDeliveryModelCall()
         {
             var adapter = new RecordingStatefulAdapter();
             // ctor d10 + per-turn (d20 main + d100 timing) for 3 turns.
@@ -164,7 +162,7 @@ namespace Pinder.Core.Tests.Conversation
                 await session.ResolveTurnAsync(0);
             }
 
-            // No avatar GM session: history stays empty and no avatar call fired.
+            // Legacy behavior remains unchanged: no mirrored session and no call.
             Assert.Empty(session.AvatarHistory);
             Assert.Empty(adapter.AvatarHistoriesSeen);
             Assert.False(adapter.AvatarCallFired);
@@ -183,7 +181,7 @@ namespace Pinder.Core.Tests.Conversation
             await session.ResolveTurnAsync(0);
 
             Assert.NotEmpty(adapter.DateePromptsSeen);
-            // No avatar session fired, so no avatar prompt was ever built.
+            // No avatar delivery call fired, so no avatar prompt was built.
             Assert.Empty(adapter.AvatarPromptsSeen);
 
             // --- Datee session ---

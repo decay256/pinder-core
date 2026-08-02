@@ -18,11 +18,12 @@ namespace Pinder.Core.Conversation
         public List<(string Sender, string Text)> History { get; internal set; } = new List<(string Sender, string Text)>();
         public string DateeOutfitDescription { get; internal set; } = string.Empty;
         public List<ConversationMessage> DateeHistory { get; internal set; } = new List<ConversationMessage>();
-        // #1123: avatar-session LLM conversation history, the symmetric sibling
-        // of DateeHistory. The avatar (delivery) session is now stateful and
-        // cached just like the datee session — the engine owns this list and
-        // threads it through the stateful avatar adapter overload on each turn.
+        // Avatar-perspective semantic history: what the player character knows.
+        // There is no separate delivery-model call; session-capable adapters use
+        // this mirror for option generation and future private reasoning.
         public List<ConversationMessage> AvatarHistory { get; internal set; } = new List<ConversationMessage>();
+        public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; internal set; }
+        public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; internal set; }
         public HashSet<int> SpentBackstoryIndices { get; internal set; } = new HashSet<int>();
         public HashSet<int> SpentStakeIndices { get; internal set; } = new HashSet<int>();
         public string? PreviousPhase { get; set; }
@@ -69,6 +70,8 @@ namespace Pinder.Core.Conversation
             clone.DateeOutfitDescription = DateeOutfitDescription;
             clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
             clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
+            clone.DateeSessionSnapshot = DateeSessionSnapshot;
+            clone.AvatarSessionSnapshot = AvatarSessionSnapshot;
             foreach (var idx in SpentBackstoryIndices) clone.SpentBackstoryIndices.Add(idx);
             foreach (var idx in SpentStakeIndices) clone.SpentStakeIndices.Add(idx);
             clone.PreviousPhase = PreviousPhase;
@@ -128,6 +131,8 @@ namespace Pinder.Core.Conversation
             DateeOutfitDescription = prepared.DateeOutfitDescription;
             DateeHistory = prepared.DateeHistory;
             AvatarHistory = prepared.AvatarHistory;
+            DateeSessionSnapshot = prepared.DateeSessionSnapshot;
+            AvatarSessionSnapshot = prepared.AvatarSessionSnapshot;
             SpentBackstoryIndices = prepared.SpentBackstoryIndices;
             SpentStakeIndices = prepared.SpentStakeIndices;
             PreviousPhase = prepared.PreviousPhase;
@@ -226,6 +231,8 @@ namespace Pinder.Core.Conversation
             History = restoredHistory;
             DateeHistory = restoredDateeHistory;
             AvatarHistory = restoredAvatarHistory;
+            DateeSessionSnapshot = data.DateeSessionSnapshot;
+            AvatarSessionSnapshot = data.AvatarSessionSnapshot;
             TurnNumber = data.TurnNumber;
             ComboTracker = restoredComboTracker;
             RizzCumulativeFailureCount = data.RizzCumulativeFailureCount;

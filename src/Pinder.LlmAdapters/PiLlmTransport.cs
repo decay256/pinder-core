@@ -15,8 +15,8 @@ namespace Pinder.LlmAdapters.Pi
     /// Adapts Pinder's prompt transport contracts to Pi's provider-neutral model API.
     /// Pinder retains prompt construction and response parsing; Pi owns provider execution.
     /// </summary>
-    public sealed class PiLlmTransport : ILlmTransport, IStreamingLlmTransport,
-        IStructuredLlmTransport, ITokenUsageProvider
+    public sealed class PiLlmTransport : ILlmTransport, IConversationLlmTransport, IStreamingLlmTransport,
+        IStructuredLlmTransport, IStructuredConversationLlmTransport, ITokenUsageProvider
     {
         private readonly Model _model;
         private readonly Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> _completeAsync;
@@ -30,6 +30,10 @@ namespace Pinder.LlmAdapters.Pi
         private long _cacheReadTokens;
         private long _cacheWriteTokens;
         private long _callCount;
+
+        public bool SupportsConversationMessages => true;
+
+        public bool SupportsStructuredConversationMessages => true;
 
         public PiLlmTransport(
             ModelsCollection models,
@@ -83,12 +87,32 @@ namespace Pinder.LlmAdapters.Pi
             string? phase = null,
             CancellationToken ct = default)
         {
-            Context context = CreateContext(systemPrompt, userMessage);
+            return await SendConversationAsync(
+                systemPrompt,
+                Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
+                userMessage,
+                temperature,
+                maxTokens,
+                phase,
+                ct).ConfigureAwait(false);
+        }
+
+        public async Task<string> SendConversationAsync(
+            string systemPrompt,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            string userMessage,
+            double temperature = 0.9,
+            int maxTokens = 1024,
+            string? phase = null,
+            CancellationToken cancellationToken = default)
+        {
+            Context context = CreateContext(systemPrompt, priorMessages, userMessage);
             var responseStatus = new ResponseStatusCapture();
-            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, ct, responseStatus);
+            ModelsSimpleStreamOptions options = CreateOptions(
+                phase, temperature, maxTokens, cancellationToken, responseStatus);
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, phase);
-            EnsureSuccess(response, ct, false, responseStatus);
+            EnsureSuccess(response, cancellationToken, false, responseStatus);
 
             string text = TextUtilities.ContentText(response.Content);
             if (string.IsNullOrWhiteSpace(text))
@@ -126,9 +150,18 @@ namespace Pinder.LlmAdapters.Pi
         public async Task<StructuredLlmResponse> SendStructuredAsync(
             StructuredLlmRequest request,
             CancellationToken ct = default)
+            => await SendStructuredConversationAsync(
+                request,
+                Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
+                ct).ConfigureAwait(false);
+
+        public async Task<StructuredLlmResponse> SendStructuredConversationAsync(
+            StructuredLlmRequest request,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            CancellationToken cancellationToken = default)
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
-            Context context = CreateContext(request.SystemPrompt, request.UserMessage);
+            Context context = CreateContext(request.SystemPrompt, priorMessages, request.UserMessage);
             string toolName = NormalizeToolName(request.SchemaName);
             context.Tools = new List<Tool>
             {
@@ -143,7 +176,7 @@ namespace Pinder.LlmAdapters.Pi
 
             var responseStatus = new ResponseStatusCapture();
             ModelsSimpleStreamOptions options = CreateOptions(
-                request.Phase, request.Temperature, request.MaxTokens, ct, responseStatus);
+                request.Phase, request.Temperature, request.MaxTokens, cancellationToken, responseStatus);
             options.Extra["toolChoice"] = "required";
             var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
             foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
@@ -153,7 +186,7 @@ namespace Pinder.LlmAdapters.Pi
 
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, request.Phase);
-            EnsureSuccess(response, ct, false, responseStatus);
+            EnsureSuccess(response, cancellationToken, false, responseStatus);
 
             ToolCall? toolCall = response.Content.OfType<ToolCall>()
                 .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
@@ -196,13 +229,49 @@ namespace Pinder.LlmAdapters.Pi
         }
 
         private Context CreateContext(string systemPrompt, string userMessage)
+            => CreateContext(
+                systemPrompt,
+                Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
+                userMessage);
+
+        private Context CreateContext(
+            string systemPrompt,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            string userMessage)
         {
             if (systemPrompt == null) throw new ArgumentNullException(nameof(systemPrompt));
+            if (priorMessages == null) throw new ArgumentNullException(nameof(priorMessages));
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
+            var messages = new List<Message>(priorMessages.Count + 1);
+            foreach (Pinder.Core.Conversation.ConversationMessage message in priorMessages)
+            {
+                if (message.Role == Pinder.Core.Conversation.ConversationMessage.UserRole)
+                {
+                    messages.Add(new UserMessage(message.Content, _timestampMilliseconds()));
+                }
+                else if (message.Role == Pinder.Core.Conversation.ConversationMessage.AssistantRole)
+                {
+                    messages.Add(new AssistantMessage(
+                        new IAssistantMessageContent[] { new TextContent(message.Content) },
+                        _model.Api,
+                        _model.Provider,
+                        _model.Id,
+                        Usage.Zero,
+                        StopReason.Stop,
+                        _timestampMilliseconds()));
+                }
+                else
+                {
+                    throw new ArgumentException(
+                        $"Unsupported conversation role '{message.Role}'.",
+                        nameof(priorMessages));
+                }
+            }
+            messages.Add(new UserMessage(userMessage, _timestampMilliseconds()));
             return new Context
             {
                 SystemPrompt = systemPrompt,
-                Messages = new List<Message> { new UserMessage(userMessage, _timestampMilliseconds()) }
+                Messages = messages
             };
         }
 

@@ -6,8 +6,10 @@ using Pinder.Core.Conversation;
 namespace Pinder.Core.Interfaces
 {
     /// <summary>
-    /// LLM adapter interface that supports a multi-turn datee conversation by
-    /// accepting the conversation history as a parameter on each call.
+    /// Legacy LLM adapter interface that supports a multi-turn datee conversation
+    /// by accepting semantic conversation history on each call. Adapters that can
+    /// restore provider-neutral Pi sessions also implement
+    /// <see cref="ISessionStatefulLlmAdapter"/>.
     ///
     /// <para>
     /// As of #788 (Phase 1 of the #393 fast-gameplay refactor) the adapter is
@@ -21,16 +23,17 @@ namespace Pinder.Core.Interfaces
     /// <para>
     /// The base <see cref="ILlmAdapter.GetDateeResponseAsync(DateeContext)"/>
     /// remains as the single-turn fallback (used by callers that don't carry an
-    /// datee history yet). Stateful callers MUST go through the
+    /// datee history yet). Legacy stateful callers MUST go through the
     /// history-passing overload below.
     /// </para>
     /// </summary>
     public interface IStatefulLlmAdapter : ILlmAdapter
     {
         /// <summary>
-        /// Generate the datee's next response. The complete prompt transcript is
-        /// supplied by <paramref name="context"/>; <paramref name="history"/> is
-        /// engine-owned semantic dialogue retained for snapshots and diagnostics.
+        /// Generate the datee's next response through the legacy prompt-document
+        /// path. The complete transcript is supplied by <paramref name="context"/>;
+        /// <paramref name="history"/> is engine-owned semantic dialogue retained
+        /// for snapshots and diagnostics.
         /// Stateless: implementations MUST NOT retain any datee-session field
         /// across calls.
         /// </summary>

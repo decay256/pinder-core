@@ -125,6 +125,17 @@ namespace Pinder.LlmAdapters
         public static PromptTraceResult BuildDialogueOptionsPromptEx(
             DialogueContext context,
             PromptCatalog? promptCatalog = null)
+            => BuildDialogueOptionsPromptCore(context, promptCatalog, includeConversationHistory: true);
+
+        internal static PromptTraceResult BuildDialogueOptionsSessionPromptEx(
+            DialogueContext context,
+            PromptCatalog? promptCatalog = null)
+            => BuildDialogueOptionsPromptCore(context, promptCatalog, includeConversationHistory: false);
+
+        private static PromptTraceResult BuildDialogueOptionsPromptCore(
+            DialogueContext context,
+            PromptCatalog? promptCatalog,
+            bool includeConversationHistory)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
@@ -143,11 +154,13 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            // Conversation history
-            var historySb = new StringBuilder();
-            HistoryFormatter.Format(historySb, context.ConversationHistory, playerName);
-            sb.Append(historySb.ToString(), "conversation-history", "conversation-history");
-            sb.AppendLine();
+            if (includeConversationHistory)
+            {
+                var historySb = new StringBuilder();
+                HistoryFormatter.Format(historySb, context.ConversationHistory, playerName);
+                sb.Append(historySb.ToString(), "conversation-history", "conversation-history");
+                sb.AppendLine();
+            }
 
             // Game state summary
             var gameState = new StringBuilder();
@@ -417,16 +430,18 @@ namespace Pinder.LlmAdapters
         internal static PromptTraceResult BuildDateePerformancePromptEx(
             DateeContext context,
             EmotionalPrivateDirection emotionalDirection,
-            PromptCatalog? promptCatalog = null)
+            PromptCatalog? promptCatalog = null,
+            bool includeConversationHistory = true)
         {
             if (emotionalDirection == null) throw new ArgumentNullException(nameof(emotionalDirection));
-            return BuildDateePromptCore(context, emotionalDirection, promptCatalog);
+            return BuildDateePromptCore(context, emotionalDirection, promptCatalog, includeConversationHistory);
         }
 
         private static PromptTraceResult BuildDateePromptCore(
             DateeContext context,
             EmotionalPrivateDirection? emotionalDirection,
-            PromptCatalog? promptCatalog)
+            PromptCatalog? promptCatalog,
+            bool includeConversationHistory = true)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (string.IsNullOrEmpty(context.PlayerName)) throw new ArgumentException("PlayerName cannot be null or empty.");
@@ -437,11 +452,13 @@ namespace Pinder.LlmAdapters
 
             var sb = new AnnotatedStringBuilder();
 
-            // Conversation history
-            var historySb = new StringBuilder();
-            HistoryFormatter.Format(historySb, context.ConversationHistory, playerName);
-            sb.Append(historySb.ToString(), "conversation-history", "conversation-history");
-            sb.AppendLine();
+            if (includeConversationHistory)
+            {
+                var historySb = new StringBuilder();
+                HistoryFormatter.Format(historySb, context.ConversationHistory, playerName);
+                sb.Append(historySb.ToString(), "conversation-history", "conversation-history");
+                sb.AppendLine();
+            }
 
             // Player's last message with failure context
             if (context.DeliveryTier != FailureTier.Success)

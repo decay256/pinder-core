@@ -69,5 +69,9 @@ namespace Pinder.Core.Conversation
         /// </para>
         /// </summary>
         public List<(string Role, string Content)> AvatarHistory { get; set; } = new List<(string, string)>();
+
+        public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; set; }
+
+        public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; set; }
     }
 }

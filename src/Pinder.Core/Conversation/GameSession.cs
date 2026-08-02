@@ -40,17 +40,13 @@ namespace Pinder.Core.Conversation
         // profile is now derived from the character's equipped items instead.
         private string _dateeOutfitDescription { get => _state.DateeOutfitDescription; set => _state.DateeOutfitDescription = value; }
 
-        // #788: datee LLM conversation history lives here, not in the adapter.
-        // The adapter is pure-stateless across calls; the engine passes this list
-        // in on every datee call and appends the new entries returned by the
-        // adapter. Survives snapshot/restore via ResimulateData.DateeHistory.
+        // Engine-owned datee-perspective semantic history. During migration it is
+        // dual-written with the provider-neutral Pi session snapshot.
         private List<ConversationMessage> _dateeHistory { get => _state.DateeHistory; set => _state.DateeHistory = value; }
 
-        // #1123: avatar LLM conversation history lives here, symmetric to
-        // _dateeHistory. The avatar (delivery) session is now stateful — the
-        // engine passes this list in on every avatar call and appends the new
-        // entries returned by the adapter. Survives snapshot/restore via
-        // ResimulateData.AvatarHistory.
+        // Engine-owned avatar-perspective semantic history. There is no separate
+        // delivery-model call; session-capable adapters use this state for option
+        // generation and future private reasoning.
         private List<ConversationMessage> _avatarHistory { get => _state.AvatarHistory; set => _state.AvatarHistory = value; }
 
         // Sprint 8 Wave 0: optional config fields

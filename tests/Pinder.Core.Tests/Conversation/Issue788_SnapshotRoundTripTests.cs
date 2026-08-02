@@ -281,6 +281,38 @@ namespace Pinder.Core.Tests.Conversation
         }
 
         [Fact]
+        public void RestoreState_RoundTripsProviderNeutralSessionSnapshots()
+        {
+            var session = new GameSession(
+                MakeProfile("P1"),
+                MakeProfile("P2"),
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            var datee = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"session\":\"datee\"}");
+            var avatar = new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                "{\"session\":\"avatar\"}");
+
+            session.RestoreState(new ResimulateData
+            {
+                TargetInterest = session.CreateSnapshot().Interest,
+                TurnNumber = 2,
+                DateeSessionSnapshot = datee,
+                AvatarSessionSnapshot = avatar,
+            }, new NullTrapRegistry());
+
+            GameStateSnapshot snapshot = session.CreateSnapshot();
+            Assert.Same(datee, snapshot.DateeSessionSnapshot);
+            Assert.Same(avatar, snapshot.AvatarSessionSnapshot);
+            Assert.Equal("{\"session\":\"datee\"}", snapshot.DateeSessionSnapshot!.Payload);
+            Assert.Equal("{\"session\":\"avatar\"}", snapshot.AvatarSessionSnapshot!.Payload);
+        }
+
+        [Fact]
         public void RestoreState_WithMalformedPersistedRole_IsAtomic()
         {
             var tracker = new SessionShadowTracker(TestHelpers.MakeStatBlock());
