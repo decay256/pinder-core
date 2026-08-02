@@ -107,6 +107,15 @@ namespace Pinder.Core.Conversation
             _lastCombo = null;
         }
 
+        /// <summary>Returns the ordered history required to continue combo detection.</summary>
+        public IReadOnlyList<(string StatName, bool Succeeded)> CreateSnapshot()
+        {
+            var snapshot = new List<(string StatName, bool Succeeded)>(_history.Count);
+            foreach (var entry in _history)
+                snapshot.Add((entry.Stat.ToString(), entry.Succeeded));
+            return snapshot;
+        }
+
         /// <summary>
         /// Consumes the Triple bonus without recording a turn.
         /// Used when the player takes a non-Speak action (Read/Recover/Wait)

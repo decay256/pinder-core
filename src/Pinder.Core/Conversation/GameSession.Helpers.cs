@@ -170,6 +170,60 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Captures all committed engine state required to continue an active
+        /// session in a fresh process. Prepared turn options and dice pools are
+        /// intentionally excluded because they are uncommitted work.
+        /// </summary>
+        public ResimulateData CreateResimulateData()
+        {
+            var data = new ResimulateData
+            {
+                TargetInterest = _interest.Current,
+                TurnNumber = _turnNumber,
+                MomentumStreak = _momentumStreak,
+                ConversationHistory = new List<(string Sender, string Text)>(_history),
+                ComboHistory = _comboTracker.CreateSnapshot().ToList(),
+                PendingTripleBonus = _comboTracker.HasTripleBonus,
+                RizzCumulativeFailureCount = _rizzCumulativeFailureCount,
+                Topics = new List<CallbackOpportunity>(_topics),
+                PendingMomentumBonus = _pendingMomentumBonus,
+                DateeHistory = _dateeHistory.Select(message => (message.Role, message.Content)).ToList(),
+                AvatarHistory = _avatarHistory.Select(message => (message.Role, message.Content)).ToList(),
+                DateeSessionSnapshot = _state.DateeSessionSnapshot,
+                AvatarSessionSnapshot = _state.AvatarSessionSnapshot,
+                DateeOutfitDescription = _state.DateeOutfitDescription,
+                SpentBackstoryIndices = new HashSet<int>(_state.SpentBackstoryIndices),
+                SpentStakeIndices = new HashSet<int>(_state.SpentStakeIndices),
+                PreviousPhase = _state.PreviousPhase,
+                PreviousResolvedIndex = _state.PreviousResolvedIndex,
+                CurrentResolvedTarget = _state.CurrentResolvedTarget,
+                CurrentCognitiveSubtext = _state.CurrentCognitiveSubtext,
+                XpEvents = _xpLedger.Events.Select(entry => (entry.Source, entry.Amount)).ToList(),
+                SessionHorniness = _sessionHorniness,
+                HorninessRoll = _horninessRoll,
+                HorninessTimeModifier = _horninessTimeModifier,
+                PendingCritAdvantage = _pendingCritAdvantage,
+                LastStatUsed = _lastStatUsed,
+                ActiveWeakness = _activeWeakness,
+                ActiveTell = _activeTell,
+            };
+
+            foreach (var trap in _traps.AllActive)
+                data.ActiveTraps.Add((trap.Definition.Stat.ToString(), trap.TurnsRemaining));
+            if (_playerShadows != null)
+            {
+                foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
+                    data.ShadowValues[shadow.ToString()] = _playerShadows.GetEffectiveShadow(shadow);
+            }
+            if (_dateeShadows != null)
+            {
+                foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
+                    data.DateeShadowValues[shadow.ToString()] = _dateeShadows.GetEffectiveShadow(shadow);
+            }
+            return data;
+        }
+
+        /// <summary>
         /// Get shadow threshold level, using rule resolver if available.
         /// </summary>
         private int ResolveThresholdLevel(int shadowValue)
