@@ -4,8 +4,8 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Pinder.LlmAdapters;
-using Pinder.LlmAdapters.Anthropic.Dto;
 using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.SessionRunner;
 using Xunit;
@@ -129,7 +129,7 @@ namespace Pinder.Core.Tests
             using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
             var inner = new InvalidOperationException("socket reset on private upstream");
             var failure = new HttpRequestException("https://private.example.invalid failed", inner);
-            agent.SendMessagesAsyncOverride = _ => throw failure;
+            agent.SendStructuredAsyncOverride = _ => throw failure;
 
             var turn = MakeTurnStart();
             var context = MakeContext();
@@ -162,17 +162,11 @@ namespace Pinder.Core.Tests
                 Model = "claude-test-model"
             };
             using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
-            agent.SendMessagesAsyncOverride = _ => Task.FromResult(new Pinder.LlmAdapters.Anthropic.Dto.MessagesResponse
-            {
-                Content = new[]
-                {
-                    new Pinder.LlmAdapters.Anthropic.Dto.ResponseContent
-                    {
-                        Type = "tool_use",
-                        Input = Newtonsoft.Json.Linq.JObject.Parse(@"{""choice"":99,""explanation"":""bad pick""}")
-                    }
-                }
-            });
+            agent.SendStructuredAsyncOverride = _ => Task.FromResult(new StructuredLlmResponse(
+                @"{""choice"":99,""explanation"":""bad pick""}",
+                provider: "anthropic",
+                model: "claude-test-model",
+                usedNativeStructuredOutput: true));
 
             var turn = MakeTurnStart();
             var context = MakeContext();
@@ -200,32 +194,59 @@ namespace Pinder.Core.Tests
             };
             using var agent = new LlmPlayerAgent(opts, new ScoringPlayerAgent(), "Sable", "Brick");
 
-            MessagesRequest? capturedRequest = null;
-            agent.SendMessagesAsyncOverride = request =>
+            StructuredLlmRequest? capturedRequest = null;
+            agent.SendStructuredAsyncOverride = request =>
             {
                 capturedRequest = request;
-                return Task.FromResult(new MessagesResponse
-                {
-                    Content = new[]
-                    {
-                        new ResponseContent
-                        {
-                            Type = "tool_use",
-                            Input = Newtonsoft.Json.Linq.JObject.Parse(@"{""choice"":0,""explanation"":""best pick""}")
-                        }
-                    }
-                });
+                return Task.FromResult(new StructuredLlmResponse(
+                    @"{""choice"":0,""explanation"":""best pick""}",
+                    provider: "anthropic",
+                    model: "claude-test-model",
+                    usedNativeStructuredOutput: true));
             };
 
             await agent.DecideAsync(MakeTurnStart(), MakeContext());
 
             Assert.NotNull(capturedRequest);
-            var tool = Assert.Single(capturedRequest!.Tools);
-            Assert.Equal("submit_choice", tool.Name);
-            Assert.Contains("strategic explanation", tool.Description);
-            Assert.NotNull(tool.InputSchema["properties"]?["choice"]);
-            Assert.NotNull(tool.InputSchema["properties"]?["explanation"]);
-            Assert.Equal("submit_choice", capturedRequest.ToolChoice.Name);
+            Assert.Equal("submit_choice", capturedRequest!.SchemaName);
+            Assert.Contains("strategic explanation", capturedRequest.JsonSchema);
+            Assert.Contains("\"choice\"", capturedRequest.JsonSchema);
+            Assert.Contains("\"explanation\"", capturedRequest.JsonSchema);
+        }
+
+        [Fact]
+        public async Task DecideAsync_ProductionPathUsesProviderNeutralStructuredContract()
+        {
+            var opts = new Pinder.LlmAdapters.Anthropic.AnthropicOptions
+            {
+                ApiKey = "test-key",
+                Model = "claude-test-model"
+            };
+            using var agent = new LlmPlayerAgent(
+                opts,
+                new ScoringPlayerAgent(),
+                "Sable",
+                "Brick");
+            StructuredLlmRequest? capturedRequest = null;
+            agent.SendStructuredAsyncOverride = request =>
+            {
+                capturedRequest = request;
+                return Task.FromResult(new StructuredLlmResponse(
+                    @"{""choice"":1,""explanation"":""best structured pick""}",
+                    provider: "anthropic",
+                    model: "claude-test-model",
+                    usedNativeStructuredOutput: true));
+            };
+
+            PlayerDecision decision = await agent.DecideAsync(MakeTurnStart(), MakeContext());
+
+            Assert.Equal(1, decision.OptionIndex);
+            Assert.Equal("best structured pick", agent.LastExplanation);
+            Assert.NotNull(capturedRequest);
+            Assert.Equal("submit_choice", capturedRequest!.SchemaName);
+            Assert.Equal("llm-player-pick", capturedRequest.Phase);
+            Assert.Contains("\"choice\"", capturedRequest.JsonSchema);
+            Assert.Contains("\"explanation\"", capturedRequest.JsonSchema);
         }
 
         [Fact]

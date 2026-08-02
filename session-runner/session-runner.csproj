@@ -9,6 +9,7 @@
     <InternalsVisibleTo Include="Pinder.Core.Tests" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Pi.AI.Transports.HttpClient" Version="0.1.0-alpha.2" />
     <ProjectReference Include="..\src\Pinder.Core\Pinder.Core.csproj" />
     <ProjectReference Include="..\src\Pinder.LlmAdapters\Pinder.LlmAdapters.csproj" />
     <ProjectReference Include="..\src\Pinder.SessionSetup\Pinder.SessionSetup.csproj" />

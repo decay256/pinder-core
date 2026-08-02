@@ -58,7 +58,7 @@ namespace Pinder.Tools.NarrativeHarness
             doc.AppendLine($"- **Pursuer side:** {_pursuer.HeaderLabel}");
             doc.AppendLine($"- **Turns:** {_opts.Turns}");
             doc.AppendLine($"- **Model:** claude-opus-4-8 (real Anthropic adapter)");
-            doc.AppendLine($"- **Rule paths:** NONE — SessionSystemPromptBuilder → AnthropicTransport only (no Pinder.Rules).");
+            doc.AppendLine($"- **Rule paths:** NONE — SessionSystemPromptBuilder → Pi transport only (no Pinder.Rules).");
             doc.AppendLine($"- **Generated:** {DateTime.UtcNow:yyyy-MM-dd HH:mm}Z");
             doc.AppendLine();
 

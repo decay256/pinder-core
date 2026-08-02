@@ -5,13 +5,12 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Anthropic.Dto;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Spec-based tests for SessionDocumentBuilder, PromptTemplates, and CacheBlockBuilder.
+    /// Spec-based tests for SessionDocumentBuilder and PromptTemplates.
     /// Tests derived from docs/specs/issue-207-spec.md.
     /// </summary>
     [Collection("PromptTraceSingleton")]
@@ -175,66 +174,6 @@ namespace Pinder.LlmAdapters.Tests
         // AC4: CacheBlockBuilder
         // ═══════════════════════════════════════════════════════════════
 
-        [Fact]
-        public void CacheBlockBuilder_TwoPrompts_ReturnsTwoBlocks()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("p", "o");
-            Assert.Equal(2, blocks.Length);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_TwoPrompts_CorrectOrder()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("PLAYER_PROMPT", "DATEE_PROMPT");
-            Assert.Equal("PLAYER_PROMPT", blocks[0].Text);
-            Assert.Equal("DATEE_PROMPT", blocks[1].Text);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_TwoPrompts_BothTypeText()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("p", "o");
-            Assert.Equal("text", blocks[0].Type);
-            Assert.Equal("text", blocks[1].Type);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_TwoPrompts_BothCacheControlEphemeral()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("p", "o");
-            Assert.NotNull(blocks[0].CacheControl);
-            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
-            Assert.NotNull(blocks[1].CacheControl);
-            Assert.Equal("ephemeral", blocks[1].CacheControl!.Type);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_DateeOnly_ReturnsSingleBlock()
-        {
-            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("o");
-            Assert.Single(blocks);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_DateeOnly_HasCorrectContentAndCache()
-        {
-            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("MY_PROMPT");
-            Assert.Equal("text", blocks[0].Type);
-            Assert.Equal("MY_PROMPT", blocks[0].Text);
-            Assert.NotNull(blocks[0].CacheControl);
-            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_EmptyPrompts_ReturnsBlocksWithEmptyText()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("", "");
-            Assert.Equal(2, blocks.Length);
-            Assert.Equal("", blocks[0].Text);
-            Assert.Equal("", blocks[1].Text);
-            Assert.NotNull(blocks[0].CacheControl);
-        }
-
         // ═══════════════════════════════════════════════════════════════
         // Error Conditions
         // ═══════════════════════════════════════════════════════════════
@@ -264,25 +203,5 @@ namespace Pinder.LlmAdapters.Tests
                     null!, 10, 12, InterestState.Interested));
         }
 
-        [Fact]
-        public void CacheBlockBuilder_NullPlayerPrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildCachedSystemBlocks(null!, "o"));
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_NullDateePrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildCachedSystemBlocks("p", null!));
-        }
-
-        [Fact]
-        public void CacheBlockBuilder_DateeOnly_NullPrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildDateeOnlySystemBlocks(null!));
-        }
     }
 }

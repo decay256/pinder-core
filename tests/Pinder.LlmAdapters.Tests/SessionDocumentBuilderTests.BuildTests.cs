@@ -5,7 +5,6 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Anthropic.Dto;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
@@ -152,66 +151,6 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         // ── AC4: CacheBlockBuilder ──
-
-        [Fact]
-        public void BuildCachedSystemBlocks_ReturnsTwoBlocksWithEphemeralCache()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("player prompt", "datee prompt");
-
-            Assert.Equal(2, blocks.Length);
-            Assert.Equal("text", blocks[0].Type);
-            Assert.Equal("player prompt", blocks[0].Text);
-            Assert.NotNull(blocks[0].CacheControl);
-            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
-
-            Assert.Equal("text", blocks[1].Type);
-            Assert.Equal("datee prompt", blocks[1].Text);
-            Assert.NotNull(blocks[1].CacheControl);
-            Assert.Equal("ephemeral", blocks[1].CacheControl!.Type);
-        }
-
-        [Fact]
-        public void BuildDateeOnlySystemBlocks_ReturnsOneBlockWithEphemeralCache()
-        {
-            var blocks = CacheBlockBuilder.BuildDateeOnlySystemBlocks("datee prompt");
-
-            Assert.Single(blocks);
-            Assert.Equal("text", blocks[0].Type);
-            Assert.Equal("datee prompt", blocks[0].Text);
-            Assert.NotNull(blocks[0].CacheControl);
-            Assert.Equal("ephemeral", blocks[0].CacheControl!.Type);
-        }
-
-        [Fact]
-        public void BuildCachedSystemBlocks_EmptyPrompts_ReturnsBlocksWithEmptyText()
-        {
-            var blocks = CacheBlockBuilder.BuildCachedSystemBlocks("", "");
-
-            Assert.Equal(2, blocks.Length);
-            Assert.Equal("", blocks[0].Text);
-            Assert.Equal("", blocks[1].Text);
-        }
-
-        [Fact]
-        public void BuildCachedSystemBlocks_NullPlayerPrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildCachedSystemBlocks(null!, "datee"));
-        }
-
-        [Fact]
-        public void BuildCachedSystemBlocks_NullDateePrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildCachedSystemBlocks("player", null!));
-        }
-
-        [Fact]
-        public void BuildDateeOnlySystemBlocks_NullPrompt_Throws()
-        {
-            Assert.Throws<ArgumentNullException>(() =>
-                CacheBlockBuilder.BuildDateeOnlySystemBlocks(null!));
-        }
 
         // ── Error conditions ──
 
