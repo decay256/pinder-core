@@ -80,11 +80,17 @@ namespace Pinder.LlmAdapters.Tests
                 avatarSession: null);
 
             Assert.True(adapter.SupportsConversationSessions);
-            IReadOnlyList<ConversationMessage> sentHistory = Assert.Single(transport.PriorMessages);
-            Assert.Equal(dateeHistory.Select(message => message.Role), sentHistory.Select(message => message.Role));
-            Assert.Equal(dateeHistory.Select(message => message.Content), sentHistory.Select(message => message.Content));
-            Assert.DoesNotContain("older visible player line", transport.ContextualUserMessages.Single(), StringComparison.Ordinal);
-            Assert.DoesNotContain("older visible datee line", transport.ContextualUserMessages.Single(), StringComparison.Ordinal);
+            Assert.Equal(2, transport.PriorMessages.Count);
+            Assert.All(transport.PriorMessages, sentHistory =>
+            {
+                Assert.Equal(dateeHistory.Select(message => message.Role), sentHistory.Select(message => message.Role));
+                Assert.Equal(dateeHistory.Select(message => message.Content), sentHistory.Select(message => message.Content));
+            });
+            Assert.All(transport.ContextualUserMessages, userMessage =>
+            {
+                Assert.DoesNotContain("older visible player line", userMessage, StringComparison.Ordinal);
+                Assert.DoesNotContain("older visible datee line", userMessage, StringComparison.Ordinal);
+            });
             Assert.NotNull(result.DateeSessionSnapshot);
             Assert.NotNull(result.AvatarSessionSnapshot);
 

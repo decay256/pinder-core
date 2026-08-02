@@ -31,7 +31,15 @@ namespace Pinder.LlmAdapters
             _promptCatalog = promptCatalog;
         }
 
-        public PromptTraceResult Compile(DateeContext context, PromptCatalog? promptCatalog = null)
+        public PromptTraceResult Compile(
+            DateeContext context,
+            PromptCatalog? promptCatalog = null)
+            => Compile(context, promptCatalog, includeConversationHistory: true);
+
+        public PromptTraceResult Compile(
+            DateeContext context,
+            PromptCatalog? promptCatalog,
+            bool includeConversationHistory)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -81,29 +89,52 @@ namespace Pinder.LlmAdapters
             PromptTraceResult deliveredMessage = StructuredLiteralTrace(
                 context.PlayerDeliveredMessage.Trim(),
                 "PlayerDeliveredMessage");
-            PromptTraceResult history = CompileHistory(context.ConversationHistory, catalog);
             PromptTraceResult character = CompileCharacterFormulation(turnEvent, catalog);
+            var values = new Dictionary<string, PromptTraceResult>
+            {
+                { "prior_relationship", priorRelationship },
+                { "resulting_relationship", resultingRelationship },
+                { "transition_meaning", transitionMeaning },
+                { "recipient_event_meaning", eventMeaning },
+                { "delivered_message", deliveredMessage },
+                { "character_formulation", character },
+            };
+            string wrapperKey;
+            string[] requiredTokens;
+            if (includeConversationHistory)
+            {
+                wrapperKey = "emotional-reaction-compiled-wrapper";
+                values["recent_visible_history"] = CompileHistory(context.ConversationHistory, catalog);
+                requiredTokens = new[]
+                {
+                    "prior_relationship",
+                    "resulting_relationship",
+                    "transition_meaning",
+                    "recipient_event_meaning",
+                    "delivered_message",
+                    "recent_visible_history",
+                    "character_formulation",
+                };
+            }
+            else
+            {
+                wrapperKey = "emotional-reaction-compiled-session-wrapper";
+                requiredTokens = new[]
+                {
+                    "prior_relationship",
+                    "resulting_relationship",
+                    "transition_meaning",
+                    "recipient_event_meaning",
+                    "delivered_message",
+                    "character_formulation",
+                };
+            }
 
             return RenderTemplate(
-                RequireEntry(catalog, "emotional-reaction-compiled-wrapper"),
-                "emotional-reaction-compiled-wrapper",
-                new Dictionary<string, PromptTraceResult>
-                {
-                    { "prior_relationship", priorRelationship },
-                    { "resulting_relationship", resultingRelationship },
-                    { "transition_meaning", transitionMeaning },
-                    { "recipient_event_meaning", eventMeaning },
-                    { "delivered_message", deliveredMessage },
-                    { "recent_visible_history", history },
-                    { "character_formulation", character },
-                },
-                "prior_relationship",
-                "resulting_relationship",
-                "transition_meaning",
-                "recipient_event_meaning",
-                "delivered_message",
-                "recent_visible_history",
-                "character_formulation");
+                RequireEntry(catalog, wrapperKey),
+                wrapperKey,
+                values,
+                requiredTokens);
         }
 
         private static PromptTraceResult CompileCharacterFormulation(
