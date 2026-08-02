@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
@@ -83,10 +84,11 @@ namespace Pinder.LlmAdapters.Pi
             CancellationToken ct = default)
         {
             Context context = CreateContext(systemPrompt, userMessage);
-            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, ct);
+            var responseStatus = new ResponseStatusCapture();
+            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, ct, responseStatus);
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, phase);
-            EnsureSuccess(response, ct, false);
+            EnsureSuccess(response, ct, false, responseStatus);
 
             string text = TextUtilities.ContentText(response.Content);
             if (string.IsNullOrWhiteSpace(text))
@@ -103,7 +105,9 @@ namespace Pinder.LlmAdapters.Pi
             string? phase = null)
         {
             Context context = CreateContext(systemPrompt, userMessage);
-            ModelsSimpleStreamOptions options = CreateOptions(phase, temperature, maxTokens, cancellationToken);
+            var responseStatus = new ResponseStatusCapture();
+            ModelsSimpleStreamOptions options = CreateOptions(
+                phase, temperature, maxTokens, cancellationToken, responseStatus);
             AssistantMessageEventStream stream = _stream(_model, context, options);
 
             while (true)
@@ -116,7 +120,7 @@ namespace Pinder.LlmAdapters.Pi
 
             AssistantMessage response = await stream.Result().ConfigureAwait(false);
             Observe(response, phase);
-            EnsureSuccess(response, cancellationToken, true);
+            EnsureSuccess(response, cancellationToken, true, responseStatus);
         }
 
         public async Task<StructuredLlmResponse> SendStructuredAsync(
@@ -137,7 +141,9 @@ namespace Pinder.LlmAdapters.Pi
                 }
             };
 
-            ModelsSimpleStreamOptions options = CreateOptions(request.Phase, request.Temperature, request.MaxTokens, ct);
+            var responseStatus = new ResponseStatusCapture();
+            ModelsSimpleStreamOptions options = CreateOptions(
+                request.Phase, request.Temperature, request.MaxTokens, ct, responseStatus);
             options.Extra["toolChoice"] = "required";
             var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
             foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
@@ -147,7 +153,7 @@ namespace Pinder.LlmAdapters.Pi
 
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, request.Phase);
-            EnsureSuccess(response, ct, false);
+            EnsureSuccess(response, ct, false, responseStatus);
 
             ToolCall? toolCall = response.Content.OfType<ToolCall>()
                 .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
@@ -204,13 +210,21 @@ namespace Pinder.LlmAdapters.Pi
             string? phase,
             double temperature,
             int maxTokens,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            ResponseStatusCapture responseStatus)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ModelsSimpleStreamOptions options = _optionsFactory?.Invoke(phase) ?? new ModelsSimpleStreamOptions();
             options.Temperature = temperature;
             options.MaxTokens = maxTokens;
             options.CancellationToken = cancellationToken;
+            ResponseObserver? existingObserver = options.OnResponse;
+            options.OnResponse = async (response, model, observerCancellationToken) =>
+            {
+                responseStatus.Set(response);
+                if (existingObserver != null)
+                    await existingObserver(response, model, observerCancellationToken).ConfigureAwait(false);
+            };
             return options;
         }
 
@@ -231,15 +245,34 @@ namespace Pinder.LlmAdapters.Pi
         private static void EnsureSuccess(
             AssistantMessage response,
             CancellationToken cancellationToken,
-            bool streaming)
+            bool streaming,
+            ResponseStatusCapture responseStatus)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (response.StopReason == StopReason.Aborted)
                 throw new OperationCanceledException(response.ErrorMessage ?? "Pi model request was aborted.", cancellationToken);
             if (response.StopReason != StopReason.Error) return;
+            if (responseStatus.StatusCode.HasValue)
+            {
+                HttpStatusCode statusCode = (HttpStatusCode)responseStatus.StatusCode.Value;
+                LlmFailureKind failureKind = Classify(statusCode);
+                string statusMessage = failureKind == LlmFailureKind.RateLimited
+                    ? $"Pi model request was rate limited (HTTP {(int)statusCode})."
+                    : $"Pi model request failed (HTTP {(int)statusCode}).";
+                throw new LlmTransportException(statusMessage, failureKind, statusCode, responseStatus.RetryAfter);
+            }
             string message = response.ErrorMessage ?? "Pi model request failed.";
             if (streaming) throw new LlmTransportException(message);
             throw new InvalidOperationException(message);
+        }
+
+        private static LlmFailureKind Classify(HttpStatusCode statusCode)
+        {
+            if ((int)statusCode == 429) return LlmFailureKind.RateLimited;
+            if (statusCode == HttpStatusCode.Unauthorized || statusCode == HttpStatusCode.Forbidden)
+                return LlmFailureKind.Unauthorized;
+            if (statusCode == HttpStatusCode.NotFound) return LlmFailureKind.ModelNotFound;
+            return LlmFailureKind.Network;
         }
 
         private static string NormalizeToolName(string value)
@@ -255,6 +288,37 @@ namespace Pinder.LlmAdapters.Pi
         {
             if (value <= 0) return 0;
             return value >= int.MaxValue ? int.MaxValue : (int)value;
+        }
+
+        private sealed class ResponseStatusCapture
+        {
+            public int? StatusCode { get; private set; }
+            public TimeSpan? RetryAfter { get; private set; }
+
+            public void Set(ProviderResponse response)
+            {
+                StatusCode = response.Status;
+                if (!TryGetHeader(response.Headers, "retry-after", out string? value)) return;
+                if (int.TryParse(value, out int seconds) && seconds >= 0)
+                    RetryAfter = TimeSpan.FromSeconds(seconds);
+                else if (DateTimeOffset.TryParse(value, out DateTimeOffset date))
+                    RetryAfter = date <= DateTimeOffset.UtcNow ? TimeSpan.Zero : date - DateTimeOffset.UtcNow;
+            }
+
+            private static bool TryGetHeader(
+                IReadOnlyDictionary<string, string> headers,
+                string name,
+                out string? value)
+            {
+                foreach (KeyValuePair<string, string> header in headers)
+                {
+                    if (!string.Equals(header.Key, name, StringComparison.OrdinalIgnoreCase)) continue;
+                    value = header.Value;
+                    return true;
+                }
+                value = null;
+                return false;
+            }
         }
     }
 }

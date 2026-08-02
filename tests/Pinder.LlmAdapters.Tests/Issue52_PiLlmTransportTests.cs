@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -114,6 +115,35 @@ namespace Pinder.LlmAdapters.Tests
             Assert.False(result.UsedNativeStructuredOutput);
             Assert.Equal("pi_text_fallback", result.ValidationMode);
             Assert.Equal("{\"ok\":true}", result.JsonText);
+        }
+
+        [Fact]
+        public async Task SendAsync_HttpFailureIsTypedAndDoesNotLeakProviderBody()
+        {
+            const string secretBody = "provider-secret-body";
+            var failed = Response(string.Empty);
+            failed.StopReason = StopReason.Error;
+            failed.ErrorMessage = $"OpenAI API error (429): {secretBody}";
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                (_, __, options) =>
+                {
+                    options.OnResponse!(new ProviderResponse
+                    {
+                        Status = 429,
+                        Headers = new Dictionary<string, string> { ["Retry-After"] = "2" }
+                    }, Model("model-1"), CancellationToken.None).GetAwaiter().GetResult();
+                    return Task.FromResult(failed);
+                });
+
+            Pinder.Core.Interfaces.LlmTransportException error =
+                await Assert.ThrowsAsync<Pinder.Core.Interfaces.LlmTransportException>(
+                    () => transport.SendAsync("system", "user"));
+
+            Assert.Equal(Pinder.Core.Interfaces.LlmFailureKind.RateLimited, error.FailureKind);
+            Assert.Equal(HttpStatusCode.TooManyRequests, error.StatusCode);
+            Assert.Equal(TimeSpan.FromSeconds(2), error.RetryAfter);
+            Assert.DoesNotContain(secretBody, error.ToString(), StringComparison.Ordinal);
         }
 
         [Fact]
