@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Pi.AI.Transports.HttpClient;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
@@ -11,8 +12,7 @@ using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Data;
 using Pinder.LlmAdapters;
-using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.OpenAi;
+using Pinder.LlmAdapters.Pi;
 using Pinder.SessionRunner;
 using Pinder.SessionRunner.Snapshot;
 using Pinder.Core.Rolls;
@@ -20,6 +20,8 @@ using Pinder.SessionSetup;
 
 partial class Program
 {
+    private static readonly HttpClientTransport SessionRunnerHttpTransport = new HttpClientTransport();
+
     private static void ConfigureResimulationSnapshotData(GameSetupResult result, string[] args, int fromTurnArg)
     {
         var snapOpts = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -115,9 +117,9 @@ partial class Program
 
         if (IsOpenAiCompatibleModelSpec(result.ModelSpec))
         {
-            var transport = CreateOpenAiCompatibleTransport(result.ModelSpec, result.ApiKey!, out string provider, out string model);
+            var transport = CreatePiTransport(result.ModelSpec, result.ApiKey!, out string provider, out string model);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
-            engineLabel = $"PinderLlmAdapter + OpenAiTransport ({provider}) → {model}";
+            engineLabel = $"PinderLlmAdapter + Pi ({provider}) → {model}";
         }
         else
         {
@@ -125,20 +127,15 @@ partial class Program
             {
                 Console.Error.WriteLine($"[WARN] Overlay model '{result.OverlayModel}' requested but overlay routing via option fields was removed (#1293); overlay calls will use the primary transport. Wire a dedicated overlay ILlmTransport to route overlays.");
             }
-            string anthropicModel = result.ModelSpec;
-            var transport = new AnthropicTransport(new AnthropicOptions
-            {
-                ApiKey = result.ApiKey!,
-                Model = anthropicModel,
-                GameDefinition = result.GameDef,
-                MaxTokens = adapterOptions.MaxTokens,
-                Temperature = adapterOptions.Temperature,
-                StatDeliveryInstructions = statDeliveryInstructions
-            });
+            var transport = CreatePiTransport(
+                result.ModelSpec,
+                result.ApiKey!,
+                out _,
+                out string anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = string.IsNullOrWhiteSpace(result.OverlayModel)
-                ? $"PinderLlmAdapter + AnthropicTransport → {anthropicModel}"
-                : $"PinderLlmAdapter + AnthropicTransport → {anthropicModel} (overlay: unrouted)";
+                ? $"PinderLlmAdapter + Pi (anthropic) → {anthropicModel}"
+                : $"PinderLlmAdapter + Pi (anthropic) → {anthropicModel} (overlay: unrouted)";
         }
     }
 
@@ -179,20 +176,11 @@ partial class Program
     {
         if (!result.IsResimulation)
         {
-            IDisposable? setupRawDisposable = null;
-            ILlmTransport setupRawTransport;
-            if (IsOpenAiCompatibleModelSpec(result.SetupModelSpec))
-            {
-                setupRawTransport = CreateOpenAiCompatibleTransport(result.SetupModelSpec, result.ApiKey!, out _, out _);
-                setupRawDisposable = (IDisposable)setupRawTransport;
-            }
-            else
-            {
-                var anthropicTransport = new Pinder.LlmAdapters.Anthropic.AnthropicTransport(result.ApiKey, result.SetupModelSpec);
-                setupRawTransport = anthropicTransport;
-                setupRawDisposable = anthropicTransport;
-            }
-            using var disposeSetupTransport = setupRawDisposable;
+            ILlmTransport setupRawTransport = CreatePiTransport(
+                result.SetupModelSpec,
+                result.ApiKey!,
+                out _,
+                out _);
             var setupTransport = new Pinder.LlmAdapters.ThinkingStrippingLlmTransport(setupRawTransport);
 
             // ── Psychological Stakes ──────────────────────────────────
@@ -243,14 +231,24 @@ partial class Program
             || modelSpec.StartsWith("ollama/", StringComparison.OrdinalIgnoreCase);
     }
 
-    private static OpenAiTransport CreateOpenAiCompatibleTransport(string modelSpec, string apiKey, out string provider, out string model)
+    private static PiLlmTransport CreatePiTransport(
+        string modelSpec,
+        string apiKey,
+        out string provider,
+        out string model)
     {
         string[] providerParts = modelSpec.Split(new[] { '/' }, 2);
-        provider = providerParts[0];
-        model = providerParts.Length > 1 ? providerParts[1] : modelSpec;
-        string baseUrl = GetProviderBaseUrl(provider);
+        bool explicitlyRouted = providerParts.Length > 1 && IsOpenAiCompatibleModelSpec(modelSpec);
+        provider = explicitlyRouted ? providerParts[0].ToLowerInvariant() : "anthropic";
+        model = explicitlyRouted ? providerParts[1] : modelSpec;
         string envKey = provider.ToUpperInvariant() + "_API_KEY";
-        string openAiKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
-        return new OpenAiTransport(openAiKey, baseUrl, model);
+        string providerKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
+        return PiProviderTransportFactory.Create(new PiProviderTransportOptions
+        {
+            Provider = provider,
+            Model = model,
+            ApiKey = providerKey,
+            Fetch = SessionRunnerHttpTransport.Fetch,
+        });
     }
 }

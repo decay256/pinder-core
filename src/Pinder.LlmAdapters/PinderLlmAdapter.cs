@@ -16,7 +16,7 @@ namespace Pinder.LlmAdapters
     /// <summary>
     /// Provider-agnostic implementation of ILlmAdapter and its stateful session extensions.
     /// All game-level prompt building and response parsing lives here — single source of truth.
-    /// Delegates raw LLM I/O to an ILlmTransport (AnthropicTransport, OpenAiTransport, etc.).
+    /// Delegates raw LLM I/O to an ILlmTransport composed through Pi.
     ///
     /// This replaces the need for every transport to duplicate game logic.
     /// Plain transports accept a single user message; conversation transports

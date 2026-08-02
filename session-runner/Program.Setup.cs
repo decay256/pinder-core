@@ -13,7 +13,6 @@ using Pinder.Core.Traps;
 using Pinder.Core.Data;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.OpenAi;
 using Pinder.SessionRunner;
 using Pinder.SessionRunner.Snapshot;
 using Pinder.Core.Rolls;
@@ -167,7 +166,7 @@ partial class Program
         // ── header ────────────────────────────────────────────────────────
         Console.WriteLine($"# Playtest Session {result.SessionNumber:D3} — {result.Player1} × {result.Player2}");
         Console.WriteLine($"**Date:** {DateTime.UtcNow:yyyy-MM-dd}");
-        string engineLabel = "PinderLlmAdapter + AnthropicTransport → claude-sonnet-4-20250514"; // updated after adapter selection
+        string engineLabel = "PinderLlmAdapter + Pi → claude-sonnet-4-20250514"; // updated after adapter selection
         // Engine line printed below after adapter is resolved
         string p1Archetype = result.Sable.ActiveArchetype != null ? $" | Archetype: {result.Sable.ActiveArchetype.Name} ({result.Sable.ActiveArchetype.InterferenceLevel})" : "";
         string p2Archetype = result.Brick.ActiveArchetype != null ? $" | Archetype: {result.Brick.ActiveArchetype.Name} ({result.Brick.ActiveArchetype.InterferenceLevel})" : "";

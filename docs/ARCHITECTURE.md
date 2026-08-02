@@ -69,8 +69,8 @@ Prompt construction and LLM API integration. Depends on Pinder.Core and Pinder.R
 |---|---|
 | **Purpose** | Build prompts from game state, call LLM APIs, parse responses |
 | **Key files** | `PinderLlmAdapter.cs` — unified provider-agnostic LLM adapter implementing `ILlmAdapter` and `IStatefulLlmAdapter`, delegating wire I/O to low-level transports |
-| | `Anthropic/AnthropicTransport.cs` / `AnthropicStreamingTransport.cs` — direct Anthropic wire transports with prompt-caching (system & context history) |
-| | `OpenAi/OpenAiTransport.cs` / `OpenAiStreamingTransport.cs` — OpenAI-compatible wire transports (Groq, Together, OpenRouter, Ollama) |
+| | `PiProviderTransportFactory.cs` — provider-neutral Pi.AI composition for Anthropic, OpenAI, Groq, Together, OpenRouter, Google, Ollama, and custom endpoints |
+| | `PiLlmTransport.cs` — Pinder contract adapter over Pi.AI sessions, structured output, usage, and provider streaming |
 | | `SessionDocumentBuilder.cs` — static prompt builder for all call types |
 | | `SessionSystemPromptBuilder.cs` — system prompt assembly from GameDefinition |
 | | `StatDeliveryInstructions.cs` — per-stat, per-tier delivery instructions from YAML |

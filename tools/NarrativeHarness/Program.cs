@@ -4,9 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Pi.AI.Transports.HttpClient;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
-using Pinder.LlmAdapters.Anthropic;
+using Pinder.LlmAdapters.Pi;
 
 namespace Pinder.Tools.NarrativeHarness
 {
@@ -62,8 +63,15 @@ namespace Pinder.Tools.NarrativeHarness
                 return 1;
             }
 
-            // ── Real transport (dashed model id; ctor maps to API id) ─────
-            using var transport = new AnthropicTransport(apiKey, "claude-opus-4-8");
+            // ── Real transport through the shared Pi provider composition root ──
+            var httpTransport = new HttpClientTransport();
+            var transport = PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "anthropic",
+                Model = "claude-opus-4-8",
+                ApiKey = apiKey,
+                Fetch = httpTransport.Fetch,
+            });
 
             // ── Scripted pursuer lines (optional) ─────────────────────────
             List<string>? scriptedLines = null;

@@ -87,7 +87,7 @@ namespace Pinder.Core.Tests
         [Fact]
         public void Constructor_NullFallback_Throws()
         {
-            // Note: this will throw ArgumentException from AnthropicClient if API key is empty,
+            // Note: this throws ArgumentException from the provider composition root if the API key is empty,
             // but the null check for fallback should fire first since options is valid
             var options = new Pinder.LlmAdapters.Anthropic.AnthropicOptions { ApiKey = "test-key" };
             Assert.Throws<ArgumentNullException>(() =>

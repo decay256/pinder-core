@@ -6,12 +6,13 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Pi.AI.Transports.HttpClient;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Pinder.Core.Interfaces;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Anthropic.Dto;
+using Pinder.LlmAdapters.Pi;
 
 namespace Pinder.SessionRunner
 {
@@ -24,12 +25,13 @@ namespace Pinder.SessionRunner
     {
 
         /// <summary>
-        /// Tool definition for structured output via Anthropic tool_use.
+        /// Provider-neutral tool contract for structured output.
         /// Loads the JSON schema from a static resource file rather than inlining a parsed JSON string.
         /// </summary>
-        private static readonly ToolDefinition SubmitChoiceTool = LoadSubmitChoiceTool();
+        private static readonly StructuredToolContract SubmitChoiceTool = LoadSubmitChoiceTool();
 
-        private readonly AnthropicClient _client;
+        private static readonly HttpClientTransport PlayerAgentHttpTransport = new HttpClientTransport();
+        private readonly IStructuredLlmTransport _structuredTransport;
         private readonly ScoringPlayerAgent _fallback;
         private readonly string _model;
         private readonly string _playerName;
@@ -38,6 +40,7 @@ namespace Pinder.SessionRunner
         private readonly SimAgentPromptAssets _promptAssets;
         private bool _disposed;
         private readonly List<CallSummaryStat> _tokenStats = new List<CallSummaryStat>();
+        private Pi.AI.Usage? _lastPiUsage;
 
         /// <summary>
         /// The last explanation produced by the LLM agent. Empty string if no explanation available.
@@ -46,7 +49,7 @@ namespace Pinder.SessionRunner
 
         internal LlmPlayerAgentFallbackDiagnostic? LastFallbackDiagnostic { get; private set; }
 
-        internal Func<MessagesRequest, Task<MessagesResponse>>? SendMessagesAsyncOverride { get; set; }
+        internal Func<StructuredLlmRequest, Task<StructuredLlmResponse>>? SendStructuredAsyncOverride { get; set; }
 
         public ScoringMode ScoringMode => ScoringMode.Llm;
         public string MechanicsSource => "llm+heuristic:LlmPlayerAgent wraps ScoringPlayerAgent heuristic and makes strategic LLM choices";
@@ -76,12 +79,19 @@ namespace Pinder.SessionRunner
             _playerName = playerName ?? "the player";
             _dateeName = dateeName ?? "the datee";
             _model = options.Model;
-            _client = new AnthropicClient(options.ApiKey);
+            _structuredTransport = PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "anthropic",
+                Model = options.Model,
+                ApiKey = options.ApiKey,
+                Fetch = PlayerAgentHttpTransport.Fetch,
+                ResponseObserver = (response, _) => _lastPiUsage = response.Usage,
+            });
             _ruleResolver = ruleResolver;
             _promptAssets = SimAgentPromptAssets.Load(promptCatalog ?? LoadPromptCatalog());
         }
 
-        private static ToolDefinition LoadSubmitChoiceTool()
+        private static StructuredToolContract LoadSubmitChoiceTool()
         {
             string relativePath = Path.Combine("data", "schemas", "submit_choice_tool.json");
             string? path = DataFileLocator.FindDataFile(AppContext.BaseDirectory, relativePath);
@@ -103,12 +113,10 @@ namespace Pinder.SessionRunner
             var inputSchema = root["input_schema"] as JObject
                 ?? throw new InvalidDataException($"{path}: required object property 'input_schema' is missing.");
 
-            return new ToolDefinition
-            {
-                Name = RequiredToolString(root, "name", path),
-                Description = RequiredToolString(root, "description", path),
-                InputSchema = inputSchema
-            };
+            return new StructuredToolContract(
+                RequiredToolString(root, "name", path),
+                RequiredToolString(root, "description", path),
+                inputSchema.ToString(Newtonsoft.Json.Formatting.None));
         }
 
         private static string RequiredToolString(JObject root, string propertyName, string path)
@@ -120,6 +128,20 @@ namespace Pinder.SessionRunner
             }
 
             return value!;
+        }
+
+        private sealed class StructuredToolContract
+        {
+            public StructuredToolContract(string name, string description, string jsonSchema)
+            {
+                Name = name;
+                Description = description;
+                JsonSchema = jsonSchema;
+            }
+
+            public string Name { get; }
+            public string Description { get; }
+            public string JsonSchema { get; }
         }
 
         private static PromptCatalog LoadPromptCatalog()
@@ -277,42 +299,39 @@ namespace Pinder.SessionRunner
                 string userMessage = BuildPrompt(turn, context, scoringDecision.Scores);
                 string systemMsg = BuildSystemMessage(context);
 
-                var request = new MessagesRequest
+                _lastPiUsage = null;
+                var request = new StructuredLlmRequest(
+                    SubmitChoiceTool.Name,
+                    "1",
+                    SubmitChoiceTool.JsonSchema,
+                    systemMsg,
+                    userMessage,
+                    0.3,
+                    512,
+                    "llm-player-pick");
+                Func<StructuredLlmRequest, Task<StructuredLlmResponse>>? sendStructured =
+                    SendStructuredAsyncOverride;
+                StructuredLlmResponse response = sendStructured != null
+                    ? await sendStructured(request).ConfigureAwait(false)
+                    : await _structuredTransport.SendStructuredAsync(request).ConfigureAwait(false);
+                JObject? toolInput;
+                string responseText = string.Empty;
+                try
                 {
-                    Model = _model,
-                    MaxTokens = 512,
-                    Temperature = 0.3,
-                    System = new[] { new ContentBlock { Type = "text", Text = systemMsg } },
-                    Messages = new[] { new Message { Role = "user", Content = userMessage } },
-                    Tools = new[] { SubmitChoiceTool },
-                    ToolChoice = new ToolChoiceOption { Type = "tool", Name = SubmitChoiceTool.Name }
-                };
-
-                var sendMessagesAsync = SendMessagesAsyncOverride;
-                var response = sendMessagesAsync != null
-                    ? await sendMessagesAsync(request).ConfigureAwait(false)
-                    : await _client.SendMessagesAsync(request).ConfigureAwait(false);
-
-                // Record token usage for audit table
-                if (response.Usage != null)
-                {
-                    _tokenStats.Add(new CallSummaryStat
-                    {
-                        Turn = turn.State.TurnNumber,
-                        Type = "llm-player-pick",
-                        InputTokens = response.Usage.InputTokens,
-                        OutputTokens = response.Usage.OutputTokens,
-                        CacheReadInputTokens = response.Usage.CacheReadInputTokens,
-                        CacheCreationInputTokens = response.Usage.CacheCreationInputTokens
-                    });
+                    toolInput = JObject.Parse(response.JsonText);
+                    response.ReportValidation("accepted");
                 }
+                catch (Newtonsoft.Json.JsonException)
+                {
+                    response.ReportValidation("rejected", "invalid_json");
+                    toolInput = null;
+                    responseText = response.JsonText;
+                }
+                RecordPiUsage(turn.State.TurnNumber);
 
-                // Extract tool_use input
-                JObject toolInput = response.GetToolInput();
                 if (toolInput == null)
                 {
                     // Fallback: try parsing text response for PICK: pattern
-                    string responseText = response.GetText();
                     return HandleTextFallback(responseText, turn, context, scoringDecision);
                 }
 
@@ -336,9 +355,9 @@ namespace Pinder.SessionRunner
 
                 return new PlayerDecision(choice.Value, LastExplanation, scoringDecision.Scores);
             }
-            catch (AnthropicApiException ex)
+            catch (LlmTransportException ex)
             {
-                return MakeFallbackDecision(scoringDecision, $"Anthropic API error ({ex.StatusCode})", ex, turn, context);
+                return MakeFallbackDecision(scoringDecision, "LLM transport error", ex, turn, context);
             }
             catch (HttpRequestException ex)
             {
@@ -353,6 +372,24 @@ namespace Pinder.SessionRunner
                 return MakeFallbackDecision(scoringDecision, "Unexpected player-agent error", ex, turn, context);
             }
         }
+
+        private void RecordPiUsage(int turnNumber)
+        {
+            Pi.AI.Usage? usage = _lastPiUsage;
+            if (usage == null) return;
+            _tokenStats.Add(new CallSummaryStat
+            {
+                Turn = turnNumber,
+                Type = "llm-player-pick",
+                InputTokens = ClampUsage(usage.Input),
+                OutputTokens = ClampUsage(usage.Output),
+                CacheReadInputTokens = ClampUsage(usage.CacheRead),
+                CacheCreationInputTokens = ClampUsage(usage.CacheWrite)
+            });
+        }
+
+        private static int ClampUsage(long value)
+            => value <= 0 ? 0 : value >= int.MaxValue ? int.MaxValue : (int)value;
 
         private string BuildSystemMessage(PlayerAgentContext context)
         {
@@ -652,7 +689,8 @@ namespace Pinder.SessionRunner
         {
             if (!_disposed)
             {
-                _client.Dispose();
+                if (_structuredTransport is IDisposable disposable)
+                    disposable.Dispose();
                 _disposed = true;
             }
         }

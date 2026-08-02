@@ -8,7 +8,6 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
-using Pinder.LlmAdapters.Anthropic;
 using Pinder.SessionRunner;
 
 partial class Program

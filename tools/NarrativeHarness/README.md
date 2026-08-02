@@ -1,14 +1,14 @@
 # NarrativeHarness (#843)
 
 A **rules-free narrative testbed** for Pinder. It drives ONLY the production
-prompt assembly + the real Anthropic transport — **no** roll / shadow /
+prompt assembly + the configured Pi provider transport — **no** roll / shadow /
 horniness / weakness / interest-delta / misfire code is touched. The project
 does not reference `Pinder.Rules` (it flows in transitively via
 `Pinder.LlmAdapters`, but no rule type is ever constructed or called).
 
 A turn is exactly: build the system prompt with
 `SessionSystemPromptBuilder.BuildDatee(...)` (the `== CONVERSATION ARC ==`
-slot populated by the harness) → `AnthropicTransport.SendAsync(...)` → record
+slot populated by the harness) → `PiProviderTransportFactory.Create(...)` → record
 the raw output. That's it.
 
 ## The experiment

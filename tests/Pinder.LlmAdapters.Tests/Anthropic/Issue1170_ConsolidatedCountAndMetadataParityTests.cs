@@ -118,11 +118,11 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none]";
         [InlineData(2)]
         [InlineData(3)]
         [InlineData(4)]
-        public void ToolSchema_GetDialogueOptions_ParametrizesItemsExactly(int n)
+        public void StructuredContract_ParametrizesItemsExactly(int n)
         {
-            var schema = ToolSchemas.GetDialogueOptions(n);
-            Assert.Equal(n, schema.InputSchema["properties"]!["options"]!["minItems"]!.Value<int>());
-            Assert.Equal(n, schema.InputSchema["properties"]!["options"]!["maxItems"]!.Value<int>());
+            JObject schema = BuildDialogueOptionsSchema(n);
+            Assert.Equal(n, schema["properties"]!["options"]!["minItems"]!.Value<int>());
+            Assert.Equal(n, schema["properties"]!["options"]!["maxItems"]!.Value<int>());
         }
 
         // ═══════════════════════════════════════════════════════════════
@@ -156,9 +156,9 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none]";
             Assert.DoesNotContain("TELL_BONUS", textTags);
             Assert.Equal(3, textTags.Count);
 
-            // Get schema fields from ToolSchemas
-            var toolSchema = ToolSchemas.GetDialogueOptions(4);
-            var optionsProps = toolSchema.InputSchema["properties"]?["options"]?["items"]?["properties"] as JObject;
+            // Get schema fields from the provider-neutral structured contract.
+            JObject schema = BuildDialogueOptionsSchema(4);
+            var optionsProps = schema["properties"]?["options"]?["items"]?["properties"] as JObject;
             Assert.NotNull(optionsProps);
 
             var schemaFields = optionsProps.Properties()
@@ -174,6 +174,18 @@ OPTION_3 [STAT: Wit] ""Witty message"" [CALLBACK: none] [COMBO: none]";
             Assert.Equal(3, schemaFields.Count);
 
             Assert.True(schemaFields.SetEquals(new[] { "stat", "callback", "combo" }), "Structured tool schema must only ask for model-authored fields; gameplay metadata remains engine-derived.");
+        }
+
+        private static JObject BuildDialogueOptionsSchema(int expectedCount)
+        {
+            var method = typeof(DialogueOptionsStructuredContract).GetMethod(
+                "BuildJsonSchema",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            Assert.NotNull(method);
+            string json = Assert.IsType<string>(method!.Invoke(
+                null,
+                new object?[] { expectedCount, null }));
+            return JObject.Parse(json);
         }
 
         // ═══════════════════════════════════════════════════════════════

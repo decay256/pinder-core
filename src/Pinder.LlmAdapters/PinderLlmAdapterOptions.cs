@@ -4,7 +4,7 @@ namespace Pinder.LlmAdapters
 
     /// <summary>
     /// Configuration for PinderLlmAdapter. Provider-agnostic — the transport
-    /// (AnthropicTransport, OpenAiTransport, etc.) handles API-specific settings.
+    /// Pi's provider composition handles API-specific settings.
     /// </summary>
     public sealed class PinderLlmAdapterOptions
     {

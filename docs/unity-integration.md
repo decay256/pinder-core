@@ -307,19 +307,11 @@ You have two choices:
 **(a) Reuse `Pinder.LlmAdapters.PinderLlmAdapter`** — the production
 `ILlmAdapter` implementation used by `pinder-web` and the
 `session-runner` CLI. It owns prompt assembly, response parsing, and
-overlay handling. You provide an `ILlmTransport` (the thin
-provider-specific HTTP layer) plus a `PinderLlmAdapterOptions`. Two
-transports ship in the box:
-
-- `Pinder.LlmAdapters.OpenAi.OpenAiTransport` — OpenAI Chat
-  Completions API. Constructor takes an `HttpClient`, an API key,
-  and a model name.
-- `Pinder.LlmAdapters.Anthropic.AnthropicTransport` — Anthropic
-  Messages API. Same shape.
-
-Wire `HttpClient` carefully on Unity — long-lived `HttpClient`
-survives domain reloads if you parent it to a non-static container;
-otherwise leak.
+overlay handling. Create its `ILlmTransport` through
+`Pinder.LlmAdapters.Pi.PiProviderTransportFactory` and inject Pi's
+`UnityWebRequestTransport.Fetch`. The shared factory selects Anthropic or
+OpenAI-compatible protocol details while Unity retains ownership of network
+I/O on desktop, Android, and iOS.
 
 **(b) Write your own adapter.** Useful if you're routing through your
 own backend (e.g. a Cloud Run proxy that holds the API key) or if
@@ -446,8 +438,15 @@ public class PinderRunner : MonoBehaviour
         ITrapRegistry      traps   = new JsonTrapRepository(
             await ReadStreamingAssetTextAsync("PinderData/traps/traps.json"));
 
-        // 2. Wire the LLM adapter via PinderLlmAdapter + a transport.
-        var transport = new OpenAiTransport(_http, apiKey: "sk-...", model: "gpt-4o");
+        // 2. Wire the LLM adapter through the shared Pi composition root.
+        var unityHttp = new UnityWebRequestTransport();
+        var transport = PiProviderTransportFactory.Create(new PiProviderTransportOptions
+        {
+            Provider = "openai",
+            Model = "gpt-4o",
+            ApiKey = "sk-...",
+            Fetch = unityHttp.Fetch,
+        });
         var options   = new PinderLlmAdapterOptions(/* see source for full list */);
         ILlmAdapter llm = new PinderLlmAdapter(transport, options);
 

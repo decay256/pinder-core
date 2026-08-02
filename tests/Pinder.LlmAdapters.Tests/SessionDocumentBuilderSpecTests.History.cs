@@ -5,7 +5,6 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Anthropic;
-using Pinder.LlmAdapters.Anthropic.Dto;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
