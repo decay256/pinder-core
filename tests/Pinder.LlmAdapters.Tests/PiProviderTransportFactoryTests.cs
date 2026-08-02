@@ -41,7 +41,38 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("https://api.anthropic.com/v1/messages", captured!.Url);
             string body = Encoding.UTF8.GetString(captured.Body!);
             Assert.Contains("claude-opus-4-8", body, StringComparison.Ordinal);
+            Assert.DoesNotContain("\"temperature\"", body, StringComparison.Ordinal);
             Assert.Equal("test-key", captured.Headers["x-api-key"]);
+        }
+
+        [Fact]
+        public async Task Anthropic_ModelThatSupportsTemperature_IncludesConfiguredTemperature()
+        {
+            HttpTransportRequest? captured = null;
+            FetchFunction fetch = (request, _) =>
+            {
+                captured = request;
+                return Task.FromResult(JsonResponse(
+                    "event: message_start\ndata: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":1}}}\n\n" +
+                    "event: content_block_start\ndata: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"ok\"}}\n\n" +
+                    "event: content_block_stop\ndata: {\"type\":\"content_block_stop\",\"index\":0}\n\n" +
+                    "event: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"},\"usage\":{\"output_tokens\":1}}\n\n" +
+                    "event: message_stop\ndata: {\"type\":\"message_stop\"}\n\n"));
+            };
+            var transport = PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "anthropic",
+                Model = "claude-sonnet-4.6",
+                ApiKey = "test-key",
+                Fetch = fetch,
+                MaxRetries = 0,
+            });
+
+            await transport.SendAsync("system", "hello", temperature: 0.42);
+
+            Assert.NotNull(captured);
+            string body = Encoding.UTF8.GetString(captured!.Body!);
+            Assert.Contains("\"temperature\":0.42", body, StringComparison.Ordinal);
         }
 
         [Fact]

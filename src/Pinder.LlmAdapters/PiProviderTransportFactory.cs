@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Pi
                 Input = new[] { ModelInput.Text },
                 ContextWindow = 200_000,
                 MaxTokens = 16_384,
-                Compatibility = CreateCompatibility(providerName),
+                Compatibility = CreateCompatibility(providerName, options.Model),
             };
 
             IProviderStreams api = anthropic
@@ -121,9 +121,16 @@ namespace Pinder.LlmAdapters.Pi
             }
         }
 
-        private static ModelCompatibility CreateCompatibility(string provider)
+        private static ModelCompatibility CreateCompatibility(string provider, string model)
         {
-            if (provider == "anthropic") return new AnthropicMessagesCompat();
+            if (provider == "anthropic")
+            {
+                return new AnthropicMessagesCompat
+                {
+                    SupportsTemperature = !Pinder.LlmAdapters.Anthropic.AnthropicModelIds
+                        .RejectsTemperature(model),
+                };
+            }
             return new OpenAICompletionsCompat
             {
                 SupportsStrictMode = provider == "openai",
