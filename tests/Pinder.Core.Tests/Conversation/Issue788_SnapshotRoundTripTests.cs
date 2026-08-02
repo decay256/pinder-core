@@ -403,5 +403,83 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(dateeBefore, session.DateeHistory.Select(m => (m.Role, m.Content)).ToList());
             Assert.Equal(avatarBefore, session.AvatarHistory.Select(m => (m.Role, m.Content)).ToList());
         }
+
+        [Fact]
+        public void ResumableState_RoundTripsContinuationSensitiveEngineFields()
+        {
+            var playerShadows = new SessionShadowTracker(TestHelpers.MakeStatBlock(2));
+            var dateeShadows = new SessionShadowTracker(TestHelpers.MakeStatBlock(2));
+            var session = new GameSession(
+                MakeProfile("P1"),
+                MakeProfile("P2"),
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(
+                    clock: TestHelpers.MakeClock(),
+                    playerShadows: playerShadows,
+                    dateeShadows: dateeShadows));
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "BACKSTORY",
+                Index = 3,
+                Field = "BIO_LIE",
+                Manner = "SINCERE",
+                StemText = "a remembered detail",
+                TransitionStyle = "gentle",
+            };
+
+            session.RestoreState(new ResimulateData
+            {
+                TargetInterest = 17,
+                TurnNumber = 4,
+                MomentumStreak = 2,
+                ConversationHistory = new List<(string, string)> { ("P1", "hello"), ("P2", "hi") },
+                ComboHistory = new List<(string, bool)> { ("Charm", true), ("Honesty", true) },
+                PendingTripleBonus = true,
+                RizzCumulativeFailureCount = 2,
+                Topics = new List<CallbackOpportunity> { new CallbackOpportunity("coffee", 2) },
+                PendingMomentumBonus = 1,
+                DateeOutfitDescription = "black coat",
+                SpentBackstoryIndices = new HashSet<int> { 1, 3 },
+                SpentStakeIndices = new HashSet<int> { 2 },
+                PreviousPhase = "BACKSTORY",
+                PreviousResolvedIndex = 3,
+                CurrentResolvedTarget = target,
+                CurrentCognitiveSubtext = "wants closeness but expects rejection",
+                XpEvents = new List<(string, int)> { ("StrongSuccess", 4), ("Callback", 2) },
+                SessionHorniness = 6,
+                HorninessRoll = 73,
+                HorninessTimeModifier = -1,
+                PendingCritAdvantage = true,
+                LastStatUsed = StatType.Honesty,
+                ShadowValues = new Dictionary<string, int> { [ShadowStatType.Dread.ToString()] = 5 },
+                DateeShadowValues = new Dictionary<string, int> { [ShadowStatType.Madness.ToString()] = 6 },
+                ActiveWeakness = new WeaknessWindow(StatType.Charm, 2),
+                ActiveTell = new Tell(StatType.Wit, "changes the subject when cornered"),
+            }, new NullTrapRegistry());
+
+            ResimulateData restored = session.CreateResimulateData();
+
+            Assert.Equal(17, restored.TargetInterest);
+            Assert.Equal(4, restored.TurnNumber);
+            Assert.Equal(2, restored.ComboHistory.Count);
+            Assert.True(restored.PendingTripleBonus);
+            Assert.Equal("black coat", restored.DateeOutfitDescription);
+            Assert.Equal("coffee", Assert.Single(restored.Topics).TopicKey);
+            Assert.Equal(1, restored.PendingMomentumBonus);
+            Assert.Equal(new[] { 1, 3 }, restored.SpentBackstoryIndices.OrderBy(x => x));
+            Assert.Equal("BACKSTORY", restored.PreviousPhase);
+            Assert.Equal("wants closeness but expects rejection", restored.CurrentCognitiveSubtext);
+            Assert.Equal(6, restored.XpEvents.Sum(entry => entry.Amount));
+            Assert.Equal(6, restored.SessionHorniness);
+            Assert.True(restored.PendingCritAdvantage);
+            Assert.Equal(StatType.Honesty, restored.LastStatUsed);
+            Assert.Equal(5, restored.ShadowValues[ShadowStatType.Dread.ToString()]);
+            Assert.Equal(6, restored.DateeShadowValues[ShadowStatType.Madness.ToString()]);
+            Assert.Equal(2, restored.ActiveWeakness!.DcReduction);
+            Assert.Equal(StatType.Wit, restored.ActiveTell!.Stat);
+            Assert.Equal(3, restored.CurrentResolvedTarget!.Value.Index);
+        }
     }
 }

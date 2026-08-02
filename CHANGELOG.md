@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.28] - 2026-08-02
+
+- Add a canonical `GameSession.CreateResimulateData()` export matching the
+  existing atomic `RestoreState` boundary for active-process continuation.
+- Preserve semantic Pi session snapshots, histories, combo/callback state,
+  progression events, psychological selection state, shadow state, and pending
+  one-turn mechanics without persisting uncommitted options or dice pools.
+- Validate restored state before adoption and retain the existing transactional
+  turn boundary on provider failure or cancellation.
+
 ## [0.2.27] - 2026-08-02
 
 - Run private DATEE emotional direction from a disposable `Pi.Agent.Core`

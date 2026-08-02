@@ -188,6 +188,14 @@ namespace Pinder.Core.Conversation
                 shadowValidationTracker.RestoreFromSnapshot(validatedShadowValues);
             }
 
+            Dictionary<string, int>? validatedDateeShadowValues = null;
+            if (DateeShadows != null && data.DateeShadowValues != null)
+            {
+                validatedDateeShadowValues = new Dictionary<string, int>(data.DateeShadowValues);
+                var shadowValidationTracker = DateeShadows.Clone();
+                shadowValidationTracker.RestoreFromSnapshot(validatedDateeShadowValues);
+            }
+
             var restoredTraps = new TrapState();
             if (data.ActiveTraps != null)
             {
@@ -224,6 +232,16 @@ namespace Pinder.Core.Conversation
                 // Keep the tracker identity shared by the session pipeline and host.
                 PlayerShadows!.RestoreFromSnapshot(validatedShadowValues);
             }
+            if (validatedDateeShadowValues != null)
+                DateeShadows!.RestoreFromSnapshot(validatedDateeShadowValues);
+
+            var restoredXpLedger = new XpLedger();
+            if (data.XpEvents != null)
+            {
+                foreach (var (source, amount) in data.XpEvents)
+                    restoredXpLedger.Record(source, amount);
+                restoredXpLedger.DrainTurnEvents();
+            }
 
             Interest = restoredInterest;
             MomentumStreak = data.MomentumStreak;
@@ -236,6 +254,29 @@ namespace Pinder.Core.Conversation
             TurnNumber = data.TurnNumber;
             ComboTracker = restoredComboTracker;
             RizzCumulativeFailureCount = data.RizzCumulativeFailureCount;
+            Topics = data.Topics != null
+                ? new List<CallbackOpportunity>(data.Topics)
+                : new List<CallbackOpportunity>();
+            PendingMomentumBonus = data.PendingMomentumBonus;
+            DateeOutfitDescription = data.DateeOutfitDescription ?? string.Empty;
+            SpentBackstoryIndices = data.SpentBackstoryIndices != null
+                ? new HashSet<int>(data.SpentBackstoryIndices)
+                : new HashSet<int>();
+            SpentStakeIndices = data.SpentStakeIndices != null
+                ? new HashSet<int>(data.SpentStakeIndices)
+                : new HashSet<int>();
+            PreviousPhase = data.PreviousPhase;
+            PreviousResolvedIndex = data.PreviousResolvedIndex;
+            CurrentResolvedTarget = data.CurrentResolvedTarget;
+            CurrentCognitiveSubtext = data.CurrentCognitiveSubtext;
+            XpLedger = restoredXpLedger;
+            SessionHorniness = data.SessionHorniness;
+            HorninessRoll = data.HorninessRoll;
+            HorninessTimeModifier = data.HorninessTimeModifier;
+            PendingCritAdvantage = data.PendingCritAdvantage;
+            LastStatUsed = data.LastStatUsed;
+            ActiveWeakness = data.ActiveWeakness;
+            ActiveTell = data.ActiveTell;
         }
 
         private static List<ConversationMessage> BuildConversationHistory(

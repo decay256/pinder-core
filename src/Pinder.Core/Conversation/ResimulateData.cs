@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
 {
@@ -42,6 +43,8 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Cumulative Rizz failure count for Despair shadow tracking.</summary>
         public int RizzCumulativeFailureCount { get; set; }
+        public List<CallbackOpportunity> Topics { get; set; } = new List<CallbackOpportunity>();
+        public int PendingMomentumBonus { get; set; }
 
         /// <summary>
         /// Engine-owned datee LLM conversation history (#788). Each entry is
@@ -73,5 +76,22 @@ namespace Pinder.Core.Conversation
         public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; set; }
 
         public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; set; }
+
+        public string DateeOutfitDescription { get; set; } = string.Empty;
+        public HashSet<int> SpentBackstoryIndices { get; set; } = new HashSet<int>();
+        public HashSet<int> SpentStakeIndices { get; set; } = new HashSet<int>();
+        public string? PreviousPhase { get; set; }
+        public int PreviousResolvedIndex { get; set; }
+        public ResolvedRevelationTarget? CurrentResolvedTarget { get; set; }
+        public string? CurrentCognitiveSubtext { get; set; }
+        public List<(string Source, int Amount)> XpEvents { get; set; } = new List<(string, int)>();
+        public int SessionHorniness { get; set; }
+        public int HorninessRoll { get; set; }
+        public int HorninessTimeModifier { get; set; }
+        public bool PendingCritAdvantage { get; set; }
+        public StatType? LastStatUsed { get; set; }
+        public Dictionary<string, int> DateeShadowValues { get; set; } = new Dictionary<string, int>();
+        public WeaknessWindow? ActiveWeakness { get; set; }
+        public Tell? ActiveTell { get; set; }
     }
 }
