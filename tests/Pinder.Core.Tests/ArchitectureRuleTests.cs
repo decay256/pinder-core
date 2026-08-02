@@ -111,12 +111,14 @@ namespace Pinder.Core.Tests
                 var ns = type.Namespace;
                 var fullName = type.FullName;
 
-                bool isVendorNamespace = ns == "Pinder.LlmAdapters.Anthropic" || ns == "Pinder.LlmAdapters.OpenAi";
+                bool isExternalTransportNamespace = ns == "Pinder.LlmAdapters.Anthropic" ||
+                    ns == "Pinder.LlmAdapters.OpenAi" ||
+                    ns == "Pinder.LlmAdapters.Pi";
                 bool isAllowlisted = fullName != null && DecoratorAllowlist.Contains(fullName);
 
-                if (!isVendorNamespace && !isAllowlisted)
+                if (!isExternalTransportNamespace && !isAllowlisted)
                 {
-                    Assert.Fail($"Offending transport type '{fullName}' with namespace '{ns}'. New VENDOR transports must live under a vendor namespace (Pinder.LlmAdapters.<Vendor>) and new cross-cutting decorators must be added to the allowlist with justification.");
+                    Assert.Fail($"Offending transport type '{fullName}' with namespace '{ns}'. External transports must live under a qualified namespace (Pinder.LlmAdapters.<Integration>) and new cross-cutting decorators must be added to the allowlist with justification.");
                 }
             }
         }
