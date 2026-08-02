@@ -128,7 +128,9 @@ namespace Pinder.Core.Conversation
                 state.ComboTracker.HasTripleBonus,
                 state.DateeHistory,
                 state.AvatarHistory,
-                state.PlayerShadows);
+                state.PlayerShadows,
+                state.DateeSessionSnapshot,
+                state.AvatarSessionSnapshot);
         }
 
         internal static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)

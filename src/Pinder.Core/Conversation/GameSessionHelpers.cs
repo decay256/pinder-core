@@ -147,7 +147,9 @@ namespace Pinder.Core.Conversation
             bool tripleBonusActive,
             System.Collections.Generic.IReadOnlyList<ConversationMessage> dateeHistory = null,
             System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null,
-            SessionShadowTracker? playerShadows = null)
+            SessionShadowTracker? playerShadows = null,
+            LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -198,7 +200,9 @@ namespace Pinder.Core.Conversation
                 dateeHistory: historySnapshot,
                 ghostProbabilityPerTurn: ghostProbabilityPerTurn,
                 avatarHistory: avatarHistorySnapshot,
-                shadowValues: shadowValues);
+                shadowValues: shadowValues,
+                dateeSessionSnapshot: dateeSessionSnapshot,
+                avatarSessionSnapshot: avatarSessionSnapshot);
         }
 
         /// <summary>

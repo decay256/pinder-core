@@ -131,11 +131,16 @@ namespace Pinder.LlmAdapters
 
         public PromptTraceResult CompilePerformance(
             DateeContext context,
-            EmotionalPrivateDirection direction)
+            EmotionalPrivateDirection direction,
+            bool includeConversationHistory = true)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (direction == null) throw new ArgumentNullException(nameof(direction));
-            return SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, _catalog);
+            return SessionDocumentBuilder.BuildDateePerformancePromptEx(
+                context,
+                direction,
+                _catalog,
+                includeConversationHistory);
         }
 
         public CompiledEmotionalPrompts CompileScenario(

@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters
     /// buffering — to avoid changing streaming latency characteristics.
     /// </para>
     /// </remarks>
-    public sealed class PunctuationNormalizingTransport : ILlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, ITokenUsageProvider, System.IDisposable
+    public sealed class PunctuationNormalizingTransport : ILlmTransport, IConversationLlmTransport, IStreamingLlmTransport, IStructuredLlmTransport, IStructuredConversationLlmTransport, ITokenUsageProvider, System.IDisposable
     {
         // U+2014 = em-dash, U+2009 = thin-space.
         private const char EmDash    = '\u2014';
@@ -76,6 +76,14 @@ namespace Pinder.LlmAdapters
         /// constructed without one. Same purpose as <see cref="Inner"/>.
         /// </summary>
         public IStreamingLlmTransport? InnerStreaming => _innerStreaming;
+
+        public bool SupportsConversationMessages
+            => _inner is IConversationLlmTransport contextual
+                && contextual.SupportsConversationMessages;
+
+        public bool SupportsStructuredConversationMessages
+            => _inner is IStructuredConversationLlmTransport contextual
+                && contextual.SupportsStructuredConversationMessages;
 
         /// <inheritdoc />
         public SessionTokenUsage GetSessionUsage()
@@ -115,6 +123,24 @@ namespace Pinder.LlmAdapters
             return Normalize(raw);
         }
 
+        public async Task<string> SendConversationAsync(
+            string systemPrompt,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            string userMessage,
+            double temperature = 0.9,
+            int maxTokens = 1024,
+            string? phase = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (!(_inner is IConversationLlmTransport contextual))
+                throw new System.InvalidOperationException(
+                    "The wrapped LLM transport does not support ordered conversation messages.");
+            string raw = await contextual.SendConversationAsync(
+                systemPrompt, priorMessages, userMessage, temperature, maxTokens, phase, cancellationToken)
+                .ConfigureAwait(false);
+            return Normalize(raw);
+        }
+
         public async Task<StructuredLlmResponse> SendStructuredAsync(
             StructuredLlmRequest request,
             CancellationToken ct = default)
@@ -131,6 +157,19 @@ namespace Pinder.LlmAdapters
             return new StructuredLlmResponse(
                 Normalize(raw),
                 usedNativeStructuredOutput: false);
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredConversationAsync(
+            StructuredLlmRequest request,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            CancellationToken cancellationToken = default)
+        {
+            if (!(_inner is IStructuredConversationLlmTransport contextual))
+                throw new System.InvalidOperationException(
+                    "The wrapped LLM transport does not support structured ordered conversation messages.");
+            StructuredLlmResponse response = await contextual.SendStructuredConversationAsync(
+                request, priorMessages, cancellationToken).ConfigureAwait(false);
+            return response.WithJsonText(Normalize(response.JsonText));
         }
 
         public async IAsyncEnumerable<string> SendStreamAsync(

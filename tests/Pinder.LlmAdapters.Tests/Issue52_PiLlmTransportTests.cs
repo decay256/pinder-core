@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
+using Pinder.Core.Conversation;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Pi;
 using Xunit;
@@ -200,6 +201,40 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(321, capturedOptions.MaxTokens);
             Assert.Equal(0, capturedOptions.MaxRetries);
             Assert.Equal("datee", capturedPhase);
+        }
+
+        [Fact]
+        public async Task SendConversationAsync_PreservesTypedHistoryBeforeTransientInstruction()
+        {
+            Context? captured = null;
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                (_, context, __) =>
+                {
+                    captured = context;
+                    return Task.FromResult(Response("answer"));
+                },
+                timestampMilliseconds: () => 1234L);
+            var history = new[]
+            {
+                ConversationMessage.User("older player line"),
+                ConversationMessage.Assistant("older datee reply"),
+            };
+
+            string result = await transport.SendConversationAsync(
+                "complete character system prompt",
+                history,
+                "current engine instruction");
+
+            Assert.Equal("answer", result);
+            Assert.Equal("complete character system prompt", captured!.SystemPrompt);
+            Assert.Collection(
+                captured.Messages,
+                message => Assert.Equal("older player line", Assert.IsType<UserMessage>(message).Content.Text),
+                message => Assert.Equal(
+                    "older datee reply",
+                    TextUtilities.ContentText(Assert.IsType<AssistantMessage>(message).Content)),
+                message => Assert.Equal("current engine instruction", Assert.IsType<UserMessage>(message).Content.Text));
         }
 
         [Fact]

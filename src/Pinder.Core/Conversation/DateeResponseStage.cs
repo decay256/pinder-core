@@ -121,9 +121,30 @@ namespace Pinder.Core.Conversation
                     }));
 
             DateeResponse dateeResponse;
+            StatefulDateeResult? sessionResult = null;
             try
             {
-                if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
+                if (_llm is Pinder.Core.Interfaces.ISessionStatefulLlmAdapter sessionLlm
+                    && sessionLlm.SupportsConversationSessions)
+                {
+                    sessionResult = await sessionLlm.GetDateeResponseAsync(
+                        dateeContext,
+                        new List<ConversationMessage>(state.DateeHistory),
+                        new List<ConversationMessage>(state.AvatarHistory),
+                        state.DateeSessionSnapshot,
+                        state.AvatarSessionSnapshot,
+                        ct).ConfigureAwait(false);
+                    if (sessionResult == null)
+                        throw new InvalidOperationException("LLM adapter returned null session datee result");
+                    dateeResponse = sessionResult.Response;
+                    if (dateeResponse == null)
+                        throw new InvalidOperationException("LLM adapter returned null datee response");
+                    if (sessionResult.DateeSessionSnapshot == null)
+                        throw new InvalidOperationException("Session adapter omitted the DATEE session snapshot.");
+                    if (sessionResult.AvatarSessionSnapshot == null)
+                        throw new InvalidOperationException("Session adapter omitted the avatar session snapshot.");
+                }
+                else if (_llm is Pinder.Core.Interfaces.IStatefulLlmAdapter statefulLlm)
                 {
                     var statefulResult = await statefulLlm.GetDateeResponseAsync(
                         dateeContext,
@@ -183,6 +204,13 @@ namespace Pinder.Core.Conversation
 
             state.DateeHistory.Add(ConversationMessage.User(deliveryStage.DeliveredMessage));
             state.DateeHistory.Add(ConversationMessage.Assistant(dateeResponse.MessageText));
+            if (sessionResult != null)
+            {
+                state.AvatarHistory.Add(ConversationMessage.Assistant(deliveryStage.DeliveredMessage));
+                state.AvatarHistory.Add(ConversationMessage.User(dateeResponse.MessageText));
+                state.DateeSessionSnapshot = sessionResult.DateeSessionSnapshot;
+                state.AvatarSessionSnapshot = sessionResult.AvatarSessionSnapshot;
+            }
 
             string dateeMessage = dateeResponse.MessageText;
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseCompleted, dateeMessage));

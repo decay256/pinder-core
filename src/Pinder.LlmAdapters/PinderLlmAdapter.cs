@@ -14,14 +14,16 @@ using Pinder.LlmAdapters.Anthropic;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
-    /// Provider-agnostic implementation of ILlmAdapter and IStatefulLlmAdapter.
+    /// Provider-agnostic implementation of ILlmAdapter and its stateful session extensions.
     /// All game-level prompt building and response parsing lives here — single source of truth.
     /// Delegates raw LLM I/O to an ILlmTransport (AnthropicTransport, OpenAiTransport, etc.).
     ///
     /// This replaces the need for every transport to duplicate game logic.
-    /// The transport does ONE thing: (systemPrompt, userMessage) → rawText.
+    /// Plain transports accept a single user message; conversation transports
+    /// additionally accept ordered typed prior messages. Provider wire formats
+    /// remain below the transport boundary.
     /// </summary>
-    public sealed partial class PinderLlmAdapter : IStatefulLlmAdapter, IDisposable
+    public sealed partial class PinderLlmAdapter : ISessionStatefulLlmAdapter, IDisposable
     {
         private const string HorninessOverlayPrompt = "horniness_overlay";
         private const string TrapOverlayPrompt = "trap_overlay";
@@ -41,6 +43,13 @@ namespace Pinder.LlmAdapters
         private readonly ILlmTransport _overlayTransport;
         private readonly PinderLlmAdapterOptions _options;
         private readonly PinderLlmAdapterTemperatureSource _temperatures;
+
+        public bool SupportsConversationSessions
+            => _transport is IConversationLlmTransport contextual
+                && contextual.SupportsConversationMessages
+                && (!(_transport is IStructuredLlmTransport)
+                    || (_transport is IStructuredConversationLlmTransport structuredContextual
+                        && structuredContextual.SupportsStructuredConversationMessages));
 
         // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
@@ -65,14 +74,36 @@ namespace Pinder.LlmAdapters
         // ── ILlmAdapter ────────────────────────────────────────────────────
 
         /// <inheritdoc />
-        public async Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+        public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
+            => GetDialogueOptionsCoreAsync(context, priorMessages: null, ct);
+
+        public async Task<DialogueOption[]> GetDialogueOptionsAsync(
+            DialogueContext context,
+            IReadOnlyList<ConversationMessage> avatarHistory,
+            LlmConversationSessionSnapshot? avatarSession,
+            CancellationToken cancellationToken = default)
+        {
+            await using PiConversationSession session = await PiConversationSession.RestoreOrImportAsync(
+                avatarSession,
+                avatarHistory,
+                "avatar").ConfigureAwait(false);
+            IReadOnlyList<ConversationMessage> priorMessages = await session.BuildSemanticHistoryAsync()
+                .ConfigureAwait(false);
+            return await GetDialogueOptionsCoreAsync(context, priorMessages, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<DialogueOption[]> GetDialogueOptionsCoreAsync(
+            DialogueContext context,
+            IReadOnlyList<ConversationMessage>? priorMessages,
+            CancellationToken ct)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var gameDef = RequireGameDefinition();
-            var userContent = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                context,
-                _options.PromptCatalog);
+            string userContent = priorMessages == null
+                ? SessionDocumentBuilder.BuildDialogueOptionsPrompt(context, _options.PromptCatalog)
+                : SessionDocumentBuilder.BuildDialogueOptionsSessionPromptEx(context, _options.PromptCatalog).Text;
             var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
@@ -98,7 +129,8 @@ namespace Pinder.LlmAdapters
                                     request,
                                     LlmPhase.DialogueOptions,
                                     context.CurrentTurn,
-                                    attemptCancellationToken)
+                                    attemptCancellationToken,
+                                    priorMessages: priorMessages)
                                 .ConfigureAwait(false);
                             try
                             {
@@ -157,7 +189,8 @@ namespace Pinder.LlmAdapters
                                     _options.MaxTokens,
                                     LlmPhase.DialogueOptions,
                                     context.CurrentTurn,
-                                    attemptCancellationToken)
+                                    attemptCancellationToken,
+                                    priorMessages: priorMessages)
                                 .ConfigureAwait(false);
 
                             parsedOptions = ParseDialogueOptionsFromTextOrJson(
@@ -206,10 +239,47 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public async Task<StatefulDateeResult> GetDateeResponseAsync(
+        public Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
+            => GetDateeResponseCoreAsync(context, history, priorMessages: null, cancellationToken);
+
+        public async Task<StatefulDateeResult> GetDateeResponseAsync(
+            DateeContext context,
+            IReadOnlyList<ConversationMessage> dateeHistory,
+            IReadOnlyList<ConversationMessage> avatarHistory,
+            LlmConversationSessionSnapshot? dateeSession,
+            LlmConversationSessionSnapshot? avatarSession,
+            CancellationToken cancellationToken = default)
+        {
+            await using PiConversationSession datee = await PiConversationSession.RestoreOrImportAsync(
+                dateeSession, dateeHistory, "datee").ConfigureAwait(false);
+            await using PiConversationSession avatar = await PiConversationSession.RestoreOrImportAsync(
+                avatarSession, avatarHistory, "avatar").ConfigureAwait(false);
+
+            IReadOnlyList<ConversationMessage> priorMessages = await datee.BuildSemanticHistoryAsync()
+                .ConfigureAwait(false);
+            StatefulDateeResult accepted = await GetDateeResponseCoreAsync(
+                context, dateeHistory, priorMessages, cancellationToken).ConfigureAwait(false);
+
+            await datee.AppendUserAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
+            await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
+            await avatar.AppendAssistantAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
+            await avatar.AppendUserAsync(accepted.Response.MessageText).ConfigureAwait(false);
+
+            return new StatefulDateeResult(
+                accepted.Response,
+                accepted.NewHistoryEntries,
+                await datee.SnapshotAsync().ConfigureAwait(false),
+                await avatar.SnapshotAsync().ConfigureAwait(false));
+        }
+
+        private async Task<StatefulDateeResult> GetDateeResponseCoreAsync(
+            DateeContext context,
+            IReadOnlyList<ConversationMessage> history,
+            IReadOnlyList<ConversationMessage>? priorMessages,
+            CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (history == null) throw new ArgumentNullException(nameof(history));
@@ -228,8 +298,10 @@ namespace Pinder.LlmAdapters
                     emotionalPromptCompiler,
                     cancellationToken)
                 .ConfigureAwait(false);
-            PromptTraceResult dateePrompt =
-                emotionalPromptCompiler.CompilePerformance(context, emotionalDirection);
+            PromptTraceResult dateePrompt = emotionalPromptCompiler.CompilePerformance(
+                context,
+                emotionalDirection,
+                includeConversationHistory: priorMessages == null);
             InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
             var userContent = dateePrompt.Text;
             var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
@@ -243,10 +315,10 @@ namespace Pinder.LlmAdapters
                 {
                     try
                     {
-                        // DateeContext.ConversationHistory is the authoritative transcript
-                        // and BuildDateePrompt renders it into userContent. Prefixing the
-                        // separate engine-owned DateeHistory here would include each prior
-                        // full prompt again and cause nested, quadratic prompt growth.
+                        // Legacy calls render DateeContext.ConversationHistory into
+                        // userContent. Session calls omit that block and supply ordered
+                        // semantic priorMessages instead. Never combine both forms: doing
+                        // so duplicates context and produces quadratic prompt growth.
                         string responseText = await SendWithDiagnosticsAsync(
                                 _transport,
                                 systemPrompt,
@@ -259,7 +331,8 @@ namespace Pinder.LlmAdapters
                                 attempt,
                                 maxAttempts,
                                 DateePrivatePhasePerformance,
-                                performanceMetadata)
+                                performanceMetadata,
+                                priorMessages)
                             .ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(responseText))
@@ -1225,7 +1298,8 @@ namespace Pinder.LlmAdapters
             int? attempt = null,
             int? totalAttempts = null,
             string? dateePrivatePhase = null,
-            IReadOnlyDictionary<string, string>? metadata = null)
+            IReadOnlyDictionary<string, string>? metadata = null,
+            IReadOnlyList<ConversationMessage>? priorMessages = null)
         {
             var sink = GetDiagnosticSink();
             string callId = OperationalDiagnostics.CreateCallId();
@@ -1256,7 +1330,19 @@ namespace Pinder.LlmAdapters
             var tokenUsageBefore = CaptureTokenUsageSnapshot(transport);
             try
             {
-                var result = await transport.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                StructuredLlmResponse result;
+                if (priorMessages != null)
+                {
+                    if (!(transport is IStructuredConversationLlmTransport contextual))
+                        throw new InvalidOperationException(
+                            "The configured transport does not support structured ordered conversation messages.");
+                    result = await contextual.SendStructuredConversationAsync(request, priorMessages, ct)
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    result = await transport.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                }
                 var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
                 var hints = CloneHints(baseHints);
                 AddElapsedHint(hints, stopwatch);
@@ -1339,7 +1425,8 @@ namespace Pinder.LlmAdapters
             int? attempt = null,
             int? totalAttempts = null,
             string? dateePrivatePhase = null,
-            IReadOnlyDictionary<string, string>? metadata = null)
+            IReadOnlyDictionary<string, string>? metadata = null,
+            IReadOnlyList<ConversationMessage>? priorMessages = null)
         {
             var sink = GetDiagnosticSink();
             string callId = OperationalDiagnostics.CreateCallId();
@@ -1368,9 +1455,27 @@ namespace Pinder.LlmAdapters
             var tokenUsageBefore = CaptureTokenUsageSnapshot(transport);
             try
             {
-                string result = await transport
-                    .SendAsync(systemPrompt, userContent, temperature, maxTokens, phase: phase, ct: ct)
-                    .ConfigureAwait(false);
+                string result;
+                if (priorMessages != null)
+                {
+                    if (!(transport is IConversationLlmTransport contextual))
+                        throw new InvalidOperationException(
+                            "The configured transport does not support ordered conversation messages.");
+                    result = await contextual.SendConversationAsync(
+                        systemPrompt,
+                        priorMessages,
+                        userContent,
+                        temperature,
+                        maxTokens,
+                        phase,
+                        ct).ConfigureAwait(false);
+                }
+                else
+                {
+                    result = await transport
+                        .SendAsync(systemPrompt, userContent, temperature, maxTokens, phase: phase, ct: ct)
+                        .ConfigureAwait(false);
+                }
 
                 var tokenUsageAfter = CaptureTokenUsageSnapshot(transport);
                 var hints = CloneHints(baseHints);

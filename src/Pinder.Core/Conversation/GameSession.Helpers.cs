@@ -199,7 +199,9 @@ namespace Pinder.Core.Conversation
                 _comboTracker.HasTripleBonus,
                 _dateeHistory,
                 _avatarHistory,
-                _playerShadows);
+                _playerShadows,
+                _state.DateeSessionSnapshot,
+                _state.AvatarSessionSnapshot);
         }
     }
 }

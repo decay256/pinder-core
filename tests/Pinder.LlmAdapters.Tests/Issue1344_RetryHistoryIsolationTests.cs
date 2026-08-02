@@ -54,6 +54,84 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("TELL:", result.NewHistoryEntries[1].Content, StringComparison.OrdinalIgnoreCase);
         }
 
+        [Fact]
+        public async Task SessionPath_UsesTypedCanonicalHistoryAndCommitsBothCharacterPerspectives()
+        {
+            var transport = new RecordingTransport(ValidDirectionJson(), "A visible accepted reply.");
+            var adapter = new PinderLlmAdapter(
+                transport,
+                new PinderLlmAdapterOptions
+                {
+                    GameDefinition = GameDefinition.PinderDefaults,
+                    PromptCatalog = BuiltInCatalog(),
+                    MaxContractViolationRetries = 0,
+                });
+            var dateeHistory = new[]
+            {
+                ConversationMessage.User("canonical older player line"),
+                ConversationMessage.Assistant("canonical older datee reply"),
+            };
+
+            StatefulDateeResult result = await adapter.GetDateeResponseAsync(
+                MakeContext("visible delivered line"),
+                dateeHistory,
+                Array.Empty<ConversationMessage>(),
+                dateeSession: null,
+                avatarSession: null);
+
+            Assert.True(adapter.SupportsConversationSessions);
+            IReadOnlyList<ConversationMessage> sentHistory = Assert.Single(transport.PriorMessages);
+            Assert.Equal(dateeHistory.Select(message => message.Role), sentHistory.Select(message => message.Role));
+            Assert.Equal(dateeHistory.Select(message => message.Content), sentHistory.Select(message => message.Content));
+            Assert.DoesNotContain("older visible player line", transport.ContextualUserMessages.Single(), StringComparison.Ordinal);
+            Assert.DoesNotContain("older visible datee line", transport.ContextualUserMessages.Single(), StringComparison.Ordinal);
+            Assert.NotNull(result.DateeSessionSnapshot);
+            Assert.NotNull(result.AvatarSessionSnapshot);
+
+            await using PiConversationSession datee = await PiConversationSession.RestoreOrImportAsync(
+                result.DateeSessionSnapshot,
+                Array.Empty<ConversationMessage>(),
+                "datee");
+            Assert.Equal(
+                new[]
+                {
+                    "canonical older player line",
+                    "canonical older datee reply",
+                    "visible delivered line",
+                    "A visible accepted reply.",
+                },
+                (await datee.BuildSemanticHistoryAsync()).Select(message => message.Content).ToArray());
+
+            await using PiConversationSession avatar = await PiConversationSession.RestoreOrImportAsync(
+                result.AvatarSessionSnapshot,
+                Array.Empty<ConversationMessage>(),
+                "avatar");
+            var avatarMessages = await avatar.BuildSemanticHistoryAsync();
+            Assert.Equal(
+                new[] { ConversationMessage.AssistantRole, ConversationMessage.UserRole },
+                avatarMessages.Select(message => message.Role).ToArray());
+            Assert.Equal(
+                new[] { "visible delivered line", "A visible accepted reply." },
+                avatarMessages.Select(message => message.Content).ToArray());
+        }
+
+        [Fact]
+        public void WrappedLegacyTransport_DoesNotAdvertiseSessionSupport()
+        {
+            ILlmTransport legacy = new LegacyTransport();
+            var punctuation = new PunctuationNormalizingTransport(legacy);
+            var thinking = new ThinkingStrippingLlmTransport(punctuation);
+            var adapter = new PinderLlmAdapter(
+                thinking,
+                new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults });
+
+            Assert.False(punctuation.SupportsConversationMessages);
+            Assert.False(punctuation.SupportsStructuredConversationMessages);
+            Assert.False(thinking.SupportsConversationMessages);
+            Assert.False(thinking.SupportsStructuredConversationMessages);
+            Assert.False(adapter.SupportsConversationSessions);
+        }
+
         private static DateeContext MakeContext(string deliveredMessage)
         {
             return new DateeContext(
@@ -114,7 +192,7 @@ namespace Pinder.LlmAdapters.Tests
             throw new DirectoryNotFoundException("Could not locate bundled data/prompts.");
         }
 
-        private sealed class RecordingTransport : ILlmTransport
+        private sealed class RecordingTransport : IConversationLlmTransport
         {
             private readonly Queue<string> _responses;
 
@@ -124,6 +202,9 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             public List<string?> Phases { get; } = new List<string?>();
+            public List<IReadOnlyList<ConversationMessage>> PriorMessages { get; } = new();
+            public List<string> ContextualUserMessages { get; } = new();
+            public bool SupportsConversationMessages => true;
 
             public Task<string> SendAsync(
                 string systemPrompt,
@@ -137,6 +218,34 @@ namespace Pinder.LlmAdapters.Tests
                 Phases.Add(phase);
                 return Task.FromResult(_responses.Dequeue());
             }
+
+            public Task<string> SendConversationAsync(
+                string systemPrompt,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                Phases.Add(phase);
+                PriorMessages.Add(priorMessages.ToArray());
+                ContextualUserMessages.Add(userMessage);
+                return Task.FromResult(_responses.Dequeue());
+            }
+        }
+
+        private sealed class LegacyTransport : ILlmTransport
+        {
+            public Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken ct = default)
+                => Task.FromResult(string.Empty);
         }
     }
 }
