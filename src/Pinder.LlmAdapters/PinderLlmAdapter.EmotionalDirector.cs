@@ -24,12 +24,31 @@ namespace Pinder.LlmAdapters
             DateeContext context,
             EmotionalPromptCompiler promptCompiler,
             CancellationToken cancellationToken = default)
+            => await GenerateEmotionalDirectionAsync(
+                    context,
+                    promptCompiler,
+                    priorMessages: null,
+                    dateeSystemPrompt: null,
+                    privateBranch: null,
+                    cancellationToken)
+                .ConfigureAwait(false);
+
+        private async Task<EmotionalDirectorDirection> GenerateEmotionalDirectionAsync(
+            DateeContext context,
+            EmotionalPromptCompiler promptCompiler,
+            IReadOnlyList<ConversationMessage>? priorMessages,
+            string? dateeSystemPrompt,
+            PiConversationBranch? privateBranch,
+            CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (promptCompiler == null) throw new ArgumentNullException(nameof(promptCompiler));
 
             CompiledEmotionalDirectorPrompt prompt =
-                promptCompiler.CompileDirector(context);
+                promptCompiler.CompileDirector(
+                    context,
+                    includeConversationHistory: priorMessages == null,
+                    dateeSystemPrompt: dateeSystemPrompt);
             string userMessage = prompt.UserPrompt.Text;
             PromptTraceResult systemPrompt = prompt.SystemPrompt;
             PromptTraceResult attemptSystemPrompt = systemPrompt;
@@ -48,8 +67,14 @@ namespace Pinder.LlmAdapters
                             metadata,
                             attemptSystemPrompt);
                         EmotionalDirectorDirection direction;
-                        if (_transport is IStructuredLlmTransport structuredTransport)
+                        string acceptedResponseText;
+                        bool canUseStructured = _transport is IStructuredLlmTransport
+                            && (priorMessages == null
+                                || (_transport is IStructuredConversationLlmTransport contextualStructured
+                                    && contextualStructured.SupportsStructuredConversationMessages));
+                        if (canUseStructured)
                         {
+                            var structuredTransport = (IStructuredLlmTransport)_transport;
                             var request = EmotionalDirectorContract.CreateRequest(
                                 attemptSystemPrompt.Text,
                                 userMessage,
@@ -65,8 +90,10 @@ namespace Pinder.LlmAdapters
                                     attempt,
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
-                                    attemptMetadata)
+                                    attemptMetadata,
+                                    priorMessages)
                                 .ConfigureAwait(false);
+                            acceptedResponseText = structuredResponse.JsonText;
 
                             try
                             {
@@ -98,14 +125,23 @@ namespace Pinder.LlmAdapters
                                     attempt,
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
-                                    attemptMetadata)
+                                    attemptMetadata,
+                                    priorMessages)
                                 .ConfigureAwait(false);
+                            acceptedResponseText = responseText;
                             direction = ParseEmotionalDirectorOrThrow(
                                 responseText,
                                 requireCompleteJsonObject: false,
                                 provider: null,
                                 model: null,
                                 turnId: context.CurrentTurn);
+                        }
+
+                        if (privateBranch != null)
+                        {
+                            await privateBranch.AppendAcceptedExchangeAsync(
+                                userMessage,
+                                acceptedResponseText).ConfigureAwait(false);
                         }
 
                         return SemanticOutputRecoveryAttemptResult<EmotionalDirectorDirection, LlmContractException>.Accepted(direction);

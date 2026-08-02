@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
 using Pi.Agent.Core;
@@ -10,7 +11,7 @@ namespace Pinder.LlmAdapters
     /// <summary>
     /// Short-lived adapter over Pi.Agent.Core's store/session API. Pinder owns
     /// when semantic messages commit; Pi owns ordering, parentage, snapshots,
-    /// reconstruction, and later branch mechanics.
+    /// reconstruction, and branch mechanics.
     /// </summary>
     internal sealed class PiConversationSession : IAsyncDisposable
     {
@@ -23,6 +24,22 @@ namespace Pinder.LlmAdapters
         }
 
         public ISession<SessionMetadata> Session { get; }
+
+        public async Task<PiConversationBranch> ForkAsync(string branchKind)
+        {
+            if (string.IsNullOrWhiteSpace(branchKind))
+                throw new ArgumentException("Branch kind is required.", nameof(branchKind));
+
+            var repository = Repository(_store);
+            ISession<SessionMetadata> branch = await repository.ForkAsync(
+                await Session.GetMetadataAsync().ConfigureAwait(false),
+                new InMemorySessionCreateOptions
+                {
+                    Id = $"pinder-{branchKind}-{SessionUtilities.CreateSessionId()}",
+                },
+                SessionForkSelection.All()).ConfigureAwait(false);
+            return new PiConversationBranch(repository, branch);
+        }
 
         public static async Task<PiConversationSession> RestoreOrImportAsync(
             LlmConversationSessionSnapshot? snapshot,
@@ -70,8 +87,12 @@ namespace Pinder.LlmAdapters
         }
 
         public async Task<IReadOnlyList<ConversationMessage>> BuildSemanticHistoryAsync()
+            => await BuildSemanticHistoryAsync(Session).ConfigureAwait(false);
+
+        internal static async Task<IReadOnlyList<ConversationMessage>> BuildSemanticHistoryAsync(
+            ISession<SessionMetadata> session)
         {
-            SessionContext context = await Session.BuildContextAsync().ConfigureAwait(false);
+            SessionContext context = await session.BuildContextAsync().ConfigureAwait(false);
             var result = new List<ConversationMessage>(context.Messages.Count);
             foreach (AgentMessage message in context.Messages)
             {
@@ -123,7 +144,7 @@ namespace Pinder.LlmAdapters
                     Store = store,
                 });
 
-        private static AgentMessage ToAgentMessage(ConversationMessage message)
+        internal static AgentMessage ToAgentMessage(ConversationMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
             if (message.Role == ConversationMessage.UserRole)
@@ -142,6 +163,43 @@ namespace Pinder.LlmAdapters
             throw new InvalidOperationException($"Unsupported Pinder conversation role '{message.Role}'.");
         }
 
-        private static long Timestamp() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        internal static long Timestamp() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+    }
+
+    /// <summary>
+    /// Disposable private branch over the same Pi session store as its canonical
+    /// parent. Deleting the branch cannot move or append to the canonical leaf.
+    /// </summary>
+    internal sealed class PiConversationBranch : IAsyncDisposable
+    {
+        private readonly SessionRepository<SessionMetadata, InMemorySessionCreateOptions, object> _repository;
+        private readonly ISession<SessionMetadata> _session;
+        private int _disposed;
+
+        internal PiConversationBranch(
+            SessionRepository<SessionMetadata, InMemorySessionCreateOptions, object> repository,
+            ISession<SessionMetadata> session)
+        {
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _session = session ?? throw new ArgumentNullException(nameof(session));
+        }
+
+        public Task<IReadOnlyList<ConversationMessage>> BuildSemanticHistoryAsync()
+            => PiConversationSession.BuildSemanticHistoryAsync(_session);
+
+        public async Task AppendAcceptedExchangeAsync(string userText, string assistantText)
+        {
+            await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
+                ConversationMessage.User(userText ?? string.Empty))).ConfigureAwait(false);
+            await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
+                ConversationMessage.Assistant(assistantText ?? string.Empty))).ConfigureAwait(false);
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+            await _repository.DeleteAsync(await _session.GetMetadataAsync().ConfigureAwait(false))
+                .ConfigureAwait(false);
+        }
     }
 }

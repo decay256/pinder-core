@@ -99,6 +99,8 @@ namespace Pinder.LlmAdapters
             "emotional-reaction-director-repair-field-too-long";
         public const string DirectorDraftedChatReplyRepairPromptKey =
             "emotional-reaction-director-repair-drafted-chat-reply";
+        public const string DirectorSystemWrapperPromptKey =
+            "emotional-reaction-director-system-wrapper";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
 
         private readonly PromptCatalog _catalog;
@@ -109,15 +111,30 @@ namespace Pinder.LlmAdapters
         }
 
         public CompiledEmotionalDirectorPrompt CompileDirector(DateeContext context)
+            => CompileDirector(
+                context,
+                includeConversationHistory: true,
+                dateeSystemPrompt: null);
+
+        public CompiledEmotionalDirectorPrompt CompileDirector(
+            DateeContext context,
+            bool includeConversationHistory,
+            string? dateeSystemPrompt)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             PromptEntry prompt = _catalog.RequireCompleteEntry(
                 DirectorPromptKey,
                 "prompt-catalog: missing required runtime prompt key 'emotional-reaction-director'. The yaml file is incomplete or missing.");
-            PromptTraceResult compiledInput = new EmotionalReactionEventCompiler(_catalog).Compile(context);
-            PromptTraceResult systemPrompt = TrimTrace(
+            PromptTraceResult compiledInput = new EmotionalReactionEventCompiler(_catalog).Compile(
+                context,
+                _catalog,
+                includeConversationHistory);
+            PromptTraceResult directorSystemPrompt = TrimTrace(
                 TraceLiteral(prompt.SystemPrompt!, prompt.SourceFile, DirectorPromptKey));
+            PromptTraceResult systemPrompt = string.IsNullOrWhiteSpace(dateeSystemPrompt)
+                ? directorSystemPrompt
+                : CompileDirectorSystemPrompt(dateeSystemPrompt!, directorSystemPrompt);
             PromptTraceResult userPrompt = CompileDirectorUserPrompt(prompt, compiledInput);
 
             return new CompiledEmotionalDirectorPrompt(
@@ -211,6 +228,73 @@ namespace Pinder.LlmAdapters
             }
 
             builder.Append(template.Substring(cursor), prompt.SourceFile, DirectorPromptKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+        }
+
+        private PromptTraceResult CompileDirectorSystemPrompt(
+            string dateeSystemPrompt,
+            PromptTraceResult directorSystemPrompt)
+        {
+            PromptEntry wrapper = _catalog.TryGet(DirectorSystemWrapperPromptKey)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{DirectorSystemWrapperPromptKey}'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(wrapper.SystemPrompt))
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: runtime prompt key '{DirectorSystemWrapperPromptKey}' has no system_prompt. Check the yaml file.");
+            }
+
+            var values = new Dictionary<string, PromptTraceResult>(StringComparer.Ordinal)
+            {
+                {
+                    "{datee_system_prompt}",
+                    TraceLiteral(
+                        dateeSystemPrompt,
+                        PromptTraceDiagnosticContract.RuntimeDateeContextSource,
+                        "DateeSystemPrompt")
+                },
+                { "{director_system_prompt}", directorSystemPrompt },
+            };
+            foreach (string placeholder in values.Keys)
+            {
+                if (wrapper.SystemPrompt!.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+                {
+                    throw new InvalidOperationException(
+                        $"prompt-catalog: runtime prompt key '{DirectorSystemWrapperPromptKey}' must include required token '{placeholder}'.");
+                }
+            }
+
+            var builder = new AnnotatedStringBuilder();
+            string template = wrapper.SystemPrompt!;
+            int cursor = 0;
+            while (cursor < template.Length)
+            {
+                KeyValuePair<string, PromptTraceResult>? next = null;
+                int nextIndex = template.Length;
+                foreach (var value in values)
+                {
+                    int index = template.IndexOf(value.Key, cursor, StringComparison.Ordinal);
+                    if (index >= 0 && index < nextIndex)
+                    {
+                        next = value;
+                        nextIndex = index;
+                    }
+                }
+
+                if (!next.HasValue)
+                {
+                    builder.Append(template.Substring(cursor), wrapper.SourceFile, DirectorSystemWrapperPromptKey);
+                    break;
+                }
+
+                builder.Append(
+                    template.Substring(cursor, nextIndex - cursor),
+                    wrapper.SourceFile,
+                    DirectorSystemWrapperPromptKey);
+                builder.Append(next.Value.Value);
+                cursor = nextIndex + next.Value.Key.Length;
+            }
+
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 

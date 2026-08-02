@@ -145,6 +145,15 @@ namespace Pinder.LlmAdapters
                 "character_formulation");
             RequireSystemPromptWithPlaceholders(
                 catalog,
+                "emotional-reaction-compiled-session-wrapper",
+                "prior_relationship",
+                "resulting_relationship",
+                "transition_meaning",
+                "recipient_event_meaning",
+                "delivered_message",
+                "character_formulation");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
                 "emotional-reaction-character-success-wrapper",
                 "derived_feeling",
                 "defense_reaction",
@@ -181,6 +190,11 @@ namespace Pinder.LlmAdapters
                 catalog,
                 "emotional-reaction-director",
                 "compiled_reaction_input");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                EmotionalPromptCompiler.DirectorSystemWrapperPromptKey,
+                "datee_system_prompt",
+                "director_system_prompt");
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorContractRepairPromptKey);

@@ -243,7 +243,12 @@ namespace Pinder.LlmAdapters
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
-            => GetDateeResponseCoreAsync(context, history, priorMessages: null, cancellationToken);
+            => GetDateeResponseCoreAsync(
+                context,
+                history,
+                priorMessages: null,
+                dateeSession: null,
+                cancellationToken);
 
         public async Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
@@ -261,7 +266,7 @@ namespace Pinder.LlmAdapters
             IReadOnlyList<ConversationMessage> priorMessages = await datee.BuildSemanticHistoryAsync()
                 .ConfigureAwait(false);
             StatefulDateeResult accepted = await GetDateeResponseCoreAsync(
-                context, dateeHistory, priorMessages, cancellationToken).ConfigureAwait(false);
+                context, dateeHistory, priorMessages, datee, cancellationToken).ConfigureAwait(false);
 
             await datee.AppendUserAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
             await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
@@ -279,6 +284,7 @@ namespace Pinder.LlmAdapters
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             IReadOnlyList<ConversationMessage>? priorMessages,
+            PiConversationSession? dateeSession,
             CancellationToken cancellationToken)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -293,18 +299,37 @@ namespace Pinder.LlmAdapters
 
             var emotionalPromptCompiler = new EmotionalPromptCompiler(
                 PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog));
-            EmotionalDirectorDirection emotionalDirection = await GenerateEmotionalDirectionAsync(
-                    context,
-                    emotionalPromptCompiler,
-                    cancellationToken)
-                .ConfigureAwait(false);
+            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
+            EmotionalDirectorDirection emotionalDirection;
+            if (dateeSession != null)
+            {
+                await using PiConversationBranch directorBranch = await dateeSession.ForkAsync(
+                    "datee-private-analysis").ConfigureAwait(false);
+                IReadOnlyList<ConversationMessage> directorHistory =
+                    await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
+                emotionalDirection = await GenerateEmotionalDirectionAsync(
+                        context,
+                        emotionalPromptCompiler,
+                        directorHistory,
+                        systemPrompt,
+                        directorBranch,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                emotionalDirection = await GenerateEmotionalDirectionAsync(
+                        context,
+                        emotionalPromptCompiler,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            }
             PromptTraceResult dateePrompt = emotionalPromptCompiler.CompilePerformance(
                 context,
                 emotionalDirection,
                 includeConversationHistory: priorMessages == null);
             InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
             var userContent = dateePrompt.Text;
-            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
             var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
 

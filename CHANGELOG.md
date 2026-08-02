@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.2.27] - 2026-08-02
+
+- Run private DATEE emotional direction from a disposable `Pi.Agent.Core`
+  session fork based on the pinned upstream repository/fork contracts at
+  `583f153d502aa8e958eefdb9af0fbd3344e68f95`.
+- Give the director the complete configured DATEE character system prompt and
+  canonical typed conversation context without embedding a duplicate transcript
+  in its source packet.
+- Keep contract retries on the same immutable fork context, discard private
+  analysis on success, failure, or cancellation, and commit only accepted
+  player/DATEE visible messages to canonical session snapshots.
+- Add catalog-owned session and system wrappers so all director prose remains
+  editable and runtime-validated rather than hardcoded in orchestration code.
+
 ## [0.2.24] - 2026-07-26
 
 - Added sanitized, phase-specific DATEE director and performance diagnostics
