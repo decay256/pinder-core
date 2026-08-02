@@ -7,6 +7,8 @@
 - Preserve semantic Pi session snapshots, histories, combo/callback state,
   progression events, psychological selection state, shadow state, and pending
   one-turn mechanics without persisting uncommitted options or dice pools.
+- Restore each character's captured base and assembled system prompts as one
+  validated pair so a process restart cannot regenerate private setup context.
 - Validate restored state before adoption and retain the existing transactional
   turn boundary on provider failure or cancellation.
 

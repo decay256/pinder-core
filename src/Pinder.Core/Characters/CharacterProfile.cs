@@ -138,6 +138,21 @@ namespace Pinder.Core.Characters
             BaseSystemPrompt = AssembledSystemPrompt;
         }
 
+        /// <summary>Restores the prompt pair captured for a resumable session.</summary>
+        public void RestoreSystemPrompts(string baseSystemPrompt, string assembledSystemPrompt)
+        {
+            if (baseSystemPrompt == null) throw new ArgumentNullException(nameof(baseSystemPrompt));
+            if (assembledSystemPrompt == null) throw new ArgumentNullException(nameof(assembledSystemPrompt));
+            if (!assembledSystemPrompt.StartsWith(baseSystemPrompt, StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "The assembled system prompt must preserve the captured base prompt prefix.",
+                    nameof(assembledSystemPrompt));
+            }
+            BaseSystemPrompt = baseSystemPrompt;
+            AssembledSystemPrompt = assembledSystemPrompt;
+        }
+
         public CharacterProfile(
             StatBlock stats,
             string assembledSystemPrompt,

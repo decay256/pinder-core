@@ -481,5 +481,18 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(StatType.Wit, restored.ActiveTell!.Stat);
             Assert.Equal(3, restored.CurrentResolvedTarget!.Value.Index);
         }
+
+        [Fact]
+        public void CharacterPromptRestore_PreservesCapturedBaseAndPrivateAssembly()
+        {
+            CharacterProfile profile = MakeProfile("P2");
+
+            profile.RestoreSystemPrompts("captured base", "captured base\n\nprivate arc");
+
+            Assert.Equal("captured base", profile.BaseSystemPrompt);
+            Assert.Equal("captured base\n\nprivate arc", profile.AssembledSystemPrompt);
+            Assert.Throws<ArgumentException>(() =>
+                profile.RestoreSystemPrompts("different base", "unrelated assembled prompt"));
+        }
     }
 }
