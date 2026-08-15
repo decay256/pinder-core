@@ -52,9 +52,14 @@ The Pinder adaptation layer owns typed extension contracts such as:
 - `pinder.message-link.v1` for connecting accepted semantic entries to the
   invocation that produced them.
 
-Names above describe the contract family; implementation tickets may adjust the
-exact CLR type names but must retain explicit schema versions and documented
-compatibility behavior.
+These schema names are immutable wire names. The checked-in CLR contracts remain
+provider-neutral under `Pinder.Core.Diagnostics.AgentJournals` and target
+`netstandard2.0`/C# 8. Canonical JSON fixtures use `snake_case`, deterministic
+property ordering, and additive-field tolerance.
+
+Unknown future `pinder.*` custom-entry versions must be preserved as bounded
+opaque JSON with a compatibility warning. They must never activate arbitrary CLR
+types or be silently discarded.
 
 ## Snapshot-to-Journal Materialization
 
@@ -81,9 +86,20 @@ not reconstructed later by matching strings. Each annotated range needs:
 - exact runtime/generated classification for non-configured text; and
 - an optional logical editor target, resolved through an allowlisted host API.
 
+Legacy `PromptTraceResult` source paths cross an explicit caller-supplied
+source-identity resolver before contract construction. The resolver maps a
+known source path to a registered opaque identifier; unmapped paths fail, and
+the adapter neither serializes the path nor generates a replacement host ID.
+
 The exact compiled document remains the historical truth. If current
 configuration no longer matches the recorded revision, the debugger shows drift
 instead of pretending the current text produced the historical invocation.
+
+Offsets are UTF-16 code-unit offsets: zero-based start inclusive and end
+exclusive, matching .NET string indexing. Ranges within a document are complete,
+ordered by start/end, non-overlapping, reject zero-length segments, and cannot
+split a UTF-16 surrogate pair. Adjacent ranges are valid. Unannotated text must be serialized as explicit
+`runtime_generated` ranges rather than inferred later.
 
 ## Ownership and Non-Goals
 
@@ -96,6 +112,10 @@ instead of pretending the current text produced the historical invocation.
   the Agent Journal Debugger.
 - Agent Journals are not an excuse to retain secrets, provider credentials, or
   unrestricted filesystem paths.
+- Source identities and editor targets are opaque allowlisted identifiers. Raw
+  filesystem paths, arbitrary URLs, provider credentials, bearer tokens, and
+  cookies are forbidden contract values.
+- Diagnostic custom entries must contribute zero provider-context messages/text.
 
 ## Required Verification
 
