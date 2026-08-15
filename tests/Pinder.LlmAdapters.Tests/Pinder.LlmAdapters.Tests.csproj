@@ -33,6 +33,7 @@
 
   <ItemGroup>
     <None Include="Fixtures\Issue1153\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="Fixtures\AgentJournals\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
