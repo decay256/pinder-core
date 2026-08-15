@@ -5,6 +5,7 @@ This repo is the backend-agnostic C# game engine for Pinder. It is consumed dire
 ## Operating Rules
 
 - Preserve the pure engine boundary in `src/Pinder.Core`; do not add service or web concerns there.
+- For Pi-backed conversation or diagnostics work, read `docs/agent-journals.md` first and use its canonical Game Run / Agent Session / Agent Snapshot / Agent Journal / LLM Invocation terminology. Do not introduce the ambiguous bare term `session log`.
 - Keep changes scoped to the requested mechanic, rules pipeline, adapter, or tool.
 - If gameplay-affecting code, data, schemas, or templates change, check whether `Directory.Build.props` needs a strictly greater SemVer version.
 - Preserve YAML/JSON data shape and avoid broad mechanical rewrites of rules or game data.
