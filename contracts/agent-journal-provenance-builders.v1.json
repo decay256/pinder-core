@@ -1,0 +1,362 @@
+{
+  "schema_version": "agent-journal-provenance-builders.v1",
+  "ticket_id": "CORE-1378",
+  "depends_on": [
+    "CORE-1373",
+    "CORE-1374"
+  ],
+  "closed_inventory": true,
+  "manifest_count": 12,
+  "live_builder_count": 11,
+  "dormant_guard_count": 1,
+  "composition_mechanism": "AnnotatedInvocationDocument",
+  "provenance_rules": {
+    "catalog_identity_boundary": "Prompt trace source files are resolved only through GameRunPromptSourceIdentityResolver.",
+    "no_text_recovery": true,
+    "no_second_builder_system": true,
+    "runtime_classification_required": true,
+    "recorder_lifecycle_out_of_scope": true
+  },
+  "rows": [
+    {
+      "id": "session.system",
+      "status": "live_production",
+      "source_ownership_row": "game.datee.performance",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildDateeSystemDocument",
+        "symbol_pattern": "BuildDateeSystemDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/SessionSystemPromptBuilder.cs",
+        "symbol": "SessionSystemPromptBuilder.BuildDateeEx",
+        "symbol_pattern": "BuildDateeEx\\("
+      },
+      "role": "system",
+      "kind": "session-system-prompt",
+      "expected_configured_sources": [
+        "game.definition:game_master_prompt",
+        "game.definition:datee_role_description"
+      ],
+      "runtime_fields": [
+        "datee-profile"
+      ],
+      "recorder_consumer": "datee_agent_journal"
+    },
+    {
+      "id": "session.user",
+      "status": "live_production",
+      "source_ownership_row": "game.datee.performance",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildDateeUserDocument",
+        "symbol_pattern": "BuildDateeUserDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/SessionDocumentBuilder.Trace.cs",
+        "symbol": "SessionDocumentBuilder.BuildDateePromptEx",
+        "symbol_pattern": "BuildDateePromptEx\\("
+      },
+      "role": "user",
+      "kind": "datee-session-user-prompt",
+      "expected_configured_sources": [
+        "prompt.catalog:engine-datee-block",
+        "prompt.catalog:datee-response-instruction"
+      ],
+      "runtime_fields": [
+        "DateeContext.PlayerDeliveredMessage",
+        "DateeContext.ConversationHistory",
+        "DateeContext.InterestBefore",
+        "DateeContext.InterestAfter",
+        "DateeContext.DeliveryTier"
+      ],
+      "recorder_consumer": "datee_agent_journal"
+    },
+    {
+      "id": "datee.emotional-director.system",
+      "status": "live_production",
+      "source_ownership_row": "game.emotional-director",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument",
+        "symbol_pattern": "BuildEmotionalDirectorSystemDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/EmotionalPromptCompiler.cs",
+        "symbol": "EmotionalPromptCompiler.CompileDirector",
+        "symbol_pattern": "CompileDirector\\("
+      },
+      "role": "system",
+      "kind": "emotional-director-system-prompt",
+      "expected_configured_sources": [
+        "prompt.catalog:emotional-reaction-director",
+        "prompt.catalog:emotional-reaction-director-system-wrapper"
+      ],
+      "runtime_fields": [
+        "DateeContext",
+        "datee-system-prompt"
+      ],
+      "recorder_consumer": "private_datee_branch_record"
+    },
+    {
+      "id": "datee.emotional-director.user",
+      "status": "live_production",
+      "source_ownership_row": "game.emotional-director",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildEmotionalDirectorUserDocument",
+        "symbol_pattern": "BuildEmotionalDirectorUserDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/EmotionalPromptCompiler.cs",
+        "symbol": "EmotionalPromptCompiler.CompileDirector",
+        "symbol_pattern": "CompileDirector\\("
+      },
+      "role": "user",
+      "kind": "emotional-director-user-prompt",
+      "expected_configured_sources": [
+        "prompt.catalog:emotional-reaction-director",
+        "prompt.catalog:emotional-reaction-compiled-wrapper"
+      ],
+      "runtime_fields": [
+        "DateeContext.EmotionalTurnEvent",
+        "DateeContext.PlayerDeliveredMessage",
+        "DateeContext.ConversationHistory",
+        "TherapistDiagnosis"
+      ],
+      "recorder_consumer": "private_datee_branch_record"
+    },
+    {
+      "id": "datee.performance",
+      "status": "live_production",
+      "source_ownership_row": "game.datee.performance",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildDateePerformanceDocument",
+        "symbol_pattern": "BuildDateePerformanceDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/EmotionalPromptCompiler.cs",
+        "symbol": "EmotionalPromptCompiler.CompilePerformance",
+        "symbol_pattern": "CompilePerformance\\("
+      },
+      "role": "user",
+      "kind": "datee-performance-prompt",
+      "expected_configured_sources": [
+        "prompt.catalog:engine-datee-block",
+        "prompt.catalog:datee-response-instruction",
+        "prompt.catalog:emotional-reaction-performance-direction"
+      ],
+      "runtime_fields": [
+        "DateeContext.PlayerDeliveredMessage",
+        "DateeContext.InterestBefore",
+        "DateeContext.InterestAfter",
+        "DateeContext.DeliveryTier",
+        "EmotionalDirectorDirection"
+      ],
+      "recorder_consumer": "datee_agent_journal"
+    },
+    {
+      "id": "dialogue-options.system",
+      "status": "live_production",
+      "source_ownership_row": "game.dialogue-options",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildPlayerAvatarSystemDocument",
+        "symbol_pattern": "BuildPlayerAvatarSystemDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/SessionSystemPromptBuilder.cs",
+        "symbol": "SessionSystemPromptBuilder.BuildPlayerAvatarEx",
+        "symbol_pattern": "BuildPlayerAvatarEx\\("
+      },
+      "role": "system",
+      "kind": "session-system-prompt",
+      "expected_configured_sources": [
+        "game.definition:game_master_prompt",
+        "game.definition:player_avatar_role_description"
+      ],
+      "runtime_fields": [
+        "player-profile"
+      ],
+      "recorder_consumer": "game_run_one_shot_record"
+    },
+    {
+      "id": "dialogue-options.user",
+      "status": "live_production",
+      "source_ownership_row": "game.dialogue-options",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument",
+        "symbol_pattern": "BuildDialogueOptionsUserDocument\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/SessionDocumentBuilder.Trace.cs",
+        "symbol": "SessionDocumentBuilder.BuildDialogueOptionsPromptEx",
+        "symbol_pattern": "BuildDialogueOptionsPromptEx\\("
+      },
+      "role": "user",
+      "kind": "dialogue-options-user-prompt",
+      "expected_configured_sources": [
+        "prompt.catalog:engine-options-block",
+        "prompt.catalog:dialogue-options-instruction"
+      ],
+      "runtime_fields": [
+        "DialogueContext.ConversationHistory",
+        "DialogueContext.CurrentInterest",
+        "DialogueContext.HorninessLevel",
+        "DialogueContext.AvailableStats"
+      ],
+      "recorder_consumer": "game_run_one_shot_record"
+    },
+    {
+      "id": "game.setup.dramatic-arc",
+      "status": "live_production",
+      "source_ownership_row": "game.setup.dramatic-arc",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildDramaticArcDocuments",
+        "symbol_pattern": "BuildDramaticArcDocuments\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.SessionSetup/LlmDramaticArcGenerator.cs",
+        "symbol": "LlmDramaticArcGenerator.GenerateAsync",
+        "symbol_pattern": "GenerateAsync\\("
+      },
+      "role": "system,user",
+      "kind": "dramatic-arc-setup",
+      "expected_configured_sources": [
+        "prompt.catalog:dramatic_arc.system_prompt",
+        "prompt.catalog:dramatic_arc.user_template"
+      ],
+      "runtime_fields": [
+        "playerName",
+        "playerStake",
+        "playerBio",
+        "dateeName",
+        "dateeStake",
+        "dateeBio"
+      ],
+      "recorder_consumer": "game_run_setup_one_shot_record"
+    },
+    {
+      "id": "delivery.success-improvement",
+      "status": "live_production",
+      "source_ownership_row": "game.delivery.success-improvement",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildSuccessImprovementDocuments",
+        "symbol_pattern": "BuildSuccessImprovementDocuments\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+        "symbol": "PinderLlmAdapter.GetSuccessImprovementAsync",
+        "symbol_pattern": "GetSuccessImprovementAsync\\("
+      },
+      "role": "system,user",
+      "kind": "delivery-success-improvement",
+      "expected_configured_sources": [
+        "delivery.instructions:success_improvement_prompt_template",
+        "delivery.instructions:delivery_instructions.{stat}.{tier}",
+        "game.definition:game_master_prompt"
+      ],
+      "runtime_fields": [
+        "SuccessImprovementContext.DeliveredMessage",
+        "SuccessImprovementContext.ConversationHistory",
+        "SuccessImprovementContext.Stat",
+        "SuccessImprovementContext.TierKey"
+      ],
+      "recorder_consumer": "game_run_delivery_one_shot_record"
+    },
+    {
+      "id": "delivery.steering-question",
+      "status": "live_production",
+      "source_ownership_row": "game.delivery.steering-question",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildSteeringQuestionDocuments",
+        "symbol_pattern": "BuildSteeringQuestionDocuments\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+        "symbol": "PinderLlmAdapter.GetSteeringQuestionAsync",
+        "symbol_pattern": "GetSteeringQuestionAsync\\("
+      },
+      "role": "system,user",
+      "kind": "delivery-steering-question",
+      "expected_configured_sources": [
+        "game.definition:steering_prompt",
+        "prompt.catalog:conversation-history-empty",
+        "game.definition:game_master_prompt"
+      ],
+      "runtime_fields": [
+        "SteeringContext.DeliveredMessage",
+        "SteeringContext.ConversationHistory"
+      ],
+      "recorder_consumer": "game_run_delivery_append_one_shot_record"
+    },
+    {
+      "id": "delivery.horniness-question",
+      "status": "live_production",
+      "source_ownership_row": "game.delivery.horniness-question",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/AgentJournals/GameRunPromptDocumentBuilder.cs",
+        "symbol": "GameRunPromptDocumentBuilder.BuildHorninessQuestionDocuments",
+        "symbol_pattern": "BuildHorninessQuestionDocuments\\("
+      },
+      "legacy_builder": {
+        "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+        "symbol": "PinderLlmAdapter.GetHorninessQuestionAsync",
+        "symbol_pattern": "GetHorninessQuestionAsync\\("
+      },
+      "role": "system,user",
+      "kind": "delivery-horniness-question",
+      "expected_configured_sources": [
+        "game.definition:horniness_prompt",
+        "prompt.catalog:conversation-history-empty",
+        "game.definition:game_master_prompt"
+      ],
+      "runtime_fields": [
+        "HorninessQuestionContext.DeliveredMessage",
+        "HorninessQuestionContext.ConversationHistory"
+      ],
+      "recorder_consumer": "game_run_delivery_append_one_shot_record"
+    },
+    {
+      "id": "datee.interest-change-beat.dormant",
+      "status": "provider_capable_dormant",
+      "source_ownership_row": "game.datee.interest-change-beat",
+      "implementation": {
+        "file": "src/Pinder.LlmAdapters/SessionDocumentBuilder.cs",
+        "symbol": "SessionDocumentBuilder.BuildInterestChangeBeatPrompt",
+        "symbol_pattern": "BuildInterestChangeBeatPrompt\\("
+      },
+      "provider_symbol": {
+        "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+        "symbol": "PinderLlmAdapter.GetInterestChangeBeatAsync",
+        "symbol_pattern": "GetInterestChangeBeatAsync\\("
+      },
+      "role": "system,user",
+      "kind": "datee-interest-change-beat-dormant",
+      "expected_configured_sources": [
+        "prompt.catalog:interest-beat-instruction"
+      ],
+      "runtime_fields": [
+        "InterestChangeContext.InterestBefore",
+        "InterestChangeContext.InterestAfter",
+        "InterestChangeContext.NewState",
+        "InterestChangeContext.ConversationHistory"
+      ],
+      "recorder_consumer": "none_provider_capable_dormant",
+      "dormant_activation_guard": {
+        "pattern": "GetInterestChangeBeatAsync\\(",
+        "allowed_files": [
+          "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "src/Pinder.Core/Interfaces/ILlmAdapter.cs",
+          "src/Pinder.Core/Conversation/NullLlmAdapter.cs"
+        ],
+        "fail_if_production_caller_appears": true
+      }
+    }
+  ]
+}

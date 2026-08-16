@@ -49,8 +49,12 @@ namespace Pinder.LlmAdapters
                     context,
                     includeConversationHistory: priorMessages == null,
                     dateeSystemPrompt: dateeSystemPrompt);
-            string userMessage = prompt.UserPrompt.Text;
+            AnnotatedInvocationDocument userDocument =
+                GameRunPromptDocumentBuilder.BuildEmotionalDirectorUserDocument(prompt.UserPrompt);
+            string userMessage = userDocument.Text;
             PromptTraceResult systemPrompt = prompt.SystemPrompt;
+            AnnotatedInvocationDocument systemDocument =
+                GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(systemPrompt);
             PromptTraceResult attemptSystemPrompt = systemPrompt;
             double temperature = prompt.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
             int maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
@@ -66,6 +70,8 @@ namespace Pinder.LlmAdapters
                         var attemptMetadata = BuildEmotionalDirectorMetadata(
                             metadata,
                             attemptSystemPrompt);
+                        systemDocument = GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(
+                            attemptSystemPrompt);
                         EmotionalDirectorDirection direction;
                         string acceptedResponseText;
                         bool canUseStructured = _transport is IStructuredLlmTransport
@@ -76,7 +82,7 @@ namespace Pinder.LlmAdapters
                         {
                             var structuredTransport = (IStructuredLlmTransport)_transport;
                             var request = EmotionalDirectorContract.CreateRequest(
-                                attemptSystemPrompt.Text,
+                                systemDocument.Text,
                                 userMessage,
                                 temperature,
                                 maxTokens,
@@ -115,7 +121,7 @@ namespace Pinder.LlmAdapters
                         {
                             string responseText = await SendWithDiagnosticsAsync(
                                     _transport,
-                                    attemptSystemPrompt.Text,
+                                    systemDocument.Text,
                                     userMessage,
                                     temperature,
                                     maxTokens,

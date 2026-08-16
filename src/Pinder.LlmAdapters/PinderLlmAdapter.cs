@@ -101,10 +101,13 @@ namespace Pinder.LlmAdapters
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var gameDef = RequireGameDefinition();
-            string userContent = priorMessages == null
-                ? SessionDocumentBuilder.BuildDialogueOptionsPrompt(context, _options.PromptCatalog)
-                : SessionDocumentBuilder.BuildDialogueOptionsSessionPromptEx(context, _options.PromptCatalog).Text;
-            var systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
+            AnnotatedInvocationDocument userDocument = priorMessages == null
+                ? GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument(context, _options.PromptCatalog)
+                : GameRunPromptDocumentBuilder.BuildDialogueOptionsSessionUserDocument(context, _options.PromptCatalog);
+            string userContent = userDocument.Text;
+            AnnotatedInvocationDocument systemDocument =
+                GameRunPromptDocumentBuilder.BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDef);
+            string systemPrompt = systemDocument.Text;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -299,7 +302,9 @@ namespace Pinder.LlmAdapters
 
             var emotionalPromptCompiler = new EmotionalPromptCompiler(
                 PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog));
-            var systemPrompt = SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
+            AnnotatedInvocationDocument systemDocument =
+                GameRunPromptDocumentBuilder.BuildDateeSystemDocument(context.DateePrompt, gameDef);
+            string systemPrompt = systemDocument.Text;
             EmotionalDirectorDirection emotionalDirection;
             if (dateeSession != null)
             {
@@ -328,8 +333,10 @@ namespace Pinder.LlmAdapters
                 context,
                 emotionalDirection,
                 includeConversationHistory: priorMessages == null);
+            AnnotatedInvocationDocument dateeDocument =
+                GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(dateePrompt);
             InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
-            var userContent = dateePrompt.Text;
+            string userContent = dateeDocument.Text;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
             var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
 
@@ -739,42 +746,19 @@ namespace Pinder.LlmAdapters
                 return context.DeliveredMessage;
             }
 
-            string instruction = PromptCatalog.Substitute(
-                template,
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["player_name"] = context.PlayerName,
-                    ["datee_name"] = context.DateeName,
-                    ["delivered_message"] = context.DeliveredMessage,
-                });
+            GameRunPromptDocumentPair? documents =
+                GameRunPromptDocumentBuilder.BuildSuccessImprovementDocuments(
+                    context,
+                    instructions,
+                    gameDef,
+                    _options.PromptCatalog);
+            if (documents == null)
+            {
+                return context.DeliveredMessage;
+            }
 
-            string envelope = RequireConfiguredPrompt(
-                instructions?.GetSuccessImprovementPromptTemplate() ?? "",
-                "success_improvement_prompt_template",
-                nameof(GetSuccessImprovementAsync));
-
-            string userContent = RenderRequiredTemplate(
-                envelope,
-                "success_improvement_prompt_template",
-                nameof(GetSuccessImprovementAsync),
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["player_name"] = context.PlayerName,
-                    ["datee_name"] = context.DateeName,
-                    ["delivered_message"] = context.DeliveredMessage,
-                    ["tier"] = context.TierKey ?? string.Empty,
-                    ["tier_upper"] = (context.TierKey ?? string.Empty).ToUpperInvariant(),
-                    ["stat"] = context.Stat.ToString(),
-                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
-                    ["instruction"] = instruction,
-                },
-                "tier",
-                "stat",
-                "delivered_message",
-                "conversation_history",
-                "instruction");
-
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
+            string userContent = documents.User.Text;
+            string systemPrompt = documents.System.Text;
 
             var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct)
                 .ConfigureAwait(false);
@@ -808,27 +792,15 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            string template = RequireConfiguredPrompt(
-                gameDef.SteeringPrompt,
-                "steering_prompt",
-                nameof(GetSteeringQuestionAsync));
+            GameRunPromptDocumentPair documents =
+                GameRunPromptDocumentBuilder.BuildSteeringQuestionDocuments(
+                    context,
+                    gameDef,
+                    _options.PromptCatalog);
+            string userContent = documents.User.Text;
+            string systemPrompt = documents.System.Text;
 
-            string prompt = RenderRequiredTemplate(
-                template,
-                "steering_prompt",
-                nameof(GetSteeringQuestionAsync),
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["player_name"] = context.PlayerName,
-                    ["datee_name"] = context.DateeName,
-                    ["delivered_message"] = context.DeliveredMessage,
-                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
-                },
-                "conversation_history");
-
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
-
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
                 .ConfigureAwait(false);
 
             // #831: thinking-block stripping moved to
@@ -847,27 +819,15 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            string template = RequireConfiguredPrompt(
-                gameDef.HorninessPrompt,
-                "horniness_prompt",
-                nameof(GetHorninessQuestionAsync));
+            GameRunPromptDocumentPair documents =
+                GameRunPromptDocumentBuilder.BuildHorninessQuestionDocuments(
+                    context,
+                    gameDef,
+                    _options.PromptCatalog);
+            string userContent = documents.User.Text;
+            string systemPrompt = documents.System.Text;
 
-            string prompt = RenderRequiredTemplate(
-                template,
-                "horniness_prompt",
-                nameof(GetHorninessQuestionAsync),
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["player_name"] = context.PlayerName,
-                    ["datee_name"] = context.DateeName,
-                    ["delivered_message"] = context.DeliveredMessage,
-                    ["conversation_history"] = FormatConversationHistory(context.ConversationHistory),
-                },
-                "conversation_history");
-
-            string systemPrompt = SessionSystemPromptBuilder.BuildPlayerAvatar(context.PlayerAvatarPrompt, gameDef);
-
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, prompt, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
                 .ConfigureAwait(false);
 
             var question = NormalizeSingleTextOutput(
