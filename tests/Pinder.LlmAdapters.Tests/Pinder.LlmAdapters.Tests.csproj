@@ -34,6 +34,8 @@
   <ItemGroup>
     <None Include="Fixtures\Issue1153\*.txt" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Fixtures\AgentJournals\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="AgentJournals\Materialization\Fixtures\snapshots\*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="AgentJournals\Materialization\Fixtures\normalized\*.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
