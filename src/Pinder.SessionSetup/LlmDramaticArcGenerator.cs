@@ -75,8 +75,9 @@ namespace Pinder.SessionSetup
                 { "dateeBio", dBio }
             };
 
-            systemPrompt = PromptCatalog.Substitute(systemPrompt, values);
-            string userMessage = PromptCatalog.Substitute(userTemplate, values);
+            GameRunPromptDocumentPair documents = GameRunPromptDocumentBuilder.BuildDramaticArcDocuments(entry, values);
+            systemPrompt = documents.System.Text;
+            string userMessage = documents.User.Text;
 
             double temperature = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
                 ? _options.Temperature

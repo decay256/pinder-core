@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Text;
 
@@ -21,48 +24,105 @@ namespace Pinder.LlmAdapters.AgentJournals
             if (kind == null) throw new ArgumentNullException(nameof(kind));
             if (sourceIdentityResolver == null) throw new ArgumentNullException(nameof(sourceIdentityResolver));
 
-            AgentJournalInputDocument legacyDocument = trace.ToAgentJournalInputDocument(
-                documentId,
-                role,
-                sourceIdentityResolver);
-            var ranges = new List<AgentJournalProvenanceRange>(legacyDocument.Ranges.Count);
-            for (int i = 0; i < legacyDocument.Ranges.Count; i++)
+            var ranges = new List<AgentJournalProvenanceRange>();
+            int cursor = 0;
+            foreach (AnnotatedSpan span in trace.Spans.OrderBy(span => span.Start).ThenBy(span => span.End))
             {
-                AgentJournalProvenanceRange range = legacyDocument.Ranges[i];
-                ranges.Add(new AgentJournalProvenanceRange(
-                    documentId,
-                    range.StartUtf16,
-                    range.EndUtf16,
-                    range.RangeKind,
-                    range.RedactionClass,
-                    AddLegacyMetadataMarker(range.Source, range.RangeKind)));
+                if (span.Start > cursor)
+                {
+                    ranges.Add(CreateRuntimeRange(documentId, cursor, span.Start, "generated"));
+                }
+
+                if (span.End > span.Start)
+                {
+                    ranges.Add(CreateSpanRange(trace, documentId, span, sourceIdentityResolver));
+                    cursor = Math.Max(cursor, span.End);
+                }
+            }
+
+            if (cursor < trace.Text.Length)
+            {
+                ranges.Add(CreateRuntimeRange(documentId, cursor, trace.Text.Length, "generated"));
+            }
+            if (trace.Text.Length == 0)
+            {
+                ranges.Clear();
             }
 
             return AnnotatedInvocationDocument.Create(
                 documentId,
                 role,
                 kind,
-                legacyDocument.Text,
+                trace.Text,
                 ranges);
         }
-        private static AgentJournalSourceIdentity AddLegacyMetadataMarker(
-            AgentJournalSourceIdentity source,
-            AgentJournalRangeKind rangeKind)
+
+        private static AgentJournalProvenanceRange CreateSpanRange(
+            PromptTraceResult trace,
+            string documentId,
+            AnnotatedSpan span,
+            IPromptTraceSourceIdentityResolver sourceIdentityResolver)
         {
-            if (rangeKind != AgentJournalRangeKind.Configured)
+            string sourceId = ResolveSourceId(span.SourceFile, sourceIdentityResolver);
+            string keyPath = string.IsNullOrWhiteSpace(span.Key) ? "unknown" : span.Key!;
+            if (string.Equals(sourceId, "runtime", StringComparison.Ordinal)
+                || GameRunPromptSourceIdentityResolver.IsRuntimeSource(span.SourceFile))
             {
-                return source;
+                return CreateRuntimeRange(documentId, span.Start, span.End, keyPath);
             }
 
-            return new AgentJournalSourceIdentity(
-                source.Kind,
-                source.SourceId,
-                source.KeyPath,
-                revision: string.IsNullOrWhiteSpace(source.Revision)
-                    ? LegacyMissingSourceRevision
-                    : source.Revision,
-                contentHash: source.ContentHash,
-                editorTargetId: source.EditorTargetId);
+            return new AgentJournalProvenanceRange(
+                documentId,
+                span.Start,
+                span.End,
+                AgentJournalRangeKind.Configured,
+                AgentJournalRedactionClass.SafeMetadata,
+                new AgentJournalSourceIdentity(
+                    AgentJournalSourceKind.Configuration,
+                    sourceId,
+                    keyPath,
+                    revision: LegacyMissingSourceRevision,
+                    contentHash: ComputeSha256(trace.Text.Substring(span.Start, span.End - span.Start))));
+        }
+
+        private static string ResolveSourceId(
+            string? annotatedSourceFile,
+            IPromptTraceSourceIdentityResolver resolver)
+        {
+            if (!resolver.TryResolve(annotatedSourceFile, out string? sourceId)
+                || string.IsNullOrWhiteSpace(sourceId))
+            {
+                throw new PromptTraceSourceIdentityException(
+                    PromptTraceSourceIdentityException.UnmappedSourceIdentity,
+                    "Prompt trace source has no registered journal identity mapping.");
+            }
+
+            return sourceId;
+        }
+
+        private static AgentJournalProvenanceRange CreateRuntimeRange(
+            string documentId,
+            int start,
+            int end,
+            string keyPath)
+            => new AgentJournalProvenanceRange(
+                documentId,
+                start,
+                end,
+                AgentJournalRangeKind.RuntimeGenerated,
+                AgentJournalRedactionClass.None,
+                new AgentJournalSourceIdentity(
+                    AgentJournalSourceKind.RuntimeGenerated,
+                    "runtime",
+                    string.IsNullOrWhiteSpace(keyPath) ? "generated" : keyPath));
+
+        private static string ComputeSha256(string value)
+        {
+            using (SHA256 sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(value ?? string.Empty));
+                return "sha256:" + BitConverter.ToString(hash).Replace("-", string.Empty).ToLowerInvariant();
+            }
         }
     }
 }
