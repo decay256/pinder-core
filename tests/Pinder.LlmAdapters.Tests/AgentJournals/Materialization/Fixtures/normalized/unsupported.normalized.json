@@ -1,0 +1,1 @@
+{"status":"unsupported_format","snapshot_format":"legacy.conversation-history.v1","notices":[{"code":"unsupported_format","message":"Only PiAgentSessionV1 Agent Snapshots can be materialized."}],"is_materialized":false}

@@ -1,0 +1,1 @@
+{"type":"session","version":3,"metadata":{"id":"invalid-parentage-fixture","createdAt":"2026-08-15T22:30:00Z","kind":"session"},"entries":[{"type":"message","id":"entry-orphan","parentId":"missing-parent","timestamp":"2026-08-15T22:30:01Z","message":{"role":"user","content":"orphan","timestamp":1}}]}
