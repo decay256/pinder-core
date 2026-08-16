@@ -10,7 +10,9 @@ using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.LlmAdapters.Anthropic;
+using Pinder.LlmAdapters.AgentJournals;
 
 namespace Pinder.LlmAdapters
 {
@@ -76,7 +78,7 @@ namespace Pinder.LlmAdapters
 
         /// <inheritdoc />
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
-            => GetDialogueOptionsCoreAsync(context, priorMessages: null, ct);
+            => GetDialogueOptionsCoreAsync(context, priorMessages: null, journalSession: null, ct);
 
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(
             DialogueContext context,
@@ -90,17 +92,21 @@ namespace Pinder.LlmAdapters
                 "avatar").ConfigureAwait(false);
             IReadOnlyList<ConversationMessage> priorMessages = await session.BuildSemanticHistoryAsync()
                 .ConfigureAwait(false);
-            return await GetDialogueOptionsCoreAsync(context, priorMessages, cancellationToken)
+            return await GetDialogueOptionsCoreAsync(context, priorMessages, session, cancellationToken)
                 .ConfigureAwait(false);
         }
 
         private async Task<DialogueOption[]> GetDialogueOptionsCoreAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage>? priorMessages,
+            PiConversationSession? journalSession,
             CancellationToken ct)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            ValidateOneShotJournalConfiguration(context.AgentJournal);
+            if (context.AgentJournal != null)
+            {
+                ValidateOneShotJournalConfiguration(context.AgentJournal);
+            }
 
             var gameDef = RequireGameDefinition();
             AnnotatedInvocationDocument userDocument = priorMessages == null
@@ -118,18 +124,36 @@ namespace Pinder.LlmAdapters
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
-                    AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
-                            context.AgentJournal,
-                            LlmPhase.DialogueOptions,
-                            attempt,
-                            attemptCancellationToken,
-                            journalDocuments)
-                        .ConfigureAwait(false);
+bool recordOneShotJournal = context.AgentJournal != null;
+                    AgentJournalAttempt? journalAttempt = recordOneShotJournal
+                        ? await StartOneShotJournalAsync(
+                                context.AgentJournal,
+                                LlmPhase.DialogueOptions,
+                                attempt,
+                                attemptCancellationToken,
+                                journalDocuments)
+                            .ConfigureAwait(false)
+                        : null;
                     var usageMeasurement = TokenUsageMeasurement.Start(_transport);
+                    AgentJournalCallScope journal = context.AgentJournalContext != null || !recordOneShotJournal
+                        ? await StartConversationJournalAttemptAsync(
+                                ResolveConversationCallPath(context.AgentJournalContext, GameRunConversationJournalInventory.AvatarReply),
+                                LlmPhase.DialogueOptions,
+                                context.CurrentTurn,
+                                attempt,
+                                maxAttempts,
+                                "avatar",
+                                systemDocument,
+                                userDocument,
+                                session: journalSession,
+                                correlationContext: context.AgentJournalContext)
+                            .ConfigureAwait(false)
+                        : AgentJournalCallScope.Disabled;
                     string? providerOutput = null;
                     try
                     {
                         DialogueOption[] parsedOptions;
+                        string rawOutput;
                         if (_transport is IStructuredLlmTransport structuredTransport)
                         {
                             var request = DialogueOptionsStructuredContract.CreateRequest(
@@ -148,6 +172,7 @@ namespace Pinder.LlmAdapters
                                     priorMessages: priorMessages)
                                 .ConfigureAwait(false);
                             providerOutput = structuredResponse.JsonText;
+                            rawOutput = structuredResponse.JsonText;
                             try
                             {
                                 if (structuredResponse.UsedNativeStructuredOutput)
@@ -197,7 +222,7 @@ namespace Pinder.LlmAdapters
                         }
                         else
                         {
-                            var responseText = await SendWithDiagnosticsAsync(
+                            rawOutput = await SendWithDiagnosticsAsync(
                                     _transport,
                                     systemPrompt,
                                     userContent,
@@ -208,17 +233,14 @@ namespace Pinder.LlmAdapters
                                     attemptCancellationToken,
                                     priorMessages: priorMessages)
                                 .ConfigureAwait(false);
-                            providerOutput = responseText;
+                            providerOutput = rawOutput;
 
                             parsedOptions = ParseDialogueOptionsFromTextOrJson(
-                                responseText,
+                                rawOutput,
                                 context,
                                 gameDef);
                         }
 
-                        // #950: warn when the option generator skips all stake content.
-                        // Lightweight check: split stake lines on sentence/clause boundaries,
-                        // discard fragments shorter than 8 chars, look for any fragment in any option.
                         if (context.StakeLines != null && context.StakeLines.Length > 0 && parsedOptions.Length > 0)
                         {
                             WarnIfStakeSkipped(context, parsedOptions);
@@ -226,24 +248,28 @@ namespace Pinder.LlmAdapters
 
                         await CompleteAcceptedOneShotAsync(journalAttempt, providerOutput ?? string.Empty, usageMeasurement)
                             .ConfigureAwait(false);
+                        await journal.CompleteAcceptedAsync(rawOutput).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Accepted(parsedOptions);
                     }
                     catch (LlmContractException ex)
                     {
                         await CompleteValidationRejectedOneShotAsync(journalAttempt, ex.Reason, usageMeasurement)
                             .ConfigureAwait(false);
+                        await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Rejected(ex);
                     }
                     catch (OperationCanceledException)
                     {
                         await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement)
                             .ConfigureAwait(false);
+                        await journal.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
                         throw;
                     }
                     catch (Exception ex)
                     {
                         await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement)
                             .ConfigureAwait(false);
+                        await journal.CompleteProviderFailedAsync(ex.GetType().Name).ConfigureAwait(false);
                         throw;
                     }
                 },
@@ -272,16 +298,25 @@ namespace Pinder.LlmAdapters
         }
 
         /// <inheritdoc />
-        public Task<StatefulDateeResult> GetDateeResponseAsync(
+        public async Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             CancellationToken cancellationToken = default)
-            => GetDateeResponseCoreAsync(
-                context,
-                history,
-                priorMessages: null,
-                dateeSession: null,
-                cancellationToken);
+        {
+            DateeResponseCoreResult core = await GetDateeResponseCoreAsync(
+                    context,
+                    history,
+                    priorMessages: null,
+                    dateeSession: null,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            if (core.Journal != null)
+            {
+                await core.Journal.CompleteAcceptedAsync(core.Result.Response.MessageText).ConfigureAwait(false);
+            }
+
+            return core.Result;
+        }
 
         public async Task<StatefulDateeResult> GetDateeResponseAsync(
             DateeContext context,
@@ -298,13 +333,21 @@ namespace Pinder.LlmAdapters
 
             IReadOnlyList<ConversationMessage> priorMessages = await datee.BuildSemanticHistoryAsync()
                 .ConfigureAwait(false);
-            StatefulDateeResult accepted = await GetDateeResponseCoreAsync(
+            DateeResponseCoreResult core = await GetDateeResponseCoreAsync(
                 context, dateeHistory, priorMessages, datee, cancellationToken).ConfigureAwait(false);
+            StatefulDateeResult accepted = core.Result;
 
             await datee.AppendUserAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
-            await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
+            string dateeAssistantEntryId = await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
             await avatar.AppendAssistantAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
             await avatar.AppendUserAsync(accepted.Response.MessageText).ConfigureAwait(false);
+            if (core.Journal != null)
+            {
+                await core.Journal.CompleteAcceptedAsync(
+                        accepted.Response.MessageText,
+                        dateeAssistantEntryId)
+                    .ConfigureAwait(false);
+            }
 
             return new StatefulDateeResult(
                 accepted.Response,
@@ -313,7 +356,7 @@ namespace Pinder.LlmAdapters
                 await avatar.SnapshotAsync().ConfigureAwait(false));
         }
 
-        private async Task<StatefulDateeResult> GetDateeResponseCoreAsync(
+        private async Task<DateeResponseCoreResult> GetDateeResponseCoreAsync(
             DateeContext context,
             IReadOnlyList<ConversationMessage> history,
             IReadOnlyList<ConversationMessage>? priorMessages,
@@ -338,18 +381,36 @@ namespace Pinder.LlmAdapters
             EmotionalDirectorDirection emotionalDirection;
             if (dateeSession != null)
             {
-                await using PiConversationBranch directorBranch = await dateeSession.ForkAsync(
+                PiConversationBranch directorBranch = await dateeSession.ForkAsync(
                     "datee-private-analysis").ConfigureAwait(false);
-                IReadOnlyList<ConversationMessage> directorHistory =
-                    await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
-                emotionalDirection = await GenerateEmotionalDirectionAsync(
-                        context,
-                        emotionalPromptCompiler,
-                        directorHistory,
-                        systemPrompt,
-                        directorBranch,
-                        cancellationToken)
-                    .ConfigureAwait(false);
+                AgentJournalCallScope? disposalJournal = null;
+                try
+                {
+                    disposalJournal = await StartBranchDisposalJournalAsync(
+                            dateeSession,
+                            directorBranch,
+                            context.CurrentTurn,
+                            context.AgentJournalContext)
+                        .ConfigureAwait(false);
+                    IReadOnlyList<ConversationMessage> directorHistory =
+                        await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
+                    emotionalDirection = await GenerateEmotionalDirectionAsync(
+                            context,
+                            emotionalPromptCompiler,
+                            directorHistory,
+                            systemPrompt,
+                            directorBranch,
+                            cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                finally
+                {
+                    await directorBranch.DisposeAsync().ConfigureAwait(false);
+                    if (disposalJournal != null)
+                    {
+                        await disposalJournal.CompleteAcceptedAsync("disposed").ConfigureAwait(false);
+                    }
+                }
             }
             else
             {
@@ -371,10 +432,23 @@ namespace Pinder.LlmAdapters
             var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
 
             int maxAttempts = GetContractViolationAttemptLimit();
+            AgentJournalCallScope? acceptedJournal = null;
             var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<StatefulDateeResult, LlmContractException>(
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
+                    AgentJournalCallScope journal = await StartConversationJournalAttemptAsync(
+                            ResolveConversationCallPath(context.AgentJournalContext, GameRunConversationJournalInventory.DateePerformance),
+                            LlmPhase.OpponentResponse,
+                            context.CurrentTurn,
+                            attempt,
+                            maxAttempts,
+                            "datee",
+                            systemDocument,
+                            dateeDocument,
+                            session: dateeSession,
+                            correlationContext: context.AgentJournalContext)
+                        .ConfigureAwait(false);
                     try
                     {
                         // Legacy calls render DateeContext.ConversationHistory into
@@ -449,12 +523,24 @@ namespace Pinder.LlmAdapters
                             ConversationMessage.User(context.PlayerDeliveredMessage),
                             ConversationMessage.Assistant(parsed.MessageText),
                         };
+                        acceptedJournal = journal;
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
                             new StatefulDateeResult(parsed, newEntries));
                     }
                     catch (LlmContractException ex)
                     {
+                        await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Rejected(ex);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        await journal.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        await journal.CompleteProviderFailedAsync(ex.GetType().Name).ConfigureAwait(false);
+                        throw;
                     }
                 },
                 delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
@@ -464,7 +550,7 @@ namespace Pinder.LlmAdapters
 
             if (recovery.IsAccepted)
             {
-                return recovery.AcceptedValue;
+                return new DateeResponseCoreResult(recovery.AcceptedValue, acceptedJournal);
             }
 
             ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
@@ -758,8 +844,6 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            ValidateOneShotJournalConfiguration(context.AgentJournal);
-
             var gameDef = RequireGameDefinition();
 
             var instructions = _options.StatDeliveryInstructions ?? StatDeliveryInstructions.TryLoadDefault();
@@ -861,8 +945,6 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            ValidateOneShotJournalConfiguration(context.AgentJournal);
-
             var gameDef = RequireGameDefinition();
 
             GameRunPromptDocumentPair documents =
@@ -917,8 +999,6 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            ValidateOneShotJournalConfiguration(context.AgentJournal);
-
             var gameDef = RequireGameDefinition();
 
             GameRunPromptDocumentPair documents =
@@ -1439,6 +1519,7 @@ namespace Pinder.LlmAdapters
                 SinkFailureMode = _options.AgentJournalSinkFailureMode,
                 OnDiagnostic = GetDiagnosticSink(),
                 Clock = _options.AgentJournalClock,
+                WriteTimeout = _options.AgentJournalWriteTimeout,
             };
 
             return await new AgentJournalRecorder(recorderContext).StartAsync(ct)

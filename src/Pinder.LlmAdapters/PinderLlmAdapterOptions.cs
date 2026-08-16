@@ -77,6 +77,38 @@ namespace Pinder.LlmAdapters
         public System.Action<LlmContractViolation>? OnLlmContractViolation { get; set; }
 
         /// <summary>
+        /// Optional durable host sink for Game Run one-shot and conversational journal records.
+        /// </summary>
+        public IAgentJournalSink? AgentJournalHostSink { get; set; }
+
+        /// <summary>
+        /// Controls whether host sink persistence failures fail gameplay calls.
+        /// </summary>
+        public AgentJournalSinkFailureMode AgentJournalSinkFailureMode { get; set; } =
+            AgentJournalSinkFailureMode.FailClosed;
+
+        /// <summary>
+        /// Optional clock for deterministic journal tests and host replay evidence.
+        /// </summary>
+        public System.Func<System.DateTimeOffset>? AgentJournalClock { get; set; }
+
+        private System.TimeSpan _agentJournalWriteTimeout = System.TimeSpan.FromSeconds(2);
+
+        /// <summary>
+        /// Bounded write timeout for Pi projection and host sink persistence.
+        /// </summary>
+        public System.TimeSpan AgentJournalWriteTimeout
+        {
+            get => _agentJournalWriteTimeout;
+            set
+            {
+                if (value <= System.TimeSpan.Zero)
+                    throw new System.ArgumentOutOfRangeException(nameof(value));
+                _agentJournalWriteTimeout = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum number of stateless retries after the initial
         /// LLM call when a contract/parsing violation occurs.
         /// Default is 3. Set to 0 to disable retries.
@@ -100,22 +132,6 @@ namespace Pinder.LlmAdapters
         /// configured by the host process.
         /// </summary>
         public System.Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
-
-
-        /// <summary>
-        /// Optional host-owned durable sink for no-session Game Run one-shot invocation records.
-        /// </summary>
-        public IAgentJournalSink? AgentJournalHostSink { get; set; }
-
-        /// <summary>
-        /// Persistence policy for the host-owned one-shot journal sink. Production callers should fail closed.
-        /// </summary>
-        public AgentJournalSinkFailureMode AgentJournalSinkFailureMode { get; set; } = AgentJournalSinkFailureMode.FailClosed;
-
-        /// <summary>
-        /// Optional clock used by tests and hosts that need deterministic journal timestamps.
-        /// </summary>
-        public System.Func<System.DateTimeOffset>? AgentJournalClock { get; set; }
 
         /// <summary>
         /// A default callback used when OnOverlayDegraded is null.

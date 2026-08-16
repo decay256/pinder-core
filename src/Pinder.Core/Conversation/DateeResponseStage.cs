@@ -28,13 +28,16 @@ namespace Pinder.Core.Conversation
     {
         private readonly ILlmAdapter _llm;
         private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
+        private readonly GameRunAgentJournalContext? _agentJournalContext;
 
         public DateeResponseStage(
             ILlmAdapter llm,
-            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
+            GameRunAgentJournalContext? agentJournalContext = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _onDiagnostic = onDiagnostic;
+            _agentJournalContext = agentJournalContext;
         }
 
         public async Task<DateeResponseStageResult> ExecuteAsync(
@@ -99,7 +102,8 @@ namespace Pinder.Core.Conversation
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
                     rollStage.RollResult.Stat,
                     RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
-                    datee.PsychiatricDiagnosis));
+                    datee.PsychiatricDiagnosis),
+                agentJournalContext: _agentJournalContext);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 

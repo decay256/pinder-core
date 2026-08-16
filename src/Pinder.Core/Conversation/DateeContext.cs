@@ -102,6 +102,9 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public DateeEmotionalTurnEvent? EmotionalTurnEvent { get; }
 
+        /// <summary>Per-Game-Run journal correlation supplied by the owning session.</summary>
+        public GameRunAgentJournalContext? AgentJournalContext { get; }
+
         public DateeContext(
             string dateePrompt,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
@@ -126,7 +129,8 @@ namespace Pinder.Core.Conversation
             string? cognitiveSubtext = null,
             InterestState? interestBeforeState = null,
             InterestState? interestAfterState = null,
-            DateeEmotionalTurnEvent? emotionalTurnEvent = null)
+            DateeEmotionalTurnEvent? emotionalTurnEvent = null,
+            GameRunAgentJournalContext? agentJournalContext = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -152,6 +156,7 @@ namespace Pinder.Core.Conversation
             ResolvedTarget = resolvedTarget;
             CognitiveSubtext = cognitiveSubtext;
             EmotionalTurnEvent = emotionalTurnEvent;
+            AgentJournalContext = agentJournalContext;
         }
     }
 }

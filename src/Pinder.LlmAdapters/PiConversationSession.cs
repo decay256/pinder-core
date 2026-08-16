@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Pi.AI;
 using Pi.Agent.Core;
 using Pinder.Core.Conversation;
+using Pinder.LlmAdapters.AgentJournals;
 
 namespace Pinder.LlmAdapters
 {
@@ -92,7 +93,10 @@ namespace Pinder.LlmAdapters
         internal static async Task<IReadOnlyList<ConversationMessage>> BuildSemanticHistoryAsync(
             ISession<SessionMetadata> session)
         {
-            SessionContext context = await session.BuildContextAsync().ConfigureAwait(false);
+            SessionContext context = await session.BuildContextAsync(new SessionContextBuildOptions
+            {
+                EntryProjectors = PiAgentJournalRegistry.CreateZeroContextProjectors(),
+            }).ConfigureAwait(false);
             var result = new List<ConversationMessage>(context.Messages.Count);
             foreach (AgentMessage message in context.Messages)
             {
@@ -107,11 +111,14 @@ namespace Pinder.LlmAdapters
             return result;
         }
 
-        public Task AppendUserAsync(string text)
+        public async Task<string> GetAgentSessionIdAsync()
+            => (await Session.GetMetadataAsync().ConfigureAwait(false)).Id;
+
+        public Task<string> AppendUserAsync(string text)
             => Session.AppendMessageAsync(AgentMessage.FromMessage(
                 new UserMessage(text ?? string.Empty, Timestamp())));
 
-        public Task AppendAssistantAsync(string text)
+        public Task<string> AppendAssistantAsync(string text)
             => Session.AppendMessageAsync(AgentMessage.FromMessage(new AssistantMessage(
                 new IAssistantMessageContent[] { new TextContent(text ?? string.Empty) },
                 new Api("pinder-semantic"),
@@ -184,15 +191,21 @@ namespace Pinder.LlmAdapters
             _session = session ?? throw new ArgumentNullException(nameof(session));
         }
 
+        internal ISession<SessionMetadata> Session => _session;
+
         public Task<IReadOnlyList<ConversationMessage>> BuildSemanticHistoryAsync()
             => PiConversationSession.BuildSemanticHistoryAsync(_session);
 
-        public async Task AppendAcceptedExchangeAsync(string userText, string assistantText)
+        public async Task<string> GetAgentSessionIdAsync()
+            => (await _session.GetMetadataAsync().ConfigureAwait(false)).Id;
+
+        public async Task<PiAcceptedExchangeEntryIds> AppendAcceptedExchangeAsync(string userText, string assistantText)
         {
-            await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
+            string userEntryId = await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
                 ConversationMessage.User(userText ?? string.Empty))).ConfigureAwait(false);
-            await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
+            string assistantEntryId = await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(
                 ConversationMessage.Assistant(assistantText ?? string.Empty))).ConfigureAwait(false);
+            return new PiAcceptedExchangeEntryIds(userEntryId, assistantEntryId);
         }
 
         public async ValueTask DisposeAsync()
@@ -201,5 +214,18 @@ namespace Pinder.LlmAdapters
             await _repository.DeleteAsync(await _session.GetMetadataAsync().ConfigureAwait(false))
                 .ConfigureAwait(false);
         }
+    }
+
+    internal sealed class PiAcceptedExchangeEntryIds
+    {
+        public PiAcceptedExchangeEntryIds(string userEntryId, string assistantEntryId)
+        {
+            UserEntryId = userEntryId ?? throw new ArgumentNullException(nameof(userEntryId));
+            AssistantEntryId = assistantEntryId ?? throw new ArgumentNullException(nameof(assistantEntryId));
+        }
+
+        public string UserEntryId { get; }
+
+        public string AssistantEntryId { get; }
     }
 }

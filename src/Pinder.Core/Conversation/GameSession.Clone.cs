@@ -62,7 +62,7 @@ namespace Pinder.Core.Conversation
         /// </para>
         /// </summary>
         private GameSession(GameSession src, bool forRequiredTurnTransaction)
-            : this(src, src._llm, forRequiredTurnTransaction) { }
+            : this(src, src._llm, forRequiredTurnTransaction, src._agentJournalContext) { }
 
         /// <summary>
         /// #425 (Phase 5): private clone constructor that swaps the LLM
@@ -75,7 +75,8 @@ namespace Pinder.Core.Conversation
         private GameSession(
             GameSession src,
             ILlmAdapter llmOverride,
-            bool forRequiredTurnTransaction)
+            bool forRequiredTurnTransaction,
+            GameRunAgentJournalContext? agentJournalContext)
         {
             // ── Shared-by-reference fields (Category B/C: immutable / stateless / pure adapters) ──
             _player          = src._player;
@@ -102,6 +103,7 @@ namespace Pinder.Core.Conversation
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;
             _activeTrapInterestPenalty = src._activeTrapInterestPenalty;
+            _agentJournalContext = agentJournalContext;
             _transactionTestHooks = src._transactionTestHooks;
 
             // ── Mutable engine state — deep copies (Category A) ──
@@ -208,25 +210,43 @@ namespace Pinder.Core.Conversation
 
         /// <summary>
         /// #425 (Phase 5): produce an independent clone whose LLM adapter
-        /// is replaced by <paramref name="llm"/>. Every other piece of
-        /// state is deep-copied per the documented sharing rules on
-        /// <see cref="Clone()"/>; only the adapter reference is swapped.
-        /// Used by the fast-gameplay scheduler so each speculative
-        /// branch's LLM exchanges land in its own per-branch sink.
+        /// is replaced by <paramref name="llm"/> and whose journal context
+        /// is scoped to the explicit fast-gameplay branch purpose.
         /// </summary>
         /// <param name="llm">
         /// Replacement LLM adapter. The caller is responsible for ensuring
         /// the adapter is functionally equivalent to the parent's adapter
-        /// (same model, same prompt-assembly behaviour) — typically a
+        /// (same model, same prompt-assembly behaviour) - typically a
         /// fresh <see cref="ILlmAdapter"/> wrapping a per-branch
         /// <c>SnapshotRecordingLlmTransport</c> over the session's shared
         /// inner transport. Must not be <c>null</c>.
         /// </param>
-        public GameSession Clone(ILlmAdapter llm)
+        /// <param name="branchKind">
+        /// Required branch purpose. <see cref="GameRunConversationBranchKind.Main"/>
+        /// is rejected because replacing the adapter is a branch-only operation.
+        /// </param>
+        /// <param name="branchId">Opaque identifier unique within the Game Run.</param>
+        public GameSession Clone(
+            ILlmAdapter llm,
+            GameRunConversationBranchKind branchKind,
+            string branchId)
         {
             if (llm == null) throw new ArgumentNullException(nameof(llm));
+            if (branchKind != GameRunConversationBranchKind.Prefetch
+                && branchKind != GameRunConversationBranchKind.Speculative)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(branchKind),
+                    branchKind,
+                    "An adapter-replacing clone requires Prefetch or Speculative branch purpose.");
+            }
+
             EnsureIndependentCloneCompatibility();
-            return new GameSession(this, llm, forRequiredTurnTransaction: false);
+            return new GameSession(
+                this,
+                llm,
+                forRequiredTurnTransaction: false,
+                _agentJournalContext.ForBranch(branchKind, branchId));
         }
 
         private GameSession CloneForRequiredTurnTransaction()
@@ -251,7 +271,7 @@ namespace Pinder.Core.Conversation
         /// #425 (Phase 5): adopt the mutable engine state of
         /// <paramref name="src"/> into this session, preserving this
         /// session's <see cref="_llm"/> + dependency references. Inverse
-        /// of <see cref="Clone(ILlmAdapter)"/>: a parent session can call
+        /// of the adapter-replacing branch <c>Clone</c>: a parent session can call
         /// <c>parent.AdoptStateFrom(chosenClone)</c> after the
         /// fast-gameplay scheduler resolves three speculative branches
         /// against three clones; the chosen branch's clone holds the
@@ -259,7 +279,7 @@ namespace Pinder.Core.Conversation
         /// into the parent.
         ///
         /// <para>
-        /// The shared-by-reference fields documented on <see cref="Clone(ILlmAdapter)"/>
+        /// The shared-by-reference fields documented on the adapter-replacing branch <c>Clone</c>
         /// are <em>preserved</em> on the parent (LLM adapter, dice
         /// roller, trap registry, clock, rules — these were already
         /// shared with the source's parent at clone time, so no swap is
