@@ -1,0 +1,958 @@
+{
+  "schema_version": "agent-journal-invocation-ownership.v1",
+  "ticket_id": "CORE-1373",
+  "depends_on": "Core #1370 agent-journal contract vocabulary",
+  "closed_inventory": true,
+  "inventory_size": 16,
+  "status_values": [
+    "live_production",
+    "provider_capable_dormant",
+    "dead_with_proof"
+  ],
+  "dead_rows_approved": false,
+  "rows": [
+    {
+      "id": "game.datee.performance",
+      "status": "live_production",
+      "status_evidence": [
+        "DateeResponseStage calls the session-aware DATEE response path when conversation sessions are supported.",
+        "PinderLlmAdapter restores the DATEE Pi session, generates the DATEE performance prompt, and snapshots the accepted branch."
+      ],
+      "activation_rule": "Already live. Wiring must attach invocation records to the Game Run Bundle DATEE journal using this row.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / DATEE journal",
+      "pi_agent_session": "yes",
+      "journal_destination": "datee_agent_journal",
+      "context_membership": "datee_agent_session_provider_context",
+      "player_delivery": "player_visible_datee_reply_after_validation",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.datee.live",
+      "required_owner_ids": [
+        "game_run_id",
+        "agent_session_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SessionSystemPromptBuilder.BuildDatee",
+        "EmotionalPromptCompiler.CompilePerformance",
+        "InMemoryPromptTraceService.RecordTrace:datee"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/ISessionStatefulLlmAdapter.cs",
+          "pattern": "GetDateeResponseAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "GetDateeResponseAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/DateeResponseStage.cs",
+          "pattern": "GetDateeResponseAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live"
+    },
+    {
+      "id": "game.avatar.reply",
+      "status": "live_production",
+      "status_evidence": [
+        "TurnOrchestrator calls the session-aware dialogue option overload when conversation sessions are supported.",
+        "PinderLlmAdapter restores the avatar Pi session before compiling avatar dialogue output."
+      ],
+      "activation_rule": "Already live. Wiring must attach invocation records to the Game Run Bundle avatar journal using this row.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / avatar journal",
+      "pi_agent_session": "yes",
+      "journal_destination": "avatar_agent_journal",
+      "context_membership": "avatar_agent_session_provider_context",
+      "player_delivery": "player_candidate_avatar_lines_before_player_choice",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.avatar.live",
+      "required_owner_ids": [
+        "game_run_id",
+        "agent_session_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SessionSystemPromptBuilder.BuildPlayerAvatar",
+        "SessionDocumentBuilder.BuildDialogueOptionsSessionPromptEx",
+        "DialogueOptionsStructuredContract.CreateRequest"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/ISessionStatefulLlmAdapter.cs",
+          "pattern": "Task<DialogueOption\\[]> GetDialogueOptionsAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "public async Task<DialogueOption\\[]> GetDialogueOptionsAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/TurnOrchestrator.cs",
+          "pattern": "sessionLlm\\.GetDialogueOptionsAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live"
+    },
+    {
+      "id": "game.emotional-director",
+      "status": "live_production",
+      "status_evidence": [
+        "The DATEE response path forks a datee-private-analysis branch when a DATEE Pi session is present.",
+        "The emotional director invocation uses a private phase and may append diagnostics to the disposable branch."
+      ],
+      "activation_rule": "Already live. Wiring must keep this as a disposable private DATEE branch and must not deliver it to the player timeline.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / private DATEE branch",
+      "pi_agent_session": "yes_disposable_branch",
+      "journal_destination": "private_datee_branch_record",
+      "context_membership": "private_datee_director_branch_context",
+      "player_delivery": "not_player_delivered",
+      "visibility": "authorized_private_branch_debugger_only",
+      "retention_policy_key": "game_run.agent_journal.datee.private_branch",
+      "required_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "branch_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "branch_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "EmotionalPromptCompiler.CompileDirector",
+        "EmotionalDirectorContract.CreateRequest",
+        "PinderLlmAdapter.DateePrivatePhaseDirector"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.EmotionalDirector.cs",
+          "pattern": "GenerateEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "GenerateEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.EmotionalDirector.cs",
+          "pattern": "PiConversationBranch\\? privateBranch"
+        }
+      ],
+      "verifier_group": "core_game_run_live_private"
+    },
+    {
+      "id": "game.dialogue-options",
+      "status": "live_production",
+      "status_evidence": [
+        "TurnOrchestrator still has the stateless dialogue options fallback call.",
+        "The stateless adapter method builds dialogue options without restoring a Pi Agent Session."
+      ],
+      "activation_rule": "Already live. Wiring must create a Game Run Bundle one-shot record and must not mint a Pi Agent Session ID for this row.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / one-shot record",
+      "pi_agent_session": "no",
+      "journal_destination": "game_run_one_shot_record",
+      "context_membership": "compiled_prompt_only_no_agent_session_context",
+      "player_delivery": "player_candidate_dialogue_options",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.one_shot.dialogue_options",
+      "required_owner_ids": [
+        "game_run_id",
+        "operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "operation_id",
+        "invocation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SessionSystemPromptBuilder.BuildPlayerAvatar",
+        "SessionDocumentBuilder.BuildDialogueOptionsPrompt",
+        "DialogueOptionsStructuredContract.CreateRequest"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/ILlmAdapter.cs",
+          "pattern": "GetDialogueOptionsAsync\\(DialogueContext"
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "public Task<DialogueOption\\[]> GetDialogueOptionsAsync\\(DialogueContext context"
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/TurnOrchestrator.cs",
+          "pattern": "_llm\\.GetDialogueOptionsAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live"
+    },
+    {
+      "id": "game.setup.dramatic-arc",
+      "status": "live_production",
+      "status_evidence": [
+        "LlmDramaticArcGenerator is the setup generator for the dramatic_arc prompt.",
+        "It records dramatic-arc prompt traces and calls LlmOptionalTextGeneration with LlmPhase.DramaticArc."
+      ],
+      "activation_rule": "Already live. Wiring must create a Game Run setup one-shot record and must not reuse character-synthesis owner IDs.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / setup one-shot",
+      "pi_agent_session": "no",
+      "journal_destination": "game_run_setup_one_shot_record",
+      "context_membership": "setup_prompt_only_no_agent_session_context",
+      "player_delivery": "not_directly_player_delivered_setup_diagnostic",
+      "visibility": "authorized_game_run_setup_debugger",
+      "retention_policy_key": "game_run.agent_journal.one_shot.setup.dramatic_arc",
+      "required_owner_ids": [
+        "game_run_id",
+        "setup_operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "setup_operation_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "LlmDramaticArcGenerator.GenerateAsync",
+        "InMemoryPromptTraceService.RecordTrace:dramatic-arc-system",
+        "InMemoryPromptTraceService.RecordTrace:dramatic-arc-user"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/LlmDramaticArcGenerator.cs",
+          "pattern": "public async Task<string> GenerateAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.SessionSetup/LlmDramaticArcGenerator.cs",
+          "pattern": "LlmOptionalTextGeneration\\.RunAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/LlmDramaticArcGenerator.cs",
+          "pattern": "LlmPhase\\.DramaticArc"
+        }
+      ],
+      "verifier_group": "core_game_run_setup_live"
+    },
+    {
+      "id": "game.prefetch.option-branch",
+      "status": "live_production",
+      "status_evidence": [
+        "GameSession.Clone documents branch-scoped transport replacement for speculative option work.",
+        "ResimulateData carries DATEE and avatar session snapshots for cloned Game State restoration."
+      ],
+      "activation_rule": "Already live as a branch operation. Wiring must restore DATEE/avatar branch journals from cloned Game State snapshots and keep branch correlations branch-local.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / branch-local DATEE/avatar journals",
+      "pi_agent_session": "yes_restored_from_cloned_game_state_snapshots",
+      "journal_destination": "game_run_prefetch_branch_journals",
+      "context_membership": "branch_local_datee_avatar_agent_contexts",
+      "player_delivery": "not_player_delivered_until_branch_adopted",
+      "visibility": "authorized_game_run_branch_debugger",
+      "retention_policy_key": "game_run.agent_journal.branch.prefetch",
+      "required_owner_ids": [
+        "game_run_id",
+        "branch_id",
+        "agent_session_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "branch_id",
+        "agent_session_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "GameSession.Clone",
+        "GameStateSnapshot.DateeSessionSnapshot",
+        "GameStateSnapshot.AvatarSessionSnapshot"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/GameSession.Clone.cs",
+          "pattern": "public GameSession Clone\\(ILlmAdapter llm\\)"
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/ResimulateData.cs",
+          "pattern": "DateeSessionSnapshot"
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/ResimulateData.cs",
+          "pattern": "AvatarSessionSnapshot"
+        }
+      ],
+      "verifier_group": "core_game_run_branch_live"
+    },
+    {
+      "id": "game.speculation.option-branch",
+      "status": "live_production",
+      "status_evidence": [
+        "GameSession.Clone supports speculative replay against cloned Game State and replacement LLM adapters.",
+        "LlmConversationSessionSnapshot is the provider-neutral state artifact used by branch-local DATEE/avatar journals."
+      ],
+      "activation_rule": "Already live as speculative gameplay. Wiring must restore branch-local DATEE/avatar journals from cloned Game State snapshots and must not persist branch records as mainline journals unless adopted.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / branch-local DATEE/avatar journals",
+      "pi_agent_session": "yes_restored_from_cloned_game_state_snapshots",
+      "journal_destination": "game_run_speculation_branch_journals",
+      "context_membership": "branch_local_datee_avatar_agent_contexts",
+      "player_delivery": "not_player_delivered_unless_branch_adopted",
+      "visibility": "authorized_game_run_branch_debugger",
+      "retention_policy_key": "game_run.agent_journal.branch.speculation",
+      "required_owner_ids": [
+        "game_run_id",
+        "branch_id",
+        "agent_session_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "branch_id",
+        "agent_session_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "GameSession.Clone",
+        "LlmConversationSessionSnapshot.PiAgentSessionV1",
+        "GameStateSnapshot.AvatarSessionSnapshot"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/GameSession.Clone.cs",
+          "pattern": "SnapshotRecordingLlmTransport"
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/LlmConversationSessionSnapshot.cs",
+          "pattern": "PiAgentSessionV1"
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Conversation/GameStateSnapshot.cs",
+          "pattern": "AvatarSessionSnapshot"
+        }
+      ],
+      "verifier_group": "core_game_run_branch_live"
+    },
+    {
+      "id": "character.synthesis",
+      "status": "live_production",
+      "status_evidence": [
+        "SequentialSynthesisPipeline coordinates character-creation provider calls.",
+        "Current LLM-backed synthesis generators live under Pinder.SessionSetup and are not Game Run journal entries."
+      ],
+      "activation_rule": "Already live. Wiring must use a character-creation operation journal and must not invent a Game Run ID.",
+      "owner": "character_creation_operation",
+      "owner_description": "character-creation operation journal",
+      "pi_agent_session": "no_game_run_journal",
+      "journal_destination": "character_creation_operation_journal",
+      "context_membership": "character_creation_context_only",
+      "player_delivery": "not_game_run_player_delivery",
+      "visibility": "authorized_character_authoring_debugger",
+      "retention_policy_key": "character_creation.operation_journal",
+      "required_owner_ids": [
+        "character_operation_id"
+      ],
+      "required_correlation_ids": [
+        "character_operation_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SequentialSynthesisPipeline.SynthesizeAsync",
+        "LlmOptionalTextGeneration.RunAsync",
+        "TherapistDiagnosisContract"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/SequentialSynthesisPipeline.cs",
+          "pattern": "SynthesizeAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/LlmBackstoryConsolidator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/LlmPersonalityConsolidator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/LlmBioGenerator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/LlmSequentialStakeGenerator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/Synthesis/LlmTherapistDiagnosisGenerator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/LlmBackstoryGenerator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/LlmStakeGenerator.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.SessionSetup/LlmStakeGenerator.cs",
+          "pattern": "LlmOptionalTextGeneration\\.RunAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.SessionSetup/LlmOutfitDescriber.cs",
+          "pattern": "GenerateAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.SessionSetup/LlmOutfitDescriber.cs",
+          "pattern": "LlmOptionalTextGeneration\\.RunAsync\\("
+        }
+      ],
+      "verifier_group": "core_character_operation_live"
+    },
+    {
+      "id": "admin.temporary-chat",
+      "status": "live_production",
+      "status_evidence": [
+        "Web-owned admin temporary chat path is confirmed by checked-in review notes.",
+        "No Pinder Core implementation is introduced by this contract."
+      ],
+      "activation_rule": "Already live in the host. Wiring must use the separate temporary-chat owner and must not reclassify the path inside Web implementation.",
+      "owner": "admin_temporary_chat_execution",
+      "owner_description": "admin authoring execution / separate temporary-chat owner",
+      "pi_agent_session": "separate_temporary_chat_owner",
+      "journal_destination": "admin_temporary_chat_journal",
+      "context_membership": "admin_authoring_context_only",
+      "player_delivery": "not_player_delivered",
+      "visibility": "authorized_admin_authoring_debugger",
+      "retention_policy_key": "admin.temporary_chat.execution_journal",
+      "required_owner_ids": [
+        "temporary_chat_id",
+        "admin_execution_id"
+      ],
+      "required_correlation_ids": [
+        "temporary_chat_id",
+        "admin_execution_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "character_operation_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "pinder-web.admin.temporary-chat.prompt-provenance"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "web_review_anchor",
+          "file": "docs/agent-journal-invocation-ownership.md",
+          "anchor": "web-review:admin.temporary-chat"
+        }
+      ],
+      "verifier_group": "web_reviewed_external_live"
+    },
+    {
+      "id": "admin.prompt-speculation",
+      "status": "live_production",
+      "status_evidence": [
+        "Web-owned admin prompt speculation path is confirmed by checked-in review notes.",
+        "No Pinder Core implementation is introduced by this contract."
+      ],
+      "activation_rule": "Already live in the host. Wiring must use the separate authoring owner and must not reclassify the path inside Web implementation.",
+      "owner": "admin_prompt_authoring_execution",
+      "owner_description": "admin authoring execution / separate authoring owner",
+      "pi_agent_session": "separate_authoring_owner",
+      "journal_destination": "admin_prompt_speculation_journal",
+      "context_membership": "admin_authoring_context_only",
+      "player_delivery": "not_player_delivered",
+      "visibility": "authorized_admin_authoring_debugger",
+      "retention_policy_key": "admin.prompt_speculation.execution_journal",
+      "required_owner_ids": [
+        "authoring_execution_id",
+        "admin_execution_id"
+      ],
+      "required_correlation_ids": [
+        "authoring_execution_id",
+        "admin_execution_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "character_operation_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "pinder-web.admin.prompt-speculation.prompt-provenance"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "web_review_anchor",
+          "file": "docs/agent-journal-invocation-ownership.md",
+          "anchor": "web-review:admin.prompt-speculation"
+        }
+      ],
+      "verifier_group": "web_reviewed_external_live"
+    },
+    {
+      "id": "narrative.harness",
+      "status": "live_production",
+      "status_evidence": [
+        "HarnessRunner drives the Narrative Harness through ILlmTransport.",
+        "PursuerActor may also drive a second harness-side LLM participant."
+      ],
+      "activation_rule": "Already live. Wiring must use Narrative Harness run ownership and must not attach records to a Game Run Bundle.",
+      "owner": "narrative_harness_run",
+      "owner_description": "Narrative Harness run",
+      "pi_agent_session": "harness_owned",
+      "journal_destination": "narrative_harness_run_journal",
+      "context_membership": "harness_context_only",
+      "player_delivery": "not_game_run_player_delivery",
+      "visibility": "authorized_harness_debugger",
+      "retention_policy_key": "narrative_harness.run_journal",
+      "required_owner_ids": [
+        "harness_run_id"
+      ],
+      "required_correlation_ids": [
+        "harness_run_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "HarnessRunner.BuildCharacterUserMessage",
+        "SessionSystemPromptBuilder.BuildDatee",
+        "RawLlmSession.ParsePhase"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.NarrativeHarness/HarnessRunner.cs",
+          "pattern": "public async Task<HarnessRunResult> RunAsync\\(|_transport\\.SendAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.NarrativeHarness/PursuerActor.cs",
+          "pattern": "CharacterPursuerActor|GenericLlmPursuerActor|_transport\\.SendAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.NarrativeHarness/RecordingLlmTransport.cs",
+          "pattern": "RawLlmSession"
+        }
+      ],
+      "verifier_group": "core_harness_live"
+    },
+    {
+      "id": "session.simulation",
+      "status": "live_production",
+      "status_evidence": [
+        "session-runner LlmPlayerAgent creates a Pi structured transport and sends strategic player choices.",
+        "The path is a simulation run, not a Game Run Agent Journal Bundle member."
+      ],
+      "activation_rule": "Already live. Wiring must use simulation-run ownership and must not attach records to a Game Run Bundle.",
+      "owner": "session_simulation_run",
+      "owner_description": "simulation run",
+      "pi_agent_session": "simulation_owned",
+      "journal_destination": "session_simulation_run_journal",
+      "context_membership": "simulation_agent_context_only",
+      "player_delivery": "simulation_decision_only_not_game_run_player_delivery",
+      "visibility": "authorized_simulation_debugger",
+      "retention_policy_key": "session_simulation.run_journal",
+      "required_owner_ids": [
+        "simulation_run_id"
+      ],
+      "required_correlation_ids": [
+        "simulation_run_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal"
+      ],
+      "forbidden_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id"
+      ],
+      "provenance_builder_ids": [
+        "LlmPlayerAgent.BuildSystemMessage",
+        "LlmPlayerAgent.BuildPrompt",
+        "StructuredLlmRequest:llm-player-pick"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "session-runner/LlmPlayerAgent.cs",
+          "pattern": "public sealed class LlmPlayerAgent|PiProviderTransportFactory\\.Create|SendStructuredAsync\\("
+        }
+      ],
+      "verifier_group": "core_simulation_live"
+    },
+    {
+      "id": "game.delivery.success-improvement",
+      "status": "live_production",
+      "status_evidence": [
+        "DeliveryStage calls GetSuccessImprovementAsync after strong, critical, exceptional, or nat20 success tiers.",
+        "PinderLlmAdapter builds the success improvement envelope and sends it through the primary transport."
+      ],
+      "activation_rule": "Already live. Wiring must create a Game Run Bundle one-shot record and must not mint a Pi Agent Session ID.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / one-shot record",
+      "pi_agent_session": "no",
+      "journal_destination": "game_run_delivery_one_shot_record",
+      "context_membership": "delivery_prompt_only_no_agent_session_context",
+      "player_delivery": "replaces_delivered_player_message_before_datee_response",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.one_shot.delivery.success_improvement",
+      "required_owner_ids": [
+        "game_run_id",
+        "operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "operation_id",
+        "invocation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "PinderLlmAdapter.GetSuccessImprovementAsync",
+        "StatDeliveryInstructions.GetSuccessImprovementPromptTemplate",
+        "SessionSystemPromptBuilder.BuildPlayerAvatar"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs",
+          "pattern": "GetSuccessImprovementAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "GetSuccessImprovementAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/DeliveryStage.cs",
+          "pattern": "GetSuccessImprovementAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live_delivery"
+    },
+    {
+      "id": "game.delivery.horniness-question",
+      "status": "live_production",
+      "status_evidence": [
+        "DeliveryStage calls GetHorninessQuestionAsync on horniness miss appends.",
+        "PinderLlmAdapter builds the horniness question prompt and sends it through the primary transport."
+      ],
+      "activation_rule": "Already live. Wiring must create a Game Run Bundle one-shot append record and must not mint a Pi Agent Session ID.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / one-shot append record",
+      "pi_agent_session": "no",
+      "journal_destination": "game_run_delivery_append_one_shot_record",
+      "context_membership": "delivery_append_prompt_only_no_agent_session_context",
+      "player_delivery": "appends_to_delivered_player_message_before_datee_response",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.one_shot.delivery.horniness_question",
+      "required_owner_ids": [
+        "game_run_id",
+        "operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "operation_id",
+        "invocation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "PinderLlmAdapter.GetHorninessQuestionAsync",
+        "GameDefinition.HorninessPrompt",
+        "SessionSystemPromptBuilder.BuildPlayerAvatar"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs",
+          "pattern": "GetHorninessQuestionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "GetHorninessQuestionAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/DeliveryStage.cs",
+          "pattern": "GetHorninessQuestionAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live_delivery"
+    },
+    {
+      "id": "game.delivery.steering-question",
+      "status": "live_production",
+      "status_evidence": [
+        "SteeringEngine calls GetSteeringQuestionAsync when steering succeeds.",
+        "PinderLlmAdapter builds the steering prompt and sends it through the primary transport."
+      ],
+      "activation_rule": "Already live. Wiring must create a Game Run Bundle one-shot append record and must not mint a Pi Agent Session ID.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / one-shot append record",
+      "pi_agent_session": "no",
+      "journal_destination": "game_run_delivery_append_one_shot_record",
+      "context_membership": "delivery_append_prompt_only_no_agent_session_context",
+      "player_delivery": "appends_to_delivered_player_message_before_datee_response",
+      "visibility": "authorized_game_run_agent_journal_debugger",
+      "retention_policy_key": "game_run.agent_journal.one_shot.delivery.steering_question",
+      "required_owner_ids": [
+        "game_run_id",
+        "operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "operation_id",
+        "invocation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "PinderLlmAdapter.GetSteeringQuestionAsync",
+        "GameDefinition.SteeringPrompt",
+        "SessionSystemPromptBuilder.BuildPlayerAvatar"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/IStatefulLlmAdapter.cs",
+          "pattern": "GetSteeringQuestionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "GetSteeringQuestionAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/SteeringEngine.cs",
+          "pattern": "GetSteeringQuestionAsync\\("
+        }
+      ],
+      "verifier_group": "core_game_run_live_delivery"
+    },
+    {
+      "id": "game.datee.interest-change-beat",
+      "status": "provider_capable_dormant",
+      "status_evidence": [
+        "ILlmAdapter and PinderLlmAdapter still expose GetInterestChangeBeatAsync.",
+        "The static verifier proves there is no production caller outside declarations, NullLlmAdapter, and the provider implementation."
+      ],
+      "activation_rule": "Dormant guard: if any production caller of GetInterestChangeBeatAsync appears, verification fails and the path must return to planning before runtime journal wiring is added.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / dormant DATEE interest-change one-shot",
+      "pi_agent_session": "no_runtime_journal_until_replanned",
+      "journal_destination": "none_until_replanned",
+      "context_membership": "provider_capable_no_runtime_context_membership",
+      "player_delivery": "none_until_reactivated",
+      "visibility": "not_visible_until_replanned",
+      "retention_policy_key": "game_run.agent_journal.dormant.datee.interest_change_beat",
+      "required_owner_ids": [
+        "game_run_id",
+        "operation_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "operation_id",
+        "invocation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "agent_session_id",
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SessionDocumentBuilder.BuildInterestChangeBeatPrompt",
+        "SessionSystemPromptBuilder.BuildDatee",
+        "PinderLlmAdapter.GetInterestChangeBeatAsync"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/ILlmAdapter.cs",
+          "pattern": "GetInterestChangeBeatAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
+          "pattern": "public async Task<string\\?> GetInterestChangeBeatAsync\\("
+        },
+        {
+          "kind": "no_production_caller",
+          "search_roots": [
+            "src",
+            "session-runner",
+            "tools"
+          ],
+          "pattern": "GetInterestChangeBeatAsync\\(",
+          "allowed_files": [
+            "src/Pinder.Core/Interfaces/ILlmAdapter.cs",
+            "src/Pinder.Core/Conversation/NullLlmAdapter.cs",
+            "src/Pinder.LlmAdapters/PinderLlmAdapter.cs"
+          ]
+        }
+      ],
+      "verifier_group": "core_game_run_dormant_guard"
+    }
+  ]
+}
