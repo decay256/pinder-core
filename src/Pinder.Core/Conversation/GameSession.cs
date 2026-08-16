@@ -150,6 +150,7 @@ namespace Pinder.Core.Conversation
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
         private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
+        private readonly GameRunAgentJournalContext _agentJournalContext;
 
         internal GameSessionState State => _state;
 
@@ -200,6 +201,9 @@ namespace Pinder.Core.Conversation
             _hungerForIntimacy = config.HungerForIntimacy;
             _terrorOfRejection = config.TerrorOfRejection;
             _agentJournalOneShotContextFactory = config.AgentJournalOneShotContextFactory;
+            _agentJournalContext = config.AgentJournalContext ?? new GameRunAgentJournalContext(
+                "game-run-" + Guid.NewGuid().ToString("N"),
+                "game-session-" + Guid.NewGuid().ToString("N"));
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -307,7 +311,7 @@ namespace Pinder.Core.Conversation
                 _maxDeliveryWords,
                 _agentJournalOneShotContextFactory);
 
-            var dateeResponseStage = new DateeResponseStage(_llm, _onDiagnostic);
+            var dateeResponseStage = new DateeResponseStage(_llm, _onDiagnostic, _agentJournalContext);
 
             return new TurnOrchestrator(
                 _llm,
@@ -323,7 +327,8 @@ namespace Pinder.Core.Conversation
                 _onDiagnostic,
                 _hungerForIntimacy,
                 _terrorOfRejection,
-                _agentJournalOneShotContextFactory);
+            _agentJournalOneShotContextFactory,
+                _agentJournalContext);
         }
     }
 }

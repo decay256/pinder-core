@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Diagnostics.AgentJournals;
+using Pinder.LlmAdapters.AgentJournals;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Text;
@@ -65,6 +67,7 @@ namespace Pinder.LlmAdapters
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
+                    AgentJournalCallScope? journal = null;
                     try
                     {
                         var attemptMetadata = BuildEmotionalDirectorMetadata(
@@ -72,6 +75,19 @@ namespace Pinder.LlmAdapters
                             attemptSystemPrompt);
                         systemDocument = GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(
                             attemptSystemPrompt);
+                        journal = await StartConversationJournalAttemptAsync(
+                                GameRunConversationJournalInventory.EmotionalDirector,
+                                LlmPhase.EmotionalDirector,
+                                context.CurrentTurn,
+                                attempt,
+                                maxAttempts,
+                                "datee-private-analysis",
+                                systemDocument,
+                                userDocument,
+                                branch: privateBranch,
+                                branchKind: "datee-private-analysis",
+                                correlationContext: context.AgentJournalContext)
+                            .ConfigureAwait(false);
                         EmotionalDirectorDirection direction;
                         string acceptedResponseText;
                         bool canUseStructured = _transport is IStructuredLlmTransport
@@ -143,17 +159,22 @@ namespace Pinder.LlmAdapters
                                 turnId: context.CurrentTurn);
                         }
 
+                        string? semanticEntryId = null;
                         if (privateBranch != null)
                         {
-                            await privateBranch.AppendAcceptedExchangeAsync(
+                            PiAcceptedExchangeEntryIds entryIds = await privateBranch.AppendAcceptedExchangeAsync(
                                 userMessage,
                                 acceptedResponseText).ConfigureAwait(false);
+                            semanticEntryId = entryIds.AssistantEntryId;
                         }
+                        await journal.CompleteAcceptedAsync(acceptedResponseText, semanticEntryId).ConfigureAwait(false);
 
                         return SemanticOutputRecoveryAttemptResult<EmotionalDirectorDirection, LlmContractException>.Accepted(direction);
                     }
                     catch (LlmContractException ex)
                     {
+                        if (journal != null)
+                            await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
                         if (attempt < maxAttempts)
                         {
                             attemptSystemPrompt = promptCompiler.CompileDirectorRetrySystemPrompt(
@@ -161,6 +182,18 @@ namespace Pinder.LlmAdapters
                                 ex.Reason);
                         }
                         return SemanticOutputRecoveryAttemptResult<EmotionalDirectorDirection, LlmContractException>.Rejected(ex);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        if (journal != null)
+                            await journal.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        if (journal != null)
+                            await journal.CompleteProviderFailedAsync(ex.GetType().Name).ConfigureAwait(false);
+                        throw;
                     }
                 },
                 delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(

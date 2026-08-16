@@ -1,0 +1,13 @@
+{
+  "schema_version": "core-1375-semantic-link-fixture.v2",
+  "scenario": "semantic_link_context_isolation",
+  "expected_custom_entries": [
+    "pinder.llm-invocation.v1",
+    "pinder.llm-result.v1",
+    "pinder.message-link.v1"
+  ],
+  "visible_datee_link": true,
+  "private_director_link": true,
+  "provider_context_messages_added": 0,
+  "player_history_messages_added": 0
+}

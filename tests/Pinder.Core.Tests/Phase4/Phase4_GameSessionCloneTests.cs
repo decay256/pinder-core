@@ -246,6 +246,7 @@ namespace Pinder.Core.Tests.Phase4
                 "_onShadowFilterTrace",     // delegate (stateless callback)
                 "_onRuleResolution",        // delegate (stateless callback)
                 "_onDiagnostic",            // delegate (stateless callback)
+                "_agentJournalContext",      // immutable per-Game-Run correlation
             };
 
             var missing = new List<string>();

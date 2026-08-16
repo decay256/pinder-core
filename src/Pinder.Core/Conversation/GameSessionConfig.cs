@@ -149,11 +149,14 @@ namespace Pinder.Core.Conversation
         /// <summary>Optional override for Terror Of Rejection.</summary>
         public int TerrorOfRejection { get; }
 
-        /// <summary>
+/// <summary>
         /// Host-owned factory for live no-session Game Run LLM correlation.
         /// Null preserves excluded, harness, simulation, and legacy owners.
         /// </summary>
         public IAgentJournalOneShotContextFactory? AgentJournalOneShotContextFactory { get; }
+
+        /// <summary>Immutable correlation for this Game Run's conversational Agent Journal.</summary>
+        public GameRunAgentJournalContext? AgentJournalContext { get; }
 
         public GameSessionConfig(
             IGameClock? clock = null,
@@ -180,7 +183,8 @@ namespace Pinder.Core.Conversation
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null,
-            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null,
+            GameRunAgentJournalContext? agentJournalContext = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -207,6 +211,7 @@ namespace Pinder.Core.Conversation
             ActiveTrapInterestPenalty = activeTrapInterestPenalty;
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
+            AgentJournalContext = agentJournalContext;
         }
     }
 }

@@ -126,6 +126,11 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             AddMissing(record.SemanticEntryId, "$.semantic_entry_id", errors);
             AddMissing(record.InvocationId, "$.invocation_id", errors);
             AddMissing(record.AgentSessionId, "$.agent_session_id", errors);
+            AddOpaqueIdentifier(record.SemanticEntryId, "$.semantic_entry_id", errors);
+            AddOpaqueIdentifier(record.InvocationId, "$.invocation_id", errors);
+            AddOpaqueIdentifier(record.AgentSessionId, "$.agent_session_id", errors);
+            AddOpaqueIdentifier(record.TurnId, "$.turn_id", errors);
+            AddOpaqueIdentifier(record.BranchId, "$.branch_id", errors);
             return AgentJournalValidationResult.From(errors);
         }
 
@@ -160,6 +165,14 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             }
             AddMissing(correlation.InvocationId, path + ".invocation_id", errors);
             AddMissing(correlation.OperationId, path + ".operation_id", errors);
+            AddOpaqueIdentifier(correlation.GameRunId, path + ".game_run_id", errors);
+            AddOpaqueIdentifier(correlation.AgentSessionId, path + ".agent_session_id", errors);
+            AddOpaqueIdentifier(correlation.InvocationId, path + ".invocation_id", errors);
+            AddOpaqueIdentifier(correlation.OperationId, path + ".operation_id", errors);
+            AddOpaqueIdentifier(correlation.AttemptId, path + ".attempt_id", errors);
+            AddOpaqueIdentifier(correlation.RequestId, path + ".request_id", errors);
+            AddOpaqueIdentifier(correlation.TurnId, path + ".turn_id", errors);
+            AddOpaqueIdentifier(correlation.BranchId, path + ".branch_id", errors);
             if (correlation.AttemptOrdinal < 1)
             {
                 errors.Add(new AgentJournalValidationError(InvalidAttemptOrdinal, path + ".attempt_ordinal"));
@@ -271,11 +284,11 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             }
             AddMissing(source.SourceId, path + ".source_id", errors);
             AddMissing(source.KeyPath, path + ".key_path", errors);
-            AddForbiddenLink(source.SourceId, path + ".source_id", errors);
-            AddForbiddenLink(source.KeyPath, path + ".key_path", errors);
-            AddForbiddenLink(source.Revision, path + ".revision", errors);
-            AddForbiddenLink(source.ContentHash, path + ".content_hash", errors);
-            AddForbiddenLink(source.EditorTargetId, path + ".editor_target_id", errors);
+            AddOpaqueIdentifier(source.SourceId, path + ".source_id", errors);
+            AddOpaqueIdentifier(source.KeyPath, path + ".key_path", errors);
+            AddOpaqueIdentifier(source.Revision, path + ".revision", errors);
+            AddOpaqueIdentifier(source.ContentHash, path + ".content_hash", errors);
+            AddOpaqueIdentifier(source.EditorTargetId, path + ".editor_target_id", errors);
         }
 
         private static void ValidateTerminalState(LlmResultRecord record, ICollection<AgentJournalValidationError> errors)
@@ -324,10 +337,22 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             }
         }
 
-        private static void AddForbiddenLink(string? value, string path, ICollection<AgentJournalValidationError> errors)
+        private static void AddOpaqueIdentifier(
+            string? value,
+            string path,
+            ICollection<AgentJournalValidationError> errors)
         {
             string? errorCode = AgentJournalSourceIdentifierPolicy.GetErrorCode(value);
             if (errorCode != null)
+            {
+                errors.Add(new AgentJournalValidationError(errorCode, path));
+            }
+        }
+
+        private static void AddForbiddenLink(string? value, string path, ICollection<AgentJournalValidationError> errors)
+        {
+            string? errorCode = AgentJournalSourceIdentifierPolicy.GetErrorCode(value);
+            if (string.Equals(errorCode, ForbiddenSourceLink, StringComparison.Ordinal))
             {
                 errors.Add(new AgentJournalValidationError(errorCode, path));
             }

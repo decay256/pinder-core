@@ -32,6 +32,7 @@ namespace Pinder.Core.Conversation
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
         private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
+        private readonly GameRunAgentJournalContext? _agentJournalContext;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
@@ -47,7 +48,8 @@ namespace Pinder.Core.Conversation
             Action<OperationalDiagnosticEvent>? onDiagnostic = null,
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0,
-            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null,
+            GameRunAgentJournalContext? agentJournalContext = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -64,6 +66,7 @@ namespace Pinder.Core.Conversation
             _hungerForIntimacy = hungerForIntimacy;
             _terrorOfRejection = terrorOfRejection;
             _agentJournalOneShotContextFactory = agentJournalOneShotContextFactory;
+            _agentJournalContext = agentJournalContext;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -256,7 +259,8 @@ namespace Pinder.Core.Conversation
                     {
                         ["available_stat_count"] = availableStats.Length.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         ["max_option_count"] = _maxDialogueOptions.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                    }));
+                    }),
+                agentJournalContext: _agentJournalContext);
 
             // Get dialogue options from LLM
             string dialogueCallId = OperationalDiagnostics.CreateCallId();

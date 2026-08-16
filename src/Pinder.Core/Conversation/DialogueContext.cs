@@ -100,7 +100,10 @@ namespace Pinder.Core.Conversation
         public int? DateeHungerForIntimacy { get; }
         public int? DateeTerrorOfRejection { get; }
 
-        public AgentJournalOneShotContext? AgentJournal { get; }
+public AgentJournalOneShotContext? AgentJournal { get; }
+
+        /// <summary>Per-Game-Run journal correlation supplied by the owning session.</summary>
+        public GameRunAgentJournalContext? AgentJournalContext { get; }
 
         public DialogueContext(
             string playerAvatarPrompt,
@@ -131,7 +134,8 @@ namespace Pinder.Core.Conversation
             int? dateeHungerForIntimacy = null,
             int? dateeTerrorOfRejection = null,
             InterestState? currentInterestState = null,
-            AgentJournalOneShotContext? agentJournal = null)
+AgentJournalOneShotContext? agentJournal = null,
+            GameRunAgentJournalContext? agentJournalContext = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -161,7 +165,8 @@ namespace Pinder.Core.Conversation
             PlayerTerrorOfRejection = playerTerrorOfRejection;
             DateeHungerForIntimacy = dateeHungerForIntimacy;
             DateeTerrorOfRejection = dateeTerrorOfRejection;
-            AgentJournal = agentJournal;
+AgentJournal = agentJournal;
+            AgentJournalContext = agentJournalContext;
         }
     }
 }

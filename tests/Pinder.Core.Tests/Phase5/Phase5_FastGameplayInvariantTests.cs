@@ -182,11 +182,17 @@ namespace Pinder.Core.Tests.Phase5
 
             var pools = parent.EnsureAllDicePoolsFilled();
 
-            var c1 = parent.Clone(Phase0Fixtures.MakeAdapter(t1));
+            var c1 = parent.Clone(
+                Phase0Fixtures.MakeAdapter(t1),
+                GameRunConversationBranchKind.Prefetch,
+                "fast-prefetch-1");
             c1.InjectNextDicePool(pools[0]);
             var r1 = await c1.ResolveTurnAsync(0);
 
-            var c2 = parent.Clone(Phase0Fixtures.MakeAdapter(t2));
+            var c2 = parent.Clone(
+                Phase0Fixtures.MakeAdapter(t2),
+                GameRunConversationBranchKind.Speculative,
+                "fast-speculative-2");
             c2.InjectNextDicePool(pools[1]);
             var r2 = await c2.ResolveTurnAsync(1);
 
@@ -214,7 +220,10 @@ namespace Pinder.Core.Tests.Phase5
                 var t = new RecordingLlmTransport { DefaultResponse = "" };
                 t.QueueDelivery($"d{i}");
                 t.QueueDatee($"o{i}");
-                var c = parent.Clone(Phase0Fixtures.MakeAdapter(t));
+                var c = parent.Clone(
+                    Phase0Fixtures.MakeAdapter(t),
+                    GameRunConversationBranchKind.Speculative,
+                    $"fast-speculative-{i}");
                 c.InjectNextDicePool(pools[i % pools.Length]);
                 clones.Add(c);
             }
@@ -235,6 +244,23 @@ namespace Pinder.Core.Tests.Phase5
             // Parent untouched.
             var snap = parent.CreateSnapshot();
             Assert.Equal(0, snap.TurnNumber);
+        }
+
+        [Fact]
+        public void AdapterReplacingClone_RejectsAmbiguousBranchPurpose()
+        {
+            var (parent, _) = MakeFreshParent();
+            var transport = new RecordingLlmTransport { DefaultResponse = "" };
+            var adapter = Phase0Fixtures.MakeAdapter(transport);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => parent.Clone(
+                adapter,
+                GameRunConversationBranchKind.Main,
+                "ambiguous-main"));
+            Assert.Throws<ArgumentOutOfRangeException>(() => parent.Clone(
+                adapter,
+                (GameRunConversationBranchKind)99,
+                "ambiguous-unknown"));
         }
 
         // 6. EnsureAllDicePoolsFilled is idempotent
