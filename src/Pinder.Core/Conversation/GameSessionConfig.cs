@@ -1,5 +1,6 @@
 using System;
 using Pinder.Core.I18n;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 
@@ -148,6 +149,12 @@ namespace Pinder.Core.Conversation
         /// <summary>Optional override for Terror Of Rejection.</summary>
         public int TerrorOfRejection { get; }
 
+        /// <summary>
+        /// Host-owned factory for live no-session Game Run LLM correlation.
+        /// Null preserves excluded, harness, simulation, and legacy owners.
+        /// </summary>
+        public IAgentJournalOneShotContextFactory? AgentJournalOneShotContextFactory { get; }
+
         public GameSessionConfig(
             IGameClock? clock = null,
             SessionShadowTracker? playerShadows = null,
@@ -172,7 +179,8 @@ namespace Pinder.Core.Conversation
             double activeTrapInterestPenalty = -0.25,
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0,
-            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
         {
             Clock = clock;
             PlayerShadows = playerShadows;
@@ -191,6 +199,7 @@ namespace Pinder.Core.Conversation
             OnShadowFilterTrace = onShadowFilterTrace;
             OnRuleResolution = onRuleResolution;
             OnDiagnostic = onDiagnostic;
+            AgentJournalOneShotContextFactory = agentJournalOneShotContextFactory;
             ConsequenceCatalog = consequenceCatalog;
             MaxDialogueOptions = maxDialogueOptions;
             MaxDeliveryWords = maxDeliveryWords;

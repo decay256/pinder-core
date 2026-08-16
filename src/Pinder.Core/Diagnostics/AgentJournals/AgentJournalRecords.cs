@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Pinder.Core.Diagnostics.AgentJournals
 {
@@ -7,14 +8,19 @@ namespace Pinder.Core.Diagnostics.AgentJournals
     {
         public AgentJournalCorrelationIds(
             string gameRunId,
-            string agentSessionId,
+            string? agentSessionId,
             string invocationId,
             string operationId,
             int attemptOrdinal,
             string? attemptId = null,
             string? requestId = null,
             string? turnId = null,
-            string? branchId = null)
+            string? branchId = null,
+            string? owner = null,
+            string? journalDestination = null,
+            string? executionClass = null,
+            string? outputLinkId = null,
+            IReadOnlyDictionary<string, string>? context = null)
         {
             GameRunId = gameRunId;
             AgentSessionId = agentSessionId;
@@ -25,10 +31,15 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             RequestId = requestId;
             TurnId = turnId;
             BranchId = branchId;
+            Owner = owner;
+            JournalDestination = journalDestination;
+            ExecutionClass = executionClass;
+            OutputLinkId = outputLinkId;
+            Context = CopyContext(context);
         }
 
         public string GameRunId { get; }
-        public string AgentSessionId { get; }
+        public string? AgentSessionId { get; }
         public string InvocationId { get; }
         public string OperationId { get; }
         public int AttemptOrdinal { get; }
@@ -36,6 +47,168 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public string? RequestId { get; }
         public string? TurnId { get; }
         public string? BranchId { get; }
+        public string? Owner { get; }
+        public string? JournalDestination { get; }
+        public string? ExecutionClass { get; }
+        public string? OutputLinkId { get; }
+        public IReadOnlyDictionary<string, string>? Context { get; }
+
+        private static IReadOnlyDictionary<string, string>? CopyContext(
+            IReadOnlyDictionary<string, string>? context)
+        {
+            if (context == null)
+            {
+                return null;
+            }
+
+            var copy = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> entry in context)
+            {
+                copy[entry.Key] = entry.Value;
+            }
+
+            return copy;
+        }
+    }
+
+    public sealed class AgentJournalOneShotContext
+    {
+        public const string GameRunBundleOwner = "game_run_bundle";
+
+        public AgentJournalOneShotContext(
+            string gameRunId,
+            string operationId,
+            string executionClass,
+            string journalDestination,
+            string modelId,
+            string? turnId = null,
+            string? outputLinkId = null,
+            IReadOnlyDictionary<string, string>? context = null,
+            string? requestId = null,
+            string? invocationIdPrefix = null,
+            string owner = GameRunBundleOwner)
+        {
+            RequireId(gameRunId, nameof(gameRunId));
+            RequireId(operationId, nameof(operationId));
+            RequireId(executionClass, nameof(executionClass));
+            RequireId(journalDestination, nameof(journalDestination));
+            RequireId(modelId, nameof(modelId));
+            RequireId(owner, nameof(owner));
+            RequireOpaqueId(gameRunId, nameof(gameRunId));
+            RequireOpaqueId(operationId, nameof(operationId));
+            RequireOpaqueId(executionClass, nameof(executionClass));
+            RequireOpaqueId(journalDestination, nameof(journalDestination));
+            RequireOpaqueId(turnId, nameof(turnId));
+            RequireOpaqueId(outputLinkId, nameof(outputLinkId));
+            RequireOpaqueId(requestId, nameof(requestId));
+            RequireOpaqueId(invocationIdPrefix, nameof(invocationIdPrefix));
+            RequireOpaqueId(owner, nameof(owner));
+            if (context != null)
+            {
+                foreach (KeyValuePair<string, string> entry in context)
+                {
+                    RequireId(entry.Key, nameof(context));
+                    RequireId(entry.Value, nameof(context));
+                    RequireOpaqueId(entry.Key, nameof(context));
+                    RequireOpaqueId(entry.Value, nameof(context));
+                }
+            }
+            if (!string.Equals(owner, GameRunBundleOwner, StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "Game Run one-shot journal owner must be '" + GameRunBundleOwner + "'.",
+                    nameof(owner));
+            }
+
+            GameRunId = gameRunId;
+            OperationId = operationId;
+            ExecutionClass = executionClass;
+            JournalDestination = journalDestination;
+            ModelId = modelId;
+            TurnId = turnId;
+            OutputLinkId = outputLinkId;
+            RequestId = requestId;
+            InvocationIdPrefix = string.IsNullOrWhiteSpace(invocationIdPrefix)
+                ? operationId
+                : invocationIdPrefix!;
+            Owner = owner;
+            Context = CopyContext(context);
+        }
+
+        public string GameRunId { get; }
+        public string OperationId { get; }
+        public string ExecutionClass { get; }
+        public string JournalDestination { get; }
+        public string ModelId { get; }
+        public string? TurnId { get; }
+        public string? OutputLinkId { get; }
+        public string? RequestId { get; }
+        public string InvocationIdPrefix { get; }
+        public string Owner { get; }
+        public IReadOnlyDictionary<string, string>? Context { get; }
+
+        private static IReadOnlyDictionary<string, string>? CopyContext(
+            IReadOnlyDictionary<string, string>? context)
+        {
+            if (context == null)
+            {
+                return null;
+            }
+
+            var copy = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> entry in context)
+            {
+                copy[entry.Key] = entry.Value;
+            }
+
+            return copy;
+        }
+
+        public AgentJournalCorrelationIds ToCorrelation(int attemptOrdinal)
+        {
+            if (attemptOrdinal < 1)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(attemptOrdinal),
+                    "Agent journal attempt ordinal must be positive.");
+            }
+
+            string attemptId = "attempt-" + attemptOrdinal.ToString(CultureInfo.InvariantCulture);
+            return new AgentJournalCorrelationIds(
+                GameRunId,
+                agentSessionId: null,
+                invocationId: InvocationIdPrefix + "." + attemptId,
+                operationId: OperationId,
+                attemptOrdinal: attemptOrdinal,
+                attemptId: attemptId,
+                requestId: RequestId,
+                turnId: TurnId,
+                branchId: null,
+                owner: Owner,
+                journalDestination: JournalDestination,
+                executionClass: ExecutionClass,
+                outputLinkId: OutputLinkId,
+                context: Context);
+        }
+
+        private static void RequireId(string? value, string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException(parameterName + " is required.", parameterName);
+            }
+        }
+
+        private static void RequireOpaqueId(string? value, string parameterName)
+        {
+            string? errorCode = AgentJournalSourceIdentifierPolicy.GetErrorCode(value);
+            if (errorCode != null)
+            {
+                throw new ArgumentException(
+                    parameterName + " violates the agent journal opaque identifier policy: " + errorCode + ".",
+                    parameterName);
+            }
+        }
     }
 
     public sealed class AgentJournalSourceIdentity

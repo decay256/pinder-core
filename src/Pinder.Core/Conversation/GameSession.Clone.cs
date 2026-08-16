@@ -93,6 +93,11 @@ namespace Pinder.Core.Conversation
             _onShadowFilterTrace = src._onShadowFilterTrace;
             _onRuleResolution = src._onRuleResolution;
             _onDiagnostic = src._onDiagnostic;
+            // Public speculative clones retain their simulation owner boundary.
+            // Required-turn transaction clones remain part of the live Game Run operation.
+            _agentJournalOneShotContextFactory = forRequiredTurnTransaction
+                ? src._agentJournalOneShotContextFactory
+                : null;
             _consequenceCatalog = src._consequenceCatalog;
             _maxDialogueOptions = src._maxDialogueOptions;
             _maxDeliveryWords = src._maxDeliveryWords;
@@ -122,7 +127,7 @@ namespace Pinder.Core.Conversation
                 : ForkableRandom.ForkForIndependentClone(
                     src._steeringEngine.SteeringRngForCloneOnly,
                     nameof(GameSessionConfig.SteeringRng));
-            _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
+            _steeringEngine  = new SteeringEngine(clonedSteeringRng, _onDiagnostic, _agentJournalOneShotContextFactory);
             _horninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             _statDrawRng     = src._statDrawRng != null
@@ -287,7 +292,8 @@ namespace Pinder.Core.Conversation
             // constructor above for why this no longer reflects into System.Random.
             var clonedSteeringRng = ForkableRandom.ForkForRequiredTurnTransaction(
                 src._steeringEngine.SteeringRngForCloneOnly, nameof(GameSessionConfig.SteeringRng));
-            var preparedSteeringEngine = new SteeringEngine(clonedSteeringRng, _onDiagnostic);
+            var preparedSteeringEngine = new SteeringEngine(
+                clonedSteeringRng, _onDiagnostic, _agentJournalOneShotContextFactory);
             var preparedHorninessEngine = new HorninessEngine(clonedSteeringRng, _consequenceCatalog, _horninessDcBias);
             var preparedShadowCheckEngine = new ShadowCheckEngine(clonedSteeringRng, _consequenceCatalog, _shadowDcBias);
             var preparedStatDrawRng = src._statDrawRng != null

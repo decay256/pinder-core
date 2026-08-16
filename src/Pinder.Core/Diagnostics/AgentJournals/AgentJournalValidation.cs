@@ -51,6 +51,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string CredentialShapedSourceIdentifier = "credential_shaped_source_identifier";
         public const string SurrogateSplitRange = "surrogate_split_range";
         public const string NegativeUsage = "negative_usage";
+        public const string ForbiddenOwnerId = "forbidden_owner_id";
 
         public static AgentJournalValidationResult Validate(LlmInvocationRecord record)
         {
@@ -140,7 +141,23 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             }
 
             AddMissing(correlation.GameRunId, path + ".game_run_id", errors);
-            AddMissing(correlation.AgentSessionId, path + ".agent_session_id", errors);
+            bool hasNoSessionOwner = !string.IsNullOrWhiteSpace(correlation.Owner)
+                || !string.IsNullOrWhiteSpace(correlation.JournalDestination)
+                || !string.IsNullOrWhiteSpace(correlation.ExecutionClass);
+            if (hasNoSessionOwner)
+            {
+                AddMissing(correlation.Owner, path + ".owner", errors);
+                AddMissing(correlation.JournalDestination, path + ".journal_destination", errors);
+                AddMissing(correlation.ExecutionClass, path + ".execution_class", errors);
+                if (!string.IsNullOrWhiteSpace(correlation.AgentSessionId))
+                {
+                    errors.Add(new AgentJournalValidationError(ForbiddenOwnerId, path + ".agent_session_id"));
+                }
+            }
+            else
+            {
+                AddMissing(correlation.AgentSessionId, path + ".agent_session_id", errors);
+            }
             AddMissing(correlation.InvocationId, path + ".invocation_id", errors);
             AddMissing(correlation.OperationId, path + ".operation_id", errors);
             if (correlation.AttemptOrdinal < 1)
@@ -148,6 +165,28 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 errors.Add(new AgentJournalValidationError(InvalidAttemptOrdinal, path + ".attempt_ordinal"));
             }
             AddMissing(correlation.AttemptId, path + ".attempt_id", errors);
+            AddForbiddenLink(correlation.GameRunId, path + ".game_run_id", errors);
+            AddForbiddenLink(correlation.AgentSessionId, path + ".agent_session_id", errors);
+            AddForbiddenLink(correlation.InvocationId, path + ".invocation_id", errors);
+            AddForbiddenLink(correlation.OperationId, path + ".operation_id", errors);
+            AddForbiddenLink(correlation.AttemptId, path + ".attempt_id", errors);
+            AddForbiddenLink(correlation.RequestId, path + ".request_id", errors);
+            AddForbiddenLink(correlation.TurnId, path + ".turn_id", errors);
+            AddForbiddenLink(correlation.BranchId, path + ".branch_id", errors);
+            AddForbiddenLink(correlation.Owner, path + ".owner", errors);
+            AddForbiddenLink(correlation.JournalDestination, path + ".journal_destination", errors);
+            AddForbiddenLink(correlation.ExecutionClass, path + ".execution_class", errors);
+            AddForbiddenLink(correlation.OutputLinkId, path + ".output_link_id", errors);
+            if (correlation.Context != null)
+            {
+                foreach (KeyValuePair<string, string> entry in correlation.Context)
+                {
+                    AddMissing(entry.Key, path + ".context.key", errors);
+                    AddMissing(entry.Value, path + ".context." + entry.Key, errors);
+                    AddForbiddenLink(entry.Key, path + ".context.key", errors);
+                    AddForbiddenLink(entry.Value, path + ".context." + entry.Key, errors);
+                }
+            }
         }
 
         private static void ValidateDocument(

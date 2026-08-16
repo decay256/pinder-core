@@ -8,6 +8,7 @@ using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
 using Pinder.Core.Text;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -35,6 +36,7 @@ namespace Pinder.Core.Conversation
         private readonly Action<TextLayerNoopEvent>? _onTextLayerNoop;
         private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
         private readonly int _maxDeliveryWords;
+        private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
 
         public DeliveryStage(
             ILlmAdapter llm,
@@ -45,7 +47,8 @@ namespace Pinder.Core.Conversation
             IStatDeliveryInstructionProvider? statDeliveryInstructions,
             Action<TextLayerNoopEvent>? onTextLayerNoop,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
-            int maxDeliveryWords)
+            int maxDeliveryWords,
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _rules = rules;
@@ -56,6 +59,7 @@ namespace Pinder.Core.Conversation
             _onTextLayerNoop = onTextLayerNoop;
             _onDiagnostic = onDiagnostic;
             _maxDeliveryWords = maxDeliveryWords;
+            _agentJournalOneShotContextFactory = agentJournalOneShotContextFactory;
         }
 
         public async Task<DeliveryStageResult> ExecuteAsync(
@@ -92,7 +96,7 @@ namespace Pinder.Core.Conversation
             string originalIntendedText = chosenOption.IntendedText ?? "";
             progress?.Report(new TurnProgressEvent(TurnProgressStage.SteeringStarted));
             SteeringRollResult steeringResult = await _steeringEngine.AttemptSteeringRollAsync(
-                originalIntendedText, player, datee, _llm, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state), ct).ConfigureAwait(false);
+                originalIntendedText, player, datee, _llm, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state), ct, state.TurnNumber).ConfigureAwait(false);
             progress?.Report(new TurnProgressEvent(
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
@@ -209,7 +213,19 @@ namespace Pinder.Core.Conversation
                             beforeImprovement,
                             chosenOption.Stat,
                             tierKey,
-                            TurnOrchestratorHelpers.BuildHistoryForLlmContext(state));
+                            TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
+                            agentJournal: CreateAgentJournalContext(
+                                GameRunOneShotJournalTaxonomy.SuccessImprovement,
+                                GameRunOneShotJournalTaxonomy.GameRunDeliveryOneShotRecord,
+                                state.TurnNumber,
+                                "success-improvement",
+                                new Dictionary<string, string>
+                                {
+                                    ["selected_stat"] = chosenOption.Stat.ToString(),
+                                    ["success_tier"] = tierKey,
+                                    ["check_total"] = rollResult.FinalTotal.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                    ["check_dc"] = rollResult.DC.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                }));
                         
                         improved = await statefulAdapter.GetSuccessImprovementAsync(context, ct).ConfigureAwait(false);
                     }
@@ -418,7 +434,27 @@ namespace Pinder.Core.Conversation
                 string question = null;
                 try
                 {
-                    question = await horninessStateful.GetHorninessQuestionAsync(new HorninessQuestionContext(player.AssembledSystemPrompt, datee.DisplayName, player.DisplayName, beforeHorniness, TurnOrchestratorHelpers.BuildHistoryForLlmContext(state)), ct).ConfigureAwait(false);
+                    question = await horninessStateful.GetHorninessQuestionAsync(
+                        new HorninessQuestionContext(
+                            player.AssembledSystemPrompt,
+                            datee.DisplayName,
+                            player.DisplayName,
+                            beforeHorniness,
+                            TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
+                            agentJournal: CreateAgentJournalContext(
+                                GameRunOneShotJournalTaxonomy.HorninessQuestion,
+                                GameRunOneShotJournalTaxonomy.GameRunDeliveryAppendOneShotRecord,
+                                state.TurnNumber,
+                                "horniness-question",
+                                new Dictionary<string, string>
+                                {
+                                    ["check_kind"] = "horniness",
+                                    ["check_roll"] = horninessCheckResult.Roll.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                    ["check_dc"] = horninessCheckResult.DC.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                                    ["check_tier"] = horninessCheckResult.Tier.ToString(),
+                                    ["selected_stat"] = chosenOption.Stat.ToString(),
+                                })),
+                        ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
                 catch (Exception ex)
@@ -514,6 +550,31 @@ namespace Pinder.Core.Conversation
                     state.TurnNumber);
                 throw;
             }
+        }
+
+        private AgentJournalOneShotContext? CreateAgentJournalContext(
+            string executionClass,
+            string destination,
+            int turnNumber,
+            string outputKind,
+            IReadOnlyDictionary<string, string> context)
+        {
+            if (_agentJournalOneShotContextFactory == null)
+            {
+                return null;
+            }
+
+            string turnId = "turn-" + turnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string operationId = executionClass + "." + turnId;
+            return _agentJournalOneShotContextFactory.Create(new GameRunOneShotJournalRequest(
+                operationId,
+                executionClass,
+                destination,
+                turnId,
+                turnId + "." + outputKind + ".output",
+                operationId + ".request",
+                context,
+                operationId + ".invocation"));
         }
 
         private static bool IsRetryableException(Exception ex)

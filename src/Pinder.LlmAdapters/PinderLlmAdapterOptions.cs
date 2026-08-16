@@ -1,6 +1,7 @@
 namespace Pinder.LlmAdapters
 {
     using Pinder.Core.Conversation;
+    using Pinder.Core.Diagnostics.AgentJournals;
 
     /// <summary>
     /// Configuration for PinderLlmAdapter. Provider-agnostic — the transport
@@ -99,6 +100,22 @@ namespace Pinder.LlmAdapters
         /// configured by the host process.
         /// </summary>
         public System.Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
+
+
+        /// <summary>
+        /// Optional host-owned durable sink for no-session Game Run one-shot invocation records.
+        /// </summary>
+        public IAgentJournalSink? AgentJournalHostSink { get; set; }
+
+        /// <summary>
+        /// Persistence policy for the host-owned one-shot journal sink. Production callers should fail closed.
+        /// </summary>
+        public AgentJournalSinkFailureMode AgentJournalSinkFailureMode { get; set; } = AgentJournalSinkFailureMode.FailClosed;
+
+        /// <summary>
+        /// Optional clock used by tests and hosts that need deterministic journal timestamps.
+        /// </summary>
+        public System.Func<System.DateTimeOffset>? AgentJournalClock { get; set; }
 
         /// <summary>
         /// A default callback used when OnOverlayDegraded is null.

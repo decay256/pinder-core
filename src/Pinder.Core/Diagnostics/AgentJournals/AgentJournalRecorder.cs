@@ -49,10 +49,14 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     ["custom_type"] = record.CustomType,
                     ["failure_mode"] = failureMode.ToString(),
                     ["game_run_id"] = record.Correlation.GameRunId,
-                    ["agent_session_id"] = record.Correlation.AgentSessionId,
+                    ["agent_session_id"] = record.Correlation.AgentSessionId ?? string.Empty,
                     ["invocation_id"] = record.Correlation.InvocationId,
                     ["attempt_id"] = record.Correlation.AttemptId ?? string.Empty,
                     ["attempt_ordinal"] = record.Correlation.AttemptOrdinal.ToString(CultureInfo.InvariantCulture),
+                    ["owner"] = record.Correlation.Owner ?? string.Empty,
+                    ["journal_destination"] = record.Correlation.JournalDestination ?? string.Empty,
+                    ["execution_class"] = record.Correlation.ExecutionClass ?? string.Empty,
+                    ["output_link_id"] = record.Correlation.OutputLinkId ?? string.Empty,
                 },
                 branchId: record.Correlation.BranchId);
         }
@@ -233,6 +237,12 @@ namespace Pinder.Core.Diagnostics.AgentJournals
 
             if (_context.PiProjectionSink != null)
             {
+                if (string.IsNullOrWhiteSpace(record.Correlation.AgentSessionId))
+                {
+                    throw new InvalidOperationException(
+                        "Agent journal Pi projection requires a real Agent Session id.");
+                }
+
                 try
                 {
                     await WithTimeout(
@@ -420,12 +430,12 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 semanticEntryId: semanticEntryId);
         }
 
-        public Task<AgentJournalTerminalResult> CompleteValidationRejectedAsync(string validationCode)
+        public Task<AgentJournalTerminalResult> CompleteValidationRejectedAsync(string validationCode, AgentJournalUsage? usage = null)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Rejected,
                 outputText: null,
-                usage: null,
+                usage,
                 validationCode: string.IsNullOrWhiteSpace(validationCode)
                     ? AgentJournalTerminalCodes.ValidationRejected
                     : validationCode,
@@ -433,12 +443,12 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 semanticEntryId: null);
         }
 
-        public Task<AgentJournalTerminalResult> CompleteProviderFailedAsync(string errorCode)
+        public Task<AgentJournalTerminalResult> CompleteProviderFailedAsync(string errorCode, AgentJournalUsage? usage = null)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Failed,
                 outputText: null,
-                usage: null,
+                usage,
                 validationCode: null,
                 errorCode: string.IsNullOrWhiteSpace(errorCode)
                     ? AgentJournalTerminalCodes.ProviderFailed
@@ -448,12 +458,13 @@ namespace Pinder.Core.Diagnostics.AgentJournals
 
         public Task<AgentJournalTerminalResult> CompleteCancelledAsync(
             string errorCode,
-            CancellationToken providerCancellationToken = default)
+            CancellationToken providerCancellationToken = default,
+            AgentJournalUsage? usage = null)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Cancelled,
                 outputText: null,
-                usage: null,
+                usage,
                 validationCode: null,
                 errorCode: string.IsNullOrWhiteSpace(errorCode)
                     ? AgentJournalTerminalCodes.Cancelled
@@ -569,7 +580,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 linkRecord = new MessageLinkRecord(
                     semanticEntryId!,
                     InvocationRecord.Correlation.InvocationId,
-                    InvocationRecord.Correlation.AgentSessionId,
+                    InvocationRecord.Correlation.AgentSessionId!,
                     InvocationRecord.Correlation.TurnId,
                     InvocationRecord.Correlation.BranchId);
                 ThrowIfInvalidLink(linkRecord);
@@ -758,13 +769,20 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         }
 
         private static string BaseRecordId(AgentJournalCorrelationIds correlation)
-            => "agent-journal/"
+        {
+            string ownerSegment = !string.IsNullOrWhiteSpace(correlation.AgentSessionId)
+                ? correlation.AgentSessionId!
+                : (correlation.Owner ?? "host_one_shot")
+                    + "/"
+                    + (correlation.ExecutionClass ?? correlation.JournalDestination ?? "unclassified");
+            return "agent-journal/"
                 + correlation.GameRunId
                 + "/"
-                + correlation.AgentSessionId
+                + ownerSegment
                 + "/"
                 + correlation.InvocationId
                 + "/"
                 + (correlation.AttemptId ?? correlation.AttemptOrdinal.ToString(CultureInfo.InvariantCulture));
+        }
     }
 }
