@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
@@ -30,6 +31,8 @@ namespace Pinder.Core.Conversation
         /// <summary>Full conversation history up to this point.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
+        public AgentJournalOneShotContext? AgentJournal { get; }
+
         public SuccessImprovementContext(
             string playerAvatarPrompt,
             string dateeName,
@@ -37,7 +40,8 @@ namespace Pinder.Core.Conversation
             string deliveredMessage,
             StatType stat,
             string tierKey,
-            IReadOnlyList<(string Sender, string Text)> conversationHistory)
+            IReadOnlyList<(string Sender, string Text)> conversationHistory,
+            AgentJournalOneShotContext? agentJournal = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? "";
             DateeName = dateeName ?? "";
@@ -46,6 +50,7 @@ namespace Pinder.Core.Conversation
             Stat = stat;
             TierKey = tierKey ?? "";
             ConversationHistory = conversationHistory ?? (IReadOnlyList<(string Sender, string Text)>)new List<(string, string)>();
+            AgentJournal = agentJournal;
         }
     }
 }

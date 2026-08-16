@@ -235,6 +235,22 @@ namespace Pinder.LlmAdapters
                 user);
         }
 
+        public static AnnotatedInvocationDocument BuildSuccessImprovementSkippedDocument(
+            string validationCode)
+        {
+            if (string.IsNullOrWhiteSpace(validationCode))
+                throw new ArgumentException("Validation code is required.", nameof(validationCode));
+
+            return new AnnotatedInvocationDocumentBuilder()
+                .AppendRuntimeGenerated(
+                    validationCode,
+                    "SuccessImprovement.SkipValidationCode")
+                .Build(
+                    "delivery.success-improvement.skipped",
+                    AgentJournalInputRole.User,
+                    "delivery-success-improvement-skipped");
+        }
+
         public static GameRunPromptDocumentPair BuildSteeringQuestionDocuments(
             SteeringContext context,
             GameDefinition gameDefinition,

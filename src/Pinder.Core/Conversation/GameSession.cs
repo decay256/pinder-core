@@ -11,6 +11,7 @@ using Pinder.Core.Stats;
 using Pinder.Core.Progression;
 using Pinder.Core.Traps;
 using Pinder.Core.Text;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -148,6 +149,7 @@ namespace Pinder.Core.Conversation
         private readonly int _maxDeliveryWords;
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
+        private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
 
         internal GameSessionState State => _state;
 
@@ -197,6 +199,7 @@ namespace Pinder.Core.Conversation
             _activeTrapInterestPenalty = config.ActiveTrapInterestPenalty;
             _hungerForIntimacy = config.HungerForIntimacy;
             _terrorOfRejection = config.TerrorOfRejection;
+            _agentJournalOneShotContextFactory = config.AgentJournalOneShotContextFactory;
 
             // Determine starting interest: explicit config > Dread T3 > default
             if (config.StartingInterest.HasValue)
@@ -250,7 +253,7 @@ namespace Pinder.Core.Conversation
             _consequenceCatalog = config.ConsequenceCatalog;
             _maxDialogueOptions = config.MaxDialogueOptions ?? 3;
             _maxDeliveryWords = config.MaxDeliveryWords ?? 80;
-            _steeringEngine = new SteeringEngine(steeringRng, _onDiagnostic);
+            _steeringEngine = new SteeringEngine(steeringRng, _onDiagnostic, _agentJournalOneShotContextFactory);
             _horninessEngine = new HorninessEngine(steeringRng, _consequenceCatalog, _horninessDcBias);
             _shadowCheckEngine = new ShadowCheckEngine(steeringRng, _consequenceCatalog, _shadowDcBias);
 
@@ -301,7 +304,8 @@ namespace Pinder.Core.Conversation
                 _statDeliveryInstructions,
                 _onTextLayerNoop,
                 _onDiagnostic,
-                _maxDeliveryWords);
+                _maxDeliveryWords,
+                _agentJournalOneShotContextFactory);
 
             var dateeResponseStage = new DateeResponseStage(_llm, _onDiagnostic);
 
@@ -318,7 +322,8 @@ namespace Pinder.Core.Conversation
                 _onRuleResolution,
                 _onDiagnostic,
                 _hungerForIntimacy,
-                _terrorOfRejection);
+                _terrorOfRejection,
+                _agentJournalOneShotContextFactory);
         }
     }
 }

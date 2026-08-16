@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -24,18 +25,22 @@ namespace Pinder.Core.Conversation
         /// <summary>Full conversation history up to this point.</summary>
         public IReadOnlyList<(string Sender, string Text)> ConversationHistory { get; }
 
+        public AgentJournalOneShotContext? AgentJournal { get; }
+
         public HorninessQuestionContext(
             string playerAvatarPrompt,
             string dateeName,
             string playerName,
             string deliveredMessage,
-            IReadOnlyList<(string Sender, string Text)> conversationHistory)
+            IReadOnlyList<(string Sender, string Text)> conversationHistory,
+            AgentJournalOneShotContext? agentJournal = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? "";
             DateeName = dateeName ?? "";
             PlayerName = playerName ?? "";
             DeliveredMessage = deliveredMessage ?? "";
             ConversationHistory = conversationHistory ?? (IReadOnlyList<(string Sender, string Text)>)new List<(string, string)>();
+            AgentJournal = agentJournal;
         }
     }
 }

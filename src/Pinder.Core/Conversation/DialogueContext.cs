@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Stats;
 
 namespace Pinder.Core.Conversation
@@ -99,6 +100,8 @@ namespace Pinder.Core.Conversation
         public int? DateeHungerForIntimacy { get; }
         public int? DateeTerrorOfRejection { get; }
 
+        public AgentJournalOneShotContext? AgentJournal { get; }
+
         public DialogueContext(
             string playerAvatarPrompt,
             string dateePrompt,
@@ -127,7 +130,8 @@ namespace Pinder.Core.Conversation
             int? playerTerrorOfRejection = null,
             int? dateeHungerForIntimacy = null,
             int? dateeTerrorOfRejection = null,
-            InterestState? currentInterestState = null)
+            InterestState? currentInterestState = null,
+            AgentJournalOneShotContext? agentJournal = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -157,6 +161,7 @@ namespace Pinder.Core.Conversation
             PlayerTerrorOfRejection = playerTerrorOfRejection;
             DateeHungerForIntimacy = dateeHungerForIntimacy;
             DateeTerrorOfRejection = dateeTerrorOfRejection;
+            AgentJournal = agentJournal;
         }
     }
 }

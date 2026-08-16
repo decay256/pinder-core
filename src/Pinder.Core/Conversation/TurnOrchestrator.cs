@@ -10,6 +10,7 @@ using Pinder.Core.Stats;
 using Pinder.Core.Progression;
 using Pinder.Core.Traps;
 using Pinder.Core.I18n;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -30,6 +31,7 @@ namespace Pinder.Core.Conversation
 
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
+        private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
 
         public TurnOrchestrator(
             ILlmAdapter llm,
@@ -44,7 +46,8 @@ namespace Pinder.Core.Conversation
             Action<RuleResolutionTraceEvent>? onRuleResolution = null,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null,
             int hungerForIntimacy = 0,
-            int terrorOfRejection = 0)
+            int terrorOfRejection = 0,
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
         {
             _llm = llm ?? throw new ArgumentNullException(nameof(llm));
             _dice = dice ?? throw new ArgumentNullException(nameof(dice));
@@ -60,6 +63,7 @@ namespace Pinder.Core.Conversation
             _onDiagnostic = onDiagnostic;
             _hungerForIntimacy = hungerForIntimacy;
             _terrorOfRejection = terrorOfRejection;
+            _agentJournalOneShotContextFactory = agentJournalOneShotContextFactory;
         }
 
         internal async Task<TurnStart> StartTurnAsync(
@@ -242,7 +246,17 @@ namespace Pinder.Core.Conversation
                 playerTerrorOfRejection: playerTor,
                 dateeHungerForIntimacy: dateeHfi,
                 dateeTerrorOfRejection: dateeTor,
-                currentInterestState: preTurnInterestState);
+                currentInterestState: preTurnInterestState,
+                agentJournal: CreateAgentJournalContext(
+                    GameRunOneShotJournalTaxonomy.DialogueOptions,
+                    GameRunOneShotJournalTaxonomy.GameRunOneShotRecord,
+                    state.TurnNumber,
+                    "dialogue-options",
+                    new Dictionary<string, string>
+                    {
+                        ["available_stat_count"] = availableStats.Length.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        ["max_option_count"] = _maxDialogueOptions.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    }));
 
             // Get dialogue options from LLM
             string dialogueCallId = OperationalDiagnostics.CreateCallId();
@@ -375,6 +389,31 @@ namespace Pinder.Core.Conversation
             int? weaknessDcReduction = state.ActiveWeakness?.DcReduction;
 
             return new TurnStart(options, snapshot, state.CurrentDicePools, defenseSnapshot, weaknessDcReduction);
+        }
+
+        private AgentJournalOneShotContext? CreateAgentJournalContext(
+            string executionClass,
+            string destination,
+            int turnNumber,
+            string outputKind,
+            IReadOnlyDictionary<string, string> context)
+        {
+            if (_agentJournalOneShotContextFactory == null)
+            {
+                return null;
+            }
+
+            string turnId = "turn-" + turnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string operationId = executionClass + "." + turnId;
+            return _agentJournalOneShotContextFactory.Create(new GameRunOneShotJournalRequest(
+                operationId,
+                executionClass,
+                destination,
+                turnId,
+                turnId + "." + outputKind + ".output",
+                operationId + ".request",
+                context,
+                operationId + ".invocation"));
         }
 
         private static string BuildCognitiveSubtext(CharacterProfile datee, int turnNumber)

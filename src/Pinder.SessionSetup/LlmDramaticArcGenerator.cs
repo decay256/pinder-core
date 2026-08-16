@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters;
 
@@ -55,6 +56,8 @@ namespace Pinder.SessionSetup
             if (string.IsNullOrWhiteSpace(dateeName))
                 throw new ArgumentException("dateeName must not be null or whitespace.", nameof(dateeName));
             // Stakes and bios are allowed to be empty/whitespace (character might not have them yet)
+            AgentJournalOneShotContext? agentJournal = ResolveAgentJournalContext();
+            ValidateOneShotJournalConfiguration(agentJournal);
 
             var entry = _catalog.Get("dramatic_arc");
             string systemPrompt = entry.SystemPrompt!;
@@ -99,22 +102,30 @@ namespace Pinder.SessionSetup
                 _options.MaxValidationAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
-                    string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
-                    InMemoryPromptTraceService.Instance.RecordTrace(
-                        "dramatic-arc-system",
-                        new PromptTraceResult(
-                            systemPrompt,
-                            new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
-                    InMemoryPromptTraceService.Instance.RecordTrace(
-                        "dramatic-arc-user",
-                        new PromptTraceResult(
-                            userMessage,
-                            new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
-
-                    string response;
+                    AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+                            agentJournal,
+                            documents,
+                            attempt,
+                            attemptCancellationToken)
+                        .ConfigureAwait(false);
+                    var usageMeasurement = TokenUsageMeasurement.Start(_transport);
+                    string trimmed;
+                    bool isComplete;
                     try
                     {
-                        response = await LlmOptionalTextGeneration.RunAsync(
+                        string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
+                        InMemoryPromptTraceService.Instance.RecordTrace(
+                            "dramatic-arc-system",
+                            new PromptTraceResult(
+                                systemPrompt,
+                                new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
+                        InMemoryPromptTraceService.Instance.RecordTrace(
+                            "dramatic-arc-user",
+                            new PromptTraceResult(
+                                userMessage,
+                                new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
+
+                        string response = await LlmOptionalTextGeneration.RunAsync(
                                 "dramatic_arc",
                                 _transport,
                                 systemPrompt,
@@ -131,13 +142,17 @@ namespace Pinder.SessionSetup
                                 attemptCancellationToken,
                                 passCancellationTokenToTransport: true)
                             .ConfigureAwait(false);
+                        trimmed = (response ?? string.Empty).Trim();
+                        isComplete = IsCompleteDramaticArc(trimmed);
                     }
                     catch (OperationCanceledException)
                     {
+                        await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
                         throw;
                     }
-                    catch (LlmTransportException)
+                    catch (LlmTransportException ex)
                     {
+                        await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
                         if (_options.OnDegraded != null)
                         {
                             _options.OnDegraded.Invoke(
@@ -147,19 +162,28 @@ namespace Pinder.SessionSetup
 
                         throw;
                     }
+                    catch (Exception ex)
+                    {
+                        await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                        throw;
+                    }
 
-                    string trimmed = (response ?? string.Empty).Trim();
                     if (string.IsNullOrEmpty(trimmed))
                     {
+                        await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                            .ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Rejected(
                             new DramaticArcRejection("empty_output"));
                     }
 
-                    if (IsCompleteDramaticArc(trimmed))
+                    if (isComplete)
                     {
+                        await CompleteAcceptedOneShotAsync(journalAttempt, trimmed, usageMeasurement).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Accepted(trimmed);
                     }
 
+                    await CompleteValidationRejectedOneShotAsync(journalAttempt, "invalid_output", usageMeasurement)
+                        .ConfigureAwait(false);
                     return SemanticOutputRecoveryAttemptResult<string, DramaticArcRejection>.Rejected(
                         new DramaticArcRejection("invalid_output"));
                 },
@@ -175,6 +199,135 @@ namespace Pinder.SessionSetup
             throw new InvalidOperationException(
                 $"dramatic_arc output failed validation after {_options.MaxValidationAttempts} attempts: " +
                 "expected 3-5 complete sentences of plain prose.");
+        }
+
+        private async Task<AgentJournalAttempt?> StartOneShotJournalAsync(
+            AgentJournalOneShotContext? agentJournal,
+            GameRunPromptDocumentPair documents,
+            int attemptOrdinal,
+            CancellationToken cancellationToken)
+        {
+            ValidateOneShotJournalConfiguration(agentJournal);
+            if (_options.AgentJournalHostSink == null)
+            {
+                return null;
+            }
+
+            if (agentJournal == null)
+            {
+                throw new InvalidOperationException(
+                    "Agent journal host sink was configured for dramatic-arc setup, but no AgentJournalOneShotContext was supplied.");
+            }
+
+            var recorderContext = new AgentJournalRecorderContext(
+                agentJournal.ToCorrelation(attemptOrdinal),
+                agentJournal.ModelId,
+                LlmPhase.DramaticArc,
+                new[]
+                {
+                    documents.System.ToAgentJournalInputDocument(),
+                    documents.User.ToAgentJournalInputDocument(),
+                })
+            {
+                HostSink = _options.AgentJournalHostSink,
+                SinkFailureMode = _options.AgentJournalSinkFailureMode,
+                OnDiagnostic = _options.OnDiagnostic,
+                Clock = _options.AgentJournalClock,
+            };
+
+            return await new AgentJournalRecorder(recorderContext).StartAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private AgentJournalOneShotContext? ResolveAgentJournalContext()
+        {
+            if (_options.AgentJournal != null)
+            {
+                return _options.AgentJournal;
+            }
+            if (_options.AgentJournalOneShotContextFactory == null)
+            {
+                return null;
+            }
+
+            return _options.AgentJournalOneShotContextFactory.Create(new GameRunOneShotJournalRequest(
+                GameRunOneShotJournalTaxonomy.DramaticArcSetup,
+                GameRunOneShotJournalTaxonomy.DramaticArcSetup,
+                GameRunOneShotJournalTaxonomy.GameRunSetupOneShotRecord,
+                turnId: null,
+                outputLinkId: "setup.dramatic-arc.output",
+                requestId: "setup.dramatic-arc.request",
+                context: new Dictionary<string, string> { ["setup_stage"] = "dramatic_arc" },
+                invocationIdPrefix: "setup.dramatic-arc.invocation"));
+        }
+
+        private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? agentJournal)
+        {
+            bool hasSink = _options.AgentJournalHostSink != null;
+            bool hasContext = agentJournal != null;
+            if (hasSink != hasContext)
+            {
+                throw new InvalidOperationException(
+                    "Dramatic-arc Game Run journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
+            }
+        }
+
+        private static async Task CompleteAcceptedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            string outputText,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteAcceptedAsync(outputText, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteValidationRejectedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            string validationCode,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteValidationRejectedAsync(validationCode, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteCancelledOneShotAsync(
+            AgentJournalAttempt? attempt,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteCancelledAsync(
+                    AgentJournalTerminalCodes.Cancelled,
+                    usage: ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteProviderFailedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            Exception exception,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteProviderFailedAsync(
+                    exception.GetType().Name,
+                    ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static AgentJournalUsage? ToAgentJournalUsage(TokenUsageMeasurement measurement)
+        {
+            SessionTokenUsage? usage = measurement.Complete();
+            return usage == null
+                ? null
+                : new AgentJournalUsage(
+                    usage.InputTokens,
+                    usage.OutputTokens,
+                    usage.InputTokens + usage.OutputTokens);
         }
 
         private static bool IsCompleteDramaticArc(string text)
@@ -238,6 +391,23 @@ namespace Pinder.SessionSetup
             /// Opt-in operational diagnostic sink. Null keeps diagnostics disabled.
             /// </summary>
             public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
+
+
+            /// <summary>
+            /// Optional host-owned durable sink for no-session Game Run setup one-shot records.
+            /// </summary>
+            public IAgentJournalSink? AgentJournalHostSink { get; set; }
+
+            /// <summary>
+            /// Persistence policy for the host-owned one-shot journal sink. Production callers should fail closed.
+            /// </summary>
+            public AgentJournalSinkFailureMode AgentJournalSinkFailureMode { get; set; } = AgentJournalSinkFailureMode.FailClosed;
+
+            public AgentJournalOneShotContext? AgentJournal { get; set; }
+
+            public IAgentJournalOneShotContextFactory? AgentJournalOneShotContextFactory { get; set; }
+
+            public Func<DateTimeOffset>? AgentJournalClock { get; set; }
         }
 
         private sealed class DramaticArcRejection

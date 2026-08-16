@@ -6,6 +6,7 @@ using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -18,11 +19,16 @@ namespace Pinder.Core.Conversation
     {
         private readonly Random _steeringRng;
         private readonly Action<OperationalDiagnosticEvent>? _onDiagnostic;
+        private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
 
-        public SteeringEngine(Random steeringRng, Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+        public SteeringEngine(
+            Random steeringRng,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
+            IAgentJournalOneShotContextFactory? agentJournalOneShotContextFactory = null)
         {
             _steeringRng = steeringRng ?? throw new ArgumentNullException(nameof(steeringRng));
             _onDiagnostic = onDiagnostic;
+            _agentJournalOneShotContextFactory = agentJournalOneShotContextFactory;
         }
 
         /// <summary>
@@ -53,7 +59,8 @@ namespace Pinder.Core.Conversation
             CharacterProfile datee,
             ILlmAdapter llm,
             IReadOnlyList<(string Sender, string Text)> history,
-            CancellationToken ct = default)
+            CancellationToken ct = default,
+            int? turnNumber = null)
         {
             ct.ThrowIfCancellationRequested();
             // Compute steering modifier: (playerCharm + playerWit + playerSA) / 3
@@ -90,7 +97,8 @@ namespace Pinder.Core.Conversation
                     dateeName: datee.DisplayName,
                     playerName: player.DisplayName,
                     deliveredMessage: deliveredMessage,
-                    conversationHistory: history);
+                    conversationHistory: history,
+                    agentJournal: CreateAgentJournalContext(turnNumber, roll, total, steeringMod, steeringDC));
 
                 try
                 {
@@ -138,6 +146,38 @@ namespace Pinder.Core.Conversation
                 attackerGroup: new[] { "Charm", "Wit", "SelfAwareness" },
                 defenderGroup: new[] { "SelfAwareness", "Rizz", "Honesty" },
                 dcBase: 16);
+        }
+
+        private AgentJournalOneShotContext? CreateAgentJournalContext(
+            int? turnNumber,
+            int roll,
+            int total,
+            int modifier,
+            int dc)
+        {
+            if (_agentJournalOneShotContextFactory == null || !turnNumber.HasValue)
+            {
+                return null;
+            }
+
+            string turnId = "turn-" + turnNumber.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string operationId = GameRunOneShotJournalTaxonomy.SteeringQuestion + "." + turnId;
+            return _agentJournalOneShotContextFactory.Create(new GameRunOneShotJournalRequest(
+                operationId,
+                GameRunOneShotJournalTaxonomy.SteeringQuestion,
+                GameRunOneShotJournalTaxonomy.GameRunDeliveryAppendOneShotRecord,
+                turnId,
+                turnId + ".steering-question.output",
+                operationId + ".request",
+                new Dictionary<string, string>
+                {
+                    ["check_kind"] = "steering",
+                    ["check_roll"] = roll.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ["check_total"] = total.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ["check_modifier"] = modifier.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                    ["check_dc"] = dc.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                },
+                operationId + ".invocation"));
         }
     }
 }

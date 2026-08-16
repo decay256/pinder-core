@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Progression;
 using Pinder.Core.Rolls;
@@ -183,6 +184,46 @@ namespace Pinder.Core.Tests.Conversation
 
             Assert.Equal("datee", result.DateeMessage);
             Assert.Equal(1, session.TurnNumber);
+        }
+
+        [Fact]
+        public async Task AdoptStateFrom_RequiredTurnClone_PreservesOneShotFactoryForFutureSteering()
+        {
+            var adapter = new CapturingSteeringAdapter();
+            var player = Phase0Fixtures.MakeProfile("Player");
+            var datee = Phase0Fixtures.MakeProfile("Datee");
+            var factory = new GameRunOneShotJournalContextFactory("game-run-adoption", "test-model");
+            var session = new GameSession(
+                player,
+                datee,
+                adapter,
+                new PlaybackDiceRoller(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(
+                    clock: TestHelpers.MakeClock(),
+                    steeringRng: new MaximumRandom(),
+                    statDrawRng: new CloneableRandom(4242),
+                    agentJournalOneShotContextFactory: factory));
+            var cloneMethod = typeof(GameSession).GetMethod(
+                "CloneForRequiredTurnTransaction",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            var working = (GameSession)cloneMethod!.Invoke(session, null)!;
+
+            session.AdoptStateFrom(working);
+            var steering = (SteeringEngine)GetPrivateField(session, "_steeringEngine")!;
+            SteeringRollResult result = await steering.AttemptSteeringRollAsync(
+                "delivered",
+                player,
+                datee,
+                adapter,
+                Array.Empty<(string Sender, string Text)>(),
+                turnNumber: 12);
+
+            Assert.True(result.SteeringSucceeded);
+            Assert.NotNull(adapter.LastSteeringContext);
+            Assert.NotNull(adapter.LastSteeringContext!.AgentJournal);
+            Assert.Equal("game.delivery.steering-question.turn-12", adapter.LastSteeringContext.AgentJournal!.OperationId);
+            Assert.Null(adapter.LastSteeringContext.AgentJournal.ToCorrelation(1).AgentSessionId);
         }
 
         [Fact]
@@ -602,6 +643,25 @@ namespace Pinder.Core.Tests.Conversation
             if (value is System.Collections.IEnumerable sequence && !(value is string))
                 return "[" + string.Join(",", sequence.Cast<object?>().Select(FingerprintValue)) + "]";
             return value.ToString() ?? "<null-string>";
+        }
+
+        private sealed class CapturingSteeringAdapter : NullLlmAdapter
+        {
+            public SteeringContext? LastSteeringContext { get; private set; }
+
+            public override Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
+            {
+                LastSteeringContext = context;
+                return Task.FromResult("future steering question?");
+            }
+        }
+
+        private sealed class MaximumRandom : Random
+        {
+            public override int Next(int minValue, int maxValue)
+                => maxValue - 1;
+
+            protected override double Sample() => 0.9999999999999999;
         }
 
         private sealed class PreparedSnapshot

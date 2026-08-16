@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
@@ -99,6 +100,7 @@ namespace Pinder.LlmAdapters
             CancellationToken ct)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ValidateOneShotJournalConfiguration(context.AgentJournal);
 
             var gameDef = RequireGameDefinition();
             AnnotatedInvocationDocument userDocument = priorMessages == null
@@ -108,6 +110,7 @@ namespace Pinder.LlmAdapters
             AnnotatedInvocationDocument systemDocument =
                 GameRunPromptDocumentBuilder.BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDef);
             string systemPrompt = systemDocument.Text;
+            var journalDocuments = new[] { systemDocument, userDocument };
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -115,6 +118,15 @@ namespace Pinder.LlmAdapters
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
+                    AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+                            context.AgentJournal,
+                            LlmPhase.DialogueOptions,
+                            attempt,
+                            attemptCancellationToken,
+                            journalDocuments)
+                        .ConfigureAwait(false);
+                    var usageMeasurement = TokenUsageMeasurement.Start(_transport);
+                    string? providerOutput = null;
                     try
                     {
                         DialogueOption[] parsedOptions;
@@ -135,6 +147,7 @@ namespace Pinder.LlmAdapters
                                     attemptCancellationToken,
                                     priorMessages: priorMessages)
                                 .ConfigureAwait(false);
+                            providerOutput = structuredResponse.JsonText;
                             try
                             {
                                 if (structuredResponse.UsedNativeStructuredOutput)
@@ -195,6 +208,7 @@ namespace Pinder.LlmAdapters
                                     attemptCancellationToken,
                                     priorMessages: priorMessages)
                                 .ConfigureAwait(false);
+                            providerOutput = responseText;
 
                             parsedOptions = ParseDialogueOptionsFromTextOrJson(
                                 responseText,
@@ -210,11 +224,27 @@ namespace Pinder.LlmAdapters
                             WarnIfStakeSkipped(context, parsedOptions);
                         }
 
+                        await CompleteAcceptedOneShotAsync(journalAttempt, providerOutput ?? string.Empty, usageMeasurement)
+                            .ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Accepted(parsedOptions);
                     }
                     catch (LlmContractException ex)
                     {
+                        await CompleteValidationRejectedOneShotAsync(journalAttempt, ex.Reason, usageMeasurement)
+                            .ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Rejected(ex);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement)
+                            .ConfigureAwait(false);
+                        throw;
+                    }
+                    catch (Exception ex)
+                    {
+                        await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement)
+                            .ConfigureAwait(false);
+                        throw;
                     }
                 },
                 delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
@@ -728,24 +758,11 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetSuccessImprovementAsync(SuccessImprovementContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ValidateOneShotJournalConfiguration(context.AgentJournal);
 
             var gameDef = RequireGameDefinition();
 
             var instructions = _options.StatDeliveryInstructions ?? StatDeliveryInstructions.TryLoadDefault();
-            string template = instructions?.Get(context.Stat, context.TierKey);
-
-            if (string.IsNullOrWhiteSpace(template))
-            {
-                RaiseOverlayDegraded(new OverlayDegradedEvent(
-                    overlayType: "success_improvement",
-                    provider: "primary",
-                    model: null,
-                    reason: "skipped_no_template",
-                    outcome: OverlayOutcome.Skipped
-                ));
-                return context.DeliveredMessage;
-            }
-
             GameRunPromptDocumentPair? documents =
                 GameRunPromptDocumentBuilder.BuildSuccessImprovementDocuments(
                     context,
@@ -754,24 +771,78 @@ namespace Pinder.LlmAdapters
                     _options.PromptCatalog);
             if (documents == null)
             {
+                const string validationCode = "skipped_no_template";
+                AgentJournalAttempt? skippedAttempt = await StartOneShotJournalAsync(
+                        context.AgentJournal,
+                        LlmPhase.Delivery,
+                        1,
+                        ct,
+                        GameRunPromptDocumentBuilder.BuildSuccessImprovementSkippedDocument(validationCode))
+                    .ConfigureAwait(false);
+                if (skippedAttempt != null)
+                {
+                    await skippedAttempt.CompleteValidationRejectedAsync(
+                            validationCode,
+                            new AgentJournalUsage(0, 0, 0))
+                        .ConfigureAwait(false);
+                }
+                RaiseOverlayDegraded(new OverlayDegradedEvent(
+                    overlayType: "success_improvement",
+                    provider: "primary",
+                    model: null,
+                    reason: validationCode,
+                    outcome: OverlayOutcome.Skipped
+                ));
                 return context.DeliveredMessage;
             }
 
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct)
+            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+                    context.AgentJournal,
+                    LlmPhase.Delivery,
+                    1,
+                    ct,
+                    documents.System,
+                    documents.User)
                 .ConfigureAwait(false);
+            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
 
-            var improved = NormalizeSingleTextOutput(
-                responseText,
-                "success_improvement",
-                rejectEllipsis: true);
-            if (improved == null)
-                return context.DeliveredMessage;
-
-            if (Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved))
+            string? improved;
+            bool improvedRejected;
+            try
             {
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct)
+                    .ConfigureAwait(false);
+                improved = NormalizeSingleTextOutput(
+                    responseText,
+                    "success_improvement",
+                    rejectEllipsis: true);
+                improvedRejected = improved != null
+                    && Pinder.Core.Conversation.SuccessImprovementValidator.IsRejected(improved);
+            }
+            catch (OperationCanceledException)
+            {
+                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
+
+            if (improved == null)
+            {
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                    .ConfigureAwait(false);
+                return context.DeliveredMessage;
+            }
+
+            if (improvedRejected)
+            {
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "meta_control_output", usageMeasurement)
+                    .ConfigureAwait(false);
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
@@ -782,6 +853,7 @@ namespace Pinder.LlmAdapters
                 return context.DeliveredMessage;
             }
 
+            await CompleteAcceptedOneShotAsync(journalAttempt, improved, usageMeasurement).ConfigureAwait(false);
             return improved;
         }
 
@@ -789,6 +861,7 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetSteeringQuestionAsync(SteeringContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ValidateOneShotJournalConfiguration(context.AgentJournal);
 
             var gameDef = RequireGameDefinition();
 
@@ -799,23 +872,52 @@ namespace Pinder.LlmAdapters
                     _options.PromptCatalog);
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
+            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+                    context.AgentJournal,
+                    LlmPhase.Steering,
+                    1,
+                    ct,
+                    documents.System,
+                    documents.User)
                 .ConfigureAwait(false);
+            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
 
-            // #831: thinking-block stripping moved to
-            // ThinkingStrippingLlmTransport (transport decorator). The
-            // steering question now arrives already stripped, so we only
-            // trim here.
-            return NormalizeSingleTextOutput(
-                responseText,
-                "steering",
-                rejectEllipsis: false) ?? string.Empty;
+            string? question;
+            try
+            {
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
+                    .ConfigureAwait(false);
+                // #831: thinking-block stripping is a transport decorator; this trims only.
+                question = NormalizeSingleTextOutput(
+                    responseText,
+                    "steering",
+                    rejectEllipsis: false);
+            }
+            catch (OperationCanceledException)
+            {
+                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
+            if (question == null)
+            {
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                    .ConfigureAwait(false);
+                return string.Empty;
+            }
+
+            await CompleteAcceptedOneShotAsync(journalAttempt, question, usageMeasurement).ConfigureAwait(false);
+            return question;
         }
 
         public async Task<string> GetHorninessQuestionAsync(HorninessQuestionContext context, CancellationToken ct = default)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            ValidateOneShotJournalConfiguration(context.AgentJournal);
 
             var gameDef = RequireGameDefinition();
 
@@ -826,17 +928,44 @@ namespace Pinder.LlmAdapters
                     _options.PromptCatalog);
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-
-            var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+                    context.AgentJournal,
+                    LlmPhase.HorninessOverlay,
+                    1,
+                    ct,
+                    documents.System,
+                    documents.User)
                 .ConfigureAwait(false);
+            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
 
-            var question = NormalizeSingleTextOutput(
-                responseText,
-                "horniness_question",
-                rejectEllipsis: false);
+            string? question;
+            try
+            {
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+                    .ConfigureAwait(false);
+                question = NormalizeSingleTextOutput(
+                    responseText,
+                    "horniness_question",
+                    rejectEllipsis: false);
+            }
+            catch (OperationCanceledException)
+            {
+                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                throw;
+            }
             if (question == null)
+            {
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                    .ConfigureAwait(false);
                 throw new InvalidOperationException("LLM horniness_question output is empty or whitespace.");
+            }
 
+            await CompleteAcceptedOneShotAsync(journalAttempt, question, usageMeasurement).ConfigureAwait(false);
             return question;
         }
 
@@ -1272,6 +1401,117 @@ namespace Pinder.LlmAdapters
         private Action<OperationalDiagnosticEvent>? GetDiagnosticSink()
         {
             return _options.OnDiagnostic ?? PinderLlmAdapterOptions.DefaultOnDiagnostic;
+        }
+
+
+        private async Task<AgentJournalAttempt?> StartOneShotJournalAsync(
+            AgentJournalOneShotContext? journalContext,
+            string phase,
+            int attemptOrdinal,
+            CancellationToken ct,
+            params AnnotatedInvocationDocument[] documents)
+        {
+            ValidateOneShotJournalConfiguration(journalContext);
+            if (_options.AgentJournalHostSink == null)
+            {
+                return null;
+            }
+
+            if (journalContext == null)
+            {
+                throw new InvalidOperationException(
+                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
+            }
+
+            var inputDocuments = new AgentJournalInputDocument[documents.Length];
+            for (int i = 0; i < documents.Length; i++)
+            {
+                inputDocuments[i] = documents[i].ToAgentJournalInputDocument();
+            }
+
+            var recorderContext = new AgentJournalRecorderContext(
+                journalContext.ToCorrelation(attemptOrdinal),
+                journalContext.ModelId,
+                phase,
+                inputDocuments)
+            {
+                HostSink = _options.AgentJournalHostSink,
+                SinkFailureMode = _options.AgentJournalSinkFailureMode,
+                OnDiagnostic = GetDiagnosticSink(),
+                Clock = _options.AgentJournalClock,
+            };
+
+            return await new AgentJournalRecorder(recorderContext).StartAsync(ct)
+                .ConfigureAwait(false);
+        }
+
+        private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? journalContext)
+        {
+            bool hasSink = _options.AgentJournalHostSink != null;
+            bool hasContext = journalContext != null;
+            if (hasSink != hasContext)
+            {
+                throw new InvalidOperationException(
+                    "Game Run one-shot journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
+            }
+        }
+
+        private static async Task CompleteAcceptedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            string outputText,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteAcceptedAsync(outputText, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteValidationRejectedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            string validationCode,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteValidationRejectedAsync(validationCode, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteCancelledOneShotAsync(
+            AgentJournalAttempt? attempt,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteCancelledAsync(
+                    AgentJournalTerminalCodes.Cancelled,
+                    usage: ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static async Task CompleteProviderFailedOneShotAsync(
+            AgentJournalAttempt? attempt,
+            Exception exception,
+            TokenUsageMeasurement usageMeasurement)
+        {
+            if (attempt != null)
+            {
+                await attempt.CompleteProviderFailedAsync(
+                    exception.GetType().Name,
+                    ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+            }
+        }
+
+        private static AgentJournalUsage? ToAgentJournalUsage(TokenUsageMeasurement measurement)
+        {
+            SessionTokenUsage? usage = measurement.Complete();
+            return usage == null
+                ? null
+                : new AgentJournalUsage(
+                    usage.InputTokens,
+                    usage.OutputTokens,
+                    usage.InputTokens + usage.OutputTokens);
         }
 
         private async Task<StructuredLlmResponse> SendStructuredWithDiagnosticsAsync(
