@@ -113,7 +113,8 @@ namespace Pinder.LlmAdapters
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
                                     attemptMetadata,
-                                    priorMessages)
+                                    priorMessages,
+                                    callId: journal.CallId)
                                 .ConfigureAwait(false);
                             acceptedResponseText = structuredResponse.JsonText;
 
@@ -148,7 +149,8 @@ namespace Pinder.LlmAdapters
                                     maxAttempts,
                                     DateePrivatePhaseDirector,
                                     attemptMetadata,
-                                    priorMessages)
+                                    priorMessages,
+                                    callId: journal.CallId)
                                 .ConfigureAwait(false);
                             acceptedResponseText = responseText;
                             direction = ParseEmotionalDirectorOrThrow(

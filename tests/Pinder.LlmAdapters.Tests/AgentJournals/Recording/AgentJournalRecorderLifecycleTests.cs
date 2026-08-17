@@ -67,6 +67,12 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Equal(expectedStatus, result.ResultRecord.TerminalStatus);
             Assert.Equal(expectedValidationCode, result.ResultRecord.ValidationCode);
             Assert.Equal(expectedErrorCode, result.ResultRecord.ErrorCode);
+            Assert.Equal(
+                terminalKind == "accepted"
+                    ? AgentJournalUsageStatus.Incomplete
+                    : AgentJournalUsageStatus.Unavailable,
+                result.ResultRecord.UsageStatus);
+            Assert.NotEqual(AgentJournalUsageStatus.Unknown, result.ResultRecord.UsageStatus);
             if (expectedStatus == AgentJournalTerminalStatus.Rejected)
             {
                 Assert.Null(result.ResultRecord.OutputText);

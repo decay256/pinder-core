@@ -21,6 +21,9 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
     [Collection("PromptTraceSingleton")]
     public sealed class Issue1375_ConversationJournalWiringTests
     {
+        private const string DateePrivatePhaseDirector = "director";
+        private const string DateePrivatePhasePerformance = "performance";
+
         private const string DialogueOptions =
             "OPTION_1\n[STAT: Charm]\n\"Hey, you come here often?\"\n\n" +
             "OPTION_2\n[STAT: Wit]\n\"Did you know penguins propose with pebbles?\"\n\n" +
@@ -87,6 +90,113 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
+        [Trait("CORE-1387", "datee_usage_identity")]
+        public async Task datee_director_and_performance_records_complete_usage_and_shared_call_ids()
+        {
+            var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(
+                LlmPhase.EmotionalDirector,
+                ValidDirectionJson(),
+                inputTokens: 13,
+                outputTokens: 7,
+                cacheReadInputTokens: 3,
+                cacheCreationInputTokens: 2);
+            transport.Queue(
+                LlmPhase.OpponentResponse,
+                "Visible complete-usage DATEE reply.",
+                inputTokens: 23,
+                outputTokens: 11,
+                cacheReadInputTokens: 5,
+                cacheCreationInputTokens: 4);
+            var adapter = CreateAdapter(transport, sink, diagnostics: diagnostics);
+
+            StatefulDateeResult result = await adapter.GetDateeResponseAsync(
+                MakeDateeContext(JournalContext()),
+                Array.Empty<ConversationMessage>(),
+                Array.Empty<ConversationMessage>(),
+                dateeSession: null,
+                avatarSession: null);
+
+            Assert.Equal("Visible complete-usage DATEE reply.", result.Response.MessageText);
+            LlmResultRecord director = Assert.Single(sink.Results.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.EmotionalDirector
+                && record.TerminalStatus == AgentJournalTerminalStatus.Succeeded));
+            LlmResultRecord performance = Assert.Single(sink.Results.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance
+                && record.TerminalStatus == AgentJournalTerminalStatus.Succeeded));
+            AssertCompleteUsage(director, 13, 7, cacheCreationInputTokens: 2, cacheReadInputTokens: 3);
+            AssertCompleteUsage(performance, 23, 11, cacheCreationInputTokens: 4, cacheReadInputTokens: 5);
+            Assert.Equal("attempt-1", director.Correlation.AttemptId);
+            Assert.Equal("attempt-1", performance.Correlation.AttemptId);
+            Assert.EndsWith(":attempt-1", director.Correlation.InvocationId, StringComparison.Ordinal);
+            Assert.EndsWith(":attempt-1", performance.Correlation.InvocationId, StringComparison.Ordinal);
+            AssertTerminalDiagnosticCallId(diagnostics, director, LlmPhase.EmotionalDirector, DateePrivatePhaseDirector);
+            AssertTerminalDiagnosticCallId(diagnostics, performance, LlmPhase.OpponentResponse, DateePrivatePhasePerformance);
+        }
+
+        [Fact]
+        [Trait("CORE-1387", "avatar_usage_identity")]
+        public async Task avatar_records_complete_usage_and_shared_call_id()
+        {
+            var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(
+                LlmPhase.DialogueOptions,
+                DialogueOptions,
+                inputTokens: 31,
+                outputTokens: 17,
+                cacheReadInputTokens: 6,
+                cacheCreationInputTokens: 5);
+            var adapter = CreateAdapter(transport, sink, diagnostics: diagnostics);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                MakeDialogueContext(JournalContext()),
+                Array.Empty<ConversationMessage>(),
+                avatarSession: null);
+
+            Assert.Equal(3, options.Length);
+            LlmResultRecord avatar = Assert.Single(sink.Results.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.AvatarReply
+                && record.TerminalStatus == AgentJournalTerminalStatus.Succeeded));
+            AssertCompleteUsage(avatar, 31, 17, cacheCreationInputTokens: 5, cacheReadInputTokens: 6);
+            AssertTerminalDiagnosticCallId(diagnostics, avatar, LlmPhase.DialogueOptions, privatePhase: null);
+        }
+
+        [Fact]
+        [Trait("CORE-1387", "conversation_ambiguous_usage")]
+        public async Task conversational_capture_marks_multi_call_delta_incomplete()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(
+                LlmPhase.DialogueOptions,
+                DialogueOptions,
+                inputTokens: 22,
+                outputTokens: 14,
+                cacheReadInputTokens: 8,
+                cacheCreationInputTokens: 6,
+                callCount: 2);
+            var adapter = CreateAdapter(transport, sink);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                MakeDialogueContext(JournalContext()),
+                Array.Empty<ConversationMessage>(),
+                avatarSession: null);
+
+            Assert.Equal(3, options.Length);
+            LlmResultRecord avatar = Assert.Single(sink.Results);
+            Assert.Equal(AgentJournalUsageStatus.Incomplete, avatar.UsageStatus);
+            Assert.NotNull(avatar.Usage);
+            Assert.Equal(22, avatar.Usage!.InputTokens);
+            Assert.Equal(14, avatar.Usage.OutputTokens);
+            Assert.Equal(6, avatar.Usage.CacheCreationInputTokens);
+            Assert.Equal(8, avatar.Usage.CacheReadInputTokens);
+        }
+
+        [Fact]
         [Trait("CORE-1375", "prefetch_branch_clone")]
         public async Task prefetch_branch_clone()
         {
@@ -139,11 +249,12 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         public async Task identical_prompt_retry()
         {
             var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
             var transport = new ScriptedConversationTransport();
             transport.Queue(LlmPhase.EmotionalDirector, ValidDirectionJson());
             transport.Queue(LlmPhase.OpponentResponse, "   ");
             transport.Queue(LlmPhase.OpponentResponse, "Accepted after retry.");
-            var adapter = CreateAdapter(transport, sink, maxRetries: 1);
+            var adapter = CreateAdapter(transport, sink, maxRetries: 1, diagnostics: diagnostics);
 
             StatefulDateeResult result = await adapter.GetDateeResponseAsync(
                 MakeDateeContext(JournalContext()),
@@ -157,10 +268,69 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Equal("Accepted after retry.", result.Response.MessageText);
             Assert.Equal(new[] { 1, 2 }, attempts.Select(record => record.Correlation.AttemptOrdinal).ToArray());
             Assert.Equal(2, attempts.Select(record => record.Correlation.InvocationId).Distinct(StringComparer.Ordinal).Count());
-            Assert.Equal(2, attempts.Select(record => record.Correlation.AttemptId).Distinct(StringComparer.Ordinal).Count());
+            Assert.Equal(new[] { "attempt-1", "attempt-2" }, attempts.Select(record => record.Correlation.AttemptId).ToArray());
             Assert.Equal(attempts[0].InputDocuments.Select(document => document.Text), attempts[1].InputDocuments.Select(document => document.Text));
+            foreach (LlmInvocationRecord attemptRecord in attempts)
+            {
+                AssertTerminalDiagnosticCallId(
+                    diagnostics,
+                    sink.Results.Single(record => record.Correlation.InvocationId == attemptRecord.Correlation.InvocationId),
+                    LlmPhase.OpponentResponse,
+                    DateePrivatePhasePerformance);
+            }
             Assert.Contains(sink.Results, record => record.TerminalStatus == AgentJournalTerminalStatus.Rejected);
             Assert.Contains(sink.Results, record => record.TerminalStatus == AgentJournalTerminalStatus.Succeeded);
+        }
+
+        [Fact]
+        [Trait("CORE-1387", "engine_level_datee_retry")]
+        public async Task engine_level_same_turn_datee_retry_uses_unique_provider_invocation_ids()
+        {
+            var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(LlmPhase.EmotionalDirector, ValidDirectionJson());
+            transport.QueueException(LlmPhase.OpponentResponse, new LlmTransportException("first engine attempt failed"));
+            transport.Queue(LlmPhase.EmotionalDirector, ValidDirectionJson());
+            transport.Queue(LlmPhase.OpponentResponse, "Accepted after engine retry.");
+            var adapter = CreateAdapter(transport, sink, diagnostics: diagnostics);
+            DateeContext context = MakeDateeContext(JournalContext());
+
+            await Assert.ThrowsAsync<LlmTransportException>(() => adapter.GetDateeResponseAsync(
+                context,
+                Array.Empty<ConversationMessage>(),
+                Array.Empty<ConversationMessage>(),
+                dateeSession: null,
+                avatarSession: null));
+
+            StatefulDateeResult accepted = await adapter.GetDateeResponseAsync(
+                context,
+                Array.Empty<ConversationMessage>(),
+                Array.Empty<ConversationMessage>(),
+                dateeSession: null,
+                avatarSession: null);
+
+            LlmInvocationRecord[] performanceCalls = sink.Invocations.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance).ToArray();
+            Assert.Equal("Accepted after engine retry.", accepted.Response.MessageText);
+            Assert.Equal(2, performanceCalls.Length);
+            Assert.All(performanceCalls, call => Assert.Equal(1, call.Correlation.AttemptOrdinal));
+            Assert.All(performanceCalls, call => Assert.Equal("attempt-1", call.Correlation.AttemptId));
+            Assert.Equal(2, performanceCalls.Select(call => call.Correlation.InvocationId).Distinct(StringComparer.Ordinal).Count());
+            Assert.Equal(
+                performanceCalls[0].InputDocuments.Select(document => document.Text),
+                performanceCalls[1].InputDocuments.Select(document => document.Text));
+
+            foreach (LlmInvocationRecord providerCall in performanceCalls)
+            {
+                LlmResultRecord durableMirror = sink.Results.Single(record =>
+                    record.Correlation.InvocationId == providerCall.Correlation.InvocationId);
+                AssertTerminalDiagnosticCallId(
+                    diagnostics,
+                    durableMirror,
+                    LlmPhase.OpponentResponse,
+                    DateePrivatePhasePerformance);
+            }
         }
 
         [Fact]
@@ -421,7 +591,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         private static PinderLlmAdapter CreateAdapter(
             ScriptedConversationTransport transport,
             RecordingJournalSink sink,
-            int maxRetries = 0)
+            int maxRetries = 0,
+            ConcurrentQueue<OperationalDiagnosticEvent>? diagnostics = null)
             => new PinderLlmAdapter(
                 transport,
                 new PinderLlmAdapterOptions
@@ -432,7 +603,39 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                     ContractViolationBackoffMs = 1,
                     AgentJournalHostSink = sink,
                     AgentJournalClock = () => new DateTimeOffset(2026, 8, 16, 12, 0, 0, TimeSpan.Zero),
+                    OnDiagnostic = diagnostics == null ? (Action<OperationalDiagnosticEvent>?)null : diagnostics.Enqueue,
                 });
+
+        private static void AssertCompleteUsage(
+            LlmResultRecord record,
+            int inputTokens,
+            int outputTokens,
+            int cacheCreationInputTokens,
+            int cacheReadInputTokens)
+        {
+            Assert.Equal(AgentJournalUsageStatus.Complete, record.UsageStatus);
+            Assert.NotNull(record.Usage);
+            Assert.Equal(inputTokens, record.Usage!.InputTokens);
+            Assert.Equal(outputTokens, record.Usage.OutputTokens);
+            Assert.Equal(inputTokens + outputTokens, record.Usage.TotalTokens);
+            Assert.Equal(cacheCreationInputTokens, record.Usage.CacheCreationInputTokens);
+            Assert.Equal(cacheReadInputTokens, record.Usage.CacheReadInputTokens);
+        }
+
+        private static void AssertTerminalDiagnosticCallId(
+            ConcurrentQueue<OperationalDiagnosticEvent> diagnostics,
+            LlmResultRecord result,
+            string phase,
+            string? privatePhase)
+        {
+            OperationalDiagnosticEvent terminal = Assert.Single(diagnostics.Where(diagnostic =>
+                diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Terminal
+                && diagnostic.PhaseCode == phase
+                && diagnostic.CallId == result.Correlation.InvocationId
+                && (!diagnostic.CorrelationHints.ContainsKey("datee_private_phase")
+                    || diagnostic.CorrelationHints["datee_private_phase"] == (privatePhase ?? string.Empty))));
+            Assert.Equal(result.Correlation.InvocationId, terminal.CallId);
+        }
 
         private static GameRunAgentJournalContext JournalContext(
             string gameRunId = "game-run-core-1375",
@@ -580,25 +783,44 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             }
         }
 
-        private sealed class ScriptedConversationTransport : ILlmTransport, IConversationLlmTransport
+        private sealed class ScriptedConversationTransport : ILlmTransport, IConversationLlmTransport, ITokenUsageProvider
         {
             private readonly object _gate = new object();
-            private readonly Queue<(string Phase, string? Output, Exception? Error)> _outputs =
-                new Queue<(string, string?, Exception?)>();
+            private readonly Queue<(string Phase, string? Output, Exception? Error, UsageStep Usage)> _outputs =
+                new Queue<(string, string?, Exception?, UsageStep)>();
             private readonly ConcurrentDictionary<string, ConcurrentQueue<ConversationMessage>> _priorMessages =
                 new ConcurrentDictionary<string, ConcurrentQueue<ConversationMessage>>(StringComparer.Ordinal);
+            private int _inputTokens;
+            private int _outputTokens;
+            private int _cacheReadInputTokens;
+            private int _cacheCreationInputTokens;
+            private int _callCount;
 
             public bool SupportsConversationMessages => true;
             public string? DefaultDialogueOutput { get; set; }
 
-            public void Queue(string phase, string output)
+            public void Queue(
+                string phase,
+                string output,
+                int inputTokens = 11,
+                int outputTokens = 7,
+                int cacheReadInputTokens = 0,
+                int cacheCreationInputTokens = 0,
+                int callCount = 1)
             {
-                lock (_gate) _outputs.Enqueue((phase, output, null));
+                lock (_gate)
+                {
+                    _outputs.Enqueue((
+                        phase,
+                        output,
+                        null,
+                        new UsageStep(inputTokens, outputTokens, cacheReadInputTokens, cacheCreationInputTokens, callCount)));
+                }
             }
 
             public void QueueException(string phase, Exception error)
             {
-                lock (_gate) _outputs.Enqueue((phase, null, error));
+                lock (_gate) _outputs.Enqueue((phase, null, error, UsageStep.Zero));
             }
 
             public IReadOnlyList<ConversationMessage> PriorMessagesFor(string phase)
@@ -632,17 +854,65 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             private Task<string> DequeueAsync(string? phase, CancellationToken cancellationToken)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                (string Phase, string? Output, Exception? Error) next;
+                (string Phase, string? Output, Exception? Error, UsageStep Usage) next;
                 lock (_gate)
                 {
                     if (_outputs.Count == 0 && phase == LlmPhase.DialogueOptions && DefaultDialogueOutput != null)
+                    {
+                        AddUsage(new UsageStep(11, 7, 0, 0));
                         return Task.FromResult(DefaultDialogueOutput);
+                    }
                     next = _outputs.Dequeue();
                 }
 
                 Assert.Equal(next.Phase, phase);
                 if (next.Error != null) return Task.FromException<string>(next.Error);
+                AddUsage(next.Usage);
                 return Task.FromResult(next.Output!);
+            }
+
+            public SessionTokenUsage GetSessionUsage()
+                => new SessionTokenUsage
+                {
+                    InputTokens = _inputTokens,
+                    OutputTokens = _outputTokens,
+                    CacheReadInputTokens = _cacheReadInputTokens,
+                    CacheCreationInputTokens = _cacheCreationInputTokens,
+                    CallCount = _callCount,
+                };
+
+            private void AddUsage(UsageStep usage)
+            {
+                _inputTokens += usage.InputTokens;
+                _outputTokens += usage.OutputTokens;
+                _cacheReadInputTokens += usage.CacheReadInputTokens;
+                _cacheCreationInputTokens += usage.CacheCreationInputTokens;
+                _callCount += usage.CallCount;
+            }
+
+            private readonly struct UsageStep
+            {
+                public static readonly UsageStep Zero = new UsageStep(0, 0, 0, 0, 0);
+
+                public UsageStep(
+                    int inputTokens,
+                    int outputTokens,
+                    int cacheReadInputTokens,
+                    int cacheCreationInputTokens,
+                    int callCount = 1)
+                {
+                    InputTokens = inputTokens;
+                    OutputTokens = outputTokens;
+                    CacheReadInputTokens = cacheReadInputTokens;
+                    CacheCreationInputTokens = cacheCreationInputTokens;
+                    CallCount = callCount;
+                }
+
+                public int InputTokens { get; }
+                public int OutputTokens { get; }
+                public int CacheReadInputTokens { get; }
+                public int CacheCreationInputTokens { get; }
+                public int CallCount { get; }
             }
         }
 

@@ -46,6 +46,47 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
         }
 
         [Fact]
+        public void Result_RoundTripsCompleteCacheUsage()
+        {
+            var entry = _codec.Encode(new LlmResultRecord(
+                AgentJournalAdapterTestRecords.Correlation(),
+                AgentJournalTerminalStatus.Succeeded,
+                "assistant text",
+                new AgentJournalUsage(10, 3, 13, cacheCreationInputTokens: 2, cacheReadInputTokens: 4),
+                validationCode: "accepted",
+                completedAtUtc: "2026-08-15T22:30:01Z",
+                usageStatus: AgentJournalUsageStatus.Complete));
+
+            string json = CanonicalDataJson(entry);
+            Assert.Contains("\"cache_creation_input_tokens\":2", json);
+            Assert.Contains("\"cache_read_input_tokens\":4", json);
+            Assert.Contains("\"usage_status\":\"complete\"", json);
+
+            AddPiEnvelope(entry, "entry-result-cache");
+            var decodedEntry = Assert.IsType<CustomEntry>(SessionJsonCodec.DeserializeEntry(SessionJsonCodec.SerializeEntry(entry)));
+            var decoded = _codec.Decode(decodedEntry);
+            var record = Assert.IsType<LlmResultRecord>(decoded.Record);
+            Assert.Equal(2, record.Usage!.CacheCreationInputTokens);
+            Assert.Equal(4, record.Usage.CacheReadInputTokens);
+        }
+
+        [Fact]
+        public void Result_DecodesOldRecordsWithoutCacheUsageFields()
+        {
+            var data = JsonNode.Parse(@"{""correlation"":{""game_run_id"":""game-run-001"",""agent_session_id"":""agent-session-datee"",""invocation_id"":""invocation-001"",""operation_id"":""operation-dialogue-options"",""attempt_ordinal"":1,""attempt_id"":""attempt-001"",""request_id"":""request-001"",""turn_id"":""turn-001"",""branch_id"":""branch-main""},""terminal_status"":""succeeded"",""output_text"":""assistant text"",""usage"":{""input_tokens"":10,""output_tokens"":3,""total_tokens"":13},""validation_code"":""accepted"",""completed_at_utc"":""2026-08-15T22:30:01Z""}")!;
+            var entry = new CustomEntry(null, null, null, AgentJournalSchemaNames.LlmResultV1, data);
+
+            var decoded = _codec.Decode(entry);
+
+            var record = Assert.IsType<LlmResultRecord>(decoded.Record);
+            Assert.Equal(10, record.Usage!.InputTokens);
+            Assert.Equal(3, record.Usage.OutputTokens);
+            Assert.Null(record.Usage.CacheCreationInputTokens);
+            Assert.Null(record.Usage.CacheReadInputTokens);
+            Assert.Equal(AgentJournalUsageStatus.Unknown, record.UsageStatus);
+        }
+
+        [Fact]
         public void MessageLink_RoundTripsThroughPiCustomEntryAndMatchesFixture()
         {
             var entry = _codec.Encode(AgentJournalAdapterTestRecords.MessageLink());

@@ -149,6 +149,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 correlationContext: context.AgentJournalContext)
                             .ConfigureAwait(false)
                         : AgentJournalCallScope.Disabled;
+                    string? diagnosticCallId = journal.CallId ?? journalAttempt?.InvocationRecord.Correlation.InvocationId;
                     string? providerOutput = null;
                     try
                     {
@@ -169,7 +170,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                     LlmPhase.DialogueOptions,
                                     context.CurrentTurn,
                                     attemptCancellationToken,
-                                    priorMessages: priorMessages)
+                                    priorMessages: priorMessages,
+                                    callId: diagnosticCallId)
                                 .ConfigureAwait(false);
                             providerOutput = structuredResponse.JsonText;
                             rawOutput = structuredResponse.JsonText;
@@ -231,7 +233,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                     LlmPhase.DialogueOptions,
                                     context.CurrentTurn,
                                     attemptCancellationToken,
-                                    priorMessages: priorMessages)
+                                    priorMessages: priorMessages,
+                                    callId: diagnosticCallId)
                                 .ConfigureAwait(false);
                             providerOutput = rawOutput;
 
@@ -468,7 +471,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 maxAttempts,
                                 DateePrivatePhasePerformance,
                                 performanceMetadata,
-                                priorMessages)
+                                priorMessages,
+                                callId: journal.CallId)
                             .ConfigureAwait(false);
 
                         if (string.IsNullOrWhiteSpace(responseText))
@@ -867,7 +871,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 {
                     await skippedAttempt.CompleteValidationRejectedAsync(
                             validationCode,
-                            new AgentJournalUsage(0, 0, 0))
+                            usage: null,
+                            usageStatus: AgentJournalUsageStatus.Unavailable)
                         .ConfigureAwait(false);
                 }
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
@@ -896,7 +901,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             bool improvedRejected;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
                     .ConfigureAwait(false);
                 improved = NormalizeSingleTextOutput(
                     responseText,
@@ -967,7 +972,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
                     .ConfigureAwait(false);
                 // #831: thinking-block stripping is a transport decorator; this trims only.
                 question = NormalizeSingleTextOutput(
@@ -1021,7 +1026,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
                     .ConfigureAwait(false);
                 question = NormalizeSingleTextOutput(
                     responseText,
@@ -1510,7 +1515,9 @@ bool recordOneShotJournal = context.AgentJournal != null;
             }
 
             var recorderContext = new AgentJournalRecorderContext(
-                journalContext.ToCorrelation(attemptOrdinal),
+                journalContext.ToCorrelation(
+                    attemptOrdinal,
+                    OperationalDiagnostics.CreateCallId()),
                 journalContext.ModelId,
                 phase,
                 inputDocuments)
@@ -1544,7 +1551,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
         {
             if (attempt != null)
             {
-                await attempt.CompleteAcceptedAsync(outputText, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
+                await attempt.CompleteAcceptedAsync(
+                    outputText,
+                    capture.Usage,
+                    usageStatus: capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -1555,7 +1566,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
         {
             if (attempt != null)
             {
-                await attempt.CompleteValidationRejectedAsync(validationCode, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
+                await attempt.CompleteValidationRejectedAsync(
+                    validationCode,
+                    capture.Usage,
+                    capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -1565,9 +1580,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
         {
             if (attempt != null)
             {
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
                 await attempt.CompleteCancelledAsync(
                     AgentJournalTerminalCodes.Cancelled,
-                    usage: ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                    usage: capture.Usage,
+                    usageStatus: capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -1578,21 +1595,12 @@ bool recordOneShotJournal = context.AgentJournal != null;
         {
             if (attempt != null)
             {
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
                 await attempt.CompleteProviderFailedAsync(
                     exception.GetType().Name,
-                    ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                    capture.Usage,
+                    capture.Status).ConfigureAwait(false);
             }
-        }
-
-        private static AgentJournalUsage? ToAgentJournalUsage(TokenUsageMeasurement measurement)
-        {
-            SessionTokenUsage? usage = measurement.Complete();
-            return usage == null
-                ? null
-                : new AgentJournalUsage(
-                    usage.InputTokens,
-                    usage.OutputTokens,
-                    usage.InputTokens + usage.OutputTokens);
         }
 
         private async Task<StructuredLlmResponse> SendStructuredWithDiagnosticsAsync(
@@ -1605,10 +1613,13 @@ bool recordOneShotJournal = context.AgentJournal != null;
             int? totalAttempts = null,
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
-            IReadOnlyList<ConversationMessage>? priorMessages = null)
+            IReadOnlyList<ConversationMessage>? priorMessages = null,
+            string? callId = null)
         {
             var sink = GetDiagnosticSink();
-            string callId = OperationalDiagnostics.CreateCallId();
+            callId = string.IsNullOrWhiteSpace(callId)
+                ? OperationalDiagnostics.CreateCallId()
+                : callId;
             var baseHints = BuildDiagnosticHints(
                 phase,
                 turnId,
@@ -1732,10 +1743,13 @@ bool recordOneShotJournal = context.AgentJournal != null;
             int? totalAttempts = null,
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
-            IReadOnlyList<ConversationMessage>? priorMessages = null)
+            IReadOnlyList<ConversationMessage>? priorMessages = null,
+            string? callId = null)
         {
             var sink = GetDiagnosticSink();
-            string callId = OperationalDiagnostics.CreateCallId();
+            callId = string.IsNullOrWhiteSpace(callId)
+                ? OperationalDiagnostics.CreateCallId()
+                : callId;
             var baseHints = BuildDiagnosticHints(
                 phase,
                 turnId,

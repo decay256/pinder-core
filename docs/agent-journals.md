@@ -15,7 +15,7 @@ referred both to a complete game conversation and to LLM execution history.
 | **Agent Snapshot** | A versioned serialized representation sufficient to restore one Agent Session. A snapshot is a resumable state artifact, not a complete execution audit. |
 | **Agent Journal** | The read-only, inspectable entry history materialized from an Agent Snapshot plus any durable Pinder extension records. This is the object visualized by the Agent Journal Debugger. |
 | **Agent Journal Bundle** | The Game Run-scoped read model containing all available Agent Journals, deleted/private branch records, and their cross-session invocation correlations at one persisted game-state revision. This is the default object opened by the debugger. |
-| **LLM Invocation** | One provider request attempt, including its phase, model settings, exact input documents, output or error, validation result, usage, and correlation identifiers. Retries are separate invocations. |
+| **LLM Invocation** | One actual provider request attempt, including its phase, model settings, exact input documents, output or error, validation result, usage, and correlation identifiers. Retries are separate invocations, including retries of the same game turn. |
 | **Prompt Provenance** | Versioned annotations mapping ranges of a compiled LLM input document to configuration sources, keys, runtime values, and configuration revisions. |
 | **Agent Journal Debugger** | The read-only administrative viewer for annotated Agent Journals. It does not resume, mutate, delete, or execute Agent Sessions. |
 
@@ -48,7 +48,7 @@ into provider context.
 The Pinder adaptation layer owns typed extension contracts such as:
 
 - `pinder.llm-invocation.v1` for exact invocation inputs and attempt metadata;
-- `pinder.llm-result.v1` for output, usage, validation, and terminal status; and
+- `pinder.llm-result.v1` for output, usage, usage completeness, validation, and terminal status; and
 - `pinder.message-link.v1` for connecting accepted semantic entries to the
   invocation that produced them.
 
@@ -71,9 +71,37 @@ remain visible as opaque, safe JSON instead of being discarded.
 
 An Agent Snapshot alone cannot describe every failed or deleted operation. The
 host may therefore join it with durable extension records using stable Game Run,
-Agent Session, entry, invocation, operation, request, turn, and branch IDs. One
+Agent Session, entry, invocation, operation, request, turn, and branch IDs. An
+invocation ID identifies exactly one provider call. Live diagnostics and persisted
+records for that same call share the ID and may be deduplicated; separate retries,
+including engine-level retries of the same turn, must never share it. One
 logical record may have a snapshot projection and a durable host projection, but
 both must originate from the same typed record construction path.
+
+## Usage Accounting
+
+Durable results expose `usage_status`: `complete` means all provider-neutral input,
+output, cache-creation, cache-read, and total fields are canonical for that call;
+`unavailable` means accounting could not be observed without affecting gameplay;
+`incomplete` is reserved for known partial accounting; and missing/`unknown` denotes
+historical records written before the signal existed. Newly emitted records must
+always choose an explicit status. In particular, a configured skip that makes no
+provider request records `unavailable` with null usage rather than fabricating zero
+token accounting. Cumulative transport usage is canonical for one invocation only
+when the measured call-count delta is exactly one and all provider-neutral token
+fields are present. A zero-call delta is `unavailable`; a delta above one is
+`incomplete` because overlapping or cumulative activity cannot be attributed to one
+provider invocation. The observed aggregate tokens remain attached to an incomplete
+record for diagnosis, but must not be treated as canonical per-call accounting.
+Conversation calls, ordinary one-shots, and setup one-shots use the same classifier.
+The recorder also normalizes omitted status from source-compatible legacy completion
+overloads: null usage becomes `unavailable`, and old three-field usage becomes
+`incomplete`, so the live emission boundary never writes `unknown`.
+
+Setup generators may accept a caller-supplied diagnostic call ID. When an Agent
+Journal attempt owns the provider call, the generator passes that invocation ID so
+the live start/terminal diagnostics and durable invocation/result are exact mirrors.
+Callers that do not own a durable journal attempt continue to receive a generated ID.
 
 ## Prompt Provenance Contract
 

@@ -32,9 +32,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
-        public async Task dramatic_arc_setup_records_no_session_owner_and_output()
+        public async Task dramatic_arc_setup_mirrors_runtime_and_durable_call_identity()
         {
             var sink = new RecordingJournalSink();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
             var generator = new LlmDramaticArcGenerator(
                 new QueueTransport("One sentence lands. Two sentence turns. Three sentence closes."),
                 new LlmDramaticArcGenerator.Options
@@ -42,6 +43,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                     AgentJournalHostSink = sink,
                     AgentJournal = Journal("game.setup.dramatic-arc", "game_run_setup_one_shot_record", turnId: null, output: "setup.dramatic_arc"),
                     AgentJournalClock = FixedClock,
+                    OnDiagnostic = diagnostics.Add,
                 });
 
             string arc = await generator.GenerateAsync("Ari", "truth", "bio", "Bea", "risk", "bio");
@@ -49,6 +51,137 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Contains("Three sentence closes.", arc);
             AssertInvocationAndResult(sink, "game.setup.dramatic-arc", "game_run_setup_one_shot_record", "dramatic_arc", null, AgentJournalTerminalStatus.Succeeded);
             AssertUsage(sink.Result);
+            OperationalDiagnosticEvent[] mirroredDiagnostics = diagnostics
+                .Where(diagnostic => diagnostic.PhaseCode == LlmPhase.DramaticArc)
+                .ToArray();
+            Assert.Equal(2, mirroredDiagnostics.Length);
+            Assert.Contains(mirroredDiagnostics, diagnostic => diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Start);
+            Assert.Contains(mirroredDiagnostics, diagnostic => diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Terminal);
+            Assert.All(
+                mirroredDiagnostics,
+                diagnostic => Assert.Equal(sink.Invocation.Correlation.InvocationId, diagnostic.CallId));
+        }
+
+        [Fact]
+        public async Task dialogue_options_preserves_cache_token_usage_and_diagnostic_call_id()
+        {
+            var sink = new RecordingJournalSink();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var transport = new QueueTransport(DialogueOptionsText())
+            {
+                CacheReadInputTokensPerCall = 5,
+                CacheCreationInputTokensPerCall = 4,
+            };
+            var adapter = Adapter(transport, sink, diagnostics);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(DialogueContext("game.dialogue-options.cache", "dialogue_options_cache"));
+
+            Assert.Equal(3, options.Length);
+            AssertUsage(sink.Result, cacheCreationInputTokens: 4, cacheReadInputTokens: 5);
+            OperationalDiagnosticEvent terminal = Assert.Single(diagnostics.Where(diagnostic =>
+                diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Terminal
+                && diagnostic.PhaseCode == LlmPhase.DialogueOptions));
+            Assert.Equal(sink.Invocation.Correlation.InvocationId, terminal.CallId);
+        }
+
+        [Fact]
+        public async Task successful_call_without_usage_provider_marks_usage_unavailable()
+        {
+            var sink = new RecordingJournalSink();
+            var adapter = Adapter(new PlainTransport(DialogueOptionsText()), sink);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                DialogueContext("game.dialogue-options.no-usage", "dialogue_options_no_usage"));
+
+            Assert.Equal(3, options.Length);
+            Assert.Equal(AgentJournalTerminalStatus.Succeeded, sink.Result.TerminalStatus);
+            Assert.Equal(AgentJournalUsageStatus.Unavailable, sink.Result.UsageStatus);
+            Assert.Null(sink.Result.Usage);
+        }
+
+        [Fact]
+        public async Task successful_call_with_throwing_usage_provider_marks_usage_unavailable()
+        {
+            var sink = new RecordingJournalSink();
+            var adapter = Adapter(new ThrowingUsageTransport(DialogueOptionsText()), sink);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                DialogueContext("game.dialogue-options.throwing-usage", "dialogue_options_throwing_usage"));
+
+            Assert.Equal(3, options.Length);
+            Assert.Equal(AgentJournalTerminalStatus.Succeeded, sink.Result.TerminalStatus);
+            Assert.Equal(AgentJournalUsageStatus.Unavailable, sink.Result.UsageStatus);
+            Assert.Null(sink.Result.Usage);
+        }
+
+        [Fact]
+        public async Task successful_call_with_zero_measured_calls_marks_usage_unavailable()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new QueueTransport(DialogueOptionsText()) { UsageCallCountPerSend = 0 };
+            var adapter = Adapter(transport, sink);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                DialogueContext("game.dialogue-options.zero-call-usage", "dialogue_options_zero_call_usage"));
+
+            Assert.Equal(3, options.Length);
+            Assert.Equal(1, transport.CallCount);
+            Assert.Equal(AgentJournalUsageStatus.Unavailable, sink.Result.UsageStatus);
+            Assert.Null(sink.Result.Usage);
+        }
+
+        [Fact]
+        public async Task successful_call_with_multi_call_delta_marks_usage_incomplete()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new QueueTransport(DialogueOptionsText())
+            {
+                UsageCallCountPerSend = 2,
+                CacheCreationInputTokensPerCall = 3,
+                CacheReadInputTokensPerCall = 4,
+            };
+            var adapter = Adapter(transport, sink);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                DialogueContext("game.dialogue-options.multi-call-usage", "dialogue_options_multi_call_usage"));
+
+            Assert.Equal(3, options.Length);
+            Assert.Equal(AgentJournalUsageStatus.Incomplete, sink.Result.UsageStatus);
+            Assert.NotNull(sink.Result.Usage);
+            Assert.Equal(22, sink.Result.Usage!.InputTokens);
+            Assert.Equal(14, sink.Result.Usage.OutputTokens);
+            Assert.Equal(6, sink.Result.Usage.CacheCreationInputTokens);
+            Assert.Equal(8, sink.Result.Usage.CacheReadInputTokens);
+        }
+
+        [Fact]
+        public async Task overlapping_calls_on_shared_transport_are_distinct_but_usage_is_incomplete()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new OverlappingUsageTransport(DialogueOptionsText());
+            var adapter = Adapter(transport, sink);
+
+            await Task.WhenAll(
+                adapter.GetDialogueOptionsAsync(DialogueContext(
+                    "game.dialogue-options.overlap-a",
+                    "dialogue_options_overlap_a")),
+                adapter.GetDialogueOptionsAsync(DialogueContext(
+                    "game.dialogue-options.overlap-b",
+                    "dialogue_options_overlap_b")));
+
+            Assert.Equal(2, sink.Invocations.Count);
+            Assert.Equal(2, sink.Results.Count);
+            Assert.Equal(2, sink.Invocations
+                .Select(record => record.Correlation.InvocationId)
+                .Distinct(StringComparer.Ordinal)
+                .Count());
+            Assert.All(sink.Results, result =>
+            {
+                Assert.Equal(AgentJournalUsageStatus.Incomplete, result.UsageStatus);
+                Assert.NotNull(result.Usage);
+                Assert.Equal(22, result.Usage!.InputTokens);
+                Assert.Equal(14, result.Usage.OutputTokens);
+            });
         }
 
         [Fact]
@@ -304,7 +437,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
-        public async Task validation_or_skipped_output_success_improvement_without_template_records_zero_usage_skip()
+        public async Task validation_or_skipped_output_success_improvement_without_template_records_unavailable_usage_skip()
         {
             var sink = new RecordingJournalSink();
             var transport = new QueueTransport("provider must not be called");
@@ -330,10 +463,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Equal("game.delivery.success-improvement.turn-7.skip", sink.Invocation.Correlation.OperationId);
             Assert.Equal(AgentJournalTerminalStatus.Rejected, sink.Result.TerminalStatus);
             Assert.Equal("skipped_no_template", sink.Result.ValidationCode);
-            Assert.NotNull(sink.Result.Usage);
-            Assert.Equal(0, sink.Result.Usage!.InputTokens);
-            Assert.Equal(0, sink.Result.Usage.OutputTokens);
-            Assert.Equal(0, sink.Result.Usage.TotalTokens);
+            Assert.Equal(AgentJournalUsageStatus.Unavailable, sink.Result.UsageStatus);
+            Assert.Null(sink.Result.Usage);
             Assert.Equal(0, transport.CallCount);
         }
 
@@ -451,7 +582,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Contains("BuildHorninessQuestionDocuments", adapter, StringComparison.Ordinal);
         }
 
-        private static PinderLlmAdapter Adapter(ILlmTransport transport, RecordingJournalSink sink)
+        private static PinderLlmAdapter Adapter(
+            ILlmTransport transport,
+            RecordingJournalSink sink,
+            List<OperationalDiagnosticEvent>? diagnostics = null)
             => new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
             {
                 GameDefinition = ConfiguredGameDefinition(),
@@ -459,6 +593,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 MaxTokens = 256,
                 AgentJournalHostSink = sink,
                 AgentJournalClock = FixedClock,
+                OnDiagnostic = diagnostics == null ? (Action<OperationalDiagnosticEvent>?)null : diagnostics.Add,
             });
 
         private static GameDefinition ConfiguredGameDefinition()
@@ -563,12 +698,60 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         private static string Relative(string path)
             => Path.GetRelativePath(RepoRoot(), path).Replace('\\', '/');
 
+        private sealed class PlainTransport : ILlmTransport
+        {
+            private readonly string _response;
+
+            public PlainTransport(string response)
+            {
+                _response = response;
+            }
+
+            public Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                return Task.FromResult(_response);
+            }
+        }
+
+        private sealed class ThrowingUsageTransport : ILlmTransport, ITokenUsageProvider
+        {
+            private readonly PlainTransport _inner;
+
+            public ThrowingUsageTransport(string response)
+            {
+                _inner = new PlainTransport(response);
+            }
+
+            public Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken ct = default)
+                => _inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
+
+            public SessionTokenUsage GetSessionUsage()
+                => throw new InvalidOperationException("usage diagnostics unavailable");
+        }
+
         private sealed class QueueTransport : ILlmTransport, ITokenUsageProvider
         {
             private readonly Queue<object> _responses = new Queue<object>();
-            private int _callCount;
+            private int _sendCount;
+            private int _usageCallCount;
 
-            public int CallCount => _callCount;
+            public int CallCount => _sendCount;
+            public int UsageCallCountPerSend { get; set; } = 1;
+            public int CacheReadInputTokensPerCall { get; set; }
+            public int CacheCreationInputTokensPerCall { get; set; }
 
             public QueueTransport(params object[] responses)
             {
@@ -587,7 +770,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
-                _callCount++;
+                _sendCount++;
+                _usageCallCount += UsageCallCountPerSend;
                 object next = _responses.Count == 0 ? string.Empty : _responses.Dequeue();
                 if (next is Exception ex)
                 {
@@ -600,9 +784,57 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             public SessionTokenUsage GetSessionUsage()
                 => new SessionTokenUsage
                 {
-                    InputTokens = _callCount * 11,
-                    OutputTokens = _callCount * 7,
-                    CallCount = _callCount,
+                    InputTokens = _usageCallCount * 11,
+                    OutputTokens = _usageCallCount * 7,
+                    CacheReadInputTokens = _usageCallCount * CacheReadInputTokensPerCall,
+                    CacheCreationInputTokens = _usageCallCount * CacheCreationInputTokensPerCall,
+                    CallCount = _usageCallCount,
+                };
+        }
+
+        private sealed class OverlappingUsageTransport : ILlmTransport, ITokenUsageProvider
+        {
+            private readonly string _response;
+            private readonly TaskCompletionSource<bool> _bothEntered =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private readonly TaskCompletionSource<bool> _bothAccounted =
+                new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            private int _entered;
+            private int _accounted;
+            private int _inputTokens;
+            private int _outputTokens;
+            private int _callCount;
+
+            public OverlappingUsageTransport(string response) { _response = response; }
+
+            public async Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int maxTokens = 1024,
+                string? phase = null,
+                CancellationToken ct = default)
+            {
+                if (Interlocked.Increment(ref _entered) == 2) _bothEntered.TrySetResult(true);
+                await _bothEntered.Task.ConfigureAwait(false);
+                ct.ThrowIfCancellationRequested();
+
+                Interlocked.Add(ref _inputTokens, 11);
+                Interlocked.Add(ref _outputTokens, 7);
+                Interlocked.Increment(ref _callCount);
+                if (Interlocked.Increment(ref _accounted) == 2) _bothAccounted.TrySetResult(true);
+                await _bothAccounted.Task.ConfigureAwait(false);
+                return _response;
+            }
+
+            public SessionTokenUsage GetSessionUsage()
+                => new SessionTokenUsage
+                {
+                    InputTokens = Volatile.Read(ref _inputTokens),
+                    OutputTokens = Volatile.Read(ref _outputTokens),
+                    CacheCreationInputTokens = 0,
+                    CacheReadInputTokens = 0,
+                    CallCount = Volatile.Read(ref _callCount),
                 };
         }
 
@@ -625,7 +857,17 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 
             public Task PersistAsync(AgentJournalSinkRecord record, CancellationToken cancellationToken)
             {
-                Records.Add(record);
+                if (record.Record is LlmResultRecord result
+                    && result.UsageStatus == AgentJournalUsageStatus.Unknown)
+                {
+                    throw new InvalidOperationException(
+                        "Production one-shot records must declare usage availability; unknown is historical compatibility only.");
+                }
+
+                lock (Records)
+                {
+                    Records.Add(record);
+                }
                 return Task.CompletedTask;
             }
         }
@@ -647,14 +889,21 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Null(sink.Invocation.Correlation.AgentSessionId);
             Assert.Equal(status, sink.Result.TerminalStatus);
             Assert.Equal(sink.Invocation.Correlation.InvocationId, sink.Result.Correlation.InvocationId);
+            Assert.NotEqual(AgentJournalUsageStatus.Unknown, sink.Result.UsageStatus);
         }
 
-        private static void AssertUsage(LlmResultRecord result)
+        private static void AssertUsage(
+            LlmResultRecord result,
+            int cacheCreationInputTokens = 0,
+            int cacheReadInputTokens = 0)
         {
+            Assert.Equal(AgentJournalUsageStatus.Complete, result.UsageStatus);
             Assert.NotNull(result.Usage);
-            Assert.Equal(11, result.Usage.InputTokens);
+            Assert.Equal(11, result.Usage!.InputTokens);
             Assert.Equal(7, result.Usage.OutputTokens);
             Assert.Equal(18, result.Usage.TotalTokens);
+            Assert.Equal(cacheCreationInputTokens, result.Usage.CacheCreationInputTokens);
+            Assert.Equal(cacheReadInputTokens, result.Usage.CacheReadInputTokens);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace Pinder.Core.Diagnostics.AgentJournals
 {
@@ -164,7 +165,9 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             return copy;
         }
 
-        public AgentJournalCorrelationIds ToCorrelation(int attemptOrdinal)
+        public AgentJournalCorrelationIds ToCorrelation(
+            int attemptOrdinal,
+            string? invocationDiscriminator = null)
         {
             if (attemptOrdinal < 1)
             {
@@ -173,11 +176,15 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     "Agent journal attempt ordinal must be positive.");
             }
 
+            RequireOpaqueId(invocationDiscriminator, nameof(invocationDiscriminator));
             string attemptId = "attempt-" + attemptOrdinal.ToString(CultureInfo.InvariantCulture);
+            string invocationId = string.IsNullOrWhiteSpace(invocationDiscriminator)
+                ? InvocationIdPrefix + "." + attemptId
+                : "call-" + invocationDiscriminator + "." + attemptId;
             return new AgentJournalCorrelationIds(
                 GameRunId,
                 agentSessionId: null,
-                invocationId: InvocationIdPrefix + "." + attemptId,
+                invocationId: invocationId,
                 operationId: OperationId,
                 attemptOrdinal: attemptOrdinal,
                 attemptId: attemptId,
@@ -285,16 +292,25 @@ namespace Pinder.Core.Diagnostics.AgentJournals
 
     public sealed class AgentJournalUsage
     {
-        public AgentJournalUsage(int? inputTokens = null, int? outputTokens = null, int? totalTokens = null)
+        public AgentJournalUsage(
+            int? inputTokens = null,
+            int? outputTokens = null,
+            int? totalTokens = null,
+            int? cacheCreationInputTokens = null,
+            int? cacheReadInputTokens = null)
         {
             InputTokens = inputTokens;
             OutputTokens = outputTokens;
             TotalTokens = totalTokens;
+            CacheCreationInputTokens = cacheCreationInputTokens;
+            CacheReadInputTokens = cacheReadInputTokens;
         }
 
         public int? InputTokens { get; }
         public int? OutputTokens { get; }
         public int? TotalTokens { get; }
+        public int? CacheCreationInputTokens { get; }
+        public int? CacheReadInputTokens { get; }
     }
 
     public sealed class LlmInvocationRecord
@@ -329,12 +345,14 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             AgentJournalUsage? usage,
             string? validationCode = null,
             string? errorCode = null,
-            string? completedAtUtc = null)
+            string? completedAtUtc = null,
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
         {
             Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
             TerminalStatus = terminalStatus;
             OutputText = outputText;
             Usage = usage;
+            UsageStatus = usageStatus;
             ValidationCode = validationCode;
             ErrorCode = errorCode;
             CompletedAtUtc = completedAtUtc;
@@ -344,6 +362,10 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public AgentJournalTerminalStatus TerminalStatus { get; }
         public string? OutputText { get; }
         public AgentJournalUsage? Usage { get; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public AgentJournalUsageStatus UsageStatus { get; }
+
         public string? ValidationCode { get; }
         public string? ErrorCode { get; }
         public string? CompletedAtUtc { get; }

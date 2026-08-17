@@ -31,7 +31,8 @@ namespace Pinder.SessionSetup
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             CancellationBehavior cancellationBehavior,
             CancellationToken cancellationToken = default,
-            bool passCancellationTokenToTransport = false)
+            bool passCancellationTokenToTransport = false,
+            string? callId = null)
         {
             if (generatorName == null) throw new ArgumentNullException(nameof(generatorName));
             if (transport == null) throw new ArgumentNullException(nameof(transport));
@@ -40,7 +41,7 @@ namespace Pinder.SessionSetup
             if (entry == null) throw new ArgumentNullException(nameof(entry));
             if (phase == null) throw new ArgumentNullException(nameof(phase));
 
-            string callId = EmitSetupSynthesisStarted(onDiagnostic, generatorName, phase);
+            callId = EmitSetupSynthesisStarted(onDiagnostic, generatorName, phase, callId);
 
             bool terminalEmitted = false;
             try
@@ -128,9 +129,12 @@ namespace Pinder.SessionSetup
         private static string EmitSetupSynthesisStarted(
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             string generatorName,
-            string phase)
+            string phase,
+            string? callerSuppliedCallId)
         {
-            string callId = OperationalDiagnostics.CreateCallId();
+            string callId = string.IsNullOrWhiteSpace(callerSuppliedCallId)
+                ? OperationalDiagnostics.CreateCallId()
+                : callerSuppliedCallId!;
             OperationalDiagnostics.Emit(
                 onDiagnostic,
                 new OperationalDiagnosticEvent(
@@ -266,7 +270,8 @@ namespace Pinder.SessionSetup
             int maxTokens,
             string phase,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            string? callId = null)
         {
             if (generatorName == null) throw new ArgumentNullException(nameof(generatorName));
             if (transport == null) throw new ArgumentNullException(nameof(transport));
@@ -274,7 +279,7 @@ namespace Pinder.SessionSetup
             if (userMessage == null) throw new ArgumentNullException(nameof(userMessage));
             if (phase == null) throw new ArgumentNullException(nameof(phase));
 
-            string callId = EmitSetupSynthesisStarted(onDiagnostic, generatorName, phase);
+            callId = EmitSetupSynthesisStarted(onDiagnostic, generatorName, phase, callId);
 
             try
             {
