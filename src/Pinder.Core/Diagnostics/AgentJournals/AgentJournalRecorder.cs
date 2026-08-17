@@ -419,7 +419,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public Task<AgentJournalTerminalResult> CompleteAcceptedAsync(
             string outputText,
             AgentJournalUsage? usage,
-            string? semanticEntryId = null)
+            string? semanticEntryId = null,
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Succeeded,
@@ -427,10 +428,14 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 usage,
                 validationCode: AgentJournalTerminalCodes.Accepted,
                 errorCode: null,
-                semanticEntryId: semanticEntryId);
+                semanticEntryId: semanticEntryId,
+                usageStatus: usageStatus);
         }
 
-        public Task<AgentJournalTerminalResult> CompleteValidationRejectedAsync(string validationCode, AgentJournalUsage? usage = null)
+        public Task<AgentJournalTerminalResult> CompleteValidationRejectedAsync(
+            string validationCode,
+            AgentJournalUsage? usage = null,
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Rejected,
@@ -440,10 +445,14 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     ? AgentJournalTerminalCodes.ValidationRejected
                     : validationCode,
                 errorCode: null,
-                semanticEntryId: null);
+                semanticEntryId: null,
+                usageStatus: usageStatus);
         }
 
-        public Task<AgentJournalTerminalResult> CompleteProviderFailedAsync(string errorCode, AgentJournalUsage? usage = null)
+        public Task<AgentJournalTerminalResult> CompleteProviderFailedAsync(
+            string errorCode,
+            AgentJournalUsage? usage = null,
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Failed,
@@ -453,13 +462,15 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 errorCode: string.IsNullOrWhiteSpace(errorCode)
                     ? AgentJournalTerminalCodes.ProviderFailed
                     : errorCode,
-                semanticEntryId: null);
+                semanticEntryId: null,
+                usageStatus: usageStatus);
         }
 
         public Task<AgentJournalTerminalResult> CompleteCancelledAsync(
             string errorCode,
             CancellationToken providerCancellationToken = default,
-            AgentJournalUsage? usage = null)
+            AgentJournalUsage? usage = null,
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Cancelled,
@@ -469,7 +480,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 errorCode: string.IsNullOrWhiteSpace(errorCode)
                     ? AgentJournalTerminalCodes.Cancelled
                     : errorCode,
-                semanticEntryId: null);
+                semanticEntryId: null,
+                usageStatus: usageStatus);
         }
 
         public ValueTask DisposeAsync()
@@ -480,7 +492,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 usage: null,
                 validationCode: null,
                 errorCode: AgentJournalTerminalCodes.Abandoned,
-                semanticEntryId: null));
+                semanticEntryId: null,
+                usageStatus: AgentJournalUsageStatus.Unavailable));
         }
 
         private Task<AgentJournalTerminalResult> CompleteTerminalAsync(
@@ -489,7 +502,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             AgentJournalUsage? usage,
             string? validationCode,
             string? errorCode,
-            string? semanticEntryId)
+            string? semanticEntryId,
+            AgentJournalUsageStatus usageStatus)
         {
             lock (_terminalGate)
             {
@@ -511,7 +525,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                         usage,
                         validationCode,
                         errorCode,
-                        semanticEntryId);
+                        semanticEntryId,
+                        ResolveEmittedUsageStatus(usageStatus, usage));
                 }
 
                 var completion = new TaskCompletionSource<AgentJournalTerminalResult>(
@@ -520,6 +535,25 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 _ = RunCompletionAsync(_pendingTerminal, completion);
                 return completion.Task;
             }
+        }
+
+        private static AgentJournalUsageStatus ResolveEmittedUsageStatus(
+            AgentJournalUsageStatus requestedStatus,
+            AgentJournalUsage? usage)
+        {
+            if (requestedStatus != AgentJournalUsageStatus.Unknown)
+            {
+                return requestedStatus;
+            }
+
+            if (usage == null)
+            {
+                return AgentJournalUsageStatus.Unavailable;
+            }
+
+            return usage.CacheCreationInputTokens.HasValue && usage.CacheReadInputTokens.HasValue
+                ? AgentJournalUsageStatus.Complete
+                : AgentJournalUsageStatus.Incomplete;
         }
 
         private async Task RunCompletionAsync(
@@ -560,7 +594,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             AgentJournalUsage? usage,
             string? validationCode,
             string? errorCode,
-            string? semanticEntryId)
+            string? semanticEntryId,
+            AgentJournalUsageStatus usageStatus)
         {
             // Validate the complete immutable terminal payload before reserving lifecycle work.
             var resultRecord = new LlmResultRecord(
@@ -570,7 +605,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 usage,
                 validationCode,
                 errorCode,
-                _context.TimestampUtc());
+                _context.TimestampUtc(),
+                usageStatus);
             ThrowIfInvalidResult(resultRecord);
 
             MessageLinkRecord? linkRecord = null;

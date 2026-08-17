@@ -102,12 +102,48 @@ namespace Pinder.Core.Tests.AgentJournals
                 AgentJournalTestRecords.Correlation(),
                 (AgentJournalTerminalStatus)999,
                 "nope",
-                new AgentJournalUsage(-1, 2, -3));
+                new AgentJournalUsage(-1, 2, -3, cacheCreationInputTokens: -4, cacheReadInputTokens: -5));
 
             var result = AgentJournalValidator.Validate(record);
 
             Assert.Contains(result.Errors, error => error.Code == AgentJournalValidator.InvalidTerminalStatus);
-            Assert.Equal(2, result.Errors.Count(error => error.Code == AgentJournalValidator.NegativeUsage));
+            Assert.Equal(4, result.Errors.Count(error => error.Code == AgentJournalValidator.NegativeUsage));
+            Assert.Contains(result.Errors, error => error.Path == "$.usage.cache_creation_input_tokens");
+            Assert.Contains(result.Errors, error => error.Path == "$.usage.cache_read_input_tokens");
+        }
+
+        [Fact]
+        public void ResultValidation_RequiresFullUsageWhenMarkedComplete()
+        {
+            var record = new LlmResultRecord(
+                AgentJournalTestRecords.Correlation(),
+                AgentJournalTerminalStatus.Succeeded,
+                "accepted",
+                new AgentJournalUsage(10, 3, 13),
+                validationCode: AgentJournalTerminalCodes.Accepted,
+                usageStatus: AgentJournalUsageStatus.Complete);
+
+            AgentJournalValidationResult result = AgentJournalValidator.Validate(record);
+
+            Assert.Contains(result.Errors, error =>
+                error.Code == AgentJournalValidator.InvalidUsageCompleteness
+                && error.Path == "$.usage_status");
+        }
+
+        [Fact]
+        public void ResultValidation_RejectsUsagePayloadMarkedUnavailable()
+        {
+            var record = new LlmResultRecord(
+                AgentJournalTestRecords.Correlation(),
+                AgentJournalTerminalStatus.Succeeded,
+                "accepted",
+                new AgentJournalUsage(10, 3, 13, 0, 0),
+                validationCode: AgentJournalTerminalCodes.Accepted,
+                usageStatus: AgentJournalUsageStatus.Unavailable);
+
+            AgentJournalValidationResult result = AgentJournalValidator.Validate(record);
+
+            Assert.Contains(result.Errors, error => error.Code == AgentJournalValidator.InvalidUsageCompleteness);
         }
 
         [Fact]

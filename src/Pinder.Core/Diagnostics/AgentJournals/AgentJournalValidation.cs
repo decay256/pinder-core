@@ -51,6 +51,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string CredentialShapedSourceIdentifier = "credential_shaped_source_identifier";
         public const string SurrogateSplitRange = "surrogate_split_range";
         public const string NegativeUsage = "negative_usage";
+        public const string InvalidUsageStatus = "invalid_usage_status";
+        public const string InvalidUsageCompleteness = "invalid_usage_completeness";
         public const string ForbiddenOwnerId = "forbidden_owner_id";
 
         public static AgentJournalValidationResult Validate(LlmInvocationRecord record)
@@ -104,14 +106,49 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             {
                 ValidateTerminalState(record, errors);
             }
+            if (!Enum.IsDefined(typeof(AgentJournalUsageStatus), record.UsageStatus))
+            {
+                errors.Add(new AgentJournalValidationError(InvalidUsageStatus, "$.usage_status"));
+            }
             if (record.Usage != null)
             {
                 AddNegative(record.Usage.InputTokens, "$.usage.input_tokens", errors);
                 AddNegative(record.Usage.OutputTokens, "$.usage.output_tokens", errors);
                 AddNegative(record.Usage.TotalTokens, "$.usage.total_tokens", errors);
+                AddNegative(record.Usage.CacheCreationInputTokens, "$.usage.cache_creation_input_tokens", errors);
+                AddNegative(record.Usage.CacheReadInputTokens, "$.usage.cache_read_input_tokens", errors);
             }
+            ValidateUsageCompleteness(record, errors);
 
             return AgentJournalValidationResult.From(errors);
+        }
+
+        private static void ValidateUsageCompleteness(
+            LlmResultRecord record,
+            ICollection<AgentJournalValidationError> errors)
+        {
+            if (record.UsageStatus == AgentJournalUsageStatus.Complete)
+            {
+                AgentJournalUsage? usage = record.Usage;
+                if (usage == null
+                    || !usage.InputTokens.HasValue
+                    || !usage.OutputTokens.HasValue
+                    || !usage.TotalTokens.HasValue
+                    || !usage.CacheCreationInputTokens.HasValue
+                    || !usage.CacheReadInputTokens.HasValue)
+                {
+                    errors.Add(new AgentJournalValidationError(
+                        InvalidUsageCompleteness,
+                        "$.usage_status"));
+                }
+            }
+            else if (record.UsageStatus == AgentJournalUsageStatus.Unavailable
+                && record.Usage != null)
+            {
+                errors.Add(new AgentJournalValidationError(
+                    InvalidUsageCompleteness,
+                    "$.usage_status"));
+            }
         }
 
         public static AgentJournalValidationResult Validate(MessageLinkRecord record)

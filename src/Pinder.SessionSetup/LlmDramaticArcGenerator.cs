@@ -140,7 +140,8 @@ namespace Pinder.SessionSetup
                                 _options.OnDiagnostic,
                                 LlmOptionalTextGeneration.CancellationBehavior.Throw,
                                 attemptCancellationToken,
-                                passCancellationTokenToTransport: true)
+                                passCancellationTokenToTransport: true,
+                                callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
                             .ConfigureAwait(false);
                         trimmed = (response ?? string.Empty).Trim();
                         isComplete = IsCompleteDramaticArc(trimmed);
@@ -220,7 +221,9 @@ namespace Pinder.SessionSetup
             }
 
             var recorderContext = new AgentJournalRecorderContext(
-                agentJournal.ToCorrelation(attemptOrdinal),
+                agentJournal.ToCorrelation(
+                    attemptOrdinal,
+                    OperationalDiagnostics.CreateCallId()),
                 agentJournal.ModelId,
                 LlmPhase.DramaticArc,
                 new[]
@@ -279,7 +282,11 @@ namespace Pinder.SessionSetup
         {
             if (attempt != null)
             {
-                await attempt.CompleteAcceptedAsync(outputText, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
+                await attempt.CompleteAcceptedAsync(
+                    outputText,
+                    capture.Usage,
+                    usageStatus: capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -290,7 +297,11 @@ namespace Pinder.SessionSetup
         {
             if (attempt != null)
             {
-                await attempt.CompleteValidationRejectedAsync(validationCode, ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
+                await attempt.CompleteValidationRejectedAsync(
+                    validationCode,
+                    capture.Usage,
+                    capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -300,9 +311,11 @@ namespace Pinder.SessionSetup
         {
             if (attempt != null)
             {
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
                 await attempt.CompleteCancelledAsync(
                     AgentJournalTerminalCodes.Cancelled,
-                    usage: ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                    usage: capture.Usage,
+                    usageStatus: capture.Status).ConfigureAwait(false);
             }
         }
 
@@ -313,21 +326,12 @@ namespace Pinder.SessionSetup
         {
             if (attempt != null)
             {
+                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
                 await attempt.CompleteProviderFailedAsync(
                     exception.GetType().Name,
-                    ToAgentJournalUsage(usageMeasurement)).ConfigureAwait(false);
+                    capture.Usage,
+                    capture.Status).ConfigureAwait(false);
             }
-        }
-
-        private static AgentJournalUsage? ToAgentJournalUsage(TokenUsageMeasurement measurement)
-        {
-            SessionTokenUsage? usage = measurement.Complete();
-            return usage == null
-                ? null
-                : new AgentJournalUsage(
-                    usage.InputTokens,
-                    usage.OutputTokens,
-                    usage.InputTokens + usage.OutputTokens);
         }
 
         private static bool IsCompleteDramaticArc(string text)

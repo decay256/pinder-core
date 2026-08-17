@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Pinder.Core.Conversation;
 using Pinder.Core.Diagnostics.AgentJournals;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters.AgentJournals;
 
@@ -22,7 +23,8 @@ namespace Pinder.LlmAdapters
             PiConversationSession? session = null,
             PiConversationBranch? branch = null,
             string? branchKind = null,
-            GameRunAgentJournalContext? correlationContext = null)
+            GameRunAgentJournalContext? correlationContext = null,
+            bool measureTransportUsage = true)
         {
             GameRunConversationJournalInventory.ThrowIfNotApproved(callPathId);
             if (documents == null) throw new ArgumentNullException(nameof(documents));
@@ -43,13 +45,17 @@ namespace Pinder.LlmAdapters
                     branch,
                     correlationContext)
                 .ConfigureAwait(false);
-            string normalizedPath = GameRunConversationJournalInventory.NormalizeForCorrelation(callPathId);
+            string branchId = await ResolveBranchIdAsync(branch, branchKind, correlationContext).ConfigureAwait(false);
             string turnPart = turnId.HasValue
                 ? "turn-" + turnId.Value.ToString(System.Globalization.CultureInfo.InvariantCulture)
                 : "turn-none";
-            string invocationId = normalizedPath + ":" + turnPart + ":" + Guid.NewGuid().ToString("N");
-            string attemptId = invocationId + ":attempt-" + attemptOrdinal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            string branchId = await ResolveBranchIdAsync(branch, branchKind, correlationContext).ConfigureAwait(false);
+            string attemptPart = "attempt-" + attemptOrdinal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            // One invocation id names one actual provider call. Only the live diagnostic
+            // and durable mirrors of that exact call may share it. Operation, turn, and
+            // branch stay in their typed correlation fields rather than bloating this id.
+            string callDiscriminator = OperationalDiagnostics.CreateCallId();
+            string invocationId = "call-" + callDiscriminator + ":" + attemptPart;
+            string attemptId = attemptPart;
 
             var correlation = new AgentJournalCorrelationIds(
                 correlationContext.GameRunId,
@@ -79,7 +85,7 @@ namespace Pinder.LlmAdapters
             AgentJournalAttempt attempt = await new AgentJournalRecorder(context)
                 .StartAsync()
                 .ConfigureAwait(false);
-            return new AgentJournalCallScope(attempt);
+            return new AgentJournalCallScope(attempt, measureTransportUsage ? _transport : null);
         }
 
         private Task<AgentJournalCallScope> StartConversationJournalAttemptAsync(
@@ -94,7 +100,8 @@ namespace Pinder.LlmAdapters
             PiConversationSession? session = null,
             PiConversationBranch? branch = null,
             string? branchKind = null,
-            GameRunAgentJournalContext? correlationContext = null)
+            GameRunAgentJournalContext? correlationContext = null,
+            bool measureTransportUsage = true)
             => StartConversationJournalAttemptAsync(
                 callPathId,
                 phase,
@@ -106,7 +113,8 @@ namespace Pinder.LlmAdapters
                 session,
                 branch,
                 branchKind,
-                correlationContext);
+                correlationContext,
+                measureTransportUsage);
 
         private async Task<AgentJournalCallScope> StartBranchDisposalJournalAsync(
             PiConversationSession session,
@@ -142,7 +150,8 @@ namespace Pinder.LlmAdapters
                 new[] { BuildRuntimeJournalDocument("datee.emotional-director.branch-disposal", "private director branch disposed") },
                 session: session,
                 branchKind: "datee-private-analysis",
-                correlationContext: disposalContext).ConfigureAwait(false);
+                correlationContext: disposalContext,
+                measureTransportUsage: false).ConfigureAwait(false);
         }
 
         private static AnnotatedInvocationDocument BuildRuntimeJournalDocument(string documentId, string text)
@@ -240,31 +249,65 @@ namespace Pinder.LlmAdapters
             public static readonly AgentJournalCallScope Disabled = new AgentJournalCallScope();
 
             private readonly AgentJournalAttempt? _attempt;
+            private readonly TokenUsageMeasurement? _usageMeasurement;
 
             private AgentJournalCallScope()
             {
             }
 
-            public AgentJournalCallScope(AgentJournalAttempt attempt)
+            public AgentJournalCallScope(AgentJournalAttempt attempt, object? usageSource)
             {
                 _attempt = attempt ?? throw new ArgumentNullException(nameof(attempt));
+                _usageMeasurement = usageSource == null ? null : TokenUsageMeasurement.Start(usageSource);
+                CallId = attempt.InvocationRecord.Correlation.InvocationId;
             }
 
+            public string? CallId { get; }
+
             public Task CompleteAcceptedAsync(string outputText, string? semanticEntryId = null)
-                => _attempt?.CompleteAcceptedAsync(outputText ?? string.Empty, usage: null, semanticEntryId: semanticEntryId)
-                    ?? Task.CompletedTask;
+            {
+                AgentJournalUsageCapture capture = CompleteUsage();
+                return _attempt?.CompleteAcceptedAsync(
+                    outputText ?? string.Empty,
+                    capture.Usage,
+                    semanticEntryId,
+                    capture.Status) ?? Task.CompletedTask;
+            }
 
             public Task CompleteValidationRejectedAsync(string validationCode)
-                => _attempt?.CompleteValidationRejectedAsync(validationCode) ?? Task.CompletedTask;
+            {
+                AgentJournalUsageCapture capture = CompleteUsage();
+                return _attempt?.CompleteValidationRejectedAsync(
+                    validationCode,
+                    capture.Usage,
+                    capture.Status) ?? Task.CompletedTask;
+            }
 
             public Task CompleteProviderFailedAsync(string errorCode)
-                => _attempt?.CompleteProviderFailedAsync(errorCode) ?? Task.CompletedTask;
+            {
+                AgentJournalUsageCapture capture = CompleteUsage();
+                return _attempt?.CompleteProviderFailedAsync(
+                    errorCode,
+                    capture.Usage,
+                    capture.Status) ?? Task.CompletedTask;
+            }
 
             public Task CompleteCancelledAsync(string errorCode)
-                => _attempt?.CompleteCancelledAsync(errorCode) ?? Task.CompletedTask;
+            {
+                AgentJournalUsageCapture capture = CompleteUsage();
+                return _attempt?.CompleteCancelledAsync(
+                    errorCode,
+                    usage: capture.Usage,
+                    usageStatus: capture.Status) ?? Task.CompletedTask;
+            }
 
             public ValueTask DisposeAsync()
                 => _attempt == null ? default : _attempt.DisposeAsync();
+
+            private AgentJournalUsageCapture CompleteUsage()
+                => _usageMeasurement == null
+                    ? AgentJournalUsageCapture.Unavailable
+                    : AgentJournalUsageCapture.Capture(_usageMeasurement);
         }
 
         private sealed class DateeResponseCoreResult

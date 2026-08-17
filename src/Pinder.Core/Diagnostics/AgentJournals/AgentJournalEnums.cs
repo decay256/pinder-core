@@ -52,6 +52,22 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         Rejected,
     }
 
+    /// <summary>
+    /// Whether durable token usage is canonical for this exact provider invocation.
+    /// Unknown is reserved for records written before this signal existed.
+    /// </summary>
+    public enum AgentJournalUsageStatus
+    {
+        [EnumMember(Value = "unknown")]
+        Unknown,
+        [EnumMember(Value = "complete")]
+        Complete,
+        [EnumMember(Value = "incomplete")]
+        Incomplete,
+        [EnumMember(Value = "unavailable")]
+        Unavailable,
+    }
+
     public enum AgentJournalCompatibilityKind
     {
         [EnumMember(Value = "known")]

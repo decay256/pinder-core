@@ -19,7 +19,8 @@ namespace Pinder.Core.Interfaces
     }
 
     /// <summary>
-    /// Provider-neutral measurement of one call against a cumulative usage source.
+    /// Provider-neutral measurement window against a cumulative usage source.
+    /// Call-count deltas determine whether the window can be attributed to exactly one call.
     /// Unavailable or throwing providers produce no measurement rather than invented values.
     /// </summary>
     public sealed class TokenUsageMeasurement
