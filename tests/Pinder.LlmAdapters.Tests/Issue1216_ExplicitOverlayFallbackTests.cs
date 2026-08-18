@@ -13,7 +13,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1216_ExplicitOverlayFallbackTests
     {
         private sealed class FixedResponseTransport : ILlmTransport

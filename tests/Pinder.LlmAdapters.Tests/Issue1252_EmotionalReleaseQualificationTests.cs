@@ -15,7 +15,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1252_EmotionalReleaseQualificationTests
     {
         private static readonly StatType[] Stats =

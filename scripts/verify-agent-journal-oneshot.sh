@@ -48,7 +48,7 @@ groups = [
     "abandoned_or_disposal",
     "excluded_owner_guard",
     "dormant_interest_guard",
-    "legacy_parity_guard",
+    "final_document_builder_guard",
 ]
 
 for group in groups:
@@ -104,7 +104,7 @@ required_test_names = [
     "abandoned_or_disposal_records_abandoned_no_session",
     "excluded_owner_guard_rejects_forbidden_agent_session_in_no_session_context",
     "dormant_interest_guard_static_no_production_callers",
-    "legacy_parity_guard_prompt_traces_remain",
+    "final_document_builder_guard_remains",
     "fail_closed_when_context_is_supplied_without_sink",
     "production_call_site_wiring_guard",
     "excluded_owner_guard_rejects_unsafe_host_correlation_identifiers",
@@ -231,16 +231,15 @@ if interest_matches:
     fail("Dormant interest-change production caller appeared: " + ", ".join(sorted(interest_matches)))
 print("dormant interest-change guard passed")
 
-legacy_needles = [
-    'InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options"',
+final_builder_needles = [
     "BuildSuccessImprovementDocuments",
     "BuildSteeringQuestionDocuments",
     "BuildHorninessQuestionDocuments",
 ]
-for needle in legacy_needles:
+for needle in final_builder_needles:
     if needle not in builder:
-        fail(f"Legacy parity/final document builder marker missing: {needle}")
-print("legacy parity guard passed")
+        fail(f"Final document builder marker missing: {needle}")
+print("final document builder guard passed")
 PYSTATIC
 
 git diff --check

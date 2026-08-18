@@ -17,7 +17,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1342_1343_EmotionalDirectorPerformanceTests
     {
         static Issue1342_1343_EmotionalDirectorPerformanceTests()

@@ -119,7 +119,6 @@ namespace Pinder.LlmAdapters
         public static string BuildPlayerAvatar(string playerAvatarPrompt, GameDefinition? gameDef = null)
         {
             var result = BuildPlayerAvatarEx(playerAvatarPrompt, gameDef);
-            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options-system", result);
             return result.Text;
         }
 
@@ -143,7 +142,6 @@ namespace Pinder.LlmAdapters
         public static string BuildDatee(string dateePrompt, GameDefinition? gameDef = null)
         {
             var result = BuildDateeEx(dateePrompt, gameDef);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee-system", result);
             return result.Text;
         }
 

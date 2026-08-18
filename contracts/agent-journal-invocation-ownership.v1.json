@@ -47,8 +47,7 @@
       ],
       "provenance_builder_ids": [
         "SessionSystemPromptBuilder.BuildDatee",
-        "EmotionalPromptCompiler.CompilePerformance",
-        "InMemoryPromptTraceService.RecordTrace:datee"
+        "EmotionalPromptCompiler.CompilePerformance"
       ],
       "implementation_matchers": [
         {
@@ -280,9 +279,7 @@
         "simulation_run_id"
       ],
       "provenance_builder_ids": [
-        "LlmDramaticArcGenerator.GenerateAsync",
-        "InMemoryPromptTraceService.RecordTrace:dramatic-arc-system",
-        "InMemoryPromptTraceService.RecordTrace:dramatic-arc-user"
+        "LlmDramaticArcGenerator.GenerateAsync"
       ],
       "implementation_matchers": [
         {

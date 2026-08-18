@@ -17,7 +17,6 @@ namespace Pinder.LlmAdapters.Tests
     /// The golden fixtures were captured from the UNMODIFIED pre-refactor code
     /// with a fixed "PLACEHOLDER_CHAR" character spec and checked in verbatim.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue1153_GameMasterPromptGoldenTests
     {
         private static string FixturesDir =>

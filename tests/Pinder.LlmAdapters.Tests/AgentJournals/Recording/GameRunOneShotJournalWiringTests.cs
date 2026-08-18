@@ -572,11 +572,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
-        public void legacy_parity_guard_prompt_traces_remain()
+        public void final_document_builder_guard_remains()
         {
             string adapter = File.ReadAllText(Path.Combine(RepoRoot(), "src", "Pinder.LlmAdapters", "AgentJournals", "GameRunPromptDocumentBuilder.cs"));
 
-            Assert.Contains("InMemoryPromptTraceService.Instance.RecordTrace(\"dialogue-options\"", adapter, StringComparison.Ordinal);
             Assert.Contains("BuildSuccessImprovementDocuments", adapter, StringComparison.Ordinal);
             Assert.Contains("BuildSteeringQuestionDocuments", adapter, StringComparison.Ordinal);
             Assert.Contains("BuildHorninessQuestionDocuments", adapter, StringComparison.Ordinal);
