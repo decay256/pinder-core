@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class ParameterDriftFixTests
     {
         private sealed class TemperatureTrackingTransport : ILlmTransport

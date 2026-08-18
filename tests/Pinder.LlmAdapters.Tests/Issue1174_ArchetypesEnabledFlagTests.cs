@@ -10,7 +10,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1174_ArchetypesEnabledFlagTests
     {
         private const string BaseYaml = @"

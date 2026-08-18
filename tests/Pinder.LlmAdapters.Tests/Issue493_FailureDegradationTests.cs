@@ -13,7 +13,6 @@ namespace Pinder.LlmAdapters.Tests
     /// Verifies that BuildDateePrompt injects per-tier failure context when DeliveryTier != None,
     /// and omits it on success.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue493_FailureDegradationTests
     {
         private static DateeContext MakeContext(FailureTier tier)

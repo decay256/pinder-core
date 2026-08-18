@@ -11,7 +11,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1243_SuccessImprovementEnvelopeTests
     {
         private sealed class CapturingTransport : ILlmTransport

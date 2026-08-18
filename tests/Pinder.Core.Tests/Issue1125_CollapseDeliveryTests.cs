@@ -222,24 +222,17 @@ namespace Pinder.Core.Tests
 
         // ── Regression 3: no delivery LLM call / prompt-trace fires ──────────
 
-        // A full turn must not compile a "delivery" creative prompt-trace. (The
-        // delivery LLM call itself no longer exists on the adapter contract, so
-        // "no delivery call fires" is enforced at compile time — #1137.)
+        // The delivery LLM call no longer exists on the adapter contract, so
+        // "no delivery call fires" is enforced at compile time — #1137.
         [Fact]
-        public async Task FullTurn_FiresNoDeliveryLlmCall_NorDeliveryPromptTrace()
+        public async Task FullTurn_FiresNoDeliveryLlmCall()
         {
-            InMemoryPromptTraceService.Instance.Clear();
-
             var dice = new FixedDice(5, 18, 50); // success path
             var llm = new DeliveryForbiddenAdapter(PickedLine);
             var session = NewSession(llm, dice);
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
-
-            // No "delivery" creative prompt is compiled — the delivery LLM call
-            // was collapsed into the deterministic DeliveryOverlay commit step.
-            Assert.Null(InMemoryPromptTraceService.Instance.GetLastTrace("delivery"));
         }
     }
 }

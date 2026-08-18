@@ -429,7 +429,6 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 includeConversationHistory: priorMessages == null);
             AnnotatedInvocationDocument dateeDocument =
                 GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(dateePrompt);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
             string userContent = dateeDocument.Text;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
             var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);

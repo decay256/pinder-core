@@ -15,7 +15,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue55_PrivateDirectorSessionTests
     {
         static Issue55_PrivateDirectorSessionTests()

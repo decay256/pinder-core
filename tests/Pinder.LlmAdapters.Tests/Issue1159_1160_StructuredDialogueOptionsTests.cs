@@ -11,7 +11,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1159_1160_StructuredDialogueOptionsTests
     {
         static Issue1159_1160_StructuredDialogueOptionsTests()

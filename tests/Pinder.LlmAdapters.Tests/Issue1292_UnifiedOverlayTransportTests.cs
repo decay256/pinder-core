@@ -9,7 +9,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1292_UnifiedOverlayTransportTests
     {
         private sealed class CountingTransport : ILlmTransport

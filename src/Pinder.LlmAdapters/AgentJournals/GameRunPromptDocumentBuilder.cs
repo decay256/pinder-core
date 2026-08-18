@@ -37,7 +37,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionSystemPromptBuilder.BuildPlayerAvatarEx(
                 playerAvatarPrompt,
                 gameDefinition);
-            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options-system", trace);
             return FromTrace(
                 trace,
                 "dialogue-options.system",
@@ -52,7 +51,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionSystemPromptBuilder.BuildDateeEx(
                 dateePrompt,
                 gameDefinition);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee-system", trace);
             return FromTrace(
                 trace,
                 "session.system",
@@ -67,7 +65,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(
                 context,
                 promptCatalog);
-            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options", trace);
             return FromTrace(
                 trace,
                 "dialogue-options.user",
@@ -96,7 +93,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionDocumentBuilder.BuildDateePromptEx(
                 context,
                 promptCatalog);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee", trace);
             return FromTrace(
                 trace,
                 "session.user",

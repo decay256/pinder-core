@@ -18,7 +18,6 @@ namespace Pinder.LlmAdapters.Tests
     /// AC4: ENGINE_STATE fields reflect real session state (TURN, stats, interest).
     /// AC5: Horniness displays without /10 denominator even when value exceeds 10.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue1171_PromptSsotTagsTests
     {
         // ── helpers ──────────────────────────────────────────────────────────

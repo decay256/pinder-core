@@ -14,7 +14,6 @@ namespace Pinder.LlmAdapters.Tests
     /// #950: psychological stake must surface in option-generator prompt.
     /// Tests guard the PROMPT PATH — not live LLM output (stochastic).
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue950_StakeSurfacingTests
     {
         // ── helpers ──────────────────────────────────────────────────────

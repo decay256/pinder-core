@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1217_ExplicitGameDefinitionTests
     {
         // 1. Production fail-loud.

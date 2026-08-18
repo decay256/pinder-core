@@ -113,18 +113,6 @@ namespace Pinder.SessionSetup
                     bool isComplete;
                     try
                     {
-                        string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
-                        InMemoryPromptTraceService.Instance.RecordTrace(
-                            "dramatic-arc-system",
-                            new PromptTraceResult(
-                                systemPrompt,
-                                new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
-                        InMemoryPromptTraceService.Instance.RecordTrace(
-                            "dramatic-arc-user",
-                            new PromptTraceResult(
-                                userMessage,
-                                new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
-
                         string response = await LlmOptionalTextGeneration.RunAsync(
                                 "dramatic_arc",
                                 _transport,

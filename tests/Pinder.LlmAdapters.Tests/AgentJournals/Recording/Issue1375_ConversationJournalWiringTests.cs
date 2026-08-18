@@ -18,7 +18,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1375_ConversationJournalWiringTests
     {
         private const string DateePrivatePhaseDirector = "director";

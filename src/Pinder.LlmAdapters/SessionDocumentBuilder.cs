@@ -27,7 +27,6 @@ namespace Pinder.LlmAdapters
             PromptCatalog? promptCatalog = null)
         {
             var result = BuildDialogueOptionsPromptEx(context, promptCatalog);
-            Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options", result);
             return result.Text;
         }
 
@@ -40,7 +39,6 @@ namespace Pinder.LlmAdapters
             PromptCatalog? promptCatalog = null)
         {
             var result = BuildDateePromptEx(context, promptCatalog);
-            Pinder.Core.Text.InMemoryPromptTraceService.Instance.RecordTrace("datee", result);
             return result.Text;
         }
 

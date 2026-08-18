@@ -11,7 +11,6 @@ using Pinder.Core.TestCommon;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1066_PromptTraceTests
     {
         [Fact]
@@ -38,91 +37,7 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void Test_InMemoryPromptTraceService_RecordingAndRetrieval()
-        {
-            var service = new InMemoryPromptTraceService();
-            service.Clear();
-
-            var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 10, "file.yaml", "key") };
-            var result = new PromptTraceResult("Hello World", spans);
-
-            service.RecordTrace("dialogue-options", result);
-
-            var retrieved = service.GetLastTrace("dialogue-options");
-            Assert.NotNull(retrieved);
-            Assert.Equal("Hello World", retrieved!.Text);
-            Assert.Single(retrieved.Spans);
-            Assert.Equal("file.yaml", retrieved.Spans[0].SourceFile);
-            Assert.Equal("key", retrieved.Spans[0].Key);
-        }
-
-        [Fact]
-        public void Test_InMemoryPromptTraceService_ScopesTracesBySession()
-        {
-            var service = new InMemoryPromptTraceService();
-            service.Clear();
-
-            var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 5, "file.yaml", "key") };
-
-            using (service.BeginSessionScope("session-a", "anthropic/test-model", "speculation", 3, 2))
-            {
-                service.RecordTrace("dialogue-options", new PromptTraceResult("alpha", spans));
-                service.RecordTrace("datee", new PromptTraceResult("alpha datee", spans));
-                service.RecordModelResponse("raw assistant response", "llmcall_first");
-            }
-
-            using (service.BeginSessionScope("session-b", "openai/test-model", "live_turn"))
-            {
-                service.RecordTrace("dialogue-options", new PromptTraceResult("beta", spans));
-            }
-
-            var sessionA = service.GetSequence("session-a");
-            var sessionB = service.GetSequence("session-b");
-
-            Assert.Equal(2, sessionA.Count);
-            Assert.Single(sessionB);
-            Assert.All(sessionA, r => Assert.Equal("session-a", r.SessionId));
-            Assert.All(sessionA, r => Assert.Equal(sessionA[0].RunId, r.RunId));
-            Assert.All(sessionA, r => Assert.Equal("speculation", r.RunKind));
-            Assert.All(sessionA, r => Assert.Equal("anthropic", r.Provider));
-            Assert.All(sessionA, r => Assert.Equal("anthropic/test-model", r.ProviderModel));
-            Assert.All(sessionA, r => Assert.Equal(3, r.TurnNumber));
-            Assert.All(sessionA, r => Assert.Equal(2, r.BranchOption));
-            Assert.All(sessionA, r => Assert.Equal("raw assistant response", r.ModelResponse));
-            Assert.All(sessionA, r => Assert.Equal("llmcall_first", r.CallId));
-            Assert.All(sessionA, r => Assert.NotNull(r.ResponseTimestamp));
-            Assert.Equal("alpha", service.GetLastTrace("dialogue-options", "session-a")!.Text);
-            Assert.Equal("beta", service.GetLastTrace("dialogue-options", "session-b")!.Text);
-
-            service.ClearSession("session-a");
-
-            Assert.Empty(service.GetSequence("session-a"));
-            Assert.Single(service.GetSequence("session-b"));
-        }
-
-        [Fact]
-        public void Test_InMemoryPromptTraceService_BindsIdenticalRetryPromptsToDistinctCallIds()
-        {
-            var service = new InMemoryPromptTraceService();
-            var spans = new List<AnnotatedSpan> { new AnnotatedSpan(0, 5, "file.yaml", "key") };
-
-            using (service.BeginSessionScope("session-a", runKind: "setup"))
-            {
-                service.RecordTrace("dramatic-arc-user", new PromptTraceResult("same prompt", spans));
-                service.RecordModelResponse("incomplete", "llmcall_attempt_1");
-                service.RecordTrace("dramatic-arc-user", new PromptTraceResult("same prompt", spans));
-                service.RecordModelResponse("complete", "llmcall_attempt_2");
-            }
-
-            var runs = service.GetSequence("session-a");
-            Assert.Collection(
-                runs,
-                first => Assert.Equal("llmcall_attempt_1", first.CallId),
-                second => Assert.Equal("llmcall_attempt_2", second.CallId));
-        }
-
-        [Fact]
-        public void Test_SessionDocumentBuilder_DialogueOptionsPrompt_GeneratesTrace()
+        public void Test_SessionDocumentBuilder_DialogueOptionsPrompt_GeneratesAnnotatedResult()
         {
             PromptCatalogInitializer.Initialize();
 
@@ -136,14 +51,9 @@ namespace Pinder.LlmAdapters.Tests
                 currentTurn: 3
             , availableStats: new[] { Pinder.Core.Stats.StatType.Charm, Pinder.Core.Stats.StatType.Rizz, Pinder.Core.Stats.StatType.Honesty,  }, playerName: "P", dateeName: "O");
 
-            InMemoryPromptTraceService.Instance.Clear();
-            var prompt = SessionDocumentBuilder.BuildDialogueOptionsPrompt(context);
+            PromptTraceResult trace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(context);
 
-            Assert.NotEmpty(prompt);
-
-            var trace = InMemoryPromptTraceService.Instance.GetLastTrace("dialogue-options");
-            Assert.NotNull(trace);
-            Assert.Equal(prompt, trace!.Text);
+            Assert.NotEmpty(trace.Text);
 
             // Verify that we tracked structural keys and templates
             Assert.Contains(trace.Spans, s => s.Key == "pivot-directive");

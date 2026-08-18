@@ -16,7 +16,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1345_PrivatePhaseObservabilityTests
     {
         private const string PrivateDiagnosis = "PRIVATE-DIAGNOSIS-DO-NOT-LOG-1345";

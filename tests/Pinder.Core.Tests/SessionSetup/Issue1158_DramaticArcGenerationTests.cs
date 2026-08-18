@@ -27,25 +27,28 @@ namespace Pinder.Core.Tests.SessionSetup
         }
 
         [Fact]
-        public async Task GenerateAsync_AttributesBothPromptPartsToDramaticArcCatalog()
+        public void BuildDramaticArcDocuments_AttributesBothPromptPartsToDramaticArcCatalog()
         {
-            var traceService = InMemoryPromptTraceService.Instance;
-            traceService.Clear();
-            var generator = new LlmDramaticArcGenerator(new QueueLlmTransport(
-                "Setup lands softly. Escalation tilts without forcing a choice. The turn can break either way."));
+            PromptCatalog catalog = PromptCatalog.ResolveCatalogOrThrow(PromptTemplates.Catalog);
+            PromptEntry entry = catalog.RequireCompleteEntry("dramatic_arc", "missing dramatic_arc");
+            GameRunPromptDocumentPair documents = GameRunPromptDocumentBuilder.BuildDramaticArcDocuments(
+                entry,
+                new Dictionary<string, string>
+                {
+                    { "playerName", "Player" },
+                    { "playerStake", "Player stake" },
+                    { "playerBio", "Player bio" },
+                    { "dateeName", "Datee" },
+                    { "dateeStake", "Datee stake" },
+                    { "dateeBio", "Datee bio" },
+                });
 
-            await GenerateAsync(generator);
-
-            var systemTrace = traceService.GetLastTrace("dramatic-arc-system");
-            var userTrace = traceService.GetLastTrace("dramatic-arc-user");
-            Assert.NotNull(systemTrace);
-            Assert.NotNull(userTrace);
-            Assert.Contains(systemTrace!.Spans, span =>
-                span.SourceFile == "data/prompts/dramatic_arc.yaml" &&
-                span.Key == "dramatic_arc.system_prompt");
-            Assert.Contains(userTrace!.Spans, span =>
-                span.SourceFile == "data/prompts/dramatic_arc.yaml" &&
-                span.Key == "dramatic_arc.user_template");
+            Assert.Contains(documents.System.Ranges, range =>
+                range.Source.SourceId == "prompt.catalog" &&
+                range.Source.KeyPath == "dramatic_arc.system_prompt");
+            Assert.Contains(documents.User.Ranges, range =>
+                range.Source.SourceId == "prompt.catalog" &&
+                range.Source.KeyPath == "dramatic_arc.user_template");
         }
 
         [Fact]

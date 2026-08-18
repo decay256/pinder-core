@@ -6,7 +6,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue647_ActiveTellOptionsTests
     {
         [Fact]
