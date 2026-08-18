@@ -40,6 +40,35 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public void Hydrate_StakeTarget_WithFewerThan15Lines_ClampsIndexGracefully()
+        {
+            var stakeLines = new[] { "first", "second", "third", "fourth", "fifth" };
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "STAKE", Index = 14, Field = "STAKE_LINE", Manner = "INTIMATE_BREAKTHROUGH"
+            };
+
+            var result = EmotionStemSelector.Hydrate(target, null, stakeLines);
+
+            Assert.Equal(stakeLines.Length - 1, result.Index);
+            Assert.Equal(stakeLines[^1], result.StemText);
+        }
+
+        [Fact]
+        public void Hydrate_StakeTarget_EmptyLines_ThrowsInvalidOperationException()
+        {
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "STAKE", Index = 14, Field = "STAKE_LINE", Manner = "INTIMATE_BREAKTHROUGH"
+            };
+
+            Assert.Throws<InvalidOperationException>(
+                () => EmotionStemSelector.Hydrate(target, null, Array.Empty<string>()));
+            Assert.Throws<InvalidOperationException>(
+                () => EmotionStemSelector.Hydrate(target, null, null));
+        }
+
+        [Fact]
         public void PhaseDerivation_AppliesHysteresisBuffer_PreventsThrashingOnBandBoundaries()
         {
             // Arrange
