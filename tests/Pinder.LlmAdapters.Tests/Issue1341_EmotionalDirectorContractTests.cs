@@ -61,7 +61,7 @@ namespace Pinder.LlmAdapters.Tests
                 schema["properties"]!
                     .Children<JProperty>()
                     .Where(property => property.Name != "schema_version"),
-                property => Assert.Equal(180, property.Value.Value<int>("maxLength")));
+                property => Assert.Null(property.Value["maxLength"]));
             Assert.Equal(
                 JoinTraceValues(compiled, span => span.Key),
                 transport.LastStructuredRequest.Metadata["compiled_input_keys"]);
@@ -69,7 +69,7 @@ namespace Pinder.LlmAdapters.Tests
                 JoinTraceValues(compiled, span => span.SourceFile),
                 transport.LastStructuredRequest.Metadata["compiled_input_sources"]);
             Assert.Contains("visible delivered line", transport.LastStructuredRequest.UserMessage, StringComparison.Ordinal);
-            Assert.Contains("each 180 characters or fewer", transport.LastStructuredRequest.SystemPrompt, StringComparison.Ordinal);
+            Assert.DoesNotContain("characters or fewer", transport.LastStructuredRequest.SystemPrompt, StringComparison.Ordinal);
             Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
             Assert.Equal("moderate and steadily rising", direction.Intensity);
             Assert.Equal("turns warmer while still checking sincerity", direction.ResponsePosture);
@@ -335,24 +335,18 @@ namespace Pinder.LlmAdapters.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public async Task Retry_FieldTooLongAddsCatalogRepairWithoutEchoingRejectedPrivateOutput(
+        public async Task LongFieldsParseWithoutRetry(
             bool structured)
         {
-            const string privateRejectedText = "PRIVATE-OVERLONG-DIRECTOR-DO-NOT-ECHO-";
-            string overlong = privateRejectedText + new string('x', 181);
-            string invalid = ValidJson(interpretation: overlong);
+            string longInterpretation = "reads the message as sincere warmth " + new string('x', 500);
+            string json = ValidJson(interpretation: longInterpretation);
             var context = MakeContext();
 
             if (structured)
             {
                 var transport = new StructuredQueueTransport(
                     new StructuredLlmResponse(
-                        invalid,
-                        provider: "test",
-                        model: "structured",
-                        usedNativeStructuredOutput: true),
-                    new StructuredLlmResponse(
-                        ValidJson(),
+                        json,
                         provider: "test",
                         model: "structured",
                         usedNativeStructuredOutput: true));
@@ -360,39 +354,18 @@ namespace Pinder.LlmAdapters.Tests
 
                 var direction = await adapter.GenerateEmotionalDirectionAsync(context);
 
-                Assert.Equal("relieved but cautious", direction.PrimaryEmotion);
-                Assert.Equal(2, transport.StructuredCalls);
-                Assert.DoesNotContain(
-                    "A previous emotional direction exceeded the permitted field length.",
-                    transport.StructuredRequests[0].SystemPrompt,
-                    StringComparison.Ordinal);
-                Assert.Contains(
-                    "A previous emotional direction exceeded the permitted field length.",
-                    transport.StructuredRequests[1].SystemPrompt,
-                    StringComparison.Ordinal);
-                Assert.Contains("180 characters or fewer", transport.StructuredRequests[1].SystemPrompt, StringComparison.Ordinal);
-                Assert.DoesNotContain(privateRejectedText, transport.StructuredRequests[1].SystemPrompt, StringComparison.Ordinal);
-                Assert.Equal(transport.StructuredRequests[0].JsonSchema, transport.StructuredRequests[1].JsonSchema);
+                Assert.Equal(longInterpretation, direction.Interpretation);
+                Assert.Equal(1, transport.StructuredCalls);
                 return;
             }
 
-            var plainTransport = new PlainQueueTransport(invalid, ValidJson());
+            var plainTransport = new PlainQueueTransport(json);
             var plainAdapter = CreateAdapter(plainTransport, retries: 1);
 
             var plainDirection = await plainAdapter.GenerateEmotionalDirectionAsync(context);
 
-            Assert.Equal("relieved but cautious", plainDirection.PrimaryEmotion);
-            Assert.Equal(2, plainTransport.PlainCalls);
-            Assert.DoesNotContain(
-                "A previous emotional direction exceeded the permitted field length.",
-                plainTransport.SystemPrompts[0],
-                StringComparison.Ordinal);
-            Assert.Contains(
-                "A previous emotional direction exceeded the permitted field length.",
-                plainTransport.SystemPrompts[1],
-                StringComparison.Ordinal);
-            Assert.Contains("180 characters or fewer", plainTransport.SystemPrompts[1], StringComparison.Ordinal);
-            Assert.DoesNotContain(privateRejectedText, plainTransport.SystemPrompts[1], StringComparison.Ordinal);
+            Assert.Equal(longInterpretation, plainDirection.Interpretation);
+            Assert.Equal(1, plainTransport.PlainCalls);
         }
 
         [Theory]
@@ -462,28 +435,6 @@ namespace Pinder.LlmAdapters.Tests
                 privateRejectedText,
                 plainTransport.SystemPrompts[1],
                 StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public void FieldTooLongRepairPreservesYamlSpanInCompiledSystemPrompt()
-        {
-            PromptCatalog catalog = BuiltInCatalog();
-            var compiler = new EmotionalPromptCompiler(catalog);
-            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
-
-            var repaired = compiler.CompileDirectorRetrySystemPrompt(
-                initial.SystemPrompt,
-                "field_too_long");
-
-            var repairSpan = Assert.Single(repaired.Spans.Where(
-                span => span.Key == EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey));
-            Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
-            Assert.Equal(
-                catalog.Get(EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey).SystemPrompt!.Trim(),
-                repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
-            Assert.Contains(
-                repaired.Spans,
-                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
         }
 
         [Fact]

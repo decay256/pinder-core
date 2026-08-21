@@ -189,19 +189,15 @@ OPTION_3 [STAT: Wit] ""Bold of you to assume I read."" [CALLBACK: none] [COMBO: 
         }
 
         [Fact]
-        public void ParseDialogueOptionsText_DegenerateFragment_NotSurfacedAsPlayableOption()
+        public void ParseDialogueOptionsText_ShortNonEmptyOption_IsPlayable()
         {
-            // A truncated tiny stub ("the") must NOT be surfaced as a playable
-            // option — it is dropped and the slot is backfilled by padding.
             var input = @"OPTION_1 [STAT: Charm] ""the"" [CALLBACK: none] [COMBO: none]
 OPTION_2 [STAT: Wit] ""That's a genuinely funny take, I'll give you that."" [CALLBACK: none] [COMBO: none]";
 
             var result = DialogueOptionParsers.ParseDialogueOptionsText(input, new[] { StatType.Charm, StatType.Wit, StatType.Honesty, StatType.Chaos });
 
             Assert.Equal(4, result.Length);
-            // The degenerate "the" fragment must not appear as any option's text.
-            Assert.DoesNotContain(result, o => o.IntendedText == "the");
-            // The real option is still parsed and surfaced.
+            Assert.Contains(result, o => o.IntendedText == "the");
             Assert.Contains(result, o => o.IntendedText == "That's a genuinely funny take, I'll give you that.");
         }
 

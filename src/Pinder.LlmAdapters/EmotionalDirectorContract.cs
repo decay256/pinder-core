@@ -37,7 +37,6 @@ namespace Pinder.LlmAdapters
         public const string ParserName = "EmotionalDirectorContract";
 
         private const int MinFieldChars = 3;
-        private const int MaxFieldChars = 180;
         private const string SchemaVersionField = "schema_version";
 
         private static readonly string[] Fields =
@@ -286,9 +285,6 @@ namespace Pinder.LlmAdapters
             if (value.Length < MinFieldChars)
                 return "field_too_short";
 
-            if (value.Length > MaxFieldChars)
-                return "field_too_long";
-
             if (ContainsMetaLanguage(normalized))
                 return "meta_language";
 
@@ -402,7 +398,6 @@ namespace Pinder.LlmAdapters
                 {
                     ["type"] = "string",
                     ["minLength"] = MinFieldChars,
-                    ["maxLength"] = MaxFieldChars,
                 };
             }
 

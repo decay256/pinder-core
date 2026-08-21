@@ -92,12 +92,46 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("dialogue_options.v1", transport.LastRequest.SchemaVersion);
             Assert.Equal("dialogue_options", transport.LastRequest.Metadata["phase"]);
             Assert.Contains("\"schema_version\"", transport.LastRequest.JsonSchema);
+            Assert.DoesNotContain("\"maxLength\"", transport.LastRequest.JsonSchema, StringComparison.Ordinal);
             Assert.Equal(2, options.Length);
             Assert.Equal(StatType.Charm, options[0].Stat);
             Assert.Equal("that jacket is doing dangerous work", options[0].IntendedText);
             Assert.False(options[0].HasTellBonus);
             Assert.False(options[0].HasWeaknessWindow);
             Assert.Equal(StatType.Honesty, options[1].Stat);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task LongOptionTextParsesSuccessfully(bool structured)
+        {
+            string longText = "a deliberately long option " + new string('x', 500);
+            string json = ValidJson().Replace(
+                "that jacket is doing dangerous work",
+                longText,
+                StringComparison.Ordinal);
+
+            if (structured)
+            {
+                var transport = new StructuredQueueTransport(
+                    new StructuredLlmResponse(json, provider: "test", model: "structured", usedNativeStructuredOutput: true));
+                var adapter = CreateAdapter(transport);
+
+                var options = await adapter.GetDialogueOptionsAsync(MakeContext());
+
+                Assert.Equal(longText, options[0].IntendedText);
+                Assert.Equal(1, transport.StructuredCalls);
+                return;
+            }
+
+            var textTransport = new TextTransport(json);
+            var textAdapter = CreateAdapter(textTransport);
+
+            var fallbackOptions = await textAdapter.GetDialogueOptionsAsync(MakeContext());
+
+            Assert.Equal(longText, fallbackOptions[0].IntendedText);
+            Assert.Equal(1, textTransport.Calls);
         }
 
         [Fact]
