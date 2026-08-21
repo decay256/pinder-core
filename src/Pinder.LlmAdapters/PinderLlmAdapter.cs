@@ -1534,12 +1534,10 @@ bool recordOneShotJournal = context.AgentJournal != null;
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? journalContext)
         {
-            bool hasSink = _options.AgentJournalHostSink != null;
-            bool hasContext = journalContext != null;
-            if (hasSink != hasContext)
+            if (_options.AgentJournalHostSink != null && journalContext == null)
             {
                 throw new InvalidOperationException(
-                    "Game Run one-shot journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
+                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
             }
         }
 

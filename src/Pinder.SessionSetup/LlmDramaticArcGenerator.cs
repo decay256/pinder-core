@@ -254,12 +254,10 @@ namespace Pinder.SessionSetup
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? agentJournal)
         {
-            bool hasSink = _options.AgentJournalHostSink != null;
-            bool hasContext = agentJournal != null;
-            if (hasSink != hasContext)
+            if (_options.AgentJournalHostSink != null && agentJournal == null)
             {
                 throw new InvalidOperationException(
-                    "Dramatic-arc Game Run journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
+                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
             }
         }
 
