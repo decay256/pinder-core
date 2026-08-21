@@ -43,7 +43,7 @@ namespace Pinder.LlmAdapters.Tests
                 () => adapter.GetHorninessQuestionAsync(Context()));
 
             Assert.Contains("horniness_prompt", ex.Message);
-            Assert.Contains("data/game-definition.yaml", ex.Message);
+            Assert.Contains("missing configured prompt", ex.Message);
             Assert.Empty(transport.Calls);
         }
 
@@ -53,7 +53,7 @@ namespace Pinder.LlmAdapters.Tests
             var events = new List<OverlayDegradedEvent>();
             var adapter = CreateAdapter(
                 new CapturingTransport("   "),
-                horninessPrompt: "configured prompt {conversation_history}",
+                horninessPrompt: "configured prompt {delivered_message} {conversation_history}",
                 onOverlayDegraded: events.Add);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -72,7 +72,7 @@ namespace Pinder.LlmAdapters.Tests
             var transport = new CapturingTransport("unused");
             var adapter = CreateAdapter(
                 transport,
-                horninessPrompt: "configured prompt without history");
+                horninessPrompt: "configured prompt {delivered_message} without history");
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => adapter.GetHorninessQuestionAsync(Context()));
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters.Tests
                     conversationHistory: new[] { ("Datee", "I restore antique chairs.") })));
 
             Assert.Contains("steering_prompt", ex.Message);
-            Assert.Contains("data/game-definition.yaml", ex.Message);
+            Assert.Contains("missing configured prompt", ex.Message);
             Assert.Empty(transport.Calls);
         }
 
@@ -135,7 +135,7 @@ namespace Pinder.LlmAdapters.Tests
             var transport = new CapturingTransport("unused");
             var adapter = CreateAdapter(
                 transport,
-                steeringPrompt: "configured steering without history",
+                steeringPrompt: "configured steering {delivered_message} without history",
                 horninessPrompt: "unused {conversation_history}");
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(

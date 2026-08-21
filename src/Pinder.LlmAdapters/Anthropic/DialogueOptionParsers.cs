@@ -49,14 +49,6 @@ namespace Pinder.LlmAdapters.Anthropic
             @"""(.+)""",
             RegexOptions.Compiled | RegexOptions.Singleline);
 
-        // Minimum length (after meta-prefix stripping/trim) for a parsed option
-        // to be treated as a playable dialogue line. Degenerate stubs such as
-        // "the" or "..." that slip through are dropped here so they are never
-        // surfaced; PadDialogueOptionsToFour then backfills a proper placeholder.
-        private const int MinPlayableOptionLength = 4;
-
-
-
         // Default padding stats for ParseDialogueOptions fallback
         private static readonly StatType[] DefaultPaddingStats = new[]
         {
@@ -110,11 +102,6 @@ namespace Pinder.LlmAdapters.Anthropic
 
                         var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
                         if (string.IsNullOrEmpty(text)) continue;
-
-                        // Issue #1117 sanity guard: reject sub-threshold/degenerate
-                        // fragments (e.g. "the", "...") so they are never surfaced as
-                        // playable options. PadDialogueOptionsToFour backfills instead.
-                        if (text.Length < MinPlayableOptionLength) continue;
 
                         // Parse optional metadata
                         int? callbackTurn = null;
@@ -218,7 +205,7 @@ namespace Pinder.LlmAdapters.Anthropic
                         return null;
 
                     text = MetaPrefixStripper.Strip(text.Trim());
-                    if (text.Length < MinPlayableOptionLength)
+                    if (string.IsNullOrWhiteSpace(text))
                         return null;
 
                     if (!TryParseRequiredCallback(optionObj, out var callbackTurn))
@@ -378,7 +365,7 @@ namespace Pinder.LlmAdapters.Anthropic
                 if (!textMatch.Success) continue;
 
                 var text = MetaPrefixStripper.Strip(textMatch.Groups[1].Value.Trim());
-                if (string.IsNullOrEmpty(text) || text.Length < MinPlayableOptionLength) continue;
+                if (string.IsNullOrEmpty(text)) continue;
 
                 // Parse optional metadata
                 int? callbackTurn = null;

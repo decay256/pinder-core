@@ -412,7 +412,7 @@
       {
         "order": 0,
         "role": "system",
-        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics."
+        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics."
       }
     ],
     "afterDocuments": [
@@ -421,13 +421,13 @@
         "documentId": "datee.emotional-director.system",
         "role": "system",
         "kind": "emotional-director-system-prompt",
-        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.",
-        "contentHash": "sha256:47a5743f35ef5cf2c43e05bcf261ea2bf777049660ddc61eb5a4c3371a27255d",
+        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.",
+        "contentHash": "sha256:2d51ccd413af1b448832ca22c984fcc458e9039447aa63298ac8cdd871f769e5",
         "ranges": [
           {
             "documentId": "datee.emotional-director.system",
             "startUtf16": 0,
-            "endUtf16": 964,
+            "endUtf16": 934,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -435,7 +435,7 @@
               "sourceId": "prompt.catalog",
               "keyPath": "emotional-reaction-director",
               "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:47a5743f35ef5cf2c43e05bcf261ea2bf777049660ddc61eb5a4c3371a27255d",
+              "contentHash": "sha256:2d51ccd413af1b448832ca22c984fcc458e9039447aa63298ac8cdd871f769e5",
               "editorTargetId": null
             }
           }

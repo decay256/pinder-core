@@ -95,8 +95,6 @@ namespace Pinder.LlmAdapters
         public const string DirectorPromptKey = "emotional-reaction-director";
         public const string DirectorContractRepairPromptKey =
             "emotional-reaction-director-repair-contract";
-        public const string DirectorFieldTooLongRepairPromptKey =
-            "emotional-reaction-director-repair-field-too-long";
         public const string DirectorDraftedChatReplyRepairPromptKey =
             "emotional-reaction-director-repair-drafted-chat-reply";
         public const string DirectorSystemWrapperPromptKey =
@@ -175,7 +173,6 @@ namespace Pinder.LlmAdapters
         {
             string repairKey = rejectionReason switch
             {
-                "field_too_long" => DirectorFieldTooLongRepairPromptKey,
                 "drafted_chat_reply" => DirectorDraftedChatReplyRepairPromptKey,
                 _ => DirectorContractRepairPromptKey,
             };
