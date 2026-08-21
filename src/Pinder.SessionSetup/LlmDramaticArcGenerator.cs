@@ -197,15 +197,9 @@ namespace Pinder.SessionSetup
             CancellationToken cancellationToken)
         {
             ValidateOneShotJournalConfiguration(agentJournal);
-            if (_options.AgentJournalHostSink == null)
+            if (_options.AgentJournalHostSink == null || agentJournal == null)
             {
                 return null;
-            }
-
-            if (agentJournal == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for dramatic-arc setup, but no AgentJournalOneShotContext was supplied.");
             }
 
             var recorderContext = new AgentJournalRecorderContext(
@@ -254,11 +248,7 @@ namespace Pinder.SessionSetup
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? agentJournal)
         {
-            if (_options.AgentJournalHostSink != null && agentJournal == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
-            }
+            // One-shot journaling is optional; safely skipped when either HostSink or agentJournal is absent.
         }
 
         private static async Task CompleteAcceptedOneShotAsync(

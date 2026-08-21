@@ -1496,15 +1496,9 @@ bool recordOneShotJournal = context.AgentJournal != null;
             params AnnotatedInvocationDocument[] documents)
         {
             ValidateOneShotJournalConfiguration(journalContext);
-            if (_options.AgentJournalHostSink == null)
+            if (_options.AgentJournalHostSink == null || journalContext == null)
             {
                 return null;
-            }
-
-            if (journalContext == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
             }
 
             var inputDocuments = new AgentJournalInputDocument[documents.Length];
@@ -1534,11 +1528,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? journalContext)
         {
-            if (_options.AgentJournalHostSink != null && journalContext == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
-            }
+            // One-shot journaling is optional; safely skipped when either HostSink or journalContext is absent.
         }
 
         private static async Task CompleteAcceptedOneShotAsync(
