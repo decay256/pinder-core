@@ -750,7 +750,7 @@ overlay_prompt_templates:
       ORIGINAL MESSAGE:
       {message}
 
-      Apply the overlay while preserving the archetype voice above and return the modified message.
+      Apply the overlay while preserving the character voice directives above and return the modified message.
   trap_overlay:
     system: |-
       You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
@@ -778,7 +778,7 @@ overlay_prompt_templates:
       ORIGINAL MESSAGE:
       {message}
 
-      Apply the trap taint while preserving the archetype voice above and return the modified message.
+      Apply the trap taint while preserving the character voice directives above and return the modified message.
   failure_corruption:
     system: |-
       You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
@@ -803,7 +803,7 @@ overlay_prompt_templates:
       ORIGINAL MESSAGE:
       {message}
 
-      Apply the failure corruption while preserving the archetype voice above and return the modified message.
+      Apply the failure corruption while preserving the character voice directives above and return the modified message.
   shadow_corruption:
     system: |-
       You are editing dialogue for Pinder, a comedy RPG where sentient penises date each other on a fictional app.
@@ -829,9 +829,10 @@ overlay_prompt_templates:
       ORIGINAL MESSAGE:
       {message}
 
-      Apply the corruption while preserving the archetype voice above and return the modified message.
+      Apply the corruption while preserving the character voice directives above and return the modified message.
 
 success_improvement_prompt_template: |-
+  {texting_style_block}
   <ENGINE_STATE>
   [ENGINE - CALL PURPOSE: SUCCESS_IMPROVEMENT]
   Delivery outcome / tier: {tier_upper}

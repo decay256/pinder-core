@@ -55,7 +55,7 @@ namespace Pinder.Core.Tests
                 clock: TestHelpers.MakeClock(),
                 statDeliveryInstructions: instructions);
             var session = new GameSession(
-                MakeProfile("Sable"), MakeProfile("Brick"),
+                MakeProfile("Sable", textingStyle: "lowercase; sign off with 🫡"), MakeProfile("Brick"),
                 llm, dice, new NullTrapRegistry(), config);
 
             await session.StartTurnAsync();
@@ -70,6 +70,8 @@ namespace Pinder.Core.Tests
             Assert.NotEqual("Nice vibes", result.DeliveredMessage);
             Assert.Contains("DESPAIR",
                 instructions.GetStatFailureInstruction(StatType.Rizz, result.Roll.Tier));
+            Assert.Contains("YOUR DESIGNATED TEXTING STYLE", llm.CapturedVoiceDirective);
+            Assert.Contains("lowercase; sign off with 🫡", llm.CapturedVoiceDirective);
         }
 
         [Fact]
@@ -146,20 +148,22 @@ namespace Pinder.Core.Tests
             return 0;
         }
 
-        private static CharacterProfile MakeProfile(string name, int allStats = 2)
+        private static CharacterProfile MakeProfile(string name, int allStats = 2, string textingStyle = "")
         {
             return TestHelpers.MakeCharacterProfile(
                 stats: TestHelpers.MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                textingStyleFragment: textingStyle);
         }
 
         private sealed class CapturingLlm : ILlmAdapter
         {
             private readonly StatType _targetStat;
             public DialogueOption[] LastOptions { get; private set; }
+            public string CapturedVoiceDirective { get; private set; } = string.Empty;
 
             public CapturingLlm(StatType targetStat)
             {
@@ -195,6 +199,7 @@ namespace Pinder.Core.Tests
         
         public Task<string> ApplyFailureCorruptionAsync(string message, string instruction, Pinder.Core.Stats.StatType stat, Pinder.Core.Rolls.FailureTier tier, string? archetypeDirective = null, System.Threading.CancellationToken ct = default)
         {
+            CapturedVoiceDirective = archetypeDirective ?? string.Empty;
             return Task.FromResult(message);
         }
 }

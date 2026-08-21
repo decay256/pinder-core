@@ -52,7 +52,7 @@ prompts:
       For each option include metadata:
       [STAT: X] [CALLBACK: turn_N or none] [COMBO: name or none]
 
-      Keep options concise. One to three sentences. Match the DATEE's register.
+      Keep options concise.
 
       Output EXACTLY this format for each option (no deviations):
 
@@ -86,7 +86,7 @@ prompts:
 
       SIMILARLY: when the PLAYER AVATAR's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
 
-      WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one.
+      WORD & PATTERN REPETITION — check all delivered messages above before writing options. Do not repeat: (a) the same filler words or phrases used in the previous 2 messages ('honestly', 'literally', 'actually', 'okay but', etc.), (b) the same emoji used in the previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...\U0001f62d', 'I literally just realized...') used in the last 2 messages. Each option should feel like a new move, not a variation on the last one. Exemption: designated signature texting style rules (e.g. signature emoji sign-offs, habitual question endings, sentence-starting shorthand, or defined casing) MUST be maintained consistently across all messages.
       - Since Turn 1 has empty conversation history, options generated for Turn 1 must never assume the DATEE has already spoken (never say 'you mentioned', 'since you said', 'interesting that you mention', etc.). You are initiating the contact.
   engine-datee-block:
     system_prompt: |-
@@ -251,7 +251,7 @@ prompts:
       - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. "We should get coffee sometime" is fine. "Coffee shop on Fifth at 6pm Tuesday" is NOT.
       - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
 
-      WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one.
+      WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Exemption: designated signature texting style rules (e.g. signature emoji sign-offs, habitual question endings, sentence-starting shorthand, or defined casing) MUST be maintained consistently across all messages.
 
       Generate your next message.
       - Match your personality exactly as established in the system prompt
