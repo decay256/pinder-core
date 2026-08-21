@@ -98,7 +98,8 @@ namespace Pinder.Core.Conversation
                     playerName: player.DisplayName,
                     deliveredMessage: deliveredMessage,
                     conversationHistory: history,
-                    agentJournal: CreateAgentJournalContext(turnNumber, roll, total, steeringMod, steeringDC));
+                    agentJournal: CreateAgentJournalContext(turnNumber, roll, total, steeringMod, steeringDC),
+                    playerTextingStyle: player.TextingStyleFragment);
 
                 try
                 {

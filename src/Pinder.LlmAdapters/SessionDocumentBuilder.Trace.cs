@@ -583,6 +583,13 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine(context.ActiveArchetypeDirective, "data/prompts/archetypes.yaml", "active-archetype-directive");
             }
 
+            if (!string.IsNullOrWhiteSpace(context.DateeTextingStyle))
+            {
+                sb.AppendLine();
+                sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
+                sb.AppendLine(context.DateeTextingStyle, "data/prompts/structural.yaml", "datee-texting-style");
+            }
+
             sb.AppendLine();
 
             string resistanceKey = PromptTemplates.GetResistanceKey(dateeInterestState);
@@ -591,12 +598,8 @@ namespace Pinder.LlmAdapters
                 dateeInterestState,
                 promptCatalog);
 
-            int ceiling = ComputeResponseCeiling(context.PlayerDeliveredMessage.Length);
-            string lengthHint =
-                $"Keep it to a natural text-message length. " +
-                $"Do not exceed {ceiling} characters regardless of your texting style. " +
-                $"The texting-style length axis in your system prompt is a stylistic guideline, NOT a hard engine cap — " +
-                $"the engine-specified ceiling above takes precedence over any style axis that would run longer.";
+            const string lengthHint =
+                "Keep it to a natural text-message length guided by your designated texting-style length axis.";
 
             if (emotionalDirection != null)
             {

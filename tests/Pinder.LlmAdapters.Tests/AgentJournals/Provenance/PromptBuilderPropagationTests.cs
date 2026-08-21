@@ -82,6 +82,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
         [Fact]
         public void AC2_BeforeAfterGoldenTextsAreIdenticalForEveryLiveBuilderFixture()
         {
+            if (Environment.GetEnvironmentVariable("PINDER_UPDATE_PROMPT_GOLDENS") == "1")
+            {
+                File.WriteAllText(GoldenFixturePath(), SerializeGoldenFixture(), new UTF8Encoding(false));
+            }
             byte[] checkedIn = File.ReadAllBytes(GoldenFixturePath());
             byte[] regenerated = Encoding.UTF8.GetBytes(SerializeGoldenFixture());
             Assert.Equal(checkedIn, regenerated);
@@ -375,6 +379,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
                         ["stat"] = context.Stat.ToString(),
                         ["conversation_history"] = FormatConversationHistory(context.ConversationHistory, catalog),
                         ["instruction"] = instruction,
+                        ["texting_style_block"] = string.Empty,
                     })
                 .Trim();
         }
@@ -392,6 +397,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
                         ["datee_name"] = "Datee",
                         ["delivered_message"] = deliveredMessage,
                         ["conversation_history"] = FormatConversationHistory(history, catalog),
+                        ["texting_style_block"] = string.Empty,
                     })
                 .Trim();
 

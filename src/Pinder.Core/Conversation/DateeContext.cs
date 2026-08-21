@@ -78,6 +78,9 @@ namespace Pinder.Core.Conversation
         /// <summary>Active archetype directive for the datee character, or null if none.</summary>
         public string ActiveArchetypeDirective { get; }
 
+        /// <summary>The datee's designated texting style, or empty when none is configured.</summary>
+        public string DateeTextingStyle { get; }
+
         /// <summary>True when the horniness overlay made the player's delivered message overtly horny/eager this turn.</summary>
         public bool HorninessOverlayApplied { get; }
 
@@ -130,7 +133,8 @@ namespace Pinder.Core.Conversation
             InterestState? interestBeforeState = null,
             InterestState? interestAfterState = null,
             DateeEmotionalTurnEvent? emotionalTurnEvent = null,
-            GameRunAgentJournalContext? agentJournalContext = null)
+            GameRunAgentJournalContext? agentJournalContext = null,
+            string? dateeTextingStyle = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -151,6 +155,7 @@ namespace Pinder.Core.Conversation
             CurrentTurn = currentTurn;
             DeliveryTier = deliveryTier;
             ActiveArchetypeDirective = activeArchetypeDirective;
+            DateeTextingStyle = dateeTextingStyle ?? string.Empty;
             HorninessOverlayApplied = horninessOverlayApplied;
             HorninessTier = horninessTier;
             ResolvedTarget = resolvedTarget;

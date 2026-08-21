@@ -8,10 +8,8 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Tests for Issue #866: datee response length cap (relative window + 600-char ceiling).
-    /// Four prompt-injection tests verify the length hint is injected correctly across
-    /// the formula's boundary cases. One formula test verifies ComputeResponseCeiling at
-    /// the boundary values and the regression scenario from session 707fca72.
+    /// Regression tests for #1392, which supersedes #866's artificial response cap.
+    /// The datee's designated texting-style length axis now controls natural length.
     /// </summary>
     public class Issue866_DateeLengthCapTests
     {
@@ -38,13 +36,14 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void DateePrompt_200CharPlayer_HasCeiling400()
+        public void DateePrompt_200CharPlayer_UsesDesignatedLengthAxis()
         {
             var msg = new string('x', 200);
             var ctx = MakeDateeContext(msg);
             var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
-            Assert.Contains("400 characters", prompt);
+            Assert.Contains("guided by your designated texting-style length axis", prompt);
+            Assert.DoesNotContain("characters regardless of your texting style", prompt);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -52,13 +51,13 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void DateePrompt_1CharPlayer_HasFloor80()
+        public void DateePrompt_1CharPlayer_HasNoArtificialFloor()
         {
             var msg = "x"; // 1 char
             var ctx = MakeDateeContext(msg);
             var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
-            Assert.Contains("80 characters", prompt);
+            Assert.DoesNotContain("80 characters", prompt);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -66,13 +65,13 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void DateePrompt_500CharPlayer_HasCap600()
+        public void DateePrompt_500CharPlayer_HasNoArtificialCap()
         {
             var msg = new string('y', 500);
             var ctx = MakeDateeContext(msg);
             var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
-            Assert.Contains("600 characters", prompt);
+            Assert.DoesNotContain("600 characters", prompt);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -80,13 +79,14 @@ namespace Pinder.LlmAdapters.Tests
         // ══════════════════════════════════════════════════════════════
 
         [Fact]
-        public void DateePrompt_RegressionScenario_1054CharPlayer_HasCap600()
+        public void DateePrompt_RegressionScenario_1054CharPlayer_HasNoOverrideLanguage()
         {
             var msg = new string('z', 1054);
             var ctx = MakeDateeContext(msg);
             var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
 
-            Assert.Contains("600 characters", prompt);
+            Assert.DoesNotContain("engine-specified ceiling", prompt);
+            Assert.DoesNotContain("NOT a hard engine cap", prompt);
         }
 
         // ══════════════════════════════════════════════════════════════
