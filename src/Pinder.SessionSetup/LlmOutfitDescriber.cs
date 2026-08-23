@@ -91,7 +91,6 @@ namespace Pinder.SessionSetup
                     _options.Temperature,
                     GeneratorDefaultConfigs.Outfit.Temperature,
                     _options.MaxTokens,
-                    GeneratorDefaultConfigs.Outfit.MaxTokens,
                     _options.OnDegraded,
                     _options.OnDiagnostic,
                     LlmOptionalTextGeneration.CancellationBehavior.Throw)
@@ -104,8 +103,8 @@ namespace Pinder.SessionSetup
             /// <summary>Temperature. Default 0.8 — a touch warmer than stake generation.</summary>
             public double Temperature { get; set; } = GeneratorDefaultConfigs.Outfit.Temperature;
 
-            /// <summary>Max output tokens. Default 250 (paragraph-sized).</summary>
-            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Outfit.MaxTokens;
+            /// <summary>Max output tokens (null for unconstrained).</summary>
+            public int? MaxTokens { get; set; } = null;
 
             /// <summary>
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).

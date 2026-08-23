@@ -45,8 +45,8 @@ namespace Pinder.SessionSetup
                 _transport,
                 entry.SystemPrompt!,
                 userPrompt,
-                entry.Temperature!.Value,
-                entry.MaxTokens!.Value,
+                entry.Temperature ?? 0.7,
+                entry.MaxTokens,
                 LlmPhase.Synthesis,
                 _onDiagnostic,
                 cancellationToken)

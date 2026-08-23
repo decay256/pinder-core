@@ -166,6 +166,26 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public async Task SendAsync_NullMaxTokensLeavesRequestOptionUnset()
+        {
+            ModelsSimpleStreamOptions? capturedOptions = null;
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                (_, __, options) =>
+                {
+                    capturedOptions = options;
+                    return Task.FromResult(Response("answer"));
+                },
+                _ => new ModelsSimpleStreamOptions { MaxRetries = 0 });
+
+            string result = await transport.SendAsync("system", "user", 0.25, maxTokens: null, phase: "datee");
+
+            Assert.Equal("answer", result);
+            Assert.NotNull(capturedOptions);
+            Assert.Null(capturedOptions!.MaxTokens);
+        }
+
+        [Fact]
         public async Task SendAsync_PreservesPromptsAndMapsRequestOptions()
         {
             Model? capturedModel = null;

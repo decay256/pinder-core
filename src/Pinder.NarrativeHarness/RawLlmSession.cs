@@ -49,7 +49,7 @@ namespace Pinder.Tools.NarrativeHarness
         public double Temperature { get; }
 
         /// <summary>Max-tokens limit used for this call.</summary>
-        public int MaxTokens { get; }
+        public int? MaxTokens { get; }
 
         /// <summary>The raw text response returned by the LLM.</summary>
         public string RawResponse { get; }
@@ -61,7 +61,7 @@ namespace Pinder.Tools.NarrativeHarness
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             string rawResponse)
         {
             Turn        = turn;

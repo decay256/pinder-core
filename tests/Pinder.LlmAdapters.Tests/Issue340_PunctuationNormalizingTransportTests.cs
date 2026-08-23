@@ -133,7 +133,7 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             public Task<string> SendAsync(string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+                double temperature = 0.9, int? maxTokens = null, string? phase = null,
                 CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
@@ -146,7 +146,7 @@ namespace Pinder.LlmAdapters.Tests
 #pragma warning disable CS1998 // async without await — yield-based async iterator
             public async IAsyncEnumerable<string> SendStreamAsync(
                 string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024,
+                double temperature = 0.9, int? maxTokens = null,
                 [EnumeratorCancellation] CancellationToken cancellationToken = default,
                 string? phase = null)
             {
@@ -181,7 +181,7 @@ namespace Pinder.LlmAdapters.Tests
 #pragma warning disable CS1998 // async without await - yield-based async iterator
             public async IAsyncEnumerable<string> SendStreamAsync(
                 string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024,
+                double temperature = 0.9, int? maxTokens = null,
                 [EnumeratorCancellation] CancellationToken cancellationToken = default,
                 string? phase = null)
             {

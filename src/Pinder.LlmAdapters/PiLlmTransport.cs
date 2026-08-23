@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Pi
             string systemPrompt,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             string? phase = null,
             CancellationToken ct = default)
         {
@@ -102,7 +102,7 @@ namespace Pinder.LlmAdapters.Pi
             IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             string? phase = null,
             CancellationToken cancellationToken = default)
         {
@@ -124,7 +124,7 @@ namespace Pinder.LlmAdapters.Pi
             string systemPrompt,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             [EnumeratorCancellation] CancellationToken cancellationToken = default,
             string? phase = null)
         {
@@ -278,7 +278,7 @@ namespace Pinder.LlmAdapters.Pi
         private ModelsSimpleStreamOptions CreateOptions(
             string? phase,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             CancellationToken cancellationToken,
             ResponseStatusCapture responseStatus)
         {

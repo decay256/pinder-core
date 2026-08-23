@@ -14,7 +14,7 @@ namespace Pinder.Core.Tests.SessionSetup
     public class Issue1158_DramaticArcGenerationTests
     {
         [Fact]
-        public async Task GenerateAsync_DefaultsToCatalogMaxTokens1000()
+        public async Task GenerateAsync_DefaultsToNullMaxTokens()
         {
             var transport = new QueueLlmTransport(
                 "Setup lands softly. Escalation tilts without forcing a choice. The turn can break either way.");
@@ -22,7 +22,7 @@ namespace Pinder.Core.Tests.SessionSetup
 
             await GenerateAsync(generator);
 
-            Assert.Equal(1000, transport.LastMaxTokens);
+            Assert.Null(transport.LastMaxTokens);
             Assert.Equal(LlmPhase.DramaticArc, transport.LastPhase);
         }
 
@@ -177,7 +177,7 @@ namespace Pinder.Core.Tests.SessionSetup
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -201,7 +201,7 @@ namespace Pinder.Core.Tests.SessionSetup
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

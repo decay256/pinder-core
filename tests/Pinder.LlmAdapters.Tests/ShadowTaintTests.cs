@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
@@ -9,6 +10,29 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class ShadowTaintTests
     {
+        private static readonly Lazy<PromptCatalog> TestPromptCatalog = new Lazy<PromptCatalog>(LoadPromptCatalog);
+
+        private static PromptCatalog LoadPromptCatalog()
+        {
+            var dir = AppDomain.CurrentDomain.BaseDirectory;
+            for (int i = 0; i < 10; i++)
+            {
+                var candidate = Path.Combine(dir, "data", "prompts");
+                if (Directory.Exists(candidate))
+                {
+                    var catalog = PromptCatalog.LoadFromDirectory(candidate);
+                    catalog.ValidateRuntimeCatalog();
+                    return catalog;
+                }
+
+                var parent = Path.GetDirectoryName(dir);
+                if (parent == null || parent == dir) break;
+                dir = parent;
+            }
+
+            throw new InvalidOperationException("[ShadowTaintTests] ERROR: Did not find prompts directory!");
+        }
+
         private static DialogueContext MakeDialogueContext(
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
@@ -55,7 +79,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: shadows));
+                MakeDialogueContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Madness is elevated", result);
@@ -70,7 +95,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: shadows));
+                MakeDialogueContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.DoesNotContain("SHADOW STATE", result);
         }
@@ -86,7 +112,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: shadows));
+                MakeDialogueContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.Contains("Your Madness is elevated", result);
             Assert.Contains("Your Denial is elevated", result);
@@ -102,7 +129,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: shadows));
+                MakeDialogueContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.DoesNotContain("SHADOW STATE", result);
             Assert.DoesNotContain("Your Despair is elevated", result);
@@ -117,7 +145,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: shadows));
+                MakeDialogueContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Despair is elevated", result);
@@ -127,7 +156,8 @@ namespace Pinder.LlmAdapters.Tests
         public void DialogueOptionsPrompt_NullShadow_NoShadowStateSection()
         {
             var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
-                MakeDialogueContext(shadowThresholds: null));
+                MakeDialogueContext(shadowThresholds: null),
+                TestPromptCatalog.Value);
 
             Assert.DoesNotContain("SHADOW STATE", result);
         }
@@ -145,7 +175,8 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             var result = SessionDocumentBuilder.BuildDateePrompt(
-                MakeDateeContext(shadowThresholds: shadows));
+                MakeDateeContext(shadowThresholds: shadows),
+                TestPromptCatalog.Value);
 
             Assert.Contains("SHADOW STATE", result);
             Assert.Contains("Your Fixation is elevated", result);

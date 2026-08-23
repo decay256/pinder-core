@@ -84,10 +84,8 @@ namespace Pinder.SessionSetup
 
             double temperature = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
                 ? _options.Temperature
-                : entry.Temperature!.Value;
-            int maxTokens = _options.MaxTokens != GeneratorDefaultConfigs.DramaticArc.MaxTokens
-                ? _options.MaxTokens
-                : entry.MaxTokens!.Value;
+                : (entry.Temperature ?? GeneratorDefaultConfigs.DramaticArc.Temperature);
+            int? maxTokens = _options.MaxTokens ?? entry.MaxTokens;
 
             if (_options.MaxValidationAttempts <= 0)
             {
@@ -123,7 +121,6 @@ namespace Pinder.SessionSetup
                                 temperature,
                                 GeneratorDefaultConfigs.DramaticArc.Temperature,
                                 maxTokens,
-                                GeneratorDefaultConfigs.DramaticArc.MaxTokens,
                                 onDegraded: null,
                                 _options.OnDiagnostic,
                                 LlmOptionalTextGeneration.CancellationBehavior.Throw,
@@ -356,8 +353,8 @@ namespace Pinder.SessionSetup
             /// <summary>Temperature. Default 0.85 — creative but grounded.</summary>
             public double Temperature { get; set; } = GeneratorDefaultConfigs.DramaticArc.Temperature;
 
-            /// <summary>Max tokens for dramatic arc generation.</summary>
-            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.DramaticArc.MaxTokens;
+            /// <summary>Max tokens for dramatic arc generation (null for unconstrained).</summary>
+            public int? MaxTokens { get; set; } = null;
 
             /// <summary>Total attempts for incomplete dramatic-arc output before failing.</summary>
             public int MaxValidationAttempts { get; set; } = 3;

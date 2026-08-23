@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens)
+            int? maxTokens = null)
         {
             return new StructuredLlmRequest(
                 SchemaName,

@@ -147,7 +147,7 @@ namespace Pinder.LlmAdapters
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             IReadOnlyDictionary<string, string> metadata)
         {
             return new StructuredLlmRequest(

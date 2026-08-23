@@ -230,7 +230,7 @@ namespace Pinder.Core.Tests.Phase0
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 System.Threading.CancellationToken ct = default)
             {
@@ -266,7 +266,7 @@ namespace Pinder.Core.Tests.Phase0
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 System.Threading.CancellationToken ct = default)
             {

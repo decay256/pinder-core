@@ -130,7 +130,6 @@ prompts:
 
       {compiled_reaction_input}
     temperature: 0.35
-    max_tokens: 500
 
   emotional-reaction-director-system-wrapper:
     system_prompt: |-

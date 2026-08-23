@@ -68,21 +68,20 @@ namespace Pinder.Core.Tests
 
             Assert.Contains("Return ONLY valid JSON", backstory.SystemPrompt);
             Assert.Equal(0.7, backstory.Temperature);
-            Assert.True(backstory.MaxTokens >= 4096);
+            Assert.Null(backstory.MaxTokens);
 
             Assert.Contains("{backstory}", diagnosis.UserTemplate);
             Assert.Contains("{stakes}", diagnosis.UserTemplate);
             Assert.Equal(0.45, diagnosis.Temperature);
-            Assert.Equal(2400, diagnosis.MaxTokens);
+            Assert.Null(diagnosis.MaxTokens);
 
             Assert.Contains("{character_profile}", stake.UserTemplate);
             Assert.Equal(0.9, stake.Temperature);
-            Assert.Equal(1200, stake.MaxTokens);
+            Assert.Null(stake.MaxTokens);
 
             Assert.Contains("{playerName}", dramaticArc.UserTemplate);
             Assert.Equal(0.85, dramaticArc.Temperature);
-            Assert.Equal(1000, dramaticArc.MaxTokens);
-            Assert.Equal(GeneratorDefaultConfigs.DramaticArc.MaxTokens, dramaticArc.MaxTokens);
+            Assert.Null(dramaticArc.MaxTokens);
         }
 
         [Fact]
