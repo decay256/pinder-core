@@ -1,321 +1,204 @@
-# Texting-Style Aggregation Rule (v1)
+# Texting-Style Aggregation
 
-This is the canonical rule for aggregating a character's equipped items
-and anatomy parameters into the **9-axis texting-style block** that ends
-up in the LLM system prompt and in `CharacterProfile.TextingStyleFragment`.
+This document describes the implemented `TextingStyleAggregator` contract.
+The implementation is authoritative when this document and code disagree.
 
-It replaces the random-pick-2 placeholder shipped during the
-[#834 / texting-style-pool] rework. See the parent ticket
-[#836](https://github.com/decay256/pinder-core/issues/836) for the full
-design space.
+## Canonical output
 
----
+Core recognizes nine canonical axes and emits filled axes in this order:
 
-## The contract
-
-The final aggregated style is **exactly 9 axes**:
-
-- **6 syntax axes** (concrete, mechanical patterns): `emoji`, `shorthand`,
-  `grammar`, `structure`, `length`, `tics`.
-- **3 tone axes** (stance + register + pacing): `stance`, `register`,
-  `pacing`.
-
-Each axis is filled by **at most one rule** drawn from one or more
-sources on the character. Two distinct sources never write to the same
-axis.
-
-The output is fully deterministic for a given (character_id, equipped
-items, anatomy tiers). Two runs against the same configuration produce
-the same 9-line aggregate, byte-exact. Players never see this aggregate
-directly — they discover it indirectly through the LLM's behaviour.
-
----
-
-## Item slots own syntax (1:1 fixed mapping)
-
-Each of the 6 item slots owns exactly one syntax subcategory:
-
-| slot       | syntax axis |
-|------------|-------------|
-| `shoes`    | `emoji`     |
-| `hat`      | `shorthand` |
-| `shirt`    | `grammar`   |
-| `trousers` | `structure` |
-| `frame`    | `length`    |
-| `accessory`| `tics`      |
-
-If a slot is empty (no item equipped), the axis is **silenced** for that
-character — not back-filled from elsewhere. The block emits 9 axis
-slots maximum; an unequipped slot drops its axis from the final
-fragment list.
-
-The line written to the syntax axis is read from the equipped item's
-`texting_style_fragment` block. The block has the canonical shape:
-
+```text
+emoji, shorthand, grammar, structure, length, tics,
+directness, affect, rhythm
 ```
+
+The first six are syntax axes sourced from equipped items. The final three are
+expression axes sourced from anatomy. An empty slot or an anatomy group with no
+usable contribution omits its axis, so the result contains **up to nine**
+lines. Missing axes are not back-filled or emitted as placeholders.
+
+The aggregate is a soft set of expressive influences. Downstream prompts tell
+the model to use only tendencies that fit naturally and to preserve meaning,
+personality, emotional state, and conversational variation. Selection does not
+promise that a tendency will be visible in every generated message.
+
+## Item slot mapping
+
+Each equipped item contributes only the syntax axis owned by its slot:
+
+| Current slot | Syntax axis | Legacy alias accepted |
+| --- | --- | --- |
+| `Special` | `emoji` | `shoes` |
+| `Head` | `shorthand` | `hat` |
+| `Body` | `grammar` | `shirt` |
+| `Hair` | `structure` | `trousers` |
+| `Arms` | `length` | `frame` |
+| `Face` | `tics` | `accessory` |
+
+Lookups are case-insensitive. `Waist` has no syntax mapping. Tattoo and Sticker
+items may contribute to other character channels but do not own a texting-style
+syntax axis.
+
+An item may author all six syntax axes for reuse in different slots, but the
+aggregator reads only the axis assigned to the item's equipped slot. If more
+than one source claims the same slot, source order decides and the first source
+wins; that situation is a content/assembly error rather than a blending rule.
+
+## Anatomy expression mapping
+
+Anatomy parameters are partitioned into three ordered groups:
+
+| Expression axis | Parameters in tie-break order |
+| --- | --- |
+| `directness` | `trunkLengthBase`, `trunkLengthMid`, `trunkLengthTip`, `trunkGirth`, `trunkCurvature` |
+| `affect` | `skinHue`, `skinSat`, `skinVal`, `freckles`, `smoothness`, `veins` |
+| `rhythm` | `glansScale`, `glansWidth`, `scrotumScale`, `leftTesticleScale`, `rightTesticleScale`, `scrotumDrop`, `isCircumcised` |
+
+For each parameter, Core parses the parameter's selected anatomy-band fragment
+and chooses at most one candidate for the group's axis. It then resolves the
+group by majority vote over the selected candidate text:
+
+1. Parameters without a usable candidate do not vote.
+2. Identical candidate text is grouped using ordinal comparison.
+3. The text with the most votes wins.
+4. A tie is won by the candidate whose first contributing parameter appears
+   earliest in the table's parameter order.
+5. If no parameter contributes, the expression axis is omitted.
+
+Anatomy is not read for syntax axes.
+
+## Authoring format and migration aliases
+
+New content uses this shape:
+
+```text
 SYNTAX:
-- emoji: <one line from the syntax→emoji pool>
-- shorthand: <one line from the syntax→shorthand pool>
-- grammar: <one line from the syntax→grammar pool>
-- structure: <one line from the syntax→structure pool>
-- length: <one line from the syntax→length pool>
-- tics: <one line from the syntax→tics pool>
-TONE:
-- stance (<key>): <one stance line>
-- register (<key>): <one register line>
-- pacing (<key>): <one pacing line>
+- emoji: may use a soft emoji as terminal punctuation when warmth is visible
+- shorthand: tends to use "ngl" before a candid thought
+- grammar: is comfortable writing casual messages in lowercase
+- structure: tends to split layered thoughts across a few short lines
+- length: usually keeps replies compact without losing the emotional beat
+- tics: may echo one important word before answering
+EXPRESSION:
+- directness: tends to imply attraction before naming it directly
+- affect: is comfortable letting guarded warmth show through dry phrasing
+- rhythm: tends to accelerate when emotionally engaged
 ```
 
-The aggregator reads the slot's owned axis from its item — so if the
-item in the `shoes` slot has `- emoji: ends every sentence with an emoji
-that conveys its emotion`, that's the line written to the final
-fragment's `emoji` axis. Items in the `shoes` slot do NOT contribute to
-any other axis: only the slot's owned axis is read.
+For migration compatibility, the parser also accepts the `TONE:` section and
+normalizes old expression keys as follows:
 
-This is the design rule that makes the system **discoverable by
-gameplay**: swap one item, see exactly one syntax axis change. Players
-cannot fight back across the boundary.
+| Legacy input key | Canonical axis |
+| --- | --- |
+| `stance` | `directness` |
+| `register` | `affect` |
+| `pacing` | `rhythm` |
 
----
+These aliases are for existing data, not new authoring. Parsed output,
+attribution, conflict validation, and final aggregate lines use canonical axis
+names.
 
-## Anatomy parameters lock tone (3:1 group-vote mapping)
+## Candidate pools and deterministic selection
 
-The 9 anatomy parameters are partitioned into 3 groups of 3. Each
-group decides one tone axis:
+An axis can contain a single candidate or an indented candidate pool:
 
-| anatomy params                                       | tone axis  |
-|------------------------------------------------------|------------|
-| `length`, `girth`, `circumcision`                    | `stance`   |
-| `vein_definition`, `skin_texture`, `skin_tone`       | `register` |
-| `ball_size`, `tattoos`, `eye_style`                  | `pacing`   |
-
-For each group, the aggregator extracts the tone-axis line from each
-selected tier in the group. The decision rule is:
-
-1. **Drop empty contributions.** If a tier has no `texting_style_fragment`
-   or its TONE block doesn't carry the axis, that source contributes
-   nothing.
-2. **Majority wins.** Group the remaining lines by their text. The
-   text that appears the most often wins.
-3. **Tie-break by group order.** When two distinct lines have the same
-   highest count, the line from the parameter that appears earliest in
-   the group's parameter list wins. (`length` beats `girth` beats
-   `circumcision` for stance, etc.)
-
-If the entire group contributes nothing, the tone axis is silenced for
-that character — the final fragment list emits 8 lines instead of 9.
-
-Anatomy is **never** read for syntax. The full grouping is fixed and
-documented here; designers can verify and operators can predict.
-
----
-
-## Output format
-
-The aggregator returns a list of strings, one per filled axis, in the
-canonical order:
-
-```
-emoji: <line from shoes.SYNTAX.emoji>
-shorthand: <line from hat.SYNTAX.shorthand>
-grammar: <line from shirt.SYNTAX.grammar>
-structure: <line from trousers.SYNTAX.structure>
-length: <line from frame.SYNTAX.length>
-tics: <line from accessory.SYNTAX.tics>
-stance: <majority winner from {length, girth, circumcision}.TONE.stance>
-register: <majority winner from {vein_definition, skin_texture, skin_tone}.TONE.register>
-pacing: <majority winner from {ball_size, tattoos, eye_style}.TONE.pacing>
+```text
+EXPRESSION:
+- affect:
+  - tends to keep warmth understated until trust is established
+  - may let enthusiasm become obvious when a specific interest is shared
 ```
 
-Axes whose source is empty are dropped, not emitted as
-`emoji: (empty)` or similar. The downstream consumers
-(`PromptBuilder`, `CharacterProfile.TextingStyleFragment`) emit each
-remaining axis as its own bullet line in the system prompt's TEXTING
-STYLE section.
+Before slot extraction or anatomy voting, Core selects exactly one candidate
+per source and axis. A single candidate is returned directly. Multiple
+candidates are selected with SHA-256 over a length-delimited canonical input
+containing:
 
-When the character has no items and no anatomy contributions, the
-output is an empty list — the section header may still be emitted but
-carries no rules.
+- the selector version salt;
+- `seedKey` (normally the character identity);
+- source kind, name, source id, slot or parameter, and anatomy band index;
+- canonical axis name; and
+- the candidate count plus every candidate in authored order.
 
----
+The first eight hash bytes select `hash % candidate_count`. The same complete
+input produces byte-for-byte stable selection across calls and sessions.
+Different seeds may give different characters different candidates. Editing,
+reordering, adding, or removing candidates intentionally changes selector input
+and may change the chosen candidate.
 
-## Why this rule
+Selection is bounded: Core does not concatenate the pool and does not ask the
+LLM to choose among it. For anatomy, candidate selection occurs before the
+majority vote.
 
-1. **9 axes. Always.** No more, no less. 6 items × 1 axis per slot, 3
-   anatomy groups × 1 axis per group. No risk of soup.
-2. **Discoverable through gameplay.**
-   - Layer 1: "swapping clothes never changes my stance" → anatomy
-     decides tone. The player figures this out across multiple equipment
-     swaps.
-   - Layer 2: "swapping shoes changes my emoji rule" → items decide
-     syntax, slot-by-slot. The 1:1 slot→axis mapping is the second-order
-     discovery — players will notice that swapping the same slot
-     consistently changes the same axis.
-3. **Not directly controllable.** Players never see the prompt, can't
-   say "give me dry stance". The path from intent → result goes through
-   anatomy + items, which are physical decisions, not text knobs.
-4. **Surfaces both items and anatomy.** Anatomy is back in the wire —
-   the previous placeholder silenced anatomy entirely, which broke the
-   discoverability layer. Now anatomy is the only path to tone.
-5. **Deterministic.** Per-character; per-configuration. No re-roll mid
-   conversation. Build-craft is preserved: the player's choices stick.
-6. **Auditable.** Every axis has exactly one source. A reviewer reading
-   the assembled prompt can trace each line back to a specific slot or
-   anatomy parameter without RNG.
+## Output, attribution, and conflicts
 
----
+`AggregateWithAudit` returns:
 
-## What changed from the placeholder
+- `Lines`: canonical `axis: value` strings in canonical axis order;
+- `AttributedLines`: the same kept lines with `SourceName`, `SourceKind`,
+  `SourceId`, `SlotOrParameter`, and optional `BandIndex`; and
+- `Drops`: entries removed by conflict resolution, including the conflicting
+  kept value and the catalog reason.
 
-- **Random-pick-2 is gone.** No more seeded RNG over the item fragment
-  list. No more "this character got the boring two".
-- **Anatomy is back.** The placeholder dropped anatomy entirely; the
-  v1 rule reintroduces it as the sole tone author.
-- **9 axes always.** The placeholder produced "2 messy fragments";
-  the v1 rule produces up to 9 single-axis lines.
-- **`TextingStyleFragmentSource.SlotOrParameter` is new.** The
-  per-source breakdown now carries the slot ("shoes", "hat", …) or
-  anatomy parameter id ("length", "girth", …) so the aggregator can
-  do the slot→axis lookup without re-deriving it from item / anatomy
-  definitions. This field is a strict superset; existing consumers
-  keep their `Kind` / `Source` / `Fragment` reads.
+After all axes are selected, Core walks them in canonical order. A candidate
+that conflicts with an already-kept value in
+`data/persona/texting-style-conflicts.yaml` is dropped; the earlier canonical
+axis wins. Conflict matching is bidirectional and case-insensitive for axis and
+value. The catalog must use the exact parsed value text. Its axis keys are
+normalized to the canonical model when loaded.
 
-The shape of the prompt section that PromptBuilder emits is unchanged
-(still a bullet list under `TEXTING STYLE:`); only the contents become
-deterministically authored from the new rule.
+Example result:
 
----
-
-## Future work
-
-- **Optional reveal mechanic** (issue body, "Discoverability layers"):
-  an in-game UI that surfaces the player's current style in plain
-  language, earned through gameplay (mirror item, NPC reactions,
-  achievement-style cards). Tracked separately, not in v1.
-- **Rule revision after playtest.** If a tone axis turns out to be
-  dominated by one anatomy parameter that's nearly always the same
-  tier, revisit the group composition or switch to weighted voting.
-  No revision before playtest data is in.
-- **Slot↔axis remap.** The slot→syntax assignment above is a design
-  call. Future versions may swap mappings (e.g. accessory→length to
-  match items that authentically dictate verbosity). Each swap is a
-  new revision of THIS DOCUMENT, not an undocumented engine change.
-
----
-
-## Cross-axis conflict resolution (v1.1 — issue #907)
-
-As of #907, the aggregator applies a **conflict matrix** to the picked axis
-values before emitting the final list. The matrix is encoded in
-`data/persona/texting-style-conflicts.yaml`. The outer-layer
-`TextingStyleConflictYamlLoader` performs structured YAML deserialization and
-passes parsed rows to the Core-owned `TextingStyleConflicts` domain model for
-validation and conflict resolution.
-
-### Why conflicts arise
-
-Each axis is picked independently (slot → syntax axis; anatomy group → tone
-axis). There is no constraint across axes during the pick phase. Some
-combinations are semantically contradictory even though each individual pick
-is valid:
-
-- `structure: wall-of-text` + `length: never sends more than 5 words` — the
-  LLM resolves this by applying the stricter/more concrete rule (`≤5 words`),
-  silently overriding the engine's `playerLen` length hint from #866.
-- `pacing: fast, breathless` + `structure: measured whitespace` — mutually
-  incompatible style demands.
-
-### Resolution algorithm
-
-After all per-axis picks are assembled:
-
-1. Walk the picked set in the order they were assembled (canonical axis order).
-2. For each candidate value, check it against all already-kept values using
-   the conflict matrix.
-3. On conflict: drop the candidate (the later-picked value). The earlier-kept
-   value wins — deterministic, replayable.
-4. Emit one `ConflictDropEntry` per dropped value into the audit log.
-5. Callers use `AggregateWithAudit()` to retrieve both the final lines and
-   the audit log.
-
-### Auditor tool
-
-`tools/TextingStyleAuditor/` is a data-hygiene console app. Run it when
-adding new items to `data/items/starter-items.json`:
-
-```bash
-dotnet run --project tools/TextingStyleAuditor
+```text
+emoji: may use a soft emoji as terminal punctuation when warmth is visible
+grammar: is comfortable writing casual messages in lowercase
+directness: tends to imply attraction before naming it directly
+affect: is comfortable letting guarded warmth show through dry phrasing
+rhythm: tends to accelerate when emotionally engaged
 ```
 
-Exit code 0 = all detected conflict pairs are covered by the matrix.
-Exit code 1 = unregistered conflicts found — add a matrix entry or rewrite
-the item fragment.
+The result can have fewer than nine lines when sources are missing or a conflict
+drops a later value. `Aggregate` returns those lines joined for the prompt;
+`AggregateWithAudit` is the traceable domain result.
 
-### Adding a new conflict
+## Discoverability contract
 
-Add one entry to `data/persona/texting-style-conflicts.yaml`:
+- Changing an equipped item can change the one syntax axis owned by its slot.
+- Changing an anatomy band can change the vote for its expression group.
+- A stable character/configuration/seed combination remains stable across
+  sessions.
+- The style influences delivery without overriding character psychology,
+  emotional direction, game state, or what the message needs to communicate.
+
+Players do not edit these prompt axes directly. They encounter their effects
+through equipment, anatomy, and generated conversation.
+
+## Authoring and validation
+
+Use [texting-style-pool.md](texting-style-pool.md) for fragment wording. When
+adding or changing content:
+
+1. Use canonical section and axis names.
+2. Keep each candidate a concise tendency.
+3. Confirm the source's slot or anatomy group actually consumes that axis.
+4. Run the texting-style auditor when changing item or anatomy content:
+
+   ```bash
+   dotnet run --project tools/TextingStyleAuditor
+   ```
+
+5. Add a bidirectional conflict once in
+   `data/persona/texting-style-conflicts.yaml` when two exact parsed values
+   cannot coexist.
+
+The conflict catalog schema is:
 
 ```yaml
-  - axis_a: { axis: <name>, value: "<parsed-value>" }
-    axis_b: { axis: <name>, value: "<parsed-value>" }
-    reason: "<why these can't coexist>"
+conflicts:
+  - axis_a: { axis: <canonical-axis>, value: "<exact-parsed-value>" }
+    axis_b: { axis: <canonical-axis>, value: "<exact-parsed-value>" }
+    reason: "<why the values cannot coexist>"
 ```
 
-Values must match the **parsed** axis value (the text after `:` in the
-fragment line, with the parenthetical sub-key stripped from the axis name).
-The constraint is bidirectional — encode it once, the resolver checks both
-orderings.
-
-### Length-hint defensive rule (#907 belt-and-braces)
-
-`SessionDocumentBuilder` appends a priority statement after the standard
-`playerLen` length hint:
-
-> "The length rule above is a stylistic guideline, NOT a hard cap. For this
-> message, aim for ~{playerLen} characters as the engine specifies.
-> Style-rule length axes apply ONLY when they are compatible with the
-> engine-specified length."
-
-This ensures that even if the conflict resolver misses a case, the engine's
-length floor takes priority over a style-rule hard cap.
-
----
-
-## Rule Attribution (v1.2 — issue #1310)
-
-As of #1310, the aggregation result retains origin-tracing for every active texting style line. This prevents texting style rules from being treated as anonymous blocks, allowing the engine and the UI to attribute each rule to its source item or anatomy parameter.
-
-### Data Structures
-
-A new type represents an attributed rule line:
-
-```csharp
-public sealed class AttributedTextingStyleLine
-{
-    public string Axis { get; }         // e.g., "emoji", "pacing"
-    public string Value { get; }        // e.g., "ends every sentence with a heart emoji"
-    public string SourceName { get; }   // e.g., "special_shoe6", "trunkCurvature"
-    public string SourceKind { get; }   // "item" or "anatomy"
-
-    public AttributedTextingStyleLine(string axis, string value, string sourceName, string sourceKind);
-}
-```
-
-The `AggregationResult` returned by `TextingStyleAggregator.Aggregate` has been updated to expose:
-
-```csharp
-public sealed class AggregationResult
-{
-    public IReadOnlyList<string> Lines { get; }
-    public IReadOnlyList<ConflictDropEntry> Drops { get; }
-    public IReadOnlyList<AttributedTextingStyleLine> AttributedLines { get; }
-}
-```
-
-### Flow and Integration
-
-1. **Resolution & Attribution:** During aggregation, when a syntax axis is selected from an item or a tone axis is majority-voted from an anatomy parameter group, the aggregator packages the rule along with its `SourceName` and `SourceKind`.
-2. **Conflict Resolution Preservation:** If a rule is dropped during conflict resolution, its corresponding `AttributedTextingStyleLine` is also removed from the final `AttributedLines` list, keeping the list of active lines in perfect sync with `Lines`.
-3. **Propagation:**
-   - The `CharacterProfile` exposes `IReadOnlyList<AttributedTextingStyleLine> AttributedTextingStyleLines` (populated at assembly time).
-   - `CharacterDefinitionLoader` extracts `aggregationResult.AttributedLines` and passes it to the `CharacterProfile` constructor.
+Historical design investigations and sprint notes may use the old vocabulary.
+They are not active authoring guidance.
