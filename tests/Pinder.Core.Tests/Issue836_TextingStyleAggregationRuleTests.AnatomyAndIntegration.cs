@@ -17,61 +17,61 @@ namespace Pinder.Core.Tests
         [Fact]
         public void AnatomyGroup_MajorityVoteWins()
         {
-            // Construct two anatomy entries from the stance group with the
-            // same stance value, and one with a different stance value —
+            // Construct two anatomy entries from the directness group with the
+            // same directness value, and one with a different directness value —
             // the majority (2) must win.
             // #1175: use new Unity param ids (trunkLengthBase, trunkGirth, trunkCurvature)
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeAnatomyToneFragment("trunkLengthBase", "band0",
-                    stance: "<dry-stance-line>", register: "x", pacing: "y"),
+                    directness: "<dry-directness-line>", affect: "x", rhythm: "y"),
                 MakeAnatomyToneFragment("trunkGirth", "band0",
-                    stance: "<dry-stance-line>", register: "x", pacing: "y"),
+                    directness: "<dry-directness-line>", affect: "x", rhythm: "y"),
                 MakeAnatomyToneFragment("trunkCurvature", "band0",
-                    stance: "<other-stance-line>", register: "x", pacing: "y"),
+                    directness: "<other-directness-line>", affect: "x", rhythm: "y"),
             };
 
             var lines = TextingStyleAggregator.AggregateAsList(sources, null);
-            var stanceLine = lines.Single(l => l.StartsWith("stance:"));
-            Assert.Equal("stance: <dry-stance-line>", stanceLine);
+            var directnessLine = lines.Single(l => l.StartsWith("directness:"));
+            Assert.Equal("directness: <dry-directness-line>", directnessLine);
         }
 
         [Fact]
         public void AnatomyGroup_TieBreakByGroupOrder()
         {
-            // trunkLengthBase and trunkGirth tie on stance — trunkLengthBase wins
-            // (earliest in the StanceGroup order).
+            // trunkLengthBase and trunkGirth tie on directness — trunkLengthBase wins
+            // (earliest in the DirectnessGroup order).
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeAnatomyToneFragment("trunkLengthBase", "band0",
-                    stance: "<line-from-trunkLengthBase>", register: "x", pacing: "y"),
+                    directness: "<line-from-trunkLengthBase>", affect: "x", rhythm: "y"),
                 MakeAnatomyToneFragment("trunkGirth", "band0",
-                    stance: "<line-from-trunkGirth>", register: "x", pacing: "y"),
+                    directness: "<line-from-trunkGirth>", affect: "x", rhythm: "y"),
             };
 
             var lines = TextingStyleAggregator.AggregateAsList(sources, null);
-            var stanceLine = lines.Single(l => l.StartsWith("stance:"));
-            Assert.Equal("stance: <line-from-trunkLengthBase>", stanceLine);
+            var directnessLine = lines.Single(l => l.StartsWith("directness:"));
+            Assert.Equal("directness: <line-from-trunkLengthBase>", directnessLine);
         }
 
         [Fact]
         public void AnatomyGroup_EmptyGroup_DropsAxis()
         {
-            // Only stance-group entries — register and pacing axes must drop
+            // Only directness-group entries — affect and rhythm axes must drop
             // because their groups have no contributors.
             var sources = new List<TextingStyleFragmentSource>
             {
-                // Only stance-group entries.
+                // Only directness-group entries.
                 MakeAnatomyToneFragment("trunkLengthBase", "band0",
-                    stance: "<a>", register: "<r>", pacing: "<p>"),
+                    directness: "<a>", affect: "<r>", rhythm: "<p>"),
             };
 
             var lines = TextingStyleAggregator.AggregateAsList(sources, null);
-            // stance must appear (trunkLengthBase's stance), register and pacing
+            // directness must appear (trunkLengthBase's directness), affect and rhythm
             // must NOT appear because their groups have no contributors.
-            Assert.Contains(lines, l => l.StartsWith("stance:"));
-            Assert.DoesNotContain(lines, l => l.StartsWith("register:"));
-            Assert.DoesNotContain(lines, l => l.StartsWith("pacing:"));
+            Assert.Contains(lines, l => l.StartsWith("directness:"));
+            Assert.DoesNotContain(lines, l => l.StartsWith("affect:"));
+            Assert.DoesNotContain(lines, l => l.StartsWith("rhythm:"));
         }
 
         [Fact]
@@ -82,9 +82,9 @@ namespace Pinder.Core.Tests
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeAnatomyToneFragment("nonsense_param", "band-x",
-                    stance: "<should-not-appear>",
-                    register: "<should-not-appear>",
-                    pacing: "<should-not-appear>"),
+                    directness: "<should-not-appear>",
+                    affect: "<should-not-appear>",
+                    rhythm: "<should-not-appear>"),
             };
 
             var lines = TextingStyleAggregator.AggregateAsList(sources, null);
@@ -124,7 +124,7 @@ namespace Pinder.Core.Tests
                 Assert.Contains(axis, new[]
                 {
                     "emoji", "shorthand", "grammar", "structure", "length", "tics",
-                    "stance", "register", "pacing",
+                    "directness", "affect", "rhythm",
                 });
             }
 
@@ -229,7 +229,7 @@ namespace Pinder.Core.Tests
                 Assert.Contains(axis, new[]
                 {
                     "emoji", "shorthand", "grammar", "structure", "length", "tics",
-                    "stance", "register", "pacing",
+                    "directness", "affect", "rhythm",
                 });
             }
 
@@ -298,14 +298,14 @@ namespace Pinder.Core.Tests
         /// </summary>
         private static TextingStyleFragmentSource MakeAnatomyToneFragment(
             string parameterId, string tierName,
-            string stance, string register, string pacing)
+            string directness, string affect, string rhythm)
         {
             string fragment =
                 "SYNTAX:\n" +
                 "TONE:\n" +
-                $"- stance ({tierName}): {stance}\n" +
-                $"- register ({tierName}): {register}\n" +
-                $"- pacing ({tierName}): {pacing}";
+                $"- directness ({tierName}): {directness}\n" +
+                $"- affect ({tierName}): {affect}\n" +
+                $"- rhythm ({tierName}): {rhythm}";
             return new TextingStyleFragmentSource(
                 kind: "anatomy",
                 source: tierName,

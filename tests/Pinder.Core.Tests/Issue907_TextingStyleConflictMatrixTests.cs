@@ -43,17 +43,17 @@ conflicts:
     axis_b: { axis: length, value: ""never sends more than 5 words"" }
     reason: ""Wall-of-text incompatible with hard 5-word cap""
   - axis_a: { axis: structure, value: ""wall-of-text (one paragraph, no breaks, comma splices throughout)"" }
-    axis_b: { axis: pacing, value: ""dry-pacing"" }
-    reason: ""Wall-of-text incompatible with sparse pacing""
-  - axis_a: { axis: pacing, value: ""hectic"" }
+    axis_b: { axis: rhythm, value: ""dry-rhythm"" }
+    reason: ""Wall-of-text incompatible with sparse rhythm""
+  - axis_a: { axis: rhythm, value: ""hectic"" }
     axis_b: { axis: structure, value: ""measured whitespace (3-5 short lines, blank between)"" }
     reason: ""Hectic incompatible with measured whitespace""
   - axis_a: { axis: tics, value: ""never asks questions, only states"" }
     axis_b: { axis: tics, value: ""always ends with a question, even when not asking"" }
     reason: ""Direct contradiction on question-asking""
-  - axis_a: { axis: stance, value: ""agreer"" }
-    axis_b: { axis: stance, value: ""contrarian"" }
-    reason: ""Mutually exclusive stances""
+  - axis_a: { axis: directness, value: ""agreer"" }
+    axis_b: { axis: directness, value: ""contrarian"" }
+    reason: ""Mutually exclusive directness rules""
 ";
 
         [Fact]
@@ -145,8 +145,8 @@ conflicts:
                 ("LENGTH", "never sends more than 5 words"),
                 ("LENGTH", "minimum 80 words per message, no exceptions")));
             Assert.True(c.AreConflicting(
-                ("stance", "AGREER"),
-                ("stance", "CONTRARIAN")));
+                ("directness", "AGREER"),
+                ("directness", "CONTRARIAN")));
         }
 
         [Fact]
@@ -214,9 +214,9 @@ conflicts:
                 ("tics", "always ends with a question, even when not asking")),
                 "Missing: tics:never-questions vs tics:always-question");
             Assert.True(c.AreConflicting(
-                ("stance", "\"omg same\" energy, can't disagree, vaguely unsettling"),
-                ("stance", "mild disagreement with everything, even compliments")),
-                "Missing: stance:agreer vs stance:contrarian");
+                ("directness", "\"omg same\" energy, can't disagree, vaguely unsettling"),
+                ("directness", "mild disagreement with everything, even compliments")),
+                "Missing: directness:agreer vs directness:contrarian");
         }
 
         private static TextingStyleFragmentSource MakeItemSource(
@@ -231,9 +231,9 @@ conflicts:
                 $"- length: default length\n" +
                 $"- tics: default tics\n" +
                 "TONE:\n" +
-                "- stance (neutral): neutral\n" +
-                "- register (neutral): neutral\n" +
-                "- pacing (neutral): neutral";
+                "- directness (neutral): neutral\n" +
+                "- affect (neutral): neutral\n" +
+                "- rhythm (neutral): neutral";
             fragment = fragment.Replace(
                 $"- {axisName}: default {axisName}",
                 $"- {axisName}: {axisValue}");
@@ -271,33 +271,33 @@ conflicts:
         }
 
         [Fact]
-        public void AggregateWithAudit_ConflictingStructureVsPacing_DropsPacing()
+        public void AggregateWithAudit_ConflictingStructureVsRhythm_DropsRhythm()
         {
             var conflicts = TextingStyleConflictYamlLoader.LoadFrom(MinimalConflictsYaml);
-            string MakeToneFragment(string pacingKey, string pacingValue) =>
+            string MakeToneFragment(string rhythmKey, string rhythmValue) =>
                 "SYNTAX:\n" +
                 "TONE:\n" +
-                $"- stance (neutral): neutral-stance\n" +
-                $"- register (neutral): neutral-register\n" +
-                $"- pacing ({pacingKey}): {pacingValue}\n";
+                $"- directness (neutral): neutral-directness\n" +
+                $"- affect (neutral): neutral-affect\n" +
+                $"- rhythm ({rhythmKey}): {rhythmValue}\n";
             var sources = new List<TextingStyleFragmentSource>
             {
                 MakeItemSource("trousers", "structure",
                     "wall-of-text (one paragraph, no breaks, comma splices throughout)"),
                 new TextingStyleFragmentSource(
                     kind: "anatomy", source: "isCircumcised[0.00,0.50)",
-                    fragment: MakeToneFragment("dry-low-edit", "dry-pacing"),
+                    fragment: MakeToneFragment("dry-low-edit", "dry-rhythm"),
                     slotOrParameter: "isCircumcised"),
             };
             var result = TextingStyleAggregator.AggregateWithAudit(sources, "char-002", conflicts);
 
             var hasStructure = result.Lines.Any(l =>
                 l.StartsWith("structure:", StringComparison.OrdinalIgnoreCase));
-            var hasPacing = result.Lines.Any(l =>
-                l.StartsWith("pacing:", StringComparison.OrdinalIgnoreCase));
+            var hasRhythm = result.Lines.Any(l =>
+                l.StartsWith("rhythm:", StringComparison.OrdinalIgnoreCase));
 
             Assert.True(hasStructure, "structure should be kept.");
-            Assert.False(hasPacing, "pacing:dry-pacing should be dropped.");
+            Assert.False(hasRhythm, "rhythm:dry-rhythm should be dropped.");
             Assert.Single(result.Drops);
         }
 

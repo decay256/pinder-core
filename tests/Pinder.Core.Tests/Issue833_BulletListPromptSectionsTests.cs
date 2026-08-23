@@ -202,7 +202,7 @@ namespace Pinder.Core.Tests
         {
             // #836 v1: each item contributes its slot's owned axis only.
             // Output is canonically ordered (emoji, shorthand, grammar,
-            // structure, length, tics, stance, register, pacing).
+            // structure, length, tics, directness, affect, rhythm).
             // Anatomy without proper SlotOrParameter is silently dropped.
             var sources = new List<TextingStyleFragmentSource>
             {

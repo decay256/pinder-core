@@ -113,7 +113,7 @@ namespace Pinder.Core.Prompts
             string entryAxis, string entryValue,
             string queryAxis, string queryValue)
         {
-            return string.Equals(entryAxis, queryAxis, StringComparison.OrdinalIgnoreCase)
+            return string.Equals(TextingStyleAggregator.NormalizeExpressionAxisName(entryAxis), TextingStyleAggregator.NormalizeExpressionAxisName(queryAxis), StringComparison.OrdinalIgnoreCase)
                 && string.Equals(entryValue, queryValue, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -160,7 +160,7 @@ namespace Pinder.Core.Prompts
             int entryIndex,
             string fieldName)
         {
-            string axis = rawAxis?.Trim() ?? string.Empty;
+            string axis = TextingStyleAggregator.NormalizeExpressionAxisName(rawAxis?.Trim() ?? string.Empty);
             string value = rawValue?.Trim() ?? string.Empty;
             if (axis.Length == 0 || value.Length == 0)
                 throw new FormatException(
@@ -175,7 +175,7 @@ namespace Pinder.Core.Prompts
 
         private static string RequireAxis(string? axis, string parameterName)
         {
-            string value = RequireValue(axis, parameterName);
+            string value = TextingStyleAggregator.NormalizeExpressionAxisName(RequireValue(axis, parameterName));
             if (!KnownAxes.Contains(value))
                 throw new ArgumentException($"Unknown texting-style axis '{value}'.", parameterName);
             return value;
@@ -187,6 +187,7 @@ namespace Pinder.Core.Prompts
                 throw new ArgumentException("Value must be non-empty.", parameterName);
             return value.Trim();
         }
+
 
         private static readonly IReadOnlyCollection<string> KnownAxes =
             new HashSet<string>(TextingStyleAggregator.CanonicalAxisOrder, StringComparer.OrdinalIgnoreCase);

@@ -17,11 +17,10 @@ namespace Pinder.Core.Prompts
     ///         trousers → structure, frame → length, accessory → tics.
     ///     Each slot reads the ASSIGNED axis line from its equipped item's
     ///     SYNTAX block; the other 5 lines on that item are ignored.
-    ///   - The 9 anatomy parameters partition into 3 groups of 3, one
-    ///     group per tone axis (stance, register, pacing). Each group
-    ///     decides its axis by majority vote across the equipped tiers'
-    ///     TONE block, ties broken by group order. Empty contributions
-    ///     are dropped.
+    ///   - The anatomy parameters partition into 3 expression groups: directness,
+    ///     affect, and rhythm. Each group decides its axis by majority vote
+    ///     across the equipped tiers' TONE block, ties broken by group
+    ///     order. Empty contributions are dropped.
     ///   - Output is exactly 9 axes. Unfilled slots / silent groups drop
     ///     their axis from the final list rather than back-filling.
     ///
@@ -82,26 +81,26 @@ namespace Pinder.Core.Prompts
             };
 
         // ------------------------------------------------------------------
-        // Anatomy parameter → tone axis groupings. The order of parameters
+        // Anatomy parameter → expression axis groupings. The order of parameters
         // inside each group is load-bearing: it's the tie-breaker when
         // two distinct lines share the highest count. See the design doc
         // for the rationale.
         //
         // Updated for #1175: parameter ids now mirror Unity CharacterData
         // field names. Old ids (length, girth, etc.) are replaced with the
-        // Unity scalar ids. The 3 tone groups remain (stance, register, pacing)
-        // but now cover the new ~24 Unity params.
+        // Unity scalar ids. The three expression groups cover the new
+        // Unity params while preserving deterministic group-order ties.
         // ------------------------------------------------------------------
 
-        internal static readonly IReadOnlyList<string> StanceGroup =
+        internal static readonly IReadOnlyList<string> DirectnessGroup =
             new[] { "trunkLengthBase", "trunkLengthMid", "trunkLengthTip",
                     "trunkGirth", "trunkCurvature" };
 
-        internal static readonly IReadOnlyList<string> RegisterGroup =
+        internal static readonly IReadOnlyList<string> AffectGroup =
             new[] { "skinHue", "skinSat", "skinVal",
                     "freckles", "smoothness", "veins" };
 
-        internal static readonly IReadOnlyList<string> PacingGroup =
+        internal static readonly IReadOnlyList<string> RhythmGroup =
             new[] { "glansScale", "glansWidth",
                     "scrotumScale", "leftTesticleScale", "rightTesticleScale", "scrotumDrop",
                     "isCircumcised" };
@@ -112,7 +111,7 @@ namespace Pinder.Core.Prompts
             new[]
             {
                 "emoji", "shorthand", "grammar", "structure", "length", "tics",
-                "stance", "register", "pacing",
+                "directness", "affect", "rhythm",
             };
 
         // ------------------------------------------------------------------
@@ -225,7 +224,7 @@ namespace Pinder.Core.Prompts
             if (sources == null || sources.Count == 0)
                 return new AggregationResult(Array.Empty<string>(), Array.Empty<ConflictDropEntry>(), Array.Empty<AttributedTextingStyleLine>());
 
-            // Index syntax inputs by slot, tone inputs by parameter id.
+            // Index syntax inputs by slot, expression inputs by parameter id.
             // Multiple sources for the same slot would be a content bug
             // (two items in one slot is not supposed to happen); first
             // wins so the assembler's ordering decides.
@@ -250,13 +249,13 @@ namespace Pinder.Core.Prompts
                 }
             }
 
-            // Pre-parse each anatomy fragment into its TONE map so the
+            // Pre-parse each anatomy fragment into its expression-axis map so the
             // group-vote step doesn't re-parse on every lookup.
-            var toneByParam = new Dictionary<string, IReadOnlyDictionary<string, string>>(
+            var expressionByParam = new Dictionary<string, IReadOnlyDictionary<string, string>>(
                 StringComparer.OrdinalIgnoreCase);
             foreach (var kvp in anatomyByParam)
             {
-                toneByParam[kvp.Key] = ParseToneAxes(kvp.Value.Fragment);
+                expressionByParam[kvp.Key] = ParseToneAxes(kvp.Value.Fragment);
             }
 
             // Resolve axis-by-axis in canonical order. Missing axes drop.
@@ -285,31 +284,31 @@ namespace Pinder.Core.Prompts
                 }
             }
 
-            // Tone axes — majority vote per group.
-            var stanceResult   = MajorityVote("stance",   StanceGroup,   toneByParam);
-            var registerResult = MajorityVote("register", RegisterGroup, toneByParam);
-            var pacingResult   = MajorityVote("pacing",   PacingGroup,   toneByParam);
+            // Expression axes — majority vote per group.
+            var directnessResult = MajorityVote("directness", DirectnessGroup, expressionByParam);
+            var affectResult     = MajorityVote("affect",     AffectGroup,     expressionByParam);
+            var rhythmResult     = MajorityVote("rhythm",     RhythmGroup,     expressionByParam);
 
-            if (stanceResult != null && anatomyByParam.TryGetValue(stanceResult.ParamId, out var stanceSrc))
+            if (directnessResult != null && anatomyByParam.TryGetValue(directnessResult.ParamId, out var directnessSrc))
             {
-                var pair = AxisValuePairOf(stanceResult.WinnerLine);
+                var pair = AxisValuePairOf(directnessResult.WinnerLine);
                 pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, stanceSrc.Source, stanceSrc.Kind,
-                    stanceSrc.SourceId, stanceSrc.SlotOrParameter, stanceSrc.BandIndex));
+                    pair.axis, pair.value, directnessSrc.Source, directnessSrc.Kind,
+                    directnessSrc.SourceId, directnessSrc.SlotOrParameter, directnessSrc.BandIndex));
             }
-            if (registerResult != null && anatomyByParam.TryGetValue(registerResult.ParamId, out var registerSrc))
+            if (affectResult != null && anatomyByParam.TryGetValue(affectResult.ParamId, out var affectSrc))
             {
-                var pair = AxisValuePairOf(registerResult.WinnerLine);
+                var pair = AxisValuePairOf(affectResult.WinnerLine);
                 pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, registerSrc.Source, registerSrc.Kind,
-                    registerSrc.SourceId, registerSrc.SlotOrParameter, registerSrc.BandIndex));
+                    pair.axis, pair.value, affectSrc.Source, affectSrc.Kind,
+                    affectSrc.SourceId, affectSrc.SlotOrParameter, affectSrc.BandIndex));
             }
-            if (pacingResult != null && anatomyByParam.TryGetValue(pacingResult.ParamId, out var pacingSrc))
+            if (rhythmResult != null && anatomyByParam.TryGetValue(rhythmResult.ParamId, out var rhythmSrc))
             {
-                var pair = AxisValuePairOf(pacingResult.WinnerLine);
+                var pair = AxisValuePairOf(rhythmResult.WinnerLine);
                 pickedPairs.Add(new AttributedTextingStyleLine(
-                    pair.axis, pair.value, pacingSrc.Source, pacingSrc.Kind,
-                    pacingSrc.SourceId, pacingSrc.SlotOrParameter, pacingSrc.BandIndex));
+                    pair.axis, pair.value, rhythmSrc.Source, rhythmSrc.Kind,
+                    rhythmSrc.SourceId, rhythmSrc.SlotOrParameter, rhythmSrc.BandIndex));
             }
 
             // ------------------------------------------------------------------
