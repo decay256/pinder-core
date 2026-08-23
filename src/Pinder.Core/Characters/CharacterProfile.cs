@@ -57,7 +57,7 @@ namespace Pinder.Core.Characters
         /// Each line has the shape <c>&quot;axis: rule&quot;</c>
         /// (e.g. <c>"emoji: ends every sentence with an emoji"</c>).
         /// Lines are in canonical axis order (emoji, shorthand, grammar,
-        /// structure, length, tics, stance, register, pacing); missing
+        /// structure, length, tics, directness, affect, rhythm); missing
         /// axes are dropped rather than back-filled.
         /// Empty when the aggregator produced no output (no items / anatomy
         /// configured for this character).

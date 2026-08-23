@@ -19,7 +19,7 @@ namespace Pinder.Core.Tests
     ///   - 6 syntax axes are owned 1:1 by the 6 item slots
     ///     (shoes\u2192emoji, hat\u2192shorthand, shirt\u2192grammar, trousers\u2192structure,
     ///     frame\u2192length, accessory\u2192tics).
-    ///   - 3 tone axes (stance, register, pacing) are decided by majority
+    ///   - 3 expression axes (directness, affect, rhythm) are decided by majority
     ///     vote across anatomy parameter groups.
     ///   - Output is up to 9 axis-prefixed lines in canonical order;
     ///     missing sources drop their axis rather than back-filling.
@@ -86,21 +86,21 @@ namespace Pinder.Core.Tests
             "face_eyes1",      // Face slot → tics axis
         };
 
-        // A small anatomy stack covering at least one tier per tone group
-        // so each of the three tone axes has a contributing source.
+        // A small anatomy stack covering at least one tier per expression group
+        // so each of the three expression axes has a contributing source.
         // #1175: now uses Unity param ids with float values [0..1].
-        // Stance group: trunkLengthBase, trunkLengthMid, trunkLengthTip, trunkGirth, trunkCurvature
-        // Register group: skinHue, skinSat, skinVal, freckles, smoothness, veins
-        // Pacing group: glansScale, glansWidth, scrotumScale, leftTesticleScale, rightTesticleScale, scrotumDrop, isCircumcised
+        // Directness group: trunkLengthBase, trunkLengthMid, trunkLengthTip, trunkGirth, trunkCurvature
+        // Affect group: skinHue, skinSat, skinVal, freckles, smoothness, veins
+        // Rhythm group: glansScale, glansWidth, scrotumScale, leftTesticleScale, rightTesticleScale, scrotumDrop, isCircumcised
         private static readonly Dictionary<string, float> AnatomyStack =
             new Dictionary<string, float>
             {
-                { "trunkLengthBase",  0.18f },  // stance group (band 1 – compact)
-                { "trunkGirth",       0.08f },  // stance group (band 0 – slim)
-                { "veins",            0.08f },  // register group (band 0 – subtle)
-                { "smoothness",        0.51f },  // register group (band 0 – smooth)
-                { "glansScale",       0.50f },  // pacing group (mid band)
-                { "isCircumcised",    0.0f  },  // pacing group (uncircumcised band)
+                { "trunkLengthBase",  0.18f },  // directness group (band 1 – compact)
+                { "trunkGirth",       0.08f },  // directness group (band 0 – slim)
+                { "veins",            0.08f },  // affect group (band 0 – subtle)
+                { "smoothness",        0.51f },  // affect group (band 0 – smooth)
+                { "glansScale",       0.50f },  // rhythm group (mid band)
+                { "isCircumcised",    0.0f  },  // rhythm group (uncircumcised band)
             };
 
         // ----- direct aggregator: parsing -------------------------------------
@@ -125,10 +125,10 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void ParseToneAxes_ExtractsStanceRegisterPacing_WithParenSubKeyStripped()
+        public void ParseToneAxes_ExtractsDirectnessAffectRhythm_WithParenSubKeyStripped()
         {
             // #1175: Use the trunkCurvature parameter from the bundled file,
-            // which has SYNTAX/TONE blocks and parens in tone axis keys.
+            // which has SYNTAX/TONE blocks and parens in expression axis keys.
             var repo = BuildAnatomyRepo();
             var param = repo.GetParameter("trunkCurvature");
             Assert.NotNull(param);
@@ -138,10 +138,10 @@ namespace Pinder.Core.Tests
             Assert.NotNull(band!.TextingStyleFragment);
 
             var axes = TextingStyleAggregator.ParseToneAxes(band.TextingStyleFragment!);
-            Assert.Contains("stance", axes.Keys);
-            // The parenthesised sub-key (e.g. "stance (neutral)") must not
+            Assert.Contains("directness", axes.Keys);
+            // The parenthesised sub-key (e.g. "directness (neutral)") must not
             // appear in the extracted text key.
-            Assert.False(axes.ContainsKey("stance (neutral)"));
+            Assert.False(axes.ContainsKey("directness (neutral)"));
         }
 
         [Fact]
@@ -193,12 +193,12 @@ namespace Pinder.Core.Tests
             }
 
             // Canonical axis ordering: every axis listed must come from
-            // {emoji, shorthand, grammar, structure, length, tics, stance,
-            // register, pacing} and appear in that order.
+            // {emoji, shorthand, grammar, structure, length, tics, directness,
+            // affect, rhythm} and appear in that order.
             var canonical = new[]
             {
                 "emoji", "shorthand", "grammar", "structure", "length", "tics",
-                "stance", "register", "pacing",
+                "directness", "affect", "rhythm",
             };
             int prevIdx = -1;
             foreach (var line in lines)
@@ -236,11 +236,11 @@ namespace Pinder.Core.Tests
             var lines = TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, "char-anatomy-only");
 
-            // Every line must be a tone axis; no syntax axes can appear.
+            // Every line must be an expression axis; no syntax axes can appear.
             foreach (var line in lines)
             {
                 string axis = line.Substring(0, line.IndexOf(':'));
-                Assert.Contains(axis, new[] { "stance", "register", "pacing" });
+                Assert.Contains(axis, new[] { "directness", "affect", "rhythm" });
             }
         }
 
@@ -255,7 +255,7 @@ namespace Pinder.Core.Tests
             var lines = TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources, "char-items-only");
 
-            // No tone axes should appear.
+            // No expression axes should appear.
             foreach (var line in lines)
             {
                 string axis = line.Substring(0, line.IndexOf(':'));

@@ -7,7 +7,7 @@ namespace Pinder.Core.Prompts
     public static partial class TextingStyleAggregator
     {
         // ------------------------------------------------------------------
-        // Parsing helpers — extract axis maps from a single
+        // Parsing helpers - extract axis maps from a single
         // texting_style_fragment block. The canonical block shape is:
         //
         //   SYNTAX:
@@ -18,14 +18,16 @@ namespace Pinder.Core.Prompts
         //   - length: <line>
         //   - tics: <line>
         //   TONE:
-        //   - stance (<key>): <line>
-        //   - register (<key>): <line>
-        //   - pacing (<key>): <line>
+        //   - directness (<key>): <line>
+        //   - affect (<key>): <line>
+        //   - rhythm (<key>): <line>
         //
-        // The parser is forgiving on whitespace and parenthesised
-        // sub-keys (e.g. "stance (escalator):") and silently drops lines
-        // it can't classify so future content additions don't crash the
-        // pipeline.
+        // Until the content rewrite lands, legacy TONE axis keys are
+        // accepted as input aliases: stance -> directness, register ->
+        // affect, pacing -> rhythm. Parsed output is always canonical.
+        // The parser is forgiving on whitespace and parenthesised sub-keys
+        // and silently drops lines it cannot classify so future content
+        // additions do not crash the pipeline.
         // ------------------------------------------------------------------
 
         private static readonly string[] SyntaxAxisNames =
@@ -33,22 +35,31 @@ namespace Pinder.Core.Prompts
             "emoji", "shorthand", "grammar", "structure", "length", "tics",
         };
 
-        private static readonly string[] ToneAxisNames =
+        private static readonly string[] ExpressionAxisNames =
         {
-            "stance", "register", "pacing",
+            "directness", "affect", "rhythm",
         };
 
+        internal static string NormalizeExpressionAxisName(string axis)
+        {
+            if (string.Equals(axis, "stance", StringComparison.OrdinalIgnoreCase)) return "directness";
+            if (string.Equals(axis, "register", StringComparison.OrdinalIgnoreCase)) return "affect";
+            if (string.Equals(axis, "pacing", StringComparison.OrdinalIgnoreCase)) return "rhythm";
+            return axis;
+        }
+
         internal static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
-            => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames);
+            => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames, allowLegacyExpressionAliases: false);
 
         internal static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
-            => ParseAxes(fragment, "TONE:", null, ToneAxisNames);
+            => ParseAxes(fragment, "TONE:", null, ExpressionAxisNames, allowLegacyExpressionAliases: true);
 
         private static IReadOnlyDictionary<string, string> ParseAxes(
             string fragment,
             string sectionHeader,
             string? endHeader,
-            string[] axisNames)
+            string[] axisNames,
+            bool allowLegacyExpressionAliases)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (string.IsNullOrEmpty(fragment)) return result;
@@ -79,45 +90,64 @@ namespace Pinder.Core.Prompts
                 string value = line.Substring(colon + 1).Trim();
                 if (value.Length == 0) continue;
 
-                // axis token may carry a parenthesised sub-key, e.g.
-                // "stance (escalator)". Strip it.
+                // Axis token may carry a parenthesised sub-key, e.g.
+                // "directness (guarded)" or legacy "stance (guarded)".
                 int paren = axisToken.IndexOf('(');
                 if (paren > 0) axisToken = axisToken.Substring(0, paren).Trim();
 
-                foreach (var axis in axisNames)
-                {
-                    if (string.Equals(axisToken, axis, StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!result.ContainsKey(axis))
-                            result[axis] = value;
-                        break;
-                    }
-                }
+                string? axis = CanonicalizeAxis(axisToken, axisNames, allowLegacyExpressionAliases);
+                if (axis == null) continue;
+                if (!result.ContainsKey(axis))
+                    result[axis] = value;
             }
 
             return result;
         }
 
+        private static string? CanonicalizeAxis(
+            string axisToken,
+            string[] axisNames,
+            bool allowLegacyExpressionAliases)
+        {
+            foreach (var axis in axisNames)
+            {
+                if (string.Equals(axisToken, axis, StringComparison.OrdinalIgnoreCase))
+                    return axis;
+            }
+
+            if (!allowLegacyExpressionAliases)
+                return null;
+
+            axisToken = NormalizeExpressionAxisName(axisToken);
+            foreach (var axis in axisNames)
+            {
+                if (string.Equals(axisToken, axis, StringComparison.OrdinalIgnoreCase))
+                    return axis;
+            }
+
+            return null;
+        }
+
         // ------------------------------------------------------------------
-        // Tone aggregation — majority vote across an anatomy group.
+        // Expression aggregation - majority vote across an anatomy group.
         // ------------------------------------------------------------------
 
-        internal sealed class ToneVoteResult
+        internal sealed class ExpressionVoteResult
         {
             public string WinnerLine { get; }
             public string ParamId { get; }
 
-            public ToneVoteResult(string winnerLine, string paramId)
+            public ExpressionVoteResult(string winnerLine, string paramId)
             {
                 WinnerLine = winnerLine;
                 ParamId = paramId;
             }
         }
 
-        private static ToneVoteResult? MajorityVote(
+        private static ExpressionVoteResult? MajorityVote(
             string axisName,
             IReadOnlyList<string> groupParams,
-            IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> toneByParam)
+            IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> expressionByParam)
         {
             // Tally per text. Keep a parallel "first source rank" so the
             // tie-break (group order) is correct: if two lines tie at the
@@ -130,8 +160,8 @@ namespace Pinder.Core.Prompts
             for (int rank = 0; rank < groupParams.Count; rank++)
             {
                 var paramId = groupParams[rank];
-                if (!toneByParam.TryGetValue(paramId, out var tone)) continue;
-                if (!tone.TryGetValue(axisName, out var line)) continue;
+                if (!expressionByParam.TryGetValue(paramId, out var expressionAxes)) continue;
+                if (!expressionAxes.TryGetValue(axisName, out var line)) continue;
                 if (string.IsNullOrWhiteSpace(line)) continue;
 
                 counts.TryGetValue(line, out int c);
@@ -152,7 +182,7 @@ namespace Pinder.Core.Prompts
                 .First()
                 .Key;
 
-            return new ToneVoteResult($"{axisName}: {winner}", firstParamId[winner]);
+            return new ExpressionVoteResult($"{axisName}: {winner}", firstParamId[winner]);
         }
 
         // ------------------------------------------------------------------
