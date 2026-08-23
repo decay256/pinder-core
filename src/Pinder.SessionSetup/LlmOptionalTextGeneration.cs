@@ -25,8 +25,7 @@ namespace Pinder.SessionSetup
             string phase,
             double configuredTemperature,
             double defaultTemperature,
-            int configuredMaxTokens,
-            int defaultMaxTokens,
+            int? configuredMaxTokens,
             Action<SetupGenerationResult>? onDegraded,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             CancellationBehavior cancellationBehavior,
@@ -48,10 +47,8 @@ namespace Pinder.SessionSetup
             {
                 double temperature = configuredTemperature != defaultTemperature
                     ? configuredTemperature
-                    : entry.Temperature!.Value;
-                int maxTokens = configuredMaxTokens != defaultMaxTokens
-                    ? configuredMaxTokens
-                    : entry.MaxTokens!.Value;
+                    : (entry.Temperature ?? defaultTemperature);
+                int? maxTokens = configuredMaxTokens ?? entry.MaxTokens;
 
                 CancellationToken sendCancellationToken = passCancellationTokenToTransport
                     ? cancellationToken
@@ -267,7 +264,7 @@ namespace Pinder.SessionSetup
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             string phase,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             CancellationToken cancellationToken = default,

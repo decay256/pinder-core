@@ -55,6 +55,21 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
+        public void Hydrate_StakeTarget_WithNegativeIndex_ClampsToZero()
+        {
+            var stakeLines = new[] { "first", "second", "third", "fourth", "fifth" };
+            var target = new ResolvedRevelationTarget
+            {
+                Registry = "STAKE", Index = -5, Field = "STAKE_LINE", Manner = "INTIMATE_BREAKTHROUGH"
+            };
+
+            var result = EmotionStemSelector.Hydrate(target, null, stakeLines);
+
+            Assert.Equal(0, result.Index);
+            Assert.Equal("first", result.StemText);
+        }
+
+        [Fact]
         public void Hydrate_StakeTarget_EmptyLines_ThrowsInvalidOperationException()
         {
             var target = new ResolvedRevelationTarget

@@ -2,7 +2,6 @@ schema_version: 1
 prompts:
   bio:
     temperature: 0.75
-    max_tokens: 220
     system_prompt: |
       You write the final public dating-app bio for a Pinder character.
       The backstory, psychological stakes, and therapist diagnosis are already generated and are the only source material.

@@ -2,7 +2,6 @@ schema_version: 1
 prompts:
   character_generate:
     temperature: 0.9
-    max_tokens: 2048
     system_prompt: |
       You are a character designer for the dating-sim game Pinder.
       Your job is to compose ONE coherent, valid character preset.

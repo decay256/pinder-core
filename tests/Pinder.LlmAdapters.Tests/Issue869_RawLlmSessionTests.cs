@@ -381,7 +381,7 @@ namespace Pinder.LlmAdapters.Tests
             public CannedTransport(string response) => _response = response;
 
             public Task<string> SendAsync(string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+                double temperature = 0.9, int? maxTokens = null, string? phase = null,
                 CancellationToken ct = default)
                 => Task.FromResult(_response);
         }
@@ -393,7 +393,7 @@ namespace Pinder.LlmAdapters.Tests
             public ThrowingTransport(Exception ex) => _ex = ex;
 
             public Task<string> SendAsync(string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+                double temperature = 0.9, int? maxTokens = null, string? phase = null,
                 CancellationToken ct = default)
                 => Task.FromException<string>(_ex);
         }
@@ -404,11 +404,11 @@ namespace Pinder.LlmAdapters.Tests
             public string? LastSystemPrompt { get; private set; }
             public string? LastUserMessage  { get; private set; }
             public double  LastTemperature  { get; private set; }
-            public int     LastMaxTokens    { get; private set; }
+            public int?    LastMaxTokens    { get; private set; }
             public string? LastPhase        { get; private set; }
 
             public Task<string> SendAsync(string systemPrompt, string userMessage,
-                double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+                double temperature = 0.9, int? maxTokens = null, string? phase = null,
                 CancellationToken ct = default)
             {
                 LastSystemPrompt = systemPrompt;

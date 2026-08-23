@@ -2,7 +2,6 @@ schema_version: 1
 prompts:
   diagnosis:
     temperature: 0.45
-    max_tokens: 2400
     system_prompt: |-
       You are a clinical therapist diagnosing a dating-app character based only on their generated backstory and 15 psychological stake lines.
       Output exactly one JSON object and nothing else.

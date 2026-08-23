@@ -1722,7 +1722,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             string systemPrompt,
             string userContent,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             string phase,
             int? turnId,
             CancellationToken ct,

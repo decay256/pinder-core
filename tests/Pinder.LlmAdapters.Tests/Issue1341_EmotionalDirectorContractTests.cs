@@ -105,8 +105,8 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Equal(1, transport.PlainCalls);
             Assert.Equal(LlmPhase.EmotionalDirector, transport.LastPhase);
-            Assert.Equal(catalogEntry.Temperature!.Value, transport.LastTemperature);
-            Assert.Equal(catalogEntry.MaxTokens!.Value, transport.LastMaxTokens);
+            Assert.Equal(catalogEntry.Temperature ?? 0.35, transport.LastTemperature);
+            Assert.Equal(catalogEntry.MaxTokens, transport.LastMaxTokens);
             Assert.Contains("visible delivered line", transport.LastUserMessage, StringComparison.Ordinal);
             Assert.Equal("keeps the reply tentative but available", direction.Restraint);
         }
@@ -664,13 +664,13 @@ namespace Pinder.LlmAdapters.Tests
             public List<string> UserMessages { get; } = new List<string>();
             public string? LastPhase { get; private set; }
             public double LastTemperature { get; private set; }
-            public int LastMaxTokens { get; private set; }
+            public int? LastMaxTokens { get; private set; }
 
             public virtual Task<string> SendAsync(
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -700,7 +700,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -742,7 +742,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

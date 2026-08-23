@@ -299,7 +299,7 @@ namespace Pinder.Core.Conversation
                 if (stakeLines == null || stakeLines.Count == 0)
                     throw new InvalidOperationException("Stake lines are missing from the player profile.");
 
-                int safeIndex = Math.Min(target.Index, stakeLines.Count - 1);
+                int safeIndex = Math.Max(0, Math.Min(target.Index, stakeLines.Count - 1));
                 target.Index = safeIndex;
                 target.StemText = stakeLines[safeIndex];
             }

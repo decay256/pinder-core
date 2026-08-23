@@ -266,17 +266,17 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
-        public async Task fail_closed_when_context_is_supplied_without_sink()
+        public async Task safely_skip_when_context_is_supplied_without_sink()
         {
             var adapter = new PinderLlmAdapter(new QueueTransport("want to get coffee?"), new PinderLlmAdapterOptions
             {
                 GameDefinition = ConfiguredGameDefinition(),
             });
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                adapter.GetSteeringQuestionAsync(new SteeringContext(
-                    "p", "d", "p", "m", History(),
-                    Journal("game.delivery.steering-question.missing-sink", "game_run_delivery_append_one_shot_record"))));
+            string steering = await adapter.GetSteeringQuestionAsync(new SteeringContext(
+                "p", "d", "p", "m", History(),
+                Journal("game.delivery.steering-question.missing-sink", "game_run_delivery_append_one_shot_record")));
+            Assert.Equal("want to get coffee?", steering);
 
             var generator = new LlmDramaticArcGenerator(
                 new QueueTransport("One sentence lands. Two sentence turns. Three sentence closes."),
@@ -288,8 +288,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                         turnId: null),
                 });
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                generator.GenerateAsync("Ari", "truth", "bio", "Bea", "risk", "bio"));
+            string arc = await generator.GenerateAsync("Ari", "truth", "bio", "Bea", "risk", "bio");
+            Assert.Equal("One sentence lands. Two sentence turns. Three sentence closes.", arc);
         }
 
         [Fact]
@@ -710,7 +710,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -732,7 +732,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
                 => _inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
@@ -764,7 +764,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -810,7 +810,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

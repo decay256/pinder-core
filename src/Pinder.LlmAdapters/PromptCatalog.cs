@@ -235,8 +235,6 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException($"prompt-catalog: key '{key}' has no user_template. Check the yaml file.");
             if (!entry.Temperature.HasValue)
                 throw new InvalidOperationException($"prompt-catalog: key '{key}' has no temperature. Check the yaml file.");
-            if (!entry.MaxTokens.HasValue)
-                throw new InvalidOperationException($"prompt-catalog: key '{key}' has no max_tokens. Check the yaml file.");
 
             return entry;
         }

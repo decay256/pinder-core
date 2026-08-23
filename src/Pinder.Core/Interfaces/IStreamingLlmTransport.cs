@@ -32,7 +32,7 @@ namespace Pinder.Core.Interfaces
         /// <param name="systemPrompt">System-level instructions for the LLM.</param>
         /// <param name="userMessage">User-turn message content.</param>
         /// <param name="temperature">Sampling temperature (default 0.9).</param>
-        /// <param name="maxTokens">Maximum tokens for the response (default 1024).</param>
+        /// <param name="maxTokens">Maximum tokens for the response (default null, unconstrained).</param>
         /// <param name="cancellationToken">Cancellation token; cancelling stops the stream.</param>
         /// <param name="phase">
         /// Optional engine-phase label (see <see cref="LlmPhase"/>). Transports themselves
@@ -46,7 +46,7 @@ namespace Pinder.Core.Interfaces
             string systemPrompt,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             CancellationToken cancellationToken = default,
             string? phase = null);
     }

@@ -2,7 +2,6 @@ schema_version: 1
 prompts:
   backstory_consolidation:
     temperature: 0.65
-    max_tokens: 900
     system_prompt: |-
       You consolidate raw backstory fragments for a Pinder character.
       Use the supplied full game system prompt as tonal law. Combine only the supplied backstory fragments into a coherent, standardized source narrative.

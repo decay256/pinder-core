@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             DialogueContext context,
             int expectedCount)
         {
