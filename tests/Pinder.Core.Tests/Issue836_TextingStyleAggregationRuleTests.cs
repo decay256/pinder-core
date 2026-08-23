@@ -81,11 +81,11 @@ namespace Pinder.Core.Tests
         private static readonly string[] OneItemPerSlot =
         {
             "special_shoe3",   // Special slot → emoji axis (has SYNTAX block)
-            "head_hat",        // Head slot → shorthand axis
-            "vest8",           // Body slot → grammar axis (has personality fragment)
+            "head_cheff",      // Head slot → shorthand axis
+            "vest1",           // Body slot → grammar axis
             "hair1",           // Hair slot → structure axis
             "arms0",           // Arms slot → length axis
-            "face_eyes1",      // Face slot → tics axis
+            "face_monocle",    // Face slot → tics axis
         };
 
         // A small anatomy stack covering at least one tier per expression group
@@ -108,22 +108,28 @@ namespace Pinder.Core.Tests
         // ----- direct aggregator: parsing -------------------------------------
 
         [Fact]
-        public void ParseSyntaxAxes_ExtractsAllSixAxes()
+        public void ParseSyntaxAxes_ExtractsEachSlotOwnedAxis()
         {
             var repo = BuildItemRepo();
-            // Issue #1176: use real Unity item id (special_shoe3 has a full SYNTAX/TONE block)
-            var item = repo.GetItem("special_shoe3");
-            Assert.NotNull(item);
+            var expectedAxes = new[]
+            {
+                "emoji", "shorthand", "grammar", "structure", "length", "tics",
+            };
 
-            var axes = TextingStyleAggregator.ParseSyntaxAxes(item!.TextingStyleFragment);
-            Assert.Equal(
-                new[] { "emoji", "shorthand", "grammar", "structure", "length", "tics" }
-                    .OrderBy(s => s),
-                axes.Keys.OrderBy(s => s));
-            // Each axis must have a non-empty value (the canonical pool
-            // structure per docs/persona/texting-style-pool.md).
-            foreach (var kv in axes)
-                Assert.False(string.IsNullOrWhiteSpace(kv.Value));
+            // The production catalog now assigns one syntax axis to each item
+            // slot. Parsing the representative six-slot stack still exercises
+            // every supported syntax axis without relying on a legacy item that
+            // illegally carried the complete taxonomy by itself.
+            for (var index = 0; index < OneItemPerSlot.Length; index++)
+            {
+                var item = repo.GetItem(OneItemPerSlot[index]);
+                Assert.NotNull(item);
+
+                var axes = TextingStyleAggregator.ParseSyntaxAxes(item!.TextingStyleFragment);
+                var axis = Assert.Single(axes);
+                Assert.Equal(expectedAxes[index], axis.Key);
+                Assert.False(string.IsNullOrWhiteSpace(axis.Value));
+            }
         }
 
         [Fact]

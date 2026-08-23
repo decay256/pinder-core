@@ -169,13 +169,13 @@ namespace Pinder.Core.Tests.Prompts
 
         // Test 3: Production path — CharacterDefinitionLoader.Load for Zyx.
         //
-        // Restored #907 end-to-end production guard: conflicting structure axis
-        // kept, lower-priority 5-word length cap dropped on a real Zyx load with
-        // real Unity items hair1/arms0.
+        // End-to-end production guard: the real Zyx load keeps both slot-owned,
+        // softly worded structure and length tendencies from hair1/arms0. The
+        // synthetic tests above continue to cover deterministic conflict drops.
         // ------------------------------------------------------------------
 
         [Fact]
-        public void ProductionPath_ZyxLoad_ConflictResolved_NeverFiveWordsDropped()
+        public void ProductionPath_ZyxLoad_RetainsSlotOwnedSoftContributions()
         {
             // Arrange: ConflictCatalog is loaded by CoreTestWiring.Initialize()
             Assert.NotNull(TextingStyleAggregator.ConflictCatalog);
@@ -195,7 +195,15 @@ namespace Pinder.Core.Tests.Prompts
             Assert.False(string.IsNullOrWhiteSpace(profile.AssembledSystemPrompt));
             Assert.NotNull(profile.TextingStyleFragment);
 
-            Assert.Contains("wall-of-text", profile.TextingStyleFragment, StringComparison.Ordinal);
+            Assert.Contains(
+                "tends to gather connected thoughts into one flowing paragraph with few breaks",
+                profile.TextingStyleFragment,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "tends to answer in very compact messages of roughly five words",
+                profile.TextingStyleFragment,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain("wall-of-text", profile.TextingStyleFragment, StringComparison.Ordinal);
             Assert.DoesNotContain("never sends more than 5 words", profile.TextingStyleFragment, StringComparison.Ordinal);
         }
 

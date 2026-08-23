@@ -19,7 +19,7 @@
         "upper": 0.05,
         "personality_fragment": "apologize for the lack of base length before introducing your name, then frantically pivot to discussing your vast emotional intelligence before they can leave",
         "backstory_fragment": "once got cropped out of a family portrait due to poor framing, and spent the next six years trying to find a camera that would validate your existence",
-        "texting_style_fragment": "TONE:\n- stance (timid): start every conversation by asking if you are being too loud",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to test the conversational volume gently before speaking plainly",
         "archetype_tendencies": [
           "The Philosopher",
           "The Sniper"
@@ -109,7 +109,7 @@
           "rizz": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- stance (unyielding): write declarative sentences without punctuation, and assume the date is already won",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to state attraction with confident assumptions rather than tentative questions",
         "archetype_tendencies": [
           "The Love Bomber",
           "The Peacock"
@@ -144,7 +144,7 @@
         "upper": 0.05,
         "backstory_fragment": "the midsection stayed slight while the rest of them grew; learned in adolescence to let other proportions carry the introduction and never missed what this one didn't offer",
         "personality_fragment": "interpret every silent pause from your match as a secret tribunal, scramble to fill the quiet with desperate, manic banter before they can judge you",
-        "texting_style_fragment": "TONE:\n- stance (fawning): agree with every opinion instantly, apologize when they agree back",
+        "texting_style_fragment": "EXPRESSION:\n- directness: may agree quickly and soften disagreement when seeking reassurance",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Mid: minimum range (0-5%)."
       },
@@ -185,7 +185,7 @@
         "upper": 1,
         "backstory_fragment": "an extreme middle reach made one teenage encounter go strange and slow; that was the night they began cataloguing how much room their proportions actually took",
         "personality_fragment": "treat your own presence as a monument to be admired, demand their full attention like a physical tax, and refuse to acknowledge any reality where you are not the main event",
-        "texting_style_fragment": "TONE:\n- stance (looming): make statements, never ask permission; assume the date is already going well",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to make confident statements and ask permission less often when interest is clear",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Mid: maximum range (95-100%)."
       }
@@ -211,7 +211,7 @@
         "upper": 0.05,
         "backstory_fragment": "the tip always finished short of where the eye expected; made an early peace with the anticlimax and learned to land the ending in conversation instead",
         "personality_fragment": "finish every sentence with a sudden, breathless change of topic, act as if the conversation is about to end abruptly and you must scream your final point",
-        "texting_style_fragment": "TONE:\n- stance (defensive): anticipate rejection in every reply, beat them to the exit",
+        "texting_style_fragment": "EXPRESSION:\n- directness: may anticipate rejection and name an exit before the other person does",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Tip: minimum range (0-5%)."
       },
@@ -252,7 +252,7 @@
         "upper": 1,
         "backstory_fragment": "the extreme reach of the tip turned one young encounter wary before it warmed; that wariness taught them to arrive slowly and explain the geometry before it surprised anyone",
         "personality_fragment": "announce your arrival as if you are a historic event, describe your mood in terms of seismic activity, and refuse to engage in any talk that isn't about your grand future",
-        "texting_style_fragment": "TONE:\n- stance (grandiose): write statements that read like proclamations, never use question marks",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to phrase confident opinions as playful proclamations",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Tip: maximum range (95-100%)."
       }
@@ -281,7 +281,7 @@
         "stat_modifiers": {
           "wit": 1
         },
-        "texting_style_fragment": "TONE:\n- stance (needling): use short, piercing sentences, and point out tiny logical flaws in their bio",
+        "texting_style_fragment": "EXPRESSION:\n- directness: may point out a small inconsistency with a brief, needling observation",
         "archetype_tendencies": [
           "The Sniper",
           "The Philosopher"
@@ -375,7 +375,7 @@
           "charm": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- stance (looming): make statements without asking questions, and behave as if you already own the chat",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to speak as though mutual interest is already established",
         "archetype_tendencies": [
           "The Breadcrumber",
           "The Wall of Text"
@@ -413,7 +413,7 @@
         "stat_modifiers": {
           "rizz": 1
         },
-        "texting_style_fragment": "TONE:\n- stance (oblique): approach every topic from a bizarre lateral angle, and never answer a question directly",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to approach personal questions from an oblique angle before answering",
         "archetype_tendencies": [
           "The Oversharer"
         ],
@@ -442,7 +442,7 @@
         "upper": 0.7,
         "personality_fragment": "present yourself as an essentially straight shooter who refuses to play games, and deliver your messages with flat, unadorned honesty",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- stance (neutral): no strong lean; goes where the conversation takes it",
+        "texting_style_fragment": "EXPRESSION:\n- directness: is comfortable following the conversation without a strong directness lean",
         "archetype_tendencies": [],
         "summary_text": "Trunk Curvature: balanced range (50-70%)."
       },
@@ -463,7 +463,7 @@
         "stat_modifiers": {
           "rizz": 1
         },
-        "texting_style_fragment": "TONE:\n- stance (hooked): pull the conversation back to your favorite topics with absolute, unbending force",
+        "texting_style_fragment": "EXPRESSION:\n- directness: tends to steer the conversation back toward favorite topics when engaged",
         "archetype_tendencies": [
           "The Peacock"
         ],
@@ -490,7 +490,7 @@
         "lower": 0,
         "upper": 0.05,
         "personality_fragment": "text back with frantic, vibrating speed, apologize for being too fast before they can even read your message, and treat any delay as a personal failure",
-        "texting_style_fragment": "TONE:\n- pacing (frenetic): send multiple short, breathless texts in a single minute; never pause for breath",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to answer in quick, breathless bursts when emotionally activated",
         "backstory_fragment": "spent their entire sixteenth year convinced they were actually disappearing from the edges inward; began texting at high speeds to prove they were still solid",
         "archetype_tendencies": [],
         "summary_text": "Glans Scale: minimum range (0-5%)."
@@ -531,7 +531,7 @@
         "lower": 0.95,
         "upper": 1,
         "personality_fragment": "leave your match on read for days with majestic indifference, and reappear with a single, massive block of text that demands immediate adoration",
-        "texting_style_fragment": "TONE:\n- pacing (glacial): reply once every twelve hours with absolute, heavy poise; ignore all frantic follow-ups",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to leave spacious pauses and reply with deliberate composure",
         "backstory_fragment": "realized early that the largest bell takes the longest to ring; decided to treat every conversation as a slow, solemn procession that cannot be rushed",
         "archetype_tendencies": [],
         "summary_text": "Glans Scale: maximum range (95-100%)."
@@ -557,7 +557,7 @@
         "lower": 0,
         "upper": 0.05,
         "personality_fragment": "keep your replies razor-sharp and incredibly concise, cut through any pleasantries to ask the most direct, awkward question possible",
-        "texting_style_fragment": "TONE:\n- pacing (clipped): deliver single-word replies instantly; cut off any rambling thoughts before they start",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: may answer in clipped bursts when a longer thought feels exposing",
         "backstory_fragment": "learned to navigate a cramped childhood home by finding the narrowest paths; translated that physical agility into a conversational style that leaves no room for fluff",
         "archetype_tendencies": [],
         "summary_text": "Glans Width: minimum range (0-5%)."
@@ -598,7 +598,7 @@
         "lower": 0.95,
         "upper": 1,
         "personality_fragment": "flood the chat with enormous, sweeping paragraphs that cover five topics at once, and expect them to address every single point you made",
-        "texting_style_fragment": "TONE:\n- pacing (overwhelming): send massive paragraphs that fill the screen; reply before they can finish reading the last one",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to build momentum through expansive replies when enthusiasm takes over",
         "backstory_fragment": "grew up in a family of ten loud talkers where you had to be a wall of sound to be heard at all; never learned how to make a statement small",
         "archetype_tendencies": [],
         "summary_text": "Glans Width: maximum range (95-100%)."
@@ -721,7 +721,7 @@
           "wit": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- pacing (erratic): send three texts in ten seconds, then disappear for three hours without explanation",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: may alternate a rapid cluster of replies with a longer reflective pause",
         "backstory_fragment": "spent their teenage years coding a perfect replica of a dating app that they only used to chat with their own lopsided reflection",
         "archetype_tendencies": [],
         "summary_text": "Left Testicle Scale: minimum range (0-5%)."
@@ -766,7 +766,7 @@
           "wit": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- pacing (unpredictable): reply with a flurry of complex sentences, then leave them on read during the critical moment",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to move from a flurry of complex thoughts into a sudden quiet beat",
         "backstory_fragment": "wrote a three-hundred-page manifesto on the geometry of attraction at age seventeen and still cannot figure out why people don't read it on first dates",
         "archetype_tendencies": [],
         "summary_text": "Left Testicle Scale: maximum range (95-100%)."
@@ -796,7 +796,7 @@
           "wit": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- pacing (staccato): reply with rapid, short bursts of intense analytical thoughts; never use greeting words",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends toward rapid, staccato bursts when analyzing something intensely",
         "backstory_fragment": "memorized the entire periodic table backwards to impress a childhood crush, only to discover they had moved away three weeks prior",
         "archetype_tendencies": [],
         "summary_text": "Right Testicle Scale: minimum range (0-5%)."
@@ -841,7 +841,7 @@
           "wit": 2,
           "self_awareness": -1
         },
-        "texting_style_fragment": "TONE:\n- pacing (spasmodic): write three paragraphs of brilliant insight, then send ten empty texts by accident",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: may alternate dense insight with several tiny follow-up messages",
         "backstory_fragment": "once spent a three-day weekend calculating the exact wind-resistance of a sliding patio door and forgot to eat the entire time",
         "archetype_tendencies": [],
         "summary_text": "Right Testicle Scale: maximum range (95-100%)."
@@ -867,7 +867,7 @@
         "lower": 0,
         "upper": 0.05,
         "personality_fragment": "react to every message with intense, defensive alertness, and assume every friendly tease is a calculated insult and brace for impact",
-        "texting_style_fragment": "TONE:\n- pacing (tense): reply within four seconds of receiving a text; use extremely formal, rigid grammar",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to respond quickly with a controlled, tense cadence",
         "backstory_fragment": "grew up in a drafty house where survival meant keeping everything pulled in as tight and secure as humanly possible",
         "archetype_tendencies": [],
         "summary_text": "Scrotum Drop: minimum range (0-5%)."
@@ -908,7 +908,7 @@
         "lower": 0.95,
         "upper": 1,
         "personality_fragment": "text with a heavy, sighing exhaustion, complain about the physical burden of existence at least twice, and ask if you can just lie on their floor",
-        "texting_style_fragment": "TONE:\n- pacing (languid): wait twenty minutes between every sentence; let your messages trail off without punctuation...",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to let replies arrive slowly and trail into an unhurried pause",
         "backstory_fragment": "felt the weight of gravity at age twelve and has been actively protesting the concept of standing upright ever since",
         "archetype_tendencies": [],
         "summary_text": "Scrotum Drop: maximum range (95-100%)."
@@ -1142,7 +1142,7 @@
         "upper": 0.05,
         "personality_fragment": "warn them that your skin tone shifts unpredictably when you are startled, and treat every minor notification as a sudden emergency",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (erratic): switch between overly formal grammar and pure slang without warning",
+        "texting_style_fragment": "EXPRESSION:\n- affect: may shift between polished restraint and casual warmth as comfort changes",
         "archetype_tendencies": [],
         "summary_text": "Skin Hue: minimum range (0-5%)."
       },
@@ -1187,7 +1187,7 @@
         "upper": 1,
         "personality_fragment": "howl that your intense skin tone is a biological warning sign to predators, and challenge them to prove they are brave enough to date you",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (warning): end your messages with sudden, high-intensity punctuation, and demand immediate reassurance",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to show urgency through heightened punctuation when reassurance is needed",
         "archetype_tendencies": [],
         "summary_text": "Skin Hue: maximum range (95-100%)."
       }
@@ -1212,7 +1212,7 @@
         "lower": 0,
         "upper": 0.05,
         "personality_fragment": "speak in a soft, ghostly whisper as if you are fading from the physical plane, and ask if they can still see you through the screen",
-        "texting_style_fragment": "TONE:\n- register (faded): use lowercase and spaced-out punctuation, as if each letter costs you precious energy",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to let low energy show through understated, softened phrasing",
         "backstory_fragment": "",
         "archetype_tendencies": [],
         "summary_text": "Skin Saturation: minimum range (0-5%)."
@@ -1263,7 +1263,7 @@
         "stat_modifiers": {
           "chaos": 2
         },
-        "texting_style_fragment": "TONE:\n- register (unhinged): punctuate with intensity, not grammar; CAPS for feelings, not for nouns",
+        "texting_style_fragment": "EXPRESSION:\n- affect: may let strong feelings break through in emphatic words or capitalization",
         "backstory_fragment": "",
         "archetype_tendencies": [],
         "summary_text": "Skin Saturation: maximum range (95-100%)."
@@ -1290,7 +1290,7 @@
         "upper": 0.05,
         "personality_fragment": "insist that you exist in a state of absolute, gothic darkness, and refuse to discuss anything that doesn't involve heavy shadows or existential dread",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (shadowy): wrap your statements in cryptic, moody phrasing, and never use bright emojis",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to keep warmth shadowed behind cryptic or moody phrasing",
         "archetype_tendencies": [],
         "summary_text": "Skin Value (Lightness): minimum range (0-5%)."
       },
@@ -1335,7 +1335,7 @@
         "upper": 1,
         "personality_fragment": "screech that you are a beacon of blinding, luminescent light, and demand that they worship your solar intensity or leave the chat",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (beacon): write with high-intensity exclamation points, and assume you are the center of the universe",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to make enthusiasm bright and conspicuous when feeling seen",
         "archetype_tendencies": [],
         "summary_text": "Skin Value (Lightness): maximum range (95-100%)."
       }
@@ -1361,7 +1361,7 @@
         "upper": 0.05,
         "personality_fragment": "boast that your completely smooth, freckle-free skin is a pristine marble monument, and refuse to let anyone clutter your thoughts with messy details",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (pristine): use perfect, clinical spacing and no abbreviations, as if typing on an expensive typewriter",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to present feelings with polished, clinical composure",
         "archetype_tendencies": [],
         "summary_text": "Freckles: minimum range (0-5%)."
       },
@@ -1406,7 +1406,7 @@
         "upper": 1,
         "personality_fragment": "rant that you are eighty percent freckles by volume and refuse to accept any dating-app matches who cannot appreciate a heavily speckled masterpiece",
         "backstory_fragment": "",
-        "texting_style_fragment": "TONE:\n- register (speckled): scatter random, chaotic punctuation through your sentences to mimic your skin pattern",
+        "texting_style_fragment": "EXPRESSION:\n- affect: may let excitement appear as playful, scattered punctuation",
         "archetype_tendencies": [],
         "summary_text": "Freckles: maximum range (95-100%)."
       }
@@ -1481,7 +1481,7 @@
         "stat_modifiers": {
           "honesty": 1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively shorter through a conversation\nTONE:\n- stance (counter): does the opposite of your last message\n- register (detective): notes evidence, \"interesting that you mention\"\n- pacing (hectic): fast, breathless, low-edit",
+        "texting_style_fragment": "EXPRESSION:\n- affect: may answer guardedly while signaling that each detail is being noticed",
         "summary_text": "Veins: minimum range (0-5%)."
       },
       {
@@ -1497,7 +1497,7 @@
         "stat_modifiers": {
           "wit": 1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: never sends more than 5 words\nTONE:\n- stance (escalator): each message slightly more intense than the last\n- register (sportscaster): live-commentates the conversation\n- pacing (measured): deliberate, paced, never rushed",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to let emotional intensity rise gradually while narrating what stands out",
         "summary_text": "Veins: moderate range (20-50%)."
       },
       {
@@ -1514,7 +1514,7 @@
           "rizz": 1,
           "chaos": 1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: match the energy of the conversation\nTONE:\n- stance (deflator): each message slightly more chill than the last\n- register (wikipedia): parenthetical clarifications\n- pacing (sluggish): late, low-energy, typing one-handed",
+        "texting_style_fragment": "EXPRESSION:\n- affect: tends to cool heightened emotion with reflective, clarifying asides",
         "summary_text": "Veins: high range (70-95%)."
       },
       {
@@ -1526,7 +1526,7 @@
           "chaos": 1,
           "self_awareness": -1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation\nTONE:\n- stance (interrogator): only asks questions, never states\n- register (menu-copy): \"hand-crafted with locally-sourced\"\n- pacing (flooding): maximalist, every thought sent, no filter",
+        "texting_style_fragment": "EXPRESSION:\n- affect: may let curiosity become openly enthusiastic and emotionally expansive",
         "summary_text": "Veins: maximum range (95-100%)."
       }
     ]
@@ -1553,7 +1553,7 @@
         "stat_modifiers": {
           "honesty": 1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively longer through a conversation (warming up)\nTONE:\n- stance (callback-heavy): references something 4 messages ago like it's still active\n- register (crypto): gm, ngmi, wagmi, fud, ser\n- pacing (dry-pacing): minimal, sparse, long pauses implied",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to warm into longer replies while returning to earlier conversational threads",
         "archetype_tendencies": [
           "The Oversharer",
           "The Bio Responder"
@@ -1573,7 +1573,7 @@
         "stat_modifiers": {
           "charm": 1
         },
-        "texting_style_fragment": "SYNTAX:\n- length: messages get progressively shorter through a conversation (cooling off)\nTONE:\n- stance (mirror): matches your last message in length, energy, and shape\n- register (diplomat): overly careful phrasing, hedges everything\n- pacing (double-text): sends two messages back-to-back per turn",
+        "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to cool into shorter replies while mirroring the other person's pace",
         "archetype_tendencies": [
           "The Copy-Paste Machine",
           "The Sniper"
