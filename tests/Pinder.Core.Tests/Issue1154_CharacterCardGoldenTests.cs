@@ -39,10 +39,17 @@ namespace Pinder.Core.Tests
         private static string FixturesDir =>
             Path.Combine(AppContext.BaseDirectory, "Fixtures", "Issue1154");
 
-        private static string ReadFixture(string name) =>
-            File.ReadAllText(Path.Combine(FixturesDir, name))
-                .Replace("\r\n", "\n")
-                .Replace("\n", Environment.NewLine);
+        private static string ReadFixture(string name)
+        {
+            var text = File.ReadAllText(Path.Combine(FixturesDir, name))
+                .Replace("\r\n", "\n");
+            if (text.EndsWith("\n", StringComparison.Ordinal))
+            {
+                text = text.Substring(0, text.Length - 1);
+            }
+
+            return text.Replace("\n", Environment.NewLine);
+        }
 
         private static readonly Dictionary<StatType, int> BaseStats =
             new Dictionary<StatType, int>

@@ -148,10 +148,15 @@ namespace Pinder.Core.Tests
                 "TestChar", "she/her", "bio", fragments, new TrapState());
             string section = ExtractSection(prompt, "TEXTING STYLE", "ACTIVE ARCHETYPE");
 
+            Assert.Contains("loose expressive influences", section);
+            Assert.True(
+                section.IndexOf("loose expressive influences", System.StringComparison.Ordinal)
+                < section.IndexOf("- emoji:", System.StringComparison.Ordinal));
             Assert.Contains("- emoji: never uses emoji at all", section);
             Assert.Contains("- shorthand: lol lowercase only", section);
             // Old pipe-joined form must NOT appear.
             Assert.DoesNotContain(" | ", section);
+            Assert.DoesNotContain("follow this exactly", section, System.StringComparison.OrdinalIgnoreCase);
         }
 
         // Empty section handling ─────────────────────────────────────────

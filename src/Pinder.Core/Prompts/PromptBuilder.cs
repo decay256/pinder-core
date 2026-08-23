@@ -45,6 +45,12 @@ namespace Pinder.Core.Prompts
         public const string CharacterDataFramingKey = "character_data_framing";
 
         /// <summary>
+        /// Catalog key for the shared texting-style guidance used wherever
+        /// selected style fragments are rendered into prompts.
+        /// </summary>
+        public const string TextingStyleSoftFramingKey = "texting_style_soft_framing";
+
+        /// <summary>
         /// Resolves structural prompt fragments from the yaml catalog.
         /// Character system-prompt framing consults
         /// <see cref="CharacterCardFramingKey"/> and
@@ -243,7 +249,18 @@ namespace Pinder.Core.Prompts
 
             _ = GetCardFraming(structuralFragmentLookup, structuralFragmentLookupEx);
             _ = GetCharacterDataFraming(structuralFragmentLookup, structuralFragmentLookupEx);
+            _ = GetTextingStyleSoftFramingEx(structuralFragmentLookup, structuralFragmentLookupEx);
         }
+
+        public static string GetTextingStyleSoftFraming(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
+            => GetTextingStyleSoftFramingEx(structuralFragmentLookup, structuralFragmentLookupEx).Content.Trim();
+
+        private static (string Content, string SourceFile) GetTextingStyleSoftFramingEx(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
+            => GetHeaderEx(TextingStyleSoftFramingKey, structuralFragmentLookup, structuralFragmentLookupEx);
 
         private static void RequireToken(string template, string token)
         {
@@ -396,10 +413,16 @@ namespace Pinder.Core.Prompts
             AppendPsychiatricDiagnosis(sb, generatedPsychiatricDiagnosis);
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
-            AppendBulletList(sb, TextingStyleAggregator.AggregateAsList(
+            var textingStyleLines = TextingStyleAggregator.AggregateAsList(
                 fragments.TextingStyleSources,
                 characterIdSeed,
-                textingStyleConflicts ?? TextingStyleAggregator.ConflictCatalog ?? TextingStyleConflicts.Empty));
+                textingStyleConflicts ?? TextingStyleAggregator.ConflictCatalog ?? TextingStyleConflicts.Empty);
+            if (textingStyleLines.Count > 0)
+            {
+                var softFraming = GetTextingStyleSoftFramingEx(structuralFragmentLookup, structuralFragmentLookupEx);
+                sb.AppendLine(softFraming.Content.Trim(), softFraming.SourceFile, TextingStyleSoftFramingKey);
+            }
+            AppendBulletList(sb, textingStyleLines);
             sb.AppendLine();
 
             if (archetypesEnabled)

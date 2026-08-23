@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
 using Pinder.Core.Interfaces;
+using Pinder.Core.Prompts;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.Traps;
@@ -608,7 +609,8 @@ namespace Pinder.Core.Conversation
             if (!string.IsNullOrWhiteSpace(player.TextingStyleFragment))
             {
                 directives.Add(
-                    "YOUR DESIGNATED TEXTING STYLE — preserve this exactly through every rewrite:\n" +
+                    "YOUR DESIGNATED TEXTING STYLE\n" +
+                    PromptBuilder.GetTextingStyleSoftFraming() + "\n" +
                     player.TextingStyleFragment.Trim());
             }
 

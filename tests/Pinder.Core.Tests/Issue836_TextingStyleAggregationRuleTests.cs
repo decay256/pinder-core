@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Data;
@@ -166,6 +168,94 @@ namespace Pinder.Core.Tests
             var axes = TextingStyleAggregator.ParseSyntaxAxes(fragment);
             Assert.Equal("foo", axes["emoji"]);
             Assert.Equal("bbb", axes["tics"]);
+        }
+
+        [Fact]
+        public void ParseSyntaxAxes_StopsAtExpressionHeader()
+        {
+            const string fragment =
+                "SYNTAX:\n" +
+                "- emoji: syntax emoji\n" +
+                "EXPRESSION:\n" +
+                "- tics: expression tics must not leak into syntax\n";
+
+            var axes = TextingStyleAggregator.ParseSyntaxAxes(fragment);
+
+            Assert.Single(axes);
+            Assert.Equal("syntax emoji", axes["emoji"]);
+            Assert.False(axes.ContainsKey("tics"));
+        }
+
+        [Fact]
+        public void Aggregate_MultiFragmentSyntaxAxis_SelectsOneStableCandidate()
+        {
+            const string fragment =
+                "SYNTAX:\n" +
+                "- emoji:\n" +
+                "  - closes with a tiny spark when warmth is already present\n" +
+                "  - mirrors one emoji only after the other person uses it first\n" +
+                "  - drops emoji entirely when the turn is tense\n";
+            var source = new TextingStyleFragmentSource(
+                "item",
+                "multi emoji item",
+                fragment,
+                slotOrParameter: "shoes",
+                sourceId: "item-multi-emoji",
+                bandIndex: null);
+            var sources = new[] { source };
+            var expected = ExpectedCandidate(
+                "character-a",
+                source,
+                "emoji",
+                new[]
+                {
+                    "closes with a tiny spark when warmth is already present",
+                    "mirrors one emoji only after the other person uses it first",
+                    "drops emoji entirely when the turn is tense",
+                });
+
+            var first = TextingStyleAggregator.AggregateAsList(
+                sources,
+                "character-a",
+                TextingStyleConflicts.Empty);
+            var second = TextingStyleAggregator.AggregateAsList(
+                sources,
+                "character-a",
+                TextingStyleConflicts.Empty);
+
+            Assert.Equal(new[] { "emoji: " + expected }, first);
+            Assert.Equal(first, second);
+        }
+
+        [Fact]
+        public void Aggregate_SelectionChangesOnlyWhenSelectorInputChanges()
+        {
+            const string fragment =
+                "SYNTAX:\n" +
+                "- emoji:\n" +
+                "  - alpha emoji habit\n" +
+                "  - beta emoji habit\n" +
+                "  - gamma emoji habit\n";
+            var source = new TextingStyleFragmentSource(
+                "item",
+                "multi emoji item",
+                fragment,
+                slotOrParameter: "shoes",
+                sourceId: "item-multi-emoji",
+                bandIndex: null);
+            var candidates = new[] { "alpha emoji habit", "beta emoji habit", "gamma emoji habit" };
+
+            var characterA = TextingStyleAggregator.AggregateAsList(
+                new[] { source },
+                "character-a",
+                TextingStyleConflicts.Empty);
+            var characterB = TextingStyleAggregator.AggregateAsList(
+                new[] { source },
+                "character-b",
+                TextingStyleConflicts.Empty);
+
+            Assert.Equal("emoji: " + ExpectedCandidate("character-a", source, "emoji", candidates), characterA[0]);
+            Assert.Equal("emoji: " + ExpectedCandidate("character-b", source, "emoji", candidates), characterB[0]);
         }
 
         // ----- direct aggregator: full assemble -------------------------------
@@ -388,6 +478,57 @@ namespace Pinder.Core.Tests
             {
                 Assert.DoesNotContain(nonEmojiLine, lines[0]);
             }
+        }
+
+        private static string ExpectedCandidate(
+            string? seedKey,
+            TextingStyleFragmentSource source,
+            string axis,
+            IReadOnlyList<string> candidates)
+        {
+            using var sha = SHA256.Create();
+            byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(CanonicalSelector(seedKey, source, axis, candidates)));
+            ulong value = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                value = (value << 8) | hash[i];
+            }
+
+            return candidates[(int)(value % (ulong)candidates.Count)];
+        }
+
+        private static string CanonicalSelector(
+            string? seedKey,
+            TextingStyleFragmentSource source,
+            string axis,
+            IReadOnlyList<string> candidates)
+        {
+            var sb = new StringBuilder();
+            AppendSelectorPart(sb, "salt", "pinder-texting-style-v2");
+            AppendSelectorPart(sb, "seedKey", seedKey ?? string.Empty);
+            AppendSelectorPart(sb, "kind", source.Kind ?? string.Empty);
+            AppendSelectorPart(sb, "source", source.Source ?? string.Empty);
+            AppendSelectorPart(sb, "sourceId", source.SourceId ?? string.Empty);
+            AppendSelectorPart(sb, "slotOrParameter", source.SlotOrParameter ?? string.Empty);
+            AppendSelectorPart(sb, "bandIndex", source.BandIndex?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-1");
+            AppendSelectorPart(sb, "axis", axis ?? string.Empty);
+            AppendSelectorPart(sb, "candidateCount", candidates.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                AppendSelectorPart(sb, "candidate" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), candidates[i] ?? string.Empty);
+            }
+
+            return sb.ToString();
+        }
+
+        private static void AppendSelectorPart(StringBuilder sb, string key, string value)
+        {
+            sb.Append(key);
+            sb.Append(':');
+            sb.Append(value.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            sb.Append(':');
+            sb.Append(value);
+            sb.Append('\n');
         }
 
     }
