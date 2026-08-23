@@ -561,8 +561,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 "src/Pinder.Core/Conversation/NullLlmAdapter.cs",
                 "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
             };
-            string[] matches = Directory.GetFiles(RepoRoot(), "*.cs", SearchOption.AllDirectories)
-                .Where(path => path.Contains(Path.Combine("src", ""), StringComparison.Ordinal))
+            string[] matches = Directory.GetFiles(Path.Combine(RepoRoot(), "src"), "*.cs", SearchOption.AllDirectories)
                 .Where(path => File.ReadAllText(path).Contains("GetInterestChangeBeatAsync(", StringComparison.Ordinal))
                 .Select(path => Relative(path))
                 .Where(path => !allowed.Contains(path, StringComparer.Ordinal))
