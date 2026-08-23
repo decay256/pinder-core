@@ -6,11 +6,14 @@
 #
 # IMPORTANT: values here must match the PARSED value from the
 # texting_style_fragment block — i.e. the text after the ":" in each
-# "- <axis>: <value>" line. For tone axes (stance, register, pacing),
-# the parenthetical key is stripped from the axis name and the value
-# is everything after the colon. For example:
-#   "- pacing (dry-pacing): minimal, sparse, long pauses implied"
-#   → axis: pacing, value: "minimal, sparse, long pauses implied"
+# "- <axis>: <value>" line. For expression axes (directness, affect,
+# rhythm), a parenthetical label is stripped from the axis name and the
+# value is everything after the colon. For example:
+#   "- rhythm (dry): tends toward a minimal, sparse cadence"
+#   becomes axis: rhythm, value: "tends toward a minimal, sparse cadence"
+#
+# Use canonical axis names here. The loader normalizes legacy input aliases,
+# but new conflict entries must not teach the retired authoring vocabulary.
 #
 # Schema:
 #   axis_a: { axis: <name>, value: <string> }
@@ -34,28 +37,28 @@ conflicts:
     axis_b: { axis: length, value: "never sends more than 5 words" }
     reason: "Wall-of-text structure requires multiple sentences; hard 5-word cap makes that impossible"
 
-  # --- structure × pacing (wall-of-text incompatible with sparse pacing) ---
-  # pacing value: "minimal, sparse, long pauses implied" = dry-pacing archetype
+  # --- structure x rhythm (wall-of-text incompatible with sparse rhythm) ---
+  # This exact value remains until the content rewrite softens the source text.
   - axis_a: { axis: structure, value: "wall-of-text (one paragraph, no breaks, comma splices throughout)" }
-    axis_b: { axis: pacing, value: "minimal, sparse, long pauses implied" }
-    reason: "Wall-of-text density is incompatible with minimal/sparse pacing — one demands continuous flow, the other demands restraint"
+    axis_b: { axis: rhythm, value: "minimal, sparse, long pauses implied" }
+    reason: "Wall-of-text density is incompatible with a minimal/sparse rhythm; one demands continuous flow, the other demands restraint"
 
-  # --- structure × pacing (measured whitespace incompatible with hectic) ---
-  # pacing value: "fast, breathless, low-edit, thoughts overlapping" = hectic archetype
-  - axis_a: { axis: pacing, value: "fast, breathless, low-edit, thoughts overlapping" }
+  # --- structure x rhythm (measured whitespace incompatible with hectic rhythm) ---
+  # This exact value remains until the content rewrite softens the source text.
+  - axis_a: { axis: rhythm, value: "fast, breathless, low-edit, thoughts overlapping" }
     axis_b: { axis: structure, value: "measured whitespace (3-5 short lines, blank between)" }
-    reason: "Hectic pacing (fast, breathless, low-edit) is incompatible with the deliberate spacing of measured whitespace"
+    reason: "A fast, breathless rhythm is incompatible with the deliberate spacing of measured whitespace"
 
   # --- tics × tics (direct contradiction on question-asking) ---
   - axis_a: { axis: tics, value: "never asks questions, only states" }
     axis_b: { axis: tics, value: "always ends with a question, even when not asking" }
     reason: "Direct contradiction — never-questions vs. always-ends-with-question on the same character"
 
-  # --- stance × stance (mutually exclusive interpersonal stances) ---
-  # stance values are the full parsed text after the colon (parenthetical stripped from axis)
-  - axis_a: { axis: stance, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
-    axis_b: { axis: stance, value: "mild disagreement with everything, even compliments" }
-    reason: "Mutually exclusive stances — can't simultaneously always-agree and mildly-disagree-with-everything"
+  # --- directness x directness (mutually exclusive interpersonal approaches) ---
+  # Values remain exact matches for current source data until #1398 rewrites it.
+  - axis_a: { axis: directness, value: '"omg same" energy, can''t disagree, vaguely unsettling' }
+    axis_b: { axis: directness, value: "mild disagreement with everything, even compliments" }
+    reason: "Mutually exclusive approaches; the character cannot consistently agree and disagree with everything at once"
 
   # --- length × structure (5-word cap incompatible with measured whitespace) ---
   - axis_a: { axis: length, value: "never sends more than 5 words" }

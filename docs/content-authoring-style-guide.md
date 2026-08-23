@@ -31,3 +31,43 @@ Every migrated character JSON must have exactly these 20 keys in the `backstory_
 18. `recurring_dream`
 19. `reaction_to_failure`
 20. `view_on_mortality`
+
+## Texting-Style Fragments
+
+Texting style is a soft delivery layer. It may shape visible wording and
+cadence, but it must not override the character's psychology, emotional state,
+game state, conversational meaning, or need for variation.
+
+New fragments use exactly these canonical axes:
+
+```text
+SYNTAX: emoji, shorthand, grammar, structure, length, tics
+EXPRESSION: directness, affect, rhythm
+```
+
+Use `EXPRESSION:` for new content. `TONE:` and the old `stance`, `register`,
+and `pacing` names are compatibility aliases for existing data, not authoring
+vocabulary.
+
+Write each candidate as one concise tendency. Prefer phrasing such as `may`,
+`tends to`, `usually`, and `is comfortable with`. Do not make every selected
+trait mandatory on every message. A strict absolute is allowed only for a
+deliberate signature quirk; label it `strict` and keep it narrow enough that it
+cannot distort the message's intent.
+
+An axis can contain an indented pool of candidates. Core deterministically
+selects one candidate per source and axis from the character seed, source
+identity, axis, and ordered pool. It does not concatenate the candidates.
+
+Before authoring, check which axis the source can affect:
+
+- Items: `Special -> emoji`, `Head -> shorthand`, `Body -> grammar`,
+  `Hair -> structure`, `Arms -> length`, `Face -> tics`.
+- Anatomy: trunk parameters vote on `directness`; skin, freckle, smoothness,
+  and vein parameters vote on `affect`; glans, scrotum, testicle, and
+  circumcision parameters vote on `rhythm`.
+
+See [the pool](persona/texting-style-pool.md) for examples and
+[the aggregation contract](persona/texting-style-aggregation.md) for exact
+parameter mappings, deterministic selection, voting, attribution, and conflict
+resolution.
