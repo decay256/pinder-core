@@ -36,6 +36,13 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void MaxTokensOptions_DefaultToUnconstrained()
+        {
+            Assert.Null(new PinderLlmAdapterOptions().MaxTokens);
+            Assert.Null(new AnthropicOptions().MaxTokens);
+        }
+
+        [Fact]
         public void VerifyNoOrphanOptionFields()
         {
             string repoRoot = FindRepoRoot();

@@ -8,7 +8,7 @@ namespace Pinder.LlmAdapters.Anthropic
     {
         public string ApiKey { get; set; } = "";
         public string Model { get; set; } = AnthropicModelIds.DefaultModel;
-        public int MaxTokens { get; set; } = 1024;
+        public int? MaxTokens { get; set; } = null;
         public double Temperature { get; set; } = 0.9;
         public double? DialogueOptionsTemperature { get; set; }
         public double? DeliveryTemperature { get; set; }

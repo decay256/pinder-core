@@ -111,7 +111,6 @@ partial class Program
         {
             GameDefinition = result.GameDef,
             StatDeliveryInstructions = statDeliveryInstructions,
-            MaxTokens = 1024,
             Temperature = 0.9,
         };
 
