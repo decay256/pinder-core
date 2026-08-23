@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using Pinder.Core.Characters;
 
 namespace Pinder.Core.Prompts
 {
@@ -49,59 +52,213 @@ namespace Pinder.Core.Prompts
         }
 
         internal static IReadOnlyDictionary<string, string> ParseSyntaxAxes(string fragment)
-            => ParseAxes(fragment, "SYNTAX:", "TONE:", SyntaxAxisNames, allowLegacyExpressionAliases: false);
+            => FirstCandidates(ParseSyntaxAxisCandidates(fragment));
 
         internal static IReadOnlyDictionary<string, string> ParseToneAxes(string fragment)
-            => ParseAxes(fragment, "TONE:", null, ExpressionAxisNames, allowLegacyExpressionAliases: true);
+            => FirstCandidates(ParseExpressionAxisCandidates(fragment));
 
-        private static IReadOnlyDictionary<string, string> ParseAxes(
-            string fragment,
-            string sectionHeader,
-            string? endHeader,
-            string[] axisNames,
-            bool allowLegacyExpressionAliases)
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseSyntaxAxisCandidates(string fragment)
+            => ParseAxisCandidates(
+                fragment,
+                new[] { "SYNTAX:" },
+                SyntaxAxisNames,
+                allowLegacyExpressionAliases: false);
+
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseExpressionAxisCandidates(string fragment)
+            => ParseAxisCandidates(
+                fragment,
+                new[] { "EXPRESSION:", "TONE:" },
+                ExpressionAxisNames,
+                allowLegacyExpressionAliases: true);
+
+        private static IReadOnlyDictionary<string, string> FirstCandidates(
+            IReadOnlyDictionary<string, IReadOnlyList<string>> candidatesByAxis)
         {
             var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (string.IsNullOrEmpty(fragment)) return result;
-
-            int sectionStart = fragment.IndexOf(sectionHeader, StringComparison.Ordinal);
-            if (sectionStart < 0) return result;
-            int bodyStart = sectionStart + sectionHeader.Length;
-
-            int bodyEnd = fragment.Length;
-            if (endHeader != null)
+            foreach (var pair in candidatesByAxis)
             {
-                int endIdx = fragment.IndexOf(endHeader, bodyStart, StringComparison.Ordinal);
-                if (endIdx >= 0) bodyEnd = endIdx;
-            }
-
-            string body = fragment.Substring(bodyStart, bodyEnd - bodyStart);
-            var lines = body.Split('\n');
-            foreach (var rawLine in lines)
-            {
-                var line = rawLine.Trim();
-                if (line.Length == 0) continue;
-                if (!line.StartsWith("-", StringComparison.Ordinal)) continue;
-                line = line.Substring(1).Trim();
-
-                int colon = line.IndexOf(':');
-                if (colon <= 0) continue;
-                string axisToken = line.Substring(0, colon).Trim();
-                string value = line.Substring(colon + 1).Trim();
-                if (value.Length == 0) continue;
-
-                // Axis token may carry a parenthesised sub-key, e.g.
-                // "directness (guarded)" or legacy "stance (guarded)".
-                int paren = axisToken.IndexOf('(');
-                if (paren > 0) axisToken = axisToken.Substring(0, paren).Trim();
-
-                string? axis = CanonicalizeAxis(axisToken, axisNames, allowLegacyExpressionAliases);
-                if (axis == null) continue;
-                if (!result.ContainsKey(axis))
-                    result[axis] = value;
+                if (pair.Value.Count > 0)
+                    result[pair.Key] = pair.Value[0];
             }
 
             return result;
+        }
+
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseAxisCandidates(
+            string fragment,
+            IReadOnlyList<string> sectionHeaders,
+            string[] axisNames,
+            bool allowLegacyExpressionAliases)
+        {
+            var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+            if (string.IsNullOrEmpty(fragment)) return ToReadOnly(result);
+
+            bool inSection = false;
+            string? currentAxis = null;
+            var lines = fragment.Replace("\r\n", "\n").Split('\n');
+            foreach (var rawLine in lines)
+            {
+                string line = rawLine.Trim();
+                if (line.Length == 0) continue;
+
+                if (IsTextingStyleSectionHeader(line))
+                {
+                    if (sectionHeaders.Any(header => string.Equals(header, line, StringComparison.Ordinal)))
+                    {
+                        if (!inSection)
+                        {
+                            inSection = true;
+                            currentAxis = null;
+                            continue;
+                        }
+                    }
+
+                    if (inSection)
+                        break;
+
+                    continue;
+                }
+
+                if (!inSection) continue;
+                if (!line.StartsWith("-", StringComparison.Ordinal)) continue;
+
+                string bullet = line.Substring(1).Trim();
+                if (bullet.Length == 0) continue;
+
+                int colon = bullet.IndexOf(':');
+                if (colon > 0)
+                {
+                    string axisToken = bullet.Substring(0, colon).Trim();
+                    int paren = axisToken.IndexOf('(');
+                    if (paren > 0) axisToken = axisToken.Substring(0, paren).Trim();
+                    string value = bullet.Substring(colon + 1).Trim();
+                    string? axis = CanonicalizeAxis(axisToken, axisNames, allowLegacyExpressionAliases);
+                    if (axis != null)
+                    {
+                        currentAxis = axis;
+                        if (value.Length > 0)
+                            AddCandidate(result, axis, value);
+                        continue;
+                    }
+                }
+
+                if (CountLeadingWhitespace(rawLine) > 0 && currentAxis != null)
+                {
+                    AddCandidate(result, currentAxis, bullet);
+                    continue;
+                }
+
+                currentAxis = null;
+            }
+
+            return ToReadOnly(result);
+        }
+
+        private static IReadOnlyDictionary<string, string> SelectAxisCandidates(
+            IReadOnlyDictionary<string, IReadOnlyList<string>> candidatesByAxis,
+            TextingStyleFragmentSource source,
+            string? seedKey)
+        {
+            var selected = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in candidatesByAxis)
+            {
+                if (pair.Value.Count == 0) continue;
+                selected[pair.Key] = SelectCandidate(seedKey, source, pair.Key, pair.Value);
+            }
+
+            return selected;
+        }
+
+        private static string SelectCandidate(
+            string? seedKey,
+            TextingStyleFragmentSource source,
+            string axis,
+            IReadOnlyList<string> candidates)
+        {
+            if (candidates.Count == 1)
+                return candidates[0];
+
+            using (var sha = SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(CanonicalSelector(seedKey, source, axis, candidates)));
+                ulong value = 0;
+                for (int i = 0; i < 8; i++)
+                {
+                    value = (value << 8) | hash[i];
+                }
+
+                return candidates[(int)(value % (ulong)candidates.Count)];
+            }
+        }
+
+        private static string CanonicalSelector(
+            string? seedKey,
+            TextingStyleFragmentSource source,
+            string axis,
+            IReadOnlyList<string> candidates)
+        {
+            var sb = new StringBuilder();
+            AppendSelectorPart(sb, "salt", "pinder-texting-style-v2");
+            AppendSelectorPart(sb, "seedKey", seedKey ?? string.Empty);
+            AppendSelectorPart(sb, "kind", source.Kind ?? string.Empty);
+            AppendSelectorPart(sb, "source", source.Source ?? string.Empty);
+            AppendSelectorPart(sb, "sourceId", source.SourceId ?? string.Empty);
+            AppendSelectorPart(sb, "slotOrParameter", source.SlotOrParameter ?? string.Empty);
+            AppendSelectorPart(sb, "bandIndex", source.BandIndex?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "-1");
+            AppendSelectorPart(sb, "axis", axis ?? string.Empty);
+            AppendSelectorPart(sb, "candidateCount", candidates.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                AppendSelectorPart(sb, "candidate" + i.ToString(System.Globalization.CultureInfo.InvariantCulture), candidates[i] ?? string.Empty);
+            }
+
+            return sb.ToString();
+        }
+
+        private static void AppendSelectorPart(StringBuilder sb, string key, string value)
+        {
+            sb.Append(key);
+            sb.Append(':');
+            sb.Append(value.Length.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            sb.Append(':');
+            sb.Append(value);
+            sb.Append('\n');
+        }
+
+        private static void AddCandidate(Dictionary<string, List<string>> result, string axis, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value)) return;
+            if (!result.TryGetValue(axis, out var candidates))
+            {
+                candidates = new List<string>();
+                result[axis] = candidates;
+            }
+
+            candidates.Add(value.Trim());
+        }
+
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> ToReadOnly(Dictionary<string, List<string>> result)
+        {
+            var readOnly = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pair in result)
+            {
+                readOnly[pair.Key] = pair.Value;
+            }
+
+            return readOnly;
+        }
+
+        private static bool IsTextingStyleSectionHeader(string line)
+            => string.Equals(line, "SYNTAX:", StringComparison.Ordinal)
+               || string.Equals(line, "EXPRESSION:", StringComparison.Ordinal)
+               || string.Equals(line, "TONE:", StringComparison.Ordinal);
+
+        private static int CountLeadingWhitespace(string value)
+        {
+            int count = 0;
+            while (count < value.Length && char.IsWhiteSpace(value[count]))
+                count++;
+            return count;
         }
 
         private static string? CanonicalizeAxis(

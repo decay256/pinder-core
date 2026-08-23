@@ -37,17 +37,15 @@ namespace Pinder.Core.Prompts
     /// items + anatomy and travel through different prompt sections.
     ///
     /// Determinism: the rule is fully deterministic for a given
-    /// (character_id, equipped items, anatomy tiers). The
-    /// <paramref name="seedKey"/> parameter is retained on the public
-    /// surface for backward compatibility with callers that pass the
-    /// character UUID, but the rule itself no longer consults RNG —
-    /// the seed is unused in v1. It may return as a tie-breaker in a
-    /// future revision.
+    /// (character_id, equipped items, anatomy tiers). When an axis has
+    /// multiple authored candidates, <paramref name="seedKey"/> participates
+    /// in a stable SHA-256 selector so each character gets one bounded,
+    /// reproducible candidate per source/axis.
     ///
-    /// Determinism guarantee: Aggregation output is a pure function of the
-    /// input sources and conflict catalog. It is entirely independent of the
-    /// seedKey and is stable byte-for-byte across repeated calls and across
-    /// different sessions or process lifetimes.
+    /// Determinism guarantee: aggregation output is a pure function of the
+    /// input sources, conflict catalog, and <paramref name="seedKey"/>. The same
+    /// seed produces byte-for-byte stable output across repeated calls and
+    /// sessions; different seeds may select different authored candidates.
     /// </summary>
     public static partial class TextingStyleAggregator
     {
@@ -133,8 +131,9 @@ namespace Pinder.Core.Prompts
 
         // ------------------------------------------------------------------
         // Public surface (unchanged signatures from the placeholder). The
-        // seedKey parameter is retained for callers but unused by the v1
-        // rule — deterministic by construction.
+        // seedKey parameter is retained for callers and participates in the
+        // stable candidate selector when a source offers multiple fragments
+        // for one axis.
         // ------------------------------------------------------------------
 
         /// <summary>
@@ -143,8 +142,9 @@ namespace Pinder.Core.Prompts
         /// style. Implements the #836 v1 rule with #907 conflict resolution.
         ///
         /// Determinism Guarantee: The aggregation output is a pure function of the
-        /// input sources and conflict catalog, is completely independent of the
-        /// seedKey, and is stable byte-for-byte across repeated calls and across sessions.
+        /// input sources, conflict catalog, and seedKey. The same seed is stable
+        /// byte-for-byte across repeated calls and sessions; different seeds may
+        /// select different candidates from a multi-fragment axis.
         ///
         /// Uses <see cref="ConflictCatalog"/> when set (assigned by
         /// <c>PromptWiring.Wire()</c>), otherwise falls back to
@@ -216,11 +216,6 @@ namespace Pinder.Core.Prompts
             string? seedKey,
             TextingStyleConflicts conflicts)
         {
-            // seedKey is retained on the API surface for backward
-            // compatibility but unused by the v1 deterministic rule.
-            // It IS used as CharacterId in audit-log entries.
-            _ = seedKey;
-
             if (sources == null || sources.Count == 0)
                 return new AggregationResult(Array.Empty<string>(), Array.Empty<ConflictDropEntry>(), Array.Empty<AttributedTextingStyleLine>());
 
@@ -249,13 +244,17 @@ namespace Pinder.Core.Prompts
                 }
             }
 
-            // Pre-parse each anatomy fragment into its expression-axis map so the
-            // group-vote step doesn't re-parse on every lookup.
+            // Pre-parse each anatomy fragment into its expression-axis map and
+            // select one candidate per parameter/axis so the group-vote step
+            // stays bounded and deterministic.
             var expressionByParam = new Dictionary<string, IReadOnlyDictionary<string, string>>(
                 StringComparer.OrdinalIgnoreCase);
             foreach (var kvp in anatomyByParam)
             {
-                expressionByParam[kvp.Key] = ParseToneAxes(kvp.Value.Fragment);
+                expressionByParam[kvp.Key] = SelectAxisCandidates(
+                    ParseExpressionAxisCandidates(kvp.Value.Fragment),
+                    kvp.Value,
+                    seedKey);
             }
 
             // Resolve axis-by-axis in canonical order. Missing axes drop.
@@ -275,7 +274,10 @@ namespace Pinder.Core.Prompts
                 string slot = kv.Key;
                 string axis = kv.Value;
                 if (!bySlot.TryGetValue(slot, out var src)) continue;
-                var syntax = ParseSyntaxAxes(src.Fragment);
+                var syntax = SelectAxisCandidates(
+                    ParseSyntaxAxisCandidates(src.Fragment),
+                    src,
+                    seedKey);
                 if (syntax.TryGetValue(axis, out var line) && !string.IsNullOrWhiteSpace(line))
                 {
                     pickedPairs.Add(new AttributedTextingStyleLine(

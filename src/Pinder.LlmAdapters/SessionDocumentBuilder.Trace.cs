@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Pinder.Core.Conversation;
+using Pinder.Core.Prompts;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.LlmAdapters.Anthropic;
@@ -215,7 +216,11 @@ namespace Pinder.LlmAdapters
             // Inject texting style
             if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
             {
-                sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
+                sb.AppendLine("YOUR TEXTING STYLE");
+                sb.AppendLine(
+                    PromptBuilder.GetTextingStyleSoftFraming(),
+                    "data/prompts/structural.yaml",
+                    PromptBuilder.TextingStyleSoftFramingKey);
                 sb.AppendLine(context.PlayerTextingStyle, "data/prompts/structural.yaml", "player-texting-style");
                 sb.AppendLine();
             }
@@ -586,7 +591,11 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(context.DateeTextingStyle))
             {
                 sb.AppendLine();
-                sb.AppendLine("YOUR TEXTING STYLE — follow this exactly, no deviations:");
+                sb.AppendLine("YOUR TEXTING STYLE");
+                sb.AppendLine(
+                    PromptBuilder.GetTextingStyleSoftFraming(),
+                    "data/prompts/structural.yaml",
+                    PromptBuilder.TextingStyleSoftFramingKey);
                 sb.AppendLine(context.DateeTextingStyle, "data/prompts/structural.yaml", "datee-texting-style");
             }
 

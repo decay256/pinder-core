@@ -103,8 +103,10 @@ namespace Pinder.LlmAdapters.Tests
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             // TEXTING STYLE block must appear
-            Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
+            Assert.Contains("YOUR TEXTING STYLE", result);
+            Assert.Contains("loose expressive influences", result);
             Assert.Contains("lowercase-with-intent, precise, ironic", result);
+            Assert.DoesNotContain("follow this exactly", result, StringComparison.OrdinalIgnoreCase);
 
             // TEXTING STYLE must appear before ENGINE block
             int styleIdx = result.IndexOf("YOUR TEXTING STYLE", StringComparison.Ordinal);
@@ -144,12 +146,13 @@ namespace Pinder.LlmAdapters.Tests
         // ── Voice check in DialogueOptionsInstruction ──
 
         [Fact]
-        public void DialogueOptionsInstruction_ContainsVoiceCheck()
+        public void DialogueOptionsInstruction_TreatsVoiceAsSoftInfluence()
         {
-            Assert.Contains("Before writing each option, verify: does this sound exactly like",
-                PromptTemplates.DialogueOptionsInstruction);
-            Assert.Contains("the texting style above? If not, rewrite it.",
-                PromptTemplates.DialogueOptionsInstruction);
+            string instruction = PromptTemplates.DialogueOptionsInstruction;
+            Assert.Contains("Treat the texting style above as loose expressive influences", instruction);
+            Assert.Contains("do not mechanically reproduce", instruction);
+            Assert.DoesNotContain("sound exactly like", instruction, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("MUST be maintained consistently", instruction, StringComparison.OrdinalIgnoreCase);
         }
 
         // ── Texting style verbatim injection ──

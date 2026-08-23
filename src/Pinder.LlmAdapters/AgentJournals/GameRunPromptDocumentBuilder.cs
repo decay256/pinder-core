@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Pinder.Core.Conversation;
 using Pinder.Core.Diagnostics.AgentJournals;
+using Pinder.Core.Prompts;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters.AgentJournals;
@@ -214,8 +215,8 @@ namespace Pinder.LlmAdapters
                 ["stat"] = RuntimeFragment(context.Stat.ToString(), "SuccessImprovementContext.Stat"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
                 ["instruction"] = instruction,
-                ["texting_style_block"] = RuntimeFragment(
-                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                ["texting_style_block"] = BuildTextingStyleBlockDocument(
+                    context.PlayerTextingStyle,
                     "SuccessImprovementContext.PlayerTextingStyle"),
             };
 
@@ -275,8 +276,8 @@ namespace Pinder.LlmAdapters
                 ["datee_name"] = RuntimeFragment(context.DateeName, "SteeringContext.DateeName"),
                 ["delivered_message"] = RuntimeFragment(context.DeliveredMessage, "SteeringContext.DeliveredMessage"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
-                ["texting_style_block"] = RuntimeFragment(
-                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                ["texting_style_block"] = BuildTextingStyleBlockDocument(
+                    context.PlayerTextingStyle,
                     "SteeringContext.PlayerTextingStyle"),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
@@ -320,8 +321,8 @@ namespace Pinder.LlmAdapters
                 ["datee_name"] = RuntimeFragment(context.DateeName, "HorninessQuestionContext.DateeName"),
                 ["delivered_message"] = RuntimeFragment(context.DeliveredMessage, "HorninessQuestionContext.DeliveredMessage"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
-                ["texting_style_block"] = RuntimeFragment(
-                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                ["texting_style_block"] = BuildTextingStyleBlockDocument(
+                    context.PlayerTextingStyle,
                     "HorninessQuestionContext.PlayerTextingStyle"),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
@@ -377,15 +378,33 @@ namespace Pinder.LlmAdapters
                 .AppendRuntimeGenerated(value ?? string.Empty, keyPath)
                 .Build("fragment." + keyPath.Replace(':', '.').Replace('_', '-'), AgentJournalInputRole.User, "runtime-fragment");
 
-        private static string BuildTextingStyleBlock(string? textingStyle)
+        private static AnnotatedInvocationDocument BuildTextingStyleBlockDocument(
+            string? textingStyle,
+            string runtimeKeyPath)
         {
             if (string.IsNullOrWhiteSpace(textingStyle))
             {
-                return string.Empty;
+                return RuntimeFragment(string.Empty, runtimeKeyPath);
             }
 
-            return "YOUR DESIGNATED TEXTING STYLE — follow this exactly, including signature patterns:\n" +
-                textingStyle.Trim() + "\n";
+            string softFraming = PromptBuilder.GetTextingStyleSoftFraming();
+            return new AnnotatedInvocationDocumentBuilder()
+                .AppendGeneratedLiteral(
+                    "YOUR DESIGNATED TEXTING STYLE\n",
+                    "texting_style.heading")
+                .AppendConfigured(
+                    softFraming,
+                    CatalogSource(
+                        "data/prompts/structural.yaml",
+                        PromptBuilder.TextingStyleSoftFramingKey,
+                        softFraming))
+                .AppendGeneratedLiteral("\n", "texting_style.separator")
+                .AppendRuntimeGenerated(textingStyle.Trim(), runtimeKeyPath)
+                .AppendGeneratedLiteral("\n", "texting_style.terminator")
+                .Build(
+                    "fragment." + runtimeKeyPath.Replace(':', '.').Replace('_', '-'),
+                    AgentJournalInputRole.User,
+                    "texting-style-fragment");
         }
 
         private static AnnotatedInvocationDocument FormatConversationHistoryDocument(

@@ -153,8 +153,9 @@ namespace Pinder.LlmAdapters.Tests
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             Assert.Contains("YOUR TEXTING STYLE", result);
-            Assert.Contains("follow this exactly, no deviations", result);
+            Assert.Contains("loose expressive influences", result);
             Assert.Contains("lowercase-with-intent, precise, ironic", result);
+            Assert.DoesNotContain("follow this exactly", result, StringComparison.OrdinalIgnoreCase);
         }
 
         // Mutation: would catch if texting style is placed AFTER [ENGINE] block instead of before
@@ -201,7 +202,9 @@ namespace Pinder.LlmAdapters.Tests
             var ctx = MakeContext(playerTextingStyle: "test style");
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
-            Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
+            Assert.Contains("YOUR TEXTING STYLE", result);
+            Assert.Contains("loose expressive influences", result);
+            Assert.DoesNotContain("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -210,11 +213,13 @@ namespace Pinder.LlmAdapters.Tests
 
         // Mutation: would catch if voice-check line is removed from DialogueOptionsInstruction
         [Fact]
-        public void DialogueOptionsInstruction_ContainsVoiceCheckVerification()
+        public void DialogueOptionsInstruction_ContainsSoftInfluenceVerification()
         {
             string instruction = PromptTemplates.DialogueOptionsInstruction;
-            Assert.Contains("Before writing each option, verify: does this sound exactly like", instruction);
-            Assert.Contains("the texting style above? If not, rewrite it.", instruction);
+            Assert.Contains("Treat the texting style above as loose expressive influences", instruction);
+            Assert.Contains("do not mechanically reproduce", instruction);
+            Assert.DoesNotContain("sound exactly like", instruction, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("MUST be maintained consistently", instruction, StringComparison.OrdinalIgnoreCase);
         }
 
         // ══════════════════════════════════════════════════════════════
@@ -327,7 +332,8 @@ namespace Pinder.LlmAdapters.Tests
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
             // Heading present
-            Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
+            Assert.Contains("YOUR TEXTING STYLE", result);
+            Assert.Contains("loose expressive influences", result);
             // Style text present
             Assert.Contains(velvetStyle, result);
             // Style before ENGINE block
@@ -368,8 +374,10 @@ namespace Pinder.LlmAdapters.Tests
 
             string result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(ctx);
 
-            Assert.Contains("YOUR TEXTING STYLE — follow this exactly, no deviations:", result);
+            Assert.Contains("YOUR TEXTING STYLE", result);
+            Assert.Contains("loose expressive influences", result);
             Assert.Contains(sableStyle, result);
+            Assert.DoesNotContain("follow this exactly", result, StringComparison.OrdinalIgnoreCase);
         }
 
         // ══════════════════════════════════════════════════════════════

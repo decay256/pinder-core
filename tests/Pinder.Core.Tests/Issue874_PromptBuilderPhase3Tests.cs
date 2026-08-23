@@ -62,6 +62,7 @@ namespace Pinder.Core.Tests
             // #1154: the 7 structural-* keys collapsed into one field.
             var names = catalog.Names.ToList();
             Assert.Contains("character_card_framing", names);
+            Assert.Contains("texting_style_soft_framing", names);
 
             // The old per-section keys are gone.
             Assert.DoesNotContain("structural-lead-in", names);
@@ -150,6 +151,49 @@ namespace Pinder.Core.Tests
             {
                 PromptBuilder.StructuralFragmentLookup = prior;
             }
+        }
+
+        [Fact]
+        public void SoftTextingStyleFraming_IsCatalogBackedAndDoesNotChangeSectionOrder()
+        {
+            var catalog = LoadCatalog();
+            string prompt = PromptBuilder.BuildSystemPrompt(
+                "TestChar",
+                "they/them",
+                null,
+                new FragmentCollection(
+                    personalityFragments: Array.Empty<string>(),
+                    backstoryFragments: Array.Empty<string>(),
+                    textingStyleFragments: Array.Empty<string>(),
+                    rankedArchetypes: Array.Empty<(string, int)>(),
+                    timing: null,
+                    stats: EmptyStats,
+                    textingStyleSources: new[]
+                    {
+                        new TextingStyleFragmentSource(
+                            "item",
+                            "shoes",
+                            "SYNTAX:\n- emoji: uses one tiny signal only when it fits\n",
+                            slotOrParameter: "shoes"),
+                    }),
+                new TrapState(),
+                archetypesEnabled: true,
+                structuralFragmentLookup: key => catalog.TryGet(key)?.SystemPrompt);
+
+            int identity = prompt.IndexOf("IDENTITY", StringComparison.Ordinal);
+            int personality = prompt.IndexOf("PERSONALITY", StringComparison.Ordinal);
+            int backstory = prompt.IndexOf("BACKSTORY", StringComparison.Ordinal);
+            int textingStyle = prompt.IndexOf("TEXTING STYLE", StringComparison.Ordinal);
+            int archetype = prompt.IndexOf("ACTIVE ARCHETYPE", StringComparison.Ordinal);
+            Assert.True(identity < personality);
+            Assert.True(personality < backstory);
+            Assert.True(backstory < textingStyle);
+            Assert.True(textingStyle < archetype);
+
+            string section = prompt.Substring(textingStyle, archetype - textingStyle);
+            Assert.Contains(catalog.Get("texting_style_soft_framing").SystemPrompt!, section);
+            Assert.Contains("- emoji: uses one tiny signal only when it fits", section);
+            Assert.DoesNotContain("follow this exactly", section, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

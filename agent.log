@@ -2243,3 +2243,32 @@ core-1395: replaced legacy axis alias dictionary lookup with direct normalizatio
 [2026-08-23T21:01:59+00:00] core-1395: fixed reviewer-requested stale active contract prose in CharacterProfile and Issue833 tests.
 [2026-08-23T21:03:19+00:00] core-1395: review follow-up focused Issue1395/TextingStyle/Issue907 exit=0; evidence=/srv/eigentakt/openclaw-pinder-20260823T200422Z-1812684-8756ec87/keep/core-1395-review-followup-focused.txt.
 [2026-08-23T21:03:35+00:00] core-1395: review follow-up evidence written to /srv/eigentakt/openclaw-pinder-20260823T200422Z-1812684-8756ec87/keep/core-1395-review-followup-evidence.txt.
+## 2026-08-23T21:47:47Z - Core #1396 final verification
+Task: Pinder Core #1396 final verification
+Base: f9b41d41567979ab766a1d99a985c14a5b7cce92
+Final stable patch-id (local and Linux): 878beecdae901d777b66f51112c77006cc8e8f6d
+Linux diff-check: clean
+Regression-before-change evidence:
+- Core focused red: 6 failed / 6 total
+- LlmAdapters focused red: 3 failed / 34 passed / 37 total
+Final focused Linux evidence:
+- Core TextingStyle/BulletListPromptSections: 76 passed / 0 failed / 0 skipped
+- LlmAdapters Issue1392/Issue489: 37 passed / 0 failed / 0 skipped
+Final full Linux evidence:
+- Pinder.Core.Tests: 3478 passed / 0 failed / 1 skipped / 3479 total
+- Pinder.LlmAdapters.Tests: 1353 passed / 0 failed / 0 skipped / 1353 total
+Evidence files:
+- keep/core-1396-full-core-final.log
+- keep/core-1396-full-llmadapters-final.log
+Scope notes:
+- Multi-fragment parsing, deterministic SHA-256 selection, soft-influence semantics, prompt/trace/document propagation completed.
+- APIs, section order, source attribution, and legacy TONE bridge preserved.
+- Core #1397 and #1398 excluded.
+- No commit, push, merge, delete, deploy, or GitHub mutation performed.
+Residual risk:
+- One pre-existing Core test remains explicitly skipped.
+- Android/iOS/Unity runtime behavior is outside this ticket's Linux test scope.
+[2026-08-23T21:49:21Z] Core #1396: post-evidence implementation diff (excluding tracked agent.log) matches local patch-id 878beecdae901d777b66f51112c77006cc8e8f6d; implementation and agent.log diff-check clean.
+[2026-08-23T22:07:12Z] Core #1396 review fixes: softened remaining dialogue/DATEE template constraints, preserved configured soft-framing provenance separately from runtime style for success/steering/horniness journal documents, corrected seedKey determinism docs, and regenerated the supported journal golden.
+[2026-08-23T22:07:12Z] Core #1396 review-fix verification: focused Core 49/49; focused adapters 48/48; full Core 3478 passed, 1 existing skip; full adapters 1354/1354; local and authoritative implementation patch-id de7250633a894d235a4edf976462dd2858dee7c9; diff-check clean. Evidence: /srv/eigentakt/openclaw-pinder-20260823T200422Z-1812684-8756ec87/keep/core-1396-review-fix-evidence.md. No commit/push/merge/deploy/reset/clean/delete.
+[2026-08-23T22:13:00Z] Core #1396 final docs follow-up: mirrored the corrected public Aggregate XML determinism contract into the authoritative worktree. Local and remote complete implementation patch-id da9a5f7310e4c96e0eb0e65811e21e92a5d9c80c; diff-check clean; focused Core TextingStyle tests 70/70. No commit/push/merge/deploy/reset/clean/delete.
