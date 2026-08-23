@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using Pinder.Core.Conversation;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
+using Pinder.Core.TestCommon;
 using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
     public class ShadowTaintTests
     {
+        public ShadowTaintTests()
+        {
+            PromptCatalogInitializer.Initialize();
+        }
+
         private static DialogueContext MakeDialogueContext(
             Dictionary<ShadowStatType, int> shadowThresholds = null)
         {
