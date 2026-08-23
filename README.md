@@ -14,7 +14,7 @@ and migration boundary.
 |---|---|---|---|
 | `Pinder.Core` | netstandard2.0 | Microsoft.Bcl.AsyncInterfaces, System.Text.Json | Domain model, game loop, roll engine, stats, traps, XP, combos |
 | `Pinder.Rules` | netstandard2.0 | Core, YamlDotNet | Data-driven rule resolution from YAML |
-| `Pinder.LlmAdapters` | netstandard2.0 | Core, Rules, Newtonsoft.Json | LLM prompt assembly + API integration (Anthropic, OpenAI) |
+| `Pinder.LlmAdapters` | netstandard2.0 | Core, Rules, Newtonsoft.Json, System.Text.Json, YamlDotNet, Microsoft.Bcl.AsyncInterfaces, Pi.AI, Pi.Agent.Core | Prompt catalog and provider adapters (OpenAI, Anthropic, Pi) |
 | `session-runner` | net8.0 | Core, LlmAdapters | CLI harness for automated playtesting |
 
 ## Roll Formula

@@ -299,6 +299,7 @@ public interface ILlmAdapter
     Task<string>           ApplyHorninessOverlayAsync(string msg, string instruction, string? oc, string? ad, CancellationToken ct = default);
     Task<string>           ApplyShadowCorruptionAsync(string msg, string instruction, ShadowStatType s, string? ad, CancellationToken ct = default);
     Task<string>           ApplyTrapOverlayAsync     (string msg, string trapInstruction, string trapName, string? oc, string? ad, CancellationToken ct = default);
+    Task<string>           ApplyFailureCorruptionAsync(string msg, string instruction, StatType stat, FailureTier tier, string? ad, CancellationToken ct = default);
 }
 ```
 
@@ -311,11 +312,13 @@ overlay handling. You provide an `ILlmTransport` (the thin
 provider-specific HTTP layer) plus a `PinderLlmAdapterOptions`. Two
 transports ship in the box:
 
-- `Pinder.LlmAdapters.OpenAi.OpenAiTransport` — OpenAI Chat
-  Completions API. Constructor takes an `HttpClient`, an API key,
-  and a model name.
+- `Pinder.LlmAdapters.OpenAi.OpenAiTransport` — OpenAI-compatible Chat
+  Completions API. Its primary constructor takes API key, base URL, and
+  model. The overload for an externally owned `HttpClient` takes those
+  three strings first, followed by the client.
 - `Pinder.LlmAdapters.Anthropic.AnthropicTransport` — Anthropic
-  Messages API. Same shape.
+  Messages API. Its constructors are provider-specific; consult the type
+  before wiring it rather than assuming the OpenAI constructor shape.
 
 Wire `HttpClient` carefully on Unity — long-lived `HttpClient`
 survives domain reloads if you parent it to a non-static container;
@@ -447,7 +450,11 @@ public class PinderRunner : MonoBehaviour
             await ReadStreamingAssetTextAsync("PinderData/traps/traps.json"));
 
         // 2. Wire the LLM adapter via PinderLlmAdapter + a transport.
-        var transport = new OpenAiTransport(_http, apiKey: "sk-...", model: "gpt-4o");
+        var transport = new OpenAiTransport(
+            apiKey: "sk-...",
+            baseUrl: "https://api.openai.com/v1",
+            model: "gpt-4o",
+            httpClient: _http);
         var options   = new PinderLlmAdapterOptions(/* see source for full list */);
         ILlmAdapter llm = new PinderLlmAdapter(transport, options);
 
@@ -462,10 +469,12 @@ public class PinderRunner : MonoBehaviour
         CharacterProfile datee = CharacterDefinitionLoader.Load(dateePath, items, anatomy);
 
         // 4. Construct the session. `GameSessionConfig` is required — the
-        //    engine refuses silent defaults. The zero-arg call is fine for
-        //    bring-up; see GameSessionConfig.cs for every knob (DC bias,
-        //    clock, shadow trackers, RNG, etc.).
-        var config       = new GameSessionConfig();
+        //    engine refuses a missing clock. See GameSessionConfig.cs for
+        //    every other knob (DC bias, shadow trackers, RNG, etc.).
+        var clock = new GameClock(
+            DateTimeOffset.UtcNow,
+            new HorninessModifiers(morning: 3, afternoon: 0, evening: 2, overnight: 5));
+        var config       = new GameSessionConfig(clock: clock);
         IDiceRoller dice = new SystemRandomDiceRoller(seed: null);  // null = nondeterministic
         _session = new GameSession(player, datee, llm, dice, traps, config);
     }

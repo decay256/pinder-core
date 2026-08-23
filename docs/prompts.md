@@ -65,6 +65,15 @@ data/prompts/
   narrative.yaml
   overlay-model-comparison.yaml
   emotional-reactions.yaml
+  character-generation.yaml
+  backstory.yaml
+  backstory_consolidation.yaml
+  personality_consolidation.yaml
+  bio.yaml
+  diagnosis.yaml
+  dramatic_arc.yaml
+  outfit.yaml
+  sim_agent.yaml
   stake.yaml
 ```
 
@@ -154,4 +163,4 @@ the test is rewritten to lock the yaml render alone.
 
 ## Overlay Transport Routing
 
-Overlay calls (horniness/trap/shadow-corruption) use a second, optional ILlmTransport passed to PinderLlmAdapter's constructor. When omitted, overlays use the same transport as primary game-turn calls. There is no vendor-specific overlay routing inside the adapter — the host application controls which model/vendor handles overlays purely by which transport instance it constructs and passes in. (GameApi wiring for this is tracked in a separate follow-up ticket.)
+Overlay calls (horniness/trap/shadow/failure corruption) use a second, optional `ILlmTransport` passed to `PinderLlmAdapter`'s constructor. When omitted, overlays use the same transport as primary game-turn calls. There is no vendor-specific overlay routing inside the adapter: the host controls routing through the transport instance it supplies. Pinder GameApi implements this wiring through `OVERLAY_MODEL` and passes the resulting overlay transport into live session creation, rehydration, and simulation/speculation paths.
