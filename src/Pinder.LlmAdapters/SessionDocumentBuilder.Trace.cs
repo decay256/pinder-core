@@ -391,7 +391,7 @@ namespace Pinder.LlmAdapters
                     {
                         { "primary_emotion", context.AvatarPrimaryEmotion ?? string.Empty },
                         { "response_posture", context.AvatarResponsePosture ?? string.Empty },
-                    });
+                    }) + "\n";
             }
 
             string transitionTargetLine = string.Empty;
