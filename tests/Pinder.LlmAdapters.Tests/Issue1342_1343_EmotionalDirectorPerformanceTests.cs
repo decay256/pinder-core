@@ -36,7 +36,16 @@ namespace Pinder.LlmAdapters.Tests
                     interestAfter: 6,
                     beforeState: InterestState.Bored,
                     afterState: InterestState.Lukewarm,
-                    deliveredMessage: "visible delivered line"),
+                    deliveredMessage: "visible delivered line",
+                    cognitiveSubtext: "ABANDONMENT + DEFLECTION",
+                    resolvedTarget: new ResolvedRevelationTarget
+                    {
+                        Registry = "BACKSTORY",
+                        Index = 3,
+                        Field = "BIO_LIE",
+                        StemText = "admit the move was difficult",
+                        TransitionStyle = "buffered disclosure",
+                    }),
                 Array.Empty<ConversationMessage>());
 
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
@@ -62,6 +71,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("leans in with a careful question", result.Response.EmotionalReactionDebug.Direction.Impulse);
             Assert.Equal("keeps the reply tentative but available", result.Response.EmotionalReactionDebug.Direction.Restraint);
             Assert.Equal("Writing from relief, turns warmer while still checking sincerity", result.Response.EmotionalReactionDebug.Direction.ResponsePosture);
+            Assert.Equal("ABANDONMENT + DEFLECTION", result.Response.EmotionalReactionDebug.CognitiveSubtext);
+            Assert.Equal("admit the move was difficult", result.Response.EmotionalReactionDebug.TransitionTarget);
+            Assert.Equal("buffered disclosure", result.Response.EmotionalReactionDebug.TransitionStyle);
             Assert.NotNull(result.Response.EmotionalReactionDebug.CompiledPromptInstruction);
             Assert.StartsWith(
                 "DATEE EMOTIONAL PERFORMANCE DIRECTION",
@@ -442,7 +454,9 @@ namespace Pinder.LlmAdapters.Tests
             int interestAfter = 12,
             InterestState beforeState = InterestState.Lukewarm,
             InterestState afterState = InterestState.Interested,
-            RollOutcomeIntensity outcome = RollOutcomeIntensity.Strong)
+            RollOutcomeIntensity outcome = RollOutcomeIntensity.Strong,
+            string? cognitiveSubtext = null,
+            ResolvedRevelationTarget? resolvedTarget = null)
         {
             return new DateeContext(
                 dateePrompt: "datee prompt",
@@ -461,6 +475,8 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: "Player",
                 dateeName: "Datee",
                 currentTurn: 7,
+                resolvedTarget: resolvedTarget,
+                cognitiveSubtext: cognitiveSubtext,
                 interestBeforeState: beforeState,
                 interestAfterState: afterState,
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
