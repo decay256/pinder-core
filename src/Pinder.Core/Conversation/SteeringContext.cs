@@ -27,13 +27,17 @@ namespace Pinder.Core.Conversation
 
         public AgentJournalOneShotContext? AgentJournal { get; }
 
+        /// <summary>The player avatar's designated texting style.</summary>
+        public string PlayerTextingStyle { get; }
+
         public SteeringContext(
             string playerAvatarPrompt,
             string dateeName,
             string playerName,
             string deliveredMessage,
             IReadOnlyList<(string Sender, string Text)> conversationHistory,
-            AgentJournalOneShotContext? agentJournal = null)
+            AgentJournalOneShotContext? agentJournal = null,
+            string? playerTextingStyle = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? "";
             DateeName = dateeName ?? "";
@@ -41,6 +45,7 @@ namespace Pinder.Core.Conversation
             DeliveredMessage = deliveredMessage ?? "";
             ConversationHistory = conversationHistory ?? (IReadOnlyList<(string Sender, string Text)>)new List<(string, string)>();
             AgentJournal = agentJournal;
+            PlayerTextingStyle = playerTextingStyle ?? string.Empty;
         }
     }
 }

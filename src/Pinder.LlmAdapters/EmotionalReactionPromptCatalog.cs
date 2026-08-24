@@ -200,9 +200,6 @@ namespace Pinder.LlmAdapters
                 EmotionalPromptCompiler.DirectorContractRepairPromptKey);
             RequireSystemPrompt(
                 catalog,
-                EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey);
-            RequireSystemPrompt(
-                catalog,
                 EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey);
         }
 

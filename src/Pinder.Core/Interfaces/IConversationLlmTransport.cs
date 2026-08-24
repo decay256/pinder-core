@@ -22,7 +22,7 @@ namespace Pinder.Core.Interfaces
             IReadOnlyList<ConversationMessage> priorMessages,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             string? phase = null,
             CancellationToken cancellationToken = default);
     }

@@ -15,13 +15,11 @@ namespace Pinder.LlmAdapters
         public const string SchemaName = "dialogue_options";
         public const string SchemaVersion = "dialogue_options.v1";
 
-        private const int MinPlayableOptionLength = 4;
-
         public static StructuredLlmRequest CreateRequest(
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             DialogueContext context,
             int expectedCount)
         {
@@ -166,10 +164,10 @@ namespace Pinder.LlmAdapters
                 }
 
                 text = MetaPrefixStripper.Strip(text.Trim());
-                if (text.Length < MinPlayableOptionLength)
+                if (string.IsNullOrWhiteSpace(text))
                 {
-                    errorCode = "option_text_too_short";
-                    errorMessage = "Dialogue option text is too short to be playable.";
+                    errorCode = "missing_text";
+                    errorMessage = "Every dialogue option must include non-empty string text.";
                     return Array.Empty<DialogueOption>();
                 }
 
@@ -226,7 +224,7 @@ namespace Pinder.LlmAdapters
                             ["properties"] = new JObject
                             {
                                 ["stat"] = new JObject { ["type"] = "string", ["enum"] = statNames },
-                                ["text"] = new JObject { ["type"] = "string", ["minLength"] = MinPlayableOptionLength },
+                                ["text"] = new JObject { ["type"] = "string", ["minLength"] = 1 },
                                 ["callback"] = new JObject { ["type"] = new JArray("string", "integer", "null") },
                                 ["combo"] = new JObject { ["type"] = new JArray("string", "null") }
                             }

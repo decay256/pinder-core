@@ -124,13 +124,12 @@ prompts:
 
       The schema_version field must be exactly "emotional_director.v1".
 
-      The seven director fields must be concise, concrete, actionable natural-language prose, each 180 characters or fewer. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity", never as first-person speech or a quoted reply. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
+      The seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity", never as first-person speech or a quoted reply. Interpret the recipient's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
     user_template: |-
       Private emotional director source packet:
 
       {compiled_reaction_input}
     temperature: 0.35
-    max_tokens: 500
 
   emotional-reaction-director-system-wrapper:
     system_prompt: |-
@@ -145,10 +144,6 @@ prompts:
   emotional-reaction-director-repair-contract:
     system_prompt: >-
       The previous emotional direction did not satisfy the response contract. Return a fresh complete object with exactly these fields and no others: schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture. Include every field even when the distinction is subtle, and keep each direction concrete, actionable, and consistent with the private source packet.
-
-  emotional-reaction-director-repair-field-too-long:
-    system_prompt: >-
-      A previous emotional direction exceeded the permitted field length. Return a fresh complete object with every direction field 180 characters or fewer. Preserve the emotional meaning, but compress each field to one direct, actionable sentence or phrase.
 
   emotional-reaction-director-repair-drafted-chat-reply:
     system_prompt: >-

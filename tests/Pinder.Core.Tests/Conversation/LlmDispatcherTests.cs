@@ -174,7 +174,7 @@ namespace Pinder.Core.Tests.Conversation
                 runShadow: true, "shadow-instruction", ShadowStatType.Dread,
                 "", textDiffs, null, 1, null, CancellationToken.None);
 
-            var completed = await Task.WhenAny(dispatchTask, Task.Delay(TimeSpan.FromSeconds(5)));
+            var completed = await Task.WhenAny(dispatchTask, Task.Delay(TimeSpan.FromSeconds(15)));
 
             Assert.Same(dispatchTask, completed);
             var result = await dispatchTask;

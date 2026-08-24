@@ -13,7 +13,6 @@ namespace Pinder.LlmAdapters.Tests
     /// constraint before option generation.
     /// Tests are derived from docs/specs/issue-489-spec.md acceptance criteria and edge cases.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue489_VoiceDistinctnessSpecTests
     {
         // ── Test-only helpers ──

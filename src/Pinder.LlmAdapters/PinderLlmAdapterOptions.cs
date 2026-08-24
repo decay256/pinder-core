@@ -36,8 +36,8 @@ namespace Pinder.LlmAdapters
         /// <summary>Default sampling temperature for all calls (overridable per method).</summary>
         public double Temperature { get; set; } = LlmPhaseTemperatures.Default;
 
-        /// <summary>Maximum tokens for all calls.</summary>
-        public int MaxTokens { get; set; } = 1024;
+        /// <summary>Maximum tokens for all calls (null for unconstrained).</summary>
+        public int? MaxTokens { get; set; } = null;
 
         /// <summary>Per-method temperature override for GetDialogueOptionsAsync.</summary>
         public double? DialogueOptionsTemperature { get; set; }

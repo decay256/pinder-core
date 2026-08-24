@@ -37,7 +37,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionSystemPromptBuilder.BuildPlayerAvatarEx(
                 playerAvatarPrompt,
                 gameDefinition);
-            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options-system", trace);
             return FromTrace(
                 trace,
                 "dialogue-options.system",
@@ -52,7 +51,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionSystemPromptBuilder.BuildDateeEx(
                 dateePrompt,
                 gameDefinition);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee-system", trace);
             return FromTrace(
                 trace,
                 "session.system",
@@ -67,7 +65,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(
                 context,
                 promptCatalog);
-            InMemoryPromptTraceService.Instance.RecordTrace("dialogue-options", trace);
             return FromTrace(
                 trace,
                 "dialogue-options.user",
@@ -96,7 +93,6 @@ namespace Pinder.LlmAdapters
             PromptTraceResult trace = SessionDocumentBuilder.BuildDateePromptEx(
                 context,
                 promptCatalog);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee", trace);
             return FromTrace(
                 trace,
                 "session.user",
@@ -218,6 +214,9 @@ namespace Pinder.LlmAdapters
                 ["stat"] = RuntimeFragment(context.Stat.ToString(), "SuccessImprovementContext.Stat"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
                 ["instruction"] = instruction,
+                ["texting_style_block"] = RuntimeFragment(
+                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                    "SuccessImprovementContext.PlayerTextingStyle"),
             };
 
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
@@ -276,6 +275,9 @@ namespace Pinder.LlmAdapters
                 ["datee_name"] = RuntimeFragment(context.DateeName, "SteeringContext.DateeName"),
                 ["delivered_message"] = RuntimeFragment(context.DeliveredMessage, "SteeringContext.DeliveredMessage"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
+                ["texting_style_block"] = RuntimeFragment(
+                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                    "SteeringContext.PlayerTextingStyle"),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
@@ -318,6 +320,9 @@ namespace Pinder.LlmAdapters
                 ["datee_name"] = RuntimeFragment(context.DateeName, "HorninessQuestionContext.DateeName"),
                 ["delivered_message"] = RuntimeFragment(context.DeliveredMessage, "HorninessQuestionContext.DeliveredMessage"),
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
+                ["texting_style_block"] = RuntimeFragment(
+                    BuildTextingStyleBlock(context.PlayerTextingStyle),
+                    "HorninessQuestionContext.PlayerTextingStyle"),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
@@ -371,6 +376,17 @@ namespace Pinder.LlmAdapters
             => new AnnotatedInvocationDocumentBuilder()
                 .AppendRuntimeGenerated(value ?? string.Empty, keyPath)
                 .Build("fragment." + keyPath.Replace(':', '.').Replace('_', '-'), AgentJournalInputRole.User, "runtime-fragment");
+
+        private static string BuildTextingStyleBlock(string? textingStyle)
+        {
+            if (string.IsNullOrWhiteSpace(textingStyle))
+            {
+                return string.Empty;
+            }
+
+            return "YOUR DESIGNATED TEXTING STYLE — follow this exactly, including signature patterns:\n" +
+                textingStyle.Trim() + "\n";
+        }
 
         private static AnnotatedInvocationDocument FormatConversationHistoryDocument(
             IEnumerable<(string Sender, string Text)> history,

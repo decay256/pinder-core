@@ -123,7 +123,6 @@ namespace Pinder.SessionSetup
                     _options.Temperature,
                     GeneratorDefaultConfigs.Stake.Temperature,
                     _options.MaxTokens,
-                    GeneratorDefaultConfigs.Stake.MaxTokens,
                     _options.OnDegraded,
                     _options.OnDiagnostic,
                     LlmOptionalTextGeneration.CancellationBehavior.ReturnEmpty)
@@ -151,10 +150,8 @@ namespace Pinder.SessionSetup
             var entry = _catalog.Get("stake");
             double temp = _options.Temperature != GeneratorDefaultConfigs.Stake.Temperature
                 ? _options.Temperature
-                : entry.Temperature!.Value;
-            int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Stake.MaxTokens
-                ? _options.MaxTokens
-                : entry.MaxTokens!.Value;
+                : (entry.Temperature ?? GeneratorDefaultConfigs.Stake.Temperature);
+            int? maxTok = _options.MaxTokens ?? entry.MaxTokens;
 
             IAsyncEnumerator<string> enumerator;
             try
@@ -278,10 +275,9 @@ namespace Pinder.SessionSetup
             public double Temperature { get; set; } = GeneratorDefaultConfigs.Stake.Temperature;
 
             /// <summary>
-            /// Max output tokens. Default 1200 to leave room for the
-            /// canonical 15-stem bullet contract.
+            /// Max output tokens (null for unconstrained).
             /// </summary>
-            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Stake.MaxTokens;
+            public int? MaxTokens { get; set; } = null;
 
             /// <summary>
             /// Opt-in callback triggered when generation is degraded (e.g. transport failure or empty output).

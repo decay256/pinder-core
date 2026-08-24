@@ -15,7 +15,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1344_RetryHistoryIsolationTests
     {
         static Issue1344_RetryHistoryIsolationTests()
@@ -216,7 +215,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -230,7 +229,7 @@ namespace Pinder.LlmAdapters.Tests
                 IReadOnlyList<ConversationMessage> priorMessages,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken cancellationToken = default)
             {
@@ -248,7 +247,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
                 => Task.FromResult(string.Empty);

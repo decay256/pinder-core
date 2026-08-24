@@ -114,7 +114,7 @@ namespace Pinder.LlmAdapters
 
         public async Task<string> SendAsync(
             string systemPrompt, string userMessage,
-            double temperature = 0.9, int maxTokens = 1024, string? phase = null,
+            double temperature = 0.9, int? maxTokens = null, string? phase = null,
             CancellationToken ct = default)
         {
             string raw = await _inner
@@ -128,7 +128,7 @@ namespace Pinder.LlmAdapters
             IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
             string userMessage,
             double temperature = 0.9,
-            int maxTokens = 1024,
+            int? maxTokens = null,
             string? phase = null,
             CancellationToken cancellationToken = default)
         {
@@ -174,7 +174,7 @@ namespace Pinder.LlmAdapters
 
         public async IAsyncEnumerable<string> SendStreamAsync(
             string systemPrompt, string userMessage,
-            double temperature = 0.9, int maxTokens = 1024,
+            double temperature = 0.9, int? maxTokens = null,
             [EnumeratorCancellation] CancellationToken cancellationToken = default,
             string? phase = null)
         {

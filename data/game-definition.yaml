@@ -601,6 +601,7 @@ horniness_time_modifiers:
   overnight: 3    # 00:00-08:59
 
 steering_prompt: |
+  {texting_style_block}
   CONVERSATION SO FAR:
   {conversation_history}
 
@@ -624,6 +625,7 @@ steering_prompt: |
   Output only the question. No preamble. It will be appended directly to the delivered message.
 
 horniness_prompt: |
+  {texting_style_block}
   CONVERSATION SO FAR:
   {conversation_history}
 
@@ -720,4 +722,3 @@ progression_failure_pool_tiers:
   legendary_min: 10
 
 progression_currency_per_xp: 10
-

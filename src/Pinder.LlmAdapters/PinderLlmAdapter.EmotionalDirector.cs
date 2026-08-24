@@ -59,7 +59,7 @@ namespace Pinder.LlmAdapters
                 GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(systemPrompt);
             PromptTraceResult attemptSystemPrompt = systemPrompt;
             double temperature = prompt.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
-            int maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
+            int? maxTokens = prompt.MaxTokens ?? _options.MaxTokens;
             var metadata = prompt.Metadata;
 
             int maxAttempts = GetContractViolationAttemptLimit();

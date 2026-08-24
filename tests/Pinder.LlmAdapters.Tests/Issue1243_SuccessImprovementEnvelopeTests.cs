@@ -11,7 +11,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1243_SuccessImprovementEnvelopeTests
     {
         private sealed class CapturingTransport : ILlmTransport
@@ -25,7 +24,7 @@ namespace Pinder.LlmAdapters.Tests
                 _response = response;
             }
 
-            public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
+            public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int? maxTokens = null, string? phase = null, CancellationToken ct = default)
             {
                 SystemPrompt = systemPrompt;
                 UserMessage = userMessage;

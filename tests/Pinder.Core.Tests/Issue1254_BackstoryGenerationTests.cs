@@ -18,14 +18,14 @@ namespace Pinder.Core.Tests.Characters
             public string LastSystemPrompt { get; private set; } = string.Empty;
             public string LastUserMessage { get; private set; } = string.Empty;
             public double LastTemperature { get; private set; }
-            public int LastMaxTokens { get; private set; }
+            public int? LastMaxTokens { get; private set; }
             public string ResponseToReturn { get; set; } = string.Empty;
 
             public Task<string> SendAsync(
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken cancellationToken = default)
             {

@@ -16,7 +16,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1345_PrivatePhaseObservabilityTests
     {
         private const string PrivateDiagnosis = "PRIVATE-DIAGNOSIS-DO-NOT-LOG-1345";
@@ -154,52 +153,6 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("InvalidOperationException", failure.CorrelationHints["exception_type"]);
             Assert.Equal("performance", failure.CorrelationHints["datee_private_phase"]);
             Assert.DoesNotContain(PrivateRejectedPerformance, FlattenDiagnostics(new[] { failure }), StringComparison.Ordinal);
-        }
-
-        [Fact]
-        public async Task FieldTooLongRetryDiagnosticsRetainCatalogRepairSourceAttribution()
-        {
-            const string rejectedPrivateField = "PRIVATE-OVERLONG-DIRECTOR-DIAGNOSTIC-";
-            var invalid = JObject.Parse(ValidDirectionJson());
-            invalid["interpretation"] = rejectedPrivateField + new string('x', 181);
-            var diagnostics = new List<OperationalDiagnosticEvent>();
-            var transport = new StructuredUsageTransport(
-                structuredResponses: new[]
-                {
-                    new StructuredLlmResponse(
-                        invalid.ToString(Formatting.None),
-                        provider: "unit-provider",
-                        model: "unit-director-model",
-                        usedNativeStructuredOutput: true),
-                    new StructuredLlmResponse(
-                        ValidDirectionJson(),
-                        provider: "unit-provider",
-                        model: "unit-director-model",
-                        usedNativeStructuredOutput: true),
-                },
-                plainResponses: Array.Empty<string>());
-            var adapter = CreateAdapter(transport, diagnostics.Add, retries: 1);
-
-            await adapter.GenerateEmotionalDirectionAsync(MakeContext());
-
-            var retry = diagnostics.Single(diagnostic =>
-                diagnostic.EventName == "LlmTransportStarted"
-                && diagnostic.PhaseCode == LlmPhase.EmotionalDirector
-                && diagnostic.CorrelationHints["attempt"] == "2");
-            Assert.Contains(
-                "data/prompts/emotional-reactions.yaml",
-                retry.CorrelationHints["prompt_trace_sources"],
-                StringComparison.Ordinal);
-            Assert.Contains(
-                EmotionalPromptCompiler.DirectorPromptKey,
-                retry.CorrelationHints["prompt_trace_keys"],
-                StringComparison.Ordinal);
-            Assert.Contains(
-                EmotionalPromptCompiler.DirectorFieldTooLongRepairPromptKey,
-                retry.CorrelationHints["prompt_trace_keys"],
-                StringComparison.Ordinal);
-            AssertSafePromptTraceHints(retry);
-            Assert.DoesNotContain(rejectedPrivateField, FlattenDiagnostics(diagnostics), StringComparison.Ordinal);
         }
 
         private static void AssertSafePromptTraceHints(OperationalDiagnosticEvent diagnostic)
@@ -365,7 +318,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {
@@ -429,7 +382,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

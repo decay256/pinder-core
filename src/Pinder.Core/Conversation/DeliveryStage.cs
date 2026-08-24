@@ -101,7 +101,7 @@ namespace Pinder.Core.Conversation
                 TurnProgressStage.SteeringCompleted,
                 steeringResult.SteeringSucceeded ? steeringResult.SteeringQuestion : null));
 
-            string playerArchetypeDirectiveForDelivery = player.ActiveArchetype?.Directive;
+            string playerVoiceDirectiveForDelivery = BuildPlayerVoiceDirective(player);
             // #1125: the stat-specific failure instruction and trap/beatDcBy
             // inputs that previously fed the creative delivery PROMPT are gone —
             // there is no delivery LLM call. Failure flavour now reaches the
@@ -134,7 +134,7 @@ namespace Pinder.Core.Conversation
                             failureInstruction,
                             chosenOption.Stat,
                             rollResult.Tier,
-                            playerArchetypeDirectiveForDelivery,
+                            playerVoiceDirectiveForDelivery,
                             ct).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -225,7 +225,8 @@ namespace Pinder.Core.Conversation
                                     ["success_tier"] = tierKey,
                                     ["check_total"] = rollResult.FinalTotal.ToString(System.Globalization.CultureInfo.InvariantCulture),
                                     ["check_dc"] = rollResult.DC.ToString(System.Globalization.CultureInfo.InvariantCulture),
-                                }));
+                                }),
+                            playerTextingStyle: player.TextingStyleFragment);
                         
                         improved = await statefulAdapter.GetSuccessImprovementAsync(context, ct).ConfigureAwait(false);
                     }
@@ -366,7 +367,7 @@ namespace Pinder.Core.Conversation
                 runShadow,
                 corruptionInstruction,
                 pairedShadow ?? ShadowStatType.Dread,
-                playerArchetypeDirectiveForDelivery,
+                playerVoiceDirectiveForDelivery,
                 textDiffs,
                 _onTextLayerNoop,
                 state.TurnNumber,
@@ -453,7 +454,8 @@ namespace Pinder.Core.Conversation
                                     ["check_dc"] = horninessCheckResult.DC.ToString(System.Globalization.CultureInfo.InvariantCulture),
                                     ["check_tier"] = horninessCheckResult.Tier.ToString(),
                                     ["selected_stat"] = chosenOption.Stat.ToString(),
-                                })),
+                                }),
+                            playerTextingStyle: player.TextingStyleFragment),
                         ct).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
@@ -594,6 +596,23 @@ namespace Pinder.Core.Conversation
             }
 
             return false;
+        }
+
+        private static string BuildPlayerVoiceDirective(CharacterProfile player)
+        {
+            var directives = new List<string>();
+            if (!string.IsNullOrWhiteSpace(player.ActiveArchetype?.Directive))
+            {
+                directives.Add(player.ActiveArchetype.Directive.Trim());
+            }
+            if (!string.IsNullOrWhiteSpace(player.TextingStyleFragment))
+            {
+                directives.Add(
+                    "YOUR DESIGNATED TEXTING STYLE — preserve this exactly through every rewrite:\n" +
+                    player.TextingStyleFragment.Trim());
+            }
+
+            return string.Join("\n\n", directives);
         }
 
     }

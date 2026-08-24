@@ -15,7 +15,7 @@ namespace Pinder.SessionSetup
         public sealed class Options
         {
             public double Temperature { get; set; } = GeneratorDefaultConfigs.Backstory.Temperature;
-            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.Backstory.MaxTokens;
+            public int? MaxTokens { get; set; } = null;
             public Action<OperationalDiagnosticEvent>? OnDiagnostic { get; set; }
         }
 
@@ -81,10 +81,8 @@ namespace Pinder.SessionSetup
 
             double temp = _options.Temperature != GeneratorDefaultConfigs.Backstory.Temperature
                 ? _options.Temperature
-                : entry.Temperature!.Value;
-            int maxTok = _options.MaxTokens != GeneratorDefaultConfigs.Backstory.MaxTokens
-                ? _options.MaxTokens
-                : entry.MaxTokens!.Value;
+                : (entry.Temperature ?? GeneratorDefaultConfigs.Backstory.Temperature);
+            int? maxTok = _options.MaxTokens ?? entry.MaxTokens;
 
             var responseJson = await LlmOptionalTextGeneration.SendRequiredAsync(
                 "backstory",

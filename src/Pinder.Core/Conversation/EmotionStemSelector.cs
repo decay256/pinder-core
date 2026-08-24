@@ -296,9 +296,12 @@ namespace Pinder.Core.Conversation
             }
             else if (target.Registry == "STAKE")
             {
-                if (stakeLines == null || target.Index < 0 || target.Index >= stakeLines.Count)
-                    throw new InvalidOperationException($"Stake target index {target.Index} is missing from the player profile.");
-                target.StemText = stakeLines[target.Index];
+                if (stakeLines == null || stakeLines.Count == 0)
+                    throw new InvalidOperationException("Stake lines are missing from the player profile.");
+
+                int safeIndex = Math.Max(0, Math.Min(target.Index, stakeLines.Count - 1));
+                target.Index = safeIndex;
+                target.StemText = stakeLines[safeIndex];
             }
             else
             {

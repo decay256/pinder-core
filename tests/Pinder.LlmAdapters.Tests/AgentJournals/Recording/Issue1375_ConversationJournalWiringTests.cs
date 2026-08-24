@@ -18,7 +18,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue1375_ConversationJournalWiringTests
     {
         private const string DateePrivatePhaseDirector = "director";
@@ -832,7 +831,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
                 => DequeueAsync(phase, ct);
@@ -842,7 +841,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 IReadOnlyList<ConversationMessage> priorMessages,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken cancellationToken = default)
             {

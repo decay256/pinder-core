@@ -15,7 +15,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public sealed class Issue55_PrivateDirectorSessionTests
     {
         static Issue55_PrivateDirectorSessionTests()
@@ -283,7 +282,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
                 => Task.FromResult(_plainResponses.Dequeue());
@@ -293,7 +292,7 @@ namespace Pinder.LlmAdapters.Tests
                 IReadOnlyList<ConversationMessage> priorMessages,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken cancellationToken = default)
             {

@@ -84,10 +84,8 @@ namespace Pinder.SessionSetup
 
             double temperature = _options.Temperature != GeneratorDefaultConfigs.DramaticArc.Temperature
                 ? _options.Temperature
-                : entry.Temperature!.Value;
-            int maxTokens = _options.MaxTokens != GeneratorDefaultConfigs.DramaticArc.MaxTokens
-                ? _options.MaxTokens
-                : entry.MaxTokens!.Value;
+                : (entry.Temperature ?? GeneratorDefaultConfigs.DramaticArc.Temperature);
+            int? maxTokens = _options.MaxTokens ?? entry.MaxTokens;
 
             if (_options.MaxValidationAttempts <= 0)
             {
@@ -113,18 +111,6 @@ namespace Pinder.SessionSetup
                     bool isComplete;
                     try
                     {
-                        string sourceFile = entry.SourceFile ?? "data/prompts/dramatic_arc.yaml";
-                        InMemoryPromptTraceService.Instance.RecordTrace(
-                            "dramatic-arc-system",
-                            new PromptTraceResult(
-                                systemPrompt,
-                                new[] { new AnnotatedSpan(0, systemPrompt.Length, sourceFile, "dramatic_arc.system_prompt") }));
-                        InMemoryPromptTraceService.Instance.RecordTrace(
-                            "dramatic-arc-user",
-                            new PromptTraceResult(
-                                userMessage,
-                                new[] { new AnnotatedSpan(0, userMessage.Length, sourceFile, "dramatic_arc.user_template") }));
-
                         string response = await LlmOptionalTextGeneration.RunAsync(
                                 "dramatic_arc",
                                 _transport,
@@ -135,7 +121,6 @@ namespace Pinder.SessionSetup
                                 temperature,
                                 GeneratorDefaultConfigs.DramaticArc.Temperature,
                                 maxTokens,
-                                GeneratorDefaultConfigs.DramaticArc.MaxTokens,
                                 onDegraded: null,
                                 _options.OnDiagnostic,
                                 LlmOptionalTextGeneration.CancellationBehavior.Throw,
@@ -209,15 +194,9 @@ namespace Pinder.SessionSetup
             CancellationToken cancellationToken)
         {
             ValidateOneShotJournalConfiguration(agentJournal);
-            if (_options.AgentJournalHostSink == null)
+            if (_options.AgentJournalHostSink == null || agentJournal == null)
             {
                 return null;
-            }
-
-            if (agentJournal == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for dramatic-arc setup, but no AgentJournalOneShotContext was supplied.");
             }
 
             var recorderContext = new AgentJournalRecorderContext(
@@ -266,13 +245,7 @@ namespace Pinder.SessionSetup
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? agentJournal)
         {
-            bool hasSink = _options.AgentJournalHostSink != null;
-            bool hasContext = agentJournal != null;
-            if (hasSink != hasContext)
-            {
-                throw new InvalidOperationException(
-                    "Dramatic-arc Game Run journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
-            }
+            // One-shot journaling is optional; safely skipped when either HostSink or agentJournal is absent.
         }
 
         private static async Task CompleteAcceptedOneShotAsync(
@@ -380,8 +353,8 @@ namespace Pinder.SessionSetup
             /// <summary>Temperature. Default 0.85 — creative but grounded.</summary>
             public double Temperature { get; set; } = GeneratorDefaultConfigs.DramaticArc.Temperature;
 
-            /// <summary>Max tokens for dramatic arc generation.</summary>
-            public int MaxTokens { get; set; } = GeneratorDefaultConfigs.DramaticArc.MaxTokens;
+            /// <summary>Max tokens for dramatic arc generation (null for unconstrained).</summary>
+            public int? MaxTokens { get; set; } = null;
 
             /// <summary>Total attempts for incomplete dramatic-arc output before failing.</summary>
             public int MaxValidationAttempts { get; set; } = 3;

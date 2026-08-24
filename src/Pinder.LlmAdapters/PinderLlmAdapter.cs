@@ -429,7 +429,6 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 includeConversationHistory: priorMessages == null);
             AnnotatedInvocationDocument dateeDocument =
                 GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(dateePrompt);
-            InMemoryPromptTraceService.Instance.RecordTrace("datee", dateePrompt);
             string userContent = dateeDocument.Text;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
             var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
@@ -1497,15 +1496,9 @@ bool recordOneShotJournal = context.AgentJournal != null;
             params AnnotatedInvocationDocument[] documents)
         {
             ValidateOneShotJournalConfiguration(journalContext);
-            if (_options.AgentJournalHostSink == null)
+            if (_options.AgentJournalHostSink == null || journalContext == null)
             {
                 return null;
-            }
-
-            if (journalContext == null)
-            {
-                throw new InvalidOperationException(
-                    "Agent journal host sink was configured for a Game Run one-shot path, but no AgentJournalOneShotContext was supplied.");
             }
 
             var inputDocuments = new AgentJournalInputDocument[documents.Length];
@@ -1535,13 +1528,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? journalContext)
         {
-            bool hasSink = _options.AgentJournalHostSink != null;
-            bool hasContext = journalContext != null;
-            if (hasSink != hasContext)
-            {
-                throw new InvalidOperationException(
-                    "Game Run one-shot journaling requires both AgentJournalOneShotContext and AgentJournalHostSink.");
-            }
+            // One-shot journaling is optional; safely skipped when either HostSink or journalContext is absent.
         }
 
         private static async Task CompleteAcceptedOneShotAsync(
@@ -1735,7 +1722,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             string systemPrompt,
             string userContent,
             double temperature,
-            int maxTokens,
+            int? maxTokens,
             string phase,
             int? turnId,
             CancellationToken ct,

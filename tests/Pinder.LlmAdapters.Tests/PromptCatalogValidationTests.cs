@@ -220,17 +220,14 @@ namespace Pinder.LlmAdapters.Tests
 
         [Theory]
         [InlineData(
-            "user_template: \"USER\"\n    temperature: 0.8\n    max_tokens: 250\n",
+            "user_template: \"USER\"\n    temperature: 0.8\n",
             "prompt-catalog: key 'outfit' has no system_prompt. Check the yaml file.")]
         [InlineData(
-            "system_prompt: \"SYSTEM\"\n    temperature: 0.8\n    max_tokens: 250\n",
+            "system_prompt: \"SYSTEM\"\n    temperature: 0.8\n",
             "prompt-catalog: key 'outfit' has no user_template. Check the yaml file.")]
         [InlineData(
-            "system_prompt: \"SYSTEM\"\n    user_template: \"USER\"\n    max_tokens: 250\n",
+            "system_prompt: \"SYSTEM\"\n    user_template: \"USER\"\n",
             "prompt-catalog: key 'outfit' has no temperature. Check the yaml file.")]
-        [InlineData(
-            "system_prompt: \"SYSTEM\"\n    user_template: \"USER\"\n    temperature: 0.8\n",
-            "prompt-catalog: key 'outfit' has no max_tokens. Check the yaml file.")]
         public void RequireCompleteEntry_PreservesIncompleteFieldMessages(
             string entryBody,
             string expectedMessage)

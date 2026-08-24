@@ -11,7 +11,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class IssuePromptHardcodingOverlayTemplateTests
     {
         private sealed class CapturingTransport : ILlmTransport
@@ -29,7 +28,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

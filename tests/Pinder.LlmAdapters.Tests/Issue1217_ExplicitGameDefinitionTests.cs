@@ -12,7 +12,6 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
-    [Collection("PromptTraceSingleton")]
     public class Issue1217_ExplicitGameDefinitionTests
     {
         // 1. Production fail-loud.
@@ -183,7 +182,7 @@ namespace Pinder.LlmAdapters.Tests
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
-                int maxTokens = 1024,
+                int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
             {

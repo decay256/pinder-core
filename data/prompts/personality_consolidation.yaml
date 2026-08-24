@@ -2,7 +2,6 @@ schema_version: 1
 prompts:
   personality_consolidation:
     temperature: 0.65
-    max_tokens: 700
     system_prompt: |-
       You consolidate character fragments for Pinder, a comedy dating RPG with absurd premise and sincere emotional stakes.
       Use the game system prompt as tonal law, then combine only the supplied personality fragments into one coherent personality profile.

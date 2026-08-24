@@ -19,8 +19,8 @@ namespace Pinder.Core.Interfaces
             string systemPrompt,
             string userMessage,
             double temperature,
-            int maxTokens,
-            string phase,
+            int? maxTokens = null,
+            string phase = "",
             IReadOnlyDictionary<string, string>? metadata = null)
         {
             SchemaName = schemaName ?? throw new ArgumentNullException(nameof(schemaName));
@@ -40,7 +40,7 @@ namespace Pinder.Core.Interfaces
         public string SystemPrompt { get; }
         public string UserMessage { get; }
         public double Temperature { get; }
-        public int MaxTokens { get; }
+        public int? MaxTokens { get; }
         public string Phase { get; }
         public IReadOnlyDictionary<string, string> Metadata { get; }
     }

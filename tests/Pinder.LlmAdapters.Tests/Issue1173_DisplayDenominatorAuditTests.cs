@@ -11,7 +11,6 @@ namespace Pinder.LlmAdapters.Tests
     /// Issue #1173 — Displays with fixed denominator cannot exceed denominator.
     /// Added regression tests to satisfy the DoD and guard against regression.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public class Issue1173_DisplayDenominatorAuditTests
     {
         private static DialogueContext MakeDialogueContext(

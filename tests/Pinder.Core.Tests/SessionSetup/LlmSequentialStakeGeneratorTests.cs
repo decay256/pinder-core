@@ -27,7 +27,7 @@ namespace Pinder.Core.Tests.SessionSetup
             public string ResponseToReturn { get; set; } = "[]";
             public Queue<string>? ResponsesToReturn { get; set; }
 
-            public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default)
+            public Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int? maxTokens = null, string? phase = null, CancellationToken ct = default)
             {
                 CallCount++;
                 LastSystemPrompt = systemPrompt;

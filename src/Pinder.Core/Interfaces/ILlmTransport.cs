@@ -16,7 +16,7 @@ namespace Pinder.Core.Interfaces
         /// <param name="systemPrompt">The system-level context/instructions for the LLM.</param>
         /// <param name="userMessage">The user-turn message content.</param>
         /// <param name="temperature">Sampling temperature (default 0.9).</param>
-        /// <param name="maxTokens">Maximum tokens for the response (default 1024).</param>
+        /// <param name="maxTokens">Maximum tokens for the response (default null, unconstrained).</param>
         /// <param name="phase">
         /// Optional engine-phase label (see <see cref="LlmPhase"/>). Transports themselves
         /// should ignore the value; decorators (snapshot recorders, telemetry) read it to
@@ -32,6 +32,6 @@ namespace Pinder.Core.Interfaces
         /// that don't pass a token continue to work unchanged.
         /// </param>
         /// <returns>Raw text response from the LLM.</returns>
-        Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int maxTokens = 1024, string? phase = null, CancellationToken ct = default);
+        Task<string> SendAsync(string systemPrompt, string userMessage, double temperature = 0.9, int? maxTokens = null, string? phase = null, CancellationToken ct = default);
     }
 }

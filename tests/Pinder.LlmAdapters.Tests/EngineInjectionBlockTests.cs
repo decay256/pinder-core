@@ -11,7 +11,6 @@ namespace Pinder.LlmAdapters.Tests
     /// Tests for [ENGINE] injection block format in SessionDocumentBuilder.
     /// Verifies AC from Issue #544: options, delivery, and datee injection formats.
     /// </summary>
-    [Collection("PromptTraceSingleton")]
     public partial class EngineInjectionBlockTests
     {
         // ═══════════════════════════════════════════════════════════════

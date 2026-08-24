@@ -103,7 +103,8 @@ namespace Pinder.Core.Conversation
                     rollStage.RollResult.Stat,
                     RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
                     datee.PsychiatricDiagnosis),
-                agentJournalContext: _agentJournalContext);
+                agentJournalContext: _agentJournalContext,
+                dateeTextingStyle: datee.TextingStyleFragment);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
