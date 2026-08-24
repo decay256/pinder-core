@@ -11,7 +11,9 @@ namespace Pinder.Core.Conversation
             string? cognitiveSubtext = null,
             string? transitionTarget = null,
             string? transitionStyle = null,
-            string? compiledPromptInstruction = null)
+            string? compiledPromptInstruction = null,
+            string? primaryEmotion = null,
+            string? responsePosture = null)
         {
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
@@ -19,6 +21,8 @@ namespace Pinder.Core.Conversation
             TransitionTarget = transitionTarget;
             TransitionStyle = transitionStyle;
             CompiledPromptInstruction = compiledPromptInstruction;
+            PrimaryEmotion = primaryEmotion;
+            ResponsePosture = responsePosture;
         }
 
         public int HungerForIntimacy { get; }
@@ -27,5 +31,7 @@ namespace Pinder.Core.Conversation
         public string? TransitionTarget { get; }
         public string? TransitionStyle { get; }
         public string? CompiledPromptInstruction { get; }
+        public string? PrimaryEmotion { get; }
+        public string? ResponsePosture { get; }
     }
 }

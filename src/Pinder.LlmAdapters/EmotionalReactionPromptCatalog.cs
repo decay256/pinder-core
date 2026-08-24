@@ -201,6 +201,35 @@ namespace Pinder.LlmAdapters
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey);
+            RequireSystemPrompt(catalog, "avatar-emotional-primary-emotions");
+            RequireCompletePromptWithPlaceholders(
+                catalog,
+                "avatar-emotional-director",
+                "compiled_avatar_emotional_input");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "avatar-emotional-director",
+                "emotion_vocabulary");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "avatar-emotional-director-system-wrapper",
+                "avatar_system_prompt",
+                "director_system_prompt");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "avatar-emotional-director-input",
+                "relationship_meaning",
+                "datee_profile",
+                "datee_last_message",
+                "cognitive_subtext",
+                "transition_target",
+                "transition_style");
+            RequireSystemPrompt(catalog, "avatar-emotional-director-repair");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                "avatar-emotional-performance-direction",
+                "primary_emotion",
+                "response_posture");
         }
 
         private static string RequireSystemPrompt(PromptCatalog catalog, string key)

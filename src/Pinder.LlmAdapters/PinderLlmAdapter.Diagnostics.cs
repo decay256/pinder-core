@@ -199,6 +199,7 @@ namespace Pinder.LlmAdapters
         {
             return !string.IsNullOrWhiteSpace(dateePrivatePhase)
                 || string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal)
+                || string.Equals(phase, LlmPhase.AvatarEmotionalDirector, StringComparison.Ordinal)
                 || string.Equals(phase, LlmPhase.OpponentResponse, StringComparison.Ordinal);
         }
 

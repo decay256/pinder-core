@@ -8,6 +8,7 @@ namespace Pinder.LlmAdapters.AgentJournals
         public const string DateePerformance = "game.datee.performance";
         public const string AvatarReply = "game.avatar.reply";
         public const string EmotionalDirector = "game.emotional-director";
+        public const string AvatarEmotionalDirector = "game.avatar.emotional-director";
         public const string PrefetchBranchClone = "game.prefetch.option-branch";
         public const string SpeculativeBranchClone = "game.speculation.option-branch";
         public const string DirectorBranchDisposed = "game.emotional-director.branch-disposed";
@@ -17,6 +18,7 @@ namespace Pinder.LlmAdapters.AgentJournals
             DateePerformance,
             AvatarReply,
             EmotionalDirector,
+            AvatarEmotionalDirector,
             PrefetchBranchClone,
             SpeculativeBranchClone,
             DirectorBranchDisposed,

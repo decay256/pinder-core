@@ -100,6 +100,12 @@ namespace Pinder.Core.Conversation
         public int? DateeHungerForIntimacy { get; }
         public int? DateeTerrorOfRejection { get; }
 
+        /// <summary>Turn-local primary emotion selected for the player avatar.</summary>
+        public string? AvatarPrimaryEmotion { get; private set; }
+
+        /// <summary>Concrete writing posture derived from the avatar's primary emotion.</summary>
+        public string? AvatarResponsePosture { get; private set; }
+
 public AgentJournalOneShotContext? AgentJournal { get; }
 
         /// <summary>Per-Game-Run journal correlation supplied by the owning session.</summary>
@@ -167,6 +173,17 @@ AgentJournalOneShotContext? agentJournal = null,
             DateeTerrorOfRejection = dateeTerrorOfRejection;
 AgentJournal = agentJournal;
             AgentJournalContext = agentJournalContext;
+        }
+
+        /// <summary>
+        /// Applies the accepted private avatar direction before option generation.
+        /// Engine orchestration owns the timing of this mutation.
+        /// </summary>
+        public void ApplyAvatarEmotionalDirection(AvatarEmotionalDirection direction)
+        {
+            if (direction == null) throw new System.ArgumentNullException(nameof(direction));
+            AvatarPrimaryEmotion = direction.PrimaryEmotion;
+            AvatarResponsePosture = direction.ResponsePosture;
         }
     }
 }

@@ -381,6 +381,19 @@ namespace Pinder.LlmAdapters
                     });
             }
 
+            string avatarEmotionalDirection = string.Empty;
+            if (!string.IsNullOrWhiteSpace(context.AvatarPrimaryEmotion)
+                && !string.IsNullOrWhiteSpace(context.AvatarResponsePosture))
+            {
+                avatarEmotionalDirection = RenderTemplate(
+                    GetTemplate(promptCatalog, "avatar-emotional-performance-direction"),
+                    new Dictionary<string, string>
+                    {
+                        { "primary_emotion", context.AvatarPrimaryEmotion ?? string.Empty },
+                        { "response_posture", context.AvatarResponsePosture ?? string.Empty },
+                    });
+            }
+
             string transitionTargetLine = string.Empty;
             string transitionStyleLine = string.Empty;
             if (context.ResolvedTarget != null)
@@ -416,6 +429,7 @@ namespace Pinder.LlmAdapters
                     { "{hfi_line}", (hfiLine, GetTemplateSource(promptCatalog, "engine-state-hfi-line"), "engine-state-hfi-line") },
                     { "{tor_line}", (torLine, GetTemplateSource(promptCatalog, "engine-state-tor-line"), "engine-state-tor-line") },
                     { "{cognitive_subtext_line}", (cognitiveSubtextLine, GetTemplateSource(promptCatalog, "engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
+                    { "{avatar_emotional_direction}", (avatarEmotionalDirection, GetTemplateSource(promptCatalog, "avatar-emotional-performance-direction"), "avatar-emotional-performance-direction") },
                     { "{transition_target_line}", (transitionTargetLine, GetTemplateSource(promptCatalog, "engine-state-transition-target-line"), "engine-state-transition-target-line") },
                     { "{transition_style_line}", (transitionStyleLine, GetTemplateSource(promptCatalog, "engine-state-transition-style-line"), "engine-state-transition-style-line") },
                     { "{options_count}", (optionsCountStr, engineOptionsSource, "engine-options-block") },

@@ -198,8 +198,9 @@ namespace Pinder.Core.Conversation
             }
             state.CurrentResolvedTarget = resolvedTarget;
 
-            string cognitiveSubtext = BuildCognitiveSubtext(datee, state.TurnNumber);
-            state.CurrentCognitiveSubtext = cognitiveSubtext;
+            string avatarCognitiveSubtext = BuildCognitiveSubtext(player, state.TurnNumber);
+            string dateeCognitiveSubtext = BuildCognitiveSubtext(datee, state.TurnNumber);
+            state.CurrentCognitiveSubtext = dateeCognitiveSubtext;
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             string playerArchetypeDirective = player.ActiveArchetype?.Directive;
@@ -244,7 +245,7 @@ namespace Pinder.Core.Conversation
                 stakeLinesReferenced: null,
                 maxDialogueOptions: _maxDialogueOptions,
                 resolvedTarget: resolvedTarget,
-                cognitiveSubtext: cognitiveSubtext,
+                cognitiveSubtext: avatarCognitiveSubtext,
                 playerHungerForIntimacy: playerHfi,
                 playerTerrorOfRejection: playerTor,
                 dateeHungerForIntimacy: dateeHfi,
@@ -261,6 +262,22 @@ namespace Pinder.Core.Conversation
                         ["max_option_count"] = _maxDialogueOptions.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     }),
                 agentJournalContext: _agentJournalContext);
+
+            // Determine the avatar's private emotional writing posture before
+            // generating options. The production adapter performs this on a
+            // disposable fork so private analysis never enters chat history.
+            if (_llm is IAvatarEmotionalDirectionProvider avatarDirector
+                && avatarDirector.SupportsAvatarEmotionalDirection)
+            {
+                AvatarEmotionalDirection direction = await avatarDirector
+                    .GetAvatarEmotionalDirectionAsync(
+                        context,
+                        new List<ConversationMessage>(state.AvatarHistory),
+                        state.AvatarSessionSnapshot,
+                        ct)
+                    .ConfigureAwait(false);
+                context.ApplyAvatarEmotionalDirection(direction);
+            }
 
             // Get dialogue options from LLM
             string dialogueCallId = OperationalDiagnostics.CreateCallId();
@@ -398,9 +415,11 @@ namespace Pinder.Core.Conversation
                     : new EmotionalStatusDebugInfo(
                         playerHfi,
                         playerTor,
-                        cognitiveSubtext,
+                        avatarCognitiveSubtext,
                         resolvedTarget?.StemText,
-                        resolvedTarget?.TransitionStyle);
+                        resolvedTarget?.TransitionStyle,
+                        primaryEmotion: context.AvatarPrimaryEmotion,
+                        responsePosture: context.AvatarResponsePosture);
 
             return new TurnStart(
                 options,

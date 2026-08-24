@@ -158,7 +158,7 @@ namespace Pinder.LlmAdapters
             SystemTokens("engine-state-transition-style-line", "transition_scope", "transition_style"),
             SystemTokens("dialogue-options-structured-json-instruction", "options_count", "available_stats"),
             SystemTokens("engine-options-block", "turn", "player_name", "game_state", "hfi_line", "tor_line",
-                "cognitive_subtext_line", "transition_target_line", "transition_style_line", "options_count", "options_format_list"),
+                "cognitive_subtext_line", "avatar_emotional_direction", "transition_target_line", "transition_style_line", "options_count", "options_format_list"),
             SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative",
                 "cognitive_subtext_line", "transition_target_line", "transition_style_line"),
             SystemTokens("diagnosis-repair-field", "field"),

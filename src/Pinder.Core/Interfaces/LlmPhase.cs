@@ -29,6 +29,9 @@ namespace Pinder.Core.Interfaces
         /// <summary>Private DATEE emotional reaction direction generation.</summary>
         public const string EmotionalDirector = "emotional_director";
 
+        /// <summary>Private player-avatar emotional direction before option generation.</summary>
+        public const string AvatarEmotionalDirector = "avatar_emotional_director";
+
         /// <summary>Alias for backward compatibility with tests.</summary>
         public const string DateeResponse = OpponentResponse;
 

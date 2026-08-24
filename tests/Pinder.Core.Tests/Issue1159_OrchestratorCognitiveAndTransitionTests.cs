@@ -27,9 +27,19 @@ namespace Pinder.Core.Tests
             public int Roll(int sides) => _value;
         }
 
-        private sealed class CapturingLlm : ILlmAdapter
+        private sealed class CapturingLlm : ILlmAdapter, IAvatarEmotionalDirectionProvider
         {
             public DialogueContext? LastDialogueContext { get; private set; }
+            public bool SupportsAvatarEmotionalDirection => true;
+
+            public Task<AvatarEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+                DialogueContext context,
+                IReadOnlyList<ConversationMessage> avatarHistory,
+                LlmConversationSessionSnapshot? avatarSession,
+                CancellationToken cancellationToken = default)
+                => Task.FromResult(new AvatarEmotionalDirection(
+                    "shame",
+                    "Writing from shame, the avatar risks honesty while resisting the urge to disappear."));
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
             {
@@ -162,6 +172,10 @@ namespace Pinder.Core.Tests
             Assert.NotNull(turn.AvatarEmotionalStatusDebug);
             Assert.Equal(7, turn.AvatarEmotionalStatusDebug!.HungerForIntimacy);
             Assert.Equal(12, turn.AvatarEmotionalStatusDebug.TerrorOfRejection);
+            Assert.Equal("shame", turn.AvatarEmotionalStatusDebug.PrimaryEmotion);
+            Assert.Contains("Writing from shame", turn.AvatarEmotionalStatusDebug.ResponsePosture);
+            Assert.Equal("FEAR OF BEING OVERLOOKED + TESTS SINCERITY BEFORE TRUSTING IT", llm.LastDialogueContext.CognitiveSubtext);
+            Assert.Equal("FEAR OF BEING OVERLOOKED + TESTS SINCERITY BEFORE TRUSTING IT", turn.AvatarEmotionalStatusDebug.CognitiveSubtext);
         }
 
         private static GameSession MakeSession(
@@ -170,7 +184,7 @@ namespace Pinder.Core.Tests
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0)
         {
-            var player = MakeProfile("Velvet", psychiatricDiagnosis: null);
+            var player = MakeProfile("Velvet", psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
             var datee = MakeProfile("Sable", psychiatricDiagnosis: dateeDiagnosis);
 
             return new GameSession(

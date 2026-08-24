@@ -89,6 +89,35 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
+        [Trait("CORE-AVATAR-EMOTION", "director_session_wiring")]
+        public async Task avatar_emotional_director_uses_avatar_session_context_and_private_journal()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(LlmPhase.AvatarEmotionalDirector, ValidAvatarDirectionJson());
+            var adapter = CreateAdapter(transport, sink);
+            var history = new[]
+            {
+                ConversationMessage.User("Earlier DATEE line."),
+                ConversationMessage.Assistant("Earlier avatar line."),
+            };
+
+            AvatarEmotionalDirection direction = await adapter.GetAvatarEmotionalDirectionAsync(
+                MakeDialogueContext(JournalContext()),
+                history,
+                avatarSession: null);
+
+            Assert.Equal("shame", direction.PrimaryEmotion);
+            Assert.Contains("shame", direction.ResponsePosture, StringComparison.OrdinalIgnoreCase);
+            IReadOnlyList<ConversationMessage> captured = transport.PriorMessagesFor(LlmPhase.AvatarEmotionalDirector);
+            Assert.Equal(history.Select(message => message.Role), captured.Select(message => message.Role));
+            Assert.Equal(history.Select(message => message.Content), captured.Select(message => message.Content));
+            Assert.Contains(sink.Results, record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.AvatarEmotionalDirector
+                && record.TerminalStatus == AgentJournalTerminalStatus.Succeeded);
+        }
+
+        [Fact]
         [Trait("CORE-1387", "datee_usage_identity")]
         public async Task datee_director_and_performance_records_complete_usage_and_shared_call_ids()
         {
@@ -563,7 +592,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         [Fact]
         public void StaticApprovedInventory_IsClosedForConversationVerifier()
         {
-            Assert.Equal(6, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
+            Assert.Equal(7, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
             Assert.All(GameRunConversationJournalInventory.ApprovedCallPaths, id =>
                 Assert.True(GameRunConversationJournalInventory.IsApproved(id), id));
         }
@@ -723,6 +752,13 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                "\"response_posture\":\"turns warmer while still checking sincerity\"" +
                "}";
 
+        private static string ValidAvatarDirectionJson()
+            => "{" +
+               "\"schema_version\":\"avatar_emotional_direction.v1\"," +
+               "\"primary_emotion\":\"shame\"," +
+               "\"response_posture\":\"Writing from shame, the avatar hedges before risking a sincere admission.\"" +
+               "}";
+
         private static PromptCatalog BuiltInCatalog()
         {
             var catalog = PromptCatalog.LoadFromDirectory(FindPromptsRoot());
@@ -856,6 +892,13 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 (string Phase, string? Output, Exception? Error, UsageStep Usage) next;
                 lock (_gate)
                 {
+                    if (phase == LlmPhase.AvatarEmotionalDirector
+                        && (_outputs.Count == 0
+                            || _outputs.Peek().Phase != LlmPhase.AvatarEmotionalDirector))
+                    {
+                        AddUsage(new UsageStep(11, 7, 0, 0));
+                        return Task.FromResult(ValidAvatarDirectionJson());
+                    }
                     if (_outputs.Count == 0 && phase == LlmPhase.DialogueOptions && DefaultDialogueOutput != null)
                     {
                         AddUsage(new UsageStep(11, 7, 0, 0));

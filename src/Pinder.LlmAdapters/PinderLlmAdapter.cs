@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters
     /// additionally accept ordered typed prior messages. Provider wire formats
     /// remain below the transport boundary.
     /// </summary>
-    public sealed partial class PinderLlmAdapter : ISessionStatefulLlmAdapter, IDialogueOptionsEmotionalDebugCompiler, IDisposable
+    public sealed partial class PinderLlmAdapter : ISessionStatefulLlmAdapter, IDialogueOptionsEmotionalDebugCompiler, IAvatarEmotionalDirectionProvider, IDisposable
     {
         private const string HorninessOverlayPrompt = "horniness_overlay";
         private const string TrapOverlayPrompt = "trap_overlay";
@@ -53,6 +53,8 @@ namespace Pinder.LlmAdapters
                 && (!(_transport is IStructuredLlmTransport)
                     || (_transport is IStructuredConversationLlmTransport structuredContextual
                         && structuredContextual.SupportsStructuredConversationMessages));
+
+        public bool SupportsAvatarEmotionalDirection => SupportsConversationSessions;
 
         // #788: datee conversation state lives on GameSession, not here.
         // The adapter is pure-stateless and safe for concurrent reuse across sessions.
@@ -92,7 +94,9 @@ namespace Pinder.LlmAdapters
                 context.ResolvedTarget?.TransitionStyle,
                 SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(
                     context,
-                    _options.PromptCatalog));
+                    _options.PromptCatalog),
+                context.AvatarPrimaryEmotion,
+                context.AvatarResponsePosture);
         }
 
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(
@@ -1899,6 +1903,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
             if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
             {
                 return OperationalDiagnosticOperationKind.DateeEmotionalDirector;
+            }
+
+            if (string.Equals(phase, LlmPhase.AvatarEmotionalDirector, StringComparison.Ordinal))
+            {
+                return OperationalDiagnosticOperationKind.AvatarEmotionalDirector;
             }
 
             if (string.Equals(phase, LlmPhase.Delivery, StringComparison.Ordinal))

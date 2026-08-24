@@ -108,6 +108,7 @@ prompts:
       {hfi_line}
       {tor_line}
       {cognitive_subtext_line}
+      {avatar_emotional_direction}
       {transition_target_line}
       {transition_style_line}
       Generate {options_count} options for what {player_name} might send, given the conversation above.
