@@ -269,7 +269,7 @@ namespace Pinder.Core.Conversation
             if (_llm is IAvatarEmotionalDirectionProvider avatarDirector
                 && avatarDirector.SupportsAvatarEmotionalDirection)
             {
-                AvatarEmotionalDirection direction = await avatarDirector
+                CharacterEmotionalDirection direction = await avatarDirector
                     .GetAvatarEmotionalDirectionAsync(
                         context,
                         new List<ConversationMessage>(state.AvatarHistory),
@@ -409,17 +409,16 @@ namespace Pinder.Core.Conversation
             // can render the magnitude on its FoldableHintBanner.
             int? weaknessDcReduction = state.ActiveWeakness?.DcReduction;
 
-            EmotionalStatusDebugInfo avatarEmotionalStatusDebug =
+            CharacterEmotionalDebugInfo avatarEmotionalStatusDebug =
                 _llm is IDialogueOptionsEmotionalDebugCompiler debugCompiler
                     ? debugCompiler.CompileDialogueOptionsEmotionalDebug(context)
-                    : new EmotionalStatusDebugInfo(
+                    : new CharacterEmotionalDebugInfo(
                         playerHfi,
                         playerTor,
+                        context.AvatarEmotionalDirection,
                         avatarCognitiveSubtext,
                         resolvedTarget?.StemText,
-                        resolvedTarget?.TransitionStyle,
-                        primaryEmotion: context.AvatarPrimaryEmotion,
-                        responsePosture: context.AvatarResponsePosture);
+                        resolvedTarget?.TransitionStyle);
 
             return new TurnStart(
                 options,

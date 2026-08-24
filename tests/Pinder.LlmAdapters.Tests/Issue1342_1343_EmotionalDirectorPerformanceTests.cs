@@ -42,37 +42,37 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
             string performancePrompt = transport.UserMessages[1];
             Assert.Contains("DATEE EMOTIONAL PERFORMANCE DIRECTION", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: relieved but cautious", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("Primary emotion: relief", performancePrompt, StringComparison.Ordinal);
             Assert.Contains("Intensity: moderate and steadily rising", performancePrompt, StringComparison.Ordinal);
             Assert.Contains("Underlying feeling: fear of being dismissed", performancePrompt, StringComparison.Ordinal);
             Assert.Contains("Interpretation: reads the message as specific warmth that is probably meant for them", performancePrompt, StringComparison.Ordinal);
             Assert.Contains("Impulse: leans in with a careful question", performancePrompt, StringComparison.Ordinal);
             Assert.Contains("Restraint: keeps the reply tentative but available", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Response posture: turns warmer while still checking sincerity", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("Response posture: Writing from relief, turns warmer while still checking sincerity", performancePrompt, StringComparison.Ordinal);
             Assert.DoesNotContain("\"primary_emotion\"", performancePrompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director source packet", performancePrompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Psychiatric diagnosis", performancePrompt, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain(TherapistDiagnosisContract.DerivedFeelingKey, performancePrompt, StringComparison.Ordinal);
             Assert.Equal("That lands softer than I expected.", result.Response.MessageText.Trim());
             Assert.NotNull(result.Response.EmotionalReactionDebug);
-            Assert.Equal("relieved but cautious", result.Response.EmotionalReactionDebug!.PrimaryEmotion);
-            Assert.Equal("moderate and steadily rising", result.Response.EmotionalReactionDebug.Intensity);
-            Assert.Equal("fear of being dismissed", result.Response.EmotionalReactionDebug.UnderlyingFeeling);
-            Assert.Equal("reads the message as specific warmth that is probably meant for them", result.Response.EmotionalReactionDebug.Interpretation);
-            Assert.Equal("leans in with a careful question", result.Response.EmotionalReactionDebug.Impulse);
-            Assert.Equal("keeps the reply tentative but available", result.Response.EmotionalReactionDebug.Restraint);
-            Assert.Equal("turns warmer while still checking sincerity", result.Response.EmotionalReactionDebug.ResponsePosture);
+            Assert.Equal("relief", result.Response.EmotionalReactionDebug!.Direction!.PrimaryEmotion);
+            Assert.Equal("moderate and steadily rising", result.Response.EmotionalReactionDebug.Direction.Intensity);
+            Assert.Equal("fear of being dismissed", result.Response.EmotionalReactionDebug.Direction.UnderlyingFeeling);
+            Assert.Equal("reads the message as specific warmth that is probably meant for them", result.Response.EmotionalReactionDebug.Direction.Interpretation);
+            Assert.Equal("leans in with a careful question", result.Response.EmotionalReactionDebug.Direction.Impulse);
+            Assert.Equal("keeps the reply tentative but available", result.Response.EmotionalReactionDebug.Direction.Restraint);
+            Assert.Equal("Writing from relief, turns warmer while still checking sincerity", result.Response.EmotionalReactionDebug.Direction.ResponsePosture);
             Assert.NotNull(result.Response.EmotionalReactionDebug.CompiledPromptInstruction);
             Assert.StartsWith(
                 "DATEE EMOTIONAL PERFORMANCE DIRECTION",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
             Assert.Contains(
-                "Primary emotion: relieved but cautious",
+                "Primary emotion: relief",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
             Assert.Contains(
-                "Response posture: turns warmer while still checking sincerity",
+                "Response posture: Writing from relief, turns warmer while still checking sincerity",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
             Assert.DoesNotContain(
@@ -85,7 +85,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task StructuredDirectorThenPlainPerformance_UsesStructuredTransportOnlyForDirector()
         {
             var transport = new RecordingStructuredTransport(
-                new StructuredLlmResponse(ValidDirectionJson(primaryEmotion: "quietly delighted"), provider: "test", model: "structured", usedNativeStructuredOutput: true),
+                new StructuredLlmResponse(ValidDirectionJson(primaryEmotion: "joy"), provider: "test", model: "structured", usedNativeStructuredOutput: true),
                 "I did not expect that to make me smile.");
             var adapter = CreateAdapter(transport);
 
@@ -95,7 +95,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(1, transport.PlainCalls);
             Assert.Equal(LlmPhase.EmotionalDirector, transport.LastStructuredRequest!.Phase);
             Assert.Equal(LlmPhase.OpponentResponse, transport.Phases.Single());
-            Assert.Contains("Primary emotion: quietly delighted", transport.UserMessages.Single(), StringComparison.Ordinal);
+            Assert.Contains("Primary emotion: joy", transport.UserMessages.Single(), StringComparison.Ordinal);
         }
 
         [Fact]
@@ -289,7 +289,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             PromptCatalog catalog = BuiltInCatalog();
             DateeContext context = MakeContext();
-            var direction = ValidDirection(primaryEmotion: "warmly unsettled", responsePosture: "lets the reply open one careful door");
+            var direction = ValidDirection(primaryEmotion: "anxiety", responsePosture: "Writing from anxiety, lets the reply open one careful door");
 
             PromptTraceResult trace = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, catalog);
 
@@ -299,18 +299,18 @@ namespace Pinder.LlmAdapters.Tests
                     && span.Key == "emotional-reaction-performance-direction");
             foreach (string key in new[]
             {
-                "EmotionalDirector.PrimaryEmotion",
-                "EmotionalDirector.Intensity",
-                "EmotionalDirector.UnderlyingFeeling",
-                "EmotionalDirector.Interpretation",
-                "EmotionalDirector.Impulse",
-                "EmotionalDirector.Restraint",
-                "EmotionalDirector.ResponsePosture",
+                "CharacterEmotionalDirection.PrimaryEmotion",
+                "CharacterEmotionalDirection.Intensity",
+                "CharacterEmotionalDirection.UnderlyingFeeling",
+                "CharacterEmotionalDirection.Interpretation",
+                "CharacterEmotionalDirection.Impulse",
+                "CharacterEmotionalDirection.Restraint",
+                "CharacterEmotionalDirection.ResponsePosture",
             })
             {
                 Assert.Contains(
                     trace.Spans,
-                    span => span.SourceFile == SessionDocumentBuilder.EmotionalDirectorRuntimeSource
+                    span => span.SourceFile == SessionDocumentBuilder.CharacterEmotionalDirectionRuntimeSource
                         && span.Key == key);
             }
 
@@ -322,8 +322,8 @@ namespace Pinder.LlmAdapters.Tests
                 trace,
                 "emotional-reaction-performance-direction");
             Assert.StartsWith("DATEE EMOTIONAL PERFORMANCE DIRECTION", debugInstruction, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: warmly unsettled", debugInstruction, StringComparison.Ordinal);
-            Assert.Contains("Response posture: lets the reply open one careful door", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("Primary emotion: anxiety", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("Response posture: Writing from anxiety, lets the reply open one careful door", debugInstruction, StringComparison.Ordinal);
             Assert.DoesNotContain("visible delivered line", debugInstruction, StringComparison.Ordinal);
         }
 
@@ -488,7 +488,7 @@ namespace Pinder.LlmAdapters.Tests
                 interestAfterState: InterestState.Interested);
         }
 
-        private static EmotionalDirectorDirection ValidDirection(
+        private static CharacterEmotionalDirection ValidDirection(
             string? primaryEmotion = null,
             string? intensity = null,
             string? underlyingFeeling = null,
@@ -497,14 +497,14 @@ namespace Pinder.LlmAdapters.Tests
             string? restraint = null,
             string? responsePosture = null)
         {
-            return new EmotionalDirectorDirection(
-                primaryEmotion ?? "relieved but cautious",
+            return new CharacterEmotionalDirection(
+                primaryEmotion ?? "relief",
                 intensity ?? "moderate and steadily rising",
                 underlyingFeeling ?? "fear of being dismissed",
                 interpretation ?? "reads the message as specific warmth that is probably meant for them",
                 impulse ?? "leans in with a careful question",
                 restraint ?? "keeps the reply tentative but available",
-                responsePosture ?? "turns warmer while still checking sincerity");
+                responsePosture ?? "Writing from " + (primaryEmotion ?? "relief") + ", turns warmer while still checking sincerity");
         }
 
         private static string ValidDirectionJson(
@@ -526,7 +526,7 @@ namespace Pinder.LlmAdapters.Tests
                 responsePosture);
             return new JObject
             {
-                ["schema_version"] = EmotionalDirectorContract.SchemaVersion,
+                ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
                 ["primary_emotion"] = direction.PrimaryEmotion,
                 ["intensity"] = direction.Intensity,
                 ["underlying_feeling"] = direction.UnderlyingFeeling,

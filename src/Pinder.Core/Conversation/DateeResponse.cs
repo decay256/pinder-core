@@ -20,13 +20,13 @@ namespace Pinder.Core.Conversation
         /// Accepted private emotional direction for trusted diagnostics. Callers must
         /// keep this out of player-visible history and public wire contracts.
         /// </summary>
-        public EmotionalReactionDebugInfo? EmotionalReactionDebug { get; }
+        public CharacterEmotionalDebugInfo? EmotionalReactionDebug { get; }
 
         public DateeResponse(
             string messageText,
             Tell? detectedTell = null,
             WeaknessWindow? weaknessWindow = null,
-            EmotionalReactionDebugInfo? emotionalReactionDebug = null)
+            CharacterEmotionalDebugInfo? emotionalReactionDebug = null)
         {
             MessageText = messageText ?? throw new System.ArgumentNullException(nameof(messageText));
             DetectedTell = detectedTell;

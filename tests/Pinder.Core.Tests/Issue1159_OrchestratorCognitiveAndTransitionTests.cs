@@ -32,13 +32,18 @@ namespace Pinder.Core.Tests
             public DialogueContext? LastDialogueContext { get; private set; }
             public bool SupportsAvatarEmotionalDirection => true;
 
-            public Task<AvatarEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+            public Task<CharacterEmotionalDirection> GetAvatarEmotionalDirectionAsync(
                 DialogueContext context,
                 IReadOnlyList<ConversationMessage> avatarHistory,
                 LlmConversationSessionSnapshot? avatarSession,
                 CancellationToken cancellationToken = default)
-                => Task.FromResult(new AvatarEmotionalDirection(
+                => Task.FromResult(new CharacterEmotionalDirection(
                     "shame",
+                    "strong",
+                    "fear of being exposed",
+                    "reads the moment as risky but important",
+                    "wants to admit what they mean",
+                    "resists disappearing behind a joke",
                     "Writing from shame, the avatar risks honesty while resisting the urge to disappear."));
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
@@ -172,8 +177,8 @@ namespace Pinder.Core.Tests
             Assert.NotNull(turn.AvatarEmotionalStatusDebug);
             Assert.Equal(7, turn.AvatarEmotionalStatusDebug!.HungerForIntimacy);
             Assert.Equal(12, turn.AvatarEmotionalStatusDebug.TerrorOfRejection);
-            Assert.Equal("shame", turn.AvatarEmotionalStatusDebug.PrimaryEmotion);
-            Assert.Contains("Writing from shame", turn.AvatarEmotionalStatusDebug.ResponsePosture);
+            Assert.Equal("shame", turn.AvatarEmotionalStatusDebug.Direction!.PrimaryEmotion);
+            Assert.Contains("Writing from shame", turn.AvatarEmotionalStatusDebug.Direction.ResponsePosture);
             Assert.Equal("FEAR OF BEING OVERLOOKED + TESTS SINCERITY BEFORE TRUSTING IT", llm.LastDialogueContext.CognitiveSubtext);
             Assert.Equal("FEAR OF BEING OVERLOOKED + TESTS SINCERITY BEFORE TRUSTING IT", turn.AvatarEmotionalStatusDebug.CognitiveSubtext);
         }

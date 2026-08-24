@@ -59,7 +59,8 @@ namespace Pinder.LlmAdapters.AgentJournals
             => string.Equals(annotatedSourceFile, "character-profile", StringComparison.Ordinal)
                 || string.Equals(annotatedSourceFile, "conversation-history", StringComparison.Ordinal)
                 || string.Equals(annotatedSourceFile, PromptTraceDiagnosticContract.RuntimeDateeContextSource, StringComparison.Ordinal)
-                || string.Equals(annotatedSourceFile, PromptTraceDiagnosticContract.EmotionalDirectorRuntimeSource, StringComparison.Ordinal)
+                || string.Equals(annotatedSourceFile, PromptTraceDiagnosticContract.CharacterEmotionalDirectionRuntimeSource, StringComparison.Ordinal)
+                || string.Equals(annotatedSourceFile, PromptTraceDiagnosticContract.LegacyEmotionalDirectorRuntimeSource, StringComparison.Ordinal)
                 || string.Equals(annotatedSourceFile, PromptTraceDiagnosticContract.CharacterDiagnosisSource, StringComparison.Ordinal)
                 || (annotatedSourceFile ?? string.Empty).StartsWith("runtime:", StringComparison.Ordinal);
     }

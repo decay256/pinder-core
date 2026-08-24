@@ -151,7 +151,7 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Accepted private emotional direction for trusted diagnostic projections.
         /// </summary>
-        public EmotionalReactionDebugInfo? EmotionalReactionDebug { get; }
+        public CharacterEmotionalDebugInfo? EmotionalReactionDebug { get; }
 
         public TurnResult(
             RollResult roll,
@@ -192,7 +192,7 @@ namespace Pinder.Core.Conversation
             int dateeHungerForIntimacy = 0,
             int dateeTerrorOfRejection = 0,
             IReadOnlyList<XpLedger.XpEvent>? xpBreakdown = null,
-            EmotionalReactionDebugInfo? emotionalReactionDebug = null)
+            CharacterEmotionalDebugInfo? emotionalReactionDebug = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));

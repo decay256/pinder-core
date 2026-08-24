@@ -14,7 +14,8 @@ namespace Pinder.LlmAdapters
     {
         public const string RuntimeDateeContextSource = "runtime:DateeContext";
         public const string CharacterDiagnosisSource = "character:psychiatric_diagnosis";
-        public const string EmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
+        public const string CharacterEmotionalDirectionRuntimeSource = "runtime:CharacterEmotionalDirection";
+        public const string LegacyEmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
         public const string EmotionalReactionCatalogSource = "data/prompts/emotional-reactions.yaml";
         public const string ConversationHistorySource = "conversation-history";
 
@@ -38,7 +39,8 @@ namespace Pinder.LlmAdapters
             {
                 RuntimeDateeContextSource,
                 CharacterDiagnosisSource,
-                EmotionalDirectorRuntimeSource,
+                CharacterEmotionalDirectionRuntimeSource,
+                LegacyEmotionalDirectorRuntimeSource,
                 EmotionalReactionCatalogSource,
                 ConversationHistorySource,
             };

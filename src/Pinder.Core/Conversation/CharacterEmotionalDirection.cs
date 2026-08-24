@@ -3,20 +3,20 @@ using System;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Accepted private emotional-director output attached to a turn for trusted
-    /// diagnostic projections. This is never part of semantic conversation history.
+    /// Private, turn-local emotional direction for any character who is about
+    /// to communicate. The model is role-neutral; callers supply character and
+    /// situation context separately.
     /// </summary>
-    public sealed class EmotionalReactionDebugInfo
+    public sealed class CharacterEmotionalDirection
     {
-        public EmotionalReactionDebugInfo(
+        public CharacterEmotionalDirection(
             string primaryEmotion,
             string intensity,
             string underlyingFeeling,
             string interpretation,
             string impulse,
             string restraint,
-            string responsePosture,
-            string? compiledPromptInstruction = null)
+            string responsePosture)
         {
             PrimaryEmotion = primaryEmotion ?? throw new ArgumentNullException(nameof(primaryEmotion));
             Intensity = intensity ?? throw new ArgumentNullException(nameof(intensity));
@@ -25,7 +25,6 @@ namespace Pinder.Core.Conversation
             Impulse = impulse ?? throw new ArgumentNullException(nameof(impulse));
             Restraint = restraint ?? throw new ArgumentNullException(nameof(restraint));
             ResponsePosture = responsePosture ?? throw new ArgumentNullException(nameof(responsePosture));
-            CompiledPromptInstruction = compiledPromptInstruction;
         }
 
         public string PrimaryEmotion { get; }
@@ -35,6 +34,5 @@ namespace Pinder.Core.Conversation
         public string Impulse { get; }
         public string Restraint { get; }
         public string ResponsePosture { get; }
-        public string? CompiledPromptInstruction { get; }
     }
 }

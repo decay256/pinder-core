@@ -88,15 +88,15 @@ namespace Pinder.LlmAdapters.Tests
         private static (int Start, int End, string? SourceFile, string? Key) SpanTuple(AnnotatedSpan span)
             => (span.Start, span.End, span.SourceFile, span.Key);
 
-        private static EmotionalPrivateDirection ValidDirection()
+        private static CharacterEmotionalDirection ValidDirection()
             => new(
-                "relieved but cautious",
+                "relief",
                 "moderate and steadily rising",
                 "fear of being dismissed",
                 "reads the message as specific warmth that is probably meant for them",
                 "leans in with a careful question",
                 "keeps the reply tentative but available",
-                "turns warmer while still checking sincerity");
+                "Writing from relief, turns warmer while still checking sincerity");
 
         private static DateeContext MakeContext()
             => new(

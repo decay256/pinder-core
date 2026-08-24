@@ -13,8 +13,8 @@ namespace Pinder.LlmAdapters
 {
     public static partial class SessionDocumentBuilder
     {
-        internal const string EmotionalDirectorRuntimeSource =
-            PromptTraceDiagnosticContract.EmotionalDirectorRuntimeSource;
+        internal const string CharacterEmotionalDirectionRuntimeSource =
+            PromptTraceDiagnosticContract.CharacterEmotionalDirectionRuntimeSource;
 
         private static string GetTemplateSource(PromptCatalog? promptCatalog, string key)
         {
@@ -382,15 +382,20 @@ namespace Pinder.LlmAdapters
             }
 
             string avatarEmotionalDirection = string.Empty;
-            if (!string.IsNullOrWhiteSpace(context.AvatarPrimaryEmotion)
-                && !string.IsNullOrWhiteSpace(context.AvatarResponsePosture))
+            if (context.AvatarEmotionalDirection != null)
             {
+                CharacterEmotionalDirection direction = context.AvatarEmotionalDirection;
                 avatarEmotionalDirection = RenderTemplate(
                     GetTemplate(promptCatalog, "avatar-emotional-performance-direction"),
                     new Dictionary<string, string>
                     {
-                        { "primary_emotion", context.AvatarPrimaryEmotion ?? string.Empty },
-                        { "response_posture", context.AvatarResponsePosture ?? string.Empty },
+                        { "primary_emotion", direction.PrimaryEmotion },
+                        { "intensity", direction.Intensity },
+                        { "underlying_feeling", direction.UnderlyingFeeling },
+                        { "interpretation", direction.Interpretation },
+                        { "impulse", direction.Impulse },
+                        { "restraint", direction.Restraint },
+                        { "response_posture", direction.ResponsePosture },
                     }) + "\n";
             }
 
@@ -487,7 +492,7 @@ namespace Pinder.LlmAdapters
 
         internal static PromptTraceResult BuildDateePerformancePromptEx(
             DateeContext context,
-            EmotionalPrivateDirection emotionalDirection,
+            CharacterEmotionalDirection emotionalDirection,
             PromptCatalog? promptCatalog = null,
             bool includeConversationHistory = true)
         {
@@ -497,7 +502,7 @@ namespace Pinder.LlmAdapters
 
         private static PromptTraceResult BuildDateePromptCore(
             DateeContext context,
-            EmotionalPrivateDirection? emotionalDirection,
+            CharacterEmotionalDirection? emotionalDirection,
             PromptCatalog? promptCatalog,
             bool includeConversationHistory = true)
         {
@@ -673,13 +678,13 @@ namespace Pinder.LlmAdapters
                     "emotional-reaction-performance-direction",
                     new Dictionary<string, (string Value, string SourceFile, string Key)>
                     {
-                        { "{primary_emotion}", (emotionalDirection.PrimaryEmotion, EmotionalDirectorRuntimeSource, "EmotionalDirector.PrimaryEmotion") },
-                        { "{intensity}", (emotionalDirection.Intensity, EmotionalDirectorRuntimeSource, "EmotionalDirector.Intensity") },
-                        { "{underlying_feeling}", (emotionalDirection.UnderlyingFeeling, EmotionalDirectorRuntimeSource, "EmotionalDirector.UnderlyingFeeling") },
-                        { "{interpretation}", (emotionalDirection.Interpretation, EmotionalDirectorRuntimeSource, "EmotionalDirector.Interpretation") },
-                        { "{impulse}", (emotionalDirection.Impulse, EmotionalDirectorRuntimeSource, "EmotionalDirector.Impulse") },
-                        { "{restraint}", (emotionalDirection.Restraint, EmotionalDirectorRuntimeSource, "EmotionalDirector.Restraint") },
-                        { "{response_posture}", (emotionalDirection.ResponsePosture, EmotionalDirectorRuntimeSource, "EmotionalDirector.ResponsePosture") },
+                        { "{primary_emotion}", (emotionalDirection.PrimaryEmotion, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.PrimaryEmotion") },
+                        { "{intensity}", (emotionalDirection.Intensity, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Intensity") },
+                        { "{underlying_feeling}", (emotionalDirection.UnderlyingFeeling, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.UnderlyingFeeling") },
+                        { "{interpretation}", (emotionalDirection.Interpretation, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Interpretation") },
+                        { "{impulse}", (emotionalDirection.Impulse, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Impulse") },
+                        { "{restraint}", (emotionalDirection.Restraint, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Restraint") },
+                        { "{response_posture}", (emotionalDirection.ResponsePosture, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.ResponsePosture") },
                     },
                     promptCatalog);
                 sb.AppendLine();

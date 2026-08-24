@@ -245,7 +245,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
             DateeContext dateeContext = Datee();
             EmotionalPromptCompiler compiler = new EmotionalPromptCompiler(catalog);
             CompiledEmotionalDirectorPrompt director = compiler.CompileDirector(dateeContext);
-            EmotionalPrivateDirection direction = Direction();
+            CharacterEmotionalDirection direction = Direction();
             PromptTraceResult performance = compiler.CompilePerformance(dateeContext, direction);
             PromptEntry dramaticArc = catalog.RequireCompleteEntry("dramatic_arc", "missing dramatic_arc");
             IReadOnlyDictionary<string, string> dramaticValues = DramaticArcValues();
@@ -484,15 +484,15 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
                 ["dateeBio"] = "notices evasions",
             };
 
-        private static EmotionalPrivateDirection Direction()
-            => new EmotionalPrivateDirection(
-                "relieved but cautious",
+        private static CharacterEmotionalDirection Direction()
+            => new CharacterEmotionalDirection(
+                "relief",
                 "moderate and steadily rising",
                 "fear of being dismissed",
                 "reads the message as specific warmth that is probably meant for them",
                 "leans in with a careful question",
                 "keeps the reply tentative but available",
-                "turns warmer while still checking sincerity");
+                "Writing from relief, turns warmer while still checking sincerity");
 
         private static Dictionary<string, string> Diagnosis()
             => new Dictionary<string, string>

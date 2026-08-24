@@ -67,7 +67,7 @@ same payload under Anthropic tool, OpenAI JSON-schema, structured non-native,
 and plain-text local JSON fallback paths, and has regression coverage in
 `Issue1159_1160_StructuredDialogueOptionsTests`.
 
-`EmotionalDirectorContract` sets `SchemaName = "emotional_director"` and
+`CharacterEmotionalDirectionContract` sets `SchemaName = "emotional_director"` and
 `SchemaVersion = "emotional_director.v1"` on `StructuredLlmRequest`. Its
 payload schema and parser require root `schema_version:
 "emotional_director.v1"` plus the seven director fields, and reject missing,

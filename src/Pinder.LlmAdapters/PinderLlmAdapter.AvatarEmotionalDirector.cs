@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ namespace Pinder.LlmAdapters
 {
     public sealed partial class PinderLlmAdapter
     {
-        public async Task<AvatarEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+        public async Task<CharacterEmotionalDirection> GetAvatarEmotionalDirectionAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage> avatarHistory,
             LlmConversationSessionSnapshot? avatarSession,
@@ -55,26 +54,19 @@ namespace Pinder.LlmAdapters
             }
         }
 
-        private async Task<AvatarEmotionalDirection> GenerateAvatarEmotionalDirectionAsync(
+        private async Task<CharacterEmotionalDirection> GenerateAvatarEmotionalDirectionAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage> priorMessages,
             PiConversationBranch privateBranch,
             CancellationToken cancellationToken)
         {
             PromptCatalog catalog = PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog);
-            PromptEntry vocabularyEntry = RequireAvatarPrompt(catalog, "avatar-emotional-primary-emotions");
-            IReadOnlyList<string> allowedEmotions = vocabularyEntry.SystemPrompt!
-                .Split(new[] { ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                .Select(value => value.Trim())
-                .Where(value => value.Length > 0)
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .ToArray();
-            if (allowedEmotions.Count == 0)
-                throw new InvalidOperationException("avatar-emotional-primary-emotions must contain at least one emotion.");
+            PromptEntry vocabularyEntry = RequireAvatarPrompt(catalog, CharacterEmotionCatalog.PromptKey);
+            IReadOnlyList<string> allowedEmotions = CharacterEmotionCatalog.Load(catalog);
 
             PromptEntry director = catalog.RequireCompleteEntry(
-                "avatar-emotional-director",
-                "prompt-catalog: missing avatar-emotional-director.");
+                EmotionalPromptCompiler.DirectorPromptKey,
+                "prompt-catalog: missing shared character emotional director.");
             PromptEntry wrapper = RequireAvatarPrompt(catalog, "avatar-emotional-director-system-wrapper");
             PromptEntry input = RequireAvatarPrompt(catalog, "avatar-emotional-director-input");
             PromptEntry relationship = RequireAvatarPrompt(
@@ -87,13 +79,13 @@ namespace Pinder.LlmAdapters
             PromptTraceResult directorRulesTrace = RenderAvatarTemplate(
                 director.SystemPrompt!,
                 director,
-                "avatar-emotional-director",
+                EmotionalPromptCompiler.DirectorPromptKey,
                 new Dictionary<string, PromptTraceResult>
                 {
                     ["{emotion_vocabulary}"] = TraceAvatarPrompt(
                         string.Join(", ", allowedEmotions),
                         vocabularyEntry,
-                        "avatar-emotional-primary-emotions"),
+                        CharacterEmotionCatalog.PromptKey),
                 });
             PromptTraceResult systemTrace = RenderAvatarTemplate(
                 wrapper.SystemPrompt!,
@@ -124,154 +116,43 @@ namespace Pinder.LlmAdapters
             PromptTraceResult userTrace = RenderAvatarTemplate(
                 director.UserTemplate!,
                 director,
-                "avatar-emotional-director",
+                EmotionalPromptCompiler.DirectorPromptKey,
                 new Dictionary<string, PromptTraceResult>
                 {
-                    ["{compiled_avatar_emotional_input}"] = inputTrace,
+                    ["{compiled_reaction_input}"] = inputTrace,
                 });
-            AnnotatedInvocationDocument systemDocument =
-                GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(systemTrace);
-            AnnotatedInvocationDocument userDocument =
-                GameRunPromptDocumentBuilder.BuildEmotionalDirectorUserDocument(userTrace);
             double temperature = director.Temperature ?? LlmPhaseTemperatures.EmotionalDirector;
             int? maxTokens = director.MaxTokens ?? _options.MaxTokens;
             var metadata = new Dictionary<string, string>
             {
-                ["schema_version"] = AvatarEmotionalDirectionContract.SchemaVersion,
+                ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
                 ["emotion_count"] = allowedEmotions.Count.ToString(System.Globalization.CultureInfo.InvariantCulture),
             };
-
-            int maxAttempts = GetContractViolationAttemptLimit();
-            var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<AvatarEmotionalDirection, LlmContractException>(
-                maxAttempts,
-                async (attempt, attemptCancellationToken) =>
-                {
-                    AgentJournalCallScope? journal = null;
-                    try
+            var sharedCompiler = new EmotionalPromptCompiler(catalog);
+            return await ExecuteCharacterEmotionalDirectorAsync(
+                    new CharacterEmotionalDirectorInvocation
                     {
-                        if (attempt > 1)
-                        {
-                            PromptEntry repair = RequireAvatarPrompt(catalog, "avatar-emotional-director-repair");
-                            PromptTraceResult retryTrace = AppendAvatarTraces(
-                                systemTrace,
-                                TraceAvatarPrompt(repair.SystemPrompt!, repair, "avatar-emotional-director-repair"));
-                            systemDocument = GameRunPromptDocumentBuilder.BuildEmotionalDirectorSystemDocument(retryTrace);
-                        }
-
-                        journal = await StartConversationJournalAttemptAsync(
-                                GameRunConversationJournalInventory.AvatarEmotionalDirector,
-                                LlmPhase.AvatarEmotionalDirector,
-                                context.CurrentTurn,
-                                attempt,
-                                maxAttempts,
-                                "avatar-private-analysis",
-                                systemDocument,
-                                userDocument,
-                                branch: privateBranch,
-                                branchKind: "avatar-private-analysis",
-                                correlationContext: context.AgentJournalContext)
-                            .ConfigureAwait(false);
-
-                        AvatarEmotionalDirection direction;
-                        string responseText;
-                        bool canUseStructured = _transport is IStructuredLlmTransport
-                            && (priorMessages.Count == 0
-                                || (_transport is IStructuredConversationLlmTransport contextual
-                                    && contextual.SupportsStructuredConversationMessages));
-                        if (canUseStructured)
-                        {
-                            var request = AvatarEmotionalDirectionContract.CreateRequest(
-                                systemDocument.Text,
-                                userDocument.Text,
-                                temperature,
-                                maxTokens,
-                                metadata,
-                                allowedEmotions);
-                            var response = await SendStructuredWithDiagnosticsAsync(
-                                    (IStructuredLlmTransport)_transport,
-                                    request,
-                                    LlmPhase.AvatarEmotionalDirector,
-                                    context.CurrentTurn,
-                                    attemptCancellationToken,
-                                    priorMessages: priorMessages,
-                                    callId: journal.CallId)
-                                .ConfigureAwait(false);
-                            responseText = response.JsonText;
-                            try
-                            {
-                                direction = ParseAvatarDirectionOrThrow(
-                                    responseText,
-                                    response.UsedNativeStructuredOutput,
-                                    allowedEmotions,
-                                    response.Provider,
-                                    response.Model,
-                                    context.CurrentTurn);
-                                response.ReportValidation("accepted");
-                            }
-                            catch (LlmContractException ex)
-                            {
-                                response.ReportValidation("rejected", ex.Reason);
-                                throw;
-                            }
-                        }
-                        else
-                        {
-                            responseText = await SendWithDiagnosticsAsync(
-                                    _transport,
-                                    systemDocument.Text,
-                                    userDocument.Text,
-                                    temperature,
-                                    maxTokens,
-                                    LlmPhase.AvatarEmotionalDirector,
-                                    context.CurrentTurn,
-                                    attemptCancellationToken,
-                                    priorMessages: priorMessages,
-                                    callId: journal.CallId)
-                                .ConfigureAwait(false);
-                            direction = ParseAvatarDirectionOrThrow(
-                                responseText,
-                                false,
-                                allowedEmotions,
-                                null,
-                                null,
-                                context.CurrentTurn);
-                        }
-
-                        PiAcceptedExchangeEntryIds entryIds = await privateBranch.AppendAcceptedExchangeAsync(
-                            userDocument.Text,
-                            responseText).ConfigureAwait(false);
-                        await journal.CompleteAcceptedAsync(responseText, entryIds.AssistantEntryId).ConfigureAwait(false);
-                        return SemanticOutputRecoveryAttemptResult<AvatarEmotionalDirection, LlmContractException>.Accepted(direction);
-                    }
-                    catch (LlmContractException ex)
-                    {
-                        if (journal != null)
-                            await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
-                        return SemanticOutputRecoveryAttemptResult<AvatarEmotionalDirection, LlmContractException>.Rejected(ex);
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        if (journal != null)
-                            await journal.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        if (journal != null)
-                            await journal.CompleteProviderFailedAsync(ex.GetType().Name).ConfigureAwait(false);
-                        throw;
-                    }
-                },
-                delayAfterRejectedAttempt: attempt => TimeSpan.FromMilliseconds(
-                    GetContractViolationBackoffDelayMs(_options.ContractViolationBackoffMs, attempt)),
-                onRejected: rejection => NotifyContractViolation(rejection, "avatar-director"),
-                cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            if (recovery.IsAccepted)
-                return recovery.AcceptedValue;
-
-            ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
-            throw recovery.Exhaustion.FinalRejection;
+                        Phase = LlmPhase.AvatarEmotionalDirector,
+                        JournalOperation = GameRunConversationJournalInventory.AvatarEmotionalDirector,
+                        PrivatePhase = "avatar-private-analysis",
+                        BranchKind = "avatar-private-analysis",
+                        Turn = context.CurrentTurn,
+                        SystemPrompt = systemTrace,
+                        UserPrompt = userTrace,
+                        Temperature = temperature,
+                        MaxTokens = maxTokens,
+                        AllowedEmotions = allowedEmotions,
+                        PriorMessages = priorMessages,
+                        PrivateBranch = privateBranch,
+                        JournalContext = context.AgentJournalContext,
+                        BuildMetadata = _ => metadata,
+                        CompileRetrySystemPrompt = reason => sharedCompiler.CompileDirectorRetrySystemPrompt(
+                            systemTrace,
+                            reason),
+                        OnExhausted = (exception, attempts) => { },
+                    },
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private static PromptEntry RequireAvatarPrompt(PromptCatalog catalog, string key)
@@ -333,46 +214,5 @@ namespace Pinder.LlmAdapters
                 text,
                 new[] { new AnnotatedSpan(0, text.Length, "runtime:AvatarEmotionalDirectorInput", key) });
 
-        private static PromptTraceResult AppendAvatarTraces(PromptTraceResult first, PromptTraceResult second)
-        {
-            var builder = new AnnotatedStringBuilder();
-            builder.Append(first);
-            builder.Append("\n\n", "runtime:AvatarEmotionalDirectorInput", "AvatarEmotionalDirector.RepairSeparator");
-            builder.Append(second);
-            return new PromptTraceResult(builder.ToString(), builder.Spans);
-        }
-
-        private static AvatarEmotionalDirection ParseAvatarDirectionOrThrow(
-            string? jsonText,
-            bool requireCompleteJsonObject,
-            IReadOnlyList<string> allowedEmotions,
-            string? provider,
-            string? model,
-            int? turnId)
-        {
-            if (AvatarEmotionalDirectionContract.TryParse(
-                jsonText,
-                requireCompleteJsonObject,
-                allowedEmotions,
-                out AvatarEmotionalDirection? direction,
-                out string errorCode))
-            {
-                return direction!;
-            }
-
-            throw new LlmContractException(
-                LlmPhase.AvatarEmotionalDirector,
-                errorCode,
-                "LLM avatar emotional direction output failed its private contract.",
-                provider,
-                model,
-                AvatarEmotionalDirectionContract.ParserName,
-                null,
-                null,
-                null,
-                null,
-                null,
-                turnId);
-        }
     }
 }

@@ -68,17 +68,29 @@ Returns a resistance descriptor string for the typed relationship state supplied
 
 Builds the user-message content for `GetDateeResponseAsync` (§3.5). Assembles prior completed visible exchanges from `DateeContext.ConversationHistory`, the current delivered event from `DateeContext.PlayerDeliveredMessage`, typed final interest state from `DateeContext.InterestAfterState`, optional trap/shadow blocks, and the final `DateeResponseInstruction`. The relationship narrative and resistance block are selected by the typed state and annotated with their semantic YAML keys. Section order remains the active DATEE order documented in tests. When `context.DeliveryTier != FailureTier.None`, the "PLAYER'S LAST MESSAGE" heading includes the tier name and a "FAILURE CONTEXT" section is injected containing the per-tier reaction guidance from `GetDateeReactionGuidance()`. On success (`FailureTier.None`), no failure section is injected.
 
-### `PinderLlmAdapter.GenerateEmotionalDirectionAsync(DateeContext)` (internal)
+### Character emotional direction subsystem
 
-Private DATEE emotional director operation for #1341. It compiles the #1340
-`DateeContext.EmotionalTurnEvent` artifact, renders the
-`emotional-reaction-director` YAML system/user prompt, sends the primary
-transport under `LlmPhase.EmotionalDirector`, prefers
-`IStructuredLlmTransport` when available, falls back to local JSON extraction
-for plain text transports, and validates exactly `primary_emotion`,
+Avatar and DATEE emotional planning share one role-neutral domain model,
+`CharacterEmotionalDirection`, one structured-output contract,
+`CharacterEmotionalDirectionContract`, one configurable primary-emotion
+vocabulary, and one execution lifecycle for transport selection, retries,
+journal recording, validation, and diagnostics. Role-specific compilers only
+construct the character and situation context supplied to that lifecycle.
+This keeps emotional semantics identical for every character without mixing
+DATEE event interpretation with avatar option-generation concerns.
+
+The shared contract validates exactly `primary_emotion`,
 `intensity`, `underlying_feeling`, `interpretation`, `impulse`, `restraint`,
-and `response_posture`. It preserves the compiled annotation source files and
-keys in private request metadata and emits a sanitized terminal diagnostic when
+and `response_posture`. The configured vocabulary is loaded from
+`character-emotional-primary-emotions` in
+`data/prompts/emotional-reactions.yaml`; the JSON schema and parser both enforce
+it. A response posture must explicitly name the selected primary emotion.
+
+The DATEE path compiles `DateeContext.EmotionalTurnEvent`, then runs emotional
+direction after the delivered player message and before DATEE performance. The
+avatar path runs before dialogue-option generation and uses the complete avatar
+system prompt plus visible conversation history. Both preserve annotation source files and
+keys in private request metadata and emit a sanitized terminal diagnostic when
 contract retries are exhausted.
 
 The production `PinderLlmAdapter.GetDateeResponseAsync(DateeContext, history,
@@ -121,7 +133,7 @@ transport. Anthropic's optional improvement pass reports its successful response
 through a narrow callback to the owning `AnthropicTransport`, so the same session
 total includes both draft and improvement calls without a second telemetry store.
 
-### `SessionDocumentBuilder.BuildDateePerformancePromptEx(DateeContext, EmotionalDirectorDirection)` (internal)
+### `SessionDocumentBuilder.BuildDateePerformancePromptEx(DateeContext, CharacterEmotionalDirection)` (internal)
 
 Internal DATEE performance prompt builder used only by the production adapter
 path. It preserves the ordinary public `BuildDateePrompt/BuildDateePromptEx`

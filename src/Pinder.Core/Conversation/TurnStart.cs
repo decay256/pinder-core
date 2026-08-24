@@ -60,12 +60,12 @@ namespace Pinder.Core.Conversation
         /// Exact avatar HFI/TOR values supplied to dialogue-option generation.
         /// Trusted callers may project this for diagnostics; it is not gameplay history.
         /// </summary>
-        public EmotionalStatusDebugInfo? AvatarEmotionalStatusDebug { get; }
+        public CharacterEmotionalDebugInfo? AvatarEmotionalStatusDebug { get; }
 
         public TurnStart(DialogueOption[] options, GameStateSnapshot state, PerOptionDicePool[] dicePools,
             DateeDefenseSnapshot dateeDefenseSnapshot = null,
             int? weaknessDcReduction = null,
-            EmotionalStatusDebugInfo? avatarEmotionalStatusDebug = null)
+            CharacterEmotionalDebugInfo? avatarEmotionalStatusDebug = null)
         {
             Options = options ?? throw new ArgumentNullException(nameof(options));
             State = state ?? throw new ArgumentNullException(nameof(state));

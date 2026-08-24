@@ -8,6 +8,6 @@ namespace Pinder.Core.Interfaces
     /// </summary>
     public interface IDialogueOptionsEmotionalDebugCompiler
     {
-        EmotionalStatusDebugInfo CompileDialogueOptionsEmotionalDebug(DialogueContext context);
+        CharacterEmotionalDebugInfo CompileDialogueOptionsEmotionalDebug(DialogueContext context);
     }
 }

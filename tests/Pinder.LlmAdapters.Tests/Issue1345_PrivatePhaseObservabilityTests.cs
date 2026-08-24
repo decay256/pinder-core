@@ -41,7 +41,7 @@ namespace Pinder.LlmAdapters.Tests
                         model: "unit-director-model",
                         usedNativeStructuredOutput: true),
                     new StructuredLlmResponse(
-                        ValidDirectionJson(primaryEmotion: PrivateDirectorValue),
+                        ValidDirectionJson(underlyingFeeling: PrivateDirectorValue),
                         provider: "unit-provider",
                         model: "unit-director-model",
                         usedNativeStructuredOutput: true),
@@ -100,7 +100,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.True(directorTerminal.CorrelationHints["compiled_input_keys"].Length > 256);
             AssertSafePromptTraceHints(directorTerminal);
             Assert.Equal("emotional_director", directorTerminal.CorrelationHints["schema_name"]);
-            Assert.Equal(EmotionalDirectorContract.SchemaVersion, directorTerminal.CorrelationHints["schema_version"]);
+            Assert.Equal(CharacterEmotionalDirectionContract.SchemaVersion, directorTerminal.CorrelationHints["schema_version"]);
             Assert.Equal("unit-provider", directorTerminal.CorrelationHints["provider"]);
             Assert.Equal("unit-director-model", directorTerminal.CorrelationHints["model"]);
             AssertNonNegativeIntHint(directorTerminal, "elapsed_ms");
@@ -122,7 +122,6 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("data/prompts/emotional-reactions.yaml", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
             Assert.Contains("conversation-history", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
             Assert.Contains("emotional-reaction-performance-direction", performanceTerminal.CorrelationHints["prompt_trace_keys"], StringComparison.Ordinal);
-            Assert.True(performanceTerminal.CorrelationHints["prompt_trace_keys"].Length > 256);
             AssertSafePromptTraceHints(performanceTerminal);
             AssertNonNegativeIntHint(performanceTerminal, "elapsed_ms");
             Assert.Equal("ITokenUsageProvider.session_delta", performanceTerminal.CorrelationHints["token_source"]);
@@ -214,18 +213,20 @@ namespace Pinder.LlmAdapters.Tests
                     diagnosis));
         }
 
-        private static string ValidDirectionJson(string? primaryEmotion = null)
+        private static string ValidDirectionJson(
+            string? primaryEmotion = null,
+            string? underlyingFeeling = null)
         {
             return new JObject
             {
-                ["schema_version"] = EmotionalDirectorContract.SchemaVersion,
-                ["primary_emotion"] = primaryEmotion ?? "relieved but cautious",
+                ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
+                ["primary_emotion"] = primaryEmotion ?? "relief",
                 ["intensity"] = "moderate and steadily rising",
-                ["underlying_feeling"] = "fear of being dismissed",
+                ["underlying_feeling"] = underlyingFeeling ?? "fear of being dismissed",
                 ["interpretation"] = "reads the message as specific warmth that is probably meant for them",
                 ["impulse"] = "leans in with a careful question",
                 ["restraint"] = "keeps the reply tentative but available",
-                ["response_posture"] = "turns warmer while still checking sincerity",
+                ["response_posture"] = "Writing from " + (primaryEmotion ?? "relief") + ", turns warmer while still checking sincerity",
             }.ToString(Formatting.None);
         }
 

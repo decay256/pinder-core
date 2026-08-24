@@ -152,7 +152,7 @@
         "DateeContext.InterestBefore",
         "DateeContext.InterestAfter",
         "DateeContext.DeliveryTier",
-        "EmotionalDirectorDirection"
+        "CharacterEmotionalDirection"
       ],
       "recorder_consumer": "datee_agent_journal"
     },

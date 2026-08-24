@@ -1,40 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 
 namespace Pinder.LlmAdapters
 {
-    internal sealed class EmotionalDirectorDirection : EmotionalPrivateDirection
-    {
-        public EmotionalDirectorDirection(
-            string primaryEmotion,
-            string intensity,
-            string underlyingFeeling,
-            string interpretation,
-            string impulse,
-            string restraint,
-            string responsePosture)
-            : base(
-                primaryEmotion,
-                intensity,
-                underlyingFeeling,
-                interpretation,
-                impulse,
-                restraint,
-                responsePosture)
-        {
-        }
-    }
-
-    internal static class EmotionalDirectorContract
+    internal static class CharacterEmotionalDirectionContract
     {
         public const string SchemaName = "emotional_director";
         public const string SchemaVersion = "emotional_director.v1";
-        public const string ParserName = "EmotionalDirectorContract";
+        public const string ParserName = "CharacterEmotionalDirectionContract";
 
         private const int MinFieldChars = 3;
         private const string SchemaVersionField = "schema_version";
@@ -148,24 +128,27 @@ namespace Pinder.LlmAdapters
             string userMessage,
             double temperature,
             int? maxTokens,
-            IReadOnlyDictionary<string, string> metadata)
+            IReadOnlyDictionary<string, string> metadata,
+            string phase,
+            IReadOnlyList<string> allowedEmotions)
         {
             return new StructuredLlmRequest(
                 schemaName: SchemaName,
                 schemaVersion: SchemaVersion,
-                jsonSchema: BuildJsonSchema(),
+                jsonSchema: BuildJsonSchema(allowedEmotions),
                 systemPrompt: systemPrompt,
                 userMessage: userMessage,
                 temperature: temperature,
                 maxTokens: maxTokens,
-                phase: LlmPhase.EmotionalDirector,
+                phase: phase,
                 metadata: metadata);
         }
 
         public static bool TryParse(
             string? jsonText,
             bool requireCompleteJsonObject,
-            out EmotionalDirectorDirection? direction,
+            IReadOnlyList<string> allowedEmotions,
+            out CharacterEmotionalDirection? direction,
             out string errorCode)
         {
             direction = null;
@@ -265,8 +248,25 @@ namespace Pinder.LlmAdapters
                 values[field] = value;
             }
 
-            direction = new EmotionalDirectorDirection(
-                values["primary_emotion"],
+            string? canonicalEmotion = allowedEmotions.FirstOrDefault(
+                emotion => string.Equals(
+                    emotion,
+                    values["primary_emotion"],
+                    StringComparison.OrdinalIgnoreCase));
+            if (canonicalEmotion == null)
+            {
+                errorCode = "unsupported_primary_emotion";
+                return false;
+            }
+
+            if (values["response_posture"].IndexOf(canonicalEmotion, StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                errorCode = "response_posture_omits_primary_emotion";
+                return false;
+            }
+
+            direction = new CharacterEmotionalDirection(
+                canonicalEmotion,
                 values["intensity"],
                 values["underlying_feeling"],
                 values["interpretation"],
@@ -383,7 +383,7 @@ namespace Pinder.LlmAdapters
             return true;
         }
 
-        private static string BuildJsonSchema()
+        private static string BuildJsonSchema(IReadOnlyList<string> allowedEmotions)
         {
             var properties = new JObject();
             properties[SchemaVersionField] = new JObject
@@ -400,6 +400,12 @@ namespace Pinder.LlmAdapters
                     ["minLength"] = MinFieldChars,
                 };
             }
+
+            properties["primary_emotion"] = new JObject
+            {
+                ["type"] = "string",
+                ["enum"] = new JArray(allowedEmotions),
+            };
 
             var schema = new JObject
             {

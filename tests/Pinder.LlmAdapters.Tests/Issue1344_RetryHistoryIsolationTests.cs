@@ -166,14 +166,14 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new JObject
             {
-                ["schema_version"] = EmotionalDirectorContract.SchemaVersion,
-                ["primary_emotion"] = "relieved but cautious",
+                ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
+                ["primary_emotion"] = "relief",
                 ["intensity"] = "moderate and steadily rising",
                 ["underlying_feeling"] = "fear of being dismissed",
                 ["interpretation"] = "reads the message as specific warmth that is probably meant for them",
                 ["impulse"] = "leans in with a careful question",
                 ["restraint"] = "keeps the reply tentative but available",
-                ["response_posture"] = "turns warmer while still checking sincerity",
+                ["response_posture"] = "Writing from relief, turns warmer while still checking sincerity",
             }.ToString(Formatting.None);
         }
 

@@ -324,10 +324,10 @@ namespace Pinder.LlmAdapters.Tests
         {
             QualificationTransport transport = structured
                 ? new StructuredQualificationTransport(
-                    ValidDirectionJson(primaryEmotion: "carefully impressed"),
+                    ValidDirectionJson(primaryEmotion: "pride"),
                     VisibleQualifiedReply)
                 : new QualificationTransport(
-                    ValidDirectionJson(primaryEmotion: "carefully impressed"),
+                    ValidDirectionJson(primaryEmotion: "pride"),
                     VisibleQualifiedReply);
             var adapter = CreateAdapter(transport);
 
@@ -356,7 +356,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
             Assert.Contains("DATEE EMOTIONAL PERFORMANCE DIRECTION", transport.PerformanceUserMessage, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: carefully impressed", transport.PerformanceUserMessage, StringComparison.Ordinal);
+            Assert.Contains("Primary emotion: pride", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director source packet", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("Character-specific emotional translation", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.Contains("QUALIFICATION COMPLETE CHARACTER VOICE " + scenarioId, transport.PerformanceSystemPrompt, StringComparison.Ordinal);
@@ -374,8 +374,8 @@ namespace Pinder.LlmAdapters.Tests
                 "QUALIFICATION VOICE RESTRAINED: lowercase, dry, and unwilling to over-explain.";
             const string expressiveVoice =
                 "QUALIFICATION VOICE EXPRESSIVE: candid, buoyant, and emotionally explicit.";
-            const string restrainedEmotion = "guarded amusement";
-            const string expressiveEmotion = "open delight";
+            const string restrainedEmotion = "amusement";
+            const string expressiveEmotion = "joy";
             const string restrainedReply = "maybe. that was better than I expected.";
             const string expressiveReply = "Okay, that genuinely delighted me. Tell me more.";
 
@@ -645,14 +645,14 @@ namespace Pinder.LlmAdapters.Tests
         {
             return new JObject
             {
-                ["schema_version"] = EmotionalDirectorContract.SchemaVersion,
-                ["primary_emotion"] = primaryEmotion ?? "relieved but cautious",
+                ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
+                ["primary_emotion"] = primaryEmotion ?? "relief",
                 ["intensity"] = "moderate and steadily rising",
                 ["underlying_feeling"] = "fear of being dismissed",
                 ["interpretation"] = "reads the message as specific warmth that is probably meant for them",
                 ["impulse"] = impulse ?? "leans in with a careful question",
                 ["restraint"] = "keeps the reply tentative but available",
-                ["response_posture"] = "turns warmer while still checking sincerity",
+                ["response_posture"] = "Writing from " + (primaryEmotion ?? "relief") + ", turns warmer while still checking sincerity",
             }.ToString(Newtonsoft.Json.Formatting.None);
         }
 

@@ -9,38 +9,6 @@ using Pinder.Core.Text;
 namespace Pinder.LlmAdapters
 {
     /// <summary>
-    /// Public DTO for private emotional direction used to compile the visible performance prompt.
-    /// </summary>
-    public class EmotionalPrivateDirection
-    {
-        public EmotionalPrivateDirection(
-            string primaryEmotion,
-            string intensity,
-            string underlyingFeeling,
-            string interpretation,
-            string impulse,
-            string restraint,
-            string responsePosture)
-        {
-            PrimaryEmotion = primaryEmotion;
-            Intensity = intensity;
-            UnderlyingFeeling = underlyingFeeling;
-            Interpretation = interpretation;
-            Impulse = impulse;
-            Restraint = restraint;
-            ResponsePosture = responsePosture;
-        }
-
-        public string PrimaryEmotion { get; }
-        public string Intensity { get; }
-        public string UnderlyingFeeling { get; }
-        public string Interpretation { get; }
-        public string Impulse { get; }
-        public string Restraint { get; }
-        public string ResponsePosture { get; }
-    }
-
-    /// <summary>
     /// Non-sending compilation result for the private emotional director request.
     /// </summary>
     public sealed class CompiledEmotionalDirectorPrompt
@@ -128,8 +96,7 @@ namespace Pinder.LlmAdapters
                 context,
                 _catalog,
                 includeConversationHistory);
-            PromptTraceResult directorSystemPrompt = TrimTrace(
-                TraceLiteral(prompt.SystemPrompt!, prompt.SourceFile, DirectorPromptKey));
+            PromptTraceResult directorSystemPrompt = CompileDirectorRulesPrompt(prompt);
             PromptTraceResult systemPrompt = string.IsNullOrWhiteSpace(dateeSystemPrompt)
                 ? directorSystemPrompt
                 : CompileDirectorSystemPrompt(dateeSystemPrompt!, directorSystemPrompt);
@@ -146,7 +113,7 @@ namespace Pinder.LlmAdapters
 
         public PromptTraceResult CompilePerformance(
             DateeContext context,
-            EmotionalPrivateDirection direction,
+            CharacterEmotionalDirection direction,
             bool includeConversationHistory = true)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -160,7 +127,7 @@ namespace Pinder.LlmAdapters
 
         public CompiledEmotionalPrompts CompileScenario(
             DateeContext context,
-            EmotionalPrivateDirection direction)
+            CharacterEmotionalDirection direction)
         {
             CompiledEmotionalDirectorPrompt director = CompileDirector(context);
             PromptTraceResult performance = CompilePerformance(context, direction);
@@ -193,6 +160,31 @@ namespace Pinder.LlmAdapters
                 repairPrompt!.Trim(),
                 repair.SourceFile,
                 repairKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+        }
+
+        private PromptTraceResult CompileDirectorRulesPrompt(PromptEntry prompt)
+        {
+            const string placeholder = "{emotion_vocabulary}";
+            string template = prompt.SystemPrompt!;
+            int index = template.IndexOf(placeholder, StringComparison.Ordinal);
+            if (index < 0)
+            {
+                throw new InvalidOperationException(
+                    "emotional-reaction-director must include {emotion_vocabulary}.");
+            }
+
+            PromptEntry vocabulary = _catalog.TryGet(CharacterEmotionCatalog.PromptKey)!;
+            var builder = new AnnotatedStringBuilder();
+            builder.Append(template.Substring(0, index), prompt.SourceFile, DirectorPromptKey);
+            builder.Append(
+                string.Join(", ", CharacterEmotionCatalog.Load(_catalog)),
+                vocabulary.SourceFile,
+                CharacterEmotionCatalog.PromptKey);
+            builder.Append(
+                template.Substring(index + placeholder.Length),
+                prompt.SourceFile,
+                DirectorPromptKey);
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 

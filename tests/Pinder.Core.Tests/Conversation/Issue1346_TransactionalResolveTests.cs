@@ -831,7 +831,7 @@ namespace Pinder.Core.Tests.Conversation
                 new Dictionary<string, Queue<Func<string>>>(StringComparer.Ordinal);
 
             private const string ValidDirectorJson =
-                "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relieved but cautious\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
+                "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relief\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"}";
 
             public void Queue(string phase, string response)
             {

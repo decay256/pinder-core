@@ -102,7 +102,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 ConversationMessage.Assistant("Earlier avatar line."),
             };
 
-            AvatarEmotionalDirection direction = await adapter.GetAvatarEmotionalDirectionAsync(
+            CharacterEmotionalDirection direction = await adapter.GetAvatarEmotionalDirectionAsync(
                 MakeDialogueContext(JournalContext()),
                 history,
                 avatarSession: null);
@@ -742,20 +742,25 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 
         private static string ValidDirectionJson()
             => "{" +
-               "\"schema_version\":\"" + EmotionalDirectorContract.SchemaVersion + "\"," +
-               "\"primary_emotion\":\"relieved but cautious\"," +
+               "\"schema_version\":\"" + CharacterEmotionalDirectionContract.SchemaVersion + "\"," +
+               "\"primary_emotion\":\"relief\"," +
                "\"intensity\":\"moderate and steadily rising\"," +
                "\"underlying_feeling\":\"fear of being dismissed\"," +
                "\"interpretation\":\"reads the message as specific warmth that is probably meant for them\"," +
                "\"impulse\":\"leans in with a careful question\"," +
                "\"restraint\":\"keeps the reply tentative but available\"," +
-               "\"response_posture\":\"turns warmer while still checking sincerity\"" +
+               "\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"" +
                "}";
 
         private static string ValidAvatarDirectionJson()
             => "{" +
-               "\"schema_version\":\"avatar_emotional_direction.v1\"," +
+               "\"schema_version\":\"" + CharacterEmotionalDirectionContract.SchemaVersion + "\"," +
                "\"primary_emotion\":\"shame\"," +
+               "\"intensity\":\"strong and rising\"," +
+               "\"underlying_feeling\":\"fear of being exposed\"," +
+               "\"interpretation\":\"reads the moment as risky but meaningful\"," +
+               "\"impulse\":\"risks a sincere admission\"," +
+               "\"restraint\":\"resists retreating into a joke\"," +
                "\"response_posture\":\"Writing from shame, the avatar hedges before risking a sincere admission.\"" +
                "}";
 

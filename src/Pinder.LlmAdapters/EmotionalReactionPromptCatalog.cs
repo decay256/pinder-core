@@ -189,7 +189,8 @@ namespace Pinder.LlmAdapters
             RequireCompletePromptWithPlaceholders(
                 catalog,
                 "emotional-reaction-director",
-                "compiled_reaction_input");
+                new[] { "emotion_vocabulary" },
+                new[] { "compiled_reaction_input" });
             RequireSystemPromptWithPlaceholders(
                 catalog,
                 EmotionalPromptCompiler.DirectorSystemWrapperPromptKey,
@@ -201,15 +202,7 @@ namespace Pinder.LlmAdapters
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey);
-            RequireSystemPrompt(catalog, "avatar-emotional-primary-emotions");
-            RequireCompletePromptWithPlaceholders(
-                catalog,
-                "avatar-emotional-director",
-                "compiled_avatar_emotional_input");
-            RequireSystemPromptWithPlaceholders(
-                catalog,
-                "avatar-emotional-director",
-                "emotion_vocabulary");
+            RequireSystemPrompt(catalog, CharacterEmotionCatalog.PromptKey);
             RequireSystemPromptWithPlaceholders(
                 catalog,
                 "avatar-emotional-director-system-wrapper",
@@ -224,11 +217,15 @@ namespace Pinder.LlmAdapters
                 "cognitive_subtext",
                 "transition_target",
                 "transition_style");
-            RequireSystemPrompt(catalog, "avatar-emotional-director-repair");
             RequireSystemPromptWithPlaceholders(
                 catalog,
                 "avatar-emotional-performance-direction",
                 "primary_emotion",
+                "intensity",
+                "underlying_feeling",
+                "interpretation",
+                "impulse",
+                "restraint",
                 "response_posture");
         }
 
@@ -270,11 +267,14 @@ namespace Pinder.LlmAdapters
         private static void RequireCompletePromptWithPlaceholders(
             PromptCatalog catalog,
             string key,
-            params string[] userTokens)
+            IReadOnlyList<string> systemTokens,
+            IReadOnlyList<string> userTokens)
         {
             var entry = catalog.RequireCompleteEntry(
                 key,
                 $"prompt-catalog: missing required runtime prompt key '{key}'. The yaml file is incomplete or missing.");
+            foreach (string token in systemTokens)
+                RequirePlaceholderInTemplate(key, entry.SystemPrompt!, "system_prompt", token);
             foreach (string token in userTokens)
                 RequirePlaceholderInTemplate(key, entry.UserTemplate!, "user_template", token);
         }

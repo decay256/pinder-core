@@ -10,7 +10,6 @@ using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
-using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.LlmAdapters.Anthropic;
 using Pinder.LlmAdapters.AgentJournals;
 
@@ -82,21 +81,20 @@ namespace Pinder.LlmAdapters
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
             => GetDialogueOptionsCoreAsync(context, priorMessages: null, journalSession: null, ct);
 
-        public EmotionalStatusDebugInfo CompileDialogueOptionsEmotionalDebug(DialogueContext context)
+        public CharacterEmotionalDebugInfo CompileDialogueOptionsEmotionalDebug(DialogueContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            return new EmotionalStatusDebugInfo(
+            return new CharacterEmotionalDebugInfo(
                 context.PlayerHungerForIntimacy ?? 0,
                 context.PlayerTerrorOfRejection ?? 0,
+                context.AvatarEmotionalDirection,
                 context.CognitiveSubtext,
                 context.ResolvedTarget?.StemText,
                 context.ResolvedTarget?.TransitionStyle,
                 SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(
                     context,
-                    _options.PromptCatalog),
-                context.AvatarPrimaryEmotion,
-                context.AvatarResponsePosture);
+                    _options.PromptCatalog));
         }
 
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(
@@ -400,7 +398,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             AnnotatedInvocationDocument systemDocument =
                 GameRunPromptDocumentBuilder.BuildDateeSystemDocument(context.DateePrompt, gameDef);
             string systemPrompt = systemDocument.Text;
-            EmotionalDirectorDirection emotionalDirection;
+            CharacterEmotionalDirection emotionalDirection;
             if (dateeSession != null)
             {
                 PiConversationBranch directorBranch = await dateeSession.ForkAsync(
@@ -540,15 +538,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
                             parsed.MessageText,
                             parsed.DetectedTell,
                             parsed.WeaknessWindow,
-                            new EmotionalReactionDebugInfo(
-                                emotionalDirection.PrimaryEmotion,
-                                emotionalDirection.Intensity,
-                                emotionalDirection.UnderlyingFeeling,
-                                emotionalDirection.Interpretation,
-                                emotionalDirection.Impulse,
-                                emotionalDirection.Restraint,
-                                emotionalDirection.ResponsePosture,
-                                SessionDocumentBuilder.ExtractAnnotatedInstruction(
+                            new CharacterEmotionalDebugInfo(
+                                hungerForIntimacy: 0,
+                                terrorOfRejection: 0,
+                                direction: emotionalDirection,
+                                compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
                                     dateePrompt,
                                     "emotional-reaction-performance-direction")));
 

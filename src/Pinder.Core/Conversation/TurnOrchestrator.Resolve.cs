@@ -131,6 +131,13 @@ namespace Pinder.Core.Conversation
 
             var stateSnapshot = TurnOrchestratorHelpers.CreateSnapshot(state, _rules);
 
+            int playerHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm);
+            int playerTor = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz);
+            int dateeHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm);
+            int dateeTor = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz);
+            CharacterEmotionalDebugInfo? dateeEmotionalDebug =
+                dateeResponse.EmotionalReactionDebug?.WithStatus(dateeHfi, dateeTor);
+
             return new TurnResult(
                 roll: rollStage.RollResult,
                 deliveredMessage: deliveryStage.DeliveredMessage,
@@ -168,11 +175,11 @@ namespace Pinder.Core.Conversation
                 activeTrapInterestPenaltyPercent: rollStage.ActiveTrapInterestPenaltyPercent,
                 resolvedTarget: state.CurrentResolvedTarget,
                 cognitiveSubtext: state.CurrentCognitiveSubtext,
-                hungerForIntimacy: _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm),
-                terrorOfRejection: _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz),
-                dateeHungerForIntimacy: _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm),
-                dateeTerrorOfRejection: _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz),
-                emotionalReactionDebug: dateeResponse.EmotionalReactionDebug);
+                hungerForIntimacy: playerHfi,
+                terrorOfRejection: playerTor,
+                dateeHungerForIntimacy: dateeHfi,
+                dateeTerrorOfRejection: dateeTor,
+                emotionalReactionDebug: dateeEmotionalDebug);
         }
     }
 }
