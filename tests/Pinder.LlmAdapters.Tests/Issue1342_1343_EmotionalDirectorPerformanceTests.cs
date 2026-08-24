@@ -62,6 +62,23 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("leans in with a careful question", result.Response.EmotionalReactionDebug.Impulse);
             Assert.Equal("keeps the reply tentative but available", result.Response.EmotionalReactionDebug.Restraint);
             Assert.Equal("turns warmer while still checking sincerity", result.Response.EmotionalReactionDebug.ResponsePosture);
+            Assert.NotNull(result.Response.EmotionalReactionDebug.CompiledPromptInstruction);
+            Assert.StartsWith(
+                "DATEE EMOTIONAL PERFORMANCE DIRECTION",
+                result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "Primary emotion: relieved but cautious",
+                result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "Response posture: turns warmer while still checking sincerity",
+                result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "visible delivered line",
+                result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
+                StringComparison.Ordinal);
         }
 
         [Fact]
@@ -300,6 +317,14 @@ namespace Pinder.LlmAdapters.Tests
             int performanceIndex = trace.Spans.First(span => span.Key == "emotional-reaction-performance-direction").Start;
             int finalIndex = trace.Spans.First(span => span.Key == "datee-response-instruction").Start;
             Assert.InRange(performanceIndex, 0, finalIndex - 1);
+
+            string debugInstruction = SessionDocumentBuilder.ExtractAnnotatedInstruction(
+                trace,
+                "emotional-reaction-performance-direction");
+            Assert.StartsWith("DATEE EMOTIONAL PERFORMANCE DIRECTION", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("Primary emotion: warmly unsettled", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("Response posture: lets the reply open one careful door", debugInstruction, StringComparison.Ordinal);
+            Assert.DoesNotContain("visible delivered line", debugInstruction, StringComparison.Ordinal);
         }
 
         [Fact]

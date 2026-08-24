@@ -392,13 +392,23 @@ namespace Pinder.Core.Conversation
             // can render the magnitude on its FoldableHintBanner.
             int? weaknessDcReduction = state.ActiveWeakness?.DcReduction;
 
+            EmotionalStatusDebugInfo avatarEmotionalStatusDebug =
+                _llm is IDialogueOptionsEmotionalDebugCompiler debugCompiler
+                    ? debugCompiler.CompileDialogueOptionsEmotionalDebug(context)
+                    : new EmotionalStatusDebugInfo(
+                        playerHfi,
+                        playerTor,
+                        cognitiveSubtext,
+                        resolvedTarget?.StemText,
+                        resolvedTarget?.TransitionStyle);
+
             return new TurnStart(
                 options,
                 snapshot,
                 state.CurrentDicePools,
                 defenseSnapshot,
                 weaknessDcReduction,
-                new EmotionalStatusDebugInfo(playerHfi, playerTor));
+                avatarEmotionalStatusDebug);
         }
 
         private AgentJournalOneShotContext? CreateAgentJournalContext(

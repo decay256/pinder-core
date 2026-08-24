@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters
     /// additionally accept ordered typed prior messages. Provider wire formats
     /// remain below the transport boundary.
     /// </summary>
-    public sealed partial class PinderLlmAdapter : ISessionStatefulLlmAdapter, IDisposable
+    public sealed partial class PinderLlmAdapter : ISessionStatefulLlmAdapter, IDialogueOptionsEmotionalDebugCompiler, IDisposable
     {
         private const string HorninessOverlayPrompt = "horniness_overlay";
         private const string TrapOverlayPrompt = "trap_overlay";
@@ -79,6 +79,21 @@ namespace Pinder.LlmAdapters
         /// <inheritdoc />
         public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
             => GetDialogueOptionsCoreAsync(context, priorMessages: null, journalSession: null, ct);
+
+        public EmotionalStatusDebugInfo CompileDialogueOptionsEmotionalDebug(DialogueContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            return new EmotionalStatusDebugInfo(
+                context.PlayerHungerForIntimacy ?? 0,
+                context.PlayerTerrorOfRejection ?? 0,
+                context.CognitiveSubtext,
+                context.ResolvedTarget?.StemText,
+                context.ResolvedTarget?.TransitionStyle,
+                SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(
+                    context,
+                    _options.PromptCatalog));
+        }
 
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(
             DialogueContext context,
@@ -528,7 +543,10 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 emotionalDirection.Interpretation,
                                 emotionalDirection.Impulse,
                                 emotionalDirection.Restraint,
-                                emotionalDirection.ResponsePosture));
+                                emotionalDirection.ResponsePosture,
+                                SessionDocumentBuilder.ExtractAnnotatedInstruction(
+                                    dateePrompt,
+                                    "emotional-reaction-performance-direction")));
 
                         // Keep dialogue history semantic: never persist the generated
                         // prompt document or hidden signal block as though it were

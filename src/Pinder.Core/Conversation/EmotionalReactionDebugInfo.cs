@@ -15,7 +15,8 @@ namespace Pinder.Core.Conversation
             string interpretation,
             string impulse,
             string restraint,
-            string responsePosture)
+            string responsePosture,
+            string? compiledPromptInstruction = null)
         {
             PrimaryEmotion = primaryEmotion ?? throw new ArgumentNullException(nameof(primaryEmotion));
             Intensity = intensity ?? throw new ArgumentNullException(nameof(intensity));
@@ -24,6 +25,7 @@ namespace Pinder.Core.Conversation
             Impulse = impulse ?? throw new ArgumentNullException(nameof(impulse));
             Restraint = restraint ?? throw new ArgumentNullException(nameof(restraint));
             ResponsePosture = responsePosture ?? throw new ArgumentNullException(nameof(responsePosture));
+            CompiledPromptInstruction = compiledPromptInstruction;
         }
 
         public string PrimaryEmotion { get; }
@@ -33,5 +35,6 @@ namespace Pinder.Core.Conversation
         public string Impulse { get; }
         public string Restraint { get; }
         public string ResponsePosture { get; }
+        public string? CompiledPromptInstruction { get; }
     }
 }

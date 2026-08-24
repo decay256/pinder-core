@@ -128,6 +128,43 @@ namespace Pinder.LlmAdapters
             PromptCatalog? promptCatalog = null)
             => BuildDialogueOptionsPromptCore(context, promptCatalog, includeConversationHistory: true);
 
+        /// <summary>
+        /// Returns the exact annotated ENGINE_STATE block embedded in the dialogue-options prompt.
+        /// </summary>
+        public static string BuildDialogueOptionsEngineStateInstruction(
+            DialogueContext context,
+            PromptCatalog? promptCatalog = null)
+            => ExtractAnnotatedInstruction(
+                BuildDialogueOptionsPromptEx(context, promptCatalog),
+                "engine-options-block");
+
+        /// <summary>
+        /// Extracts one complete configured instruction from an annotated prompt without
+        /// re-rendering it. Replacement spans between the template spans are retained.
+        /// </summary>
+        public static string ExtractAnnotatedInstruction(PromptTraceResult prompt, string templateKey)
+        {
+            if (prompt == null) throw new ArgumentNullException(nameof(prompt));
+            if (string.IsNullOrWhiteSpace(templateKey))
+                throw new ArgumentException("Template key must not be blank.", nameof(templateKey));
+
+            var templateSpans = prompt.Spans
+                .Where(span => string.Equals(span.Key, templateKey, StringComparison.Ordinal))
+                .ToArray();
+            if (templateSpans.Length == 0)
+                throw new InvalidOperationException(
+                    $"Compiled prompt does not contain annotated template '{templateKey}'.");
+
+            int start = templateSpans.Min(span => span.Start);
+            int literalEnd = templateSpans.Max(span => span.End);
+            int end = prompt.Spans
+                .Where(span => span.Start >= start && span.Start <= literalEnd)
+                .Select(span => span.End)
+                .DefaultIfEmpty(literalEnd)
+                .Max();
+            return prompt.Text.Substring(start, end - start).Trim();
+        }
+
         internal static PromptTraceResult BuildDialogueOptionsSessionPromptEx(
             DialogueContext context,
             PromptCatalog? promptCatalog = null)

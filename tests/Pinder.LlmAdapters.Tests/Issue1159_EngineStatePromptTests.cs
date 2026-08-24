@@ -58,6 +58,17 @@ namespace Pinder.LlmAdapters.Tests
             AssertCatalogSpan(trace, "engine-state-cognitive-subtext-line");
             AssertCatalogSpan(trace, "engine-state-transition-target-line");
             AssertCatalogSpan(trace, "engine-state-transition-style-line");
+
+            string debugInstruction = SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(context);
+            Assert.StartsWith("<ENGINE_STATE>", debugInstruction, StringComparison.Ordinal);
+            Assert.EndsWith("</ENGINE_STATE>", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("HFI (Hunger for Intimacy): player 7, datee 9", debugInstruction);
+            Assert.Contains("TOR (Terror of Rejection): player 12, datee 14", debugInstruction);
+            Assert.Contains("Cognitive subtext: ABANDONMENT + DEFLECTION", debugInstruction);
+            Assert.Contains("Transition target: pretending the move was easy", debugInstruction);
+            Assert.Contains("Transition style for the final option: buffered disclosure", debugInstruction);
+            Assert.DoesNotContain("velvet system prompt", debugInstruction, StringComparison.Ordinal);
+            Assert.DoesNotContain("sable system prompt", debugInstruction, StringComparison.Ordinal);
         }
 
         [Fact]
