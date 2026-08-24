@@ -5,6 +5,19 @@ using Pi.AI;
 namespace Pinder.LlmAdapters.Pi
 {
     /// <summary>
+    /// Host-owned capabilities for the selected provider model. Values come
+    /// from the host's model configuration rather than universal adapter defaults.
+    /// </summary>
+    public sealed class PiProviderModelCapabilities
+    {
+        /// <summary>
+        /// Maximum output tokens used when a provider requires a wire value and
+        /// the individual request does not specify one.
+        /// </summary>
+        public int? MaxOutputTokens { get; set; }
+    }
+
+    /// <summary>
     /// Host-neutral configuration for Pinder's Pi provider composition root.
     /// The host supplies networking through <see cref="FetchFunction"/>.
     /// </summary>
@@ -18,6 +31,7 @@ namespace Pinder.LlmAdapters.Pi
         public int MaxRetries { get; set; } = 3;
         public int MaxRetryDelayMilliseconds { get; set; } = 60_000;
         public ThinkingLevel? Reasoning { get; set; }
+        public PiProviderModelCapabilities? ModelCapabilities { get; set; }
         public Action<AssistantMessage, string?>? ResponseObserver { get; set; }
     }
 
@@ -41,6 +55,10 @@ namespace Pinder.LlmAdapters.Pi
                 throw new ArgumentOutOfRangeException(nameof(options), "MaxRetries must be non-negative.");
             if (options.MaxRetryDelayMilliseconds < 0)
                 throw new ArgumentOutOfRangeException(nameof(options), "MaxRetryDelayMilliseconds must be non-negative.");
+            if (options.ModelCapabilities?.MaxOutputTokens <= 0)
+                throw new ArgumentOutOfRangeException(
+                    nameof(options),
+                    "ModelCapabilities.MaxOutputTokens must be positive when configured.");
 
             bool anthropic = providerName == "anthropic";
             var providerId = new ProviderId(providerName);
@@ -56,7 +74,7 @@ namespace Pinder.LlmAdapters.Pi
                 Reasoning = providerName == "google",
                 Input = new[] { ModelInput.Text },
                 ContextWindow = 200_000,
-                MaxTokens = 16_384,
+                MaxTokens = options.ModelCapabilities?.MaxOutputTokens ?? 0,
                 Compatibility = CreateCompatibility(providerName, options.Model),
             };
 
@@ -92,7 +110,28 @@ namespace Pinder.LlmAdapters.Pi
                     Reasoning = options.Reasoning
                         ?? (providerName == "google" ? ThinkingLevel.Minimal : null),
                 },
-                options.ResponseObserver);
+                options.ResponseObserver,
+                requestedMaxTokens => ResolveMaxTokens(
+                    providerName,
+                    options.Model,
+                    requestedMaxTokens,
+                    options.ModelCapabilities));
+        }
+
+        private static int? ResolveMaxTokens(
+            string provider,
+            string model,
+            int? requestedMaxTokens,
+            PiProviderModelCapabilities? capabilities)
+        {
+            if (requestedMaxTokens.HasValue) return requestedMaxTokens;
+            if (provider != "anthropic") return null;
+            if (capabilities?.MaxOutputTokens is int configuredMaximum) return configuredMaximum;
+
+            throw new InvalidOperationException(
+                "Anthropic requires max output tokens. Configure the selected model '" + model +
+                "' through PiProviderTransportOptions.ModelCapabilities.MaxOutputTokens " +
+                "or provide maxTokens for this request.");
         }
 
         private static string NormalizeProvider(string provider)

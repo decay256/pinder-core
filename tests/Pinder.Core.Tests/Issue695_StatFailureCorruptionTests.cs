@@ -70,7 +70,9 @@ namespace Pinder.Core.Tests
             Assert.NotEqual("Nice vibes", result.DeliveredMessage);
             Assert.Contains("DESPAIR",
                 instructions.GetStatFailureInstruction(StatType.Rizz, result.Roll.Tier));
-            Assert.Contains("YOUR DESIGNATED TEXTING STYLE", llm.CapturedVoiceDirective);
+            Assert.StartsWith("YOUR TEXTING STYLE\n", llm.CapturedVoiceDirective, StringComparison.Ordinal);
+            Assert.Contains("loose expressive influences", llm.CapturedVoiceDirective);
+            Assert.DoesNotContain("YOUR DESIGNATED TEXTING STYLE", llm.CapturedVoiceDirective);
             Assert.Contains("lowercase; sign off with 🫡", llm.CapturedVoiceDirective);
         }
 

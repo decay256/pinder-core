@@ -6,6 +6,45 @@ using Pinder.Core.Characters;
 namespace Pinder.Core.Prompts
 {
     /// <summary>
+    /// Canonical texting-style axis taxonomy shared by runtime aggregation,
+    /// content validation, and tooling. The exposed collections are immutable
+    /// and ordered: syntax axes precede expression axes in model-facing output.
+    /// </summary>
+    public static class TextingStyleTaxonomy
+    {
+        public static IReadOnlyList<string> SyntaxAxes { get; } = Array.AsReadOnly(new[]
+        {
+            "emoji", "shorthand", "grammar", "structure", "length", "tics",
+        });
+
+        public static IReadOnlyList<string> ExpressionAxes { get; } = Array.AsReadOnly(new[]
+        {
+            "directness", "affect", "rhythm",
+        });
+
+        public static IReadOnlyList<string> CanonicalAxes { get; } = Array.AsReadOnly(
+            SyntaxAxes.Concat(ExpressionAxes).ToArray());
+
+        public static bool IsSyntaxAxis(string? axis)
+            => Contains(SyntaxAxes, axis);
+
+        public static bool IsExpressionAxis(string? axis)
+            => Contains(ExpressionAxes, axis);
+
+        private static bool Contains(IReadOnlyList<string> axes, string? candidate)
+        {
+            if (candidate == null) return false;
+            for (int index = 0; index < axes.Count; index++)
+            {
+                if (string.Equals(axes[index], candidate, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Aggregation for the texting-style channel that flows into the LLM
     /// system prompt and runtime <c>PlayerTextingStyle</c>.
     ///
@@ -19,7 +58,7 @@ namespace Pinder.Core.Prompts
     ///     SYNTAX block; the other 5 lines on that item are ignored.
     ///   - The anatomy parameters partition into 3 expression groups: directness,
     ///     affect, and rhythm. Each group decides its axis by majority vote
-    ///     across the equipped tiers' TONE block, ties broken by group
+    ///     across the equipped tiers' EXPRESSION block, ties broken by group
     ///     order. Empty contributions are dropped.
     ///   - Output is exactly 9 axes. Unfilled slots / silent groups drop
     ///     their axis from the final list rather than back-filling.
@@ -32,8 +71,7 @@ namespace Pinder.Core.Prompts
     /// returned via <see cref="AggregateWithAudit"/>. Callers that only
     /// need the string output can use <see cref="Aggregate"/> as before.
     ///
-    /// Replaces the placeholder random-pick-2 aggregation. Personality /
-    /// backstory channels are unaffected — they remain a flat join across
+    /// Personality / backstory channels are unaffected — they remain a flat join across
     /// items + anatomy and travel through different prompt sections.
     ///
     /// Determinism: the rule is fully deterministic for a given
@@ -105,12 +143,7 @@ namespace Pinder.Core.Prompts
 
         // Canonical output order. Aggregate() emits axes in this order;
         // missing axes are dropped, not preserved as gaps.
-        internal static readonly IReadOnlyList<string> CanonicalAxisOrder =
-            new[]
-            {
-                "emoji", "shorthand", "grammar", "structure", "length", "tics",
-                "directness", "affect", "rhythm",
-            };
+        internal static IReadOnlyList<string> CanonicalAxisOrder => TextingStyleTaxonomy.CanonicalAxes;
 
         // ------------------------------------------------------------------
         // #907: Production conflict catalog. Loaded once at startup by
@@ -130,8 +163,7 @@ namespace Pinder.Core.Prompts
         public static TextingStyleConflicts? ConflictCatalog { get; set; }
 
         // ------------------------------------------------------------------
-        // Public surface (unchanged signatures from the placeholder). The
-        // seedKey parameter is retained for callers and participates in the
+        // Public surface. The seedKey parameter participates in the
         // stable candidate selector when a source offers multiple fragments
         // for one axis.
         // ------------------------------------------------------------------

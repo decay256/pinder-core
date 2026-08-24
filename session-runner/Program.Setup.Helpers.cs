@@ -93,6 +93,14 @@ partial class Program
     {
         result.ModelSpec = ParseGameModelArg(args);
         result.SetupModelSpec = ParseSetupModelArg(args, result.ModelSpec);
+        var modelMaximums = ResolveModelMaxOutputTokens(
+            args,
+            result.ModelSpec,
+            result.SetupModelSpec,
+            Environment.GetEnvironmentVariable(ModelMaxOutputTokensEnvVar),
+            Environment.GetEnvironmentVariable(SetupModelMaxOutputTokensEnvVar));
+        result.ModelMaxOutputTokens = modelMaximums.GameModel;
+        result.SetupModelMaxOutputTokens = modelMaximums.SetupModel;
         result.OverlayModel = ParseArg(args, "--overlay-model");
 
         // Load delivery-instructions.yaml if present
@@ -116,7 +124,12 @@ partial class Program
 
         if (IsOpenAiCompatibleModelSpec(result.ModelSpec))
         {
-            var transport = CreatePiTransport(result.ModelSpec, result.ApiKey!, out string provider, out string model);
+            var transport = CreatePiTransport(
+                result.ModelSpec,
+                result.ApiKey!,
+                result.ModelMaxOutputTokens,
+                out string provider,
+                out string model);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
             engineLabel = $"PinderLlmAdapter + Pi ({provider}) → {model}";
         }
@@ -129,6 +142,7 @@ partial class Program
             var transport = CreatePiTransport(
                 result.ModelSpec,
                 result.ApiKey!,
+                result.ModelMaxOutputTokens,
                 out _,
                 out string anthropicModel);
             result.Llm = new PinderLlmAdapter(transport, adapterOptions);
@@ -178,6 +192,7 @@ partial class Program
             ILlmTransport setupRawTransport = CreatePiTransport(
                 result.SetupModelSpec,
                 result.ApiKey!,
+                result.SetupModelMaxOutputTokens,
                 out _,
                 out _);
             var setupTransport = new Pinder.LlmAdapters.ThinkingStrippingLlmTransport(setupRawTransport);
@@ -233,6 +248,20 @@ partial class Program
     private static PiLlmTransport CreatePiTransport(
         string modelSpec,
         string apiKey,
+        int? modelMaxOutputTokens,
+        out string provider,
+        out string model)
+        => PiProviderTransportFactory.Create(BuildPiProviderTransportOptions(
+            modelSpec,
+            apiKey,
+            modelMaxOutputTokens,
+            out provider,
+            out model));
+
+    internal static PiProviderTransportOptions BuildPiProviderTransportOptions(
+        string modelSpec,
+        string apiKey,
+        int? modelMaxOutputTokens,
         out string provider,
         out string model)
     {
@@ -242,12 +271,15 @@ partial class Program
         model = explicitlyRouted ? providerParts[1] : modelSpec;
         string envKey = provider.ToUpperInvariant() + "_API_KEY";
         string providerKey = Environment.GetEnvironmentVariable(envKey) ?? apiKey;
-        return PiProviderTransportFactory.Create(new PiProviderTransportOptions
+        return new PiProviderTransportOptions
         {
             Provider = provider,
             Model = model,
             ApiKey = providerKey,
             Fetch = SessionRunnerHttpTransport.Fetch,
-        });
+            ModelCapabilities = modelMaxOutputTokens.HasValue
+                ? new PiProviderModelCapabilities { MaxOutputTokens = modelMaxOutputTokens }
+                : null,
+        };
     }
 }

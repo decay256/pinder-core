@@ -24,6 +24,7 @@ namespace Pinder.LlmAdapters.Pi
         private readonly Func<string?, ModelsSimpleStreamOptions>? _optionsFactory;
         private readonly Func<long> _timestampMilliseconds;
         private readonly Action<AssistantMessage, string?>? _responseObserver;
+        private readonly Func<int?, int?>? _maxTokensResolver;
         private readonly object _usageSync = new object();
         private long _inputTokens;
         private long _outputTokens;
@@ -40,13 +41,24 @@ namespace Pinder.LlmAdapters.Pi
             Model model,
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
             Action<AssistantMessage, string?>? responseObserver = null)
+            : this(models, model, optionsFactory, responseObserver, null)
+        {
+        }
+
+        internal PiLlmTransport(
+            ModelsCollection models,
+            Model model,
+            Func<string?, ModelsSimpleStreamOptions>? optionsFactory,
+            Action<AssistantMessage, string?>? responseObserver,
+            Func<int?, int?>? maxTokensResolver)
             : this(
                 model,
                 (selectedModel, context, options) => models.CompleteSimpleAsync(selectedModel, context, options),
                 (selectedModel, context, options) => models.StreamSimple(selectedModel, context, options),
                 optionsFactory,
                 () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                responseObserver)
+                responseObserver,
+                maxTokensResolver)
         {
             if (models == null) throw new ArgumentNullException(nameof(models));
         }
@@ -56,10 +68,11 @@ namespace Pinder.LlmAdapters.Pi
             Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> completeAsync,
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
             Func<long>? timestampMilliseconds = null,
-            Action<AssistantMessage, string?>? responseObserver = null)
+            Action<AssistantMessage, string?>? responseObserver = null,
+            Func<int?, int?>? maxTokensResolver = null)
             : this(model, completeAsync, (_, __, ___) =>
                 throw new InvalidOperationException("No Pi stream delegate was configured."),
-                optionsFactory, timestampMilliseconds, responseObserver)
+                optionsFactory, timestampMilliseconds, responseObserver, maxTokensResolver)
         {
         }
 
@@ -69,7 +82,8 @@ namespace Pinder.LlmAdapters.Pi
             Func<Model, Context, ModelsSimpleStreamOptions, AssistantMessageEventStream> stream,
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
             Func<long>? timestampMilliseconds = null,
-            Action<AssistantMessage, string?>? responseObserver = null)
+            Action<AssistantMessage, string?>? responseObserver = null,
+            Func<int?, int?>? maxTokensResolver = null)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _completeAsync = completeAsync ?? throw new ArgumentNullException(nameof(completeAsync));
@@ -77,6 +91,7 @@ namespace Pinder.LlmAdapters.Pi
             _optionsFactory = optionsFactory;
             _timestampMilliseconds = timestampMilliseconds ?? (() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             _responseObserver = responseObserver;
+            _maxTokensResolver = maxTokensResolver;
         }
 
         public async Task<string> SendAsync(
@@ -285,7 +300,7 @@ namespace Pinder.LlmAdapters.Pi
             cancellationToken.ThrowIfCancellationRequested();
             ModelsSimpleStreamOptions options = _optionsFactory?.Invoke(phase) ?? new ModelsSimpleStreamOptions();
             options.Temperature = temperature;
-            options.MaxTokens = maxTokens;
+            options.MaxTokens = _maxTokensResolver?.Invoke(maxTokens) ?? maxTokens;
             options.CancellationToken = cancellationToken;
             ResponseObserver? existingObserver = options.OnResponse;
             options.OnResponse = async (response, model, observerCancellationToken) =>

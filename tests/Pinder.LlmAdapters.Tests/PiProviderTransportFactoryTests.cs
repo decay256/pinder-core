@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
@@ -32,6 +33,10 @@ namespace Pinder.LlmAdapters.Tests
                 ApiKey = "test-key",
                 Fetch = fetch,
                 MaxRetries = 0,
+                ModelCapabilities = new PiProviderModelCapabilities
+                {
+                    MaxOutputTokens = 4096,
+                },
             });
 
             string result = await transport.SendAsync("system", "hello");
@@ -42,7 +47,38 @@ namespace Pinder.LlmAdapters.Tests
             string body = Encoding.UTF8.GetString(captured.Body!);
             Assert.Contains("claude-opus-4-8", body, StringComparison.Ordinal);
             Assert.DoesNotContain("\"temperature\"", body, StringComparison.Ordinal);
+            Assert.Equal(4096, ReadInteger(body, "max_tokens"));
             Assert.Equal("test-key", captured.Headers["x-api-key"]);
+        }
+
+        [Fact]
+        public async Task Anthropic_ExplicitMaxTokensDoesNotRequireModelPolicy()
+        {
+            HttpTransportRequest? captured = null;
+            var transport = CreateAnthropicTransport(
+                request => captured = request,
+                new PiProviderModelCapabilities());
+
+            await transport.SendAsync("system", "hello", maxTokens: 321);
+
+            Assert.NotNull(captured);
+            Assert.Equal(321, ReadInteger(Encoding.UTF8.GetString(captured!.Body!), "max_tokens"));
+        }
+
+        [Fact]
+        public async Task Anthropic_NullMaxTokensWithoutModelPolicyFailsClearlyBeforeFetch()
+        {
+            int fetchCalls = 0;
+            var transport = CreateAnthropicTransport(
+                _ => fetchCalls++,
+                new PiProviderModelCapabilities());
+
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => transport.SendAsync("system", "hello", maxTokens: null));
+
+            Assert.Contains("max output tokens", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("anthropic", exception.Message, StringComparison.OrdinalIgnoreCase);
+            Assert.Equal(0, fetchCalls);
         }
 
         [Fact]
@@ -66,6 +102,10 @@ namespace Pinder.LlmAdapters.Tests
                 ApiKey = "test-key",
                 Fetch = fetch,
                 MaxRetries = 0,
+                ModelCapabilities = new PiProviderModelCapabilities
+                {
+                    MaxOutputTokens = 4096,
+                },
             });
 
             await transport.SendAsync("system", "hello", temperature: 0.42);
@@ -102,6 +142,19 @@ namespace Pinder.LlmAdapters.Tests
             Assert.NotNull(captured);
             Assert.Equal("https://openrouter.ai/api/v1/chat/completions", captured!.Url);
             Assert.Equal("Bearer router-key", captured.Headers["Authorization"]);
+            Assert.DoesNotContain("\"max_tokens\"", Encoding.UTF8.GetString(captured.Body!), StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public async Task OpenRouter_ExplicitMaxTokensIsIncludedOnWire()
+        {
+            HttpTransportRequest? captured = null;
+            var transport = CreateOpenRouterTransport(request => captured = request);
+
+            await transport.SendAsync("system", "hello", maxTokens: 654);
+
+            Assert.NotNull(captured);
+            Assert.Equal(654, ReadInteger(Encoding.UTF8.GetString(captured!.Body!), "max_completion_tokens"));
         }
 
         [Fact]
@@ -125,6 +178,57 @@ namespace Pinder.LlmAdapters.Tests
                     ["content-type"] = "application/json",
                 },
                 new MemoryResponseBody(Encoding.UTF8.GetBytes(json)));
+
+        private static PiLlmTransport CreateAnthropicTransport(
+            Action<HttpTransportRequest> capture,
+            PiProviderModelCapabilities capabilities)
+            => PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "anthropic",
+                Model = "claude-sonnet-4.6",
+                ApiKey = "test-key",
+                Fetch = (request, _) =>
+                {
+                    capture(request);
+                    return Task.FromResult(AnthropicResponse());
+                },
+                MaxRetries = 0,
+                ModelCapabilities = capabilities,
+            });
+
+        private static PiLlmTransport CreateOpenRouterTransport(Action<HttpTransportRequest> capture)
+            => PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "openrouter",
+                Model = "anthropic/claude-sonnet-4.6",
+                ApiKey = "router-key",
+                Fetch = (request, _) =>
+                {
+                    capture(request);
+                    return Task.FromResult(OpenAiResponse());
+                },
+                MaxRetries = 0,
+            });
+
+        private static HttpTransportResponse AnthropicResponse()
+            => JsonResponse(
+                "event: message_start\ndata: {\"type\":\"message_start\",\"message\":{\"id\":\"msg_1\",\"usage\":{\"input_tokens\":1}}}\n\n" +
+                "event: content_block_start\ndata: {\"type\":\"content_block_start\",\"index\":0,\"content_block\":{\"type\":\"text\",\"text\":\"ok\"}}\n\n" +
+                "event: content_block_stop\ndata: {\"type\":\"content_block_stop\",\"index\":0}\n\n" +
+                "event: message_delta\ndata: {\"type\":\"message_delta\",\"delta\":{\"stop_reason\":\"end_turn\"},\"usage\":{\"output_tokens\":1}}\n\n" +
+                "event: message_stop\ndata: {\"type\":\"message_stop\"}\n\n");
+
+        private static HttpTransportResponse OpenAiResponse()
+            => JsonResponse(
+                "data: {\"id\":\"chatcmpl-1\",\"model\":\"anthropic/claude-sonnet-4.6\",\"choices\":[{\"index\":0,\"delta\":{\"content\":\"ok\"},\"finish_reason\":null}]}\n\n" +
+                "data: {\"id\":\"chatcmpl-1\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}],\"usage\":{\"prompt_tokens\":1,\"completion_tokens\":1,\"total_tokens\":2}}\n\n" +
+                "data: [DONE]\n\n");
+
+        private static int ReadInteger(string json, string propertyName)
+        {
+            using var document = JsonDocument.Parse(json);
+            return document.RootElement.GetProperty(propertyName).GetInt32();
+        }
 
         private sealed class MemoryResponseBody : IHttpResponseBody
         {

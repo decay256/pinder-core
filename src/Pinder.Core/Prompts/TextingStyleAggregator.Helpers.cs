@@ -20,28 +20,19 @@ namespace Pinder.Core.Prompts
         //   - structure: <line>
         //   - length: <line>
         //   - tics: <line>
-        //   TONE:
+        //   EXPRESSION:
         //   - directness (<key>): <line>
         //   - affect (<key>): <line>
         //   - rhythm (<key>): <line>
         //
-        // Until the content rewrite lands, legacy TONE axis keys are
-        // accepted as input aliases: stance -> directness, register ->
-        // affect, pacing -> rhythm. Parsed output is always canonical.
+        // For backward compatibility, the legacy TONE section and its axis
+        // aliases are accepted on input: stance -> directness, register ->
+        // affect, pacing -> rhythm. Parsed output is always canonical
+        // EXPRESSION taxonomy.
         // The parser is forgiving on whitespace and parenthesised sub-keys
         // and silently drops lines it cannot classify so future content
         // additions do not crash the pipeline.
         // ------------------------------------------------------------------
-
-        private static readonly string[] SyntaxAxisNames =
-        {
-            "emoji", "shorthand", "grammar", "structure", "length", "tics",
-        };
-
-        private static readonly string[] ExpressionAxisNames =
-        {
-            "directness", "affect", "rhythm",
-        };
 
         internal static string NormalizeExpressionAxisName(string axis)
         {
@@ -61,14 +52,14 @@ namespace Pinder.Core.Prompts
             => ParseAxisCandidates(
                 fragment,
                 new[] { "SYNTAX:" },
-                SyntaxAxisNames,
+                TextingStyleTaxonomy.SyntaxAxes,
                 allowLegacyExpressionAliases: false);
 
         private static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseExpressionAxisCandidates(string fragment)
             => ParseAxisCandidates(
                 fragment,
                 new[] { "EXPRESSION:", "TONE:" },
-                ExpressionAxisNames,
+                TextingStyleTaxonomy.ExpressionAxes,
                 allowLegacyExpressionAliases: true);
 
         private static IReadOnlyDictionary<string, string> FirstCandidates(
@@ -87,7 +78,7 @@ namespace Pinder.Core.Prompts
         private static IReadOnlyDictionary<string, IReadOnlyList<string>> ParseAxisCandidates(
             string fragment,
             IReadOnlyList<string> sectionHeaders,
-            string[] axisNames,
+            IReadOnlyList<string> axisNames,
             bool allowLegacyExpressionAliases)
         {
             var result = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
@@ -178,6 +169,9 @@ namespace Pinder.Core.Prompts
             if (candidates.Count == 1)
                 return candidates[0];
 
+            // SHA-256 the length-prefixed canonical selector, interpret its
+            // first eight bytes as an unsigned big-endian value, then select
+            // by modulo so the result is stable across runtimes and sessions.
             using (var sha = SHA256.Create())
             {
                 byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(CanonicalSelector(seedKey, source, axis, candidates)));
@@ -263,7 +257,7 @@ namespace Pinder.Core.Prompts
 
         private static string? CanonicalizeAxis(
             string axisToken,
-            string[] axisNames,
+            IReadOnlyList<string> axisNames,
             bool allowLegacyExpressionAliases)
         {
             foreach (var axis in axisNames)

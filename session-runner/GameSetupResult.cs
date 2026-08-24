@@ -46,6 +46,8 @@ public class GameSetupResult
     public string ModelSpec { get; set; }
     public string SetupModelSpec { get; set; }
     public string PlayerAgentModelSpec { get; set; }
+    public int? ModelMaxOutputTokens { get; set; }
+    public int? SetupModelMaxOutputTokens { get; set; }
     public string? OverlayModel { get; set; }
     public IStatefulLlmAdapter Llm { get; set; }
     public ITrapRegistry TrapRegistry { get; set; }

@@ -24,9 +24,30 @@ namespace Pinder.Core.Tests
         [Fact]
         public void CanonicalAxisOrder_UsesNineAxisModelWithoutLegacyToneNames()
         {
+            Assert.Equal(CanonicalNineAxisOrder, TextingStyleTaxonomy.CanonicalAxes);
             Assert.Equal(CanonicalNineAxisOrder, TextingStyleAggregator.CanonicalAxisOrder);
+            Assert.Equal(CanonicalNineAxisOrder.Take(6), TextingStyleTaxonomy.SyntaxAxes);
+            Assert.Equal(CanonicalNineAxisOrder.Skip(6), TextingStyleTaxonomy.ExpressionAxes);
             foreach (var legacyAxis in LegacyToneAxes)
-                Assert.DoesNotContain(legacyAxis, TextingStyleAggregator.CanonicalAxisOrder);
+                Assert.DoesNotContain(legacyAxis, TextingStyleTaxonomy.CanonicalAxes);
+        }
+
+        [Fact]
+        public void CanonicalTaxonomy_IsCaseInsensitiveAndCannotBeMutatedByCallers()
+        {
+            Assert.True(TextingStyleTaxonomy.IsSyntaxAxis("EMOJI"));
+            Assert.True(TextingStyleTaxonomy.IsExpressionAxis("Directness"));
+            Assert.False(TextingStyleTaxonomy.IsSyntaxAxis("stance"));
+            Assert.False(TextingStyleTaxonomy.IsExpressionAxis("register"));
+
+            Assert.Throws<NotSupportedException>(
+                () => ((IList<string>)TextingStyleTaxonomy.SyntaxAxes)[0] = "changed");
+            Assert.Throws<NotSupportedException>(
+                () => ((IList<string>)TextingStyleTaxonomy.ExpressionAxes).Add("changed"));
+            Assert.Throws<NotSupportedException>(
+                () => ((IList<string>)TextingStyleTaxonomy.CanonicalAxes).RemoveAt(0));
+
+            Assert.Equal(CanonicalNineAxisOrder, TextingStyleTaxonomy.CanonicalAxes);
         }
 
         [Fact]

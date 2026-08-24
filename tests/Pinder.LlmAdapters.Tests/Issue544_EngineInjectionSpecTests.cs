@@ -20,6 +20,31 @@ namespace Pinder.LlmAdapters.Tests
     /// </summary>
     public partial class Issue544_EngineInjectionSpecTests
     {
+        private static readonly PromptCatalog TestPromptCatalog = LoadTestPromptCatalog();
+
+        private static PromptCatalog LoadTestPromptCatalog()
+        {
+            string directory = AppDomain.CurrentDomain.BaseDirectory;
+            for (int depth = 0; depth < 10; depth++)
+            {
+                string candidate = System.IO.Path.Combine(directory, "data", "prompts");
+                if (System.IO.Directory.Exists(candidate))
+                    return PromptCatalog.LoadFromDirectory(candidate);
+
+                string? parent = System.IO.Path.GetDirectoryName(directory);
+                if (parent == null || parent == directory) break;
+                directory = parent;
+            }
+
+            throw new System.IO.DirectoryNotFoundException("Could not locate data/prompts for Issue #544 tests.");
+        }
+
+        private static string BuildDialogueOptionsPrompt(DialogueContext? context)
+            => SessionDocumentBuilder.BuildDialogueOptionsPrompt(context!, TestPromptCatalog);
+
+        private static string BuildDateePrompt(DateeContext? context)
+            => SessionDocumentBuilder.BuildDateePrompt(context!, TestPromptCatalog);
+
         // ── Test Helpers ──
 
         private static DialogueContext MakeDialogueContext(
@@ -102,7 +127,7 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(20)]
         public void AC1_OptionsInjection_TurnNumberInterpolated(int turn)
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentTurn: turn));
             Assert.Contains($"[ENGINE — Turn {turn}]", result);
         }
@@ -111,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_UsesActualPlayerName()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerName: "Brick"));
             Assert.Contains("Brick is deciding what to send next", result);
             Assert.Contains("Generate 3 options for what Brick might send", result);
@@ -121,7 +146,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_ShowsCurrentInterest()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentInterest: 22));
             Assert.Contains("Interest: 22/25", result);
         }
@@ -130,7 +155,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_HasOptionFormatInstruction()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext());
             Assert.Contains("OPTION_1", result);
             Assert.Contains("OPTION_2", result);
@@ -140,7 +165,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_IncludesHorninessWhenHigh()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(horninessLevel: 8));
             Assert.Contains("Horniness: 8", result);
             Assert.DoesNotContain("Horniness: 8/10", result);
@@ -150,7 +175,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_NoHorninessWhenLow()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(horninessLevel: 4));
             Assert.DoesNotContain("Horniness", result);
         }
@@ -159,7 +184,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_ShowsRizzRequirement()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(requiresRizzOption: true));
             Assert.Contains("Rizz option", result);
         }
@@ -172,7 +197,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 new CallbackOpportunity("music taste", 1)
             };
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentTurn: 5, callbackOpportunities: callbacks));
             Assert.Contains("music taste", result);
         }
@@ -185,7 +210,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 new CallbackOpportunity("weather", 1)
             };
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentTurn: 5, callbackOpportunities: callbacks));
             Assert.Contains("+2 hidden", result);
         }
@@ -198,7 +223,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 new CallbackOpportunity("topic", 1)
             };
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentTurn: 3, callbackOpportunities: callbacks));
             Assert.Contains("+1 hidden", result);
         }
@@ -207,7 +232,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_TextingStyleBeforeEngineBlock()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(playerTextingStyle: "lowercase, ironic, precise"));
 
             int styleIdx = result.IndexOf("lowercase, ironic, precise");
@@ -221,7 +246,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_IncludesActiveTrapInstructions()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(activeTrapInstructions: new[] { "Your messages all sound desperate" }));
             Assert.Contains("Your messages all sound desperate", result);
         }
@@ -234,7 +259,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_InterestLabel_Bored()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentInterest: 3));
             Assert.Contains("Bored", result);
             Assert.Contains("disadvantage", result);
@@ -244,7 +269,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_InterestLabel_VeryIntoIt()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentInterest: 18));
             Assert.Contains("Very Into It", result);
             Assert.Contains("advantage", result);
@@ -254,7 +279,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_InterestLabel_Lukewarm()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentInterest: 7));
             Assert.Contains("Lukewarm", result);
         }
@@ -263,7 +288,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC1_OptionsInjection_InterestLabel_Interested()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(currentInterest: 12));
             Assert.Contains("Interested", result);
         }
@@ -289,7 +314,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC3_DateeInjection_HasEngineDateeHeader()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = BuildDateePrompt(MakeDateeContext());
             Assert.Contains("[ENGINE — DATEE]", result);
         }
 
@@ -297,7 +322,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC3_DateeInjection_UsesActualDateeName()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(dateeName: "Brick"));
             Assert.Contains("Brick is at Interest", result);
             Assert.Contains("Write Brick's response", result);
@@ -307,7 +332,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC3_DateeInjection_ShowsInterestLevel()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(interestAfter: 19));
             Assert.Contains("Interest 19/25", result);
         }
@@ -316,7 +341,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC3_DateeInjection_ShowsInterestDelta()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(interestBefore: 10, interestAfter: 13));
             Assert.Contains("+3", result);
         }
@@ -325,7 +350,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC3_DateeInjection_ShowsNegativeDelta()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(interestBefore: 15, interestAfter: 12));
             Assert.Contains("-3", result);
         }

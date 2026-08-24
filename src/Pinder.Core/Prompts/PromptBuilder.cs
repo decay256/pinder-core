@@ -49,6 +49,7 @@ namespace Pinder.Core.Prompts
         /// selected style fragments are rendered into prompts.
         /// </summary>
         public const string TextingStyleSoftFramingKey = "texting_style_soft_framing";
+        public const string TextingStyleRuntimeFramingKey = "texting_style_runtime_framing";
 
         /// <summary>
         /// Resolves structural prompt fragments from the yaml catalog.
@@ -250,6 +251,7 @@ namespace Pinder.Core.Prompts
             _ = GetCardFraming(structuralFragmentLookup, structuralFragmentLookupEx);
             _ = GetCharacterDataFraming(structuralFragmentLookup, structuralFragmentLookupEx);
             _ = GetTextingStyleSoftFramingEx(structuralFragmentLookup, structuralFragmentLookupEx);
+            _ = GetTextingStyleRuntimeFramingEx(structuralFragmentLookup, structuralFragmentLookupEx);
         }
 
         public static string GetTextingStyleSoftFraming(
@@ -261,6 +263,16 @@ namespace Pinder.Core.Prompts
             Func<string, string?>? structuralFragmentLookup = null,
             Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
             => GetHeaderEx(TextingStyleSoftFramingKey, structuralFragmentLookup, structuralFragmentLookupEx);
+
+        public static string GetTextingStyleRuntimeFraming(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
+            => GetTextingStyleRuntimeFramingEx(structuralFragmentLookup, structuralFragmentLookupEx).Content.Trim();
+
+        private static (string Content, string SourceFile) GetTextingStyleRuntimeFramingEx(
+            Func<string, string?>? structuralFragmentLookup = null,
+            Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null)
+            => GetHeaderEx(TextingStyleRuntimeFramingKey, structuralFragmentLookup, structuralFragmentLookupEx);
 
         private static void RequireToken(string template, string token)
         {
@@ -289,12 +301,12 @@ namespace Pinder.Core.Prompts
         /// <param name="fragments">Assembled fragment collection from CharacterAssembler.</param>
         /// <param name="activeTraps">Current trap state. May have zero active traps.</param>
         /// <param name="characterIdSeed">
-        /// Optional stable per-character seed used by the placeholder
-        /// texting-style aggregator (#836) to pick a deterministic subset
-        /// of item fragments. Pass the character UUID when available. When
-        /// null/empty, the aggregator falls back to a stable hash of the
-        /// fragment content itself, which is still deterministic for a
-        /// given configuration but not stable across reconfigurations.
+        /// Optional stable per-character seed used by the canonical nine-axis
+        /// soft-influence aggregator to choose deterministically when an owned
+        /// axis offers multiple candidate fragments. Pass the character UUID
+        /// when available. When null/empty, the aggregator falls back to a
+        /// stable hash of the fragment content itself, which is deterministic
+        /// for a given configuration but not stable across reconfigurations.
         /// </param>
         /// <summary>
         /// Assemble the full system prompt for a character.
