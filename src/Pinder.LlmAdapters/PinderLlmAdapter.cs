@@ -542,6 +542,9 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 hungerForIntimacy: 0,
                                 terrorOfRejection: 0,
                                 direction: emotionalDirection,
+                                cognitiveSubtext: context.CognitiveSubtext,
+                                transitionTarget: context.ResolvedTarget?.StemText,
+                                transitionStyle: context.ResolvedTarget?.TransitionStyle,
                                 compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
                                     dateePrompt,
                                     "emotional-reaction-performance-direction")));
