@@ -9,6 +9,31 @@ prompts:
     system_prompt: >-
       joy, affection, desire, hope, curiosity, relief, pride, amusement, surprise, sadness, loneliness, disappointment, shame, guilt, embarrassment, fear, anxiety, anger, disgust, jealousy, resentment, numbness, ambivalence
 
+  character-emotional-hfi-low:
+    system_prompt: >-
+      closeness is not exerting a strong pull right now, so connection is easier to postpone, intellectualize, or keep at a controlled distance
+  character-emotional-hfi-high:
+    system_prompt: >-
+      closeness is exerting a strong pull right now, so signs of connection carry extra hope, urgency, and emotional reward
+  character-emotional-tor-low:
+    system_prompt: >-
+      rejection feels survivable right now, so the character can risk clearer expression without immediately protecting themselves
+  character-emotional-tor-high:
+    system_prompt: >-
+      rejection feels dangerous right now, so the character scans for threat and is pulled toward testing, restraint, retreat, or defensive control
+  character-emotional-status-unavailable:
+    system_prompt: >-
+      No reliable HFI/TOR emotional-status values are available. Do not invent them or infer numeric values from unrelated traits.
+  character-emotional-status-context:
+    system_prompt: |-
+      Emotional-status pressure for this reaction:
+      - {subject_name} has HFI {subject_hfi}: {subject_hfi_meaning}.
+      - {subject_name} has TOR {subject_tor}: {subject_tor_meaning}.
+      - {counterpart_name} has HFI {counterpart_hfi}: {counterpart_hfi_meaning}.
+      - {counterpart_name} has TOR {counterpart_tor}: {counterpart_tor_meaning}.
+
+      Determine the subject character's direction from their own HFI/TOR. Use the counterpart's values only to understand the relationship pressure between them. These values shape the reaction; they do not replace character history, diagnosis, the triggering event, or the visible conversation.
+
   avatar-emotional-director-system-wrapper:
     system_prompt: |-
       Use the complete player avatar character context below while following the private emotional planning rules that come after it.
@@ -32,6 +57,9 @@ prompts:
 
       Avatar's persistent psychological pressure:
       {cognitive_subtext}
+
+      Emotional-status pressure:
+      {emotional_status}
 
       Current emotional destination:
       {transition_target}
@@ -116,6 +144,9 @@ prompts:
 
       Character-specific emotional translation:
       {character_formulation}
+
+      Emotional-status pressure:
+      {emotional_status}
   emotional-reaction-compiled-session-wrapper:
     system_prompt: |-
       Private emotional director input for interpreting the DATEE's internal reaction.
@@ -139,6 +170,9 @@ prompts:
 
       Character-specific emotional translation:
       {character_formulation}
+
+      Emotional-status pressure:
+      {emotional_status}
   emotional-reaction-character-success-wrapper:
     system_prompt: >-
       You tend to feel {derived_feeling}. Your first defense is that you {defense_reaction}. With this kind of move, {stat_reaction}. Because the moment helps rather than hurts, let {safe_connection} shape the softer part of the reaction.

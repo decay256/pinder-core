@@ -15,6 +15,7 @@ namespace Pinder.LlmAdapters
         public const string RuntimeDateeContextSource = "runtime:DateeContext";
         public const string CharacterDiagnosisSource = "character:psychiatric_diagnosis";
         public const string CharacterEmotionalDirectionRuntimeSource = "runtime:CharacterEmotionalDirection";
+        public const string CharacterEmotionalStatusRuntimeSource = "runtime:CharacterEmotionalStatus";
         public const string LegacyEmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
         public const string EmotionalReactionCatalogSource = "data/prompts/emotional-reactions.yaml";
         public const string ConversationHistorySource = "conversation-history";
@@ -40,6 +41,7 @@ namespace Pinder.LlmAdapters
                 RuntimeDateeContextSource,
                 CharacterDiagnosisSource,
                 CharacterEmotionalDirectionRuntimeSource,
+                CharacterEmotionalStatusRuntimeSource,
                 LegacyEmotionalDirectorRuntimeSource,
                 EmotionalReactionCatalogSource,
                 ConversationHistorySource,
@@ -99,7 +101,8 @@ namespace Pinder.LlmAdapters
             => ExactTraceKeys.Contains(value) || IsCatalogKey(value);
 
         private static bool IsCatalogKey(string value)
-            => value.StartsWith("emotional-reaction-", StringComparison.Ordinal)
+            => (value.StartsWith("emotional-reaction-", StringComparison.Ordinal)
+                || value.StartsWith("character-emotional-", StringComparison.Ordinal))
                 && value.Length <= 96
                 && value.All(ch => (ch >= 'a' && ch <= 'z')
                     || (ch >= '0' && ch <= '9')
@@ -122,6 +125,12 @@ namespace Pinder.LlmAdapters
                 "EmotionalDirector.Impulse",
                 "EmotionalDirector.Restraint",
                 "EmotionalDirector.ResponsePosture",
+                "SubjectName",
+                "SubjectHfi",
+                "SubjectTor",
+                "CounterpartName",
+                "CounterpartHfi",
+                "CounterpartTor",
             };
             return keys;
         }

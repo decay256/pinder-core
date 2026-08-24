@@ -83,6 +83,10 @@ namespace Pinder.Core.Conversation
                 state,
                 _rules,
                 _onRuleResolution);
+            CharacterEmotionalStatus playerStatus = CharacterEmotionalStatusResolver.Resolve(
+                player, _hungerForIntimacy, _terrorOfRejection);
+            CharacterEmotionalStatus dateeStatus = CharacterEmotionalStatusResolver.Resolve(
+                datee, _hungerForIntimacy, _terrorOfRejection);
 
             // 9. Check interest threshold crossing → narrative beat
             string? narrativeBeat = null;
@@ -102,7 +106,9 @@ namespace Pinder.Core.Conversation
                 datee,
                 progress,
                 ct,
-                finalInterestAfterState).ConfigureAwait(false);
+                finalInterestAfterState,
+                playerStatus,
+                dateeStatus).ConfigureAwait(false);
 
             var dateeResponse = dateeStageResult.DateeResponse;
             string dateeMessage = dateeStageResult.DateeMessage;
@@ -131,10 +137,10 @@ namespace Pinder.Core.Conversation
 
             var stateSnapshot = TurnOrchestratorHelpers.CreateSnapshot(state, _rules);
 
-            int playerHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm);
-            int playerTor = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz);
-            int dateeHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm);
-            int dateeTor = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz);
+            int playerHfi = playerStatus.HungerForIntimacy;
+            int playerTor = playerStatus.TerrorOfRejection;
+            int dateeHfi = dateeStatus.HungerForIntimacy;
+            int dateeTor = dateeStatus.TerrorOfRejection;
             CharacterEmotionalDebugInfo? dateeEmotionalDebug =
                 dateeResponse.EmotionalReactionDebug?.WithStatus(dateeHfi, dateeTor);
 

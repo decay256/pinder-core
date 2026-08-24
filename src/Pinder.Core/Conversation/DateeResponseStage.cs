@@ -48,11 +48,15 @@ namespace Pinder.Core.Conversation
             CharacterProfile datee,
             System.IProgress<TurnProgressEvent>? progress,
             CancellationToken ct,
-            InterestState? finalInterestAfterState = null)
+            InterestState? finalInterestAfterState = null,
+            CharacterEmotionalStatus? playerEmotionalStatus = null,
+            CharacterEmotionalStatus? dateeEmotionalStatus = null)
         {
             int finalInterestAfter = state.Interest.Current;
             InterestState resolvedFinalInterestAfterState =
                 finalInterestAfterState ?? new InterestMeter(finalInterestAfter).GetState();
+            playerEmotionalStatus ??= CharacterEmotionalStatusResolver.Resolve(player, 0, 0);
+            dateeEmotionalStatus ??= CharacterEmotionalStatusResolver.Resolve(datee, 0, 0);
 
             // Compute response delay
             double responseDelayMinutes = datee.Timing.ComputeDelay(finalInterestAfter, rollStage.ResolveDice);
@@ -104,7 +108,11 @@ namespace Pinder.Core.Conversation
                     RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
                     datee.PsychiatricDiagnosis),
                 agentJournalContext: _agentJournalContext,
-                dateeTextingStyle: datee.TextingStyleFragment);
+                dateeTextingStyle: datee.TextingStyleFragment,
+                playerHungerForIntimacy: playerEmotionalStatus.HungerForIntimacy,
+                playerTerrorOfRejection: playerEmotionalStatus.TerrorOfRejection,
+                dateeHungerForIntimacy: dateeEmotionalStatus.HungerForIntimacy,
+                dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 

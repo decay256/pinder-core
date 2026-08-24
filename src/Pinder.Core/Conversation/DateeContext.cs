@@ -105,6 +105,11 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public DateeEmotionalTurnEvent? EmotionalTurnEvent { get; }
 
+        public int? PlayerHungerForIntimacy { get; }
+        public int? PlayerTerrorOfRejection { get; }
+        public int? DateeHungerForIntimacy { get; }
+        public int? DateeTerrorOfRejection { get; }
+
         /// <summary>Per-Game-Run journal correlation supplied by the owning session.</summary>
         public GameRunAgentJournalContext? AgentJournalContext { get; }
 
@@ -134,7 +139,11 @@ namespace Pinder.Core.Conversation
             InterestState? interestAfterState = null,
             DateeEmotionalTurnEvent? emotionalTurnEvent = null,
             GameRunAgentJournalContext? agentJournalContext = null,
-            string? dateeTextingStyle = null)
+            string? dateeTextingStyle = null,
+            int? playerHungerForIntimacy = null,
+            int? playerTerrorOfRejection = null,
+            int? dateeHungerForIntimacy = null,
+            int? dateeTerrorOfRejection = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -162,6 +171,10 @@ namespace Pinder.Core.Conversation
             CognitiveSubtext = cognitiveSubtext;
             EmotionalTurnEvent = emotionalTurnEvent;
             AgentJournalContext = agentJournalContext;
+            PlayerHungerForIntimacy = playerHungerForIntimacy;
+            PlayerTerrorOfRejection = playerTerrorOfRejection;
+            DateeHungerForIntimacy = dateeHungerForIntimacy;
+            DateeTerrorOfRejection = dateeTerrorOfRejection;
         }
     }
 }
