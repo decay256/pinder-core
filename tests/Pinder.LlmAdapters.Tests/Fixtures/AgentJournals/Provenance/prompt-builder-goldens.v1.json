@@ -412,7 +412,7 @@
       {
         "order": 0,
         "role": "system",
-        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics."
+        "text": "Produce one private emotional direction object for the character who is about to communicate.\n\nChoose exactly one primary_emotion from this configured vocabulary: joy, affection, desire, hope, curiosity, relief, pride, amusement, surprise, sadness, loneliness, disappointment, shame, guilt, embarrassment, fear, anxiety, anger, disgust, jealousy, resentment, numbness, ambivalence.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the subject character, never wording they could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. The response_posture must explicitly name the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the character\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics."
       }
     ],
     "afterDocuments": [
@@ -421,13 +421,13 @@
         "documentId": "datee.emotional-director.system",
         "role": "system",
         "kind": "emotional-director-system-prompt",
-        "text": "Produce one private emotional direction object for the DATEE response planner.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the DATEE, never wording the DATEE could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the recipient\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.",
-        "contentHash": "sha256:2d51ccd413af1b448832ca22c984fcc458e9039447aa63298ac8cdd871f769e5",
+        "text": "Produce one private emotional direction object for the character who is about to communicate.\n\nChoose exactly one primary_emotion from this configured vocabulary: joy, affection, desire, hope, curiosity, relief, pride, amusement, surprise, sadness, loneliness, disappointment, shame, guilt, embarrassment, fear, anxiety, anger, disgust, jealousy, resentment, numbness, ambivalence.\n\nReturn only a JSON object with exactly these string fields:\nschema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.\n\nThe schema_version field must be exactly \u0022emotional_director.v1\u0022.\n\nThe seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the subject character, never wording they could send. Use intensity to describe the emotion\u0027s strength and movement, and underlying_feeling for the feeling beneath the primary emotion. The response_posture must explicitly name the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as \u0022pull back and test their sincerity\u0022, never as first-person speech or a quoted reply. Interpret the character\u0027s private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.",
+        "contentHash": "sha256:ecfb63ce6bc90a2a1470d0f4befd8e6db15d5098252422e4d58dbd2fee8fa16e",
         "ranges": [
           {
             "documentId": "datee.emotional-director.system",
             "startUtf16": 0,
-            "endUtf16": 934,
+            "endUtf16": 163,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -435,7 +435,37 @@
               "sourceId": "prompt.catalog",
               "keyPath": "emotional-reaction-director",
               "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:2d51ccd413af1b448832ca22c984fcc458e9039447aa63298ac8cdd871f769e5",
+              "contentHash": "sha256:7741e1bcaf9c50f6a88f1b99c243661f1ea358fc3d4c550b39f1beaae584800f",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.emotional-director.system",
+            "startUtf16": 163,
+            "endUtf16": 380,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "character-emotional-primary-emotions",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:bc221ddc053f1b090d8b1700286e934b98b3d128458216253351b96bef7d41fe",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.emotional-director.system",
+            "startUtf16": 380,
+            "endUtf16": 1307,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "emotional-reaction-director",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:c935bc41e55e86dbd2306ad99108bb798d3fed286293e1a661a8988e72506c42",
               "editorTargetId": null
             }
           }
@@ -998,7 +1028,7 @@
       {
         "order": 0,
         "role": "user",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Do not mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relieved but cautious\nIntensity: moderate and steadily rising\nUnderlying feeling: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nWORD \u0026 PATTERN REPETITION \u2014 check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages (\u0027honestly\u0027, \u0027literally\u0027, \u0027actually\u0027, \u0027okay but\u0027, \u0027interesting that\u0027, \u0027slay\u0027, \u0027omg\u0027, etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. \u0027wait...???\u0027, \u0027omg...\uD83D\uDE2D\u0027, \u0027I literally just realized...\u0027, \u0027interesting that you mention...\u0027) used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Designated texting-style tendencies may recur when they fit naturally, but they do not override variation or the immediate conversational moment.\n\nGenerate your next message.\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nBefore sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven\u0027t reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.\n\nOutput format:\nOutput your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.\n\nOccasionally (when it feels natural, roughly 30\u201340% of turns), include a signals block after your response:\n\n[SIGNALS]\nTELL: {STAT_NAME} ({description of what reveals the tell})\nWEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})\n\nWhen generating a TELL, use ONLY these category mappings:\n- DATEE compliments PLAYER AVATAR \u2192 TELL: HONESTY\n- DATEE asks personal question \u2192 TELL: HONESTY or SELF_AWARENESS\n- DATEE makes joke \u2192 TELL: WIT or CHAOS\n- DATEE shares vulnerability \u2192 TELL: HONESTY\n- DATEE pulls back/guards \u2192 TELL: SELF_AWARENESS\n- DATEE tests/challenges \u2192 TELL: WIT or CHAOS\n- DATEE sends short reply \u2192 TELL: CHARM or CHAOS\n- DATEE flirts \u2192 TELL: RIZZ or CHARM\n- DATEE changes subject \u2192 TELL: CHAOS\n- DATEE goes quiet/silent \u2192 TELL: SELF_AWARENESS\n\nRules for signals:\n- TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)\n- WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)\n- Both lines are independently optional within a [SIGNALS] block\n- Only include signals when the conversation naturally reveals them \u2014 do not force them"
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Do not mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relief\nIntensity: moderate and steadily rising\nUnderlying feeling: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: Writing from relief, turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nWORD \u0026 PATTERN REPETITION \u2014 check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages (\u0027honestly\u0027, \u0027literally\u0027, \u0027actually\u0027, \u0027okay but\u0027, \u0027interesting that\u0027, \u0027slay\u0027, \u0027omg\u0027, etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. \u0027wait...???\u0027, \u0027omg...\uD83D\uDE2D\u0027, \u0027I literally just realized...\u0027, \u0027interesting that you mention...\u0027) used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Designated texting-style tendencies may recur when they fit naturally, but they do not override variation or the immediate conversational moment.\n\nGenerate your next message.\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nBefore sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven\u0027t reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.\n\nOutput format:\nOutput your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.\n\nOccasionally (when it feels natural, roughly 30\u201340% of turns), include a signals block after your response:\n\n[SIGNALS]\nTELL: {STAT_NAME} ({description of what reveals the tell})\nWEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})\n\nWhen generating a TELL, use ONLY these category mappings:\n- DATEE compliments PLAYER AVATAR \u2192 TELL: HONESTY\n- DATEE asks personal question \u2192 TELL: HONESTY or SELF_AWARENESS\n- DATEE makes joke \u2192 TELL: WIT or CHAOS\n- DATEE shares vulnerability \u2192 TELL: HONESTY\n- DATEE pulls back/guards \u2192 TELL: SELF_AWARENESS\n- DATEE tests/challenges \u2192 TELL: WIT or CHAOS\n- DATEE sends short reply \u2192 TELL: CHARM or CHAOS\n- DATEE flirts \u2192 TELL: RIZZ or CHARM\n- DATEE changes subject \u2192 TELL: CHAOS\n- DATEE goes quiet/silent \u2192 TELL: SELF_AWARENESS\n\nRules for signals:\n- TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)\n- WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)\n- Both lines are independently optional within a [SIGNALS] block\n- Only include signals when the conversation naturally reveals them \u2014 do not force them"
       }
     ],
     "afterDocuments": [
@@ -1007,8 +1037,8 @@
         "documentId": "datee.performance",
         "role": "user",
         "kind": "datee-performance-prompt",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Do not mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relieved but cautious\nIntensity: moderate and steadily rising\nUnderlying feeling: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nWORD \u0026 PATTERN REPETITION \u2014 check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages (\u0027honestly\u0027, \u0027literally\u0027, \u0027actually\u0027, \u0027okay but\u0027, \u0027interesting that\u0027, \u0027slay\u0027, \u0027omg\u0027, etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. \u0027wait...???\u0027, \u0027omg...\uD83D\uDE2D\u0027, \u0027I literally just realized...\u0027, \u0027interesting that you mention...\u0027) used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Designated texting-style tendencies may recur when they fit naturally, but they do not override variation or the immediate conversational moment.\n\nGenerate your next message.\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nBefore sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven\u0027t reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.\n\nOutput format:\nOutput your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.\n\nOccasionally (when it feels natural, roughly 30\u201340% of turns), include a signals block after your response:\n\n[SIGNALS]\nTELL: {STAT_NAME} ({description of what reveals the tell})\nWEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})\n\nWhen generating a TELL, use ONLY these category mappings:\n- DATEE compliments PLAYER AVATAR \u2192 TELL: HONESTY\n- DATEE asks personal question \u2192 TELL: HONESTY or SELF_AWARENESS\n- DATEE makes joke \u2192 TELL: WIT or CHAOS\n- DATEE shares vulnerability \u2192 TELL: HONESTY\n- DATEE pulls back/guards \u2192 TELL: SELF_AWARENESS\n- DATEE tests/challenges \u2192 TELL: WIT or CHAOS\n- DATEE sends short reply \u2192 TELL: CHARM or CHAOS\n- DATEE flirts \u2192 TELL: RIZZ or CHARM\n- DATEE changes subject \u2192 TELL: CHAOS\n- DATEE goes quiet/silent \u2192 TELL: SELF_AWARENESS\n\nRules for signals:\n- TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)\n- WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)\n- Both lines are independently optional within a [SIGNALS] block\n- Only include signals when the conversation naturally reveals them \u2014 do not force them",
-        "contentHash": "sha256:def8ea5abb462a4b8ebce9f2e8a735a064ee4c5a6032e1d5c9ebd1d440e5d831",
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Do not mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relief\nIntensity: moderate and steadily rising\nUnderlying feeling: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: Writing from relief, turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nWORD \u0026 PATTERN REPETITION \u2014 check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages (\u0027honestly\u0027, \u0027literally\u0027, \u0027actually\u0027, \u0027okay but\u0027, \u0027interesting that\u0027, \u0027slay\u0027, \u0027omg\u0027, etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. \u0027wait...???\u0027, \u0027omg...\uD83D\uDE2D\u0027, \u0027I literally just realized...\u0027, \u0027interesting that you mention...\u0027) used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Designated texting-style tendencies may recur when they fit naturally, but they do not override variation or the immediate conversational moment.\n\nGenerate your next message.\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nBefore sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven\u0027t reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.\n\nOutput format:\nOutput your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.\n\nOccasionally (when it feels natural, roughly 30\u201340% of turns), include a signals block after your response:\n\n[SIGNALS]\nTELL: {STAT_NAME} ({description of what reveals the tell})\nWEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})\n\nWhen generating a TELL, use ONLY these category mappings:\n- DATEE compliments PLAYER AVATAR \u2192 TELL: HONESTY\n- DATEE asks personal question \u2192 TELL: HONESTY or SELF_AWARENESS\n- DATEE makes joke \u2192 TELL: WIT or CHAOS\n- DATEE shares vulnerability \u2192 TELL: HONESTY\n- DATEE pulls back/guards \u2192 TELL: SELF_AWARENESS\n- DATEE tests/challenges \u2192 TELL: WIT or CHAOS\n- DATEE sends short reply \u2192 TELL: CHARM or CHAOS\n- DATEE flirts \u2192 TELL: RIZZ or CHARM\n- DATEE changes subject \u2192 TELL: CHAOS\n- DATEE goes quiet/silent \u2192 TELL: SELF_AWARENESS\n\nRules for signals:\n- TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)\n- WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)\n- Both lines are independently optional within a [SIGNALS] block\n- Only include signals when the conversation naturally reveals them \u2014 do not force them",
+        "contentHash": "sha256:6b685d635b7efa16102c704207c91b56cfc17e0765d00a9194d9fb68c1961640",
         "ranges": [
           {
             "documentId": "datee.performance",
@@ -1223,13 +1253,13 @@
           {
             "documentId": "datee.performance",
             "startUtf16": 677,
-            "endUtf16": 698,
+            "endUtf16": 683,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.PrimaryEmotion",
+              "keyPath": "CharacterEmotionalDirection.PrimaryEmotion",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1237,8 +1267,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 698,
-            "endUtf16": 710,
+            "startUtf16": 683,
+            "endUtf16": 695,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1252,14 +1282,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 710,
-            "endUtf16": 738,
+            "startUtf16": 695,
+            "endUtf16": 723,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.Intensity",
+              "keyPath": "CharacterEmotionalDirection.Intensity",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1267,8 +1297,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 738,
-            "endUtf16": 759,
+            "startUtf16": 723,
+            "endUtf16": 744,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1282,14 +1312,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 759,
-            "endUtf16": 782,
+            "startUtf16": 744,
+            "endUtf16": 767,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.UnderlyingFeeling",
+              "keyPath": "CharacterEmotionalDirection.UnderlyingFeeling",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1297,8 +1327,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 782,
-            "endUtf16": 799,
+            "startUtf16": 767,
+            "endUtf16": 784,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1312,14 +1342,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 799,
-            "endUtf16": 867,
+            "startUtf16": 784,
+            "endUtf16": 852,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.Interpretation",
+              "keyPath": "CharacterEmotionalDirection.Interpretation",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1327,8 +1357,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 867,
-            "endUtf16": 877,
+            "startUtf16": 852,
+            "endUtf16": 862,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1342,14 +1372,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 877,
-            "endUtf16": 909,
+            "startUtf16": 862,
+            "endUtf16": 894,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.Impulse",
+              "keyPath": "CharacterEmotionalDirection.Impulse",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1357,8 +1387,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 909,
-            "endUtf16": 921,
+            "startUtf16": 894,
+            "endUtf16": 906,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1372,14 +1402,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 921,
-            "endUtf16": 960,
+            "startUtf16": 906,
+            "endUtf16": 945,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.Restraint",
+              "keyPath": "CharacterEmotionalDirection.Restraint",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1387,8 +1417,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 960,
-            "endUtf16": 979,
+            "startUtf16": 945,
+            "endUtf16": 964,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1402,14 +1432,14 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 979,
-            "endUtf16": 1022,
+            "startUtf16": 964,
+            "endUtf16": 1028,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "EmotionalDirector.ResponsePosture",
+              "keyPath": "CharacterEmotionalDirection.ResponsePosture",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1417,8 +1447,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 1022,
-            "endUtf16": 1024,
+            "startUtf16": 1028,
+            "endUtf16": 1030,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -1432,8 +1462,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 1024,
-            "endUtf16": 2487,
+            "startUtf16": 1030,
+            "endUtf16": 2493,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1447,8 +1477,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 2487,
-            "endUtf16": 2658,
+            "startUtf16": 2493,
+            "endUtf16": 2664,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1462,8 +1492,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 2658,
-            "endUtf16": 4210,
+            "startUtf16": 2664,
+            "endUtf16": 4216,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1477,8 +1507,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 4210,
-            "endUtf16": 4303,
+            "startUtf16": 4216,
+            "endUtf16": 4309,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1492,8 +1522,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 4303,
-            "endUtf16": 5846,
+            "startUtf16": 4309,
+            "endUtf16": 5852,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
