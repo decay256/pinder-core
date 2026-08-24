@@ -13,7 +13,7 @@ namespace Pinder.Core.Interfaces
     {
         bool SupportsAvatarEmotionalDirection { get; }
 
-        Task<CharacterEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+        Task<CharacterEmotionalDirectorResult> GetAvatarEmotionalDirectionAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage> avatarHistory,
             LlmConversationSessionSnapshot? avatarSession,

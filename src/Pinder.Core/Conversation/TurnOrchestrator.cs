@@ -155,10 +155,14 @@ namespace Pinder.Core.Conversation
             var activeTrapNames = GameSessionHelpers.GetActiveTrapNames(state.Traps);
             var activeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
 
-            int playerHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm);
-            int playerTor = _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz);
-            int dateeHfi = _hungerForIntimacy != 0 ? _hungerForIntimacy : datee.Stats.GetBase(StatType.Charm);
-            int dateeTor = _terrorOfRejection != 0 ? _terrorOfRejection : datee.Stats.GetBase(StatType.Rizz);
+            CharacterEmotionalStatus playerStatus = CharacterEmotionalStatusResolver.Resolve(
+                player, _hungerForIntimacy, _terrorOfRejection);
+            CharacterEmotionalStatus dateeStatus = CharacterEmotionalStatusResolver.Resolve(
+                datee, _hungerForIntimacy, _terrorOfRejection);
+            int playerHfi = playerStatus.HungerForIntimacy;
+            int playerTor = playerStatus.TerrorOfRejection;
+            int dateeHfi = dateeStatus.HungerForIntimacy;
+            int dateeTor = dateeStatus.TerrorOfRejection;
 
             ResolvedRevelationTarget? resolvedTarget = null;
             var llmHistory = TurnOrchestratorHelpers.BuildHistoryForLlmContext(state);
@@ -269,14 +273,16 @@ namespace Pinder.Core.Conversation
             if (_llm is IAvatarEmotionalDirectionProvider avatarDirector
                 && avatarDirector.SupportsAvatarEmotionalDirection)
             {
-                CharacterEmotionalDirection direction = await avatarDirector
+                CharacterEmotionalDirectorResult directorResult = await avatarDirector
                     .GetAvatarEmotionalDirectionAsync(
                         context,
                         new List<ConversationMessage>(state.AvatarHistory),
                         state.AvatarSessionSnapshot,
                         ct)
                     .ConfigureAwait(false);
-                context.ApplyAvatarEmotionalDirection(direction);
+                context.ApplyAvatarEmotionalDirection(
+                    directorResult.Direction,
+                    directorResult.DirectorInput);
             }
 
             // Get dialogue options from LLM
@@ -418,7 +424,8 @@ namespace Pinder.Core.Conversation
                         context.AvatarEmotionalDirection,
                         avatarCognitiveSubtext,
                         resolvedTarget?.StemText,
-                        resolvedTarget?.TransitionStyle);
+                        resolvedTarget?.TransitionStyle,
+                        directorInput: context.AvatarEmotionalDirectorInput);
 
             return new TurnStart(
                 options,

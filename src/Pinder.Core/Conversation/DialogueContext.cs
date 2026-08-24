@@ -102,6 +102,7 @@ namespace Pinder.Core.Conversation
 
         /// <summary>Turn-local emotional direction selected for the player avatar.</summary>
         public CharacterEmotionalDirection? AvatarEmotionalDirection { get; private set; }
+        public string? AvatarEmotionalDirectorInput { get; private set; }
 
 public AgentJournalOneShotContext? AgentJournal { get; }
 
@@ -176,10 +177,13 @@ AgentJournal = agentJournal;
         /// Applies the accepted private avatar direction before option generation.
         /// Engine orchestration owns the timing of this mutation.
         /// </summary>
-        public void ApplyAvatarEmotionalDirection(CharacterEmotionalDirection direction)
+        public void ApplyAvatarEmotionalDirection(
+            CharacterEmotionalDirection direction,
+            string? directorInput = null)
         {
             if (direction == null) throw new System.ArgumentNullException(nameof(direction));
             AvatarEmotionalDirection = direction;
+            AvatarEmotionalDirectorInput = directorInput;
         }
     }
 }

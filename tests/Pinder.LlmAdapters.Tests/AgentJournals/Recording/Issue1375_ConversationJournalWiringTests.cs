@@ -102,10 +102,11 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 ConversationMessage.Assistant("Earlier avatar line."),
             };
 
-            CharacterEmotionalDirection direction = await adapter.GetAvatarEmotionalDirectionAsync(
+            CharacterEmotionalDirectorResult result = await adapter.GetAvatarEmotionalDirectionAsync(
                 MakeDialogueContext(JournalContext()),
                 history,
                 avatarSession: null);
+            CharacterEmotionalDirection direction = result.Direction;
 
             Assert.Equal("shame", direction.PrimaryEmotion);
             Assert.Contains("shame", direction.ResponsePosture, StringComparison.OrdinalIgnoreCase);

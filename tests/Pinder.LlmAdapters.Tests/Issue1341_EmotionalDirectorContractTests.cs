@@ -94,6 +94,22 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void DirectorInput_ExplainsBothCharactersHfiAndTor()
+        {
+            var compiler = new EmotionalPromptCompiler(BuiltInCatalog());
+
+            CompiledEmotionalDirectorPrompt prompt = compiler.CompileDirector(
+                MakeContext(playerHfi: 4, playerTor: 13, dateeHfi: 12, dateeTor: 3));
+
+            Assert.Contains("Datee has HFI 12", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+            Assert.Contains("Datee has TOR 3", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+            Assert.Contains("Player has HFI 4", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+            Assert.Contains("Player has TOR 13", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+            Assert.Contains("closeness is exerting a strong pull", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+            Assert.Contains("rejection feels dangerous", prompt.CompiledReactionInput.Text, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public async Task PlainTransport_ExtractsFirstJsonObjectAndUsesPromptEntrySampling()
         {
             var transport = new PlainQueueTransport(
@@ -569,7 +585,11 @@ namespace Pinder.LlmAdapters.Tests
                 });
         }
 
-        private static DateeContext MakeContext()
+        private static DateeContext MakeContext(
+            int? playerHfi = null,
+            int? playerTor = null,
+            int? dateeHfi = null,
+            int? dateeTor = null)
         {
             return new DateeContext(
                 dateePrompt: "datee prompt",
@@ -593,7 +613,11 @@ namespace Pinder.LlmAdapters.Tests
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
                     StatType.Honesty,
                     RollOutcomeIntensity.Strong,
-                    TestHelpers.MakePsychiatricDiagnosis()));
+                    TestHelpers.MakePsychiatricDiagnosis()),
+                playerHungerForIntimacy: playerHfi,
+                playerTerrorOfRejection: playerTor,
+                dateeHungerForIntimacy: dateeHfi,
+                dateeTerrorOfRejection: dateeTor);
         }
 
         private static PromptCatalog BuiltInCatalog()

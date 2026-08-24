@@ -10,28 +10,30 @@ namespace Pinder.LlmAdapters
 {
     public sealed partial class PinderLlmAdapter
     {
-        internal Task<CharacterEmotionalDirection> GenerateEmotionalDirectionAsync(
+        internal async Task<CharacterEmotionalDirection> GenerateEmotionalDirectionAsync(
             DateeContext context,
             CancellationToken cancellationToken = default)
         {
             var promptCompiler = new EmotionalPromptCompiler(
                 PromptCatalog.ResolveCatalogOrThrow(_options.PromptCatalog));
-            return GenerateEmotionalDirectionAsync(context, promptCompiler, cancellationToken);
+            CharacterEmotionalDirectorResult result = await GenerateEmotionalDirectorResultAsync(
+                context, promptCompiler, priorMessages: null, dateeSystemPrompt: null,
+                privateBranch: null, cancellationToken).ConfigureAwait(false);
+            return result.Direction;
         }
 
-        internal Task<CharacterEmotionalDirection> GenerateEmotionalDirectionAsync(
+        internal async Task<CharacterEmotionalDirection> GenerateEmotionalDirectionAsync(
             DateeContext context,
             EmotionalPromptCompiler promptCompiler,
             CancellationToken cancellationToken = default)
-            => GenerateEmotionalDirectionAsync(
-                context,
-                promptCompiler,
-                priorMessages: null,
-                dateeSystemPrompt: null,
-                privateBranch: null,
-                cancellationToken);
+        {
+            CharacterEmotionalDirectorResult result = await GenerateEmotionalDirectorResultAsync(
+                context, promptCompiler, priorMessages: null, dateeSystemPrompt: null,
+                privateBranch: null, cancellationToken).ConfigureAwait(false);
+            return result.Direction;
+        }
 
-        private Task<CharacterEmotionalDirection> GenerateEmotionalDirectionAsync(
+        private async Task<CharacterEmotionalDirectorResult> GenerateEmotionalDirectorResultAsync(
             DateeContext context,
             EmotionalPromptCompiler promptCompiler,
             IReadOnlyList<ConversationMessage>? priorMessages,
@@ -48,7 +50,7 @@ namespace Pinder.LlmAdapters
                 includeConversationHistory: priorMessages == null,
                 dateeSystemPrompt: dateeSystemPrompt);
 
-            return ExecuteCharacterEmotionalDirectorAsync(
+            CharacterEmotionalDirection direction = await ExecuteCharacterEmotionalDirectorAsync(
                 new CharacterEmotionalDirectorInvocation
                 {
                     Phase = LlmPhase.EmotionalDirector,
@@ -75,7 +77,8 @@ namespace Pinder.LlmAdapters
                         attempts,
                         context.CurrentTurn),
                 },
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+            return new CharacterEmotionalDirectorResult(direction, prompt.CompiledReactionInput.Text);
         }
 
         private void EmitEmotionalDirectorExhaustedDiagnostic(

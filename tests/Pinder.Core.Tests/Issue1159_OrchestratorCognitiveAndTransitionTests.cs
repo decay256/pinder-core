@@ -32,19 +32,20 @@ namespace Pinder.Core.Tests
             public DialogueContext? LastDialogueContext { get; private set; }
             public bool SupportsAvatarEmotionalDirection => true;
 
-            public Task<CharacterEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+            public Task<CharacterEmotionalDirectorResult> GetAvatarEmotionalDirectionAsync(
                 DialogueContext context,
                 IReadOnlyList<ConversationMessage> avatarHistory,
                 LlmConversationSessionSnapshot? avatarSession,
                 CancellationToken cancellationToken = default)
-                => Task.FromResult(new CharacterEmotionalDirection(
+                => Task.FromResult(new CharacterEmotionalDirectorResult(new CharacterEmotionalDirection(
                     "shame",
                     "strong",
                     "fear of being exposed",
                     "reads the moment as risky but important",
                     "wants to admit what they mean",
                     "resists disappearing behind a joke",
-                    "Writing from shame, the avatar risks honesty while resisting the urge to disappear."));
+                    "Writing from shame, the avatar risks honesty while resisting the urge to disappear."),
+                    "director input"));
 
             public Task<DialogueOption[]> GetDialogueOptionsAsync(DialogueContext context, CancellationToken ct = default)
             {

@@ -90,6 +90,14 @@ namespace Pinder.LlmAdapters
                 context.PlayerDeliveredMessage.Trim(),
                 "PlayerDeliveredMessage");
             PromptTraceResult character = CompileCharacterFormulation(turnEvent, catalog);
+            PromptTraceResult emotionalStatus = CharacterEmotionalStatusPromptCompiler.Compile(
+                catalog,
+                string.IsNullOrWhiteSpace(context.DateeName) ? "The DATEE" : context.DateeName,
+                context.DateeHungerForIntimacy,
+                context.DateeTerrorOfRejection,
+                string.IsNullOrWhiteSpace(context.PlayerName) ? "The avatar" : context.PlayerName,
+                context.PlayerHungerForIntimacy,
+                context.PlayerTerrorOfRejection);
             var values = new Dictionary<string, PromptTraceResult>
             {
                 { "prior_relationship", priorRelationship },
@@ -98,6 +106,7 @@ namespace Pinder.LlmAdapters
                 { "recipient_event_meaning", eventMeaning },
                 { "delivered_message", deliveredMessage },
                 { "character_formulation", character },
+                { "emotional_status", emotionalStatus },
             };
             string wrapperKey;
             string[] requiredTokens;
@@ -114,6 +123,7 @@ namespace Pinder.LlmAdapters
                     "delivered_message",
                     "recent_visible_history",
                     "character_formulation",
+                    "emotional_status",
                 };
             }
             else
@@ -127,6 +137,7 @@ namespace Pinder.LlmAdapters
                     "recipient_event_meaning",
                     "delivered_message",
                     "character_formulation",
+                    "emotional_status",
                 };
             }
 

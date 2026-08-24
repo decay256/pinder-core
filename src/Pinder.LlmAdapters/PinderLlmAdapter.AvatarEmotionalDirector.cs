@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters
 {
     public sealed partial class PinderLlmAdapter
     {
-        public async Task<CharacterEmotionalDirection> GetAvatarEmotionalDirectionAsync(
+        public async Task<CharacterEmotionalDirectorResult> GetAvatarEmotionalDirectionAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage> avatarHistory,
             LlmConversationSessionSnapshot? avatarSession,
@@ -54,7 +54,7 @@ namespace Pinder.LlmAdapters
             }
         }
 
-        private async Task<CharacterEmotionalDirection> GenerateAvatarEmotionalDirectionAsync(
+        private async Task<CharacterEmotionalDirectorResult> GenerateAvatarEmotionalDirectionAsync(
             DialogueContext context,
             IReadOnlyList<ConversationMessage> priorMessages,
             PiConversationBranch privateBranch,
@@ -110,6 +110,14 @@ namespace Pinder.LlmAdapters
                             : context.DateeLastMessage),
                         "AvatarEmotionalDirector.DateeLastMessage"),
                     ["{cognitive_subtext}"] = TraceAvatarRuntime(context.CognitiveSubtext ?? "No persistent pressure is available.", "AvatarEmotionalDirector.CognitiveSubtext"),
+                    ["{emotional_status}"] = CharacterEmotionalStatusPromptCompiler.Compile(
+                        catalog,
+                        string.IsNullOrWhiteSpace(context.PlayerName) ? "The avatar" : context.PlayerName,
+                        context.PlayerHungerForIntimacy,
+                        context.PlayerTerrorOfRejection,
+                        string.IsNullOrWhiteSpace(context.DateeName) ? "The DATEE" : context.DateeName,
+                        context.DateeHungerForIntimacy,
+                        context.DateeTerrorOfRejection),
                     ["{transition_target}"] = TraceAvatarRuntime(context.ResolvedTarget?.StemText ?? "No specific revelation target is active.", "AvatarEmotionalDirector.TransitionTarget"),
                     ["{transition_style}"] = TraceAvatarRuntime(context.ResolvedTarget?.TransitionStyle ?? "Stay open to the immediate exchange.", "AvatarEmotionalDirector.TransitionStyle"),
                 });
@@ -129,7 +137,7 @@ namespace Pinder.LlmAdapters
                 ["emotion_count"] = allowedEmotions.Count.ToString(System.Globalization.CultureInfo.InvariantCulture),
             };
             var sharedCompiler = new EmotionalPromptCompiler(catalog);
-            return await ExecuteCharacterEmotionalDirectorAsync(
+            CharacterEmotionalDirection direction = await ExecuteCharacterEmotionalDirectorAsync(
                     new CharacterEmotionalDirectorInvocation
                     {
                         Phase = LlmPhase.AvatarEmotionalDirector,
@@ -153,6 +161,7 @@ namespace Pinder.LlmAdapters
                     },
                     cancellationToken)
                 .ConfigureAwait(false);
+            return new CharacterEmotionalDirectorResult(direction, inputTrace.Text);
         }
 
         private static PromptEntry RequireAvatarPrompt(PromptCatalog catalog, string key)

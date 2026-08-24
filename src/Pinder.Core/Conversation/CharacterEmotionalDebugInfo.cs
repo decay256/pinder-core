@@ -16,7 +16,8 @@ namespace Pinder.Core.Conversation
             string? cognitiveSubtext = null,
             string? transitionTarget = null,
             string? transitionStyle = null,
-            string? compiledPromptInstruction = null)
+            string? compiledPromptInstruction = null,
+            string? directorInput = null)
         {
             Direction = direction;
             HungerForIntimacy = hungerForIntimacy;
@@ -25,6 +26,7 @@ namespace Pinder.Core.Conversation
             TransitionTarget = transitionTarget;
             TransitionStyle = transitionStyle;
             CompiledPromptInstruction = compiledPromptInstruction;
+            DirectorInput = directorInput;
         }
 
         public CharacterEmotionalDirection? Direction { get; }
@@ -34,6 +36,7 @@ namespace Pinder.Core.Conversation
         public string? TransitionTarget { get; }
         public string? TransitionStyle { get; }
         public string? CompiledPromptInstruction { get; }
+        public string? DirectorInput { get; }
 
         public CharacterEmotionalDebugInfo WithStatus(
             int hungerForIntimacy,
@@ -46,7 +49,8 @@ namespace Pinder.Core.Conversation
                 CognitiveSubtext,
                 TransitionTarget,
                 TransitionStyle,
-                CompiledPromptInstruction);
+                CompiledPromptInstruction,
+                DirectorInput);
         }
     }
 }

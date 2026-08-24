@@ -94,7 +94,8 @@ namespace Pinder.LlmAdapters
                 context.ResolvedTarget?.TransitionStyle,
                 SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(
                     context,
-                    _options.PromptCatalog));
+                    _options.PromptCatalog),
+                context.AvatarEmotionalDirectorInput);
         }
 
         public async Task<DialogueOption[]> GetDialogueOptionsAsync(
@@ -398,7 +399,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             AnnotatedInvocationDocument systemDocument =
                 GameRunPromptDocumentBuilder.BuildDateeSystemDocument(context.DateePrompt, gameDef);
             string systemPrompt = systemDocument.Text;
-            CharacterEmotionalDirection emotionalDirection;
+            CharacterEmotionalDirectorResult emotionalDirectorResult;
             if (dateeSession != null)
             {
                 PiConversationBranch directorBranch = await dateeSession.ForkAsync(
@@ -414,7 +415,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                         .ConfigureAwait(false);
                     IReadOnlyList<ConversationMessage> directorHistory =
                         await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
-                    emotionalDirection = await GenerateEmotionalDirectionAsync(
+                    emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
                             context,
                             emotionalPromptCompiler,
                             directorHistory,
@@ -434,16 +435,17 @@ bool recordOneShotJournal = context.AgentJournal != null;
             }
             else
             {
-                emotionalDirection = await GenerateEmotionalDirectionAsync(
-                        context,
-                        emotionalPromptCompiler,
-                        cancellationToken)
+                emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
+                        context, emotionalPromptCompiler, priorMessages: null,
+                        dateeSystemPrompt: null, privateBranch: null, cancellationToken)
                     .ConfigureAwait(false);
             }
+            CharacterEmotionalDirection emotionalDirection = emotionalDirectorResult.Direction;
             PromptTraceResult dateePrompt = emotionalPromptCompiler.CompilePerformance(
                 context,
                 emotionalDirection,
                 includeConversationHistory: priorMessages == null);
+            string directorInput = emotionalDirectorResult.DirectorInput;
             AnnotatedInvocationDocument dateeDocument =
                 GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(dateePrompt);
             string userContent = dateeDocument.Text;
@@ -547,7 +549,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 transitionStyle: context.ResolvedTarget?.TransitionStyle,
                                 compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
                                     dateePrompt,
-                                    "emotional-reaction-performance-direction")));
+                                    "emotional-reaction-performance-direction"),
+                                directorInput: directorInput));
 
                         // Keep dialogue history semantic: never persist the generated
                         // prompt document or hidden signal block as though it were
