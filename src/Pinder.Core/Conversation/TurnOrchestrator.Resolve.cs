@@ -169,7 +169,8 @@ namespace Pinder.Core.Conversation
                 resolvedTarget: state.CurrentResolvedTarget,
                 cognitiveSubtext: state.CurrentCognitiveSubtext,
                 hungerForIntimacy: _hungerForIntimacy != 0 ? _hungerForIntimacy : player.Stats.GetBase(StatType.Charm),
-                terrorOfRejection: _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz));
+                terrorOfRejection: _terrorOfRejection != 0 ? _terrorOfRejection : player.Stats.GetBase(StatType.Rizz),
+                emotionalReactionDebug: dateeResponse.EmotionalReactionDebug);
         }
     }
 }

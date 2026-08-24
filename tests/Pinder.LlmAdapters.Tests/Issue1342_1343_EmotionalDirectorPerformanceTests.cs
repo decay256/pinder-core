@@ -54,6 +54,14 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("Psychiatric diagnosis", performancePrompt, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain(TherapistDiagnosisContract.DerivedFeelingKey, performancePrompt, StringComparison.Ordinal);
             Assert.Equal("That lands softer than I expected.", result.Response.MessageText.Trim());
+            Assert.NotNull(result.Response.EmotionalReactionDebug);
+            Assert.Equal("relieved but cautious", result.Response.EmotionalReactionDebug!.PrimaryEmotion);
+            Assert.Equal("moderate and steadily rising", result.Response.EmotionalReactionDebug.Intensity);
+            Assert.Equal("fear of being dismissed", result.Response.EmotionalReactionDebug.UnderlyingFeeling);
+            Assert.Equal("reads the message as specific warmth that is probably meant for them", result.Response.EmotionalReactionDebug.Interpretation);
+            Assert.Equal("leans in with a careful question", result.Response.EmotionalReactionDebug.Impulse);
+            Assert.Equal("keeps the reply tentative but available", result.Response.EmotionalReactionDebug.Restraint);
+            Assert.Equal("turns warmer while still checking sincerity", result.Response.EmotionalReactionDebug.ResponsePosture);
         }
 
         [Fact]

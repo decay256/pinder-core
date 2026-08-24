@@ -146,6 +146,11 @@ namespace Pinder.Core.Conversation
         public int HungerForIntimacy { get; }
         public int TerrorOfRejection { get; }
 
+        /// <summary>
+        /// Accepted private emotional direction for trusted diagnostic projections.
+        /// </summary>
+        public EmotionalReactionDebugInfo? EmotionalReactionDebug { get; }
+
         public TurnResult(
             RollResult roll,
             string deliveredMessage,
@@ -182,7 +187,8 @@ namespace Pinder.Core.Conversation
             string? cognitiveSubtext = null,
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0,
-            IReadOnlyList<XpLedger.XpEvent>? xpBreakdown = null)
+            IReadOnlyList<XpLedger.XpEvent>? xpBreakdown = null,
+            EmotionalReactionDebugInfo? emotionalReactionDebug = null)
         {
             Roll = roll ?? throw new ArgumentNullException(nameof(roll));
             DeliveredMessage = deliveredMessage ?? throw new ArgumentNullException(nameof(deliveredMessage));
@@ -220,6 +226,7 @@ namespace Pinder.Core.Conversation
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
             XpBreakdown = xpBreakdown ?? Array.Empty<XpLedger.XpEvent>();
+            EmotionalReactionDebug = emotionalReactionDebug;
             InterestBreakdown = BuildBreakdown(
                 baseInterestDelta, riskBonusDelta, comboBonusDelta,
                 shadowInterestDelta, horninessInterestPenalty, activeTrapInterestPenalty);

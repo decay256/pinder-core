@@ -517,6 +517,18 @@ bool recordOneShotJournal = context.AgentJournal != null;
                             responseText,
                             GetDiagnosticSink(),
                             requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
+                        var acceptedResponse = new DateeResponse(
+                            parsed.MessageText,
+                            parsed.DetectedTell,
+                            parsed.WeaknessWindow,
+                            new EmotionalReactionDebugInfo(
+                                emotionalDirection.PrimaryEmotion,
+                                emotionalDirection.Intensity,
+                                emotionalDirection.UnderlyingFeeling,
+                                emotionalDirection.Interpretation,
+                                emotionalDirection.Impulse,
+                                emotionalDirection.Restraint,
+                                emotionalDirection.ResponsePosture));
 
                         // Keep dialogue history semantic: never persist the generated
                         // prompt document or hidden signal block as though it were
@@ -528,7 +540,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                         };
                         acceptedJournal = journal;
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
-                            new StatefulDateeResult(parsed, newEntries));
+                            new StatefulDateeResult(acceptedResponse, newEntries));
                     }
                     catch (LlmContractException ex)
                     {

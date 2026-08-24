@@ -16,14 +16,22 @@ namespace Pinder.Core.Conversation
         /// <summary>A weakness window opened by the datee's response, or null if none.</summary>
         public WeaknessWindow? WeaknessWindow { get; }
 
+        /// <summary>
+        /// Accepted private emotional direction for trusted diagnostics. Callers must
+        /// keep this out of player-visible history and public wire contracts.
+        /// </summary>
+        public EmotionalReactionDebugInfo? EmotionalReactionDebug { get; }
+
         public DateeResponse(
             string messageText,
             Tell? detectedTell = null,
-            WeaknessWindow? weaknessWindow = null)
+            WeaknessWindow? weaknessWindow = null,
+            EmotionalReactionDebugInfo? emotionalReactionDebug = null)
         {
             MessageText = messageText ?? throw new System.ArgumentNullException(nameof(messageText));
             DetectedTell = detectedTell;
             WeaknessWindow = weaknessWindow;
+            EmotionalReactionDebug = emotionalReactionDebug;
         }
     }
 }
