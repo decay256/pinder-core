@@ -71,7 +71,7 @@ namespace Pinder.LlmAdapters.Pi
                 Api = anthropic ? KnownApi.AnthropicMessages : KnownApi.OpenAICompletions,
                 Provider = providerId,
                 BaseUrl = ResolveBaseUrl(providerName, options.BaseUrl),
-                Reasoning = options.Reasoning.HasValue || providerName == "google",
+                Reasoning = options.Reasoning != null || providerName == "google",
                 Input = new[] { ModelInput.Text },
                 ContextWindow = 200_000,
                 MaxTokens = options.ModelCapabilities?.MaxOutputTokens ?? 0,
