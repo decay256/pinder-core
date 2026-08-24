@@ -145,6 +145,8 @@ namespace Pinder.Core.Conversation
         public string? CognitiveSubtext { get; }
         public int HungerForIntimacy { get; }
         public int TerrorOfRejection { get; }
+        public int DateeHungerForIntimacy { get; }
+        public int DateeTerrorOfRejection { get; }
 
         /// <summary>
         /// Accepted private emotional direction for trusted diagnostic projections.
@@ -187,6 +189,8 @@ namespace Pinder.Core.Conversation
             string? cognitiveSubtext = null,
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0,
+            int dateeHungerForIntimacy = 0,
+            int dateeTerrorOfRejection = 0,
             IReadOnlyList<XpLedger.XpEvent>? xpBreakdown = null,
             EmotionalReactionDebugInfo? emotionalReactionDebug = null)
         {
@@ -225,6 +229,8 @@ namespace Pinder.Core.Conversation
             CognitiveSubtext = cognitiveSubtext;
             HungerForIntimacy = hungerForIntimacy;
             TerrorOfRejection = terrorOfRejection;
+            DateeHungerForIntimacy = dateeHungerForIntimacy;
+            DateeTerrorOfRejection = dateeTerrorOfRejection;
             XpBreakdown = xpBreakdown ?? Array.Empty<XpLedger.XpEvent>();
             EmotionalReactionDebug = emotionalReactionDebug;
             InterestBreakdown = BuildBreakdown(

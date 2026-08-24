@@ -145,9 +145,30 @@ namespace Pinder.Core.Tests
             Assert.True(turn.Options[1].HasWeaknessWindow);
         }
 
+        [Fact]
+        public async Task StartTurn_ProjectsExactAvatarEmotionalStatusUsedByOptionsPrompt()
+        {
+            var llm = new CapturingLlm();
+            var session = MakeSession(
+                llm,
+                dateeDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
+                hungerForIntimacy: 7,
+                terrorOfRejection: 12);
+
+            var turn = await session.StartTurnAsync();
+
+            Assert.Equal(7, llm.LastDialogueContext!.PlayerHungerForIntimacy);
+            Assert.Equal(12, llm.LastDialogueContext.PlayerTerrorOfRejection);
+            Assert.NotNull(turn.AvatarEmotionalStatusDebug);
+            Assert.Equal(7, turn.AvatarEmotionalStatusDebug!.HungerForIntimacy);
+            Assert.Equal(12, turn.AvatarEmotionalStatusDebug.TerrorOfRejection);
+        }
+
         private static GameSession MakeSession(
             ILlmAdapter llm,
-            IReadOnlyDictionary<string, string>? dateeDiagnosis)
+            IReadOnlyDictionary<string, string>? dateeDiagnosis,
+            int hungerForIntimacy = 0,
+            int terrorOfRejection = 0)
         {
             var player = MakeProfile("Velvet", psychiatricDiagnosis: null);
             var datee = MakeProfile("Sable", psychiatricDiagnosis: dateeDiagnosis);
@@ -161,7 +182,9 @@ namespace Pinder.Core.Tests
                 new GameSessionConfig(
                     clock: TestHelpers.MakeClock(),
                     maxDialogueOptions: 2,
-                    statDrawRng: new Random(1)));
+                    statDrawRng: new Random(1),
+                    hungerForIntimacy: hungerForIntimacy,
+                    terrorOfRejection: terrorOfRejection));
         }
 
         private static CharacterProfile MakeProfile(
