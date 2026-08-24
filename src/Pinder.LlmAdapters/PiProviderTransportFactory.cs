@@ -173,7 +173,7 @@ namespace Pinder.LlmAdapters.Pi
             return new OpenAICompletionsCompat
             {
                 SupportsStrictMode = provider == "openai",
-                SupportsReasoningEffort = provider == "google",
+                SupportsReasoningEffort = provider == "google" || provider == "openai",
                 SupportsUsageInStreaming = true,
             };
         }

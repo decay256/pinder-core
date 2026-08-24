@@ -158,6 +158,31 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public async Task OpenAi_ConfiguredReasoningLevelIsIncludedOnWire()
+        {
+            HttpTransportRequest? captured = null;
+            var transport = PiProviderTransportFactory.Create(new PiProviderTransportOptions
+            {
+                Provider = "openai",
+                Model = "gpt-test",
+                ApiKey = "openai-key",
+                Fetch = (request, _) =>
+                {
+                    captured = request;
+                    return Task.FromResult(OpenAiResponse());
+                },
+                MaxRetries = 0,
+                Reasoning = ThinkingLevel.Low,
+            });
+
+            await transport.SendAsync("system", "hello");
+
+            Assert.NotNull(captured);
+            string body = Encoding.UTF8.GetString(captured!.Body!);
+            Assert.Contains("\"reasoning_effort\":\"low\"", body, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void CustomProviderWithoutBaseUrl_FailsClosed()
         {
             Assert.Throws<ArgumentException>(() => PiProviderTransportFactory.Create(
