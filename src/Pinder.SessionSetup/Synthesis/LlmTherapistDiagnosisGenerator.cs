@@ -62,7 +62,7 @@ namespace Pinder.SessionSetup
                             TherapistDiagnosisStructuredContract.CreateRequest(
                                 attemptSystemPrompt,
                                 userPrompt,
-                                entry.Temperature ?? 0.45,
+                                entry.Temperature!.Value,
                                 entry.MaxTokens),
                             attemptCancellationToken).ConfigureAwait(false);
                         llmResponse = structuredResponse.JsonText;
@@ -74,7 +74,7 @@ namespace Pinder.SessionSetup
                             _transport,
                             attemptSystemPrompt,
                             userPrompt,
-                            entry.Temperature ?? 0.45,
+                            entry.Temperature!.Value,
                             entry.MaxTokens,
                             LlmPhase.Synthesis,
                             _onDiagnostic,

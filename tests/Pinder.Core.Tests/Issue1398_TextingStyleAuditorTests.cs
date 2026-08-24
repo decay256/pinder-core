@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Pinder.Core.Prompts;
 using Pinder.Tools.TextingStyleAuditor;
 using Xunit;
 
@@ -17,6 +18,32 @@ public sealed class Issue1398_TextingStyleAuditorTests : IDisposable
         Assert.Equal(0, result.ExitCode);
         Assert.Contains("parameter=trunkLengthBase band=0", result.Output);
         Assert.Contains("loaded 1 anatomy parameter(s), 1 band(s)", result.Output);
+    }
+
+    [Fact]
+    public void AuditorAcceptsEveryAxisOwnedByTheRuntimeTaxonomy()
+    {
+        var items = TextingStyleAggregator.SlotToSyntaxAxis
+            .GroupBy(pair => pair.Value, StringComparer.OrdinalIgnoreCase)
+            .Select(group => new
+            {
+                item_id = "item-" + group.Key,
+                slot = group.First().Key,
+                texting_style_fragment = $"SYNTAX:\n- {group.Key}: may express {group.Key}",
+            })
+            .ToArray();
+        var anatomy = new[]
+        {
+            AnatomyParameter(TextingStyleAggregator.DirectnessGroup[0], "directness"),
+            AnatomyParameter(TextingStyleAggregator.AffectGroup[0], "affect"),
+            AnatomyParameter(TextingStyleAggregator.RhythmGroup[0], "rhythm"),
+        };
+
+        var result = RunAuditor(JsonSerializer.Serialize(items), JsonSerializer.Serialize(anatomy));
+
+        Assert.Equal(0, result.ExitCode);
+        foreach (string axis in TextingStyleTaxonomy.CanonicalAxes)
+            Assert.Contains($"axis={axis}", result.Output);
     }
 
     [Theory]
@@ -142,6 +169,11 @@ public sealed class Issue1398_TextingStyleAuditorTests : IDisposable
 
     private static string Item(string slot, string fragment) => JsonSerializer.Serialize(new[] { new { item_id = "test-item", slot, texting_style_fragment = fragment } });
     private static string Anatomy(string parameterId, string fragment) => JsonSerializer.Serialize(new[] { new { id = parameterId, bands = new[] { new { lower = 0, upper = 1, texting_style_fragment = fragment } } } });
+    private static object AnatomyParameter(string parameterId, string axis) => new
+    {
+        id = parameterId,
+        bands = new[] { new { lower = 0, upper = 1, texting_style_fragment = $"EXPRESSION:\n- {axis}: may express {axis}" } },
+    };
     public void Dispose() => Directory.Delete(_directory, recursive: true);
     private sealed record AuditResult(int ExitCode, string Output);
 }

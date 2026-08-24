@@ -609,8 +609,7 @@ namespace Pinder.Core.Conversation
             if (!string.IsNullOrWhiteSpace(player.TextingStyleFragment))
             {
                 directives.Add(
-                    "YOUR DESIGNATED TEXTING STYLE\n" +
-                    PromptBuilder.GetTextingStyleSoftFraming() + "\n" +
+                    PromptBuilder.GetTextingStyleRuntimeFraming() + "\n" +
                     player.TextingStyleFragment.Trim());
             }
 

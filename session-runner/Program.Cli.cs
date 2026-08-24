@@ -6,6 +6,8 @@ partial class Program
 {
     internal const string SessionSetupModelEnvVar = "SESSION_SETUP_MODEL";
     internal const string PlayerAgentModelEnvVar = "PLAYER_AGENT_MODEL";
+    internal const string ModelMaxOutputTokensEnvVar = "PINDER_MODEL_MAX_OUTPUT_TOKENS";
+    internal const string SetupModelMaxOutputTokensEnvVar = "PINDER_SETUP_MODEL_MAX_OUTPUT_TOKENS";
 
     internal static string ExtractSystemPrompt(string md)
     {
@@ -49,6 +51,50 @@ partial class Program
             ?? AnthropicModelIds.DefaultModel;
     }
 
+    internal static int? ParseModelMaxOutputTokens(string[] args, string? environmentValue = null)
+        => ParsePositiveOptionalInt(
+            ParseArg(args, "--model-max-output-tokens")
+                ?? environmentValue,
+            $"--model-max-output-tokens / {ModelMaxOutputTokensEnvVar}");
+
+    internal static int? ParseSetupModelMaxOutputTokens(
+        string[] args,
+        int? gameModelMaximum,
+        bool setupUsesGameModel,
+        string? environmentValue = null)
+        => ParsePositiveOptionalInt(
+            ParseArg(args, "--setup-model-max-output-tokens")
+                ?? environmentValue,
+            $"--setup-model-max-output-tokens / {SetupModelMaxOutputTokensEnvVar}")
+            ?? (setupUsesGameModel ? gameModelMaximum : null);
+
+    internal static (int? GameModel, int? SetupModel) ResolveModelMaxOutputTokens(
+        string[] args,
+        string gameModel,
+        string setupModel,
+        string? gameEnvironmentValue,
+        string? setupEnvironmentValue)
+    {
+        int? gameMaximum = ParseModelMaxOutputTokens(args, gameEnvironmentValue);
+        int? setupMaximum = ParseSetupModelMaxOutputTokens(
+            args,
+            gameMaximum,
+            string.Equals(setupModel, gameModel, StringComparison.OrdinalIgnoreCase),
+            setupEnvironmentValue);
+        return (gameMaximum, setupMaximum);
+    }
+
+    private static int? ParsePositiveOptionalInt(string? configured, string settingName)
+    {
+        if (string.IsNullOrWhiteSpace(configured))
+            return null;
+        if (int.TryParse(configured, out int value) && value > 0)
+            return value;
+
+        throw new ArgumentException(
+            $"{settingName} must be a positive integer.");
+    }
+
     internal static string? ParseArg(string[] args, string flag)
     {
         int idx = Array.IndexOf(args, flag);
@@ -70,6 +116,8 @@ partial class Program
         Console.Error.WriteLine($"  --model <spec>      Game-turn LLM target (default: {AnthropicModelIds.DefaultModel})");
         Console.Error.WriteLine($"  --setup-model <m>   Setup generator model (default: same as --model; env: {SessionSetupModelEnvVar})");
         Console.Error.WriteLine($"  --player-agent-model <m> LLM player decision model (default: {AnthropicModelIds.DefaultModel}; env: {PlayerAgentModelEnvVar})");
+        Console.Error.WriteLine($"  --model-max-output-tokens <N> Provider model output capability (env: {ModelMaxOutputTokensEnvVar})");
+        Console.Error.WriteLine($"  --setup-model-max-output-tokens <N> Setup-model output capability (env: {SetupModelMaxOutputTokensEnvVar})");
         Console.Error.WriteLine("  --overlay-model <m> Run an overlay/refinement model on top of primary adapter output (via Groq)");
         Console.Error.WriteLine("  --difficulty <pct> Reduce check success probability by N% (e.g. --difficulty 15 = 15% harder)");
         Console.Error.WriteLine("  --seed <int>       Seed value for deterministic dice checks");

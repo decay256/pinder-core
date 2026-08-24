@@ -217,7 +217,8 @@ namespace Pinder.LlmAdapters
                 ["instruction"] = instruction,
                 ["texting_style_block"] = BuildTextingStyleBlockDocument(
                     context.PlayerTextingStyle,
-                    "SuccessImprovementContext.PlayerTextingStyle"),
+                    "SuccessImprovementContext.PlayerTextingStyle",
+                    promptCatalog),
             };
 
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
@@ -278,7 +279,8 @@ namespace Pinder.LlmAdapters
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
                 ["texting_style_block"] = BuildTextingStyleBlockDocument(
                     context.PlayerTextingStyle,
-                    "SteeringContext.PlayerTextingStyle"),
+                    "SteeringContext.PlayerTextingStyle",
+                    promptCatalog),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
@@ -323,7 +325,8 @@ namespace Pinder.LlmAdapters
                 ["conversation_history"] = FormatConversationHistoryDocument(context.ConversationHistory, promptCatalog),
                 ["texting_style_block"] = BuildTextingStyleBlockDocument(
                     context.PlayerTextingStyle,
-                    "HorninessQuestionContext.PlayerTextingStyle"),
+                    "HorninessQuestionContext.PlayerTextingStyle",
+                    promptCatalog),
             };
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
@@ -380,26 +383,26 @@ namespace Pinder.LlmAdapters
 
         private static AnnotatedInvocationDocument BuildTextingStyleBlockDocument(
             string? textingStyle,
-            string runtimeKeyPath)
+            string runtimeKeyPath,
+            PromptCatalog? promptCatalog)
         {
             if (string.IsNullOrWhiteSpace(textingStyle))
             {
                 return RuntimeFragment(string.Empty, runtimeKeyPath);
             }
 
-            string softFraming = PromptBuilder.GetTextingStyleSoftFraming();
+            string runtimeFraming = PromptTemplates.GetCatalogString(
+                promptCatalog,
+                PromptBuilder.TextingStyleRuntimeFramingKey).Trim();
             return new AnnotatedInvocationDocumentBuilder()
-                .AppendGeneratedLiteral(
-                    "YOUR DESIGNATED TEXTING STYLE\n",
-                    "texting_style.heading")
                 .AppendConfigured(
-                    softFraming,
+                    runtimeFraming,
                     CatalogSource(
-                        "data/prompts/structural.yaml",
-                        PromptBuilder.TextingStyleSoftFramingKey,
-                        softFraming))
+                        GetTemplateSource(promptCatalog, PromptBuilder.TextingStyleRuntimeFramingKey),
+                        PromptBuilder.TextingStyleRuntimeFramingKey,
+                        runtimeFraming))
                 .AppendGeneratedLiteral("\n", "texting_style.separator")
-                .AppendRuntimeGenerated(textingStyle.Trim(), runtimeKeyPath)
+                .AppendRuntimeGenerated(textingStyle!.Trim(), runtimeKeyPath)
                 .AppendGeneratedLiteral("\n", "texting_style.terminator")
                 .Build(
                     "fragment." + runtimeKeyPath.Replace(':', '.').Replace('_', '-'),

@@ -41,3 +41,11 @@ prompts:
   texting_style_soft_framing:
     system_prompt: |-
       Treat these selected texting-style fragments as loose expressive influences, not mandatory formatting rules. Use only what fits naturally in the moment; several fragments may have no visible effect. Preserve the character's meaning, personality, and emotional state instead of forcing every trait into every response.
+
+  # Issue #1405: complete runtime framing shared by dialogue, DATEE, and
+  # post-processing emitters. Keeping the heading and behavioral instruction in
+  # one fragment prevents individual emitters from drifting into stricter rules.
+  texting_style_runtime_framing:
+    system_prompt: |-
+      YOUR TEXTING STYLE
+      Treat these selected texting-style fragments as loose expressive influences, not mandatory formatting rules. Use only what fits naturally in the moment; several fragments may have no visible effect. Preserve the character's meaning, personality, and emotional state instead of forcing every trait into every response.

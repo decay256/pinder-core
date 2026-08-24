@@ -31,6 +31,12 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("sound exactly like", datee, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("MUST be maintained consistently", options, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("MUST be maintained consistently", datee, StringComparison.OrdinalIgnoreCase);
+            AssertNoMandatoryStyleLanguage(options);
+            AssertNoMandatoryStyleLanguage(datee);
+
+            string rewrite = catalog.TryGet("default-register-instruction")!.SystemPrompt!;
+            Assert.Contains("loose expressive influence", rewrite, StringComparison.OrdinalIgnoreCase);
+            AssertNoMandatoryStyleLanguage(rewrite);
         }
 
         [Fact]
@@ -62,6 +68,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("characters regardless of your texting style", prompt);
             Assert.DoesNotContain("follow this exactly", prompt, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("no deviations", prompt, StringComparison.OrdinalIgnoreCase);
+            AssertNoMandatoryStyleLanguage(prompt);
         }
 
         [Fact]
@@ -98,6 +105,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("preserve this exactly", improvement.User.Text, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("preserve this exactly", steering.User.Text, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("preserve this exactly", horniness.User.Text, StringComparison.OrdinalIgnoreCase);
+            AssertNoMandatoryStyleLanguage(improvement.User.Text);
+            AssertNoMandatoryStyleLanguage(steering.User.Text);
+            AssertNoMandatoryStyleLanguage(horniness.User.Text);
         }
 
         [Fact]
@@ -135,14 +145,135 @@ namespace Pinder.LlmAdapters.Tests
             {
                 AgentJournalProvenanceRange framing = Assert.Single(documents[index].User.Ranges, range =>
                     range.RangeKind == AgentJournalRangeKind.Configured
-                    && range.Source.KeyPath == PromptBuilder.TextingStyleSoftFramingKey);
+                    && range.Source.KeyPath == PromptBuilder.TextingStyleRuntimeFramingKey);
                 AgentJournalProvenanceRange runtimeStyle = Assert.Single(documents[index].User.Ranges, range =>
                     range.RangeKind == AgentJournalRangeKind.RuntimeGenerated
                     && range.Source.KeyPath == runtimeKeys[index]);
 
                 Assert.Equal("prompt.catalog", framing.Source.SourceId);
+                Assert.StartsWith("YOUR TEXTING STYLE\n", Slice(documents[index].User, framing), StringComparison.Ordinal);
                 Assert.Contains("loose expressive influences", Slice(documents[index].User, framing));
                 Assert.Equal(Style, Slice(documents[index].User, runtimeStyle));
+                Assert.DoesNotContain(documents[index].User.Ranges, range =>
+                    range.Source.KeyPath == "texting_style.heading");
+            }
+        }
+
+        [Fact]
+        public void SessionDocuments_AttributeConfiguredFramingAndRuntimeStylesHonestly()
+        {
+            PromptCatalog catalog = PromptCatalog.LoadFromDirectory(Path.Combine(RepoRoot(), "data", "prompts"));
+            var history = new List<(string Sender, string Text)> { ("P", "hello"), ("D", "hey") };
+            var dialogueContext = new DialogueContext(
+                "player prompt",
+                "datee prompt",
+                history,
+                "hey",
+                Array.Empty<string>(),
+                12,
+                playerName: "P",
+                dateeName: "D",
+                currentTurn: 2,
+                playerTextingStyle: Style,
+                availableStats: new[] { StatType.Charm, StatType.Honesty });
+            var dateeContext = new DateeContext(
+                "datee prompt",
+                history,
+                "hey",
+                Array.Empty<string>(),
+                12,
+                "hello",
+                11,
+                12,
+                1,
+                playerName: "P",
+                dateeName: "D",
+                dateeTextingStyle: Style);
+
+            AnnotatedInvocationDocument player = GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument(dialogueContext, catalog);
+            AnnotatedInvocationDocument datee = GameRunPromptDocumentBuilder.BuildDateeUserDocument(dateeContext, catalog);
+
+            AssertStyleRanges(player, "DialogueContext.PlayerTextingStyle");
+            AssertStyleRanges(datee, "DateeContext.DateeTextingStyle");
+            AssertNoMandatoryStyleLanguage(player.Text);
+            AssertNoMandatoryStyleLanguage(datee.Text);
+        }
+
+        [Fact]
+        public void AdapterEmittersUseTheExplicitCatalogForRuntimeStyleFraming()
+        {
+            string root = RepoRoot();
+            string temporaryRoot = Path.Combine(
+                Path.GetTempPath(),
+                "pinder-1405-prompts-" + Guid.NewGuid().ToString("N"));
+            string temporaryPrompts = Path.Combine(temporaryRoot, "data", "prompts");
+            try
+            {
+                CopyDirectory(Path.Combine(root, "data", "prompts"), temporaryPrompts);
+                string structuralPath = Path.Combine(temporaryPrompts, "structural.yaml");
+                File.WriteAllText(
+                    structuralPath,
+                    File.ReadAllText(structuralPath).Replace(
+                        "YOUR TEXTING STYLE",
+                        "EXPLICIT CATALOG TEXTING STYLE"));
+                PromptCatalog catalog = PromptCatalog.LoadFromDirectory(temporaryPrompts);
+                var history = new List<(string Sender, string Text)> { ("P", "hello"), ("D", "hey") };
+                var gameDefinition = GameDefinition.LoadFrom(
+                    File.ReadAllText(Path.Combine(root, "data", "game-definition.yaml")));
+                var delivery = StatDeliveryInstructions.LoadFrom(
+                    File.ReadAllText(Path.Combine(root, "data", "delivery-instructions.yaml")));
+                var dialogueContext = new DialogueContext(
+                    "player prompt",
+                    "datee prompt",
+                    history,
+                    "hey",
+                    Array.Empty<string>(),
+                    12,
+                    playerName: "P",
+                    dateeName: "D",
+                    currentTurn: 2,
+                    playerTextingStyle: Style,
+                    availableStats: new[] { StatType.Charm, StatType.Honesty });
+                var dateeContext = new DateeContext(
+                    "datee prompt",
+                    history,
+                    "hey",
+                    Array.Empty<string>(),
+                    12,
+                    "hello",
+                    11,
+                    12,
+                    1,
+                    playerName: "P",
+                    dateeName: "D",
+                    dateeTextingStyle: Style);
+
+                string[] rendered =
+                {
+                    GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument(dialogueContext, catalog).Text,
+                    GameRunPromptDocumentBuilder.BuildDateeUserDocument(dateeContext, catalog).Text,
+                    GameRunPromptDocumentBuilder.BuildSuccessImprovementDocuments(
+                        new SuccessImprovementContext("player prompt", "D", "P", "hello", StatType.Charm, "strong", history, playerTextingStyle: Style),
+                        delivery,
+                        gameDefinition,
+                        catalog)!.User.Text,
+                    GameRunPromptDocumentBuilder.BuildSteeringQuestionDocuments(
+                        new SteeringContext("player prompt", "D", "P", "hello", history, playerTextingStyle: Style),
+                        gameDefinition,
+                        catalog).User.Text,
+                    GameRunPromptDocumentBuilder.BuildHorninessQuestionDocuments(
+                        new HorninessQuestionContext("player prompt", "D", "P", "hello", history, playerTextingStyle: Style),
+                        gameDefinition,
+                        catalog).User.Text,
+                };
+
+                foreach (string prompt in rendered)
+                    Assert.Contains("EXPLICIT CATALOG TEXTING STYLE", prompt, StringComparison.Ordinal);
+            }
+            finally
+            {
+                if (Directory.Exists(temporaryRoot))
+                    Directory.Delete(temporaryRoot, recursive: true);
             }
         }
 
@@ -167,6 +298,33 @@ namespace Pinder.LlmAdapters.Tests
         private static string Slice(AnnotatedInvocationDocument document, AgentJournalProvenanceRange range)
             => document.Text.Substring(range.StartUtf16, range.EndUtf16 - range.StartUtf16);
 
+        private static void AssertStyleRanges(AnnotatedInvocationDocument document, string runtimeKey)
+        {
+            AgentJournalProvenanceRange framing = Assert.Single(document.Ranges, range =>
+                range.RangeKind == AgentJournalRangeKind.Configured
+                && range.Source.KeyPath == PromptBuilder.TextingStyleRuntimeFramingKey);
+            AgentJournalProvenanceRange style = Assert.Single(document.Ranges, range =>
+                range.RangeKind == AgentJournalRangeKind.RuntimeGenerated
+                && range.Source.KeyPath == runtimeKey);
+
+            Assert.Equal("prompt.catalog", framing.Source.SourceId);
+            Assert.StartsWith("YOUR TEXTING STYLE\n", Slice(document, framing), StringComparison.Ordinal);
+            Assert.Contains("loose expressive influences", Slice(document, framing));
+            Assert.Equal("runtime", style.Source.SourceId);
+            Assert.Equal(Style + Environment.NewLine, Slice(document, style));
+            Assert.DoesNotContain(document.Ranges, range =>
+                range.RangeKind == AgentJournalRangeKind.Configured
+                && Slice(document, range).Contains(Style, StringComparison.Ordinal));
+        }
+
+        private static void AssertNoMandatoryStyleLanguage(string prompt)
+        {
+            Assert.DoesNotContain("match the register exactly", prompt, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("match the texting register", prompt, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("sound exactly like", prompt, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("must be maintained consistently", prompt, StringComparison.OrdinalIgnoreCase);
+        }
+
         private static string RepoRoot()
         {
             string? current = AppContext.BaseDirectory;
@@ -177,6 +335,15 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             throw new DirectoryNotFoundException("Could not locate repository root.");
+        }
+
+        private static void CopyDirectory(string source, string destination)
+        {
+            Directory.CreateDirectory(destination);
+            foreach (string file in Directory.GetFiles(source))
+                File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
+            foreach (string directory in Directory.GetDirectories(source))
+                CopyDirectory(directory, Path.Combine(destination, Path.GetFileName(directory)));
         }
     }
 }

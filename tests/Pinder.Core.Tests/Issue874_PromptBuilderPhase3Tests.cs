@@ -63,6 +63,7 @@ namespace Pinder.Core.Tests
             var names = catalog.Names.ToList();
             Assert.Contains("character_card_framing", names);
             Assert.Contains("texting_style_soft_framing", names);
+            Assert.Contains("texting_style_runtime_framing", names);
 
             // The old per-section keys are gone.
             Assert.DoesNotContain("structural-lead-in", names);
@@ -194,6 +195,19 @@ namespace Pinder.Core.Tests
             Assert.Contains(catalog.Get("texting_style_soft_framing").SystemPrompt!, section);
             Assert.Contains("- emoji: uses one tiny signal only when it fits", section);
             Assert.DoesNotContain("follow this exactly", section, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void RuntimeTextingStyleFraming_OwnsHeadingAndSoftInstructionInOneCatalogFragment()
+        {
+            var catalog = LoadCatalog();
+            string configured = catalog.Get("texting_style_runtime_framing").SystemPrompt!;
+            string resolved = PromptBuilder.GetTextingStyleRuntimeFraming(
+                key => catalog.TryGet(key)?.SystemPrompt);
+
+            Assert.Equal(configured, resolved);
+            Assert.StartsWith("YOUR TEXTING STYLE\n", resolved, StringComparison.Ordinal);
+            Assert.Contains("loose expressive influences", resolved);
         }
 
         [Fact]

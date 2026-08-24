@@ -6,16 +6,6 @@ namespace Pinder.Tools.TextingStyleAuditor;
 
 public static class TextingStyleAuditorRunner
 {
-    private static readonly HashSet<string> SyntaxAxes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "emoji", "shorthand", "grammar", "structure", "length", "tics",
-    };
-
-    private static readonly HashSet<string> ExpressionAxes = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "directness", "affect", "rhythm",
-    };
-
     private static readonly IReadOnlyDictionary<string, string> AnatomyOwners = BuildAnatomyOwners();
 
     public static int Run(string[] args, TextWriter stdout, TextWriter stderr)
@@ -117,7 +107,7 @@ public static class TextingStyleAuditorRunner
                 continue;
             }
 
-            ParseFragment(fragment, location, "SYNTAX", SyntaxAxes, ownerAxis, findings, contributions);
+            ParseFragment(fragment, location, "SYNTAX", TextingStyleTaxonomy.SyntaxAxes, ownerAxis, findings, contributions);
         }
         return count;
     }
@@ -175,13 +165,13 @@ public static class TextingStyleAuditorRunner
                     continue;
                 }
 
-                ParseFragment(fragment, location, "EXPRESSION", ExpressionAxes, ownerAxis, findings, contributions);
+                ParseFragment(fragment, location, "EXPRESSION", TextingStyleTaxonomy.ExpressionAxes, ownerAxis, findings, contributions);
             }
         }
         return (parameterCount, bandCount);
     }
 
-    private static void ParseFragment(string fragment, string location, string requiredSection, ISet<string> validAxes, string ownerAxis, ICollection<Finding> findings, ICollection<Contribution> contributions)
+    private static void ParseFragment(string fragment, string location, string requiredSection, IReadOnlyList<string> validAxes, string ownerAxis, ICollection<Finding> findings, ICollection<Contribution> contributions)
     {
         var candidates = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         bool inSection = false;
@@ -234,7 +224,7 @@ public static class TextingStyleAuditorRunner
             string axisToken = bullet[..colon].Trim();
             int parenthesis = axisToken.IndexOf('(');
             if (parenthesis > 0) axisToken = axisToken[..parenthesis].Trim();
-            if (!validAxes.Contains(axisToken))
+            if (!validAxes.Any(axis => string.Equals(axis, axisToken, StringComparison.OrdinalIgnoreCase)))
             {
                 findings.Add(Blocking(location, $"unknown axis '{axisToken}'"));
                 currentAxis = null;

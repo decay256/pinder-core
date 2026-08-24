@@ -17,7 +17,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_OptionsPrompt_IncludesConversationHistory()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
+            var result = BuildDialogueOptionsPrompt(MakeDialogueContext());
             Assert.Contains("[CONVERSATION_START]", result);
             Assert.Contains("[CURRENT_TURN]", result);
             Assert.Contains("hey there", result);
@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_OptionsPrompt_IncludesDateeProfile()
         {
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(MakeDialogueContext());
+            var result = BuildDialogueOptionsPrompt(MakeDialogueContext());
             Assert.Contains("YOU ARE TALKING TO", result);
         }
 
@@ -39,7 +39,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_DateePrompt_IncludesConversationHistory()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = BuildDateePrompt(MakeDateeContext());
             Assert.Contains("[CONVERSATION_START]", result);
         }
 
@@ -47,7 +47,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_DateePrompt_ShowsInterestMovement()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(interestBefore: 10, interestAfter: 14));
             Assert.Contains("from 10 to 14", result);
         }
@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_DateePrompt_OmitsResponseTiming()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 5.0));
             Assert.DoesNotContain("RESPONSE TIMING", result);
             Assert.DoesNotContain("5.0 minutes", result);
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC6_DateePrompt_SubMinuteDelay_IndicatesRapidResponse()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = BuildDateePrompt(
                 MakeDateeContext(responseDelayMinutes: 0.5));
             Assert.DoesNotContain("less than 1 minute", result);
         }
@@ -79,7 +79,7 @@ namespace Pinder.LlmAdapters.Tests
             {
                 { ShadowStatType.Fixation, 12 }
             };
-            var result = SessionDocumentBuilder.BuildDialogueOptionsPrompt(
+            var result = BuildDialogueOptionsPrompt(
                 MakeDialogueContext(shadowThresholds: shadows));
             // Shadow state should appear in the output
             Assert.Contains("Shadow", result, StringComparison.OrdinalIgnoreCase);
@@ -94,7 +94,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC7_BuildDialogueOptionsPrompt_NullContextThrows()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDialogueOptionsPrompt(null!));
+                BuildDialogueOptionsPrompt(null!));
         }
 
         // #1138: AC7_BuildDeliveryPrompt_NullContextThrows removed —
@@ -105,7 +105,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC7_BuildDateePrompt_NullContextThrows()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDateePrompt(null!));
+                BuildDateePrompt(null!));
         }
     }
 }

@@ -216,12 +216,14 @@ namespace Pinder.LlmAdapters
             // Inject texting style
             if (!string.IsNullOrEmpty(context.PlayerTextingStyle))
             {
-                sb.AppendLine("YOUR TEXTING STYLE");
+                string runtimeFraming = GetTemplate(
+                    promptCatalog,
+                    PromptBuilder.TextingStyleRuntimeFramingKey);
                 sb.AppendLine(
-                    PromptBuilder.GetTextingStyleSoftFraming(),
-                    "data/prompts/structural.yaml",
-                    PromptBuilder.TextingStyleSoftFramingKey);
-                sb.AppendLine(context.PlayerTextingStyle, "data/prompts/structural.yaml", "player-texting-style");
+                    runtimeFraming,
+                    GetTemplateSource(promptCatalog, PromptBuilder.TextingStyleRuntimeFramingKey),
+                    PromptBuilder.TextingStyleRuntimeFramingKey);
+                sb.AppendLine(context.PlayerTextingStyle, "runtime:dialogue-context", "DialogueContext.PlayerTextingStyle");
                 sb.AppendLine();
             }
 
@@ -591,12 +593,14 @@ namespace Pinder.LlmAdapters
             if (!string.IsNullOrWhiteSpace(context.DateeTextingStyle))
             {
                 sb.AppendLine();
-                sb.AppendLine("YOUR TEXTING STYLE");
+                string runtimeFraming = GetTemplate(
+                    promptCatalog,
+                    PromptBuilder.TextingStyleRuntimeFramingKey);
                 sb.AppendLine(
-                    PromptBuilder.GetTextingStyleSoftFraming(),
-                    "data/prompts/structural.yaml",
-                    PromptBuilder.TextingStyleSoftFramingKey);
-                sb.AppendLine(context.DateeTextingStyle, "data/prompts/structural.yaml", "datee-texting-style");
+                    runtimeFraming,
+                    GetTemplateSource(promptCatalog, PromptBuilder.TextingStyleRuntimeFramingKey),
+                    PromptBuilder.TextingStyleRuntimeFramingKey);
+                sb.AppendLine(context.DateeTextingStyle, "runtime:datee-context", "DateeContext.DateeTextingStyle");
             }
 
             sb.AppendLine();
