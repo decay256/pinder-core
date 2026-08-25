@@ -66,7 +66,7 @@ namespace Pinder.Core.Tests
                 "dramatic_arc",
                 "prompt-catalog: missing required key 'dramatic_arc'.");
 
-            Assert.Contains("Return ONLY valid JSON", backstory.SystemPrompt);
+            Assert.Contains("Provide the 20 category entries", backstory.SystemPrompt);
             Assert.Equal(0.7, backstory.Temperature);
             Assert.Null(backstory.MaxTokens);
 
