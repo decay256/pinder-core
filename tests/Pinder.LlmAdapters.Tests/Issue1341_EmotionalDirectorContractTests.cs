@@ -57,6 +57,30 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(
                 "emotional_director.v1",
                 schema["properties"]!["schema_version"]!.Value<string>("const"));
+            Assert.Equal(
+                "The contract schema version string. Must be exactly 'emotional_director.v1'.",
+                schema["properties"]!["schema_version"]!.Value<string>("description"));
+            Assert.Equal(
+                "The single dominant primary emotion chosen from the configured vocabulary.",
+                schema["properties"]!["primary_emotion"]!.Value<string>("description"));
+            Assert.Equal(
+                "The strength, movement, and trajectory of the primary emotion.",
+                schema["properties"]!["intensity"]!.Value<string>("description"));
+            Assert.Equal(
+                "The deeper, more vulnerable feeling or subtext beneath the primary emotion.",
+                schema["properties"]!["underlying_feeling"]!.Value<string>("description"));
+            Assert.Equal(
+                "How the subject character interprets the counterpart's message and intention.",
+                schema["properties"]!["interpretation"]!.Value<string>("description"));
+            Assert.Equal(
+                "A behavioral urge or instinct in third-person or infinitive form (e.g. 'pull back and test their sincerity').",
+                schema["properties"]!["impulse"]!.Value<string>("description"));
+            Assert.Equal(
+                "What holds the subject character back from fully acting on their impulse.",
+                schema["properties"]!["restraint"]!.Value<string>("description"));
+            Assert.Equal(
+                "Natural-language prose describing the character's behavioral stance/posture in response to the moment. Must explicitly mention or include the chosen primary_emotion.",
+                schema["properties"]!["response_posture"]!.Value<string>("description"));
             Assert.All(
                 schema["properties"]!
                     .Children<JProperty>()
@@ -498,6 +522,200 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void ResponsePostureOmitsPrimaryEmotionRepairPreservesYamlSpanInCompiledSystemPrompt()
+        {
+            PromptCatalog catalog = BuiltInCatalog();
+            var compiler = new EmotionalPromptCompiler(catalog);
+            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
+
+            var repaired = compiler.CompileDirectorRetrySystemPrompt(
+                initial.SystemPrompt,
+                "response_posture_omits_primary_emotion");
+
+            const string expectedKey = "emotional-reaction-director-repair-response-posture-omits-primary-emotion";
+            var repairSpan = Assert.Single(repaired.Spans.Where(
+                span => span.Key == expectedKey));
+            Assert.Equal("data/prompts/emotional-reactions.yaml", repairSpan.SourceFile);
+            Assert.Equal(
+                catalog.Get(expectedKey).SystemPrompt!.Trim(),
+                repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
+            Assert.Contains(
+                repaired.Spans,
+                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
+        }
+
+        [Fact]
+        public void UnsupportedPrimaryEmotionRepairPreservesYamlSpanAndSubstitutesVocabulary()
+        {
+            PromptCatalog catalog = BuiltInCatalog();
+            var compiler = new EmotionalPromptCompiler(catalog);
+            CompiledEmotionalDirectorPrompt initial = compiler.CompileDirector(MakeContext());
+
+            var repaired = compiler.CompileDirectorRetrySystemPrompt(
+                initial.SystemPrompt,
+                "unsupported_primary_emotion");
+
+            const string expectedKey = "emotional-reaction-director-repair-unsupported-primary-emotion";
+            Assert.DoesNotContain("{emotion_vocabulary}", repaired.Text, StringComparison.Ordinal);
+            Assert.Contains(repaired.Spans, span => span.Key == expectedKey);
+            Assert.Contains(repaired.Spans, span => span.Key == CharacterEmotionCatalog.PromptKey);
+            Assert.Contains(
+                repaired.Spans,
+                span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
+
+            var vocabulary = string.Join(", ", CharacterEmotionCatalog.Load(catalog));
+            Assert.Contains(vocabulary, repaired.Text, StringComparison.Ordinal);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Retry_ResponsePostureOmitsPrimaryEmotionAddsActionableCatalogRepairWithoutEchoingRejectedOutput(
+            bool structured)
+        {
+            string invalid = ValidJson(responsePosture: "They become clipped and confrontational.");
+            var context = MakeContext();
+
+            if (structured)
+            {
+                var transport = new StructuredQueueTransport(
+                    new StructuredLlmResponse(
+                        invalid,
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true),
+                    new StructuredLlmResponse(
+                        ValidJson(),
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true));
+                var adapter = CreateAdapter(transport, retries: 1);
+
+                var direction = await adapter.GenerateEmotionalDirectionAsync(context);
+
+                Assert.Equal("relief", direction.PrimaryEmotion);
+                Assert.Equal(2, transport.StructuredCalls);
+                Assert.DoesNotContain(
+                    "The previous emotional direction did not satisfy the response contract.",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains(
+                    "response_posture",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    "They become clipped and confrontational.",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Equal(
+                    transport.StructuredRequests[0].JsonSchema,
+                    transport.StructuredRequests[1].JsonSchema);
+                return;
+            }
+
+            var plainTransport = new PlainQueueTransport(invalid, ValidJson());
+            var plainAdapter = CreateAdapter(plainTransport, retries: 1);
+
+            var plainDirection = await plainAdapter.GenerateEmotionalDirectionAsync(context);
+
+            Assert.Equal("relief", plainDirection.PrimaryEmotion);
+            Assert.Equal(2, plainTransport.PlainCalls);
+            Assert.DoesNotContain(
+                "The previous emotional direction did not satisfy the response contract.",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "response_posture",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "They become clipped and confrontational.",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public async Task Retry_UnsupportedPrimaryEmotionAddsActionableCatalogRepairWithVocabularyWithoutEchoingRejectedOutput(
+            bool structured)
+        {
+            string invalid = ValidJson(
+                primaryEmotion: "contempt",
+                responsePosture: "Writing from contempt, they sharpen every observation.");
+            var context = MakeContext();
+
+            if (structured)
+            {
+                var transport = new StructuredQueueTransport(
+                    new StructuredLlmResponse(
+                        invalid,
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true),
+                    new StructuredLlmResponse(
+                        ValidJson(),
+                        provider: "test",
+                        model: "structured",
+                        usedNativeStructuredOutput: true));
+                var adapter = CreateAdapter(transport, retries: 1);
+
+                var direction = await adapter.GenerateEmotionalDirectionAsync(context);
+
+                Assert.Equal("relief", direction.PrimaryEmotion);
+                Assert.Equal(2, transport.StructuredCalls);
+                Assert.DoesNotContain(
+                    "The previous emotional direction did not satisfy the response contract.",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains(
+                    "primary_emotion",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Contains(
+                    "relief",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    "contempt",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    "{emotion_vocabulary}",
+                    transport.StructuredRequests[1].SystemPrompt,
+                    StringComparison.Ordinal);
+                Assert.Equal(
+                    transport.StructuredRequests[0].JsonSchema,
+                    transport.StructuredRequests[1].JsonSchema);
+                return;
+            }
+
+            var plainTransport = new PlainQueueTransport(invalid, ValidJson());
+            var plainAdapter = CreateAdapter(plainTransport, retries: 1);
+
+            var plainDirection = await plainAdapter.GenerateEmotionalDirectionAsync(context);
+
+            Assert.Equal("relief", plainDirection.PrimaryEmotion);
+            Assert.Equal(2, plainTransport.PlainCalls);
+            Assert.DoesNotContain(
+                "The previous emotional direction did not satisfy the response contract.",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "primary_emotion",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "contempt",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "{emotion_vocabulary}",
+                plainTransport.SystemPrompts[1],
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
         public async Task Retry_ExhaustionThrowsFinalStableReason()
         {
             const string privateRejectedDirector = "PRIVATE-DIRECTOR-EXHAUSTION-DO-NOT-LOG-1345";
@@ -657,7 +875,8 @@ namespace Pinder.LlmAdapters.Tests
             string? interpretation = null,
             string? impulse = null,
             string? primaryEmotion = null,
-            string? schemaVersion = "emotional_director.v1")
+            string? schemaVersion = "emotional_director.v1",
+            string? responsePosture = null)
         {
             return new JObject
             {
@@ -668,7 +887,7 @@ namespace Pinder.LlmAdapters.Tests
                 ["interpretation"] = interpretation ?? "reads the message as specific warmth that is probably meant for them",
                 ["impulse"] = impulse ?? "leans in with a careful question",
                 ["restraint"] = "keeps the reply tentative but available",
-                ["response_posture"] = "Writing from relief, turns warmer while still checking sincerity",
+                ["response_posture"] = responsePosture ?? "Writing from relief, turns warmer while still checking sincerity",
             }.ToString(Formatting.None);
         }
 

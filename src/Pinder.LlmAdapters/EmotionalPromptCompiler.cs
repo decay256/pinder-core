@@ -65,6 +65,10 @@ namespace Pinder.LlmAdapters
             "emotional-reaction-director-repair-contract";
         public const string DirectorDraftedChatReplyRepairPromptKey =
             "emotional-reaction-director-repair-drafted-chat-reply";
+        public const string DirectorResponsePostureOmitsPrimaryEmotionRepairPromptKey =
+            "emotional-reaction-director-repair-response-posture-omits-primary-emotion";
+        public const string DirectorUnsupportedPrimaryEmotionRepairPromptKey =
+            "emotional-reaction-director-repair-unsupported-primary-emotion";
         public const string DirectorSystemWrapperPromptKey =
             "emotional-reaction-director-system-wrapper";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
@@ -140,6 +144,8 @@ namespace Pinder.LlmAdapters
         {
             string repairKey = rejectionReason switch
             {
+                "response_posture_omits_primary_emotion" => DirectorResponsePostureOmitsPrimaryEmotionRepairPromptKey,
+                "unsupported_primary_emotion" => DirectorUnsupportedPrimaryEmotionRepairPromptKey,
                 "drafted_chat_reply" => DirectorDraftedChatReplyRepairPromptKey,
                 _ => DirectorContractRepairPromptKey,
             };
@@ -156,10 +162,34 @@ namespace Pinder.LlmAdapters
             var builder = new AnnotatedStringBuilder();
             builder.Append(baseSystemPrompt);
             builder.Append("\n\n");
-            builder.Append(
-                repairPrompt!.Trim(),
-                repair.SourceFile,
-                repairKey);
+
+            const string vocabularyPlaceholder = "{emotion_vocabulary}";
+            string trimmedRepairPrompt = repairPrompt!.Trim();
+            int vocabIndex = trimmedRepairPrompt.IndexOf(vocabularyPlaceholder, StringComparison.Ordinal);
+            if (vocabIndex >= 0)
+            {
+                PromptEntry vocabulary = _catalog.TryGet(CharacterEmotionCatalog.PromptKey)!;
+                builder.Append(
+                    trimmedRepairPrompt.Substring(0, vocabIndex),
+                    repair.SourceFile,
+                    repairKey);
+                builder.Append(
+                    string.Join(", ", CharacterEmotionCatalog.Load(_catalog)),
+                    vocabulary.SourceFile,
+                    CharacterEmotionCatalog.PromptKey);
+                builder.Append(
+                    trimmedRepairPrompt.Substring(vocabIndex + vocabularyPlaceholder.Length),
+                    repair.SourceFile,
+                    repairKey);
+            }
+            else
+            {
+                builder.Append(
+                    trimmedRepairPrompt,
+                    repair.SourceFile,
+                    repairKey);
+            }
+
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 

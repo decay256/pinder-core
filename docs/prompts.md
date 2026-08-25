@@ -84,6 +84,9 @@ keyed by typed engine concepts rather than score math:
   `StatType` x outcome key combination.
 - `emotional-reaction-director` owns the private director LLM system/user
   wrapper plus temperature and max-token settings.
+- `emotional-reaction-director-repair-*` templates provide targeted retry instructions
+  for specific rejection reasons (e.g. `response-posture-omits-primary-emotion`,
+  `unsupported-primary-emotion`, and `drafted-chat-reply`).
 - `emotional-reaction-performance-direction` owns the reusable DATEE performance
   wrapper that renders the validated director fields before the final DATEE
   response instruction.

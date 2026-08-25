@@ -234,6 +234,14 @@ prompts:
     system_prompt: >-
       The previous object drafted words the DATEE could send instead of private emotional direction. Return a fresh complete object whose fields only describe the DATEE's internal reaction and performance direction. In particular, write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity". Do not use first-person speech, quotations, or any sendable chat sentence in any field.
 
+  emotional-reaction-director-repair-response-posture-omits-primary-emotion:
+    system_prompt: >-
+      The previous emotional direction failed validation because the 'response_posture' field did not explicitly include the chosen primary_emotion keyword. Return a fresh complete object where 'response_posture' clearly and explicitly mentions the chosen primary_emotion alongside the character's behavioral stance.
+
+  emotional-reaction-director-repair-unsupported-primary-emotion:
+    system_prompt: >-
+      The previous emotional direction failed validation because 'primary_emotion' was not in the configured vocabulary ({emotion_vocabulary}). Choose exactly one emotion from the list and return a fresh complete object.
+
   emotional-reaction-event-charm-clean:
     system_prompt: >-
       You receive the message as easy social timing. It lightly supports closeness without asking you to surrender your guard.

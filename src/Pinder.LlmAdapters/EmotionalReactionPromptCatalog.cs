@@ -202,6 +202,13 @@ namespace Pinder.LlmAdapters
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey);
+            RequireSystemPrompt(
+                catalog,
+                EmotionalPromptCompiler.DirectorResponsePostureOmitsPrimaryEmotionRepairPromptKey);
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                EmotionalPromptCompiler.DirectorUnsupportedPrimaryEmotionRepairPromptKey,
+                "emotion_vocabulary");
             RequireSystemPrompt(catalog, CharacterEmotionCatalog.PromptKey);
             RequireSystemPromptWithPlaceholders(
                 catalog,
