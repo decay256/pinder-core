@@ -1,0 +1,7 @@
+version=1
+state=initialized
+dependency_store_mode=shared-content-cache
+server_llm_runtime=forbidden
+dependency_roots="."
+nonshareable_runtime_data=""
+product_data_authority=profile
