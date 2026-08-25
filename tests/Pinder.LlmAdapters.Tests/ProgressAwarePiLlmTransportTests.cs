@@ -136,10 +136,11 @@ namespace Pinder.LlmAdapters.Tests
             const string partialContent = "partial secret output";
             AssistantMessage partial = Response(partialContent);
             var progress = new RecordingProgress();
+            var providerFailure = new InvalidOperationException("Malformed provider response stream: " + partialContent);
             var transport = new PiLlmTransport(
                 Model("model-1"),
                 (_, __, ___) => Task.FromResult(partial),
-                (_, __, ___) => FailingResultStream(partial, partialContent));
+                (_, __, ___) => FailingResultStream(partial, partialContent, providerFailure));
 
             LlmTransportException error = await Assert.ThrowsAsync<LlmTransportException>(() =>
                 ((IProgressAwareLlmTransport)transport)
@@ -147,8 +148,11 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Equal(LlmFailureKind.Unknown, error.FailureKind);
             Assert.Equal("The LLM response stream failed.", error.Message);
-            Assert.Null(error.InnerException);
-            Assert.DoesNotContain(partialContent, error.ToString(), StringComparison.Ordinal);
+            Assert.DoesNotContain(partialContent, error.Message, StringComparison.Ordinal);
+            Assert.Same(providerFailure, error.InnerException);
+            InvalidOperationException inner = Assert.IsType<InvalidOperationException>(error.InnerException);
+            Assert.Equal(providerFailure.Message, inner.Message);
+            Assert.Contains(partialContent, inner.Message, StringComparison.Ordinal);
             Assert.Contains(progress.Events, e => e.Kind == LlmProgressKind.ResponseStarted);
             Assert.Contains(progress.Events, e => e.Kind == LlmProgressKind.Text);
             Assert.DoesNotContain(progress.Events, e => e.Kind == LlmProgressKind.Completion);
@@ -156,7 +160,8 @@ namespace Pinder.LlmAdapters.Tests
 
         private static AssistantMessageEventStream FailingResultStream(
             AssistantMessage partial,
-            string partialContent)
+            string partialContent,
+            Exception providerFailure)
         {
             AssistantMessageEventStream stream = EventStreams.CreateAssistantMessageEventStream();
             stream.Push(new AssistantMessageStartEvent(partial));
@@ -164,8 +169,7 @@ namespace Pinder.LlmAdapters.Tests
             FieldInfo finalResultField = typeof(AssistantMessageEventStream).BaseType!
                 .GetField("finalResult", BindingFlags.Instance | BindingFlags.NonPublic)!;
             var finalResult = (TaskCompletionSource<AssistantMessage>)finalResultField.GetValue(stream)!;
-            Assert.True(finalResult.TrySetException(
-                new InvalidOperationException("Malformed provider response stream: " + partialContent)));
+            Assert.True(finalResult.TrySetException(providerFailure));
             stream.End();
             return stream;
         }
