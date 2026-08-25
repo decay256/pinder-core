@@ -355,12 +355,19 @@ namespace Pinder.LlmAdapters.Pi
             ModelsSimpleStreamOptions options)
         {
             string toolName = NormalizeToolName(request.SchemaName);
+            string toolDescription = request.SchemaName switch
+            {
+                "emotional_director" => "Emit the internal emotional reaction and direction for the character who is about to communicate.",
+                "dialogue_options" => "Emit dialogue options for the player character.",
+                "therapist_diagnosis" => "Emit the psychological synthesis and therapist diagnosis for the character.",
+                _ => "Return the requested structured result."
+            };
             context.Tools = new List<Tool>
             {
                 new Tool
                 {
                     Name = toolName,
-                    Description = "Return the requested structured result.",
+                    Description = toolDescription,
                     Parameters = PiJsonSchemaParser.Parse(request.JsonSchema),
                     ConstrainedSampling = new JsonSchemaConstrainedSamplingConfig("require")
                 }
