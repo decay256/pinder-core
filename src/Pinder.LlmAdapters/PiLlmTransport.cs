@@ -16,7 +16,9 @@ namespace Pinder.LlmAdapters.Pi
     /// Pinder retains prompt construction and response parsing; Pi owns provider execution.
     /// </summary>
     public sealed class PiLlmTransport : ILlmTransport, IConversationLlmTransport, IStreamingLlmTransport,
-        IStructuredLlmTransport, IStructuredConversationLlmTransport, ITokenUsageProvider
+        IStructuredLlmTransport, IStructuredConversationLlmTransport, IProgressAwareLlmTransport,
+        IProgressAwareConversationLlmTransport, IProgressAwareStructuredLlmTransport,
+        IProgressAwareStructuredConversationLlmTransport, ITokenUsageProvider
     {
         private readonly Model _model;
         private readonly Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> _completeAsync;
@@ -129,10 +131,51 @@ namespace Pinder.LlmAdapters.Pi
             Observe(response, phase);
             EnsureSuccess(response, cancellationToken, false, responseStatus);
 
-            string text = TextUtilities.ContentText(response.Content);
-            if (string.IsNullOrWhiteSpace(text))
-                throw new InvalidOperationException("Pi model response contained no text content.");
-            return text;
+            return ExtractRequiredText(response, "Pi model response contained no text content.");
+        }
+
+        public async Task<string> SendWithProgressAsync(
+            string systemPrompt,
+            string userMessage,
+            IProgress<LlmProgressEvent>? progress = null,
+            double temperature = 0.9,
+            int? maxTokens = null,
+            string? phase = null,
+            CancellationToken ct = default)
+        {
+            return await SendConversationWithProgressAsync(
+                systemPrompt,
+                Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
+                userMessage,
+                progress,
+                temperature,
+                maxTokens,
+                phase,
+                ct).ConfigureAwait(false);
+        }
+
+        public async Task<string> SendConversationWithProgressAsync(
+            string systemPrompt,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            string userMessage,
+            IProgress<LlmProgressEvent>? progress = null,
+            double temperature = 0.9,
+            int? maxTokens = null,
+            string? phase = null,
+            CancellationToken cancellationToken = default)
+        {
+            Context context = CreateContext(systemPrompt, priorMessages, userMessage);
+            var responseStatus = new ResponseStatusCapture();
+            ModelsSimpleStreamOptions options = CreateOptions(
+                phase, temperature, maxTokens, cancellationToken, responseStatus);
+            AssistantMessage response = await ReadBufferedResponseAsync(
+                _stream(_model, context, options),
+                progress,
+                phase,
+                cancellationToken,
+                responseStatus).ConfigureAwait(false);
+
+            return ExtractRequiredText(response, "Pi model response contained no text content.");
         }
 
         public async IAsyncEnumerable<string> SendStreamAsync(
@@ -170,6 +213,16 @@ namespace Pinder.LlmAdapters.Pi
                 Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
                 ct).ConfigureAwait(false);
 
+        public async Task<StructuredLlmResponse> SendStructuredWithProgressAsync(
+            StructuredLlmRequest request,
+            IProgress<LlmProgressEvent>? progress = null,
+            CancellationToken ct = default)
+            => await SendStructuredConversationWithProgressAsync(
+                request,
+                Array.Empty<Pinder.Core.Conversation.ConversationMessage>(),
+                progress,
+                ct).ConfigureAwait(false);
+
         public async Task<StructuredLlmResponse> SendStructuredConversationAsync(
             StructuredLlmRequest request,
             IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
@@ -177,55 +230,39 @@ namespace Pinder.LlmAdapters.Pi
         {
             if (request == null) throw new ArgumentNullException(nameof(request));
             Context context = CreateContext(request.SystemPrompt, priorMessages, request.UserMessage);
-            string toolName = NormalizeToolName(request.SchemaName);
-            context.Tools = new List<Tool>
-            {
-                new Tool
-                {
-                    Name = toolName,
-                    Description = "Return the requested structured result.",
-                    Parameters = PiJsonSchemaParser.Parse(request.JsonSchema),
-                    ConstrainedSampling = new JsonSchemaConstrainedSamplingConfig("require")
-                }
-            };
-
             var responseStatus = new ResponseStatusCapture();
             ModelsSimpleStreamOptions options = CreateOptions(
                 request.Phase, request.Temperature, request.MaxTokens, cancellationToken, responseStatus);
-            options.Extra["toolChoice"] = "required";
-            var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
-            foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
-            metadata["schemaName"] = request.SchemaName;
-            metadata["schemaVersion"] = request.SchemaVersion;
-            options.Metadata = metadata;
+            string toolName = ConfigureStructuredRequest(request, context, options);
 
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, request.Phase);
             EnsureSuccess(response, cancellationToken, false, responseStatus);
 
-            ToolCall? toolCall = response.Content.OfType<ToolCall>()
-                .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
-            if (toolCall != null)
-            {
-                return new StructuredLlmResponse(
-                    JsonSerializer.Serialize(toolCall.Arguments),
-                    response.Provider.Value,
-                    response.ResponseModel ?? response.Model,
-                    usedNativeStructuredOutput: true,
-                    metadata: request.Metadata,
-                    validationMode: "pi_required_tool");
-            }
+            return CreateStructuredResponse(response, request, toolName);
+        }
 
-            string text = TextUtilities.ContentText(response.Content);
-            if (string.IsNullOrWhiteSpace(text))
-                throw new InvalidOperationException("Pi structured response contained neither a tool call nor text.");
-            return new StructuredLlmResponse(
-                text,
-                response.Provider.Value,
-                response.ResponseModel ?? response.Model,
-                usedNativeStructuredOutput: false,
-                metadata: request.Metadata,
-                validationMode: "pi_text_fallback");
+        public async Task<StructuredLlmResponse> SendStructuredConversationWithProgressAsync(
+            StructuredLlmRequest request,
+            IReadOnlyList<Pinder.Core.Conversation.ConversationMessage> priorMessages,
+            IProgress<LlmProgressEvent>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+            Context context = CreateContext(request.SystemPrompt, priorMessages, request.UserMessage);
+            var responseStatus = new ResponseStatusCapture();
+            ModelsSimpleStreamOptions options = CreateOptions(
+                request.Phase, request.Temperature, request.MaxTokens, cancellationToken, responseStatus);
+            string toolName = ConfigureStructuredRequest(request, context, options);
+
+            AssistantMessage response = await ReadBufferedResponseAsync(
+                _stream(_model, context, options),
+                progress,
+                request.Phase,
+                cancellationToken,
+                responseStatus).ConfigureAwait(false);
+
+            return CreateStructuredResponse(response, request, toolName);
         }
 
         public SessionTokenUsage GetSessionUsage()
@@ -310,6 +347,163 @@ namespace Pinder.LlmAdapters.Pi
                     await existingObserver(response, model, observerCancellationToken).ConfigureAwait(false);
             };
             return options;
+        }
+
+        private static string ConfigureStructuredRequest(
+            StructuredLlmRequest request,
+            Context context,
+            ModelsSimpleStreamOptions options)
+        {
+            string toolName = NormalizeToolName(request.SchemaName);
+            context.Tools = new List<Tool>
+            {
+                new Tool
+                {
+                    Name = toolName,
+                    Description = "Return the requested structured result.",
+                    Parameters = PiJsonSchemaParser.Parse(request.JsonSchema),
+                    ConstrainedSampling = new JsonSchemaConstrainedSamplingConfig("require")
+                }
+            };
+
+            options.Extra["toolChoice"] = "required";
+            var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
+            metadata["schemaName"] = request.SchemaName;
+            metadata["schemaVersion"] = request.SchemaVersion;
+            options.Metadata = metadata;
+            return toolName;
+        }
+
+        private async Task<AssistantMessage> ReadBufferedResponseAsync(
+            AssistantMessageEventStream stream,
+            IProgress<LlmProgressEvent>? progress,
+            string? phase,
+            CancellationToken cancellationToken,
+            ResponseStatusCapture responseStatus)
+        {
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                EventReadResult<AssistantMessageEvent> read = await ReadPiStreamAsync(
+                        () => stream.ReadAsync(cancellationToken))
+                    .ConfigureAwait(false);
+                if (!read.HasValue) break;
+                AssistantMessageEvent assistantEvent = read.Value!;
+                ReportProgress(progress, assistantEvent);
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+
+            AssistantMessage response = await ReadPiStreamAsync(stream.Result).ConfigureAwait(false);
+            Observe(response, phase);
+            EnsureSuccess(response, cancellationToken, false, responseStatus);
+            return response;
+        }
+
+        private static async Task<T> ReadPiStreamAsync<T>(Func<Task<T>> operation)
+        {
+            try
+            {
+                return await operation().ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                throw new LlmTransportException(
+                    "The LLM response stream failed.", LlmFailureKind.Unknown);
+            }
+        }
+
+        private void ReportProgress(IProgress<LlmProgressEvent>? progress, AssistantMessageEvent assistantEvent)
+        {
+            if (progress == null) return;
+            if (!TryClassifyProgress(assistantEvent, out LlmProgressKind kind)) return;
+            progress.Report(new LlmProgressEvent(
+                kind,
+                DateTimeOffset.FromUnixTimeMilliseconds(_timestampMilliseconds())));
+        }
+
+        private static bool TryClassifyProgress(AssistantMessageEvent assistantEvent, out LlmProgressKind kind)
+        {
+            if (assistantEvent is AssistantMessageStartEvent)
+            {
+                kind = LlmProgressKind.ResponseStarted;
+                return true;
+            }
+
+            if (assistantEvent is ThinkingStartEvent ||
+                assistantEvent is ThinkingDeltaEvent ||
+                assistantEvent is ThinkingEndEvent)
+            {
+                kind = LlmProgressKind.Reasoning;
+                return true;
+            }
+
+            if (assistantEvent is TextStartEvent ||
+                assistantEvent is TextDeltaEvent ||
+                assistantEvent is TextEndEvent)
+            {
+                kind = LlmProgressKind.Text;
+                return true;
+            }
+
+            if (assistantEvent is ToolCallStartEvent ||
+                assistantEvent is ToolCallDeltaEvent ||
+                assistantEvent is ToolCallEndEvent)
+            {
+                kind = LlmProgressKind.ToolCall;
+                return true;
+            }
+
+            if (assistantEvent is AssistantMessageDoneEvent ||
+                assistantEvent is AssistantMessageErrorEvent)
+            {
+                kind = LlmProgressKind.Completion;
+                return true;
+            }
+
+            kind = default;
+            return false;
+        }
+
+        private static string ExtractRequiredText(AssistantMessage response, string errorMessage)
+        {
+            string text = TextUtilities.ContentText(response.Content);
+            if (string.IsNullOrWhiteSpace(text)) throw new InvalidOperationException(errorMessage);
+            return text;
+        }
+
+        private static StructuredLlmResponse CreateStructuredResponse(
+            AssistantMessage response,
+            StructuredLlmRequest request,
+            string toolName)
+        {
+            ToolCall? toolCall = response.Content.OfType<ToolCall>()
+                .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
+            if (toolCall != null)
+            {
+                return new StructuredLlmResponse(
+                    JsonSerializer.Serialize(toolCall.Arguments),
+                    response.Provider.Value,
+                    response.ResponseModel ?? response.Model,
+                    usedNativeStructuredOutput: true,
+                    metadata: request.Metadata,
+                    validationMode: "pi_required_tool");
+            }
+
+            string text = TextUtilities.ContentText(response.Content);
+            if (string.IsNullOrWhiteSpace(text))
+                throw new InvalidOperationException("Pi structured response contained neither a tool call nor text.");
+            return new StructuredLlmResponse(
+                text,
+                response.Provider.Value,
+                response.ResponseModel ?? response.Model,
+                usedNativeStructuredOutput: false,
+                metadata: request.Metadata,
+                validationMode: "pi_text_fallback");
         }
 
         private void Observe(AssistantMessage response, string? phase)
