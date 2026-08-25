@@ -29,6 +29,7 @@ rows. `game.datee.interest-change-beat` is provider-capable dormant, not dead.
 |---|---|---|---|
 | `game.datee.performance` | `live_production` | Game Run Bundle / DATEE journal | yes |
 | `game.avatar.reply` | `live_production` | Game Run Bundle / avatar journal | yes |
+| `game.avatar.emotional-director` | `live_production` | Game Run Bundle / private avatar branch | yes, disposable branch |
 | `game.emotional-director` | `live_production` | Game Run Bundle / private DATEE branch | yes, disposable branch |
 | `game.dialogue-options` | `live_production` | Game Run Bundle / one-shot record | no |
 | `game.setup.dramatic-arc` | `live_production` | Game Run Bundle / setup one-shot | no |
@@ -99,6 +100,6 @@ Run:
 pwsh ./scripts/verify-agent-journal-ownership.ps1
 ```
 
-The verifier checks the exact 16-ID inventory, row field completeness, live /
+The verifier checks the exact 17-ID inventory, row field completeness, live /
 dormant / dead counts, implementation matcher counts, the dormant no-caller
 proof, static scan coverage, focused xUnit tests, and `git diff --check`.

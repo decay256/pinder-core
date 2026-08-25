@@ -354,27 +354,40 @@ bool recordOneShotJournal = context.AgentJournal != null;
 
             IReadOnlyList<ConversationMessage> priorMessages = await datee.BuildSemanticHistoryAsync()
                 .ConfigureAwait(false);
-            DateeResponseCoreResult core = await GetDateeResponseCoreAsync(
-                context, dateeHistory, priorMessages, datee, cancellationToken).ConfigureAwait(false);
-            StatefulDateeResult accepted = core.Result;
-
-            await datee.AppendUserAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
-            string dateeAssistantEntryId = await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
-            await avatar.AppendAssistantAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
-            await avatar.AppendUserAsync(accepted.Response.MessageText).ConfigureAwait(false);
-            if (core.Journal != null)
+            await ObserveAgentJournalSessionSnapshotAsync("datee.restored", "datee", datee).ConfigureAwait(false);
+            await ObserveAgentJournalSessionSnapshotAsync("avatar.restored", "avatar", avatar).ConfigureAwait(false);
+            try
             {
-                await core.Journal.CompleteAcceptedAsync(
-                        accepted.Response.MessageText,
-                        dateeAssistantEntryId)
-                    .ConfigureAwait(false);
-            }
+                DateeResponseCoreResult core = await GetDateeResponseCoreAsync(
+                    context, dateeHistory, priorMessages, datee, cancellationToken).ConfigureAwait(false);
+                StatefulDateeResult accepted = core.Result;
 
-            return new StatefulDateeResult(
-                accepted.Response,
-                accepted.NewHistoryEntries,
-                await datee.SnapshotAsync().ConfigureAwait(false),
-                await avatar.SnapshotAsync().ConfigureAwait(false));
+                await ObserveAgentJournalSessionSnapshotAsync("datee.before-accepted-commit", "datee", datee).ConfigureAwait(false);
+                await ObserveAgentJournalSessionSnapshotAsync("avatar.before-accepted-commit", "avatar", avatar).ConfigureAwait(false);
+                await datee.AppendUserAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
+                string dateeAssistantEntryId = await datee.AppendAssistantAsync(accepted.Response.MessageText).ConfigureAwait(false);
+                await avatar.AppendAssistantAsync(context.PlayerDeliveredMessage).ConfigureAwait(false);
+                await avatar.AppendUserAsync(accepted.Response.MessageText).ConfigureAwait(false);
+                if (core.Journal != null)
+                {
+                    await core.Journal.CompleteAcceptedAsync(
+                            accepted.Response.MessageText,
+                            dateeAssistantEntryId)
+                        .ConfigureAwait(false);
+                }
+
+                return new StatefulDateeResult(
+                    accepted.Response,
+                    accepted.NewHistoryEntries,
+                    await datee.SnapshotAsync().ConfigureAwait(false),
+                    await avatar.SnapshotAsync().ConfigureAwait(false));
+            }
+            catch
+            {
+                await ObserveAgentJournalSessionSnapshotAsync("datee.before-error-dispose", "datee", datee).ConfigureAwait(false);
+                await ObserveAgentJournalSessionSnapshotAsync("avatar.before-error-dispose", "avatar", avatar).ConfigureAwait(false);
+                throw;
+            }
         }
 
         private async Task<DateeResponseCoreResult> GetDateeResponseCoreAsync(
@@ -413,6 +426,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                             context.CurrentTurn,
                             context.AgentJournalContext)
                         .ConfigureAwait(false);
+                    await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.restored", "datee-director", directorBranch).ConfigureAwait(false);
                     IReadOnlyList<ConversationMessage> directorHistory =
                         await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
                     emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
@@ -426,6 +440,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 }
                 finally
                 {
+                    await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.before-dispose", "datee-director", directorBranch).ConfigureAwait(false);
                     await directorBranch.DisposeAsync().ConfigureAwait(false);
                     if (disposalJournal != null)
                     {
@@ -1622,6 +1637,42 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     capture.Usage,
                     capture.Status).ConfigureAwait(false);
             }
+        }
+
+        private async Task ObserveAgentJournalSessionSnapshotAsync(
+            string label,
+            string sessionKind,
+            PiConversationSession session)
+        {
+            var observer = _options.AgentJournalSessionSnapshotObserver;
+            if (observer == null)
+            {
+                return;
+            }
+
+            observer(new AgentJournalSessionSnapshotProbe(
+                label,
+                sessionKind,
+                await session.SnapshotAsync().ConfigureAwait(false),
+                await session.BuildSemanticHistoryAsync().ConfigureAwait(false)));
+        }
+
+        private async Task ObserveAgentJournalBranchSnapshotAsync(
+            string label,
+            string sessionKind,
+            PiConversationBranch branch)
+        {
+            var observer = _options.AgentJournalSessionSnapshotObserver;
+            if (observer == null)
+            {
+                return;
+            }
+
+            observer(new AgentJournalSessionSnapshotProbe(
+                label,
+                sessionKind,
+                await branch.SnapshotAsync().ConfigureAwait(false),
+                await branch.BuildSemanticHistoryAsync().ConfigureAwait(false)));
         }
 
         private async Task<StructuredLlmResponse> SendStructuredWithDiagnosticsAsync(

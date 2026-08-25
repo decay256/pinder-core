@@ -13,6 +13,7 @@ from pathlib import Path
 REQUIRED_IDS = [
     "game.datee.performance",
     "game.avatar.reply",
+    "game.avatar.emotional-director",
     "game.emotional-director",
     "game.dialogue-options",
     "game.setup.dramatic-arc",
@@ -179,10 +180,10 @@ def static_scan_candidates(repo: Path) -> list[dict]:
                 ):
                     add_candidate(candidates, name, idx, line, "core-conversation-call")
                 elif re.match(
-                    r"^src/Pinder.LlmAdapters/PinderLlmAdapter(\.EmotionalDirector)?\.cs$",
+                    r"^src/Pinder.LlmAdapters/PinderLlmAdapter(\.(AvatarEmotionalDirector|EmotionalDirector))?\.cs$",
                     name,
                 ) and re.search(
-                    r"Get(DialogueOptions|DateeResponse|InterestChangeBeat|SuccessImprovement|SteeringQuestion|HorninessQuestion)Async\(|GenerateEmotionalDirectionAsync\(",
+                    r"Get(DialogueOptions|DateeResponse|InterestChangeBeat|SuccessImprovement|SteeringQuestion|HorninessQuestion)Async\(|Generate(Avatar)?EmotionalDirectionAsync\(",
                     line,
                 ):
                     add_candidate(candidates, name, idx, line, "adapter-provider-path")
@@ -245,8 +246,8 @@ def verify_manifest(repo: Path) -> tuple[list[str], dict[str, int]]:
         raise AssertionError("Unexpected manifest schema_version")
     if manifest["closed_inventory"] is not True:
         raise AssertionError("Manifest must be closed_inventory=true")
-    if manifest["inventory_size"] != 16:
-        raise AssertionError("Manifest inventory_size must be 16")
+    if manifest["inventory_size"] != 17:
+        raise AssertionError("Manifest inventory_size must be 17")
 
     rows = manifest["rows"]
     ids = [row["id"] for row in rows]
@@ -300,7 +301,7 @@ def verify_manifest(repo: Path) -> tuple[list[str], dict[str, int]]:
     live_count = sum(1 for row in rows if row["status"] == "live_production")
     dormant_count = sum(1 for row in rows if row["status"] == "provider_capable_dormant")
     dead_count = sum(1 for row in rows if row["status"] == "dead_with_proof")
-    if live_count != 15 or dormant_count != 1 or dead_count != 0:
+    if live_count != 16 or dormant_count != 1 or dead_count != 0:
         raise AssertionError(
             f"Unexpected status counts: live={live_count}, dormant={dormant_count}, dead={dead_count}"
         )

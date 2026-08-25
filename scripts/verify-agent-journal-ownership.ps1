@@ -14,6 +14,7 @@ $resultsDir = Join-Path $repo "TestResults/agent-journal-ownership"
 $requiredIds = @(
     "game.datee.performance",
     "game.avatar.reply",
+    "game.avatar.emotional-director",
     "game.emotional-director",
     "game.dialogue-options",
     "game.setup.dramatic-arc",
@@ -187,8 +188,8 @@ function Get-StaticScanCandidates {
                     $line -match "Get(DialogueOptions|DateeResponse|SuccessImprovement|SteeringQuestion|HorninessQuestion)Async\(") {
                     Add-Candidate $candidates $rel $lineNo $line "core-conversation-call"
                 }
-                elseif ($rel -match "^src/Pinder.LlmAdapters/PinderLlmAdapter(\.EmotionalDirector)?\.cs$" -and
-                    $line -match "Get(DialogueOptions|DateeResponse|InterestChangeBeat|SuccessImprovement|SteeringQuestion|HorninessQuestion)Async\(|GenerateEmotionalDirectionAsync\(") {
+                elseif ($rel -match "^src/Pinder.LlmAdapters/PinderLlmAdapter(\.(AvatarEmotionalDirector|EmotionalDirector))?\.cs$" -and
+                    $line -match "Get(DialogueOptions|DateeResponse|InterestChangeBeat|SuccessImprovement|SteeringQuestion|HorninessQuestion)Async\(|Generate(Avatar)?EmotionalDirectionAsync\(") {
                     Add-Candidate $candidates $rel $lineNo $line "adapter-provider-path"
                 }
                 elseif ($rel -match "^src/Pinder.SessionSetup/" -and
@@ -222,10 +223,10 @@ function Get-TrxTestCount {
 $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
 Assert-True ($manifest.schema_version -eq "agent-journal-invocation-ownership.v1") "Unexpected manifest schema_version"
 Assert-True ($manifest.closed_inventory -eq $true) "Manifest must be closed_inventory=true"
-Assert-True ([int]$manifest.inventory_size -eq 16) "Manifest inventory_size must be 16"
+Assert-True ([int]$manifest.inventory_size -eq 17) "Manifest inventory_size must be 17"
 
 $rows = As-Array $manifest.rows
-Assert-True ($rows.Count -eq 16) "Manifest must contain exactly 16 rows; found $($rows.Count)"
+Assert-True ($rows.Count -eq 17) "Manifest must contain exactly 17 rows; found $($rows.Count)"
 $ids = @($rows | ForEach-Object { [string]$_.id })
 $missing = @($requiredIds | Where-Object { $ids -notcontains $_ })
 $extra = @($ids | Where-Object { $requiredIds -notcontains $_ })
@@ -309,7 +310,7 @@ Assert-True ($dormantProofs -gt 0) "Dormant no-caller proof did not run"
 $liveCount = @($rows | Where-Object { $_.status -eq "live_production" }).Count
 $dormantCount = @($rows | Where-Object { $_.status -eq "provider_capable_dormant" }).Count
 $deadCount = @($rows | Where-Object { $_.status -eq "dead_with_proof" }).Count
-Assert-True ($liveCount -eq 15) "Expected 15 live rows; found $liveCount"
+Assert-True ($liveCount -eq 16) "Expected 16 live rows; found $liveCount"
 Assert-True ($dormantCount -eq 1) "Expected 1 dormant row; found $dormantCount"
 Assert-True ($deadCount -eq 0) "No dead rows are approved; found $deadCount"
 

@@ -199,6 +199,18 @@ namespace Pinder.LlmAdapters
         public async Task<string> GetAgentSessionIdAsync()
             => (await _session.GetMetadataAsync().ConfigureAwait(false)).Id;
 
+        public async Task<LlmConversationSessionSnapshot> SnapshotAsync()
+        {
+            var snapshot = new SessionSnapshot
+            {
+                Metadata = await _session.GetMetadataAsync().ConfigureAwait(false),
+                Entries = await _session.GetEntriesAsync().ConfigureAwait(false),
+            };
+            return new LlmConversationSessionSnapshot(
+                LlmConversationSessionSnapshot.PiAgentSessionV1,
+                SessionJsonCodec.SerializeSnapshot(snapshot));
+        }
+
         public async Task<PiAcceptedExchangeEntryIds> AppendAcceptedExchangeAsync(string userText, string assistantText)
         {
             string userEntryId = await _session.AppendMessageAsync(PiConversationSession.ToAgentMessage(

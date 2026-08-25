@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
         {
             "game.datee.performance",
             "game.avatar.reply",
+            "game.avatar.emotional-director",
             "game.emotional-director",
             "game.dialogue-options",
             "game.setup.dramatic-arc",
@@ -52,14 +53,14 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
         };
 
         [Fact]
-        public void ManifestContainsClosedSixteenRowInventory()
+        public void ManifestContainsClosedSeventeenRowInventory()
         {
             using var document = LoadManifest();
             JsonElement root = document.RootElement;
 
             Assert.Equal("agent-journal-invocation-ownership.v1", root.GetProperty("schema_version").GetString());
             Assert.True(root.GetProperty("closed_inventory").GetBoolean());
-            Assert.Equal(16, root.GetProperty("inventory_size").GetInt32());
+            Assert.Equal(17, root.GetProperty("inventory_size").GetInt32());
 
             string[] ids = Rows(root)
                 .Select(row => row.GetProperty("id").GetString()!)
@@ -117,7 +118,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
             using var document = LoadManifest();
             var rows = Rows(document.RootElement).ToArray();
 
-            Assert.Equal(15, rows.Count(row => row.GetProperty("status").GetString() == "live_production"));
+            Assert.Equal(16, rows.Count(row => row.GetProperty("status").GetString() == "live_production"));
             Assert.Single(rows.Where(row => row.GetProperty("status").GetString() == "provider_capable_dormant"));
             Assert.Empty(rows.Where(row => row.GetProperty("status").GetString() == "dead_with_proof"));
         }
@@ -140,6 +141,32 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
                 && matcher.TryGetProperty("pattern", out JsonElement pattern)
                 && pattern.GetString()!.Contains(expectedPattern, StringComparison.Ordinal));
             Assert.DoesNotContain("agent_session_id", StringArray(row, "required_owner_ids"));
+        }
+
+        [Fact]
+        public void AvatarEmotionalDirectorStaticScannerCoversLiveGeneratorCandidate()
+        {
+            JsonElement row = Row("game.avatar.emotional-director");
+
+            Assert.Contains(row.GetProperty("implementation_matchers").EnumerateArray(), matcher =>
+                matcher.TryGetProperty("file", out JsonElement file)
+                && file.GetString()!.EndsWith("PinderLlmAdapter.AvatarEmotionalDirector.cs", StringComparison.Ordinal)
+                && matcher.TryGetProperty("pattern", out JsonElement pattern)
+                && pattern.GetString() == "GenerateAvatarEmotionalDirectionAsync\\(");
+
+            string source = File.ReadAllText(Path.Combine(
+                RepoRoot(),
+                "src",
+                "Pinder.LlmAdapters",
+                "PinderLlmAdapter.AvatarEmotionalDirector.cs"));
+            Assert.Contains("GenerateAvatarEmotionalDirectionAsync(", source, StringComparison.Ordinal);
+
+            string pythonVerifier = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "verify-agent-journal-ownership.py"));
+            string powershellVerifier = File.ReadAllText(Path.Combine(RepoRoot(), "scripts", "verify-agent-journal-ownership.ps1"));
+            Assert.Contains("AvatarEmotionalDirector", pythonVerifier, StringComparison.Ordinal);
+            Assert.Contains("Generate(Avatar)?EmotionalDirectionAsync", pythonVerifier, StringComparison.Ordinal);
+            Assert.Contains("AvatarEmotionalDirector", powershellVerifier, StringComparison.Ordinal);
+            Assert.Contains("Generate(Avatar)?EmotionalDirectionAsync", powershellVerifier, StringComparison.Ordinal);
         }
 
         [Fact]
