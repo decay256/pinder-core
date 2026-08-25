@@ -410,10 +410,10 @@ namespace Pinder.LlmAdapters.Pi
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 throw new LlmTransportException(
-                    "The LLM response stream failed.", LlmFailureKind.Unknown);
+                    "The LLM response stream failed.", LlmFailureKind.Unknown, ex);
             }
         }
 
