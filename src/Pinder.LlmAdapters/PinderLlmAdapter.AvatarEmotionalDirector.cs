@@ -37,6 +37,8 @@ namespace Pinder.LlmAdapters
                         context.CurrentTurn,
                         context.AgentJournalContext)
                     .ConfigureAwait(false);
+                await ObserveAgentJournalSessionSnapshotAsync("avatar.director.parent.restored", "avatar", session).ConfigureAwait(false);
+                await ObserveAgentJournalBranchSnapshotAsync("avatar.director.branch.restored", "avatar-director", branch).ConfigureAwait(false);
                 IReadOnlyList<ConversationMessage> priorMessages = await branch.BuildSemanticHistoryAsync()
                     .ConfigureAwait(false);
                 return await GenerateAvatarEmotionalDirectionAsync(
@@ -48,6 +50,8 @@ namespace Pinder.LlmAdapters
             }
             finally
             {
+                await ObserveAgentJournalSessionSnapshotAsync("avatar.director.parent.before-dispose", "avatar", session).ConfigureAwait(false);
+                await ObserveAgentJournalBranchSnapshotAsync("avatar.director.branch.before-dispose", "avatar-director", branch).ConfigureAwait(false);
                 await branch.DisposeAsync().ConfigureAwait(false);
                 if (disposalJournal != null)
                     await disposalJournal.CompleteAcceptedAsync("disposed").ConfigureAwait(false);

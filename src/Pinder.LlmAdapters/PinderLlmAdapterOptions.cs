@@ -1,7 +1,9 @@
 namespace Pinder.LlmAdapters
 {
+    using System.Collections.Generic;
     using Pinder.Core.Conversation;
     using Pinder.Core.Diagnostics.AgentJournals;
+    using Pinder.Core.Interfaces;
 
     /// <summary>
     /// Configuration for PinderLlmAdapter. Provider-agnostic — the transport
@@ -92,6 +94,8 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public System.Func<System.DateTimeOffset>? AgentJournalClock { get; set; }
 
+        internal System.Action<AgentJournalSessionSnapshotProbe>? AgentJournalSessionSnapshotObserver { get; set; }
+
         private System.TimeSpan _agentJournalWriteTimeout = System.TimeSpan.FromSeconds(2);
 
         /// <summary>
@@ -142,5 +146,28 @@ namespace Pinder.LlmAdapters
         /// A default callback used when OnDiagnostic is null.
         /// </summary>
         public static System.Action<OperationalDiagnosticEvent>? DefaultOnDiagnostic { get; set; }
+    }
+
+    internal sealed class AgentJournalSessionSnapshotProbe
+    {
+        public AgentJournalSessionSnapshotProbe(
+            string label,
+            string sessionKind,
+            LlmConversationSessionSnapshot snapshot,
+            IReadOnlyList<ConversationMessage> semanticHistory)
+        {
+            Label = label ?? throw new System.ArgumentNullException(nameof(label));
+            SessionKind = sessionKind ?? throw new System.ArgumentNullException(nameof(sessionKind));
+            Snapshot = snapshot ?? throw new System.ArgumentNullException(nameof(snapshot));
+            SemanticHistory = semanticHistory ?? throw new System.ArgumentNullException(nameof(semanticHistory));
+        }
+
+        public string Label { get; }
+
+        public string SessionKind { get; }
+
+        public LlmConversationSessionSnapshot Snapshot { get; }
+
+        public IReadOnlyList<ConversationMessage> SemanticHistory { get; }
     }
 }

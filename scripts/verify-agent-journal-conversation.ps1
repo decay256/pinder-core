@@ -1,9 +1,16 @@
 param(
-    [string]$ResultsDirectory = "/srv/eigentakt/openclaw-pinder-20260815T214155Z-742296-d7993757/keep/CORE-1375"
+    [string]$ResultsDirectory = ""
 )
 
 $ErrorActionPreference = "Stop"
 $repo = Split-Path -Parent $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($ResultsDirectory)) {
+    if (-not [string]::IsNullOrWhiteSpace($env:EIGENTAKT_KEEP_DIR)) {
+        $ResultsDirectory = Join-Path $env:EIGENTAKT_KEEP_DIR "CORE-1375"
+    } else {
+        $ResultsDirectory = Join-Path $repo "TestResults/agent-journal-conversation"
+    }
+}
 $null = New-Item -ItemType Directory -Force -Path $ResultsDirectory
 $stamp = (Get-Date).ToUniversalTime().ToString("yyyyMMddTHHmmssZ") + "-" + $PID
 $trxName = "core-1375-conversation-$stamp.trx"
@@ -16,6 +23,7 @@ $expected = @(
     "game.datee.performance",
     "game.avatar.reply",
     "game.emotional-director",
+    "game.avatar.emotional-director",
     "game.prefetch.option-branch",
     "game.speculation.option-branch",
     "game.emotional-director.branch-disposed"
@@ -58,9 +66,15 @@ $requiredFragments = @{
         "StartBranchDisposalJournalAsync"
     )
     "src/Pinder.LlmAdapters/PinderLlmAdapter.EmotionalDirector.cs" = @(
-        "GameRunConversationJournalInventory.EmotionalDirector",
+        "GameRunConversationJournalInventory.EmotionalDirector"
+    )
+    "src/Pinder.LlmAdapters/PinderLlmAdapter.CharacterEmotionalDirector.cs" = @(
         "entryIds.AssistantEntryId",
-        "CompleteAcceptedAsync(acceptedResponseText, semanticEntryId)"
+        "CompleteAcceptedAsync(responseText, semanticEntryId)"
+    )
+    "src/Pinder.LlmAdapters/PinderLlmAdapter.AvatarEmotionalDirector.cs" = @(
+        "GameRunConversationJournalInventory.AvatarEmotionalDirector",
+        "avatar-private-analysis"
     )
     "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs" = @(
         "GameRunConversationBranchKind.Prefetch",
@@ -101,7 +115,7 @@ foreach ($forbidden in @("AgentJournalGameRunId", "_agentJournalDefaultGameRunId
         throw "Adapter-wide correlation state remains: $forbidden"
     }
 }
-Write-Host "CORE-1375 static no-bypass inventory passed: approved_paths=6 production_matrix=true"
+Write-Host "CORE-1375 static no-bypass inventory passed: approved_paths=7 production_matrix=true"
 
 $arguments = @(
     "test",
@@ -128,6 +142,7 @@ $required = @(
     "prefetch_branch_clone",
     "speculative_branch_clone",
     "identical_prompt_retry",
+    "avatar_emotional_director",
     "validation_rejected",
     "cancelled",
     "provider_failed",

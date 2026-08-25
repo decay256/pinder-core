@@ -4,7 +4,13 @@ set -euo pipefail
 repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$repo"
 
-results_dir="${1:-/srv/eigentakt/openclaw-pinder-20260815T214155Z-742296-d7993757/keep/CORE-1375}"
+if [ "$#" -gt 0 ]; then
+  results_dir="$1"
+elif [ -n "${EIGENTAKT_KEEP_DIR:-}" ]; then
+  results_dir="${EIGENTAKT_KEEP_DIR}/CORE-1375"
+else
+  results_dir="${repo}/TestResults/agent-journal-conversation"
+fi
 mkdir -p "$results_dir"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)-$$"
 trx_name="core-1375-conversation-$stamp.trx"
@@ -22,6 +28,7 @@ expected = {
     "game.datee.performance",
     "game.avatar.reply",
     "game.emotional-director",
+    "game.avatar.emotional-director",
     "game.prefetch.option-branch",
     "game.speculation.option-branch",
     "game.emotional-director.branch-disposed",
@@ -61,8 +68,14 @@ required_fragments = {
     ),
     "src/Pinder.LlmAdapters/PinderLlmAdapter.EmotionalDirector.cs": (
         "GameRunConversationJournalInventory.EmotionalDirector",
+    ),
+    "src/Pinder.LlmAdapters/PinderLlmAdapter.CharacterEmotionalDirector.cs": (
         "entryIds.AssistantEntryId",
-        "CompleteAcceptedAsync(acceptedResponseText, semanticEntryId)",
+        "CompleteAcceptedAsync(responseText, semanticEntryId)",
+    ),
+    "src/Pinder.LlmAdapters/PinderLlmAdapter.AvatarEmotionalDirector.cs": (
+        "GameRunConversationJournalInventory.AvatarEmotionalDirector",
+        "avatar-private-analysis",
     ),
     "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs": (
         "GameRunConversationBranchKind.Prefetch",
@@ -96,7 +109,7 @@ for forbidden in ("AgentJournalGameRunId", "_agentJournalDefaultGameRunId", "_ag
     if forbidden in production:
         raise SystemExit(f"adapter-wide correlation state remains: {forbidden}")
 
-print("CORE-1375 static no-bypass inventory passed: approved_paths=6 production_matrix=true")
+print("CORE-1375 static no-bypass inventory passed: approved_paths=7 production_matrix=true")
 PY
 
 dotnet test tests/Pinder.LlmAdapters.Tests/Pinder.LlmAdapters.Tests.csproj \
@@ -115,6 +128,7 @@ required = [
     "prefetch_branch_clone",
     "speculative_branch_clone",
     "identical_prompt_retry",
+    "avatar_emotional_director",
     "validation_rejected",
     "cancelled",
     "provider_failed",

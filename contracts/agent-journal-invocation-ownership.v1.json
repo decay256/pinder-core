@@ -3,7 +3,7 @@
   "ticket_id": "CORE-1373",
   "depends_on": "Core #1370 agent-journal contract vocabulary",
   "closed_inventory": true,
-  "inventory_size": 16,
+  "inventory_size": 17,
   "status_values": [
     "live_production",
     "provider_capable_dormant",
@@ -127,6 +127,76 @@
       "verifier_group": "core_game_run_live"
     },
     {
+      "id": "game.avatar.emotional-director",
+      "status": "live_production",
+      "status_evidence": [
+        "TurnOrchestrator calls the avatar emotional direction provider during the live avatar reply path.",
+        "PinderLlmAdapter restores the avatar Pi session, forks an avatar-private-analysis branch, and records the director result on that disposable branch."
+      ],
+      "activation_rule": "Already live. Wiring must keep this as a disposable private avatar branch and must not deliver it to the player timeline.",
+      "owner": "game_run_bundle",
+      "owner_description": "Game Run Bundle / private avatar branch",
+      "pi_agent_session": "yes_disposable_branch",
+      "journal_destination": "private_avatar_branch_record",
+      "context_membership": "private_avatar_director_branch_context",
+      "player_delivery": "not_player_delivered",
+      "visibility": "authorized_private_branch_debugger_only",
+      "retention_policy_key": "game_run.agent_journal.avatar.private_branch",
+      "required_owner_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "branch_id"
+      ],
+      "required_correlation_ids": [
+        "game_run_id",
+        "agent_session_id",
+        "branch_id",
+        "invocation_id",
+        "operation_id",
+        "attempt_ordinal",
+        "turn_id"
+      ],
+      "forbidden_owner_ids": [
+        "character_operation_id",
+        "admin_execution_id",
+        "harness_run_id",
+        "simulation_run_id"
+      ],
+      "provenance_builder_ids": [
+        "SessionSystemPromptBuilder.BuildPlayerAvatar",
+        "CharacterEmotionalDirectionContract.CreateRequest",
+        "PinderLlmAdapter.AvatarEmotionalDirector"
+      ],
+      "implementation_matchers": [
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.Core/Interfaces/IAvatarEmotionalDirectionProvider.cs",
+          "pattern": "GetAvatarEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AvatarEmotionalDirector.cs",
+          "pattern": "GetAvatarEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AvatarEmotionalDirector.cs",
+          "pattern": "GenerateAvatarEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "production_call",
+          "file": "src/Pinder.Core/Conversation/TurnOrchestrator.cs",
+          "pattern": "GetAvatarEmotionalDirectionAsync\\("
+        },
+        {
+          "kind": "symbol",
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AvatarEmotionalDirector.cs",
+          "pattern": "GameRunConversationJournalInventory\\.AvatarEmotionalDirector"
+        }
+      ],
+      "verifier_group": "core_game_run_live_private"
+    },
+    {
       "id": "game.emotional-director",
       "status": "live_production",
       "status_evidence": [
@@ -176,7 +246,7 @@
         {
           "kind": "production_call",
           "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.cs",
-          "pattern": "GenerateEmotionalDirectionAsync\\("
+          "pattern": "GenerateEmotionalDirectorResultAsync\\("
         },
         {
           "kind": "symbol",
@@ -345,17 +415,17 @@
         {
           "kind": "symbol",
           "file": "src/Pinder.Core/Conversation/GameSession.Clone.cs",
-          "pattern": "public GameSession Clone\\(ILlmAdapter llm\\)"
+          "pattern": "GameRunConversationBranchKind branchKind"
         },
         {
           "kind": "symbol",
-          "file": "src/Pinder.Core/Conversation/ResimulateData.cs",
-          "pattern": "DateeSessionSnapshot"
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs",
+          "pattern": "GameRunConversationBranchKind\\.Prefetch"
         },
         {
           "kind": "symbol",
-          "file": "src/Pinder.Core/Conversation/ResimulateData.cs",
-          "pattern": "AvatarSessionSnapshot"
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs",
+          "pattern": "GameRunConversationJournalInventory\\.PrefetchBranchClone"
         }
       ],
       "verifier_group": "core_game_run_branch_live"
@@ -405,17 +475,17 @@
         {
           "kind": "symbol",
           "file": "src/Pinder.Core/Conversation/GameSession.Clone.cs",
-          "pattern": "SnapshotRecordingLlmTransport"
+          "pattern": "GameRunConversationBranchKind branchKind"
         },
         {
           "kind": "symbol",
-          "file": "src/Pinder.Core/Conversation/LlmConversationSessionSnapshot.cs",
-          "pattern": "PiAgentSessionV1"
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs",
+          "pattern": "GameRunConversationBranchKind\\.Speculative"
         },
         {
           "kind": "symbol",
-          "file": "src/Pinder.Core/Conversation/GameStateSnapshot.cs",
-          "pattern": "AvatarSessionSnapshot"
+          "file": "src/Pinder.LlmAdapters/PinderLlmAdapter.AgentJournals.cs",
+          "pattern": "GameRunConversationJournalInventory\\.SpeculativeBranchClone"
         }
       ],
       "verifier_group": "core_game_run_branch_live"
