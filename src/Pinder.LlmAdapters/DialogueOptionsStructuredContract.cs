@@ -209,11 +209,13 @@ namespace Pinder.LlmAdapters
                     ["schema_version"] = new JObject
                     {
                         ["type"] = "string",
-                        ["const"] = SchemaVersion
+                        ["const"] = SchemaVersion,
+                        ["description"] = "Contract schema version identifier."
                     },
                     ["options"] = new JObject
                     {
                         ["type"] = "array",
+                        ["description"] = "The candidate dialogue options.",
                         ["minItems"] = expectedCount,
                         ["maxItems"] = expectedCount,
                         ["items"] = new JObject
@@ -223,10 +225,10 @@ namespace Pinder.LlmAdapters
                             ["required"] = new JArray("stat", "text", "callback", "combo"),
                             ["properties"] = new JObject
                             {
-                                ["stat"] = new JObject { ["type"] = "string", ["enum"] = statNames },
-                                ["text"] = new JObject { ["type"] = "string", ["minLength"] = 1 },
-                                ["callback"] = new JObject { ["type"] = new JArray("string", "integer", "null") },
-                                ["combo"] = new JObject { ["type"] = new JArray("string", "null") }
+                                ["stat"] = new JObject { ["type"] = "string", ["enum"] = statNames, ["description"] = "The positive stat strategy." },
+                                ["text"] = new JObject { ["type"] = "string", ["minLength"] = 1, ["description"] = "The in-world sendable text." },
+                                ["callback"] = new JObject { ["type"] = new JArray("string", "integer", "null"), ["description"] = "Optional referenced prior turn, or null." },
+                                ["combo"] = new JObject { ["type"] = new JArray("string", "null"), ["description"] = "Optional combo move name, or null." }
                             }
                         }
                     }

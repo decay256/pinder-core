@@ -72,10 +72,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(canonicalHistory.Select(message => message.Role), director.PriorMessages.Select(message => message.Role));
             Assert.Equal(canonicalHistory.Select(message => message.Content), director.PriorMessages.Select(message => message.Content));
             Assert.Contains("DATEE CHARACTER SYSTEM MARKER", director.Request.SystemPrompt, StringComparison.Ordinal);
-            Assert.Contains("Produce one private emotional direction object", director.Request.SystemPrompt, StringComparison.Ordinal);
+            Assert.Contains("Determine the internal emotional reaction and direction", director.Request.SystemPrompt, StringComparison.Ordinal);
             Assert.True(
                 director.Request.SystemPrompt.IndexOf("DATEE CHARACTER SYSTEM MARKER", StringComparison.Ordinal)
-                < director.Request.SystemPrompt.IndexOf("Produce one private emotional direction object", StringComparison.Ordinal));
+                < director.Request.SystemPrompt.IndexOf("Determine the internal emotional reaction and direction", StringComparison.Ordinal));
             Assert.Contains("current delivered player line", director.Request.UserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("legacy duplicate player line", director.Request.UserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("legacy duplicate datee reply", director.Request.UserMessage, StringComparison.Ordinal);

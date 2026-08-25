@@ -200,11 +200,11 @@ prompts:
       Response posture: {response_posture}
   emotional-reaction-director:
     system_prompt: |-
-      Produce one private emotional direction object for the character who is about to communicate.
+      Determine the internal emotional reaction and direction for the character who is about to communicate.
 
       Choose exactly one primary_emotion from this configured vocabulary: {emotion_vocabulary}.
 
-      Return only a JSON object with exactly these string fields:
+      Provide the emotional direction using exactly these string fields:
       schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.
 
       The schema_version field must be exactly "emotional_director.v1".

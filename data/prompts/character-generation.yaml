@@ -7,7 +7,7 @@ prompts:
       Your job is to compose ONE coherent, valid character preset.
 
       ## Output contract
-      Return ONLY a single JSON object with the following keys:
+      Provide a character preset with the following keys:
         - name              (string, distinctive)
         - gender_identity   (string, e.g. 'he/him', 'she/her', 'they/them')
         - bio               (string, must be empty; final bio is generated after backstory, stake, and diagnosis)
@@ -17,7 +17,7 @@ prompts:
         - build_points      (object with charm, rizz, honesty, chaos, wit, self_awareness; integers, total roughly level*2)
         - shadows           (object: madness, despair, denial, fixation, dread, overthinking; integers 0..7)
 
-      Do NOT include extra keys. Do NOT wrap the JSON in markdown fences.
+      Do not include extra keys.
 
       ## Items catalogue (id | slot | type)
       {items_catalogue}
@@ -39,4 +39,4 @@ prompts:
       {existing_library}
       {smart_initialization}
 
-      Return ONLY the JSON object. No commentary, no markdown.
+      Return the character preset matching the keys above.

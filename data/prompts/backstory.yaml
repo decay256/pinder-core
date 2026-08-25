@@ -28,7 +28,7 @@ prompts:
       - dependencies
       For each category, provide a 'BioLie' and a 'TragicReality'.
       Keep each string concise enough that the entire response completes comfortably.
-      Return ONLY valid JSON where keys are the 20 category names and values are objects containing 'BioLie' and 'TragicReality' strings.
+      Provide the 20 category entries where keys are the 20 category names and values are objects containing 'BioLie' and 'TragicReality' strings.
     user_template: |
       Character: {characterName}
       Gender: {genderIdentity}

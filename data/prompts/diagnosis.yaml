@@ -4,9 +4,7 @@ prompts:
     temperature: 0.45
     system_prompt: |-
       You are a clinical therapist diagnosing a dating-app character based only on their generated backstory and 15 psychological stake lines.
-      Output exactly one JSON object and nothing else.
-      Do not use markdown. Do not wrap the JSON in a code fence. Do not add headings, commentary, notes, or prose outside the object.
-      The object must have exactly these string keys:
+      Provide the diagnosis using exactly these string keys:
       {
         "derived_feeling": "one concise core wound or emotional driver",
         "defense_reaction": "one concise defensive behavior pattern",
@@ -14,11 +12,11 @@ prompts:
         "hurt_protection": "second-person prompt prose for how this character protects themselves when hurt or threatened",
         "repair_requirement": "second-person prompt prose for what this character needs before repair feels believable",
         "charm_reaction": "second-person prompt prose covering the affirming and threatening meaning of charm to this character",
-        "rizz_reaction": "second-person prompt prose covering the affirming and threatening meaning of direct desire or physical-sexual confidence to this character",
-        "honesty_reaction": "second-person prompt prose covering the affirming and threatening meaning of radical candor to this character",
-        "chaos_reaction": "second-person prompt prose covering the affirming and threatening meaning of risk, mess, and disruption to this character",
-        "wit_reaction": "second-person prompt prose covering the affirming and threatening meaning of humor and cleverness to this character",
-        "self_awareness_reaction": "second-person prompt prose covering the affirming and threatening meaning of reflection and emotional insight to this character"
+        "rizz_reaction": "second-person prose covering the affirming and threatening meaning of direct desire or physical-sexual confidence to this character",
+        "honesty_reaction": "second-person prose covering the affirming and threatening meaning of radical candor to this character",
+        "chaos_reaction": "second-person prose covering the affirming and threatening meaning of risk, mess, and disruption to this character",
+        "wit_reaction": "second-person prose covering the affirming and threatening meaning of humor and cleverness to this character",
+        "self_awareness_reaction": "second-person prose covering the affirming and threatening meaning of reflection and emotional insight to this character"
       }
       Every value must be character-specific, directly usable as internal prompt instructions, and one sentence of no more than 35 words.
       Write the nine formulation values as second-person prompt prose addressed to the datee, for example: "You perceive..."

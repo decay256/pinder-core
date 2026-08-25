@@ -136,10 +136,10 @@ prompts:
       The conversation just started.
   dialogue-options-structured-json-instruction:
     system_prompt: |-
-      STRUCTURED OUTPUT PREFERRED:
-      If your provider supports JSON output, return one JSON object matching schema_version "dialogue_options.v1":
+      STRUCTURED OPTIONS FORMAT:
+      Provide the dialogue options matching schema_version "dialogue_options.v1":
       {"schema_version":"dialogue_options.v1","options":[{"stat":"CHARM","text":"sendable message","callback":null,"combo":null}]}
-      The options array must contain exactly {options_count} items. Each stat must be one of: {available_stats}. Do not include analysis, reasoning, markdown fences, or prose outside the JSON object.
+      The options array must contain exactly {options_count} items. Each stat must be one of: {available_stats}.
   interest-beat-above15:
     system_prompt: >-
       Generate a brief reaction — one sentence or a small gesture — showing {datee_name} becoming more invested. Subtle. Not a proclamation. A shift in energy.
