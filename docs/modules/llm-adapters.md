@@ -85,6 +85,11 @@ and `response_posture`. The configured vocabulary is loaded from
 `character-emotional-primary-emotions` in
 `data/prompts/emotional-reactions.yaml`; the JSON schema and parser both enforce
 it. A response posture must explicitly name the selected primary emotion.
+The JSON schema property definitions provide informative field descriptions
+and constrain `schema_version` to `'emotional_director.v1'`. Targeted repair
+templates in `data/prompts/emotional-reactions.yaml` guide retry recovery for
+specific contract rejections such as `response_posture_omits_primary_emotion`,
+`unsupported_primary_emotion`, and `drafted_chat_reply`.
 
 The DATEE path compiles `DateeContext.EmotionalTurnEvent`, then runs emotional
 direction after the delivered player message and before DATEE performance. The

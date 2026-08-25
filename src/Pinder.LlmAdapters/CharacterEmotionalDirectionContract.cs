@@ -385,26 +385,56 @@ namespace Pinder.LlmAdapters
 
         private static string BuildJsonSchema(IReadOnlyList<string> allowedEmotions)
         {
-            var properties = new JObject();
-            properties[SchemaVersionField] = new JObject
+            var properties = new JObject
             {
-                ["type"] = "string",
-                ["const"] = SchemaVersion,
-            };
-
-            foreach (string field in Fields)
-            {
-                properties[field] = new JObject
+                [SchemaVersionField] = new JObject
+                {
+                    ["type"] = "string",
+                    ["const"] = SchemaVersion,
+                    ["description"] = "The contract schema version string. Must be exactly 'emotional_director.v1'.",
+                },
+                ["primary_emotion"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["enum"] = new JArray(allowedEmotions),
+                    ["description"] = "The single dominant primary emotion chosen from the configured vocabulary.",
+                },
+                ["intensity"] = new JObject
                 {
                     ["type"] = "string",
                     ["minLength"] = MinFieldChars,
-                };
-            }
-
-            properties["primary_emotion"] = new JObject
-            {
-                ["type"] = "string",
-                ["enum"] = new JArray(allowedEmotions),
+                    ["description"] = "The strength, movement, and trajectory of the primary emotion.",
+                },
+                ["underlying_feeling"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["minLength"] = MinFieldChars,
+                    ["description"] = "The deeper, more vulnerable feeling or subtext beneath the primary emotion.",
+                },
+                ["interpretation"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["minLength"] = MinFieldChars,
+                    ["description"] = "How the subject character interprets the counterpart's message and intention.",
+                },
+                ["impulse"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["minLength"] = MinFieldChars,
+                    ["description"] = "A behavioral urge or instinct in third-person or infinitive form (e.g. 'pull back and test their sincerity').",
+                },
+                ["restraint"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["minLength"] = MinFieldChars,
+                    ["description"] = "What holds the subject character back from fully acting on their impulse.",
+                },
+                ["response_posture"] = new JObject
+                {
+                    ["type"] = "string",
+                    ["minLength"] = MinFieldChars,
+                    ["description"] = "Natural-language prose describing the character's behavioral stance/posture in response to the moment. Must explicitly mention or include the chosen primary_emotion.",
+                },
             };
 
             var schema = new JObject

@@ -212,7 +212,7 @@ namespace Pinder.LlmAdapters.Tests
                 .Select(key => (Key: key, Prompt: catalog.Get(key).SystemPrompt!))
                 .ToArray();
 
-            Assert.Equal(82, entries.Length);
+            Assert.Equal(84, entries.Length);
 
             foreach (var entry in entries)
             {
@@ -225,6 +225,94 @@ namespace Pinder.LlmAdapters.Tests
                 Assert.True(
                     entry.Prompt.Split(new[] { ' ', '\r', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length >= 8,
                     entry.Key + " should contain actionable prose, not an enum-only label.");
+            }
+        }
+
+        [Theory]
+        [InlineData("emotional-reaction-director-repair-contract")]
+        [InlineData("emotional-reaction-director-repair-drafted-chat-reply")]
+        [InlineData("emotional-reaction-director-repair-response-posture-omits-primary-emotion")]
+        [InlineData("emotional-reaction-director-repair-unsupported-primary-emotion")]
+        public void BuiltInCatalog_HasDirectorRepairPrompts(string repairPromptKey)
+        {
+            var catalog = BuiltInCatalog();
+            var entry = catalog.Get(repairPromptKey);
+
+            Assert.Equal("data/prompts/emotional-reactions.yaml", entry.SourceFile);
+            Assert.False(string.IsNullOrWhiteSpace(entry.SystemPrompt));
+        }
+
+        [Fact]
+        public void BuiltInCatalog_UnsupportedPrimaryEmotionRepairPrompt_HasEmotionVocabularyPlaceholder()
+        {
+            var catalog = BuiltInCatalog();
+            var entry = catalog.Get("emotional-reaction-director-repair-unsupported-primary-emotion");
+
+            Assert.Contains("{emotion_vocabulary}", entry.SystemPrompt!, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void RuntimeValidation_RejectsMissingResponsePostureOmitsPrimaryEmotionRepairPrompt()
+        {
+            string root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                DeleteLineBlock(root, "emotional-reaction-director-repair-response-posture-omits-primary-emotion");
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("emotional-reaction-director-repair-response-posture-omits-primary-emotion", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void RuntimeValidation_RejectsMissingUnsupportedPrimaryEmotionRepairPrompt()
+        {
+            string root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                DeleteLineBlock(root, "emotional-reaction-director-repair-unsupported-primary-emotion");
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("emotional-reaction-director-repair-unsupported-primary-emotion", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+
+        [Fact]
+        public void RuntimeValidation_RejectsUnsupportedPrimaryEmotionRepairPromptWithoutVocabularyPlaceholder()
+        {
+            string root = CopyPromptsToTemp(FindPromptsRoot());
+            try
+            {
+                DeleteLineBlock(root, "emotional-reaction-director-repair-unsupported-primary-emotion");
+                string path = Path.Combine(root, "emotional-reactions.yaml");
+                File.AppendAllText(
+                    path,
+                    "\n  emotional-reaction-director-repair-unsupported-primary-emotion:\n    system_prompt: >-\n      Please choose a supported emotion.\n");
+                var catalog = PromptCatalog.LoadFromDirectory(root);
+
+                var error = Assert.Throws<InvalidOperationException>(
+                    () => catalog.ValidateRuntimeCatalog());
+
+                Assert.Contains("emotional-reaction-director-repair-unsupported-primary-emotion", error.Message);
+                Assert.Contains("{emotion_vocabulary}", error.Message);
+            }
+            finally
+            {
+                Directory.Delete(root, recursive: true);
             }
         }
 
