@@ -148,6 +148,31 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public async Task SendAsync_HttpSuccessWithProviderErrorIsNotClassifiedAsNetwork()
+        {
+            const string secretBody = "provider-secret-body";
+            var failed = Response(string.Empty);
+            failed.StopReason = StopReason.Error;
+            failed.ErrorMessage = secretBody;
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                (_, __, options) =>
+                {
+                    options.OnResponse!(new ProviderResponse { Status = 200 }, Model("model-1"), CancellationToken.None)
+                        .GetAwaiter().GetResult();
+                    return Task.FromResult(failed);
+                });
+
+            Pinder.Core.Interfaces.LlmTransportException error =
+                await Assert.ThrowsAsync<Pinder.Core.Interfaces.LlmTransportException>(
+                    () => transport.SendAsync("system", "user"));
+
+            Assert.Equal(Pinder.Core.Interfaces.LlmFailureKind.Unknown, error.FailureKind);
+            Assert.Equal(HttpStatusCode.OK, error.StatusCode);
+            Assert.DoesNotContain(secretBody, error.ToString(), StringComparison.Ordinal);
+        }
+
+        [Fact]
         public async Task PublicBoundary_CompletesThroughPiModelsCollection()
         {
             FauxProviderHandle faux = Faux.Provider();

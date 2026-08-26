@@ -540,6 +540,14 @@ namespace Pinder.LlmAdapters.Pi
             if (responseStatus.StatusCode.HasValue)
             {
                 HttpStatusCode statusCode = (HttpStatusCode)responseStatus.StatusCode.Value;
+                if ((int)statusCode >= 200 && (int)statusCode < 300)
+                {
+                    throw new LlmTransportException(
+                        "Pi model returned an error after a successful HTTP response.",
+                        LlmFailureKind.Unknown,
+                        statusCode,
+                        retryAfter: null);
+                }
                 LlmFailureKind failureKind = Classify(statusCode);
                 string statusMessage = failureKind == LlmFailureKind.RateLimited
                     ? $"Pi model request was rate limited (HTTP {(int)statusCode})."
