@@ -540,6 +540,10 @@ namespace Pinder.LlmAdapters.Tests
                 catalog.Get(expectedKey).SystemPrompt!.Trim(),
                 repaired.Text.Substring(repairSpan.Start, repairSpan.End - repairSpan.Start));
             Assert.Contains(
+                "Writing from <exact primary_emotion value>, ...",
+                repaired.Text,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 repaired.Spans,
                 span => span.Key == EmotionalPromptCompiler.DirectorPromptKey);
         }

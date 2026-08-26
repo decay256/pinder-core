@@ -236,7 +236,7 @@ prompts:
 
   emotional-reaction-director-repair-response-posture-omits-primary-emotion:
     system_prompt: >-
-      The previous emotional direction failed validation because the 'response_posture' field did not explicitly include the chosen primary_emotion keyword. Return a fresh complete object where 'response_posture' clearly and explicitly mentions the chosen primary_emotion alongside the character's behavioral stance.
+      The previous emotional direction failed validation because the 'response_posture' field did not explicitly include the chosen primary_emotion keyword. Return a fresh complete object. Copy the exact string value chosen for 'primary_emotion' into 'response_posture', using the form "Writing from <exact primary_emotion value>, ...", then describe the character's behavioral stance.
 
   emotional-reaction-director-repair-unsupported-primary-emotion:
     system_prompt: >-
