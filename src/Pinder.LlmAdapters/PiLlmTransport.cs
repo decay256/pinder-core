@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
@@ -27,6 +28,7 @@ namespace Pinder.LlmAdapters.Pi
         private readonly Func<long> _timestampMilliseconds;
         private readonly Action<AssistantMessage, string?>? _responseObserver;
         private readonly Func<int?, int?>? _maxTokensResolver;
+        private readonly PiStructuredOutputMode _structuredOutputMode;
         private readonly object _usageSync = new object();
         private long _inputTokens;
         private long _outputTokens;
@@ -52,7 +54,8 @@ namespace Pinder.LlmAdapters.Pi
             Model model,
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory,
             Action<AssistantMessage, string?>? responseObserver,
-            Func<int?, int?>? maxTokensResolver)
+            Func<int?, int?>? maxTokensResolver,
+            PiStructuredOutputMode structuredOutputMode = PiStructuredOutputMode.RequiredTool)
             : this(
                 model,
                 (selectedModel, context, options) => models.CompleteSimpleAsync(selectedModel, context, options),
@@ -60,7 +63,8 @@ namespace Pinder.LlmAdapters.Pi
                 optionsFactory,
                 () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 responseObserver,
-                maxTokensResolver)
+                maxTokensResolver,
+                structuredOutputMode)
         {
             if (models == null) throw new ArgumentNullException(nameof(models));
         }
@@ -71,10 +75,11 @@ namespace Pinder.LlmAdapters.Pi
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
             Func<long>? timestampMilliseconds = null,
             Action<AssistantMessage, string?>? responseObserver = null,
-            Func<int?, int?>? maxTokensResolver = null)
+            Func<int?, int?>? maxTokensResolver = null,
+            PiStructuredOutputMode structuredOutputMode = PiStructuredOutputMode.RequiredTool)
             : this(model, completeAsync, (_, __, ___) =>
                 throw new InvalidOperationException("No Pi stream delegate was configured."),
-                optionsFactory, timestampMilliseconds, responseObserver, maxTokensResolver)
+                optionsFactory, timestampMilliseconds, responseObserver, maxTokensResolver, structuredOutputMode)
         {
         }
 
@@ -85,7 +90,8 @@ namespace Pinder.LlmAdapters.Pi
             Func<string?, ModelsSimpleStreamOptions>? optionsFactory = null,
             Func<long>? timestampMilliseconds = null,
             Action<AssistantMessage, string?>? responseObserver = null,
-            Func<int?, int?>? maxTokensResolver = null)
+            Func<int?, int?>? maxTokensResolver = null,
+            PiStructuredOutputMode structuredOutputMode = PiStructuredOutputMode.RequiredTool)
         {
             _model = model ?? throw new ArgumentNullException(nameof(model));
             _completeAsync = completeAsync ?? throw new ArgumentNullException(nameof(completeAsync));
@@ -94,6 +100,7 @@ namespace Pinder.LlmAdapters.Pi
             _timestampMilliseconds = timestampMilliseconds ?? (() => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
             _responseObserver = responseObserver;
             _maxTokensResolver = maxTokensResolver;
+            _structuredOutputMode = structuredOutputMode;
         }
 
         public async Task<string> SendAsync(
@@ -233,7 +240,7 @@ namespace Pinder.LlmAdapters.Pi
             var responseStatus = new ResponseStatusCapture();
             ModelsSimpleStreamOptions options = CreateOptions(
                 request.Phase, request.Temperature, request.MaxTokens, cancellationToken, responseStatus);
-            string toolName = ConfigureStructuredRequest(request, context, options);
+            string? toolName = ConfigureStructuredRequest(request, context, options);
 
             AssistantMessage response = await _completeAsync(_model, context, options).ConfigureAwait(false);
             Observe(response, request.Phase);
@@ -253,7 +260,7 @@ namespace Pinder.LlmAdapters.Pi
             var responseStatus = new ResponseStatusCapture();
             ModelsSimpleStreamOptions options = CreateOptions(
                 request.Phase, request.Temperature, request.MaxTokens, cancellationToken, responseStatus);
-            string toolName = ConfigureStructuredRequest(request, context, options);
+            string? toolName = ConfigureStructuredRequest(request, context, options);
 
             AssistantMessage response = await ReadBufferedResponseAsync(
                 _stream(_model, context, options),
@@ -349,11 +356,18 @@ namespace Pinder.LlmAdapters.Pi
             return options;
         }
 
-        private static string ConfigureStructuredRequest(
+        private string? ConfigureStructuredRequest(
             StructuredLlmRequest request,
             Context context,
             ModelsSimpleStreamOptions options)
         {
+            ApplyStructuredMetadata(request, options);
+            if (_structuredOutputMode == PiStructuredOutputMode.JsonSchemaResponse)
+            {
+                ConfigureJsonSchemaResponse(request, options);
+                return null;
+            }
+
             string toolName = NormalizeToolName(request.SchemaName);
             string toolDescription = request.SchemaName switch
             {
@@ -374,12 +388,47 @@ namespace Pinder.LlmAdapters.Pi
             };
 
             options.Extra["toolChoice"] = "required";
+            return toolName;
+        }
+
+        private static void ApplyStructuredMetadata(
+            StructuredLlmRequest request,
+            ModelsSimpleStreamOptions options)
+        {
             var metadata = new Dictionary<string, object?>(StringComparer.Ordinal);
             foreach (KeyValuePair<string, string> item in request.Metadata) metadata[item.Key] = item.Value;
             metadata["schemaName"] = request.SchemaName;
             metadata["schemaVersion"] = request.SchemaVersion;
             options.Metadata = metadata;
-            return toolName;
+        }
+
+        private static void ConfigureJsonSchemaResponse(
+            StructuredLlmRequest request,
+            ModelsSimpleStreamOptions options)
+        {
+            PayloadTransform? existingTransform = options.OnPayload;
+            options.OnPayload = async (payload, model, cancellationToken) =>
+            {
+                object transformed = existingTransform == null
+                    ? payload
+                    : await existingTransform(payload, model, cancellationToken).ConfigureAwait(false) ?? payload;
+                JsonNode? node = JsonSerializer.SerializeToNode(transformed);
+                JsonObject? root = node as JsonObject;
+                if (root == null)
+                    throw new InvalidOperationException("Pi structured request payload must be a JSON object.");
+
+                root["response_format"] = new JsonObject
+                {
+                    ["type"] = "json_schema",
+                    ["json_schema"] = new JsonObject
+                    {
+                        ["name"] = NormalizeToolName(request.SchemaName),
+                        ["strict"] = true,
+                        ["schema"] = JsonNode.Parse(request.JsonSchema),
+                    },
+                };
+                return root;
+            };
         }
 
         private async Task<AssistantMessage> ReadBufferedResponseAsync(
@@ -486,10 +535,12 @@ namespace Pinder.LlmAdapters.Pi
         private static StructuredLlmResponse CreateStructuredResponse(
             AssistantMessage response,
             StructuredLlmRequest request,
-            string toolName)
+            string? toolName)
         {
-            ToolCall? toolCall = response.Content.OfType<ToolCall>()
-                .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
+            ToolCall? toolCall = toolName == null
+                ? null
+                : response.Content.OfType<ToolCall>()
+                    .FirstOrDefault(call => string.Equals(call.Name, toolName, StringComparison.Ordinal));
             if (toolCall != null)
             {
                 return new StructuredLlmResponse(
@@ -508,9 +559,9 @@ namespace Pinder.LlmAdapters.Pi
                 text,
                 response.Provider.Value,
                 response.ResponseModel ?? response.Model,
-                usedNativeStructuredOutput: false,
+                usedNativeStructuredOutput: toolName == null,
                 metadata: request.Metadata,
-                validationMode: "pi_text_fallback");
+                validationMode: toolName == null ? "pi_json_schema_response" : "pi_text_fallback");
         }
 
         private void Observe(AssistantMessage response, string? phase)

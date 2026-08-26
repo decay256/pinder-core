@@ -4,6 +4,12 @@ using Pi.AI;
 
 namespace Pinder.LlmAdapters.Pi
 {
+    public enum PiStructuredOutputMode
+    {
+        RequiredTool,
+        JsonSchemaResponse,
+    }
+
     /// <summary>
     /// Host-owned capabilities for the selected provider model. Values come
     /// from the host's model configuration rather than universal adapter defaults.
@@ -15,6 +21,12 @@ namespace Pinder.LlmAdapters.Pi
         /// the individual request does not specify one.
         /// </summary>
         public int? MaxOutputTokens { get; set; }
+
+        /// <summary>
+        /// Provider wire mechanism used for strict structured output. The
+        /// default preserves the established required-tool contract.
+        /// </summary>
+        public PiStructuredOutputMode StructuredOutputMode { get; set; } = PiStructuredOutputMode.RequiredTool;
     }
 
     /// <summary>
@@ -115,7 +127,8 @@ namespace Pinder.LlmAdapters.Pi
                     providerName,
                     options.Model,
                     requestedMaxTokens,
-                    options.ModelCapabilities));
+                    options.ModelCapabilities),
+                options.ModelCapabilities?.StructuredOutputMode ?? PiStructuredOutputMode.RequiredTool);
         }
 
         private static int? ResolveMaxTokens(
