@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class Issue1314_ResilientStructuredLlmWrapperTests
     {
-        private sealed class FailureSimulatingTransport : ILlmTransport
+        private sealed class FailureSimulatingTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             public int Calls { get; private set; }
             public List<string> UserMessages { get; } = new List<string>();
@@ -33,6 +33,8 @@ namespace Pinder.LlmAdapters.Tests
                 _throwDirectly = throwDirectly;
             }
 
+            public bool SupportsStructuredConversationMessages => true;
+
             public Task<string> SendAsync(
                 string systemPrompt,
                 string userMessage,
@@ -40,9 +42,29 @@ namespace Pinder.LlmAdapters.Tests
                 int? maxTokens = null,
                 string? phase = null,
                 CancellationToken ct = default)
+                => Task.FromResult(NextResponse(userMessage, phase, ct));
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+                => Task.FromResult(new StructuredLlmResponse(
+                    NextResponse(request.UserMessage, request.Phase, ct),
+                    provider: "test",
+                    model: "test-model"));
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+                => SendStructuredAsync(request, cancellationToken);
+
+            private string NextResponse(string userMessage, string? phase, CancellationToken ct)
             {
+                ct.ThrowIfCancellationRequested();
                 if (string.Equals(phase, LlmPhase.EmotionalDirector, StringComparison.Ordinal))
-                    return Task.FromResult(ValidDirectorJson);
+                {
+                    return ValidDirectorJson;
+                }
 
                 Calls++;
                 UserMessages.Add(userMessage);
@@ -67,9 +89,9 @@ namespace Pinder.LlmAdapters.Tests
                             turnId: 1
                         );
                     }
-                    return Task.FromResult(_malformedResponse);
+                    return _malformedResponse;
                 }
-                return Task.FromResult(_successResponse);
+                return _successResponse;
             }
         }
 
@@ -182,10 +204,8 @@ OPTION 2
         public async Task GetDateeResponseAsync_MalformedSignals_RecoversOnFinalRetry()
         {
             // Arrange
-            string malformed = "Hello there!\n[SIGNALS]\nTELL: Charm";
-            string success = @"Hello there!
-[SIGNALS]
-TELL: Charm (She liked your charm)";
+            string malformed = DateeJson("Hello there!", tellStat: "NOT_A_STAT");
+            string success = DateeJson("Hello there!", tellStat: "CHARM");
 
             var transport = new FailureSimulatingTransport(3, malformed, success);
             int violationCount = 0;
@@ -227,9 +247,7 @@ TELL: Charm (She liked your charm)";
         public async Task GetDateeResponseAsync_EmptyOutput_RecoversOnRetry()
         {
             // Arrange
-            string success = @"Hello there!
-[SIGNALS]
-TELL: Charm (She liked your charm)";
+            string success = DateeJson("Hello there!", tellStat: "CHARM");
 
             var transport = new FailureSimulatingTransport(1, "   ", success);
             int violationCount = 0;
@@ -274,10 +292,8 @@ TELL: Charm (She liked your charm)";
         public async Task GetDateeResponseAsync_PersistentViolation_BubblesUpAfterMaxAttempts()
         {
             // Arrange
-            string malformed = "Hello there!\n[SIGNALS]\nTELL: Charm";
-            string success = @"Hello there!
-[SIGNALS]
-TELL: Charm (She liked your charm)";
+            string malformed = DateeJson("Hello there!", tellStat: "NOT_A_STAT");
+            string success = DateeJson("Hello there!", tellStat: "CHARM");
 
             var transport = new FailureSimulatingTransport(4, malformed, success);
             int violationCount = 0;
@@ -360,10 +376,8 @@ OPTION 2
         public async Task GetDateeResponseAsync_StatefulRetries_DoNotMutateSuppliedHistoryAndReusePrompt()
         {
             // Arrange
-            string malformed = "Hello there!\n[SIGNALS]\nTELL: Charm";
-            string success = @"Hello there!
-[SIGNALS]
-TELL: Charm (She liked your charm)";
+            string malformed = DateeJson("Hello there!", tellStat: "NOT_A_STAT");
+            string success = DateeJson("Hello there!", tellStat: "CHARM");
 
             var transport = new FailureSimulatingTransport(3, malformed, success);
             int violationCount = 0;
@@ -417,7 +431,7 @@ TELL: Charm (She liked your charm)";
         [Fact]
         public async Task GetDateeResponseAsync_ConsecutiveTurns_DoNotNestPriorPromptDocuments()
         {
-            const string response = "Datee reply\n[SIGNALS]\nTELL: Charm (She liked that)";
+            string response = DateeJson("Datee reply", tellStat: "CHARM");
             var transport = new FailureSimulatingTransport(0, response, response);
             var adapter = new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
             {
@@ -480,6 +494,16 @@ TELL: Charm (She liked your charm)";
                 StatType.Honesty,
                 RollOutcomeIntensity.Strong,
                 TestHelpers.MakePsychiatricDiagnosis());
+        }
+
+        private static string DateeJson(string message, string? tellStat = null)
+        {
+            string tell = tellStat == null
+                ? "null"
+                : "{\"stat\":\"" + tellStat + "\",\"description\":\"She liked your charm\"}";
+            return "{\"schema_version\":\"datee_performance.v1\","
+                + "\"message\":" + System.Text.Json.JsonSerializer.Serialize(message) + ","
+                + "\"signals\":{\"tell\":" + tell + ",\"weakness\":null}}";
         }
 
         private const string ValidDirectorJson =

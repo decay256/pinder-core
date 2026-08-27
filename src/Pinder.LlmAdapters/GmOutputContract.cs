@@ -35,10 +35,14 @@ namespace Pinder.LlmAdapters
     /// degrades gracefully — malformed or partial input never throws; unknown
     /// stats / missing fields collapse to a message-only result.
     /// </summary>
+    [Obsolete("Legacy GM text output is disabled. Use datee_performance.v1 structured output.")]
     public static class GmOutputContract
     {
-        /// <summary>Marker that opens the optional structured signals block.</summary>
+        /// <summary>Marker retained only for deterministic legacy rejection.</summary>
         public const string SignalsMarker = "[SIGNALS]";
+        public const string LegacyContractReason = "legacy_gm_text_contract_removed";
+
+        private static bool LegacyEntryPointsDisabled => true;
 
         private const string ResponseMarker = "[RESPONSE]";
         private const string TellSignalPrefix = "TELL:";
@@ -60,8 +64,10 @@ namespace Pinder.LlmAdapters
         /// Renders a GM turn output to the canonical text format. The result is
         /// parseable back into an equal value by <see cref="Parse"/>.
         /// </summary>
+        [Obsolete("Legacy GM text emission is rejected. Use datee_performance.v1 structured output.")]
         public static string Emit(GmTurnOutput output)
         {
+            if (LegacyEntryPointsDisabled) throw LegacyContractRejected();
             if (output == null) throw new ArgumentNullException(nameof(output));
 
             var sb = new StringBuilder();
@@ -106,8 +112,10 @@ namespace Pinder.LlmAdapters
         /// Production gameplay uses strict validation (ValidateSignalsStrict).
         /// </para>
         /// </summary>
+        [Obsolete("Legacy GM text parsing is rejected. Use datee_performance.v1 structured output.")]
         public static GmTurnOutput Parse(string? raw)
         {
+            if (LegacyEntryPointsDisabled) throw LegacyContractRejected();
             return ParseCore(
                 raw,
                 validatedSignalsBlock: false,
@@ -121,10 +129,12 @@ namespace Pinder.LlmAdapters
         /// If the validated signal block cannot be parsed, throws a contract exception
         /// instead of silently dropping gameplay-relevant signals.
         /// </summary>
+        [Obsolete("Legacy validated signal parsing is rejected. Use datee_performance.v1 structured output.")]
         internal static GmTurnOutput ParseValidatedSignals(
             string? raw,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
+            if (LegacyEntryPointsDisabled) throw LegacyContractRejected();
             return ParseValidatedSignals(
                 raw,
                 onDiagnostic,
@@ -132,12 +142,14 @@ namespace Pinder.LlmAdapters
                 MatchWeaknessSignal);
         }
 
+        [Obsolete("Legacy validated signal parsing is rejected. Use datee_performance.v1 structured output.")]
         internal static GmTurnOutput ParseValidatedSignals(
             string? raw,
             Action<OperationalDiagnosticEvent>? onDiagnostic,
             Func<string, Match> tellSignalMatcher,
             Func<string, Match> weaknessSignalMatcher)
         {
+            if (LegacyEntryPointsDisabled) throw LegacyContractRejected();
             if (tellSignalMatcher == null) throw new ArgumentNullException(nameof(tellSignalMatcher));
             if (weaknessSignalMatcher == null) throw new ArgumentNullException(nameof(weaknessSignalMatcher));
 
@@ -265,6 +277,18 @@ namespace Pinder.LlmAdapters
                 signalCount: signalCount);
         }
 
+        private static LlmContractException LegacyContractRejected()
+        {
+            return new LlmContractException(
+                phase: GmOutputPhase,
+                reason: LegacyContractReason,
+                message: "Legacy GM plain-text and [SIGNALS] contracts are disabled; use datee_performance.v1 structured output.",
+                provider: null,
+                model: null,
+                parserName: ParserName,
+                signalCount: 0);
+        }
+
         private static bool HasSignalsMarker(string raw)
         {
             return raw.IndexOf(SignalsMarker, StringComparison.OrdinalIgnoreCase) >= 0;
@@ -308,8 +332,10 @@ namespace Pinder.LlmAdapters
         /// <summary>
         /// Strictly validates the optional [SIGNALS] block of datee output if present.
         /// </summary>
+        [Obsolete("Legacy visible signal validation is rejected. Use datee_performance.v1 structured output.")]
         public static DateeSignalsValidationResult ValidateSignalsStrict(string? raw, out string? errorDetail)
         {
+            if (LegacyEntryPointsDisabled) throw LegacyContractRejected();
             errorDetail = null;
             if (string.IsNullOrEmpty(raw))
             {

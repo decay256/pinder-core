@@ -70,8 +70,12 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("RESPONSE TIMING", result);
             Assert.DoesNotContain("3.5 minutes", result);
             Assert.Contains("Engaged but not sold", result);
-            Assert.Contains("[RESPONSE]", result);
-            Assert.Contains("[SIGNALS]", result);
+            Assert.Contains("Structured output contract:", result);
+            Assert.Contains("datee_performance.v1", result);
+            Assert.Contains("signals.tell", result);
+            Assert.Contains("signals.weakness", result);
+            Assert.DoesNotContain("[RESPONSE]", result);
+            Assert.DoesNotContain("[SIGNALS]", result);
         }
 
         [Fact]
@@ -206,12 +210,15 @@ namespace Pinder.LlmAdapters.Tests
         // collapsed into DeliveryOverlay, #1125).
 
         [Fact]
-        public void PromptTemplates_DateeResponseInstruction_ContainsSignalsBlock()
+        public void PromptTemplates_DateeResponseInstruction_ContainsStructuredSignalsContract()
         {
-            Assert.Contains("[SIGNALS]", PromptTemplates.DateeResponseInstruction);
-            Assert.Contains("[RESPONSE]", PromptTemplates.DateeResponseInstruction);
-            Assert.Contains("TELL:", PromptTemplates.DateeResponseInstruction);
-            Assert.Contains("WEAKNESS:", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("datee_performance.v1", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("signals.tell", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("signals.weakness", PromptTemplates.DateeResponseInstruction);
+            Assert.Contains("message` field is the only player-visible", PromptTemplates.DateeResponseInstruction);
+            Assert.DoesNotContain("[SIGNALS]", PromptTemplates.DateeResponseInstruction);
+            Assert.DoesNotContain("TELL:", PromptTemplates.DateeResponseInstruction);
+            Assert.DoesNotContain("WEAKNESS:", PromptTemplates.DateeResponseInstruction);
         }
 
         // ── Pivot directive tests (#696) ──

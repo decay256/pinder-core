@@ -3,8 +3,8 @@ using Xunit;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Issue #311: Verify that DateeResponseInstruction includes all 10 tell category mappings
-    /// from rules §15, so the LLM uses the correct stat for each datee behavior.
+    /// Issue #311: Verify that DateeResponseInstruction includes all 10 typed tell mappings
+    /// so the LLM emits the correct private signals.tell stat for each datee behavior.
     /// </summary>
     public class Issue311_TellCategoriesTests
     {
@@ -12,25 +12,24 @@ namespace Pinder.LlmAdapters.Tests
         public void DateeResponseInstruction_ContainsTellCategoryHeader()
         {
             Assert.Contains(
-                "When generating a TELL, use ONLY these category mappings:",
+                "Tell guidance for the private `signals.tell` field:",
                 PromptTemplates.DateeResponseInstruction);
         }
 
         [Theory]
-        [InlineData("DATEE compliments PLAYER AVATAR", "TELL: HONESTY")]
-        [InlineData("DATEE asks personal question", "TELL: HONESTY or SELF_AWARENESS")]
-        [InlineData("DATEE makes joke", "TELL: WIT or CHAOS")]
-        [InlineData("DATEE shares vulnerability", "TELL: HONESTY")]
-        [InlineData("DATEE pulls back/guards", "TELL: SELF_AWARENESS")]
-        [InlineData("DATEE tests/challenges", "TELL: WIT or CHAOS")]
-        [InlineData("DATEE sends short reply", "TELL: CHARM or CHAOS")]
-        [InlineData("DATEE flirts", "TELL: RIZZ or CHARM")]
-        [InlineData("DATEE changes subject", "TELL: CHAOS")]
-        [InlineData("DATEE goes quiet/silent", "TELL: SELF_AWARENESS")]
+        [InlineData("compliments PLAYER AVATAR", "HONESTY")]
+        [InlineData("asks a personal question", "HONESTY or SELF_AWARENESS")]
+        [InlineData("makes a joke", "WIT or CHAOS")]
+        [InlineData("shares vulnerability", "HONESTY")]
+        [InlineData("pulls back or guards", "SELF_AWARENESS")]
+        [InlineData("tests or challenges", "WIT or CHAOS")]
+        [InlineData("sends a short reply", "CHARM or CHAOS")]
+        [InlineData("flirts", "RIZZ or CHARM")]
+        [InlineData("changes subject", "CHAOS")]
+        [InlineData("goes quiet or silent", "SELF_AWARENESS")]
         public void DateeResponseInstruction_ContainsTellCategory(string behavior, string expectedTell)
         {
-            // Each mapping should appear as "- {behavior} → {expectedTell}"
-            var expectedMapping = $"- {behavior} \u2192 {expectedTell}";
+            var expectedMapping = $"- {behavior} -> {expectedTell}";
             Assert.Contains(expectedMapping, PromptTemplates.DateeResponseInstruction);
         }
 
@@ -39,13 +38,13 @@ namespace Pinder.LlmAdapters.Tests
         {
             var instruction = PromptTemplates.DateeResponseInstruction;
 
-            // Count the number of tell category mapping lines (lines starting with "- DATEE")
-            var lines = instruction.Split('\n');
-            var categoryLines = 0;
-            foreach (var line in lines)
+            int start = instruction.IndexOf("Tell guidance for the private `signals.tell` field:");
+            int end = instruction.IndexOf("Signal field rules:", start);
+            string tellSection = instruction.Substring(start, end - start);
+            int categoryLines = 0;
+            foreach (string line in tellSection.Split('\n'))
             {
-                if (line.TrimStart().StartsWith("- DATEE"))
-                    categoryLines++;
+                if (line.TrimStart().StartsWith("- ")) categoryLines++;
             }
 
             Assert.Equal(10, categoryLines);

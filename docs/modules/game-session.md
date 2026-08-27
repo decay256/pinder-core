@@ -117,3 +117,7 @@ Interest is clamped to [0, 25] by `GameSession` / `InterestMeter`. Individual de
 | 2026-04-03 | #308 | Shadow threshold wiring: confirmed `GameSession` routes player shadows to `DeliveryContext` and datee shadows to `DateeContext`. `GameSessionConfig` accepts `dateeShadows` parameter. New test file `Issue308_ShadowThresholdWiringSpecTests.cs` (443 lines, 13 tests). |
 | 2026-04-03 | #315 | Vision concern — added tier boundary tests for Triple combo bonus on Read/Recover. Tests verify +1 external bonus softens every failure tier boundary: Catastrophe→TropeTrap (miss 10→9), Misfire→Fumble (miss 3→2), Fumble→Success (miss 1→0), plus Recover path equivalents. New test file `Issue315_VisionTierBoundaryTests.cs` (242 lines, 10 tests). Test-only change; no production code modified. |
 | 2026-06-03 | #1095 | Shadow trap rule change: a shadow trap (success roll + paired-shadow MISS with overlay) NO LONGER demotes the turn to a forced failure. The positive interest delta is truncated to a max of 1; the roll verdict stays SUCCESS and the momentum streak keeps incrementing. Horniness §15 halving then runs on the truncated delta (shadow→1, floor(1/2)=0), still not a failure. Momentum section clarified. |
+
+## DATEE Signal Boundary
+
+DATEE response resolution consumes typed `DateeResponse.DetectedTell` and `DateeResponse.WeaknessWindow` from the accepted structured adapter result. Game/session histories persist only `DateeResponse.MessageText`; rejected structured attempts do not mutate turn state, snapshots, spent targets, or semantic histories.

@@ -49,9 +49,8 @@ namespace Pinder.LlmAdapters
         public bool SupportsConversationSessions
             => _transport is IConversationLlmTransport contextual
                 && contextual.SupportsConversationMessages
-                && (!(_transport is IStructuredLlmTransport)
-                    || (_transport is IStructuredConversationLlmTransport structuredContextual
-                        && structuredContextual.SupportsStructuredConversationMessages));
+                && _transport is IStructuredConversationLlmTransport structuredContextual
+                && structuredContextual.SupportsStructuredConversationMessages;
 
         public bool SupportsAvatarEmotionalDirection => SupportsConversationSessions;
 
@@ -332,7 +331,7 @@ namespace Pinder.LlmAdapters
                 .ConfigureAwait(false);
             if (core.Journal != null)
             {
-                await core.Journal.CompleteAcceptedAsync(core.Result.Response.MessageText).ConfigureAwait(false);
+                await core.Journal.CompleteAcceptedAsync(core.Result.Response.MessageText, resultMetadata: core.JournalResultMetadata).ConfigureAwait(false);
             }
 
             return core.Result;
@@ -371,7 +370,8 @@ namespace Pinder.LlmAdapters
                 {
                     await core.Journal.CompleteAcceptedAsync(
                             accepted.Response.MessageText,
-                            dateeAssistantEntryId)
+                            dateeAssistantEntryId,
+                            core.JournalResultMetadata)
                         .ConfigureAwait(false);
                 }
 
@@ -457,6 +457,8 @@ namespace Pinder.LlmAdapters
 
             int maxAttempts = GetContractViolationAttemptLimit();
             AgentJournalCallScope? acceptedJournal = null;
+            IReadOnlyDictionary<string, string>? acceptedJournalMetadata = null;
+            IReadOnlyDictionary<string, string>? rejectedJournalMetadata = null;
             var recovery = await SemanticOutputRecoveryExecutor.ExecuteAsync<StatefulDateeResult, LlmContractException>(
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
@@ -475,101 +477,95 @@ namespace Pinder.LlmAdapters
                         .ConfigureAwait(false);
                     try
                     {
+                        rejectedJournalMetadata = null;
                         // Legacy calls render DateeContext.ConversationHistory into
                         // userContent. Session calls omit that block and supply ordered
-                        // semantic priorMessages instead. Never combine both forms: doing
-                        // so duplicates context and produces quadratic prompt growth.
-                        string responseText = await SendWithDiagnosticsAsync(
-                                _transport,
-                                systemPrompt,
-                                userContent,
-                                temperature,
-                                _options.MaxTokens,
-                                LlmPhase.OpponentResponse,
+                        // semantic priorMessages instead. Never combine both forms.
+                        if (!(_transport is IStructuredLlmTransport structuredTransport))
+                        {
+                            var transportException = new LlmContractException(
+                                phase: "datee_response",
+                                reason: "structured_transport_required",
+                                message: "DATEE performance requires provider-neutral structured output transport.",
+                                parserName: DateePerformanceStructuredContract.ParserName,
+                                turnId: context.CurrentTurn);
+                            rejectedJournalMetadata = DateePerformanceStructuredContract.BuildRejectedJournalMetadata(
+                                response: null,
+                                transportException.Reason);
+                            throw transportException;
+                        }
+
+                        var request = DateePerformanceStructuredContract.CreateRequest(
+                            systemPrompt,
+                            userContent,
+                            temperature,
+                            _options.MaxTokens,
+                            context.CurrentTurn,
+                            performanceMetadata);
+                        StructuredLlmResponse? structuredResponse = null;
+                        try
+                        {
+                            structuredResponse = await SendStructuredWithDiagnosticsAsync(
+                                    structuredTransport,
+                                    request,
+                                    LlmPhase.OpponentResponse,
+                                    context.CurrentTurn,
+                                    attemptCancellationToken,
+                                    attempt,
+                                    maxAttempts,
+                                    DateePrivatePhasePerformance,
+                                    performanceMetadata,
+                                    priorMessages,
+                                    callId: journal.CallId)
+                                .ConfigureAwait(false);
+
+                            DateePerformanceStructuredResult parsed = DateePerformanceStructuredContract.ParseStrict(
+                                structuredResponse.JsonText,
                                 context.CurrentTurn,
-                                attemptCancellationToken,
-                                attempt,
-                                maxAttempts,
-                                DateePrivatePhasePerformance,
-                                performanceMetadata,
-                                priorMessages,
-                                callId: journal.CallId)
-                            .ConfigureAwait(false);
+                                structuredResponse.Provider,
+                                structuredResponse.Model);
+                            EmotionalDirectionLeakGuard.ThrowIfDetected(parsed.Response.MessageText, context.CurrentTurn);
+                            var acceptedResponse = new DateeResponse(
+                                parsed.Response.MessageText,
+                                parsed.Response.DetectedTell,
+                                parsed.Response.WeaknessWindow,
+                                new CharacterEmotionalDebugInfo(
+                                    hungerForIntimacy: 0,
+                                    terrorOfRejection: 0,
+                                    direction: emotionalDirection,
+                                    cognitiveSubtext: context.CognitiveSubtext,
+                                    transitionTarget: context.ResolvedTarget?.StemText,
+                                    transitionStyle: context.ResolvedTarget?.TransitionStyle,
+                                    compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
+                                        dateePrompt,
+                                        "emotional-reaction-performance-direction"),
+                                    directorInput: directorInput));
+                            structuredResponse.ReportValidation("accepted");
 
-                        if (string.IsNullOrWhiteSpace(responseText))
-                        {
-                            throw new LlmContractException(
-                                phase: "datee_response",
-                                reason: "empty_output",
-                                message: "LLM datee_response output is empty or whitespace.",
-                                provider: null,
-                                model: null,
-                                parserName: "StrictDateeResponseParser",
-                                expectedOptionCount: null,
-                                parsedOptionCount: null,
-                                optionCount: null,
-                                signalCount: 0,
-                                sessionId: null,
-                                turnId: context.CurrentTurn
-                            );
+                            acceptedJournalMetadata = DateePerformanceStructuredContract.BuildAcceptedJournalMetadata(
+                                parsed,
+                                structuredResponse);
+                            var newEntries = new ConversationMessage[]
+                            {
+                                ConversationMessage.User(context.PlayerDeliveredMessage),
+                                ConversationMessage.Assistant(parsed.Response.MessageText),
+                            };
+                            acceptedJournal = journal;
+                            return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
+                                new StatefulDateeResult(acceptedResponse, newEntries));
                         }
-
-                        EmotionalDirectionLeakGuard.ThrowIfDetected(responseText, context.CurrentTurn);
-
-                        var validationResult = GmOutputContract.ValidateSignalsStrict(responseText, out string? errorDetail);
-                        if (validationResult == DateeSignalsValidationResult.MalformedSignals)
+                        catch (LlmContractException ex)
                         {
-                            throw new LlmContractException(
-                                phase: "datee_response",
-                                reason: "malformed_signals",
-                                message: $"LLM datee_response has malformed signals block: {errorDetail}",
-                                provider: null,
-                                model: null,
-                                parserName: "StrictDateeResponseParser",
-                                expectedOptionCount: null,
-                                parsedOptionCount: null,
-                                optionCount: null,
-                                signalCount: null,
-                                sessionId: null,
-                                turnId: context.CurrentTurn
-                            );
+                            structuredResponse?.ReportValidation("rejected", ex.Reason);
+                            rejectedJournalMetadata = DateePerformanceStructuredContract.BuildRejectedJournalMetadata(
+                                structuredResponse,
+                                ex.Reason);
+                            throw;
                         }
-
-                        var parsed = DateeResponseParsers.ParseDateeResponseText(
-                            responseText,
-                            GetDiagnosticSink(),
-                            requireValidatedSignals: validationResult == DateeSignalsValidationResult.ValidSignals);
-                        var acceptedResponse = new DateeResponse(
-                            parsed.MessageText,
-                            parsed.DetectedTell,
-                            parsed.WeaknessWindow,
-                            new CharacterEmotionalDebugInfo(
-                                hungerForIntimacy: 0,
-                                terrorOfRejection: 0,
-                                direction: emotionalDirection,
-                                cognitiveSubtext: context.CognitiveSubtext,
-                                transitionTarget: context.ResolvedTarget?.StemText,
-                                transitionStyle: context.ResolvedTarget?.TransitionStyle,
-                                compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
-                                    dateePrompt,
-                                    "emotional-reaction-performance-direction"),
-                                directorInput: directorInput));
-
-                        // Keep dialogue history semantic: never persist the generated
-                        // prompt document or hidden signal block as though it were
-                        // visible chat content.
-                        var newEntries = new ConversationMessage[]
-                        {
-                            ConversationMessage.User(context.PlayerDeliveredMessage),
-                            ConversationMessage.Assistant(parsed.MessageText),
-                        };
-                        acceptedJournal = journal;
-                        return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Accepted(
-                            new StatefulDateeResult(acceptedResponse, newEntries));
                     }
                     catch (LlmContractException ex)
                     {
-                        await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
+                        await journal.CompleteValidationRejectedAsync(ex.Reason, rejectedJournalMetadata).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Rejected(ex);
                     }
                     catch (OperationCanceledException)
@@ -590,7 +586,7 @@ namespace Pinder.LlmAdapters
 
             if (recovery.IsAccepted)
             {
-                return new DateeResponseCoreResult(recovery.AcceptedValue, acceptedJournal);
+                return new DateeResponseCoreResult(recovery.AcceptedValue, acceptedJournal, acceptedJournalMetadata);
             }
 
             ExceptionDispatchInfo.Capture(recovery.Exhaustion.FinalRejection).Throw();
@@ -1658,7 +1654,7 @@ namespace Pinder.LlmAdapters
                 StructuredLlmResponse result;
                 if (priorMessages != null)
                 {
-                    if (!(transport is IStructuredConversationLlmTransport contextual))
+                    if (!(transport is IStructuredConversationLlmTransport contextual) || !contextual.SupportsStructuredConversationMessages)
                         throw new InvalidOperationException(
                             "The configured transport does not support structured ordered conversation messages.");
                     result = await contextual.SendStructuredConversationAsync(request, priorMessages, ct)

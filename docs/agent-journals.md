@@ -152,3 +152,7 @@ trip, custom-entry version handling, unknown-entry preservation, prompt-range
 accuracy, and zero diagnostic-entry contribution to provider context. Wiring
 changes additionally require integration coverage for retries and disposable
 private branches before stale diagnostics are removed downstream.
+
+## DATEE Structured Result Metadata
+
+For DATEE performance calls, `pinder.llm-result.v1` records the visible assistant `output_text` separately from trusted `result_metadata` about the `datee_performance.v1` contract. The metadata may include schema/version, validation mode and outcome, and typed tell/weakness diagnostics. Message-link records continue to point only at semantic chat entries.

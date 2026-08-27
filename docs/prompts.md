@@ -158,3 +158,7 @@ the test is rewritten to lock the yaml render alone.
 ## Overlay Transport Routing
 
 Overlay calls (horniness/trap/shadow-corruption) use a second, optional ILlmTransport passed to PinderLlmAdapter's constructor. When omitted, overlays use the same transport as primary game-turn calls. There is no vendor-specific overlay routing inside the adapter — the host application controls which model/vendor handles overlays purely by which transport instance it constructs and passes in. (GameApi wiring for this is tracked in a separate follow-up ticket.)
+
+## DATEE Performance Structured Output
+
+`datee-response-instruction` now describes the configurable semantics for the `datee_performance.v1` structured output contract. The visible `message` field is the only text that may enter chat history. Private `signals.tell` and `signals.weakness` are typed engine diagnostics and must stay out of semantic conversation messages.

@@ -153,13 +153,17 @@ namespace Pinder.LlmAdapters.Tests
         // the Issue1125 regression tests in Pinder.Core.Tests.
 
         [Fact]
-        public void PromptTemplates_DateeResponse_ContainsSignalFormat()
+        public void PromptTemplates_DateeResponse_ContainsStructuredSignalFormat()
         {
             var t = PromptTemplates.DateeResponseInstruction;
-            Assert.Contains("[RESPONSE]", t);
-            Assert.Contains("[SIGNALS]", t);
-            Assert.Contains("TELL:", t);
-            Assert.Contains("WEAKNESS:", t);
+            Assert.Contains("datee_performance.v1", t);
+            Assert.Contains("signals.tell", t);
+            Assert.Contains("signals.weakness", t);
+            Assert.Contains("dc_reduction` is exactly 2 or 3", t);
+            Assert.DoesNotContain("[RESPONSE]", t);
+            Assert.DoesNotContain("[SIGNALS]", t);
+            Assert.DoesNotContain("TELL:", t);
+            Assert.DoesNotContain("WEAKNESS:", t);
         }
 
         [Fact]

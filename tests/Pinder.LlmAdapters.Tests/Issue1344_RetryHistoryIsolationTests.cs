@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters.Tests
         public async Task PerformanceSignalsAreParsedButOnlyVisibleDateeReplyEntersStatefulHistory()
         {
             const string visibleReply = "That actually does make me soften a little.";
-            string rawResponse = visibleReply + "\n[SIGNALS]\nTELL: Charm (she lets the guard down)";
+            string rawResponse = DateeJson(visibleReply, tellStat: "CHARM");
             var transport = new RecordingTransport(ValidDirectionJson(), rawResponse);
             var adapter = new PinderLlmAdapter(
                 transport,
@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public async Task SessionPath_UsesTypedCanonicalHistoryAndCommitsBothCharacterPerspectives()
         {
-            var transport = new RecordingTransport(ValidDirectionJson(), "A visible accepted reply.");
+            var transport = new RecordingTransport(ValidDirectionJson(), DateeJson("A visible accepted reply."));
             var adapter = new PinderLlmAdapter(
                 transport,
                 new PinderLlmAdapterOptions
@@ -121,6 +121,16 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
+        public void ConversationOnlyTransport_DoesNotAdvertiseStatefulDateeSupport()
+        {
+            var adapter = new PinderLlmAdapter(
+                new ConversationOnlyTransport(),
+                new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults });
+
+            Assert.False(adapter.SupportsConversationSessions);
+        }
+
+        [Fact]
         public void WrappedLegacyTransport_DoesNotAdvertiseSessionSupport()
         {
             ILlmTransport legacy = new LegacyTransport();
@@ -177,6 +187,16 @@ namespace Pinder.LlmAdapters.Tests
             }.ToString(Formatting.None);
         }
 
+        private static string DateeJson(string message, string? tellStat = null)
+        {
+            string tell = tellStat == null
+                ? "null"
+                : "{\"stat\":\"" + tellStat + "\",\"description\":\"she lets the guard down\"}";
+            return "{\"schema_version\":\"datee_performance.v1\",\"message\":"
+                + System.Text.Json.JsonSerializer.Serialize(message)
+                + ",\"signals\":{\"tell\":" + tell + ",\"weakness\":null}}";
+        }
+
         private static PromptCatalog BuiltInCatalog()
         {
             var catalog = PromptCatalog.LoadFromDirectory(FindPromptsRoot());
@@ -197,7 +217,7 @@ namespace Pinder.LlmAdapters.Tests
             throw new DirectoryNotFoundException("Could not locate bundled data/prompts.");
         }
 
-        private sealed class RecordingTransport : IConversationLlmTransport
+        private sealed class RecordingTransport : IConversationLlmTransport, IStructuredConversationLlmTransport
         {
             private readonly Queue<string> _responses;
 
@@ -210,6 +230,7 @@ namespace Pinder.LlmAdapters.Tests
             public List<IReadOnlyList<ConversationMessage>> PriorMessages { get; } = new();
             public List<string> ContextualUserMessages { get; } = new();
             public bool SupportsConversationMessages => true;
+            public bool SupportsStructuredConversationMessages => true;
 
             public Task<string> SendAsync(
                 string systemPrompt,
@@ -239,6 +260,54 @@ namespace Pinder.LlmAdapters.Tests
                 ContextualUserMessages.Add(userMessage);
                 return Task.FromResult(_responses.Dequeue());
             }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                Phases.Add(request.Phase);
+                return Task.FromResult(Response(_responses.Dequeue()));
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                Phases.Add(request.Phase);
+                PriorMessages.Add(priorMessages.ToArray());
+                ContextualUserMessages.Add(request.UserMessage);
+                return Task.FromResult(Response(_responses.Dequeue()));
+            }
+
+            private static StructuredLlmResponse Response(string json)
+                => new StructuredLlmResponse(json, provider: "test", model: "test-model");
+        }
+
+        private sealed class ConversationOnlyTransport : IConversationLlmTransport
+        {
+            public bool SupportsConversationMessages => true;
+
+            public Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int? maxTokens = null,
+                string? phase = null,
+                CancellationToken ct = default)
+                => Task.FromResult(string.Empty);
+
+            public Task<string> SendConversationAsync(
+                string systemPrompt,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                string userMessage,
+                double temperature = 0.9,
+                int? maxTokens = null,
+                string? phase = null,
+                CancellationToken cancellationToken = default)
+                => Task.FromResult(string.Empty);
         }
 
         private sealed class LegacyTransport : ILlmTransport

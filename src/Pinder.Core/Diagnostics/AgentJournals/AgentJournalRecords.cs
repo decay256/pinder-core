@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Pinder.Core.Diagnostics.AgentJournals
@@ -358,7 +359,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             int? effectiveInputTokens = null,
             int? effectiveOutputTokens = null,
             int? effectiveTotalTokens = null,
-            string? telemetryDiscrepancyCode = null)
+            string? telemetryDiscrepancyCode = null,
+            IReadOnlyDictionary<string, string>? resultMetadata = null)
         {
             Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
             TerminalStatus = terminalStatus;
@@ -377,6 +379,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             EffectiveOutputTokens = effectiveOutputTokens;
             EffectiveTotalTokens = effectiveTotalTokens;
             TelemetryDiscrepancyCode = telemetryDiscrepancyCode;
+            ResultMetadata = CopyMetadata(resultMetadata);
             ValidationCode = validationCode;
             ErrorCode = errorCode;
             CompletedAtUtc = completedAtUtc;
@@ -402,10 +405,22 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public int? EffectiveOutputTokens { get; }
         public int? EffectiveTotalTokens { get; }
         public string? TelemetryDiscrepancyCode { get; }
+        public IReadOnlyDictionary<string, string>? ResultMetadata { get; }
 
         public string? ValidationCode { get; }
         public string? ErrorCode { get; }
         public string? CompletedAtUtc { get; }
+
+        private static IReadOnlyDictionary<string, string>? CopyMetadata(
+            IReadOnlyDictionary<string, string>? metadata)
+        {
+            if (metadata == null || metadata.Count == 0)
+            {
+                return null;
+            }
+
+            return metadata.ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+        }
     }
 
     public sealed class MessageLinkRecord
