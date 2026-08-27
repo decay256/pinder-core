@@ -71,6 +71,12 @@ namespace Pinder.LlmAdapters
             "emotional-reaction-director-repair-unsupported-primary-emotion";
         public const string DirectorSystemWrapperPromptKey =
             "emotional-reaction-director-system-wrapper";
+        public const string PreviousDirectionEmptyPromptKey =
+            "emotional-reaction-previous-direction-empty";
+        public const string PreviousDirectionLinePromptKey =
+            "emotional-reaction-previous-direction-line";
+        public const string DateeResponseRepetitionRepairPromptKey =
+            "datee-response-repetition-repair";
         private const string CompiledInputPlaceholder = "{compiled_reaction_input}";
 
         private readonly PromptCatalog _catalog;
@@ -100,7 +106,7 @@ namespace Pinder.LlmAdapters
                 context,
                 _catalog,
                 includeConversationHistory);
-            PromptTraceResult directorSystemPrompt = CompileDirectorRulesPrompt(prompt);
+            PromptTraceResult directorSystemPrompt = CompileDirectorRulesPrompt(prompt, context);
             PromptTraceResult systemPrompt = string.IsNullOrWhiteSpace(dateeSystemPrompt)
                 ? directorSystemPrompt
                 : CompileDirectorSystemPrompt(dateeSystemPrompt!, directorSystemPrompt);
@@ -193,29 +199,26 @@ namespace Pinder.LlmAdapters
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 
-        private PromptTraceResult CompileDirectorRulesPrompt(PromptEntry prompt)
+        private PromptTraceResult CompileDirectorRulesPrompt(PromptEntry prompt, DateeContext context)
         {
-            const string placeholder = "{emotion_vocabulary}";
-            string template = prompt.SystemPrompt!;
-            int index = template.IndexOf(placeholder, StringComparison.Ordinal);
-            if (index < 0)
-            {
-                throw new InvalidOperationException(
-                    "emotional-reaction-director must include {emotion_vocabulary}.");
-            }
-
-            PromptEntry vocabulary = _catalog.TryGet(CharacterEmotionCatalog.PromptKey)!;
-            var builder = new AnnotatedStringBuilder();
-            builder.Append(template.Substring(0, index), prompt.SourceFile, DirectorPromptKey);
-            builder.Append(
-                string.Join(", ", CharacterEmotionCatalog.Load(_catalog)),
-                vocabulary.SourceFile,
-                CharacterEmotionCatalog.PromptKey);
-            builder.Append(
-                template.Substring(index + placeholder.Length),
+            return RenderTemplateWithTrace(
+                prompt.SystemPrompt!,
                 prompt.SourceFile,
-                DirectorPromptKey);
-            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+                DirectorPromptKey,
+                new Dictionary<string, PromptTraceResult>(StringComparer.Ordinal)
+                {
+                    {
+                        "{emotion_vocabulary}",
+                        TraceLiteral(
+                            string.Join(", ", CharacterEmotionCatalog.Load(_catalog)),
+                            _catalog.TryGet(CharacterEmotionCatalog.PromptKey)!.SourceFile,
+                            CharacterEmotionCatalog.PromptKey)
+                    },
+                    {
+                        "{previous_accepted_directions}",
+                        CompilePreviousAcceptedDirections(context)
+                    },
+                });
         }
 
         private static PromptTraceResult CompileDirectorUserPrompt(
@@ -247,6 +250,108 @@ namespace Pinder.LlmAdapters
             }
 
             builder.Append(template.Substring(cursor), prompt.SourceFile, DirectorPromptKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+        }
+
+        internal PromptTraceResult CompilePerformanceRepetitionRepairPrompt(PromptTraceResult basePrompt)
+        {
+            PromptEntry repair = _catalog.TryGet(DateeResponseRepetitionRepairPromptKey)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{DateeResponseRepetitionRepairPromptKey}'. The yaml file is incomplete or missing.");
+            if (string.IsNullOrWhiteSpace(repair.SystemPrompt))
+            {
+                throw new InvalidOperationException(
+                    $"prompt-catalog: runtime prompt key '{DateeResponseRepetitionRepairPromptKey}' has no system_prompt. Check the yaml file.");
+            }
+
+            var builder = new AnnotatedStringBuilder();
+            builder.Append(basePrompt);
+            builder.AppendLine();
+            builder.AppendLine();
+            builder.Append(repair.SystemPrompt!.Trim(), repair.SourceFile, DateeResponseRepetitionRepairPromptKey);
+            return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
+        }
+
+        private PromptTraceResult CompilePreviousAcceptedDirections(DateeContext context)
+        {
+            if (context.PreviousAcceptedEmotionalDirections.Count == 0)
+            {
+                PromptEntry empty = _catalog.TryGet(PreviousDirectionEmptyPromptKey)
+                    ?? throw new InvalidOperationException(
+                        $"prompt-catalog: missing required runtime prompt key '{PreviousDirectionEmptyPromptKey}'.");
+                return TraceLiteral(empty.SystemPrompt!.Trim(), empty.SourceFile, PreviousDirectionEmptyPromptKey);
+            }
+
+            PromptEntry line = _catalog.TryGet(PreviousDirectionLinePromptKey)
+                ?? throw new InvalidOperationException(
+                    $"prompt-catalog: missing required runtime prompt key '{PreviousDirectionLinePromptKey}'.");
+            var builder = new AnnotatedStringBuilder();
+            foreach (CharacterEmotionalDirectionSummary summary in context.PreviousAcceptedEmotionalDirections)
+            {
+                if (builder.Length > 0)
+                    builder.AppendLine();
+                builder.Append(
+                    PromptCatalog.Substitute(
+                        line.SystemPrompt!.Trim(),
+                        new Dictionary<string, string>(StringComparer.Ordinal)
+                        {
+                            ["turn"] = summary.Turn.ToString(CultureInfo.InvariantCulture),
+                            ["primary_emotion"] = summary.PrimaryEmotion,
+                            ["secondary_emotion"] = summary.SecondaryEmotion,
+                            ["regulatory_state"] = summary.RegulatoryState,
+                            ["activation"] = summary.Activation.ToString(CultureInfo.InvariantCulture),
+                            ["trajectory"] = summary.Trajectory,
+                            ["impulse"] = summary.Impulse,
+                        }),
+                    line.SourceFile,
+                    PreviousDirectionLinePromptKey);
+            }
+
+            return new PromptTraceResult(builder.ToString(), builder.Spans);
+        }
+
+        private static PromptTraceResult RenderTemplateWithTrace(
+            string template,
+            string sourceFile,
+            string key,
+            IReadOnlyDictionary<string, PromptTraceResult> values)
+        {
+            foreach (string placeholder in values.Keys)
+            {
+                if (template.IndexOf(placeholder, StringComparison.Ordinal) < 0)
+                {
+                    throw new InvalidOperationException(
+                        $"prompt-catalog: runtime prompt key '{key}' must include required token '{placeholder}'.");
+                }
+            }
+
+            var builder = new AnnotatedStringBuilder();
+            int cursor = 0;
+            while (cursor < template.Length)
+            {
+                KeyValuePair<string, PromptTraceResult>? next = null;
+                int nextIndex = template.Length;
+                foreach (KeyValuePair<string, PromptTraceResult> value in values)
+                {
+                    int index = template.IndexOf(value.Key, cursor, StringComparison.Ordinal);
+                    if (index >= 0 && index < nextIndex)
+                    {
+                        next = value;
+                        nextIndex = index;
+                    }
+                }
+
+                if (!next.HasValue)
+                {
+                    builder.Append(template.Substring(cursor), sourceFile, key);
+                    break;
+                }
+
+                builder.Append(template.Substring(cursor, nextIndex - cursor), sourceFile, key);
+                builder.Append(next.Value.Value);
+                cursor = nextIndex + next.Value.Key.Length;
+            }
+
             return TrimTrace(new PromptTraceResult(builder.ToString(), builder.Spans));
         }
 

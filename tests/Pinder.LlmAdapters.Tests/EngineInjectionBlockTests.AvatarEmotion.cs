@@ -11,7 +11,10 @@ namespace Pinder.LlmAdapters.Tests
             DialogueContext context = MakeDialogueContext();
             context.ApplyAvatarEmotionalDirection(new CharacterEmotionalDirection(
                 "anger",
-                "strong",
+                "fear",
+                "controlled",
+                5,
+                "escalating",
                 "fear of being dismissed",
                 "reads the moment as requiring a clear boundary",
                 "wants to challenge the other person",
@@ -23,8 +26,17 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Contains("AVATAR EMOTIONAL WRITING DIRECTION", prompt);
             Assert.Contains("Primary emotion: anger", prompt);
-            Assert.Contains("Writing from anger", prompt);
+            Assert.Contains("Secondary emotion: fear", prompt);
+            Assert.Contains("Regulatory state: controlled", prompt);
+            Assert.Contains("Activation: 5", prompt);
+            Assert.Contains("Trajectory: escalating", prompt);
+            Assert.Contains("Core threat/desire: fear of being dismissed", prompt);
+            Assert.Contains("Interpretation: reads the moment as requiring a clear boundary", prompt);
+            Assert.Contains("Impulse: wants to challenge the other person", prompt);
+            Assert.Contains("Restraint: resists turning the message into an attack", prompt);
+            Assert.Contains("Response posture: Writing from anger", prompt);
             Assert.Contains("Primary emotion: anger", debugInstruction);
+            Assert.DoesNotContain("{", debugInstruction);
         }
     }
 }

@@ -10,7 +10,10 @@ namespace Pinder.Core.Tests
         {
             var direction = new CharacterEmotionalDirection(
                 "shame",
-                "strong and rising",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "escalating",
                 "fear of exposure",
                 "reads the moment as risky but meaningful",
                 "risks a sincere admission",

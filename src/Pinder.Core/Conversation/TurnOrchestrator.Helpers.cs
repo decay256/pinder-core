@@ -130,7 +130,8 @@ namespace Pinder.Core.Conversation
                 state.AvatarHistory,
                 state.PlayerShadows,
                 state.DateeSessionSnapshot,
-                state.AvatarSessionSnapshot);
+                state.AvatarSessionSnapshot,
+                state.DateeEmotionalDirectionHistory);
         }
 
         internal static System.Collections.Generic.IReadOnlyList<(string Sender, string Text)> BuildHistoryForLlmContext(GameSessionState state)

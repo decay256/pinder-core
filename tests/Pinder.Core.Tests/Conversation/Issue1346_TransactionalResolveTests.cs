@@ -825,13 +825,23 @@ namespace Pinder.Core.Tests.Conversation
             public bool AllowDefaultFallback => true;
         }
 
-        private sealed class ScriptedLlmTransport : ILlmTransport
+        private sealed class ScriptedLlmTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             private readonly Dictionary<string, Queue<Func<string>>> _responses =
                 new Dictionary<string, Queue<Func<string>>>(StringComparer.Ordinal);
 
             private const string ValidDirectorJson =
-                "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relief\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"}";
+                "{\"schema_version\":\"emotional_director.v2\"," +
+                "\"primary_emotion\":\"relief\"," +
+                "\"secondary_emotion\":\"none\"," +
+                "\"regulatory_state\":\"controlled\"," +
+                "\"activation\":4," +
+                "\"trajectory\":\"escalating\"," +
+                "\"core_threat_or_desire\":\"fear of being dismissed\"," +
+                "\"interpretation\":\"reads the message as specific warmth that is probably meant for them\"," +
+                "\"impulse\":\"leans in with a careful question\"," +
+                "\"restraint\":\"keeps the reply tentative but available\"," +
+                "\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
             public void Queue(string phase, string response)
             {
@@ -872,6 +882,33 @@ namespace Pinder.Core.Tests.Conversation
 
                 return Task.FromResult(response);
             }
+
+            public bool SupportsStructuredConversationMessages => true;
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct);
+                string json = string.Equals(request.SchemaName, "datee_performance", StringComparison.Ordinal)
+                    ? "{\"schema_version\":\"datee_performance.v1\",\"message\":"
+                        + System.Text.Json.JsonSerializer.Serialize(response)
+                        + ",\"signals\":{\"tell\":null,\"weakness\":null}}"
+                    : response;
+                return new StructuredLlmResponse(json, provider: "test", model: "test-model");
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+                => SendStructuredAsync(request, cancellationToken);
 
             private void Enqueue(string phase, Func<string> response)
             {

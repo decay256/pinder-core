@@ -9,6 +9,7 @@ using Pinder.Core.Interfaces;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 using Pinder.Core.TestCommon;
+using Pinder.Core.Traps;
 
 namespace Pinder.Core.Tests.Conversation
 {
@@ -153,6 +154,22 @@ namespace Pinder.Core.Tests.Conversation
                 DateeSnapshotSeen = dateeSession;
                 AvatarSnapshotSeen = avatarSession;
                 return Task.FromResult(_result);
+            }
+        }
+
+        private sealed class CancellationAwareDirectionLlm : NullLlmAdapter
+        {
+            public TaskCompletionSource<object?> Started { get; } =
+                new TaskCompletionSource<object?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            public override async Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> history,
+                CancellationToken cancellationToken = default)
+            {
+                Started.TrySetResult(null);
+                await Task.Delay(Timeout.Infinite, cancellationToken);
+                throw new InvalidOperationException("unreachable");
             }
         }
 
@@ -514,25 +531,6 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(OperationalDiagnosticOutcome.Failed, terminal.Outcome);
         }
 
-        private static RollStageResult MakeRollStageResult()
-        {
-            return new RollStageResult
-            {
-                ResolveDice = new SimpleDiceRoller(50),
-                InterestBefore = 10,
-                InterestAfter = 12,
-                RollResult = new RollResult(
-                    dieRoll: 10,
-                    secondDieRoll: null,
-                    usedDieRoll: 10,
-                    stat: StatType.Charm,
-                    statModifier: 0,
-                    levelBonus: 0,
-                    dc: 10,
-                    tier: FailureTier.Success)
-            };
-        }
-
         [Fact]
         public async Task ExecuteAsync_UpdatesSpentBackstory_BasedOnResolvedTarget()
         {
@@ -682,5 +680,312 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Empty(state.SpentBackstoryIndices);
             Assert.Empty(state.SpentStakeIndices);
         }
+
+        [Fact]
+        public async Task Issue1423_RecordsAcceptedDirectionOnlyAfterVisibleDateeCommitAndCarriesPreviousTwo()
+        {
+            var first = new CharacterEmotionalDirectionSummary(
+                3,
+                "fear",
+                "hope",
+                "conflicted",
+                5,
+                "volatile",
+                "almost asks for reassurance");
+            var second = new CharacterEmotionalDirectionSummary(
+                4,
+                "relief",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "easing",
+                "lets the reply soften");
+            var acceptedDirection = new CharacterEmotionalDirection(
+                "curiosity",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "guarded",
+                3,
+                "steady",
+                "desire to know whether the warmth is sincere",
+                "reads the message as careful attention",
+                "asks one grounded follow-up",
+                "does not over-offer",
+                "answers with guarded openness");
+            var llm = new CapturingDirectionLlm(acceptedDirection, "Visible accepted datee reply.");
+            var stage = new DateeResponseStage(llm);
+            var state = new GameSessionState
+            {
+                Interest = new InterestMeter(10),
+                TurnNumber = 8,
+            };
+            state.RecordAcceptedDateeEmotionalDirection(first);
+            state.RecordAcceptedDateeEmotionalDirection(second);
+
+            var result = await stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "visible delivered line",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed,
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None);
+
+            Assert.Equal("Visible accepted datee reply.", result.DateeMessage);
+            Assert.Equal(new[] { 3, 4 }, llm.ContextSeen!.PreviousAcceptedEmotionalDirections.Select(summary => summary.Turn).ToArray());
+            Assert.Equal(new[] { 4, 8 }, state.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+            Assert.Equal("curiosity", state.DateeEmotionalDirectionHistory[1].PrimaryEmotion);
+            Assert.Equal("guarded", state.DateeEmotionalDirectionHistory[1].RegulatoryState);
+            Assert.Equal(3, state.DateeEmotionalDirectionHistory[1].Activation);
+            Assert.Equal("Visible accepted datee reply.", state.DateeHistory.Last().Content);
+        }
+
+        [Fact]
+        public async Task Issue1423_RejectedOrCancelledDateeResponseDoesNotMutateDirectionHistory()
+        {
+            var existing = new CharacterEmotionalDirectionSummary(
+                2,
+                "relief",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "easing",
+                "softens");
+            var state = new GameSessionState
+            {
+                Interest = new InterestMeter(10),
+                TurnNumber = 5,
+            };
+            state.RecordAcceptedDateeEmotionalDirection(existing);
+            var stage = new DateeResponseStage(new ThrowingDirectionLlm());
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "visible delivered line",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed,
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                CancellationToken.None));
+
+            Assert.Single(state.DateeEmotionalDirectionHistory);
+            Assert.Equal(2, state.DateeEmotionalDirectionHistory[0].Turn);
+            Assert.Empty(state.DateeHistory);
+        }
+
+        [Fact]
+        public void Issue1423_DirectionHistoryIsBoundedAndCloneIndependent()
+        {
+            var first = new CharacterEmotionalDirectionSummary(1, "fear", "hope", "conflicted", 5, "volatile", "reaches");
+            var second = new CharacterEmotionalDirectionSummary(2, "relief", CharacterEmotionalDirection.NoneSecondaryEmotion, "controlled", 4, "easing", "softens");
+            var third = new CharacterEmotionalDirectionSummary(3, "curiosity", CharacterEmotionalDirection.NoneSecondaryEmotion, "guarded", 3, "steady", "asks");
+            var state = new GameSessionState();
+
+            state.RecordAcceptedDateeEmotionalDirection(first);
+            state.RecordAcceptedDateeEmotionalDirection(second);
+            state.RecordAcceptedDateeEmotionalDirection(third);
+
+            Assert.Equal(new[] { 2, 3 }, state.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+
+            GameSessionState clone = state.Clone();
+            clone.RecordAcceptedDateeEmotionalDirection(new CharacterEmotionalDirectionSummary(4, "joy", CharacterEmotionalDirection.NoneSecondaryEmotion, "open", 4, "escalating", "reaches again"));
+
+            Assert.Equal(new[] { 2, 3 }, state.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+            Assert.Equal(new[] { 3, 4 }, clone.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+        }
+
+        [Fact]
+        public void Issue1423_DirectionHistorySurvivesAdoptWithBoundedOrdering()
+        {
+            var destination = new GameSessionState();
+            destination.RecordAcceptedDateeEmotionalDirection(
+                new CharacterEmotionalDirectionSummary(1, "fear", "hope", "conflicted", 5, "volatile", "reaches"));
+            var source = new GameSessionState();
+            source.RecordAcceptedDateeEmotionalDirection(
+                new CharacterEmotionalDirectionSummary(2, "relief", CharacterEmotionalDirection.NoneSecondaryEmotion, "controlled", 4, "easing", "softens"));
+            source.RecordAcceptedDateeEmotionalDirection(
+                new CharacterEmotionalDirectionSummary(3, "curiosity", CharacterEmotionalDirection.NoneSecondaryEmotion, "guarded", 3, "steady", "asks"));
+
+            destination.AdoptStateFrom(source);
+            source.RecordAcceptedDateeEmotionalDirection(
+                new CharacterEmotionalDirectionSummary(4, "joy", CharacterEmotionalDirection.NoneSecondaryEmotion, "open", 4, "escalating", "reaches again"));
+
+            Assert.Equal(new[] { 2, 3 }, destination.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+            Assert.Equal(new[] { 3, 4 }, source.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+        }
+
+        [Fact]
+        public void Issue1423_DirectionHistorySurvivesSnapshotRestoreAndResimulation()
+        {
+            var trapRegistry = new NullTrapRegistry();
+            var expected = new List<CharacterEmotionalDirectionSummary>
+            {
+                new CharacterEmotionalDirectionSummary(6, "fear", "hope", "conflicted", 5, "volatile", "almost asks for reassurance"),
+                new CharacterEmotionalDirectionSummary(7, "relief", CharacterEmotionalDirection.NoneSecondaryEmotion, "controlled", 4, "easing", "lets the reply soften"),
+            };
+            var original = new GameSession(
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                new NullLlmAdapter(),
+                new SimpleDiceRoller(10),
+                trapRegistry,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+
+            original.RestoreState(new ResimulateData
+            {
+                TargetInterest = 12,
+                TurnNumber = 8,
+                DateeEmotionalDirectionHistory = expected,
+            }, trapRegistry);
+
+            GameStateSnapshot snapshot = original.CreateSnapshot();
+            Assert.Equal(new[] { 6, 7 }, snapshot.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+
+            ResimulateData resimulation = original.CreateResimulateData();
+            Assert.Equal(new[] { 6, 7 }, resimulation.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+
+            var restored = new GameSession(
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                new NullLlmAdapter(),
+                new SimpleDiceRoller(10),
+                trapRegistry,
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            restored.RestoreState(resimulation, trapRegistry);
+
+            Assert.Equal(new[] { 6, 7 }, restored.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+            Assert.Equal("almost asks for reassurance", restored.DateeEmotionalDirectionHistory[0].Impulse);
+            Assert.Equal("lets the reply soften", restored.DateeEmotionalDirectionHistory[1].Impulse);
+        }
+
+        [Fact]
+        public async Task Issue1423_RealCancellationDoesNotCommitDirectionOrVisibleHistory()
+        {
+            var existing = new CharacterEmotionalDirectionSummary(
+                2,
+                "relief",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "easing",
+                "softens");
+            var state = new GameSessionState
+            {
+                Interest = new InterestMeter(10),
+                TurnNumber = 5,
+            };
+            state.RecordAcceptedDateeEmotionalDirection(existing);
+            var llm = new CancellationAwareDirectionLlm();
+            var stage = new DateeResponseStage(llm);
+            using var cancellation = new CancellationTokenSource();
+
+            Task<DateeResponseStageResult> pending = stage.ExecuteAsync(
+                state,
+                MakeRollStageResult(),
+                new DeliveryStageResult
+                {
+                    DeliveredMessage = "visible delivered line",
+                    HorninessCheckResult = HorninessCheckResult.NotPerformed,
+                },
+                MakeProfile("Player"),
+                MakeProfile("Datee"),
+                null,
+                cancellation.Token);
+            await llm.Started.Task;
+            cancellation.Cancel();
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => pending);
+            Assert.Equal(new[] { 2 }, state.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
+            Assert.Empty(state.DateeHistory);
+            Assert.Empty(state.AvatarHistory);
+            Assert.Empty(state.History);
+        }
+
+        [Fact]
+        public void Issue1423_PrivateContinuityNeverEntersVisibleOrAvatarHistory()
+        {
+            const string privateSentinel = "PRIVATE-CONTINUITY-SENTINEL-1423";
+            var state = new GameSessionState();
+            state.RecordAcceptedDateeEmotionalDirection(
+                new CharacterEmotionalDirectionSummary(
+                    4,
+                    "fear",
+                    "hope",
+                    "conflicted",
+                    5,
+                    "volatile",
+                    privateSentinel));
+
+            Assert.DoesNotContain(state.History, entry => entry.Text.Contains(privateSentinel, StringComparison.Ordinal));
+            Assert.DoesNotContain(state.DateeHistory, entry => entry.Content.Contains(privateSentinel, StringComparison.Ordinal));
+            Assert.DoesNotContain(state.AvatarHistory, entry => entry.Content.Contains(privateSentinel, StringComparison.Ordinal));
+        }
+
+        private static RollStageResult MakeRollStageResult()
+        {
+            return new RollStageResult
+            {
+                ResolveDice = new SimpleDiceRoller(50),
+                InterestBefore = 10,
+                InterestAfter = 12,
+                RollResult = new RollResult(
+                    dieRoll: 10,
+                    secondDieRoll: null,
+                    usedDieRoll: 10,
+                    stat: StatType.Charm,
+                    statModifier: 0,
+                    levelBonus: 0,
+                    dc: 10,
+                    tier: FailureTier.Success)
+            };
+        }
+
+        private sealed class CapturingDirectionLlm : NullLlmAdapter
+        {
+            private readonly CharacterEmotionalDirection _direction;
+            private readonly string _message;
+
+            public CapturingDirectionLlm(CharacterEmotionalDirection direction, string message)
+            {
+                _direction = direction;
+                _message = message;
+            }
+
+            public DateeContext? ContextSeen { get; private set; }
+
+            public override Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> history,
+                CancellationToken cancellationToken = default)
+            {
+                ContextSeen = context;
+                var response = new DateeResponse(
+                    _message,
+                    emotionalReactionDebug: new CharacterEmotionalDebugInfo(
+                        hungerForIntimacy: 8,
+                        terrorOfRejection: 8,
+                        direction: _direction));
+                return Task.FromResult(new StatefulDateeResult(response, Array.Empty<ConversationMessage>()));
+            }
+        }
+
+        private sealed class ThrowingDirectionLlm : NullLlmAdapter
+        {
+            public override Task<StatefulDateeResult> GetDateeResponseAsync(
+                DateeContext context,
+                IReadOnlyList<ConversationMessage> history,
+                CancellationToken cancellationToken = default)
+            {
+                throw new InvalidOperationException("DATEE rejected before commit");
+            }
+        }
+
     }
 }

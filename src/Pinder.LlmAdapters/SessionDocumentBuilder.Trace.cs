@@ -390,8 +390,11 @@ namespace Pinder.LlmAdapters
                     new Dictionary<string, string>
                     {
                         { "primary_emotion", direction.PrimaryEmotion },
-                        { "intensity", direction.Intensity },
-                        { "underlying_feeling", direction.UnderlyingFeeling },
+                        { "secondary_emotion", direction.SecondaryEmotion },
+                        { "regulatory_state", direction.RegulatoryState },
+                        { "activation", direction.Activation.ToString(System.Globalization.CultureInfo.InvariantCulture) },
+                        { "trajectory", direction.Trajectory },
+                        { "core_threat_or_desire", direction.CoreThreatOrDesire },
                         { "interpretation", direction.Interpretation },
                         { "impulse", direction.Impulse },
                         { "restraint", direction.Restraint },
@@ -679,8 +682,11 @@ namespace Pinder.LlmAdapters
                     new Dictionary<string, (string Value, string SourceFile, string Key)>
                     {
                         { "{primary_emotion}", (emotionalDirection.PrimaryEmotion, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.PrimaryEmotion") },
-                        { "{intensity}", (emotionalDirection.Intensity, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Intensity") },
-                        { "{underlying_feeling}", (emotionalDirection.UnderlyingFeeling, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.UnderlyingFeeling") },
+                        { "{secondary_emotion}", (emotionalDirection.SecondaryEmotion, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.SecondaryEmotion") },
+                        { "{regulatory_state}", (emotionalDirection.RegulatoryState, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.RegulatoryState") },
+                        { "{activation}", (emotionalDirection.Activation.ToString(System.Globalization.CultureInfo.InvariantCulture), CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Activation") },
+                        { "{trajectory}", (emotionalDirection.Trajectory, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Trajectory") },
+                        { "{core_threat_or_desire}", (emotionalDirection.CoreThreatOrDesire, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.CoreThreatOrDesire") },
                         { "{interpretation}", (emotionalDirection.Interpretation, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Interpretation") },
                         { "{impulse}", (emotionalDirection.Impulse, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Impulse") },
                         { "{restraint}", (emotionalDirection.Restraint, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Restraint") },

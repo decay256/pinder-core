@@ -13,17 +13,19 @@ namespace Pinder.LlmAdapters
     internal static class CharacterEmotionalDirectionContract
     {
         public const string SchemaName = "emotional_director";
-        public const string SchemaVersion = "emotional_director.v1";
+        public const string SchemaVersion = "emotional_director.v2";
         public const string ParserName = "CharacterEmotionalDirectionContract";
 
         private const int MinFieldChars = 3;
         private const string SchemaVersionField = "schema_version";
 
-        private static readonly string[] Fields =
+        private static readonly string[] StringFields =
         {
             "primary_emotion",
-            "intensity",
-            "underlying_feeling",
+            "secondary_emotion",
+            "regulatory_state",
+            "trajectory",
+            "core_threat_or_desire",
             "interpretation",
             "impulse",
             "restraint",
@@ -34,13 +36,49 @@ namespace Pinder.LlmAdapters
         {
             SchemaVersionField,
             "primary_emotion",
-            "intensity",
-            "underlying_feeling",
+            "secondary_emotion",
+            "regulatory_state",
+            "activation",
+            "trajectory",
+            "core_threat_or_desire",
             "interpretation",
             "impulse",
             "restraint",
             "response_posture",
         };
+
+        private static readonly HashSet<string> ProseFields =
+            new HashSet<string>(StringComparer.Ordinal)
+            {
+                "core_threat_or_desire",
+                "interpretation",
+                "impulse",
+                "restraint",
+                "response_posture",
+            };
+
+        private static readonly HashSet<string> RegulatoryStates =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "open",
+                "controlled",
+                "anxious",
+                "guarded",
+                "overwhelmed",
+                "conflicted",
+                "numb",
+                "dissociated",
+            };
+
+        private static readonly HashSet<string> Trajectories =
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "escalating",
+                "easing",
+                "volatile",
+                "reversing",
+                "steady",
+            };
 
         private static readonly HashSet<string> MechanicalShorthandValues =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -223,7 +261,7 @@ namespace Pinder.LlmAdapters
             }
 
             var values = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (string field in Fields)
+            foreach (string field in StringFields)
             {
                 if (!root.TryGetValue(field, out var token) || token.Type != JTokenType.String)
                 {
@@ -238,42 +276,108 @@ namespace Pinder.LlmAdapters
                     return false;
                 }
 
-                string? semanticReason = ValidateFieldValue(value);
-                if (semanticReason != null)
+                if (ProseFields.Contains(field))
                 {
-                    errorCode = semanticReason;
-                    return false;
+                    string? semanticReason = ValidateFieldValue(value);
+                    if (semanticReason != null)
+                    {
+                        errorCode = semanticReason;
+                        return false;
+                    }
                 }
 
                 values[field] = value;
             }
 
-            string? canonicalEmotion = allowedEmotions.FirstOrDefault(
-                emotion => string.Equals(
-                    emotion,
-                    values["primary_emotion"],
-                    StringComparison.OrdinalIgnoreCase));
-            if (canonicalEmotion == null)
+            if (!root.TryGetValue("activation", out var activationToken)
+                || activationToken.Type != JTokenType.Integer)
+            {
+                errorCode = "invalid_activation";
+                return false;
+            }
+
+            int activation = activationToken.Value<int>();
+            if (activation < 1 || activation > 5)
+            {
+                errorCode = "invalid_activation";
+                return false;
+            }
+
+            string? primaryEmotion = CanonicalEmotion(values["primary_emotion"], allowedEmotions);
+            if (primaryEmotion == null)
             {
                 errorCode = "unsupported_primary_emotion";
                 return false;
             }
 
-            if (values["response_posture"].IndexOf(canonicalEmotion, StringComparison.OrdinalIgnoreCase) < 0)
+            string secondary = values["secondary_emotion"];
+            bool hasSecondary = !string.Equals(
+                secondary,
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                StringComparison.OrdinalIgnoreCase);
+            string secondaryEmotion = CharacterEmotionalDirection.NoneSecondaryEmotion;
+            if (hasSecondary)
             {
-                errorCode = "response_posture_omits_primary_emotion";
+                secondaryEmotion = CanonicalEmotion(secondary, allowedEmotions) ?? string.Empty;
+                if (secondaryEmotion.Length == 0)
+                {
+                    errorCode = "unsupported_secondary_emotion";
+                    return false;
+                }
+
+                if (string.Equals(primaryEmotion, secondaryEmotion, StringComparison.OrdinalIgnoreCase))
+                {
+                    errorCode = "duplicate_primary_secondary_emotion";
+                    return false;
+                }
+            }
+
+            string regulatoryState = Canonical(values["regulatory_state"], RegulatoryStates);
+            if (regulatoryState.Length == 0)
+            {
+                errorCode = "unsupported_regulatory_state";
+                return false;
+            }
+
+            if (string.Equals(regulatoryState, "conflicted", StringComparison.Ordinal)
+                && !hasSecondary)
+            {
+                errorCode = "conflicted_requires_secondary_emotion";
+                return false;
+            }
+
+            string trajectory = Canonical(values["trajectory"], Trajectories);
+            if (trajectory.Length == 0)
+            {
+                errorCode = "unsupported_trajectory";
                 return false;
             }
 
             direction = new CharacterEmotionalDirection(
-                canonicalEmotion,
-                values["intensity"],
-                values["underlying_feeling"],
+                primaryEmotion,
+                secondaryEmotion,
+                regulatoryState,
+                activation,
+                trajectory,
+                values["core_threat_or_desire"],
                 values["interpretation"],
                 values["impulse"],
                 values["restraint"],
                 values["response_posture"]);
             return true;
+        }
+
+        private static string? CanonicalEmotion(string value, IReadOnlyList<string> allowedEmotions)
+        {
+            return allowedEmotions.FirstOrDefault(
+                emotion => string.Equals(emotion, value, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static string Canonical(string value, HashSet<string> allowedValues)
+        {
+            return allowedValues.FirstOrDefault(
+                candidate => string.Equals(candidate, value, StringComparison.OrdinalIgnoreCase))
+                ?? string.Empty;
         }
 
         private static string? ValidateFieldValue(string value)
@@ -391,50 +495,44 @@ namespace Pinder.LlmAdapters
                 {
                     ["type"] = "string",
                     ["const"] = SchemaVersion,
-                    ["description"] = "The contract schema version string. Must be exactly 'emotional_director.v1'.",
+                    ["description"] = "The contract schema version string. Must be exactly 'emotional_director.v2'.",
                 },
                 ["primary_emotion"] = new JObject
                 {
                     ["type"] = "string",
                     ["enum"] = new JArray(allowedEmotions),
-                    ["description"] = "The single dominant primary emotion chosen from the configured vocabulary.",
+                    ["description"] = "The single dominant concrete felt emotion chosen from the configured vocabulary.",
                 },
-                ["intensity"] = new JObject
+                ["secondary_emotion"] = new JObject
                 {
                     ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "The strength, movement, and trajectory of the primary emotion.",
+                    ["enum"] = new JArray(allowedEmotions.Concat(new[] { CharacterEmotionalDirection.NoneSecondaryEmotion })),
+                    ["description"] = "A distinct configured concrete emotion, or literal 'none'.",
                 },
-                ["underlying_feeling"] = new JObject
+                ["regulatory_state"] = new JObject
                 {
                     ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "The deeper, more vulnerable feeling or subtext beneath the primary emotion.",
+                    ["enum"] = new JArray(RegulatoryStates),
+                    ["description"] = "The character's regulatory state.",
                 },
-                ["interpretation"] = new JObject
+                ["activation"] = new JObject
+                {
+                    ["type"] = "integer",
+                    ["minimum"] = 1,
+                    ["maximum"] = 5,
+                    ["description"] = "Emotional activation from 1 through 5.",
+                },
+                ["trajectory"] = new JObject
                 {
                     ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "How the subject character interprets the counterpart's message and intention.",
+                    ["enum"] = new JArray(Trajectories),
+                    ["description"] = "The movement of the emotional beat.",
                 },
-                ["impulse"] = new JObject
-                {
-                    ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "A behavioral urge or instinct in third-person or infinitive form (e.g. 'pull back and test their sincerity').",
-                },
-                ["restraint"] = new JObject
-                {
-                    ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "What holds the subject character back from fully acting on their impulse.",
-                },
-                ["response_posture"] = new JObject
-                {
-                    ["type"] = "string",
-                    ["minLength"] = MinFieldChars,
-                    ["description"] = "Natural-language prose describing the character's behavioral stance/posture in response to the moment. Must explicitly mention or include the chosen primary_emotion.",
-                },
+                ["core_threat_or_desire"] = StringProperty("Concise vulnerable threat or desire driving the reaction."),
+                ["interpretation"] = StringProperty("How the latest visible message lands for this character."),
+                ["impulse"] = StringProperty("Immediate behavioral urge, never drafted dialogue."),
+                ["restraint"] = StringProperty("What prevents full expression."),
+                ["response_posture"] = StringProperty("Actionable performance direction, never drafted dialogue."),
             };
 
             var schema = new JObject
@@ -446,6 +544,16 @@ namespace Pinder.LlmAdapters
             };
 
             return schema.ToString(Formatting.None);
+        }
+
+        private static JObject StringProperty(string description)
+        {
+            return new JObject
+            {
+                ["type"] = "string",
+                ["minLength"] = MinFieldChars,
+                ["description"] = description,
+            };
         }
     }
 }

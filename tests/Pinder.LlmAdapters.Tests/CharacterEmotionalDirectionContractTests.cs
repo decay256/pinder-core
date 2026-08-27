@@ -12,18 +12,21 @@ namespace Pinder.LlmAdapters.Tests
     {
         private static readonly IReadOnlyList<string> Allowed = new[]
         {
-            "joy", "shame", "fear", "anger", "ambivalence",
+            "joy", "shame", "fear", "anger", "relief",
         };
 
         [Theory]
-        [InlineData("schema_version", "The contract schema version string. Must be exactly 'emotional_director.v1'.")]
-        [InlineData("primary_emotion", "The single dominant primary emotion chosen from the configured vocabulary.")]
-        [InlineData("intensity", "The strength, movement, and trajectory of the primary emotion.")]
-        [InlineData("underlying_feeling", "The deeper, more vulnerable feeling or subtext beneath the primary emotion.")]
-        [InlineData("interpretation", "How the subject character interprets the counterpart's message and intention.")]
-        [InlineData("impulse", "A behavioral urge or instinct in third-person or infinitive form (e.g. 'pull back and test their sincerity').")]
-        [InlineData("restraint", "What holds the subject character back from fully acting on their impulse.")]
-        [InlineData("response_posture", "Natural-language prose describing the character's behavioral stance/posture in response to the moment. Must explicitly mention or include the chosen primary_emotion.")]
+        [InlineData("schema_version", "The contract schema version string. Must be exactly 'emotional_director.v2'.")]
+        [InlineData("primary_emotion", "The single dominant concrete felt emotion chosen from the configured vocabulary.")]
+        [InlineData("secondary_emotion", "A distinct configured concrete emotion, or literal 'none'.")]
+        [InlineData("regulatory_state", "The character's regulatory state.")]
+        [InlineData("activation", "Emotional activation from 1 through 5.")]
+        [InlineData("trajectory", "The movement of the emotional beat.")]
+        [InlineData("core_threat_or_desire", "Concise vulnerable threat or desire driving the reaction.")]
+        [InlineData("interpretation", "How the latest visible message lands for this character.")]
+        [InlineData("impulse", "Immediate behavioral urge, never drafted dialogue.")]
+        [InlineData("restraint", "What prevents full expression.")]
+        [InlineData("response_posture", "Actionable performance direction, never drafted dialogue.")]
         public void BuildJsonSchema_IncludesExpectedPropertyDescriptions(string propertyName, string expectedDescription)
         {
             var request = CharacterEmotionalDirectionContract.CreateRequest(
@@ -45,20 +48,20 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void TryParse_AcceptsConfiguredEmotionNamedInPosture()
         {
-            const string json = "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"shame\",\"intensity\":\"strong and rising\",\"underlying_feeling\":\"fear of exposure\",\"interpretation\":\"reads the moment as risky but meaningful\",\"impulse\":\"wants to risk a sincere admission\",\"restraint\":\"hedges before becoming fully vulnerable\",\"response_posture\":\"Writing from shame, they hedge before risking a sincere admission.\"}";
+            const string json = "{\"schema_version\":\"emotional_director.v2\",\"primary_emotion\":\"shame\",\"secondary_emotion\":\"none\",\"regulatory_state\":\"controlled\",\"activation\":4,\"trajectory\":\"escalating\",\"core_threat_or_desire\":\"fear of exposure\",\"interpretation\":\"reads the moment as risky but meaningful\",\"impulse\":\"wants to risk a sincere admission\",\"restraint\":\"hedges before becoming fully vulnerable\",\"response_posture\":\"hedges before risking a sincere admission\"}";
 
             bool accepted = CharacterEmotionalDirectionContract.TryParse(
                 json, true, Allowed, out var direction, out string error);
 
             Assert.True(accepted, error);
             Assert.Equal("shame", direction!.PrimaryEmotion);
-            Assert.Contains("shame", direction.ResponsePosture);
+            Assert.Equal("hedges before risking a sincere admission", direction.ResponsePosture);
         }
 
         [Fact]
         public void TryParse_RejectsEmotionOutsideConfiguredVocabulary()
         {
-            const string json = "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"contempt\",\"intensity\":\"strong and rising\",\"underlying_feeling\":\"fear of disrespect\",\"interpretation\":\"reads the moment as dismissive\",\"impulse\":\"wants to retaliate\",\"restraint\":\"keeps the answer controlled\",\"response_posture\":\"Writing from contempt, they sharpen every observation.\"}";
+            const string json = "{\"schema_version\":\"emotional_director.v2\",\"primary_emotion\":\"contempt\",\"secondary_emotion\":\"none\",\"regulatory_state\":\"controlled\",\"activation\":4,\"trajectory\":\"escalating\",\"core_threat_or_desire\":\"fear of disrespect\",\"interpretation\":\"reads the moment as dismissive\",\"impulse\":\"wants to retaliate\",\"restraint\":\"keeps the answer controlled\",\"response_posture\":\"sharpens every observation\"}";
 
             bool accepted = CharacterEmotionalDirectionContract.TryParse(
                 json, true, Allowed, out _, out string error);
@@ -68,15 +71,15 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void TryParse_RejectsPostureThatDoesNotNameEmotion()
+        public void TryParse_RejectsConflictedWithoutSecondaryEmotion()
         {
-            const string json = "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"anger\",\"intensity\":\"strong and rising\",\"underlying_feeling\":\"fear of disrespect\",\"interpretation\":\"reads the moment as dismissive\",\"impulse\":\"wants to challenge them\",\"restraint\":\"keeps the answer controlled\",\"response_posture\":\"They become clipped and confrontational.\"}";
+            const string json = "{\"schema_version\":\"emotional_director.v2\",\"primary_emotion\":\"anger\",\"secondary_emotion\":\"none\",\"regulatory_state\":\"conflicted\",\"activation\":4,\"trajectory\":\"volatile\",\"core_threat_or_desire\":\"fear of disrespect\",\"interpretation\":\"reads the moment as dismissive\",\"impulse\":\"wants to challenge them\",\"restraint\":\"keeps the answer controlled\",\"response_posture\":\"becomes clipped and confrontational\"}";
 
             bool accepted = CharacterEmotionalDirectionContract.TryParse(
                 json, true, Allowed, out _, out string error);
 
             Assert.False(accepted);
-            Assert.Equal("response_posture_omits_primary_emotion", error);
+            Assert.Equal("conflicted_requires_secondary_emotion", error);
         }
     }
 }

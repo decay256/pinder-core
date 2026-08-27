@@ -30,14 +30,17 @@ namespace Pinder.Core.Tests.Phase0
     public sealed class RecordingLlmTransport : ILlmTransport, IStructuredConversationLlmTransport
     {
         private const string ValidEmotionalDirection =
-            "{\"schema_version\":\"emotional_director.v1\"," +
+            "{\"schema_version\":\"emotional_director.v2\"," +
             "\"primary_emotion\":\"relief\"," +
-            "\"intensity\":\"moderate and steadily rising\"," +
-            "\"underlying_feeling\":\"fear of being dismissed\"," +
+            "\"secondary_emotion\":\"none\"," +
+            "\"regulatory_state\":\"controlled\"," +
+            "\"activation\":4," +
+            "\"trajectory\":\"escalating\"," +
+            "\"core_threat_or_desire\":\"fear of being dismissed\"," +
             "\"interpretation\":\"reads the message as specific warmth that is probably meant for them\"," +
             "\"impulse\":\"leans in with a careful question\"," +
             "\"restraint\":\"keeps the reply tentative but available\"," +
-            "\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"}";
+            "\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         public sealed record LlmExchange(
             string Phase,

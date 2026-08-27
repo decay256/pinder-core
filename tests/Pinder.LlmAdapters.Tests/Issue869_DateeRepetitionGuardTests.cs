@@ -7,7 +7,7 @@ using Pinder.LlmAdapters;
 namespace Pinder.LlmAdapters.Tests
 {
     /// <summary>
-    /// Issue #869: porting the WORD & PATTERN REPETITION block + self-check
+    /// Issue #869/#1423: DATEE repetition guard wording
     /// from <c>dialogue-options-instruction</c> to
     /// <c>datee-response-instruction</c>. These tests pin the prompt
     /// contract so future yaml edits can't silently regress the parity.
@@ -41,33 +41,33 @@ namespace Pinder.LlmAdapters.Tests
         {
             var prompt = LoadDateeResponsePrompt();
 
-            Assert.Contains("WORD & PATTERN REPETITION", prompt);
-            Assert.Contains("fresh move", prompt);
+            Assert.Contains("DRAMATIC MOMENTUM", prompt);
+            Assert.Contains("new conversational move", prompt);
             // The datee path checks the datee's OWN previous messages,
             // not the full conversation above (which is the player-side framing).
-            Assert.Contains("your own previous messages", prompt);
+            Assert.Contains("previous DATEE messages", prompt);
         }
 
         [Fact]
-        public void DateeResponseInstruction_ContainsSelfCheck()
+        public void DateeResponseInstruction_RemovesOldAlwaysOnSelfCheck()
         {
             var prompt = LoadDateeResponsePrompt();
 
-            Assert.Contains("Before sending: verify", prompt);
-            Assert.Contains("rewrite", prompt);
+            Assert.DoesNotContain("Before sending: verify", prompt);
+            Assert.DoesNotContain("WORD & PATTERN REPETITION", prompt);
         }
 
         [Fact]
-        public void DateeResponseInstruction_RepetitionGuard_ListsCommonFillers()
+        public void DateeResponseInstruction_DramaticMomentumKeepsRepetitionPressure()
         {
             // Pin the specific fillers called out in the refined ticket
             // so reviewers can confirm the wording survives future edits.
             var prompt = LoadDateeResponsePrompt();
 
-            Assert.Contains("honestly", prompt);
-            Assert.Contains("literally", prompt);
-            Assert.Contains("okay but", prompt);
-            Assert.Contains("interesting that", prompt);
+            Assert.Contains("Never repeat yourself", prompt);
+            Assert.Contains("new conversational move", prompt);
+            Assert.Contains("opening", prompt);
+            Assert.Contains("cadence", prompt);
         }
     }
 }

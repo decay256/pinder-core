@@ -487,7 +487,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
         private static CharacterEmotionalDirection Direction()
             => new CharacterEmotionalDirection(
                 "relief",
-                "moderate and steadily rising",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "escalating",
                 "fear of being dismissed",
                 "reads the message as specific warmth that is probably meant for them",
                 "leans in with a careful question",

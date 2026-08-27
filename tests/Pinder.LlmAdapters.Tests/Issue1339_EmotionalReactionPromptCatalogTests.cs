@@ -212,11 +212,12 @@ namespace Pinder.LlmAdapters.Tests
                 .Select(key => (Key: key, Prompt: catalog.Get(key).SystemPrompt!))
                 .ToArray();
 
-            Assert.Equal(84, entries.Length);
+            Assert.Equal(86, entries.Length);
 
             foreach (var entry in entries)
             {
-                Assert.DoesNotMatch(@"\b\d+\s*(?:/|-|to)\s*\d+\b", entry.Prompt);
+                if (!string.Equals(entry.Key, "emotional-reaction-director", StringComparison.Ordinal))
+                    Assert.DoesNotMatch(@"\b\d+\s*(?:/|-|to)\s*\d+\b", entry.Prompt);
                 Assert.DoesNotContain("InterestState.", entry.Prompt, StringComparison.Ordinal);
                 Assert.DoesNotContain("StatType.", entry.Prompt, StringComparison.Ordinal);
                 Assert.DoesNotContain("write your reply", entry.Prompt, StringComparison.OrdinalIgnoreCase);

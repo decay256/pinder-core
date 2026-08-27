@@ -112,7 +112,8 @@ namespace Pinder.Core.Conversation
                 playerHungerForIntimacy: playerEmotionalStatus.HungerForIntimacy,
                 playerTerrorOfRejection: playerEmotionalStatus.TerrorOfRejection,
                 dateeHungerForIntimacy: dateeEmotionalStatus.HungerForIntimacy,
-                dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection);
+                dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection,
+                previousAcceptedEmotionalDirections: state.DateeEmotionalDirectionHistory);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
@@ -217,6 +218,12 @@ namespace Pinder.Core.Conversation
 
             state.DateeHistory.Add(ConversationMessage.User(deliveryStage.DeliveredMessage));
             state.DateeHistory.Add(ConversationMessage.Assistant(dateeResponse.MessageText));
+            CharacterEmotionalDirection? acceptedDirection = dateeResponse.EmotionalReactionDebug?.Direction;
+            if (acceptedDirection != null)
+            {
+                state.RecordAcceptedDateeEmotionalDirection(
+                    CharacterEmotionalDirectionSummary.FromDirection(state.TurnNumber, acceptedDirection));
+            }
             if (sessionResult != null)
             {
                 state.AvatarHistory.Add(ConversationMessage.Assistant(deliveryStage.DeliveredMessage));

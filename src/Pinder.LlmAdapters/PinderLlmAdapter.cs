@@ -444,16 +444,14 @@ namespace Pinder.LlmAdapters
                     .ConfigureAwait(false);
             }
             CharacterEmotionalDirection emotionalDirection = emotionalDirectorResult.Direction;
-            PromptTraceResult dateePrompt = emotionalPromptCompiler.CompilePerformance(
+            PromptTraceResult baseDateePrompt = emotionalPromptCompiler.CompilePerformance(
                 context,
                 emotionalDirection,
                 includeConversationHistory: priorMessages == null);
+            PromptTraceResult attemptDateePrompt = baseDateePrompt;
+            bool includeRepetitionRepairOnNextAttempt = false;
             string directorInput = emotionalDirectorResult.DirectorInput;
-            AnnotatedInvocationDocument dateeDocument =
-                GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(dateePrompt);
-            string userContent = dateeDocument.Text;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
-            var performanceMetadata = BuildDateePerformanceMetadata(dateePrompt);
 
             int maxAttempts = GetContractViolationAttemptLimit();
             AgentJournalCallScope? acceptedJournal = null;
@@ -463,6 +461,17 @@ namespace Pinder.LlmAdapters
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
+                    if (includeRepetitionRepairOnNextAttempt)
+                    {
+                        attemptDateePrompt = emotionalPromptCompiler.CompilePerformanceRepetitionRepairPrompt(baseDateePrompt);
+                        includeRepetitionRepairOnNextAttempt = false;
+                    }
+
+                    AnnotatedInvocationDocument dateeDocument =
+                        GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(attemptDateePrompt);
+                    string userContent = dateeDocument.Text;
+                    var performanceMetadata = BuildDateePerformanceMetadata(attemptDateePrompt);
+
                     AgentJournalCallScope journal = await StartConversationJournalAttemptAsync(
                             ResolveConversationCallPath(context.AgentJournalContext, GameRunConversationJournalInventory.DateePerformance),
                             LlmPhase.OpponentResponse,
@@ -524,6 +533,24 @@ namespace Pinder.LlmAdapters
                                 context.CurrentTurn,
                                 structuredResponse.Provider,
                                 structuredResponse.Model);
+                            if (DateeVisibleMessageDuplicateGuard.IsDuplicateAcceptedVisibleMessage(
+                                parsed.Response.MessageText,
+                                priorMessages ?? history))
+                            {
+                                throw new LlmContractException(
+                                    phase: "datee_response",
+                                    reason: "repeated_visible_message",
+                                    message: "LLM datee_response repeated an accepted visible DATEE message.",
+                                    provider: structuredResponse.Provider,
+                                    model: structuredResponse.Model,
+                                    parserName: DateePerformanceStructuredContract.ParserName,
+                                    expectedOptionCount: null,
+                                    parsedOptionCount: null,
+                                    optionCount: null,
+                                    signalCount: null,
+                                    sessionId: null,
+                                    turnId: context.CurrentTurn);
+                            }
                             EmotionalDirectionLeakGuard.ThrowIfDetected(parsed.Response.MessageText, context.CurrentTurn);
                             var acceptedResponse = new DateeResponse(
                                 parsed.Response.MessageText,
@@ -537,7 +564,7 @@ namespace Pinder.LlmAdapters
                                     transitionTarget: context.ResolvedTarget?.StemText,
                                     transitionStyle: context.ResolvedTarget?.TransitionStyle,
                                     compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
-                                        dateePrompt,
+                                        attemptDateePrompt,
                                         "emotional-reaction-performance-direction"),
                                     directorInput: directorInput));
                             structuredResponse.ReportValidation("accepted");
@@ -566,6 +593,11 @@ namespace Pinder.LlmAdapters
                     catch (LlmContractException ex)
                     {
                         await journal.CompleteValidationRejectedAsync(ex.Reason, rejectedJournalMetadata).ConfigureAwait(false);
+                        if (attempt < maxAttempts
+                            && string.Equals(ex.Reason, "repeated_visible_message", StringComparison.Ordinal))
+                        {
+                            includeRepetitionRepairOnNextAttempt = true;
+                        }
                         return SemanticOutputRecoveryAttemptResult<StatefulDateeResult, LlmContractException>.Rejected(ex);
                     }
                     catch (OperationCanceledException)

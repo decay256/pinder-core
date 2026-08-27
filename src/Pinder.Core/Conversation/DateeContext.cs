@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pinder.Core.Characters;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
@@ -105,6 +107,8 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public DateeEmotionalTurnEvent? EmotionalTurnEvent { get; }
 
+        public IReadOnlyList<CharacterEmotionalDirectionSummary> PreviousAcceptedEmotionalDirections { get; }
+
         public int? PlayerHungerForIntimacy { get; }
         public int? PlayerTerrorOfRejection { get; }
         public int? DateeHungerForIntimacy { get; }
@@ -143,7 +147,8 @@ namespace Pinder.Core.Conversation
             int? playerHungerForIntimacy = null,
             int? playerTerrorOfRejection = null,
             int? dateeHungerForIntimacy = null,
-            int? dateeTerrorOfRejection = null)
+            int? dateeTerrorOfRejection = null,
+            IReadOnlyList<CharacterEmotionalDirectionSummary>? previousAcceptedEmotionalDirections = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -175,6 +180,9 @@ namespace Pinder.Core.Conversation
             PlayerTerrorOfRejection = playerTerrorOfRejection;
             DateeHungerForIntimacy = dateeHungerForIntimacy;
             DateeTerrorOfRejection = dateeTerrorOfRejection;
+            PreviousAcceptedEmotionalDirections = previousAcceptedEmotionalDirections == null
+                ? Array.Empty<CharacterEmotionalDirectionSummary>()
+                : previousAcceptedEmotionalDirections.ToArray();
         }
     }
 }

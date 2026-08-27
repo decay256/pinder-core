@@ -221,8 +221,11 @@ namespace Pinder.LlmAdapters.Tests
             {
                 ["schema_version"] = CharacterEmotionalDirectionContract.SchemaVersion,
                 ["primary_emotion"] = primaryEmotion ?? "relief",
-                ["intensity"] = "moderate and steadily rising",
-                ["underlying_feeling"] = underlyingFeeling ?? "fear of being dismissed",
+                ["secondary_emotion"] = CharacterEmotionalDirection.NoneSecondaryEmotion,
+                ["regulatory_state"] = "controlled",
+                ["activation"] = 4,
+                ["trajectory"] = "escalating",
+                ["core_threat_or_desire"] = underlyingFeeling ?? "fear of being dismissed",
                 ["interpretation"] = "reads the message as specific warmth that is probably meant for them",
                 ["impulse"] = "leans in with a careful question",
                 ["restraint"] = "keeps the reply tentative but available",

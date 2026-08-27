@@ -15,7 +15,7 @@ namespace Pinder.Core.Tests.Conversation
     public sealed class Issue1348_CurrentMessageOnceTests
     {
         private const string ValidDirectorJson =
-            "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relief\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"}";
+            "{\"schema_version\":\"emotional_director.v2\",\"primary_emotion\":\"relief\",\"secondary_emotion\":\"none\",\"regulatory_state\":\"controlled\",\"activation\":4,\"trajectory\":\"escalating\",\"core_threat_or_desire\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         [Fact]
         public async Task DateeTransportPrompt_ContainsCurrentDeliveredMessageExactlyOnce()
@@ -217,7 +217,7 @@ namespace Pinder.Core.Tests.Conversation
             }
         }
 
-        private sealed class FailingDateeTransport : ILlmTransport
+        private sealed class FailingDateeTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             public RecordingLlmTransport Inner { get; } = new RecordingLlmTransport { DefaultResponse = string.Empty };
 
@@ -242,6 +242,27 @@ namespace Pinder.Core.Tests.Conversation
 
                 return Inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
             }
+
+            public bool SupportsStructuredConversationMessages => true;
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (string.Equals(request.Phase, LlmPhase.DateeResponse, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("simulated datee failure");
+                }
+
+                return Inner.SendStructuredAsync(request, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                System.Collections.Generic.IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+                => SendStructuredAsync(request, cancellationToken);
         }
     }
 }

@@ -7,7 +7,7 @@ schema_version: 1
 prompts:
   character-emotional-primary-emotions:
     system_prompt: >-
-      joy, affection, desire, hope, curiosity, relief, pride, amusement, surprise, sadness, loneliness, disappointment, shame, guilt, embarrassment, fear, anxiety, anger, disgust, jealousy, resentment, numbness, ambivalence
+      joy, affection, desire, hope, curiosity, relief, pride, amusement, surprise, sadness, loneliness, disappointment, shame, guilt, embarrassment, fear, anger, disgust, jealousy, resentment
 
   character-emotional-hfi-low:
     system_prompt: >-
@@ -74,8 +74,11 @@ prompts:
       AVATAR EMOTIONAL WRITING DIRECTION
 
       Primary emotion: {primary_emotion}
-      Intensity: {intensity}
-      Underlying feeling: {underlying_feeling}
+      Secondary emotion: {secondary_emotion}
+      Regulatory state: {regulatory_state}
+      Activation: {activation}
+      Trajectory: {trajectory}
+      Core threat/desire: {core_threat_or_desire}
       Interpretation: {interpretation}
       Impulse: {impulse}
       Restraint: {restraint}
@@ -189,27 +192,45 @@ prompts:
     system_prompt: |-
       DATEE EMOTIONAL PERFORMANCE DIRECTION
 
-      Use this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE's established texting style and character voice. Do not mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.
+      Use this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE's established texting style and character voice. Express the change in emotion as lived behavior; do not label the emotion, explain it, mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.
 
       Primary emotion: {primary_emotion}
-      Intensity: {intensity}
-      Underlying feeling: {underlying_feeling}
+      Secondary emotion: {secondary_emotion}
+      Regulatory state: {regulatory_state}
+      Activation: {activation}
+      Trajectory: {trajectory}
+      Core threat/desire: {core_threat_or_desire}
       Interpretation: {interpretation}
       Impulse: {impulse}
       Restraint: {restraint}
       Response posture: {response_posture}
+  emotional-reaction-previous-direction-empty:
+    system_prompt: >-
+      No previous accepted emotional directions are available for this same character.
+
+  emotional-reaction-previous-direction-line:
+    system_prompt: >-
+      Turn {turn}: primary={primary_emotion}; secondary={secondary_emotion}; regulatory_state={regulatory_state}; activation={activation}; trajectory={trajectory}; impulse={impulse}
+
   emotional-reaction-director:
     system_prompt: |-
       Determine the internal emotional reaction and direction for the character who is about to communicate.
 
       Choose exactly one primary_emotion from this configured vocabulary: {emotion_vocabulary}.
 
-      Provide the emotional direction using exactly these string fields:
-      schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture.
+      Provide the emotional direction using exactly these fields and no others:
+      schema_version, primary_emotion, secondary_emotion, regulatory_state, activation, trajectory, core_threat_or_desire, interpretation, impulse, restraint, response_posture.
 
-      The schema_version field must be exactly "emotional_director.v1".
+      The schema_version field must be exactly "emotional_director.v2". Activation must be a JSON integer from 1 through 5. Secondary emotion must be a different configured concrete emotion or the literal "none". Regulatory state must be one of: open, controlled, anxious, guarded, overwhelmed, conflicted, numb, dissociated. Trajectory must be one of: escalating, easing, volatile, reversing, steady.
 
-      The seven director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the subject character, never wording they could send. Use intensity to describe the emotion's strength and movement, and underlying_feeling for the feeling beneath the primary emotion. The response_posture must explicitly name the primary emotion. Write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity", never as first-person speech or a quoted reply. Interpret the character's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
+      Previous accepted emotional directions for this same character:
+      {previous_accepted_directions}
+
+      Choose a concrete felt emotion, not a diagnostic, regulatory, or indeterminate state. Anxiety means the character has not yet named whether the feeling is fear, shame, anger, desire, disgust, sadness, or something else; name that underlying emotion as primary and record anxiety only as the regulatory state. Ambivalence is a conflict between two emotions, not an emotion: name both emotions and use "conflicted" as the regulatory state.
+
+      Make the emotional movement bold enough to read as game drama. Default activation to 4 or 5; use 1-3 only when the event specifically calls for emotional flattening, withdrawal, or quiet. Compare the previous two accepted directions. Do not repeat the same primary emotion, trajectory, and impulse pattern on consecutive turns unless the latest event clearly intensifies or reverses that exact feeling. Prefer contrast, escalation, reversal, and emotionally specific surprise over cautious equilibrium.
+
+      The director fields must be concise, concrete, actionable natural-language prose. Every field is private direction about the subject character, never wording they could send. Write impulse as a behavioral urge in third-person or infinitive form, such as "pull back and test their sincerity", never as first-person speech or a quoted reply. Interpret the character's private reaction; do not draft chat text, mention prompts, mention this director step, or expose game mechanics.
     user_template: |-
       Private emotional director source packet:
 
@@ -228,7 +249,7 @@ prompts:
 
   emotional-reaction-director-repair-contract:
     system_prompt: >-
-      The previous emotional direction did not satisfy the response contract. Return a fresh complete object with exactly these fields and no others: schema_version, primary_emotion, intensity, underlying_feeling, interpretation, impulse, restraint, response_posture. Include every field even when the distinction is subtle, and keep each direction concrete, actionable, and consistent with the private source packet.
+      The previous emotional direction did not satisfy the response contract. Return a fresh complete object with exactly these fields and no others: schema_version, primary_emotion, secondary_emotion, regulatory_state, activation, trajectory, core_threat_or_desire, interpretation, impulse, restraint, response_posture. Include every field even when the distinction is subtle, keep activation as a JSON integer from 1 through 5, and keep each direction concrete, actionable, and consistent with the private source packet.
 
   emotional-reaction-director-repair-drafted-chat-reply:
     system_prompt: >-

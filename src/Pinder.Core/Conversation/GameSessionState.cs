@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pinder.Core.Characters;
 using Pinder.Core.I18n;
 using Pinder.Core.Interfaces;
@@ -18,6 +19,7 @@ namespace Pinder.Core.Conversation
         public List<(string Sender, string Text)> History { get; internal set; } = new List<(string Sender, string Text)>();
         public string DateeOutfitDescription { get; internal set; } = string.Empty;
         public List<ConversationMessage> DateeHistory { get; internal set; } = new List<ConversationMessage>();
+        public List<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; internal set; } = new List<CharacterEmotionalDirectionSummary>();
         // Avatar-perspective semantic history: what the player character knows.
         // There is no separate delivery-model call; session-capable adapters use
         // this mirror for option generation and future private reasoning.
@@ -69,6 +71,7 @@ namespace Pinder.Core.Conversation
             clone.History = new List<(string Sender, string Text)>(History);
             clone.DateeOutfitDescription = DateeOutfitDescription;
             clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
+            clone.DateeEmotionalDirectionHistory = new List<CharacterEmotionalDirectionSummary>(DateeEmotionalDirectionHistory);
             clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
             clone.DateeSessionSnapshot = DateeSessionSnapshot;
             clone.AvatarSessionSnapshot = AvatarSessionSnapshot;
@@ -130,6 +133,7 @@ namespace Pinder.Core.Conversation
             History = prepared.History;
             DateeOutfitDescription = prepared.DateeOutfitDescription;
             DateeHistory = prepared.DateeHistory;
+            DateeEmotionalDirectionHistory = prepared.DateeEmotionalDirectionHistory;
             AvatarHistory = prepared.AvatarHistory;
             DateeSessionSnapshot = prepared.DateeSessionSnapshot;
             AvatarSessionSnapshot = prepared.AvatarSessionSnapshot;
@@ -222,6 +226,8 @@ namespace Pinder.Core.Conversation
                 ? BuildConversationHistory(data.AvatarHistory, "avatar")
                 : new List<ConversationMessage>();
 
+            var restoredDirectionHistory = BuildDirectionHistory(data.DateeEmotionalDirectionHistory);
+
             var restoredComboTracker = new ComboTracker();
             restoredComboTracker.RestoreFromSnapshot(
                 data.ComboHistory ?? new List<(string StatName, bool Succeeded)>(),
@@ -248,6 +254,7 @@ namespace Pinder.Core.Conversation
             Traps = restoredTraps;
             History = restoredHistory;
             DateeHistory = restoredDateeHistory;
+            DateeEmotionalDirectionHistory = restoredDirectionHistory;
             AvatarHistory = restoredAvatarHistory;
             DateeSessionSnapshot = data.DateeSessionSnapshot;
             AvatarSessionSnapshot = data.AvatarSessionSnapshot;
@@ -277,6 +284,25 @@ namespace Pinder.Core.Conversation
             LastStatUsed = data.LastStatUsed;
             ActiveWeakness = data.ActiveWeakness;
             ActiveTell = data.ActiveTell;
+        }
+
+        public void RecordAcceptedDateeEmotionalDirection(CharacterEmotionalDirectionSummary summary)
+        {
+            if (summary == null) throw new ArgumentNullException(nameof(summary));
+            DateeEmotionalDirectionHistory.Add(summary);
+            while (DateeEmotionalDirectionHistory.Count > 2)
+                DateeEmotionalDirectionHistory.RemoveAt(0);
+        }
+
+        private static List<CharacterEmotionalDirectionSummary> BuildDirectionHistory(
+            IEnumerable<CharacterEmotionalDirectionSummary>? entries)
+        {
+            var restored = entries == null
+                ? new List<CharacterEmotionalDirectionSummary>()
+                : entries.Where(entry => entry != null).ToList();
+            while (restored.Count > 2)
+                restored.RemoveAt(0);
+            return restored;
         }
 
         private static List<ConversationMessage> BuildConversationHistory(

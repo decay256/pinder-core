@@ -211,6 +211,8 @@ namespace Pinder.SessionRunner.Snapshot
         /// </summary>
         public List<DateeHistoryEntry> AvatarHistory { get; set; } = new List<DateeHistoryEntry>();
 
+        public List<DateeEmotionalDirectionSummaryEntry> DateeEmotionalDirectionHistory { get; set; } = new List<DateeEmotionalDirectionSummaryEntry>();
+
         /// <summary>
         /// Issue #474: events fired on this turn, with their deterministic
         /// human-readable interpretation strings from the i18n catalog.
@@ -259,6 +261,17 @@ namespace Pinder.SessionRunner.Snapshot
     {
         public string Role { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
+    }
+
+    public sealed class DateeEmotionalDirectionSummaryEntry
+    {
+        public int Turn { get; set; }
+        public string PrimaryEmotion { get; set; } = string.Empty;
+        public string SecondaryEmotion { get; set; } = string.Empty;
+        public string RegulatoryState { get; set; } = string.Empty;
+        public int Activation { get; set; }
+        public string Trajectory { get; set; } = string.Empty;
+        public string Impulse { get; set; } = string.Empty;
     }
 
     /// <summary>Active trap state at the time of snapshot.</summary>
