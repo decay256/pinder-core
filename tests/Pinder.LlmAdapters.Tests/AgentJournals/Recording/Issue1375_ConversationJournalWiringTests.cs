@@ -275,6 +275,51 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
+        [Trait("CORE-1423", "duplicate_recovery_journal_lifecycle")]
+        public async Task Issue1423_duplicate_recovery_records_rejected_then_accepted_performance_lifecycle()
+        {
+            var sink = new RecordingJournalSink();
+            var transport = new ScriptedConversationTransport();
+            transport.Queue(LlmPhase.EmotionalDirector, ValidDirectionJson());
+            transport.Queue(LlmPhase.OpponentResponse, "That lands softer than I expected.");
+            transport.Queue(LlmPhase.OpponentResponse, "Accepted after duplicate repair.");
+            var adapter = CreateAdapter(transport, sink, maxRetries: 1);
+            var dateeHistory = new[]
+            {
+                ConversationMessage.Assistant("That lands softer than I expected."),
+            };
+
+            StatefulDateeResult result = await adapter.GetDateeResponseAsync(
+                MakeDateeContext(JournalContext()),
+                dateeHistory,
+                Array.Empty<ConversationMessage>(),
+                dateeSession: null,
+                avatarSession: null);
+
+            LlmInvocationRecord[] attempts = sink.Invocations
+                .Where(record => record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance)
+                .OrderBy(record => record.Correlation.AttemptOrdinal)
+                .ToArray();
+            LlmResultRecord[] lifecycles = sink.Results
+                .Where(record => record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance)
+                .OrderBy(record => record.Correlation.AttemptOrdinal)
+                .ToArray();
+
+            Assert.Equal("Accepted after duplicate repair.", result.Response.MessageText);
+            Assert.Equal(new[] { 1, 2 }, attempts.Select(record => record.Correlation.AttemptOrdinal).ToArray());
+            Assert.Equal(2, lifecycles.Length);
+            Assert.Equal(attempts.Select(record => record.Correlation.InvocationId), lifecycles.Select(record => record.Correlation.InvocationId));
+            Assert.Equal(AgentJournalTerminalStatus.Rejected, lifecycles[0].TerminalStatus);
+            Assert.Equal("repeated_visible_message", lifecycles[0].ValidationCode);
+            Assert.Null(lifecycles[0].OutputText);
+            Assert.Equal(AgentJournalTerminalStatus.Succeeded, lifecycles[1].TerminalStatus);
+            Assert.Equal("accepted", lifecycles[1].ValidationCode);
+            Assert.Equal("Accepted after duplicate repair.", lifecycles[1].OutputText);
+            Assert.DoesNotContain(sink.MessageLinks, link => link.InvocationId == lifecycles[0].Correlation.InvocationId);
+            Assert.Contains(sink.MessageLinks, link => link.InvocationId == lifecycles[1].Correlation.InvocationId);
+        }
+
+        [Fact]
         [Trait("CORE-1375", "identical_prompt_retry")]
         public async Task identical_prompt_retry()
         {
@@ -757,8 +802,11 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             => "{" +
                "\"schema_version\":\"" + CharacterEmotionalDirectionContract.SchemaVersion + "\"," +
                "\"primary_emotion\":\"relief\"," +
-               "\"intensity\":\"moderate and steadily rising\"," +
-               "\"underlying_feeling\":\"fear of being dismissed\"," +
+               "\"secondary_emotion\":\"none\"," +
+               "\"regulatory_state\":\"controlled\"," +
+               "\"activation\":4," +
+               "\"trajectory\":\"easing\"," +
+               "\"core_threat_or_desire\":\"fear of being dismissed\"," +
                "\"interpretation\":\"reads the message as specific warmth that is probably meant for them\"," +
                "\"impulse\":\"leans in with a careful question\"," +
                "\"restraint\":\"keeps the reply tentative but available\"," +
@@ -769,8 +817,11 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             => "{" +
                "\"schema_version\":\"" + CharacterEmotionalDirectionContract.SchemaVersion + "\"," +
                "\"primary_emotion\":\"shame\"," +
-               "\"intensity\":\"strong and rising\"," +
-               "\"underlying_feeling\":\"fear of being exposed\"," +
+               "\"secondary_emotion\":\"none\"," +
+               "\"regulatory_state\":\"controlled\"," +
+               "\"activation\":4," +
+               "\"trajectory\":\"escalating\"," +
+               "\"core_threat_or_desire\":\"fear of being exposed\"," +
                "\"interpretation\":\"reads the moment as risky but meaningful\"," +
                "\"impulse\":\"risks a sincere admission\"," +
                "\"restraint\":\"resists retreating into a joke\"," +

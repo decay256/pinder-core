@@ -3,26 +3,21 @@ using System;
 namespace Pinder.Core.Conversation
 {
     /// <summary>
-    /// Private, turn-local emotional direction for any character who is about
-    /// to communicate. The model is role-neutral; callers supply character and
-    /// situation context separately.
+    /// Bounded private summary of an accepted DATEE emotional direction.
+    /// Carries only the continuity fields needed by the next director turn.
     /// </summary>
-    public sealed class CharacterEmotionalDirection
+    public sealed class CharacterEmotionalDirectionSummary
     {
-        public const string NoneSecondaryEmotion = "none";
-
-        public CharacterEmotionalDirection(
+        public CharacterEmotionalDirectionSummary(
+            int turn,
             string primaryEmotion,
             string secondaryEmotion,
             string regulatoryState,
             int activation,
             string trajectory,
-            string coreThreatOrDesire,
-            string interpretation,
-            string impulse,
-            string restraint,
-            string responsePosture)
+            string impulse)
         {
+            Turn = turn;
             PrimaryEmotion = primaryEmotion ?? throw new ArgumentNullException(nameof(primaryEmotion));
             SecondaryEmotion = secondaryEmotion ?? throw new ArgumentNullException(nameof(secondaryEmotion));
             RegulatoryState = regulatoryState ?? throw new ArgumentNullException(nameof(regulatoryState));
@@ -30,22 +25,30 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentOutOfRangeException(nameof(activation), "Activation must be between 1 and 5.");
             Activation = activation;
             Trajectory = trajectory ?? throw new ArgumentNullException(nameof(trajectory));
-            CoreThreatOrDesire = coreThreatOrDesire ?? throw new ArgumentNullException(nameof(coreThreatOrDesire));
-            Interpretation = interpretation ?? throw new ArgumentNullException(nameof(interpretation));
             Impulse = impulse ?? throw new ArgumentNullException(nameof(impulse));
-            Restraint = restraint ?? throw new ArgumentNullException(nameof(restraint));
-            ResponsePosture = responsePosture ?? throw new ArgumentNullException(nameof(responsePosture));
         }
 
+        public int Turn { get; }
         public string PrimaryEmotion { get; }
         public string SecondaryEmotion { get; }
         public string RegulatoryState { get; }
         public int Activation { get; }
         public string Trajectory { get; }
-        public string CoreThreatOrDesire { get; }
-        public string Interpretation { get; }
         public string Impulse { get; }
-        public string Restraint { get; }
-        public string ResponsePosture { get; }
+
+        public static CharacterEmotionalDirectionSummary FromDirection(
+            int turn,
+            CharacterEmotionalDirection direction)
+        {
+            if (direction == null) throw new ArgumentNullException(nameof(direction));
+            return new CharacterEmotionalDirectionSummary(
+                turn,
+                direction.PrimaryEmotion,
+                direction.SecondaryEmotion,
+                direction.RegulatoryState,
+                direction.Activation,
+                direction.Trajectory,
+                direction.Impulse);
+        }
     }
 }

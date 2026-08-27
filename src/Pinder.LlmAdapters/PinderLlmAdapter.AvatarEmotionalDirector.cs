@@ -81,6 +81,14 @@ namespace Pinder.LlmAdapters
                         string.Join(", ", allowedEmotions),
                         vocabularyEntry,
                         CharacterEmotionCatalog.PromptKey),
+                    ["{previous_accepted_directions}"] = TraceAvatarPrompt(
+                        RequireAvatarPrompt(catalog, EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey).SystemPrompt!,
+                        RequireAvatarPrompt(catalog, EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey),
+                        EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey),
+                    ["{previous_accepted_directions}"] = TraceAvatarPrompt(
+                        RequireAvatarPrompt(catalog, EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey).SystemPrompt!,
+                        RequireAvatarPrompt(catalog, EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey),
+                        EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey),
                 });
             PromptTraceResult systemTrace = RenderAvatarTemplate(
                 wrapper.SystemPrompt!,

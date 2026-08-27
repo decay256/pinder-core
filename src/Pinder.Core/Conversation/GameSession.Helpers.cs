@@ -94,6 +94,9 @@ namespace Pinder.Core.Conversation
         public System.Collections.Generic.IReadOnlyList<ConversationMessage> AvatarHistory
             => _avatarHistory;
 
+        public System.Collections.Generic.IReadOnlyList<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory
+            => _state.DateeEmotionalDirectionHistory;
+
         /// <summary>
         /// Build the conversation history view fed to subsequent LLM calls.
         /// Excludes synthetic scene-setting entries (issue #333) so the
@@ -188,6 +191,7 @@ namespace Pinder.Core.Conversation
                 Topics = new List<CallbackOpportunity>(_topics),
                 PendingMomentumBonus = _pendingMomentumBonus,
                 DateeHistory = _dateeHistory.Select(message => (message.Role, message.Content)).ToList(),
+                DateeEmotionalDirectionHistory = _state.DateeEmotionalDirectionHistory.ToList(),
                 AvatarHistory = _avatarHistory.Select(message => (message.Role, message.Content)).ToList(),
                 DateeSessionSnapshot = _state.DateeSessionSnapshot,
                 AvatarSessionSnapshot = _state.AvatarSessionSnapshot,
@@ -255,7 +259,8 @@ namespace Pinder.Core.Conversation
                 _avatarHistory,
                 _playerShadows,
                 _state.DateeSessionSnapshot,
-                _state.AvatarSessionSnapshot);
+                _state.AvatarSessionSnapshot,
+                _state.DateeEmotionalDirectionHistory);
         }
     }
 }

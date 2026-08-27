@@ -12,8 +12,11 @@ namespace Pinder.LlmAdapters
         private static readonly string[] FieldPrefixes =
         {
             "Primary emotion:",
-            "Intensity:",
-            "Underlying feeling:",
+            "Secondary emotion:",
+            "Regulatory state:",
+            "Activation:",
+            "Trajectory:",
+            "Core threat/desire:",
             "Interpretation:",
             "Impulse:",
             "Restraint:",
@@ -23,8 +26,11 @@ namespace Pinder.LlmAdapters
         private static readonly string[] FieldPlaceholders =
         {
             "primary_emotion",
-            "intensity",
-            "underlying_feeling",
+            "secondary_emotion",
+            "regulatory_state",
+            "activation",
+            "trajectory",
+            "core_threat_or_desire",
             "interpretation",
             "impulse",
             "restraint",

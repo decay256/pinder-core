@@ -177,8 +177,11 @@ namespace Pinder.LlmAdapters
                 catalog,
                 "emotional-reaction-performance-direction",
                 "primary_emotion",
-                "intensity",
-                "underlying_feeling",
+                "secondary_emotion",
+                "regulatory_state",
+                "activation",
+                "trajectory",
+                "core_threat_or_desire",
                 "interpretation",
                 "impulse",
                 "restraint",
@@ -189,13 +192,29 @@ namespace Pinder.LlmAdapters
             RequireCompletePromptWithPlaceholders(
                 catalog,
                 "emotional-reaction-director",
-                new[] { "emotion_vocabulary" },
+                new[] { "emotion_vocabulary", "previous_accepted_directions" },
                 new[] { "compiled_reaction_input" });
             RequireSystemPromptWithPlaceholders(
                 catalog,
                 EmotionalPromptCompiler.DirectorSystemWrapperPromptKey,
                 "datee_system_prompt",
                 "director_system_prompt");
+            RequireSystemPromptWithPlaceholders(
+                catalog,
+                EmotionalPromptCompiler.PreviousDirectionLinePromptKey,
+                "turn",
+                "primary_emotion",
+                "secondary_emotion",
+                "regulatory_state",
+                "activation",
+                "trajectory",
+                "impulse");
+            RequireSystemPrompt(
+                catalog,
+                EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey);
+            RequireSystemPrompt(
+                catalog,
+                EmotionalPromptCompiler.DateeResponseRepetitionRepairPromptKey);
             RequireSystemPrompt(
                 catalog,
                 EmotionalPromptCompiler.DirectorContractRepairPromptKey);
@@ -228,8 +247,11 @@ namespace Pinder.LlmAdapters
                 catalog,
                 "avatar-emotional-performance-direction",
                 "primary_emotion",
-                "intensity",
-                "underlying_feeling",
+                "secondary_emotion",
+                "regulatory_state",
+                "activation",
+                "trajectory",
+                "core_threat_or_desire",
                 "interpretation",
                 "impulse",
                 "restraint",

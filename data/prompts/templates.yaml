@@ -252,7 +252,11 @@ prompts:
       - Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. "We should get coffee sometime" is fine. "Coffee shop on Fifth at 6pm Tuesday" is NOT.
       - At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.
 
-      WORD & PATTERN REPETITION — check your own previous messages in the conversation above before writing this one. Do not repeat: (a) the same filler words or phrases you used in your previous 2 messages ('honestly', 'literally', 'actually', 'okay but', 'interesting that', 'slay', 'omg', etc.), (b) the same emoji you used in your previous message, (c) the same structural pattern (e.g. 'wait...???', 'omg...😭', 'I literally just realized...', 'interesting that you mention...') used in your last 2 messages. Each message should feel like a fresh move, not a variation on the last one. Designated texting-style tendencies may recur when they fit naturally, but they do not override variation or the immediate conversational moment.
+      DRAMATIC MOMENTUM
+
+      Never repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.
+
+      Before returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.
 
       Generate your next message.
       - Match your personality exactly as established in the system prompt
@@ -261,8 +265,6 @@ prompts:
       - If Interest rose: show warming without being gushing
       - Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.
       - {length_hint}
-
-      Before sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven't reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.
 
       Output format:
       Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
@@ -290,6 +292,11 @@ prompts:
       - WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
       - Both lines are independently optional within a [SIGNALS] block
       - Only include signals when the conversation naturally reveals them — do not force them
+  datee-response-repetition-repair:
+    system_prompt: |-
+      REPETITION REPAIR
+
+      The previous draft repeated an already accepted DATEE message. Return a visibly new reply with a different opening, image, cadence, punctuation routine, and conversational move. React to the latest message from scratch while preserving the same character and private emotional direction.
   pivot-directive:
     system_prompt: |-
       TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.

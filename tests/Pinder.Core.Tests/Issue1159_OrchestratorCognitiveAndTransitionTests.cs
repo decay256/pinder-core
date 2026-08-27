@@ -39,7 +39,10 @@ namespace Pinder.Core.Tests
                 CancellationToken cancellationToken = default)
                 => Task.FromResult(new CharacterEmotionalDirectorResult(new CharacterEmotionalDirection(
                     "shame",
-                    "strong",
+                    CharacterEmotionalDirection.NoneSecondaryEmotion,
+                    "controlled",
+                    4,
+                    "escalating",
                     "fear of being exposed",
                     "reads the moment as risky but important",
                     "wants to admit what they mean",

@@ -149,7 +149,8 @@ namespace Pinder.Core.Conversation
             System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null,
             SessionShadowTracker? playerShadows = null,
             LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
-            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null,
+            System.Collections.Generic.IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -173,6 +174,10 @@ namespace Pinder.Core.Conversation
             ConversationMessage[] avatarHistorySnapshot = avatarHistory == null
                 ? System.Array.Empty<ConversationMessage>()
                 : avatarHistory.ToArray();
+
+            CharacterEmotionalDirectionSummary[] directionHistorySnapshot = dateeEmotionalDirectionHistory == null
+                ? System.Array.Empty<CharacterEmotionalDirectionSummary>()
+                : dateeEmotionalDirectionHistory.ToArray();
 
             // #905: Derive ghost probability from interest state.
             // When Bored, the ghost-trigger check fires with 25% probability (dice.Roll(4)==1).
@@ -202,7 +207,8 @@ namespace Pinder.Core.Conversation
                 avatarHistory: avatarHistorySnapshot,
                 shadowValues: shadowValues,
                 dateeSessionSnapshot: dateeSessionSnapshot,
-                avatarSessionSnapshot: avatarSessionSnapshot);
+                avatarSessionSnapshot: avatarSessionSnapshot,
+                dateeEmotionalDirectionHistory: directionHistorySnapshot);
         }
 
         /// <summary>

@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("Match the DATEE's register", options);
             Assert.Contains("loose expressive influences", options);
             Assert.Contains("texting-style tendencies may recur when they fit naturally", options);
-            Assert.Contains("texting-style tendencies may recur when they fit naturally", datee);
+            Assert.Contains("Let the register established in your system prompt influence the reply where it fits naturally", datee);
             Assert.DoesNotContain("sound exactly like", options, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("sound exactly like", datee, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain("MUST be maintained consistently", options, StringComparison.OrdinalIgnoreCase);

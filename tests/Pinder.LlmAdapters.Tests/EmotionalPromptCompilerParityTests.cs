@@ -91,7 +91,10 @@ namespace Pinder.LlmAdapters.Tests
         private static CharacterEmotionalDirection ValidDirection()
             => new(
                 "relief",
-                "moderate and steadily rising",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "escalating",
                 "fear of being dismissed",
                 "reads the message as specific warmth that is probably meant for them",
                 "leans in with a careful question",

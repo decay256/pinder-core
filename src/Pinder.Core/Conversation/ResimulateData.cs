@@ -55,6 +55,8 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public List<(string Role, string Content)> DateeHistory { get; set; } = new List<(string, string)>();
 
+        public List<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; set; } = new List<CharacterEmotionalDirectionSummary>();
+
         /// <summary>
         /// Engine-owned avatar LLM conversation history (#1123) — the symmetric
         /// sibling of <see cref="DateeHistory"/>. Each entry is a (role, content)

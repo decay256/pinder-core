@@ -24,6 +24,7 @@ namespace Pinder.LlmAdapters.Tests
             private readonly string _malformedResponse;
             private readonly string _successResponse;
             private readonly bool _throwDirectly;
+            private Queue<string>? _successResponses;
 
             public FailureSimulatingTransport(int failCount, string malformedResponse, string successResponse, bool throwDirectly = false)
             {
@@ -31,6 +32,16 @@ namespace Pinder.LlmAdapters.Tests
                 _malformedResponse = malformedResponse;
                 _successResponse = successResponse;
                 _throwDirectly = throwDirectly;
+            }
+
+            public FailureSimulatingTransport(
+                int failCount,
+                string malformedResponse,
+                string firstSuccessResponse,
+                string secondSuccessResponse)
+                : this(failCount, malformedResponse, secondSuccessResponse)
+            {
+                _successResponses = new Queue<string>(new[] { firstSuccessResponse, secondSuccessResponse });
             }
 
             public Task<string> SendAsync(
@@ -69,7 +80,10 @@ namespace Pinder.LlmAdapters.Tests
                     }
                     return Task.FromResult(_malformedResponse);
                 }
-                return Task.FromResult(_successResponse);
+                return Task.FromResult(
+                    _successResponses != null && _successResponses.Count > 0
+                        ? _successResponses.Dequeue()
+                        : _successResponse);
             }
         }
 
@@ -418,7 +432,7 @@ TELL: Charm (She liked your charm)";
         public async Task GetDateeResponseAsync_ConsecutiveTurns_DoNotNestPriorPromptDocuments()
         {
             const string response = "Datee reply\n[SIGNALS]\nTELL: Charm (She liked that)";
-            var transport = new FailureSimulatingTransport(0, response, response);
+            var transport = new FailureSimulatingTransport(0, response, response, "Different datee reply");
             var adapter = new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
             {
                 GameDefinition = GameDefinition.PinderDefaults,
@@ -483,7 +497,7 @@ TELL: Charm (She liked your charm)";
         }
 
         private const string ValidDirectorJson =
-            "{\"schema_version\":\"emotional_director.v1\",\"primary_emotion\":\"relief\",\"intensity\":\"moderate and steadily rising\",\"underlying_feeling\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"Writing from relief, turns warmer while still checking sincerity\"}";
+            "{\"schema_version\":\"emotional_director.v2\",\"primary_emotion\":\"relief\",\"secondary_emotion\":\"none\",\"regulatory_state\":\"controlled\",\"activation\":4,\"trajectory\":\"escalating\",\"core_threat_or_desire\":\"fear of being dismissed\",\"interpretation\":\"reads the message as specific warmth that is probably meant for them\",\"impulse\":\"leans in with a careful question\",\"restraint\":\"keeps the reply tentative but available\",\"response_posture\":\"turns warmer while still checking sincerity\"}";
 
         private static int CountOccurrences(string text, string value)
         {

@@ -52,6 +52,8 @@ namespace Pinder.Core.Conversation
         /// </summary>
         public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
 
+        public IReadOnlyList<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; }
+
         public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; }
 
         public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; }
@@ -71,7 +73,8 @@ namespace Pinder.Core.Conversation
             IReadOnlyList<ConversationMessage> avatarHistory = null,
             IReadOnlyDictionary<string, int> shadowValues = null,
             LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
-            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null,
+            IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null)
         {
             Interest = interest;
             State = state;
@@ -82,6 +85,7 @@ namespace Pinder.Core.Conversation
             TripleBonusActive = tripleBonusActive;
             DateeHistory = dateeHistory ?? System.Array.Empty<ConversationMessage>();
             AvatarHistory = avatarHistory ?? System.Array.Empty<ConversationMessage>();
+            DateeEmotionalDirectionHistory = dateeEmotionalDirectionHistory ?? System.Array.Empty<CharacterEmotionalDirectionSummary>();
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
             ShadowValues = shadowValues ?? new Dictionary<string, int>();
             DateeSessionSnapshot = dateeSessionSnapshot;

@@ -164,6 +164,19 @@ partial class Program
             .Select(m => new DateeHistoryEntry { Role = m.Role, Content = m.Content })
             .ToList();
 
+        var dateeDirectionEntries = (state.DateeEmotionalDirectionHistory ?? System.Array.Empty<Pinder.Core.Conversation.CharacterEmotionalDirectionSummary>())
+            .Select(d => new DateeEmotionalDirectionSummaryEntry
+            {
+                Turn = d.Turn,
+                PrimaryEmotion = d.PrimaryEmotion,
+                SecondaryEmotion = d.SecondaryEmotion,
+                RegulatoryState = d.RegulatoryState,
+                Activation = d.Activation,
+                Trajectory = d.Trajectory,
+                Impulse = d.Impulse,
+            })
+            .ToList();
+
         // Issue #474: detect canonical event kinds fired this turn and
         // resolve their interpretation strings via the (optional) i18n
         // catalog. Empty list when no event-class condition was met,
@@ -191,6 +204,7 @@ partial class Program
             ConversationHistory = convEntries,
             DateeHistory = dateeHistoryEntries,
             AvatarHistory = avatarHistoryEntries,
+            DateeEmotionalDirectionHistory = dateeDirectionEntries,
             Events = events,
             DefendingStat = result.Roll.DefendingStat.ToString(),
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
@@ -254,6 +268,7 @@ partial class Program
         snap.ConversationHistory ??= new List<ConversationEntry>();
         snap.DateeHistory ??= new List<DateeHistoryEntry>();
         snap.AvatarHistory ??= new List<DateeHistoryEntry>();
+        snap.DateeEmotionalDirectionHistory ??= new List<DateeEmotionalDirectionSummaryEntry>();
 
         void Assume(string field, string defaultValue)
         {
@@ -311,6 +326,16 @@ partial class Program
                                      .ToList(),
             AvatarHistory     = (snap.AvatarHistory ?? new List<DateeHistoryEntry>())
                                      .Select(e => (e.Role, e.Content))
+                                     .ToList(),
+            DateeEmotionalDirectionHistory = (snap.DateeEmotionalDirectionHistory ?? new List<DateeEmotionalDirectionSummaryEntry>())
+                                     .Select(e => new Pinder.Core.Conversation.CharacterEmotionalDirectionSummary(
+                                         e.Turn,
+                                         e.PrimaryEmotion,
+                                         e.SecondaryEmotion,
+                                         e.RegulatoryState,
+                                         e.Activation,
+                                         e.Trajectory,
+                                         e.Impulse))
                                      .ToList(),
         };
     }
