@@ -8,6 +8,7 @@ using Xunit;
 namespace Pinder.Core.Tests
 {
     [Trait("Category", "Core")]
+    [Collection("StaticWiring")]
     public class Issue1326_1327_ProgressionSettlementTests
     {
         [Fact]

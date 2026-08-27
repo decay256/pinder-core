@@ -227,9 +227,11 @@ namespace Pinder.LlmAdapters.Tests
                     responsePosture: "Writing from relief, turns warmer while still checking sincerity")));
             var adapter = CreateAdapter(transport);
             var trapRegistry = new NullTrapRegistry();
+            CharacterProfile player = MakeProfile("Player");
+            CharacterProfile datee = MakeProfile("Datee");
             var session = new GameSession(
-                MakeProfile("Player"),
-                MakeProfile("Datee"),
+                player,
+                datee,
                 adapter,
                 new FixedDice(10),
                 trapRegistry,
@@ -239,6 +241,9 @@ namespace Pinder.LlmAdapters.Tests
                     maxDialogueOptions: 2));
             session.RestoreState(new ResimulateData
             {
+                SchemaVersion = ResimulateData.CurrentSchemaVersion,
+                PlayerCharacterId = player.CharacterId,
+                DateeCharacterId = datee.CharacterId,
                 TargetInterest = 12,
                 TurnNumber = 4,
                 DateeEmotionalDirectionHistory = new List<CharacterEmotionalDirectionSummary>

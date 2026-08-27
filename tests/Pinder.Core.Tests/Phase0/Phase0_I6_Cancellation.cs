@@ -259,11 +259,12 @@ namespace Pinder.Core.Tests.Phase0
 
         // ── Helper transport ──────────────────────────────────────────────
 
-        private sealed class ThrowingTransport : ILlmTransport
+        private sealed class ThrowingTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             private readonly string _throwOnPhase;
             private readonly Func<Exception> _exFactory;
             private readonly RecordingLlmTransport _inner;
+            public bool SupportsStructuredConversationMessages => true;
 
             public ThrowingTransport(
                 string throwOnPhase,
@@ -293,6 +294,30 @@ namespace Pinder.Core.Tests.Phase0
                 }
                 return _inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
             }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ThrowIfConfigured(request.Phase, ct);
+                return _inner.SendStructuredAsync(request, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken ct = default)
+            {
+                ThrowIfConfigured(request.Phase, ct);
+                return _inner.SendStructuredConversationAsync(request, priorMessages, ct);
+            }
+
+            private void ThrowIfConfigured(string? phase, CancellationToken ct)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (string.Equals(phase, _throwOnPhase, StringComparison.Ordinal))
+                    throw _exFactory();
+            }
         }
 
         /// <summary>
@@ -301,11 +326,12 @@ namespace Pinder.Core.Tests.Phase0
         /// real CT cancellation that fires AFTER one phase completes but
         /// BEFORE the engine reaches the next awaited transport call.
         /// </summary>
-        private sealed class CancellingTransport : ILlmTransport
+        private sealed class CancellingTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             private readonly string _cancelOnPhase;
             private readonly CancellationTokenSource _cts;
             public RecordingLlmTransport Inner { get; }
+            public bool SupportsStructuredConversationMessages => true;
 
             public CancellingTransport(string cancelOnPhase, CancellationTokenSource cts)
             {
@@ -340,6 +366,31 @@ namespace Pinder.Core.Tests.Phase0
                     // LLM round-trip throws OCE.
                     _cts.Cancel();
                 }
+                return response;
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                StructuredLlmResponse response = await Inner.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                if (string.Equals(request.Phase, _cancelOnPhase, StringComparison.Ordinal))
+                    _cts.Cancel();
+                return response;
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                StructuredLlmResponse response = await Inner
+                    .SendStructuredConversationAsync(request, priorMessages, ct)
+                    .ConfigureAwait(false);
+                if (string.Equals(request.Phase, _cancelOnPhase, StringComparison.Ordinal))
+                    _cts.Cancel();
                 return response;
             }
         }

@@ -24,7 +24,8 @@ namespace Pinder.Core.Tests
                 displayName: "Player",
                 timing: new TimingProfile(0, 1.0f, 0.0f, "neutral"),
                 level: 1,
-                textingStyleFragment: "length: lets the sentence breathe");
+                textingStyleFragment: "length: lets the sentence breathe",
+                characterId: Guid.Parse("14310000-0000-4000-8000-000000000061"));
 
             string directive = InvokeDeliveryVoiceDirective(profile);
 

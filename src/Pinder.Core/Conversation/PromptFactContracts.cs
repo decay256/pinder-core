@@ -140,7 +140,7 @@ namespace Pinder.Core.Conversation
             ValidateRequiredString(text, "fact.text.required", nameof(text));
             string trimmed = text!.Trim();
             if (PlaceholderTokenPattern.IsMatch(trimmed)
-                || trimmed.IndexOf("Resolved stem text", StringComparison.OrdinalIgnoreCase) >= 0)
+                || trimmed.IndexOf("resolved stem text", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 throw new RoleFactContractException("fact.text.placeholder", "Resolved prompt fact text must not contain unresolved placeholders.");
             }

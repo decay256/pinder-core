@@ -112,7 +112,7 @@ namespace Pinder.LlmAdapters
                             ? "No DATEE message has been received yet."
                             : context.DateeLastMessage),
                         "AvatarEmotionalDirector.DateeLastMessage"),
-                    ["{cognitive_subtext}"] = TraceAvatarRuntime(context.CognitiveSubtext ?? "No persistent pressure is available.", "AvatarEmotionalDirector.CognitiveSubtext"),
+                    ["{cognitive_subtext}"] = TraceAvatarRuntime(context.CognitiveSubtextFact?.Text ?? "No persistent pressure is available.", "AvatarEmotionalDirector.CognitiveSubtext"),
                     ["{emotional_status}"] = CharacterEmotionalStatusPromptCompiler.Compile(
                         catalog,
                         string.IsNullOrWhiteSpace(context.PlayerName) ? "The avatar" : context.PlayerName,
@@ -121,8 +121,8 @@ namespace Pinder.LlmAdapters
                         string.IsNullOrWhiteSpace(context.DateeName) ? "The DATEE" : context.DateeName,
                         context.DateeHungerForIntimacy,
                         context.DateeTerrorOfRejection),
-                    ["{transition_target}"] = TraceAvatarRuntime(context.ResolvedTarget?.StemText ?? "No specific revelation target is active.", "AvatarEmotionalDirector.TransitionTarget"),
-                    ["{transition_style}"] = TraceAvatarRuntime(context.ResolvedTarget?.TransitionStyle ?? "Stay open to the immediate exchange.", "AvatarEmotionalDirector.TransitionStyle"),
+                    ["{transition_target}"] = TraceAvatarRuntime(context.AvatarRevelationTarget?.Text ?? string.Empty, "AvatarEmotionalDirector.TransitionTarget"),
+                    ["{transition_style}"] = TraceAvatarRuntime(context.AvatarRevelationTarget?.TransitionStyle ?? string.Empty, "AvatarEmotionalDirector.TransitionStyle"),
                 });
             PromptTraceResult userTrace = RenderAvatarTemplate(
                 director.UserTemplate!,
@@ -156,6 +156,7 @@ namespace Pinder.LlmAdapters
                         PriorMessages = priorMessages,
                         PrivateBranch = privateBranch,
                         JournalContext = context.AgentJournalContext,
+                        RoleFactAccessDecisions = context.PromptFactAccessDecisions,
                         BuildMetadata = _ => metadata,
                         CompileRetrySystemPrompt = reason => sharedCompiler.CompileDirectorRetrySystemPrompt(
                             systemTrace,

@@ -33,18 +33,24 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentOutOfRangeException(nameof(optionIndex),
                     $"Option index {optionIndex} is out of range. Valid range: 0–{state.CurrentOptions.Length - 1}.");
 
-            if (optionIndex == 2 && state.CurrentResolvedTarget.HasValue)
-            {
-                var target = state.CurrentResolvedTarget.Value;
-                if (target.Registry == "BACKSTORY")
-                {
-                    state.SpentBackstoryIndices.Add(target.Index);
-                }
-                else if (target.Registry == "STAKE")
-                {
-                    state.SpentStakeIndices.Add(target.Index);
-                }
-            }
+            // Authorization is a transaction precondition. Denial must occur before
+            // roll, delivery, retries, provider calls, or mutation of the working state.
+            RoleFactAccessGuard.RequireAdmitted(
+                state.CurrentDateeReactionTarget?.Fact,
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            RoleFactAccessGuard.RequireAdmitted(
+                state.CurrentDateeCognitiveSubtextFact,
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
 
             // Execute Roll Stage
             var rollStage = _rollResolutionStage.Execute(
@@ -112,6 +118,9 @@ namespace Pinder.Core.Conversation
 
             var dateeResponse = dateeStageResult.DateeResponse;
             string dateeMessage = dateeStageResult.DateeMessage;
+            if (ShouldSpendAvatarTarget(optionIndex, state.CurrentOptions.Length)
+                && state.CurrentAvatarRevelationTarget != null)
+                MarkTargetSpent(state.CurrentAvatarRevelationTarget.ResolvedTarget, state.AvatarSpentBackstoryIndices, state.AvatarSpentStakeIndices);
 
             state.ActiveWeakness = dateeResponse.WeaknessWindow != null 
                 ? new WeaknessWindow(dateeResponse.WeaknessWindow.DefendingStat, dateeResponse.WeaknessWindow.DcReduction * 2) 
@@ -179,13 +188,24 @@ namespace Pinder.Core.Conversation
                 activeTrapInterestPenalty: rollStage.ActiveTrapInterestPenalty,
                 activeTrapInterestBefore: rollStage.ActiveTrapInterestBefore,
                 activeTrapInterestPenaltyPercent: rollStage.ActiveTrapInterestPenaltyPercent,
-                resolvedTarget: state.CurrentResolvedTarget,
-                cognitiveSubtext: state.CurrentCognitiveSubtext,
+                resolvedTarget: state.CurrentAvatarRevelationTarget?.ResolvedTarget,
+                cognitiveSubtext: state.CurrentDateeCognitiveSubtext,
                 hungerForIntimacy: playerHfi,
                 terrorOfRejection: playerTor,
                 dateeHungerForIntimacy: dateeHfi,
                 dateeTerrorOfRejection: dateeTor,
                 emotionalReactionDebug: dateeEmotionalDebug);
+        }
+
+        internal static bool ShouldSpendAvatarTarget(int optionIndex, int optionCount)
+            => optionCount > 0 && optionIndex == optionCount - 1;
+
+        private static void MarkTargetSpent(ResolvedRevelationTarget target, HashSet<int> spentBackstory, HashSet<int> spentStake)
+        {
+            if (target.Registry == EmotionStemSelectionRules.BackstoryRegistry)
+                spentBackstory.Add(target.Index);
+            else if (target.Registry == EmotionStemSelectionRules.StakeRegistry)
+                spentStake.Add(target.Index);
         }
     }
 }

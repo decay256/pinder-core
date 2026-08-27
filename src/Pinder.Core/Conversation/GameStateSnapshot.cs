@@ -60,6 +60,34 @@ namespace Pinder.Core.Conversation
 
         public IReadOnlyDictionary<string, int> ShadowValues { get; }
 
+        public IReadOnlyCollection<int> AvatarSpentBackstoryIndices { get; }
+
+        public IReadOnlyCollection<int> AvatarSpentStakeIndices { get; }
+
+        public string? AvatarPreviousPhase { get; }
+
+        public int AvatarPreviousResolvedIndex { get; }
+
+        public AvatarRevelationTarget? CurrentAvatarRevelationTarget { get; }
+
+        public string? CurrentAvatarCognitiveSubtext { get; }
+
+        public OwnedPromptFactV1? CurrentAvatarCognitiveSubtextFact { get; }
+
+        public IReadOnlyCollection<int> DateeSpentBackstoryIndices { get; }
+
+        public IReadOnlyCollection<int> DateeSpentStakeIndices { get; }
+
+        public string? DateePreviousPhase { get; }
+
+        public int DateePreviousResolvedIndex { get; }
+
+        public DateeReactionTarget? CurrentDateeReactionTarget { get; }
+
+        public string? CurrentDateeCognitiveSubtext { get; }
+
+        public OwnedPromptFactV1? CurrentDateeCognitiveSubtextFact { get; }
+
         public GameStateSnapshot(
             int interest,
             InterestState state,
@@ -74,7 +102,21 @@ namespace Pinder.Core.Conversation
             IReadOnlyDictionary<string, int> shadowValues = null,
             LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
             LlmConversationSessionSnapshot? avatarSessionSnapshot = null,
-            IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null)
+            IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null,
+            IReadOnlyCollection<int>? avatarSpentBackstoryIndices = null,
+            IReadOnlyCollection<int>? avatarSpentStakeIndices = null,
+            string? avatarPreviousPhase = null,
+            int avatarPreviousResolvedIndex = 0,
+            AvatarRevelationTarget? currentAvatarRevelationTarget = null,
+            string? currentAvatarCognitiveSubtext = null,
+            OwnedPromptFactV1? currentAvatarCognitiveSubtextFact = null,
+            IReadOnlyCollection<int>? dateeSpentBackstoryIndices = null,
+            IReadOnlyCollection<int>? dateeSpentStakeIndices = null,
+            string? dateePreviousPhase = null,
+            int dateePreviousResolvedIndex = 0,
+            DateeReactionTarget? currentDateeReactionTarget = null,
+            string? currentDateeCognitiveSubtext = null,
+            OwnedPromptFactV1? currentDateeCognitiveSubtextFact = null)
         {
             Interest = interest;
             State = state;
@@ -90,6 +132,20 @@ namespace Pinder.Core.Conversation
             ShadowValues = shadowValues ?? new Dictionary<string, int>();
             DateeSessionSnapshot = dateeSessionSnapshot;
             AvatarSessionSnapshot = avatarSessionSnapshot;
+            AvatarSpentBackstoryIndices = avatarSpentBackstoryIndices != null ? (IReadOnlyCollection<int>)new List<int>(avatarSpentBackstoryIndices) : System.Array.Empty<int>();
+            AvatarSpentStakeIndices = avatarSpentStakeIndices != null ? (IReadOnlyCollection<int>)new List<int>(avatarSpentStakeIndices) : System.Array.Empty<int>();
+            AvatarPreviousPhase = avatarPreviousPhase;
+            AvatarPreviousResolvedIndex = avatarPreviousResolvedIndex;
+            CurrentAvatarRevelationTarget = currentAvatarRevelationTarget;
+            CurrentAvatarCognitiveSubtext = currentAvatarCognitiveSubtext;
+            CurrentAvatarCognitiveSubtextFact = currentAvatarCognitiveSubtextFact;
+            DateeSpentBackstoryIndices = dateeSpentBackstoryIndices != null ? (IReadOnlyCollection<int>)new List<int>(dateeSpentBackstoryIndices) : System.Array.Empty<int>();
+            DateeSpentStakeIndices = dateeSpentStakeIndices != null ? (IReadOnlyCollection<int>)new List<int>(dateeSpentStakeIndices) : System.Array.Empty<int>();
+            DateePreviousPhase = dateePreviousPhase;
+            DateePreviousResolvedIndex = dateePreviousResolvedIndex;
+            CurrentDateeReactionTarget = currentDateeReactionTarget;
+            CurrentDateeCognitiveSubtext = currentDateeCognitiveSubtext;
+            CurrentDateeCognitiveSubtextFact = currentDateeCognitiveSubtextFact;
         }
     }
 }

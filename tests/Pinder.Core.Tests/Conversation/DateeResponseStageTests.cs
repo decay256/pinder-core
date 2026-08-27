@@ -539,7 +539,6 @@ namespace Pinder.Core.Tests.Conversation
             var stage = new DateeResponseStage(mockLlm);
             var state = new GameSessionState();
             state.Interest = new InterestMeter(10);
-            state.CurrentResolvedTarget = new ResolvedRevelationTarget { Registry = "BACKSTORY", Index = 4 };
 
             var rollStageResult = new RollStageResult
             {
@@ -565,6 +564,14 @@ namespace Pinder.Core.Tests.Conversation
 
             var player = MakeProfile("Player");
             var datee = MakeProfile("Datee");
+            var fact = new OwnedPromptFactV1(
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(datee.CharacterId, BackstoryValidator.RequiredCategories[4], "bio_lie"),
+                "DATEE backstory target");
+            state.CurrentDateeReactionTarget = DateeReactionTarget.Create(datee.CharacterId, fact);
 
             // Act
             var result = await stage.ExecuteAsync(
@@ -577,8 +584,8 @@ namespace Pinder.Core.Tests.Conversation
                 CancellationToken.None);
 
             // Assert
-            Assert.Contains(4, state.SpentBackstoryIndices);
-            Assert.Empty(state.SpentStakeIndices);
+            Assert.Contains(4, state.DateeSpentBackstoryIndices);
+            Assert.Empty(state.DateeSpentStakeIndices);
         }
 
         [Fact]
@@ -589,7 +596,6 @@ namespace Pinder.Core.Tests.Conversation
             var stage = new DateeResponseStage(mockLlm);
             var state = new GameSessionState();
             state.Interest = new InterestMeter(10);
-            state.CurrentResolvedTarget = new ResolvedRevelationTarget { Registry = "STAKE", Index = 7 };
 
             var rollStageResult = new RollStageResult
             {
@@ -615,6 +621,14 @@ namespace Pinder.Core.Tests.Conversation
 
             var player = MakeProfile("Player");
             var datee = MakeProfile("Datee");
+            var fact = new OwnedPromptFactV1(
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.PsychologicalStake,
+                PromptFactSourceIds.PsychologicalStake(datee.CharacterId, 7),
+                "DATEE stake target");
+            state.CurrentDateeReactionTarget = DateeReactionTarget.Create(datee.CharacterId, fact);
 
             // Act
             var result = await stage.ExecuteAsync(
@@ -627,8 +641,8 @@ namespace Pinder.Core.Tests.Conversation
                 CancellationToken.None);
 
             // Assert
-            Assert.Contains(7, state.SpentStakeIndices);
-            Assert.Empty(state.SpentBackstoryIndices);
+            Assert.Contains(7, state.DateeSpentStakeIndices);
+            Assert.Empty(state.DateeSpentBackstoryIndices);
         }
 
         [Fact]
@@ -830,9 +844,11 @@ namespace Pinder.Core.Tests.Conversation
                 new CharacterEmotionalDirectionSummary(6, "fear", "hope", "conflicted", 5, "volatile", "almost asks for reassurance"),
                 new CharacterEmotionalDirectionSummary(7, "relief", CharacterEmotionalDirection.NoneSecondaryEmotion, "controlled", 4, "easing", "lets the reply soften"),
             };
+            CharacterProfile player = MakeProfile("Player");
+            CharacterProfile datee = MakeProfile("Datee");
             var original = new GameSession(
-                MakeProfile("Player"),
-                MakeProfile("Datee"),
+                player,
+                datee,
                 new NullLlmAdapter(),
                 new SimpleDiceRoller(10),
                 trapRegistry,
@@ -840,6 +856,9 @@ namespace Pinder.Core.Tests.Conversation
 
             original.RestoreState(new ResimulateData
             {
+                SchemaVersion = ResimulateData.CurrentSchemaVersion,
+                PlayerCharacterId = player.CharacterId,
+                DateeCharacterId = datee.CharacterId,
                 TargetInterest = 12,
                 TurnNumber = 8,
                 DateeEmotionalDirectionHistory = expected,
@@ -852,8 +871,8 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(new[] { 6, 7 }, resimulation.DateeEmotionalDirectionHistory.Select(summary => summary.Turn).ToArray());
 
             var restored = new GameSession(
-                MakeProfile("Player"),
-                MakeProfile("Datee"),
+                player,
+                datee,
                 new NullLlmAdapter(),
                 new SimpleDiceRoller(10),
                 trapRegistry,

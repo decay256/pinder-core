@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Pinder.Core.Conversation;
 
 namespace Pinder.Core.Diagnostics.AgentJournals
 {
@@ -314,6 +315,164 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public int? CacheReadInputTokens { get; }
     }
 
+    /// <summary>
+    /// Text-free role-fact admission provenance attached to one exact provider invocation.
+    /// </summary>
+    public sealed class AgentJournalRoleFactAccessDecision
+    {
+        public const int CurrentSchemaVersion = 1;
+
+        public AgentJournalRoleFactAccessDecision(
+            bool admitted,
+            string code,
+            string factSourceId,
+            PromptFactSourceKind factSourceKind,
+            Guid subjectCharacterId,
+            ConversationParticipantRole subjectRole,
+            Guid recipientCharacterId,
+            ConversationParticipantRole recipientRole,
+            PromptFactVisibility visibility,
+            int schemaVersion = CurrentSchemaVersion)
+        {
+            SchemaVersion = schemaVersion;
+            Admitted = admitted;
+            Code = code;
+            FactSourceId = factSourceId;
+            FactSourceKind = factSourceKind;
+            SubjectCharacterId = subjectCharacterId;
+            SubjectRole = subjectRole;
+            RecipientCharacterId = recipientCharacterId;
+            RecipientRole = recipientRole;
+            Visibility = visibility;
+        }
+
+        public int SchemaVersion { get; }
+        public bool Admitted { get; }
+        public string Code { get; }
+        public string FactSourceId { get; }
+        public PromptFactSourceKind FactSourceKind { get; }
+        public Guid SubjectCharacterId { get; }
+        public ConversationParticipantRole SubjectRole { get; }
+        public Guid RecipientCharacterId { get; }
+        public ConversationParticipantRole RecipientRole { get; }
+        public PromptFactVisibility Visibility { get; }
+
+        public static AgentJournalRoleFactAccessDecision From(RoleFactAccessDecision decision)
+        {
+            if (decision == null) throw new ArgumentNullException(nameof(decision));
+            return new AgentJournalRoleFactAccessDecision(
+                decision.Admitted,
+                decision.Code,
+                decision.FactSourceId,
+                decision.FactSourceKind,
+                decision.SubjectCharacterId,
+                decision.SubjectRole,
+                decision.RecipientCharacterId,
+                decision.RecipientRole,
+                decision.Visibility);
+        }
+    }
+
+
+    public sealed class AgentJournalRoleFactPolicyCorrelation
+    {
+        public AgentJournalRoleFactPolicyCorrelation(
+            string gameRunId,
+            string agentSessionId,
+            string requestId,
+            string turnId,
+            string? branchId = null)
+        {
+            GameRunId = gameRunId;
+            AgentSessionId = agentSessionId;
+            RequestId = requestId;
+            TurnId = turnId;
+            BranchId = branchId;
+        }
+
+        public string GameRunId { get; }
+        public string AgentSessionId { get; }
+        public string RequestId { get; }
+        public string TurnId { get; }
+        public string? BranchId { get; }
+    }
+
+    /// <summary>Durable text-free rejection provenance emitted before provider invocation.</summary>
+    public sealed class AgentJournalRoleFactPolicyDecisionRecord
+    {
+        public const int CurrentSchemaVersion = 1;
+
+        public AgentJournalRoleFactPolicyDecisionRecord(
+            AgentJournalRoleFactPolicyCorrelation correlation,
+            string operationKind,
+            string factSourceId,
+            PromptFactSourceKind factSourceKind,
+            Guid ownerCharacterId,
+            ConversationParticipantRole ownerRole,
+            Guid recipientCharacterId,
+            ConversationParticipantRole recipientRole,
+            PromptFactVisibility visibility,
+            string decisionCode,
+            int schemaVersion = CurrentSchemaVersion)
+        {
+            SchemaVersion = schemaVersion;
+            Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
+            OperationKind = operationKind;
+            FactSourceId = factSourceId;
+            FactSourceKind = factSourceKind;
+            OwnerCharacterId = ownerCharacterId;
+            OwnerRole = ownerRole;
+            RecipientCharacterId = recipientCharacterId;
+            RecipientRole = recipientRole;
+            Visibility = visibility;
+            DecisionCode = decisionCode;
+        }
+
+        public int SchemaVersion { get; }
+        public AgentJournalRoleFactPolicyCorrelation Correlation { get; }
+        public string OperationKind { get; }
+        public string FactSourceId { get; }
+        public PromptFactSourceKind FactSourceKind { get; }
+        public Guid OwnerCharacterId { get; }
+        public ConversationParticipantRole OwnerRole { get; }
+        public Guid RecipientCharacterId { get; }
+        public ConversationParticipantRole RecipientRole { get; }
+        public PromptFactVisibility Visibility { get; }
+        public string DecisionCode { get; }
+
+        public static AgentJournalRoleFactPolicyDecisionRecord Rejected(
+            RoleFactAccessDecision decision,
+            GameRunAgentJournalContext context,
+            string operationKind,
+            int turn)
+        {
+            if (decision == null) throw new ArgumentNullException(nameof(decision));
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (string.IsNullOrWhiteSpace(context.RequestId))
+            {
+                throw new RoleFactContractException(
+                    "agent_journal.request_id.required",
+                    "Durable role-fact rejection journaling requires a real request ID.");
+            }
+            return new AgentJournalRoleFactPolicyDecisionRecord(
+                new AgentJournalRoleFactPolicyCorrelation(
+                    context.GameRunId,
+                    context.AgentSessionId,
+                    context.RequestId!,
+                    "turn-" + turn.ToString(CultureInfo.InvariantCulture),
+                    context.BranchId),
+                operationKind,
+                decision.FactSourceId,
+                decision.FactSourceKind,
+                decision.SubjectCharacterId,
+                decision.SubjectRole,
+                decision.RecipientCharacterId,
+                decision.RecipientRole,
+                decision.Visibility,
+                decision.Code);
+        }
+    }
+
     public sealed class LlmInvocationRecord
     {
         public LlmInvocationRecord(
@@ -321,13 +480,15 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string modelId,
             string phase,
             IReadOnlyList<AgentJournalInputDocument> inputDocuments,
-            string? createdAtUtc = null)
+            string? createdAtUtc = null,
+            IReadOnlyList<AgentJournalRoleFactAccessDecision>? roleFactAccessDecisions = null)
         {
             Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
             ModelId = modelId;
             Phase = phase;
             InputDocuments = inputDocuments ?? throw new ArgumentNullException(nameof(inputDocuments));
             CreatedAtUtc = createdAtUtc;
+            RoleFactAccessDecisions = roleFactAccessDecisions;
         }
 
         public AgentJournalCorrelationIds Correlation { get; }
@@ -335,6 +496,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public string Phase { get; }
         public IReadOnlyList<AgentJournalInputDocument> InputDocuments { get; }
         public string? CreatedAtUtc { get; }
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public IReadOnlyList<AgentJournalRoleFactAccessDecision>? RoleFactAccessDecisions { get; }
     }
 
     public sealed class LlmResultRecord

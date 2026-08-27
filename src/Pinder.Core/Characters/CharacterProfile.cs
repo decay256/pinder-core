@@ -11,6 +11,9 @@ namespace Pinder.Core.Characters
     /// </summary>
     public sealed class CharacterProfile
     {
+        /// <summary>Canonical character UUID. Display names and slugs are not identity.</summary>
+        public Guid CharacterId { get; }
+
         /// <summary>The character's stat block for roll resolution.</summary>
         public StatBlock Stats { get; private set; }
 
@@ -173,8 +176,10 @@ namespace Pinder.Core.Characters
             IReadOnlyList<Prompts.TextingStyleAggregator.AttributedTextingStyleLine> attributedTextingStyleLines = null,
             string? consolidatedPersonality = null,
             string? consolidatedBackstory = null,
-            IReadOnlyList<string>? personalityFragments = null)
+            IReadOnlyList<string>? personalityFragments = null,
+            Guid? characterId = null)
         {
+            CharacterId = RequireCharacterId(characterId);
             Stats = stats ?? throw new ArgumentNullException(nameof(stats));
             AssembledSystemPrompt = assembledSystemPrompt ?? throw new ArgumentNullException(nameof(assembledSystemPrompt));
             BaseSystemPrompt = AssembledSystemPrompt;
@@ -200,6 +205,17 @@ namespace Pinder.Core.Characters
             AttributedTextingStyleLines = attributedTextingStyleLines ?? new System.Collections.Generic.List<Prompts.TextingStyleAggregator.AttributedTextingStyleLine>();
             ConsolidatedPersonality = consolidatedPersonality;
             ConsolidatedBackstory = consolidatedBackstory;
+        }
+
+        private static Guid RequireCharacterId(Guid? characterId)
+        {
+            if (!characterId.HasValue || characterId.Value == Guid.Empty)
+            {
+                throw new RoleFactContractException(
+                    "character_profile.character_id.required",
+                    "CharacterProfile requires a canonical non-empty character UUID.");
+            }
+            return characterId.Value;
         }
     }
 }

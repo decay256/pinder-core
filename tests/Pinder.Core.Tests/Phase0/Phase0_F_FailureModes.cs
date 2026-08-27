@@ -210,11 +210,12 @@ namespace Pinder.Core.Tests.Phase0
         /// notices the cancellation on the next awaited adapter call and
         /// surfaces <see cref="OperationCanceledException"/>.
         /// </summary>
-        private sealed class CancelOnPhaseTransport : ILlmTransport
+        private sealed class CancelOnPhaseTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             private readonly string _cancelOnPhase;
             private readonly CancellationTokenSource _cts;
             public RecordingLlmTransport Inner { get; }
+            public bool SupportsStructuredConversationMessages => true;
 
             public CancelOnPhaseTransport(string cancelOnPhase, CancellationTokenSource cts)
             {
@@ -244,13 +245,39 @@ namespace Pinder.Core.Tests.Phase0
                 }
                 return response;
             }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                StructuredLlmResponse response = await Inner.SendStructuredAsync(request, ct).ConfigureAwait(false);
+                if (string.Equals(request.Phase, _cancelOnPhase, StringComparison.Ordinal))
+                    _cts.Cancel();
+                return response;
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                StructuredLlmResponse response = await Inner
+                    .SendStructuredConversationAsync(request, priorMessages, ct)
+                    .ConfigureAwait(false);
+                if (string.Equals(request.Phase, _cancelOnPhase, StringComparison.Ordinal))
+                    _cts.Cancel();
+                return response;
+            }
         }
 
-        private sealed class ExceptionInjectingTransport : ILlmTransport
+        private sealed class ExceptionInjectingTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             private readonly string _throwOnPhase;
             private readonly Func<Exception> _exFactory;
             public RecordingLlmTransport Inner { get; }
+            public bool SupportsStructuredConversationMessages => true;
 
             public ExceptionInjectingTransport(string throwOnPhase, Func<Exception> exFactory)
             {
@@ -276,6 +303,30 @@ namespace Pinder.Core.Tests.Phase0
                     throw _exFactory();
                 }
                 return Inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ThrowIfConfigured(request.Phase, ct);
+                return Inner.SendStructuredAsync(request, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken ct = default)
+            {
+                ThrowIfConfigured(request.Phase, ct);
+                return Inner.SendStructuredConversationAsync(request, priorMessages, ct);
+            }
+
+            private void ThrowIfConfigured(string? phase, CancellationToken ct)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (string.Equals(phase, _throwOnPhase, StringComparison.Ordinal))
+                    throw _exFactory();
             }
         }
     }

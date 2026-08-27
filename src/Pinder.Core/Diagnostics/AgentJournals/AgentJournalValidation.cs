@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Pinder.Core.Conversation;
 
 namespace Pinder.Core.Diagnostics.AgentJournals
 {
@@ -54,6 +55,53 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string InvalidUsageStatus = "invalid_usage_status";
         public const string InvalidUsageCompleteness = "invalid_usage_completeness";
         public const string ForbiddenOwnerId = "forbidden_owner_id";
+        public const string InvalidRoleFactDecision = "invalid_role_fact_decision";
+
+
+        public static AgentJournalValidationResult Validate(AgentJournalRoleFactPolicyDecisionRecord record)
+        {
+            var errors = new List<AgentJournalValidationError>();
+            if (record == null)
+            {
+                errors.Add(new AgentJournalValidationError(MissingId, "$"));
+                return AgentJournalValidationResult.From(errors);
+            }
+
+            if (record.SchemaVersion != AgentJournalRoleFactPolicyDecisionRecord.CurrentSchemaVersion)
+                errors.Add(new AgentJournalValidationError(InvalidRoleFactDecision, "$.schema_version"));
+            if (record.Correlation == null)
+            {
+                errors.Add(new AgentJournalValidationError(MissingId, "$.correlation"));
+            }
+            else
+            {
+                AddMissing(record.Correlation.GameRunId, "$.correlation.game_run_id", errors);
+                AddMissing(record.Correlation.AgentSessionId, "$.correlation.agent_session_id", errors);
+                AddMissing(record.Correlation.RequestId, "$.correlation.request_id", errors);
+                AddMissing(record.Correlation.TurnId, "$.correlation.turn_id", errors);
+                AddOpaqueIdentifier(record.Correlation.GameRunId, "$.correlation.game_run_id", errors);
+                AddOpaqueIdentifier(record.Correlation.AgentSessionId, "$.correlation.agent_session_id", errors);
+                AddOpaqueIdentifier(record.Correlation.RequestId, "$.correlation.request_id", errors);
+                AddOpaqueIdentifier(record.Correlation.TurnId, "$.correlation.turn_id", errors);
+                AddOpaqueIdentifier(record.Correlation.BranchId, "$.correlation.branch_id", errors);
+            }
+            AddMissing(record.OperationKind, "$.operation_kind", errors);
+            AddMissing(record.FactSourceId, "$.fact_source_id", errors);
+            AddMissing(record.DecisionCode, "$.decision_code", errors);
+            AddOpaqueIdentifier(record.OperationKind, "$.operation_kind", errors);
+            AddOpaqueIdentifier(record.FactSourceId, "$.fact_source_id", errors);
+            AddOpaqueIdentifier(record.DecisionCode, "$.decision_code", errors);
+            if (!Enum.IsDefined(typeof(PromptFactSourceKind), record.FactSourceKind)
+                || record.OwnerCharacterId == Guid.Empty
+                || record.RecipientCharacterId == Guid.Empty
+                || !Enum.IsDefined(typeof(ConversationParticipantRole), record.OwnerRole)
+                || !Enum.IsDefined(typeof(ConversationParticipantRole), record.RecipientRole)
+                || !Enum.IsDefined(typeof(PromptFactVisibility), record.Visibility))
+            {
+                errors.Add(new AgentJournalValidationError(InvalidRoleFactDecision, "$"));
+            }
+            return AgentJournalValidationResult.From(errors);
+        }
 
         public static AgentJournalValidationResult Validate(LlmInvocationRecord record)
         {
@@ -83,6 +131,28 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     continue;
                 }
                 ValidateDocument(document, "$.input_documents[" + i + "]", documentIds, errors);
+            }
+
+            if (record.RoleFactAccessDecisions != null)
+            {
+                for (int i = 0; i < record.RoleFactAccessDecisions.Count; i++)
+                {
+                    AgentJournalRoleFactAccessDecision decision = record.RoleFactAccessDecisions[i];
+                    string path = "$.role_fact_access_decisions[" + i + "]";
+                    if (decision == null
+                        || decision.SchemaVersion != AgentJournalRoleFactAccessDecision.CurrentSchemaVersion
+                        || string.IsNullOrWhiteSpace(decision.Code)
+                        || string.IsNullOrWhiteSpace(decision.FactSourceId)
+                        || !Enum.IsDefined(typeof(PromptFactSourceKind), decision.FactSourceKind)
+                        || decision.SubjectCharacterId == Guid.Empty
+                        || decision.RecipientCharacterId == Guid.Empty
+                        || !Enum.IsDefined(typeof(ConversationParticipantRole), decision.SubjectRole)
+                        || !Enum.IsDefined(typeof(ConversationParticipantRole), decision.RecipientRole)
+                        || !Enum.IsDefined(typeof(PromptFactVisibility), decision.Visibility))
+                    {
+                        errors.Add(new AgentJournalValidationError(InvalidRoleFactDecision, path));
+                    }
+                }
             }
 
             return AgentJournalValidationResult.From(errors);

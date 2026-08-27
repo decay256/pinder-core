@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
         [InlineData(AgentJournalSchemaNames.LlmInvocationV1, @"{""correlation"":{""game_run_id"":""game"",""agent_session_id"":""session"",""invocation_id"":""inv"",""operation_id"":""op"",""attempt_ordinal"":1,""attempt_id"":""attempt""},""phase"":""phase"",""input_documents"":[]}", AgentJournalValidator.MissingId)]
         [InlineData(AgentJournalSchemaNames.LlmResultV1, @"{""correlation"":{""game_run_id"":""game"",""agent_session_id"":""session"",""invocation_id"":""inv"",""operation_id"":""op"",""attempt_ordinal"":1,""attempt_id"":""attempt""},""terminal_status"":""succeeded""}", AgentJournalValidator.InvalidStatusTransition)]
         [InlineData(AgentJournalSchemaNames.MessageLinkV1, @"{""semantic_entry_id"":""entry"",""invocation_id"":""inv""}", AgentJournalValidator.MissingId)]
+        [InlineData(AgentJournalSchemaNames.RoleFactPolicyDecisionV1, @"{""schema_version"":1,""correlation"":{""game_run_id"":""game"",""agent_session_id"":""session"",""turn_id"":""turn-1""}}", AgentJournalValidator.MissingId)]
         public void EveryKnownV1Payload_IsValidatedBeforeKnown(
             string customType,
             string json,

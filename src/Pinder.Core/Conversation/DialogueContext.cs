@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Stats;
@@ -88,12 +89,16 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Resolved revelation target for injecting into the LLM prompt.
         /// </summary>
-        public ResolvedRevelationTarget? ResolvedTarget { get; }
+        public ResolvedRevelationTarget? ResolvedTarget => AvatarRevelationTarget?.ResolvedTarget;
+        public AvatarRevelationTarget? AvatarRevelationTarget { get; }
 
         /// <summary>
-        /// Therapeutic cognitive subtext for injecting into the LLM prompt.
+        /// Therapeutic cognitive subtext admitted for this recipient.
         /// </summary>
-        public string? CognitiveSubtext { get; }
+        public string? CognitiveSubtext => CognitiveSubtextFact?.Text;
+        public OwnedPromptFactV1? CognitiveSubtextFact { get; }
+        public Guid? RecipientCharacterId { get; }
+        public IReadOnlyList<RoleFactAccessDecision> PromptFactAccessDecisions { get; }
 
         public int? PlayerHungerForIntimacy { get; }
         public int? PlayerTerrorOfRejection { get; }
@@ -139,7 +144,11 @@ public AgentJournalOneShotContext? AgentJournal { get; }
             int? dateeTerrorOfRejection = null,
             InterestState? currentInterestState = null,
 AgentJournalOneShotContext? agentJournal = null,
-            GameRunAgentJournalContext? agentJournalContext = null)
+            GameRunAgentJournalContext? agentJournalContext = null,
+            AvatarRevelationTarget? avatarRevelationTarget = null,
+            OwnedPromptFactV1? cognitiveSubtextFact = null,
+            Guid? recipientCharacterId = null,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             PlayerAvatarPrompt = playerAvatarPrompt ?? throw new System.ArgumentNullException(nameof(playerAvatarPrompt));
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -163,14 +172,73 @@ AgentJournalOneShotContext? agentJournal = null,
             StakeLines = stakeLines;
             StakeLinesReferenced = stakeLinesReferenced;
             MaxDialogueOptions = maxDialogueOptions;
-            ResolvedTarget = resolvedTarget;
-            CognitiveSubtext = cognitiveSubtext;
+            OwnedPromptFactV1? diagnosticSourceFact = avatarRevelationTarget?.Fact ?? cognitiveSubtextFact;
+            RoleFactPreProviderFailureGuard.RejectRawPromptFallbacks(
+                resolvedTarget,
+                cognitiveSubtext,
+                diagnosticSourceFact,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DialogueOptions);
+            RecipientCharacterId = RoleFactPreProviderFailureGuard.RequireRecipientIdentity(
+                recipientCharacterId,
+                diagnosticSourceFact,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DialogueOptions);
+            var decisions = new List<RoleFactAccessDecision>();
+            RoleFactAccessDecision? targetDecision = DecideFact(
+                avatarRevelationTarget?.Fact,
+                RecipientCharacterId,
+                ConversationParticipantRole.PlayerAvatar,
+                decisions,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DialogueOptions);
+            RoleFactAccessDecision? cognitiveDecision = DecideFact(
+                cognitiveSubtextFact,
+                RecipientCharacterId,
+                ConversationParticipantRole.PlayerAvatar,
+                decisions,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DialogueOptions);
+            AvatarRevelationTarget = targetDecision?.Admitted == true ? avatarRevelationTarget : null;
+            CognitiveSubtextFact = cognitiveDecision?.Admitted == true ? cognitiveSubtextFact : null;
+            PromptFactAccessDecisions = decisions.AsReadOnly();
             PlayerHungerForIntimacy = playerHungerForIntimacy;
             PlayerTerrorOfRejection = playerTerrorOfRejection;
             DateeHungerForIntimacy = dateeHungerForIntimacy;
             DateeTerrorOfRejection = dateeTerrorOfRejection;
 AgentJournal = agentJournal;
             AgentJournalContext = agentJournalContext;
+        }
+
+        private static RoleFactAccessDecision? DecideFact(
+            OwnedPromptFactV1? fact,
+            Guid? recipientCharacterId,
+            ConversationParticipantRole recipientRole,
+            ICollection<RoleFactAccessDecision> decisions,
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            GameRunAgentJournalContext? agentJournalContext,
+            int currentTurn,
+            string operationKind)
+        {
+            if (fact == null) return null;
+            RoleFactAccessDecision decision = RoleFactAccessGuard.RequireAdmitted(
+                fact,
+                recipientCharacterId!.Value,
+                recipientRole,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                operationKind)!;
+            decisions.Add(decision);
+            return decision;
         }
 
         /// <summary>

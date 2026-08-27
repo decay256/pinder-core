@@ -1,3 +1,4 @@
+using System;
 using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.TestCommon;
@@ -7,6 +8,7 @@ namespace Pinder.Core.Tests.Conversation;
 
 public sealed class CharacterEmotionalStatusResolverTests
 {
+    private static readonly Guid CharacterId = Guid.Parse("14310000-0000-4000-8000-000000000051");
     [Fact]
     public void Resolve_ZeroOverridesUseCharactersOwnCharmAndRizz()
     {
@@ -32,5 +34,6 @@ public sealed class CharacterEmotionalStatusResolverTests
         "system prompt",
         "Alex",
         new TimingProfile(5, 1.0f, 0.0f, "neutral"),
-        level: 1);
+        level: 1,
+        characterId: CharacterId);
 }

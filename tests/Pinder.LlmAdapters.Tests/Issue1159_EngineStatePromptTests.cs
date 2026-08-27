@@ -12,6 +12,29 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void OptionsPrompt_EngineStateIncludesHfiTorCognitiveAndTransitionLines()
         {
+            Guid avatarId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            var resolved = new ResolvedRevelationTarget
+            {
+                Registry = "BACKSTORY",
+                Index = 3,
+                Field = "BIO_LIE",
+                StemText = "pretending the move was easy",
+                TransitionStyle = "buffered disclosure"
+            };
+            var targetFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(avatarId, "age_and_demographics", "bio_lie"),
+                resolved.StemText);
+            var cognitiveFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(avatarId, 2),
+                "ABANDONMENT + DEFLECTION");
             var context = new DialogueContext(
                 playerAvatarPrompt: "velvet system prompt",
                 dateePrompt: "sable system prompt",
@@ -23,15 +46,9 @@ namespace Pinder.LlmAdapters.Tests
                 dateeName: "Sable",
                 currentTurn: 2,
                 availableStats: new[] { StatType.Charm, StatType.Honesty },
-                resolvedTarget: new ResolvedRevelationTarget
-                {
-                    Registry = "BACKSTORY",
-                    Index = 3,
-                    Field = "BIO_LIE",
-                    StemText = "pretending the move was easy",
-                    TransitionStyle = "buffered disclosure"
-                },
-                cognitiveSubtext: "ABANDONMENT + DEFLECTION",
+                avatarRevelationTarget: AvatarRevelationTarget.Create(avatarId, targetFact, resolved),
+                cognitiveSubtextFact: cognitiveFact,
+                recipientCharacterId: avatarId,
                 playerHungerForIntimacy: 7,
                 playerTerrorOfRejection: 12,
                 dateeHungerForIntimacy: 9,

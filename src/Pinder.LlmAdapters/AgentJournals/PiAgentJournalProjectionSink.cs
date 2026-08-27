@@ -66,6 +66,12 @@ namespace Pinder.LlmAdapters.AgentJournals
                     }
                     return _codec.Encode(link);
 
+                case AgentJournalSchemaNames.RoleFactPolicyDecisionV1:
+                    var decision = record.Record as AgentJournalRoleFactPolicyDecisionRecord;
+                    if (decision == null)
+                        throw InvalidRecordType(record, nameof(AgentJournalRoleFactPolicyDecisionRecord));
+                    return _codec.Encode(decision);
+
                 default:
                     throw new InvalidOperationException("Unsupported Pinder agent journal custom type '" + record.CustomType + "'.");
             }

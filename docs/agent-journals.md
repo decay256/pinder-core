@@ -52,6 +52,13 @@ The Pinder adaptation layer owns typed extension contracts such as:
 - `pinder.message-link.v1` for connecting accepted semantic entries to the
   invocation that produced them.
 
+`pinder.llm-invocation.v1` may also include additive, text-free
+`role_fact_access_decisions`. Each admitted turn-local fact is correlated to the
+same exact provider call as the prompt documents and records source ID/kind,
+visibility, decision code, and subject/recipient UUID+role. A rejected fact creates
+the terminal `AgentJournalRoleFactAccessRejected` operational diagnostic and aborts
+before an invocation exists. Neither artifact copies private fact text.
+
 These schema names are immutable wire names. The checked-in CLR contracts remain
 provider-neutral under `Pinder.Core.Diagnostics.AgentJournals` and target
 `netstandard2.0`/C# 8. Canonical JSON fixtures use `snake_case`, deterministic
@@ -156,3 +163,22 @@ private branches before stale diagnostics are removed downstream.
 ## DATEE Structured Result Metadata
 
 For DATEE performance calls, `pinder.llm-result.v1` records the visible assistant `output_text` separately from trusted `result_metadata` about the `datee_performance.v1` contract. The metadata may include schema/version, validation mode and outcome, and typed tell/weakness diagnostics. Message-link records continue to point only at semantic chat entries.
+
+## Pre-provider policy decisions
+
+Rejected private facts use the versioned `pinder.role-fact-policy-decision.v1`
+custom entry. The durable record contains only source ID/kind, owner and recipient
+UUID/role, visibility, decision code, operation kind, and Game Run, request, turn,
+Agent Session, and branch correlation. It has no fact text and no provider
+invocation ID because rejection happens before a provider call exists. It projects
+zero messages into Pi context.
+
+The request correlation is mandatory whenever a host sink is configured for a
+rejected fact. Core never writes a placeholder request ID. A missing request ID
+fails the contract before persistence; a host write failure emits a terminal
+fail-closed diagnostic and propagates `AgentJournalSinkPersistenceException`.
+
+`AgentJournalRoleFactAccessRejected` remains a separate terminal operational
+diagnostic. A malformed raw fallback or missing recipient emits
+`AgentJournalRoleFactContractRejected`; for typed missing-recipient failures its
+correlation hints include the text-free source ID/kind and owner UUID/role.

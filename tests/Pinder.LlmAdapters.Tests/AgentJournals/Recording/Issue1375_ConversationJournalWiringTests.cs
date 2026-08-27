@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
@@ -40,6 +41,342 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         static Issue1375_ConversationJournalWiringTests()
         {
             PromptCatalogInitializer.Initialize();
+        }
+
+        [Fact]
+        [Trait("CORE-1431", "role_fact_access_decisions")]
+        public async Task role_fact_access_decisions_include_source_kind_and_link_to_provider_invocation()
+        {
+            const string admittedTargetText = "admitted avatar target 1431";
+            const string admittedCognitiveText = "admitted avatar cognitive fact 1431";
+            Guid avatarId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            var targetFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(avatarId, "age_and_demographics", "bio_lie"),
+                admittedTargetText);
+            var cognitiveFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(avatarId, 7),
+                admittedCognitiveText);
+            var target = AvatarRevelationTarget.Create(
+                avatarId,
+                targetFact,
+                new ResolvedRevelationTarget
+                {
+                    Registry = EmotionStemSelectionRules.BackstoryRegistry,
+                    Index = 0,
+                    Field = "BIO_LIE",
+                    Manner = "CURATED_BUFFER",
+                    StemText = admittedTargetText,
+                    TransitionStyle = "sideways",
+                });
+            var context = new DialogueContext(
+                playerAvatarPrompt: "You are the player avatar.",
+                dateePrompt: "You are the datee.",
+                conversationHistory: Array.Empty<(string, string)>(),
+                dateeLastMessage: string.Empty,
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                playerName: "Player",
+                dateeName: "Datee",
+                currentTurn: 7,
+                availableStats: new[] { StatType.Charm, StatType.Wit, StatType.Honesty },
+                agentJournalContext: JournalContext(),
+                avatarRevelationTarget: target,
+                cognitiveSubtextFact: cognitiveFact,
+                recipientCharacterId: avatarId);
+            var sink = new RecordingJournalSink();
+            var transport = new ScriptedConversationTransport { DefaultDialogueOutput = DialogueOptions };
+            var adapter = CreateAdapter(transport, sink);
+
+            await adapter.GetDialogueOptionsAsync(context, Array.Empty<ConversationMessage>(), avatarSession: null);
+
+            LlmInvocationRecord invocation = Assert.Single(sink.Invocations.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.AvatarReply));
+            string compiledDocuments = string.Join("\n", invocation.InputDocuments.Select(document => document.Text));
+            Assert.Contains(admittedTargetText, compiledDocuments, StringComparison.Ordinal);
+            Assert.Contains(admittedCognitiveText, compiledDocuments, StringComparison.Ordinal);
+            AgentJournalRoleFactAccessDecision[] decisions = invocation.RoleFactAccessDecisions!.ToArray();
+            Assert.Equal(2, decisions.Length);
+            Assert.Contains(decisions, decision => decision.Admitted
+                && decision.FactSourceId == targetFact.SourceId
+                && decision.FactSourceKind == PromptFactSourceKind.Backstory);
+            Assert.Contains(decisions, decision => decision.Admitted
+                && decision.FactSourceId == cognitiveFact.SourceId
+                && decision.FactSourceKind == PromptFactSourceKind.CognitiveSubtext);
+            Assert.DoesNotContain(
+                typeof(AgentJournalRoleFactAccessDecision).GetProperties(),
+                property => property.Name == "Text");
+            string serialized = AgentJournalJson.Serialize(invocation);
+            Assert.Contains("cognitive_subtext", serialized, StringComparison.Ordinal);
+            Assert.StartsWith("call-", invocation.Correlation.InvocationId, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        [Trait("CORE-1431", "denied_pre_provider")]
+        public void denied_fact_throws_text_free_before_provider_retry_or_journal_invocation()
+        {
+            const string deniedSecret = "DENIED_PRIVATE_SENTINEL_1431";
+            Guid avatarId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            Guid dateeId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+            var deniedFact = new OwnedPromptFactV1(
+                dateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(dateeId, 7),
+                deniedSecret);
+            var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
+            var transport = new ScriptedConversationTransport { DefaultDialogueOutput = DialogueOptions };
+            _ = CreateAdapter(transport, sink, maxRetries: 2, diagnostics: diagnostics);
+
+            RoleFactAccessDeniedException error = Assert.Throws<RoleFactAccessDeniedException>(() => new DialogueContext(
+                playerAvatarPrompt: "You are the player avatar.",
+                dateePrompt: "You are the datee.",
+                conversationHistory: Array.Empty<(string, string)>(),
+                dateeLastMessage: string.Empty,
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                agentJournalContext: JournalContext(hostSink: sink),
+                cognitiveSubtextFact: deniedFact,
+                recipientCharacterId: avatarId,
+                onDiagnostic: diagnostics.Enqueue));
+
+            Assert.Equal("prompt_fact.access_denied", error.Code);
+            Assert.Equal(0, transport.GetSessionUsage().CallCount);
+            Assert.Empty(sink.Invocations);
+            Assert.Empty(sink.Results);
+            AgentJournalSinkRecord rejectionSinkRecord = Assert.Single(sink.PolicySinkRecords);
+            Assert.Null(rejectionSinkRecord.Correlation);
+            Assert.NotNull(rejectionSinkRecord.PolicyCorrelation);
+            AgentJournalRoleFactPolicyDecisionRecord rejection = Assert.IsType<AgentJournalRoleFactPolicyDecisionRecord>(
+                rejectionSinkRecord.Record);
+            Assert.Equal(AgentJournalRoleFactPolicyDecisionRecord.CurrentSchemaVersion, rejection.SchemaVersion);
+            Assert.Equal(deniedFact.SourceId, rejection.FactSourceId);
+            Assert.Equal(PromptFactSourceKind.CognitiveSubtext, rejection.FactSourceKind);
+            Assert.Equal(dateeId, rejection.OwnerCharacterId);
+            Assert.Equal(ConversationParticipantRole.Datee, rejection.OwnerRole);
+            Assert.Equal(avatarId, rejection.RecipientCharacterId);
+            Assert.Equal(ConversationParticipantRole.PlayerAvatar, rejection.RecipientRole);
+            Assert.Equal(PromptFactVisibility.PrivateToSubject, rejection.Visibility);
+            Assert.Equal("denied.private_to_subject", rejection.DecisionCode);
+            Assert.Equal("game-run-core-1375", rejection.Correlation.GameRunId);
+            Assert.Equal("request-core-1375", rejection.Correlation.RequestId);
+            Assert.Equal("turn-0", rejection.Correlation.TurnId);
+            string rejectionJson = AgentJournalJson.Serialize(rejection);
+            Assert.DoesNotContain("invocation_id", rejectionJson, StringComparison.Ordinal);
+            Assert.DoesNotContain(deniedSecret, rejectionJson, StringComparison.Ordinal);
+            OperationalDiagnosticEvent diagnostic = Assert.Single(diagnostics);
+            Assert.Equal(AgentJournalOperationalDiagnostics.RoleFactAccessRejectedEventName, diagnostic.EventName);
+            Assert.DoesNotContain(deniedSecret, error.Message, StringComparison.Ordinal);
+            string diagnosticMetadata = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                diagnostic.EventName,
+                diagnostic.Message,
+                diagnostic.PhaseCode,
+                diagnostic.CallId,
+                diagnostic.CorrelationHints,
+            });
+            Assert.DoesNotContain(deniedSecret, diagnosticMetadata, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        [Trait("CORE-1431", "rejection_request_correlation")]
+        public void denied_fact_with_durable_sink_requires_real_request_id()
+        {
+            Guid avatarId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            Guid dateeId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+            var deniedFact = new OwnedPromptFactV1(
+                dateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(dateeId, 7),
+                "PRIVATE_REQUEST_CORRELATION_SENTINEL_1431");
+            var sink = new RecordingJournalSink();
+            var diagnostics = new ConcurrentQueue<OperationalDiagnosticEvent>();
+            var journalContext = new GameRunAgentJournalContext(
+                "game-run-core-1375",
+                "agent-session-core-1375",
+                requestId: null,
+                branchId: "main",
+                hostSink: sink);
+
+            RoleFactContractException error = Assert.Throws<RoleFactContractException>(() => new DialogueContext(
+                playerAvatarPrompt: "You are the player avatar.",
+                dateePrompt: "You are the datee.",
+                conversationHistory: Array.Empty<(string, string)>(),
+                dateeLastMessage: string.Empty,
+                activeTraps: Array.Empty<string>(),
+                currentInterest: 10,
+                agentJournalContext: journalContext,
+                cognitiveSubtextFact: deniedFact,
+                recipientCharacterId: avatarId,
+                onDiagnostic: diagnostics.Enqueue));
+
+            Assert.Equal("agent_journal.request_id.required", error.Code);
+            Assert.Empty(sink.PolicySinkRecords);
+            OperationalDiagnosticEvent diagnostic = Assert.Single(diagnostics);
+            Assert.Equal(
+                AgentJournalOperationalDiagnostics.RoleFactPolicyCorrelationRejectedEventName,
+                diagnostic.EventName);
+            Assert.Equal(OperationalDiagnosticLifecycle.Terminal, diagnostic.Lifecycle);
+            Assert.Equal(OperationalDiagnosticOutcome.Failed, diagnostic.Outcome);
+            Assert.Equal("agent_journal.request_id.required", diagnostic.CorrelationHints["error_code"]);
+            string serialized = JsonSerializer.Serialize(new
+            {
+                diagnostic.Message,
+                diagnostic.CorrelationId,
+                diagnostic.CorrelationHints,
+            });
+            const string forbiddenSyntheticRequestId = "request-" + "unavailable";
+            Assert.DoesNotContain(forbiddenSyntheticRequestId, serialized, StringComparison.Ordinal);
+            Assert.DoesNotContain(deniedFact.Text, serialized, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        [Trait("CORE-1431", "gerald_velvet_multiturn")]
+        public async Task gerald_private_fact_never_enters_velvet_documents_history_or_retry()
+        {
+            const string geraldSecret = "Gerald keeps a GBP 70 Soho silk sleeping bag hidden in plain sight.";
+            const string velvetTargetText = "Velvet privately worries that sincerity is temporary.";
+            const string publicCardSentinel = "Gerald publicly restores antique radios.";
+            Guid geraldId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+            Guid velvetId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+            var geraldFact = new OwnedPromptFactV1(
+                geraldId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(geraldId, "age_and_demographics", "bio_lie"),
+                geraldSecret);
+            var velvetFact = new OwnedPromptFactV1(
+                velvetId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(velvetId, "age_and_demographics", "bio_lie"),
+                velvetTargetText);
+            var geraldTarget = AvatarRevelationTarget.Create(geraldId, geraldFact, new ResolvedRevelationTarget
+            {
+                Registry = EmotionStemSelectionRules.BackstoryRegistry,
+                Index = 0,
+                Field = "BIO_LIE",
+                Manner = "CURATED_BUFFER",
+                StemText = geraldSecret,
+                TransitionStyle = "sideways",
+            });
+            var velvetTarget = DateeReactionTarget.Create(velvetId, velvetFact, new ResolvedRevelationTarget
+            {
+                Registry = EmotionStemSelectionRules.BackstoryRegistry,
+                Index = 0,
+                Field = "BIO_LIE",
+                Manner = "CURATED_BUFFER",
+                StemText = velvetTargetText,
+                TransitionStyle = "sideways",
+            });
+            var publicCard = new PublicProfileCard(
+                "Gerald", "he/him", publicCardSentinel, "green coat", Array.Empty<string>());
+            var sink = new RecordingJournalSink();
+            var transport = new ScriptedConversationTransport { DefaultDialogueOutput = DialogueOptions };
+            var adapter = CreateAdapter(transport, sink, maxRetries: 1);
+            var visibleHistory = new List<(string Sender, string Text)>();
+            var avatarHistory = new List<ConversationMessage>();
+            var dateeHistory = new List<ConversationMessage>();
+
+            for (int turn = 1; turn <= 5; turn++)
+            {
+                var avatarContext = new DialogueContext(
+                    playerAvatarPrompt: "You are Gerald.",
+                    dateePrompt: "You are Velvet.",
+                    conversationHistory: visibleHistory,
+                    dateeLastMessage: visibleHistory.LastOrDefault(item => item.Sender == "Velvet").Text ?? string.Empty,
+                    activeTraps: Array.Empty<string>(),
+                    currentInterest: 10 + turn,
+                    playerName: "Gerald",
+                    dateeName: "Velvet",
+                    currentTurn: turn,
+                    availableStats: new[] { StatType.Charm, StatType.Wit, StatType.Honesty },
+                    agentJournalContext: JournalContext(requestId: $"gerald-avatar-{turn}"),
+                    avatarRevelationTarget: geraldTarget,
+                    recipientCharacterId: geraldId);
+                await adapter.GetDialogueOptionsAsync(avatarContext, avatarHistory, avatarSession: null);
+
+                string delivered = $"Gerald visible line {turn}.";
+                var dateeContext = new DateeContext(
+                    dateePrompt: "You are Velvet.",
+                    conversationHistory: visibleHistory,
+                    dateeLastMessage: visibleHistory.LastOrDefault(item => item.Sender == "Velvet").Text ?? string.Empty,
+                    activeTraps: Array.Empty<string>(),
+                    currentInterest: 10 + turn,
+                    playerDeliveredMessage: delivered,
+                    interestBefore: 9 + turn,
+                    interestAfter: 10 + turn,
+                    responseDelayMinutes: 0,
+                    playerName: "Gerald",
+                    dateeName: "Velvet",
+                    currentTurn: turn,
+                    deliveryTier: FailureTier.Success,
+                    playerAvatarCard: publicCard,
+                    emotionalTurnEvent: new DateeEmotionalTurnEvent(
+                        StatType.Honesty,
+                        RollOutcomeIntensity.Strong,
+                        TestHelpers.MakePsychiatricDiagnosis()),
+                    agentJournalContext: JournalContext(requestId: $"velvet-datee-{turn}"),
+                    dateeReactionTarget: velvetTarget,
+                    recipientCharacterId: velvetId);
+                transport.Queue(LlmPhase.EmotionalDirector, ValidDirectionJson());
+                if (turn == 3) transport.Queue(LlmPhase.OpponentResponse, "   ");
+                transport.Queue(LlmPhase.OpponentResponse, $"Velvet visible reply {turn}.");
+                StatefulDateeResult result = await adapter.GetDateeResponseAsync(
+                    dateeContext,
+                    dateeHistory,
+                    avatarHistory,
+                    dateeSession: null,
+                    avatarSession: null);
+                dateeHistory.AddRange(result.NewHistoryEntries);
+                avatarHistory.Add(ConversationMessage.User(delivered));
+                avatarHistory.Add(ConversationMessage.Assistant(result.Response.MessageText));
+                visibleHistory.Add(("Gerald", delivered));
+                visibleHistory.Add(("Velvet", result.Response.MessageText));
+            }
+
+            LlmInvocationRecord[] avatarInvocations = sink.Invocations.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.AvatarReply).ToArray();
+            LlmInvocationRecord[] dateeInvocations = sink.Invocations.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.EmotionalDirector
+                || record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance).ToArray();
+            Assert.Equal(5, avatarInvocations.Length);
+            Assert.Equal(11, dateeInvocations.Length);
+            Assert.Contains(avatarInvocations.SelectMany(record => record.InputDocuments), document =>
+                document.Text.Contains(geraldSecret, StringComparison.Ordinal));
+            Assert.All(dateeInvocations.SelectMany(record => record.InputDocuments), document =>
+                Assert.DoesNotContain(geraldSecret, document.Text, StringComparison.Ordinal));
+            LlmInvocationRecord[] performanceInvocations = dateeInvocations.Where(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance).ToArray();
+            Assert.All(performanceInvocations, invocation =>
+                Assert.Contains(publicCardSentinel, string.Join("\n", invocation.InputDocuments.Select(document => document.Text)), StringComparison.Ordinal));
+            Assert.All(dateeInvocations, invocation =>
+            {
+                AgentJournalRoleFactAccessDecision decision = Assert.Single(invocation.RoleFactAccessDecisions!);
+                Assert.True(decision.Admitted);
+                Assert.Equal(velvetId, decision.SubjectCharacterId);
+                Assert.Equal(ConversationParticipantRole.Datee, decision.SubjectRole);
+                Assert.DoesNotContain(geraldId.ToString(), decision.FactSourceId, StringComparison.Ordinal);
+            });
+            Assert.DoesNotContain(transport.PriorMessagesFor(LlmPhase.EmotionalDirector), message =>
+                message.Content.Contains(geraldSecret, StringComparison.Ordinal));
+            Assert.DoesNotContain(transport.PriorMessagesFor(LlmPhase.OpponentResponse), message =>
+                message.Content.Contains(geraldSecret, StringComparison.Ordinal));
+            Assert.Equal(6, sink.Invocations.Count(record =>
+                record.Correlation.OperationId == GameRunConversationJournalInventory.DateePerformance));
         }
 
         [Fact]
@@ -725,12 +1062,14 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 
         private static GameRunAgentJournalContext JournalContext(
             string gameRunId = "game-run-core-1375",
-            string requestId = "request-core-1375")
+            string requestId = "request-core-1375",
+            IAgentJournalSink? hostSink = null)
             => new GameRunAgentJournalContext(
                 gameRunId,
                 "agent-session-core-1375",
                 requestId,
-                branchId: "main");
+                branchId: "main",
+                hostSink: hostSink);
 
         private static DialogueContext MakeDialogueContext(GameRunAgentJournalContext? journalContext)
             => new DialogueContext(
@@ -878,6 +1217,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             public IReadOnlyList<MessageLinkRecord> MessageLinks => _records
                 .Where(record => record.CustomType == AgentJournalSchemaNames.MessageLinkV1)
                 .Select(record => (MessageLinkRecord)record.Record)
+                .ToArray();
+
+            public IReadOnlyList<AgentJournalSinkRecord> PolicySinkRecords => _records
+                .Where(record => record.CustomType == AgentJournalSchemaNames.RoleFactPolicyDecisionV1)
                 .ToArray();
 
             public Task PersistAsync(AgentJournalSinkRecord record, CancellationToken cancellationToken)

@@ -43,6 +43,7 @@ partial class Program
             result.ExitCode = 1;
             return;
         }
+        resimInitialSnap = ValidateInitialSessionSnapshot(resimInitialSnap);
 
         // Determine which turn to resume from
         result.FromTurn = fromTurnArg >= 1 ? fromTurnArg : FindLastTurnSnapshot(result.PlaytestDir!, result.ResimulateSlug!);
@@ -73,7 +74,7 @@ partial class Program
         }
 
         // Validate + log assumptions for missing fields
-        resimTurnSnap = ValidateAndPatchTurnSnapshot(resimTurnSnap, result.AssumptionLog);
+        resimTurnSnap = ValidateAndPatchTurnSnapshot(resimTurnSnap, result.AssumptionLog, authoritativeIdentityAvailable: true);
 
         // Reconstruct CharacterProfile objects from frozen snapshot data
         result.Sable = BuildProfileFromSnapshot(resimInitialSnap.Player);

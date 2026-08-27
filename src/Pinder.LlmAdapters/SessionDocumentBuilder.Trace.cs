@@ -371,13 +371,13 @@ namespace Pinder.LlmAdapters
             }
 
             string cognitiveSubtextLine = string.Empty;
-            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
+            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtextFact?.Text))
             {
                 cognitiveSubtextLine = RenderTemplate(
                     GetTemplate(promptCatalog, "engine-state-cognitive-subtext-line"),
                     new Dictionary<string, string>
                     {
-                        { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                        { "cognitive_subtext", context.CognitiveSubtextFact?.Text ?? string.Empty },
                     });
             }
 
@@ -404,9 +404,9 @@ namespace Pinder.LlmAdapters
 
             string transitionTargetLine = string.Empty;
             string transitionStyleLine = string.Empty;
-            if (context.ResolvedTarget != null)
+            if (context.AvatarRevelationTarget != null)
             {
-                var target = context.ResolvedTarget.Value;
+                ResolvedRevelationTarget target = context.AvatarRevelationTarget.ResolvedTarget;
                 transitionTargetLine = RenderTemplate(
                     GetTemplate(promptCatalog, "engine-state-transition-target-line"),
                     new Dictionary<string, string>
@@ -518,6 +518,17 @@ namespace Pinder.LlmAdapters
 
             var sb = new AnnotatedStringBuilder();
 
+            string playerAvatarCard = context.PlayerAvatarCard.Render();
+            if (!string.IsNullOrWhiteSpace(playerAvatarCard))
+            {
+                sb.AppendLine("PLAYER AVATAR PUBLIC DATING CARD");
+                sb.AppendLine(
+                    playerAvatarCard,
+                    "runtime:datee-context",
+                    "DateeContext.PlayerAvatarCard");
+                sb.AppendLine();
+            }
+
             if (includeConversationHistory)
             {
                 var historySb = new StringBuilder();
@@ -564,21 +575,21 @@ namespace Pinder.LlmAdapters
 
             // [ENGINE — DATEE] injection block with interest narrative
             string dateeCognitiveSubtextLine = string.Empty;
-            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtext))
+            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtextFact?.Text))
             {
                 dateeCognitiveSubtextLine = RenderTemplate(
                     GetTemplate(promptCatalog, "engine-state-cognitive-subtext-line"),
                     new Dictionary<string, string>
                     {
-                        { "cognitive_subtext", context.CognitiveSubtext ?? string.Empty },
+                        { "cognitive_subtext", context.CognitiveSubtextFact?.Text ?? string.Empty },
                     });
             }
 
             string dateeTransitionTargetLine = string.Empty;
             string dateeTransitionStyleLine = string.Empty;
-            if (context.ResolvedTarget != null)
+            if (context.DateeReactionTarget != null)
             {
-                var target = context.ResolvedTarget.Value;
+                ResolvedRevelationTarget target = context.DateeReactionTarget.ResolvedTarget;
                 dateeTransitionTargetLine = RenderTemplate(
                     GetTemplate(promptCatalog, "engine-state-transition-target-line"),
                     new Dictionary<string, string>

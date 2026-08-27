@@ -237,6 +237,25 @@ namespace Pinder.Core.Conversation
         {
             ct.ThrowIfCancellationRequested();
 
+            // Authorization is a parent-session transaction precondition. Run it
+            // before dice reservation so denial cannot consume RNG or mutate retry state.
+            RoleFactAccessGuard.RequireAdmitted(
+                _state.CurrentDateeReactionTarget?.Fact,
+                _datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                _state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            RoleFactAccessGuard.RequireAdmitted(
+                _state.CurrentDateeCognitiveSubtextFact,
+                _datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                _state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
+
             EnsureTransactionalCloneCompatibility();
             var selectedPool = ReserveSelectedDicePool(optionIndex);
             var working = CloneForRequiredTurnTransaction();

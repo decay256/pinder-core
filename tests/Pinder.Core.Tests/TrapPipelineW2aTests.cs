@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +37,8 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public sealed class TrapPipelineW2aTests
     {
+        private static readonly Guid RestorePlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000031");
+        private static readonly Guid RestoreDateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000032");
         // ──────────────────────────────────────────────────────────────────
         // Test plumbing
         // ──────────────────────────────────────────────────────────────────
@@ -148,14 +151,17 @@ namespace Pinder.Core.Tests
                 new Dictionary<ShadowStatType, int>());
         }
 
-        private static CharacterProfile MakeProfile(string name, int allStats = 2)
+        private static CharacterProfile MakeProfile(string name, int allStats = 2, Guid? characterId = null)
         {
-            return TestHelpers.MakeCharacterProfile(
+            return new CharacterProfile(
                 stats: MakeStatBlock(allStats),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                backstory: TestHelpers.MakeBackstory(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
+                characterId: characterId ?? TestHelpers.DeterministicCharacterId(name));
         }
 
         // The LLM adapter places SA at index 3 and the failing-charm trap option at 0.
@@ -434,11 +440,12 @@ namespace Pinder.Core.Tests
             var llm = new W2aTrapLlmAdapter();
             var registry = new StubTrapRegistry();
             var session = new GameSession(
-                MakeProfile("Player"), MakeProfile("Datee"),
+                MakeProfile("Player", characterId: RestorePlayerCharacterId),
+                MakeProfile("Datee", characterId: RestoreDateeCharacterId),
                 llm, new FixedDice(5, 18, 18), registry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-            var data = new ResimulateData
+            var data = new ResimulateData(RestorePlayerCharacterId, RestoreDateeCharacterId)
             {
                 TargetInterest = 12,
                 TurnNumber = 5,

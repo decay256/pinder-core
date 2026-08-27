@@ -16,11 +16,13 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue1017_ShadowStatPersistenceTests
     {
-        private static CharacterProfile MakeProfile(string name, SessionShadowTracker? tracker = null)
+        private static readonly Guid PlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000011");
+        private static readonly Guid DateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000012");
+        private static CharacterProfile MakeProfile(string name, Guid characterId, SessionShadowTracker? tracker = null)
         {
             var stats = TestHelpers.MakeStatBlock();
             var timing = new TimingProfile(5, 1.0f, 0.0f, "neutral");
-            return TestHelpers.MakeCharacterProfile(
+            return new CharacterProfile(
                 stats,
                 "system prompt",
                 name,
@@ -28,7 +30,8 @@ namespace Pinder.Core.Tests
                 1,
                 psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
                 backstory: TestHelpers.MakeBackstory(),
-                stakeLines: TestHelpers.MakeStakeLines());
+                stakeLines: TestHelpers.MakeStakeLines(),
+                characterId: characterId);
         }
 
         private (GameSession Session, SessionShadowTracker Tracker) BuildSession(params int[] diceRolls)
@@ -40,8 +43,8 @@ namespace Pinder.Core.Tests
             );
             
             var session = new GameSession(
-                MakeProfile("Player", tracker),
-                MakeProfile("Datee"),
+                MakeProfile("Player", PlayerCharacterId, tracker),
+                MakeProfile("Datee", DateeCharacterId),
                 new StubLlmAdapter(),
                 new StubDice(diceRolls.Length > 0 ? diceRolls : new[] { 10 }),
                 new StubTrapRegistry(),
@@ -68,7 +71,7 @@ namespace Pinder.Core.Tests
         {
             var (session, tracker) = BuildSession(5, 1, 50);
             
-            var resimData = new ResimulateData
+            var resimData = new ResimulateData(PlayerCharacterId, DateeCharacterId)
             {
                 TargetInterest = 10,
                 ShadowValues = new Dictionary<string, int>

@@ -28,6 +28,7 @@ partial class Program
     {
         return new InitialSessionSnapshot
         {
+            SchemaVersion = SessionSnapshotSchema.CurrentVersion,
             Player = BuildCharacterSnapshot(player, playerLevelBonus),
             Datee = BuildCharacterSnapshot(datee, dateeLevelBonus),
             SessionHorniness = session.SessionHorniness,
@@ -53,6 +54,7 @@ partial class Program
         return new CharacterSnapshot
         {
             DisplayName = profile.DisplayName,
+            CharacterId = profile.CharacterId.ToString("D"),
             Level = profile.Level,
             LevelBonus = levelBonus,
             Stats = stats,
@@ -186,6 +188,7 @@ partial class Program
 
         return new TurnSnapshot
         {
+            SchemaVersion = SessionSnapshotSchema.CurrentVersion,
             TurnNumber = turnNumber,
             Interest = state.Interest,
             ShadowValues = shadowValues,
@@ -205,6 +208,20 @@ partial class Program
             DateeHistory = dateeHistoryEntries,
             AvatarHistory = avatarHistoryEntries,
             DateeEmotionalDirectionHistory = dateeDirectionEntries,
+            AvatarSpentBackstoryIndices = state.AvatarSpentBackstoryIndices.ToList(),
+            AvatarSpentStakeIndices = state.AvatarSpentStakeIndices.ToList(),
+            AvatarPreviousPhase = state.AvatarPreviousPhase,
+            AvatarPreviousResolvedIndex = state.AvatarPreviousResolvedIndex,
+            AvatarRevelationTarget = ToSnapshot(state.CurrentAvatarRevelationTarget),
+            AvatarCognitiveSubtext = state.CurrentAvatarCognitiveSubtext,
+            AvatarCognitiveSubtextFact = ToSnapshot(state.CurrentAvatarCognitiveSubtextFact),
+            DateeSpentBackstoryIndices = state.DateeSpentBackstoryIndices.ToList(),
+            DateeSpentStakeIndices = state.DateeSpentStakeIndices.ToList(),
+            DateePreviousPhase = state.DateePreviousPhase,
+            DateePreviousResolvedIndex = state.DateePreviousResolvedIndex,
+            DateeReactionTarget = ToSnapshot(state.CurrentDateeReactionTarget),
+            DateeCognitiveSubtext = state.CurrentDateeCognitiveSubtext,
+            DateeCognitiveSubtextFact = ToSnapshot(state.CurrentDateeCognitiveSubtextFact),
             Events = events,
             DefendingStat = result.Roll.DefendingStat.ToString(),
             GhostProbabilityPerTurn = state.GhostProbabilityPerTurn,
@@ -258,8 +275,42 @@ partial class Program
         return 0;
     }
 
-    internal static TurnSnapshot ValidateAndPatchTurnSnapshot(TurnSnapshot snap, List<string> log)
+    internal static InitialSessionSnapshot ValidateInitialSessionSnapshot(InitialSessionSnapshot snap)
     {
+        if (snap == null) throw new ArgumentNullException(nameof(snap));
+        ValidateSnapshotSchemaVersion(snap.SchemaVersion);
+        if (snap.Player == null || snap.Datee == null)
+            throw new InvalidOperationException("snapshot.character_identity.required");
+        ParseCharacterId(snap.Player.CharacterId);
+        ParseCharacterId(snap.Datee.CharacterId);
+        return snap;
+    }
+
+    private static void ValidateSnapshotSchemaVersion(int schemaVersion)
+    {
+        if (schemaVersion == 0)
+            throw new InvalidOperationException("snapshot.schema_version.required");
+        if (schemaVersion != SessionSnapshotSchema.IdentityBackedLegacyVersion
+            && schemaVersion != SessionSnapshotSchema.CurrentVersion)
+            throw new InvalidOperationException("snapshot.schema_version.unsupported");
+    }
+
+    internal static TurnSnapshot ValidateAndPatchTurnSnapshot(
+        TurnSnapshot snap,
+        List<string> log,
+        bool authoritativeIdentityAvailable = true)
+    {
+        if (snap == null) throw new ArgumentNullException(nameof(snap));
+        ValidateSnapshotSchemaVersion(snap.SchemaVersion);
+        if (snap.SchemaVersion == SessionSnapshotSchema.IdentityBackedLegacyVersion)
+        {
+            if (!authoritativeIdentityAvailable)
+                throw new InvalidOperationException("snapshot.character_identity.required");
+            if (snap.CurrentResolvedTarget != null
+                || snap.AvatarRevelationTarget != null
+                || snap.DateeReactionTarget != null)
+                throw new InvalidOperationException("snapshot.schema_version.legacy_active_target_forbidden");
+        }
         snap.ShadowValues ??= new Dictionary<string, int>();
         snap.ActiveTraps ??= new List<TrapSnapshot>();
         snap.ComboHistory ??= new List<TurnHistoryEntry>();
@@ -269,6 +320,12 @@ partial class Program
         snap.DateeHistory ??= new List<DateeHistoryEntry>();
         snap.AvatarHistory ??= new List<DateeHistoryEntry>();
         snap.DateeEmotionalDirectionHistory ??= new List<DateeEmotionalDirectionSummaryEntry>();
+        snap.AvatarSpentBackstoryIndices ??= new List<int>();
+        snap.AvatarSpentStakeIndices ??= new List<int>();
+        snap.DateeSpentBackstoryIndices ??= new List<int>();
+        snap.DateeSpentStakeIndices ??= new List<int>();
+        if (snap.CurrentResolvedTarget != null)
+            throw new InvalidOperationException("snapshot.role_target.legacy_active_target_forbidden");
 
         void Assume(string field, string defaultValue)
         {
@@ -302,10 +359,16 @@ partial class Program
         Console.Error.WriteLine($"[ASSUMPTION LOG] Written → {path}");
     }
 
-    internal static Pinder.Core.Conversation.ResimulateData BuildResimulateData(TurnSnapshot snap)
+    internal static Pinder.Core.Conversation.ResimulateData BuildResimulateData(
+        TurnSnapshot snap,
+        Guid playerCharacterId,
+        Guid dateeCharacterId)
     {
         return new Pinder.Core.Conversation.ResimulateData
         {
+            SchemaVersion = Pinder.Core.Conversation.ResimulateData.CurrentSchemaVersion,
+            PlayerCharacterId = playerCharacterId,
+            DateeCharacterId = dateeCharacterId,
             TargetInterest       = snap.Interest,
             TurnNumber           = snap.TurnNumber,
             MomentumStreak       = snap.MomentumStreak,
@@ -337,6 +400,20 @@ partial class Program
                                          e.Trajectory,
                                          e.Impulse))
                                      .ToList(),
+            AvatarSpentBackstoryIndices = new HashSet<int>(snap.AvatarSpentBackstoryIndices ?? new List<int>()),
+            AvatarSpentStakeIndices = new HashSet<int>(snap.AvatarSpentStakeIndices ?? new List<int>()),
+            AvatarPreviousPhase = snap.AvatarPreviousPhase,
+            AvatarPreviousResolvedIndex = snap.AvatarPreviousResolvedIndex,
+            CurrentAvatarRevelationTarget = ToAvatarTarget(snap.AvatarRevelationTarget),
+            CurrentAvatarCognitiveSubtext = snap.AvatarCognitiveSubtext,
+            CurrentAvatarCognitiveSubtextFact = ToCoreFact(snap.AvatarCognitiveSubtextFact),
+            DateeSpentBackstoryIndices = new HashSet<int>(snap.DateeSpentBackstoryIndices ?? new List<int>()),
+            DateeSpentStakeIndices = new HashSet<int>(snap.DateeSpentStakeIndices ?? new List<int>()),
+            DateePreviousPhase = snap.DateePreviousPhase,
+            DateePreviousResolvedIndex = snap.DateePreviousResolvedIndex,
+            CurrentDateeReactionTarget = ToDateeTarget(snap.DateeReactionTarget),
+            CurrentDateeCognitiveSubtext = snap.DateeCognitiveSubtext,
+            CurrentDateeCognitiveSubtextFact = ToCoreFact(snap.DateeCognitiveSubtextFact),
         };
     }
 
@@ -354,6 +431,9 @@ partial class Program
         var timing = new Pinder.Core.Conversation.TimingProfile(
             baseDelay: 5, variance: 0.5f, drySpell: 0.0f, readReceipt: "neutral");
 
+        if (!Guid.TryParse(charSnap.CharacterId, out var characterId) || characterId == Guid.Empty)
+            throw new InvalidOperationException("snapshot.character_id.required");
+
         return new CharacterProfile(
             stats: statBlock,
             assembledSystemPrompt: charSnap.AssembledSystemPrompt,
@@ -363,6 +443,111 @@ partial class Program
             bio: charSnap.Bio,
             textingStyleFragment: "",
             activeArchetype: null,
-            equippedItemDisplayNames: charSnap.EquippedItems?.ToList() ?? new List<string>());
+            equippedItemDisplayNames: charSnap.EquippedItems?.ToList() ?? new List<string>(),
+            characterId: characterId);
+    }
+
+    internal static RoleTargetSnapshot? ToSnapshot(AvatarRevelationTarget? target)
+    {
+        return target != null ? ToSnapshot(target.ResolvedTarget, target.Fact) : null;
+    }
+
+    internal static RoleTargetSnapshot? ToSnapshot(DateeReactionTarget? target)
+    {
+        return target != null ? ToSnapshot(target.ResolvedTarget, target.Fact) : null;
+    }
+
+    private static RoleTargetSnapshot ToSnapshot(ResolvedRevelationTarget target, OwnedPromptFactV1 fact)
+    {
+        return new RoleTargetSnapshot
+        {
+            Registry = target.Registry,
+            Index = target.Index,
+            Field = target.Field,
+            Manner = target.Manner,
+            StemText = target.StemText,
+            TransitionStyle = target.TransitionStyle,
+            Fact = ToSnapshot(fact) ?? new RoleFactSnapshot(),
+        };
+    }
+
+    internal static RoleFactSnapshot? ToSnapshot(OwnedPromptFactV1? fact)
+    {
+        if (fact == null)
+            return null;
+
+        return new RoleFactSnapshot
+        {
+            SchemaVersion = fact.SchemaVersion,
+            SubjectCharacterId = fact.SubjectCharacterId.ToString("D"),
+            SubjectRole = fact.SubjectRole.ToString(),
+            Visibility = fact.Visibility.ToString(),
+            SourceKind = fact.SourceKind.ToString(),
+            SourceId = fact.SourceId,
+            RevealedBy = fact.RevealedBy,
+            Text = fact.Text,
+        };
+    }
+
+    private static AvatarRevelationTarget? ToAvatarTarget(RoleTargetSnapshot? snap)
+    {
+        if (snap == null)
+            return null;
+        return AvatarRevelationTarget.Create(
+            ParseCharacterId(snap.Fact.SubjectCharacterId),
+            ToCoreFact(snap.Fact) ?? throw new InvalidOperationException("snapshot.avatar_revelation_target.fact.required"),
+            ToResolvedTarget(snap));
+    }
+
+    private static DateeReactionTarget? ToDateeTarget(RoleTargetSnapshot? snap)
+    {
+        if (snap == null)
+            return null;
+        return DateeReactionTarget.Create(
+            ParseCharacterId(snap.Fact.SubjectCharacterId),
+            ToCoreFact(snap.Fact) ?? throw new InvalidOperationException("snapshot.datee_reaction_target.fact.required"),
+            ToResolvedTarget(snap));
+    }
+
+    private static ResolvedRevelationTarget ToResolvedTarget(RoleTargetSnapshot snap)
+    {
+        return new ResolvedRevelationTarget
+        {
+            Registry = snap.Registry,
+            Index = snap.Index,
+            Field = snap.Field,
+            Manner = snap.Manner,
+            StemText = snap.StemText,
+            TransitionStyle = snap.TransitionStyle,
+        };
+    }
+
+    internal static OwnedPromptFactV1? ToCoreFact(RoleFactSnapshot? snap)
+    {
+        if (snap == null)
+            return null;
+        var sourceId = PromptFactSourceId.Parse(snap.SourceId);
+        PromptFactSourceKind sourceKind = Enum.Parse<PromptFactSourceKind>(snap.SourceKind, ignoreCase: true);
+        if (sourceId.SourceKind != sourceKind)
+            throw new InvalidOperationException("snapshot.role_fact.source_kind_mismatch");
+        ConversationMessageReference? revealedBy = string.IsNullOrWhiteSpace(snap.RevealedBy)
+            ? null
+            : ConversationMessageReference.Parse(snap.RevealedBy);
+        return new OwnedPromptFactV1(
+            ParseCharacterId(snap.SubjectCharacterId),
+            Enum.Parse<ConversationParticipantRole>(snap.SubjectRole, ignoreCase: true),
+            Enum.Parse<PromptFactVisibility>(snap.Visibility, ignoreCase: true),
+            sourceKind,
+            sourceId,
+            snap.Text,
+            revealedBy,
+            snap.SchemaVersion);
+    }
+
+    private static Guid ParseCharacterId(string value)
+    {
+        if (!Guid.TryParse(value, out var id) || id == Guid.Empty)
+            throw new InvalidOperationException("snapshot.character_id.required");
+        return id;
     }
 }

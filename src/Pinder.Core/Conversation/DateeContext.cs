@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pinder.Core.Characters;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Rolls;
 using Pinder.Core.Stats;
 
@@ -94,12 +95,16 @@ namespace Pinder.Core.Conversation
         /// <summary>
         /// Resolved revelation target for injecting into the LLM prompt.
         /// </summary>
-        public ResolvedRevelationTarget? ResolvedTarget { get; }
+        public ResolvedRevelationTarget? ResolvedTarget => DateeReactionTarget?.ResolvedTarget;
+        public DateeReactionTarget? DateeReactionTarget { get; }
 
         /// <summary>
-        /// Therapeutic cognitive subtext for injecting into the LLM prompt.
+        /// Therapeutic cognitive subtext admitted for this recipient.
         /// </summary>
-        public string? CognitiveSubtext { get; }
+        public string? CognitiveSubtext => CognitiveSubtextFact?.Text;
+        public OwnedPromptFactV1? CognitiveSubtextFact { get; }
+        public Guid? RecipientCharacterId { get; }
+        public IReadOnlyList<RoleFactAccessDecision> PromptFactAccessDecisions { get; }
 
         /// <summary>
         /// Compact typed facts for private emotional reaction input compilation.
@@ -148,7 +153,11 @@ namespace Pinder.Core.Conversation
             int? playerTerrorOfRejection = null,
             int? dateeHungerForIntimacy = null,
             int? dateeTerrorOfRejection = null,
-            IReadOnlyList<CharacterEmotionalDirectionSummary>? previousAcceptedEmotionalDirections = null)
+            IReadOnlyList<CharacterEmotionalDirectionSummary>? previousAcceptedEmotionalDirections = null,
+            DateeReactionTarget? dateeReactionTarget = null,
+            OwnedPromptFactV1? cognitiveSubtextFact = null,
+            Guid? recipientCharacterId = null,
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -172,8 +181,44 @@ namespace Pinder.Core.Conversation
             DateeTextingStyle = dateeTextingStyle ?? string.Empty;
             HorninessOverlayApplied = horninessOverlayApplied;
             HorninessTier = horninessTier;
-            ResolvedTarget = resolvedTarget;
-            CognitiveSubtext = cognitiveSubtext;
+            OwnedPromptFactV1? diagnosticSourceFact = dateeReactionTarget?.Fact ?? cognitiveSubtextFact;
+            RoleFactPreProviderFailureGuard.RejectRawPromptFallbacks(
+                resolvedTarget,
+                cognitiveSubtext,
+                diagnosticSourceFact,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            RecipientCharacterId = RoleFactPreProviderFailureGuard.RequireRecipientIdentity(
+                recipientCharacterId,
+                diagnosticSourceFact,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            var decisions = new List<RoleFactAccessDecision>();
+            RoleFactAccessDecision? targetDecision = DecideFact(
+                dateeReactionTarget?.Fact,
+                RecipientCharacterId,
+                ConversationParticipantRole.Datee,
+                decisions,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            RoleFactAccessDecision? cognitiveDecision = DecideFact(
+                cognitiveSubtextFact,
+                RecipientCharacterId,
+                ConversationParticipantRole.Datee,
+                decisions,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            DateeReactionTarget = targetDecision?.Admitted == true ? dateeReactionTarget : null;
+            CognitiveSubtextFact = cognitiveDecision?.Admitted == true ? cognitiveSubtextFact : null;
+            PromptFactAccessDecisions = decisions.AsReadOnly();
             EmotionalTurnEvent = emotionalTurnEvent;
             AgentJournalContext = agentJournalContext;
             PlayerHungerForIntimacy = playerHungerForIntimacy;
@@ -183,6 +228,29 @@ namespace Pinder.Core.Conversation
             PreviousAcceptedEmotionalDirections = previousAcceptedEmotionalDirections == null
                 ? Array.Empty<CharacterEmotionalDirectionSummary>()
                 : previousAcceptedEmotionalDirections.ToArray();
+        }
+
+        private static RoleFactAccessDecision? DecideFact(
+            OwnedPromptFactV1? fact,
+            Guid? recipientCharacterId,
+            ConversationParticipantRole recipientRole,
+            ICollection<RoleFactAccessDecision> decisions,
+            Action<OperationalDiagnosticEvent>? onDiagnostic,
+            GameRunAgentJournalContext? agentJournalContext,
+            int currentTurn,
+            string operationKind)
+        {
+            if (fact == null) return null;
+            RoleFactAccessDecision decision = RoleFactAccessGuard.RequireAdmitted(
+                fact,
+                recipientCharacterId!.Value,
+                recipientRole,
+                onDiagnostic,
+                agentJournalContext,
+                currentTurn,
+                operationKind)!;
+            decisions.Add(decision);
+            return decision;
         }
     }
 }

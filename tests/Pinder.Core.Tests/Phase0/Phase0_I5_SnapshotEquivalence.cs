@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Pinder.Core.Characters;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 using Xunit;
@@ -39,6 +40,8 @@ namespace Pinder.Core.Tests.Phase0
     [Trait("Category", "Phase0")]
     public class Phase0_I5_SnapshotEquivalence
     {
+        private static readonly Guid PlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000021");
+        private static readonly Guid DateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000022");
         // I5.1 — three turns straight vs (snapshot at turn 1) → restore → continue 2 more.
         // The replay session is wired with a transport queue that starts at
         // the POST-MID-SNAPSHOT position so its dequeue sequence matches what
@@ -75,8 +78,8 @@ namespace Pinder.Core.Tests.Phase0
                 15, 50,      // turn 2
                 15, 50);     // turn 3
             var sessionB2 = new GameSession(
-                Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Datee"),
+                MakeProfile("Player", PlayerCharacterId),
+                MakeProfile("Datee", DateeCharacterId),
                 adapterB2, diceB2, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
 
@@ -114,7 +117,7 @@ namespace Pinder.Core.Tests.Phase0
 
             // Build a "turn 0" ResimulateData — empty history, default interest.
             var sessionB = MakeFreshSession(turnsToQueue: 2);
-            var resim0 = new ResimulateData
+            var resim0 = new ResimulateData(PlayerCharacterId, DateeCharacterId)
             {
                 TargetInterest = sessionB.CreateSnapshot().Interest,
                 TurnNumber = 0,
@@ -157,10 +160,23 @@ namespace Pinder.Core.Tests.Phase0
             var dice = new PlaybackDiceRoller(diceValues.ToArray());
 
             return new GameSession(
-                Phase0Fixtures.MakeProfile("Player"),
-                Phase0Fixtures.MakeProfile("Datee"),
+                MakeProfile("Player", PlayerCharacterId),
+                MakeProfile("Datee", DateeCharacterId),
                 adapter, dice, new NullTrapRegistry(),
                 Phase0Fixtures.MakeConfig());
+        }
+
+        private static CharacterProfile MakeProfile(string name, Guid characterId)
+        {
+            return new CharacterProfile(
+                stats: TestHelpers.MakeStatBlock(2),
+                assembledSystemPrompt: $"You are {name}.",
+                displayName: name,
+                timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
+                level: 1,
+                backstory: TestHelpers.MakeBackstory(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
+                characterId: characterId);
         }
 
         private static async Task PlayOneTurn(GameSession s)
@@ -191,7 +207,7 @@ namespace Pinder.Core.Tests.Phase0
             GameStateSnapshot snap,
             List<(string Sender, string Text)> history)
         {
-            return new ResimulateData
+            return new ResimulateData(PlayerCharacterId, DateeCharacterId)
             {
                 TargetInterest = snap.Interest,
                 TurnNumber = snap.TurnNumber,

@@ -12,6 +12,7 @@ namespace Pinder.Core.Conversation
             bool admitted,
             string code,
             string factSourceId,
+            PromptFactSourceKind factSourceKind,
             Guid subjectCharacterId,
             ConversationParticipantRole subjectRole,
             Guid recipientCharacterId,
@@ -20,6 +21,7 @@ namespace Pinder.Core.Conversation
         {
             OwnedPromptFactV1.ValidateRequiredString(code, "decision.code.required", nameof(code));
             OwnedPromptFactV1.ValidateRequiredString(factSourceId, "decision.fact_source_id.required", nameof(factSourceId));
+            OwnedPromptFactV1.ValidateSourceKind(factSourceKind, "decision.fact_source_kind.invalid", nameof(factSourceKind));
             OwnedPromptFactV1.ValidateCharacterId(subjectCharacterId, "decision.subject_character_id.required", nameof(subjectCharacterId));
             OwnedPromptFactV1.ValidateCharacterId(recipientCharacterId, "decision.recipient_character_id.required", nameof(recipientCharacterId));
             OwnedPromptFactV1.ValidateParticipantRole(subjectRole, "decision.subject_role.invalid", nameof(subjectRole));
@@ -29,6 +31,7 @@ namespace Pinder.Core.Conversation
             Admitted = admitted;
             Code = code;
             FactSourceId = factSourceId;
+            FactSourceKind = factSourceKind;
             SubjectCharacterId = subjectCharacterId;
             SubjectRole = subjectRole;
             RecipientCharacterId = recipientCharacterId;
@@ -39,6 +42,7 @@ namespace Pinder.Core.Conversation
         public bool Admitted { get; }
         public string Code { get; }
         public string FactSourceId { get; }
+        public PromptFactSourceKind FactSourceKind { get; }
         public Guid SubjectCharacterId { get; }
         public ConversationParticipantRole SubjectRole { get; }
         public Guid RecipientCharacterId { get; }

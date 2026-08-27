@@ -9,21 +9,28 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class AvatarRevelationTarget
     {
-        private AvatarRevelationTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact)
+        private AvatarRevelationTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact, ResolvedRevelationTarget resolvedTarget)
         {
             SubjectCharacterId = subjectCharacterId;
             Fact = fact;
+            ResolvedTarget = resolvedTarget;
         }
 
         public Guid SubjectCharacterId { get; }
         public OwnedPromptFactV1 Fact { get; }
+        public ResolvedRevelationTarget ResolvedTarget { get; }
         public string SourceId => Fact.SourceId;
         public string Text => Fact.Text;
+        public string TransitionStyle => ResolvedTarget.TransitionStyle;
 
         public static AvatarRevelationTarget Create(Guid subjectCharacterId, OwnedPromptFactV1 fact)
+            => Create(subjectCharacterId, fact, LegacyResolvedRevelationTargetConversion.LegacyMetadataFromFact(fact));
+
+        public static AvatarRevelationTarget Create(Guid subjectCharacterId, OwnedPromptFactV1 fact, ResolvedRevelationTarget resolvedTarget)
         {
             ValidateTarget(subjectCharacterId, fact, ConversationParticipantRole.PlayerAvatar);
-            return new AvatarRevelationTarget(subjectCharacterId, fact);
+            RoleTargetFactCoherenceValidator.Validate(resolvedTarget, fact);
+            return new AvatarRevelationTarget(subjectCharacterId, fact, resolvedTarget);
         }
 
         public static AvatarRevelationTarget FromLegacyResolvedTarget(
@@ -44,7 +51,7 @@ namespace Pinder.Core.Conversation
                 visibility,
                 sourceId,
                 revealedBy);
-            return Create(subjectCharacterId, fact);
+            return Create(subjectCharacterId, fact, target);
         }
 
         private static void ValidateTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact, ConversationParticipantRole expectedRole)
@@ -73,21 +80,28 @@ namespace Pinder.Core.Conversation
     /// </summary>
     public sealed class DateeReactionTarget
     {
-        private DateeReactionTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact)
+        private DateeReactionTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact, ResolvedRevelationTarget resolvedTarget)
         {
             SubjectCharacterId = subjectCharacterId;
             Fact = fact;
+            ResolvedTarget = resolvedTarget;
         }
 
         public Guid SubjectCharacterId { get; }
         public OwnedPromptFactV1 Fact { get; }
+        public ResolvedRevelationTarget ResolvedTarget { get; }
         public string SourceId => Fact.SourceId;
         public string Text => Fact.Text;
+        public string TransitionStyle => ResolvedTarget.TransitionStyle;
 
         public static DateeReactionTarget Create(Guid subjectCharacterId, OwnedPromptFactV1 fact)
+            => Create(subjectCharacterId, fact, LegacyResolvedRevelationTargetConversion.LegacyMetadataFromFact(fact));
+
+        public static DateeReactionTarget Create(Guid subjectCharacterId, OwnedPromptFactV1 fact, ResolvedRevelationTarget resolvedTarget)
         {
             ValidateTarget(subjectCharacterId, fact, ConversationParticipantRole.Datee);
-            return new DateeReactionTarget(subjectCharacterId, fact);
+            RoleTargetFactCoherenceValidator.Validate(resolvedTarget, fact);
+            return new DateeReactionTarget(subjectCharacterId, fact, resolvedTarget);
         }
 
         public static DateeReactionTarget FromLegacyResolvedTarget(
@@ -108,7 +122,7 @@ namespace Pinder.Core.Conversation
                 visibility,
                 sourceId,
                 revealedBy);
-            return Create(subjectCharacterId, fact);
+            return Create(subjectCharacterId, fact, target);
         }
 
         private static void ValidateTarget(Guid subjectCharacterId, OwnedPromptFactV1 fact, ConversationParticipantRole expectedRole)
@@ -133,6 +147,40 @@ namespace Pinder.Core.Conversation
 
     internal static class LegacyResolvedRevelationTargetConversion
     {
+        internal static ResolvedRevelationTarget LegacyMetadataFromFact(OwnedPromptFactV1 fact)
+        {
+            if (fact == null) throw new ArgumentNullException(nameof(fact));
+            string registry = fact.SourceKind == PromptFactSourceKind.PsychologicalStake
+                ? EmotionStemSelectionRules.StakeRegistry
+                : EmotionStemSelectionRules.BackstoryRegistry;
+            string field = fact.SourceKind == PromptFactSourceKind.PsychologicalStake
+                ? "STAKE_LINE"
+                : "BIO_LIE";
+            int index = fact.SourceKind == PromptFactSourceKind.PsychologicalStake
+                ? (fact.SourceReference.StakeIndex ?? 0)
+                : ResolveBackstoryIndex(fact.SourceReference.BackstoryCategory);
+            return new ResolvedRevelationTarget
+            {
+                Registry = registry,
+                Field = field,
+                Index = index,
+                Manner = "COMPATIBILITY",
+                StemText = fact.Text,
+                TransitionStyle = string.Empty,
+            };
+        }
+
+        private static int ResolveBackstoryIndex(string? category)
+        {
+            if (string.IsNullOrWhiteSpace(category)) return 0;
+            for (int i = 0; i < BackstoryValidator.RequiredCategories.Count; i++)
+            {
+                if (string.Equals(BackstoryValidator.RequiredCategories[i], category, StringComparison.Ordinal))
+                    return i;
+            }
+            return 0;
+        }
+
         public static OwnedPromptFactV1 ToOwnedFact(
             ResolvedRevelationTarget target,
             Guid subjectCharacterId,
@@ -160,6 +208,7 @@ namespace Pinder.Core.Conversation
                 sourceId,
                 target.StemText,
                 revealedBy);
+            RoleTargetFactCoherenceValidator.Validate(target, fact);
 
             RoleFactAccessDecision decision = RoleFactAccessPolicy.Decide(new RoleFactAccessRequest(
                 recipientCharacterId,
@@ -194,22 +243,22 @@ namespace Pinder.Core.Conversation
                 throw new ArgumentNullException(nameof(sourceId));
             }
 
+        }
+    }
+
+    internal static class RoleTargetFactCoherenceValidator
+    {
+        internal static void Validate(ResolvedRevelationTarget target, OwnedPromptFactV1 fact)
+        {
+            if (fact == null) throw new ArgumentNullException(nameof(fact));
             PromptFactSourceKind expectedSourceKind = ResolveExpectedSourceKind(target);
-            if (sourceId.SourceKind != expectedSourceKind)
-            {
-                throw new RoleFactContractException(
-                    "target.source_kind_mismatch",
-                    "source_id format does not match the resolved revelation target registry.");
-            }
-
-            if (sourceId.CharacterId != subjectCharacterId)
-            {
-                throw new RoleFactContractException(
-                    "target.source_id.subject_mismatch",
-                    "source_id character ownership does not match the resolved revelation target owner.");
-            }
-
-            ValidateTargetProvenance(target, sourceId);
+            if (fact.SourceKind != expectedSourceKind)
+                throw new RoleFactContractException("target.source_kind_mismatch", "Target registry and fact source kind do not match.");
+            if (fact.SourceReference.CharacterId != fact.SubjectCharacterId)
+                throw new RoleFactContractException("target.source_id.subject_mismatch", "Target source identity does not match fact owner.");
+            if (!string.Equals(target.StemText, fact.Text, StringComparison.Ordinal))
+                throw new RoleFactContractException("target.stem_text_mismatch", "Target stem text does not match the owned fact.");
+            ValidateTargetProvenance(target, fact.SourceReference);
         }
 
         private static void ValidateTargetProvenance(

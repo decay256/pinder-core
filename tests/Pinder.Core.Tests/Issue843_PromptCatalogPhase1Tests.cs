@@ -29,6 +29,7 @@ namespace Pinder.Core.Tests
     ///   keys across files.
     /// </summary>
     [Trait("Category", "PromptCatalog")]
+    [Collection("StaticWiring")]
     public class Issue843_PromptCatalogPhase1Tests
     {
         private static string PromptsRoot

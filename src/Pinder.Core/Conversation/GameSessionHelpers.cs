@@ -150,7 +150,8 @@ namespace Pinder.Core.Conversation
             SessionShadowTracker? playerShadows = null,
             LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
             LlmConversationSessionSnapshot? avatarSessionSnapshot = null,
-            System.Collections.Generic.IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null)
+            System.Collections.Generic.IReadOnlyList<CharacterEmotionalDirectionSummary> dateeEmotionalDirectionHistory = null,
+            GameSessionState? roleState = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -208,7 +209,21 @@ namespace Pinder.Core.Conversation
                 shadowValues: shadowValues,
                 dateeSessionSnapshot: dateeSessionSnapshot,
                 avatarSessionSnapshot: avatarSessionSnapshot,
-                dateeEmotionalDirectionHistory: directionHistorySnapshot);
+                dateeEmotionalDirectionHistory: directionHistorySnapshot,
+                avatarSpentBackstoryIndices: roleState?.AvatarSpentBackstoryIndices,
+                avatarSpentStakeIndices: roleState?.AvatarSpentStakeIndices,
+                avatarPreviousPhase: roleState?.AvatarPreviousPhase,
+                avatarPreviousResolvedIndex: roleState?.AvatarPreviousResolvedIndex ?? 0,
+                currentAvatarRevelationTarget: roleState?.CurrentAvatarRevelationTarget,
+                currentAvatarCognitiveSubtext: roleState?.CurrentAvatarCognitiveSubtext,
+                currentAvatarCognitiveSubtextFact: roleState?.CurrentAvatarCognitiveSubtextFact,
+                dateeSpentBackstoryIndices: roleState?.DateeSpentBackstoryIndices,
+                dateeSpentStakeIndices: roleState?.DateeSpentStakeIndices,
+                dateePreviousPhase: roleState?.DateePreviousPhase,
+                dateePreviousResolvedIndex: roleState?.DateePreviousResolvedIndex ?? 0,
+                currentDateeReactionTarget: roleState?.CurrentDateeReactionTarget,
+                currentDateeCognitiveSubtext: roleState?.CurrentDateeCognitiveSubtext,
+                currentDateeCognitiveSubtextFact: roleState?.CurrentDateeCognitiveSubtextFact);
         }
 
         /// <summary>
