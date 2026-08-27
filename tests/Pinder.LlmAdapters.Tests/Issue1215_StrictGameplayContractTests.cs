@@ -97,7 +97,7 @@ namespace Pinder.LlmAdapters.Tests
             );
         }
 
-        private sealed class FixedResponseTransport : ILlmTransport
+        private sealed class FixedResponseTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _response;
             public FixedResponseTransport(string response) => _response = response;
@@ -114,6 +114,15 @@ namespace Pinder.LlmAdapters.Tests
                     return Task.FromResult(ValidDirectorJson);
 
                 return Task.FromResult(_response);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                string response = request.SchemaName == "emotional_director" ? ValidDirectorJson : _response;
+                return Task.FromResult(new StructuredLlmResponse(response, provider: "test", model: "test-model"));
             }
         }
 
@@ -202,55 +211,43 @@ namespace Pinder.LlmAdapters.Tests
         {
             var context = MakeDateeContext();
             var transport = new FixedResponseTransport("");
-            var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
-            var adapter = new PinderLlmAdapter(transport, options);
+            var adapter = new PinderLlmAdapter(transport, DateeOptions());
 
             var ex = await Assert.ThrowsAnyAsync<Exception>(async () => await adapter.GetDateeResponseAsync(context));
             AssertContractException(ex, "datee", "empty");
         }
 
         [Fact]
-        public async Task Test7_DateeResponse_MalformedPresentSignals_ThrowsContractException()
+        public async Task Test7_DateeResponse_LegacyVisibleSignals_AreExplicitlyRejected()
         {
             var context = MakeDateeContext();
-            var transport = new FixedResponseTransport(
-                "This is a valid message.\n" +
-                "[SIGNALS]\n" +
-                "TELL: NotAStat (This is a malformed tell because NotAStat is not a stat)"
-            );
-            var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
-            var adapter = new PinderLlmAdapter(transport, options);
+            var transport = new FixedResponseTransport(DateeJson(
+                "This is a valid message.\n[SIGNALS]\nTELL: Charm (legacy visible signal)"));
+            var adapter = new PinderLlmAdapter(transport, DateeOptions());
 
-            var ex = await Assert.ThrowsAnyAsync<Exception>(async () => await adapter.GetDateeResponseAsync(context));
-            AssertContractException(ex, "datee", "malformed");
+            var ex = await Assert.ThrowsAsync<LlmContractException>(() => adapter.GetDateeResponseAsync(context));
+            Assert.Equal("legacy_signal_marker", ex.Reason);
+            Assert.Equal(DateePerformanceStructuredContract.ParserName, ex.ParserName);
         }
 
         [Fact]
         public async Task Test7b_DateeResponse_SignalsWithoutResponseText_ThrowsContractException()
         {
             var context = MakeDateeContext();
-            var transport = new FixedResponseTransport(
-                "[SIGNALS]\n" +
-                "TELL: Charm (she twirls her hair when nervous)"
-            );
+            var transport = new FixedResponseTransport(DateeJson("", tellStat: "CHARM"));
             LlmContractViolation? violation = null;
-            var options = new PinderLlmAdapterOptions
-            {
-                GameDefinition = GameDefinition.PinderDefaults,
-                MaxContractViolationRetries = 1,
-                OnLlmContractViolation = v => violation = v,
-            };
-            var adapter = new PinderLlmAdapter(transport, options);
+            var adapter = new PinderLlmAdapter(
+                transport,
+                DateeOptions(maxRetries: 1, onViolation: v => violation = v));
 
             var ex = await Assert.ThrowsAsync<LlmContractException>(async () => await adapter.GetDateeResponseAsync(context));
 
             Assert.Equal("datee_response", ex.Phase);
-            Assert.Equal("malformed_signals", ex.Reason);
-            Assert.Contains("missing_response_text", ex.Message);
+            Assert.Equal("invalid_message", ex.Reason);
             Assert.NotNull(violation);
             Assert.Equal("datee_response", violation!.Phase);
-            Assert.Equal("malformed_signals", violation.Reason);
-            Assert.Equal("StrictDateeResponseParser", violation.ParserName);
+            Assert.Equal("invalid_message", violation.Reason);
+            Assert.Equal(DateePerformanceStructuredContract.ParserName, violation.ParserName);
         }
 
         [Fact]
@@ -258,9 +255,8 @@ namespace Pinder.LlmAdapters.Tests
         {
             var context = MakeDateeContext();
             const string expectedMessage = "This is a normal message without any signals block.";
-            var transport = new FixedResponseTransport(expectedMessage);
-            var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
-            var adapter = new PinderLlmAdapter(transport, options);
+            var transport = new FixedResponseTransport(DateeJson(expectedMessage));
+            var adapter = new PinderLlmAdapter(transport, DateeOptions());
 
             var result = await adapter.GetDateeResponseAsync(context);
 
@@ -268,6 +264,27 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(expectedMessage, result.MessageText);
             Assert.Null(result.DetectedTell);
             Assert.Null(result.WeaknessWindow);
+        }
+
+        private static PinderLlmAdapterOptions DateeOptions(
+            int maxRetries = 0,
+            Action<LlmContractViolation>? onViolation = null)
+            => new PinderLlmAdapterOptions
+            {
+                GameDefinition = GameDefinition.PinderDefaults,
+                MaxContractViolationRetries = maxRetries,
+                ContractViolationBackoffMs = 1,
+                OnLlmContractViolation = onViolation,
+            };
+
+        private static string DateeJson(string message, string? tellStat = null)
+        {
+            string tell = tellStat == null
+                ? "null"
+                : "{\"stat\":\"" + tellStat + "\",\"description\":\"legacy fixture tell\"}";
+            return "{\"schema_version\":\"datee_performance.v1\",\"message\":"
+                + System.Text.Json.JsonSerializer.Serialize(message)
+                + ",\"signals\":{\"tell\":" + tell + ",\"weakness\":null}}";
         }
 
         [Fact]

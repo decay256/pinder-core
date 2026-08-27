@@ -227,25 +227,27 @@ namespace Pinder.LlmAdapters
 
             public string? CallId { get; }
 
-            public Task CompleteAcceptedAsync(string outputText, string? semanticEntryId = null)
+            public Task CompleteAcceptedAsync(string outputText, string? semanticEntryId = null, IReadOnlyDictionary<string, string>? resultMetadata = null)
             {
                 AgentJournalUsageCapture capture = CompleteUsage();
                 return _attempt?.CompleteAcceptedAsync(
                     outputText ?? string.Empty,
                     capture.Usage,
                     semanticEntryId,
+                    resultMetadata,
                     capture.Status,
                     capture) ?? Task.CompletedTask;
             }
 
-            public Task CompleteValidationRejectedAsync(string validationCode)
+            public Task CompleteValidationRejectedAsync(string validationCode, IReadOnlyDictionary<string, string>? resultMetadata = null)
             {
                 AgentJournalUsageCapture capture = CompleteUsage();
                 return _attempt?.CompleteValidationRejectedAsync(
                     validationCode,
                     capture.Usage,
                     capture.Status,
-                    capture) ?? Task.CompletedTask;
+                    capture,
+                    resultMetadata) ?? Task.CompletedTask;
             }
 
             public Task CompleteProviderFailedAsync(string errorCode)
@@ -290,15 +292,18 @@ namespace Pinder.LlmAdapters
 
         private sealed class DateeResponseCoreResult
         {
-            public DateeResponseCoreResult(StatefulDateeResult result, AgentJournalCallScope? journal)
+            public DateeResponseCoreResult(StatefulDateeResult result, AgentJournalCallScope? journal, IReadOnlyDictionary<string, string>? journalResultMetadata)
             {
                 Result = result ?? throw new ArgumentNullException(nameof(result));
                 Journal = journal;
+                JournalResultMetadata = journalResultMetadata;
             }
 
             public StatefulDateeResult Result { get; }
 
             public AgentJournalCallScope? Journal { get; }
+
+            public IReadOnlyDictionary<string, string>? JournalResultMetadata { get; }
         }
     }
 }

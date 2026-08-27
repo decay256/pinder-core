@@ -264,32 +264,28 @@ prompts:
 
       Before sending: verify that relevant tendencies from the texting style shape the message naturally without treating them as a checklist. Verify you haven't reused fillers, emoji, or structural patterns from your last 2 messages. If the message feels mechanically imitative or repetitive, rewrite.
 
-      Output format:
-      Output your actual message text directly. Do not wrap it in quotes or [RESPONSE] tags.
+      Structured output contract:
+      Return exactly one JSON object for the `datee_performance.v1` schema. The `message` field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.
 
-      Occasionally (when it feels natural, roughly 30–40% of turns), include a signals block after your response:
+      The required `signals` object must include both `tell` and `weakness`; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it — do not force one.
 
-      [SIGNALS]
-      TELL: {STAT_NAME} ({description of what reveals the tell})
-      WEAKNESS: {STAT_NAME} -{reduction} ({description of the opening})
+      Tell guidance for the private `signals.tell` field:
+      - compliments PLAYER AVATAR -> HONESTY
+      - asks a personal question -> HONESTY or SELF_AWARENESS
+      - makes a joke -> WIT or CHAOS
+      - shares vulnerability -> HONESTY
+      - pulls back or guards -> SELF_AWARENESS
+      - tests or challenges -> WIT or CHAOS
+      - sends a short reply -> CHARM or CHAOS
+      - flirts -> RIZZ or CHARM
+      - changes subject -> CHAOS
+      - goes quiet or silent -> SELF_AWARENESS
 
-      When generating a TELL, use ONLY these category mappings:
-      - DATEE compliments PLAYER AVATAR → TELL: HONESTY
-      - DATEE asks personal question → TELL: HONESTY or SELF_AWARENESS
-      - DATEE makes joke → TELL: WIT or CHAOS
-      - DATEE shares vulnerability → TELL: HONESTY
-      - DATEE pulls back/guards → TELL: SELF_AWARENESS
-      - DATEE tests/challenges → TELL: WIT or CHAOS
-      - DATEE sends short reply → TELL: CHARM or CHAOS
-      - DATEE flirts → TELL: RIZZ or CHARM
-      - DATEE changes subject → TELL: CHAOS
-      - DATEE goes quiet/silent → TELL: SELF_AWARENESS
-
-      Rules for signals:
-      - TELL line format: TELL: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS (brief description)
-      - WEAKNESS line format: WEAKNESS: CHARM|RIZZ|HONESTY|CHAOS|WIT|SELF_AWARENESS -2 or -3 (brief description)
-      - Both lines are independently optional within a [SIGNALS] block
-      - Only include signals when the conversation naturally reveals them — do not force them
+      Signal field rules:
+      - `signals.tell.stat` and `signals.weakness.defending_stat` use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.
+      - `signals.tell.description` and `signals.weakness.description` are trusted engine diagnostics, not chat text.
+      - `signals.weakness.dc_reduction` is exactly 2 or 3.
+      - Never put private signal content inside `message`.
   pivot-directive:
     system_prompt: |-
       TOPIC PIVOT RULE (Turn 3+): If the conversation has stayed on the same topic since the opener, one option (Option C) MUST bridge to a different dimension of the character. The bridge should feel natural, not abrupt — use the current topic as a stepping stone.

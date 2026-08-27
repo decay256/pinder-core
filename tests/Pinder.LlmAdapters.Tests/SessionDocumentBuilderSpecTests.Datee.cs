@@ -107,13 +107,16 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDateePrompt_ContainsSignalsInstruction()
+        public void BuildDateePrompt_ContainsStructuredSignalsInstruction()
         {
             var result = SessionDocumentBuilder.BuildDateePrompt(
                 MakeDateeContext(interestBefore: 10, interestAfter: 12));
 
-            Assert.Contains("[RESPONSE]", result);
-            Assert.Contains("[SIGNALS]", result);
+            Assert.Contains("datee_performance.v1", result);
+            Assert.Contains("signals.tell", result);
+            Assert.Contains("signals.weakness", result);
+            Assert.DoesNotContain("[RESPONSE]", result);
+            Assert.DoesNotContain("[SIGNALS]", result);
         }
 
         [Fact]

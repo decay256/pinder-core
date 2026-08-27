@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using Pinder.Core.Conversation;
 using Pinder.Core.Interfaces;
 
 namespace Pinder.Core.Tests.Phase0
@@ -25,7 +27,7 @@ namespace Pinder.Core.Tests.Phase0
     /// returns <see cref="DefaultResponse"/> (or a per-phase default).
     /// </para>
     /// </summary>
-    public sealed class RecordingLlmTransport : ILlmTransport
+    public sealed class RecordingLlmTransport : ILlmTransport, IStructuredConversationLlmTransport
     {
         private const string ValidEmotionalDirection =
             "{\"schema_version\":\"emotional_director.v1\"," +
@@ -67,6 +69,8 @@ namespace Pinder.Core.Tests.Phase0
         }
 
         public IReadOnlyList<LlmExchange> Exchanges => _exchanges;
+
+        public bool SupportsStructuredConversationMessages => true;
 
         public IReadOnlyList<LlmExchange> ExchangesByPhase(string phase)
         {
@@ -178,6 +182,38 @@ namespace Pinder.Core.Tests.Phase0
             _callCounter++;
             _exchanges.Add(ex);
             return Task.FromResult(response);
+        }
+
+        public async Task<StructuredLlmResponse> SendStructuredAsync(
+            StructuredLlmRequest request,
+            CancellationToken ct = default)
+        {
+            string response = await SendAsync(
+                request.SystemPrompt,
+                request.UserMessage,
+                request.Temperature,
+                request.MaxTokens,
+                request.Phase,
+                ct);
+            return StructuredResponse(request, response);
+        }
+
+        public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+            StructuredLlmRequest request,
+            IReadOnlyList<ConversationMessage> priorMessages,
+            CancellationToken cancellationToken = default)
+            => SendStructuredAsync(request, cancellationToken);
+
+        private static StructuredLlmResponse StructuredResponse(
+            StructuredLlmRequest request,
+            string response)
+        {
+            string json = request.SchemaName == "datee_performance"
+                ? "{\"schema_version\":\"datee_performance.v1\",\"message\":"
+                    + System.Text.Json.JsonSerializer.Serialize(response)
+                    + ",\"signals\":{\"tell\":null,\"weakness\":null}}"
+                : response;
+            return new StructuredLlmResponse(json, provider: "test", model: "test-model");
         }
     }
 }

@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using Pinder.Core.Conversation;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Stats;
 
 namespace Pinder.LlmAdapters.Anthropic
@@ -10,8 +11,15 @@ namespace Pinder.LlmAdapters.Anthropic
     /// including the main message and embedded signals like Tell and WeaknessWindow,
     /// from both raw text and structured tool_use JSON.
     /// </summary>
+    [Obsolete("Legacy DATEE response parsers are disabled. Use datee_performance.v1 structured output.")]
     internal static class DateeResponseParsers
     {
+        internal const string LegacyTextContractReason = "legacy_datee_text_contract_removed";
+        internal const string LegacyToolContractReason = "legacy_datee_tool_contract_removed";
+        internal const string LegacyParserName = "DateeResponseParsers";
+
+        private static bool LegacyEntryPointsDisabled => true;
+
         // #1124: the [SIGNALS] block (TELL/WEAKNESS) is parsed via the single
         // canonical GmOutputContract — the ONE output-format contract shared by
         // both GM sessions — rather than a duplicate regex here. The datee path
@@ -68,11 +76,17 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses strict validation logic.
         /// </para>
         /// </summary>
+        [Obsolete("Legacy plain-text DATEE output is rejected. Use datee_performance.v1 structured output.")]
         public static DateeResponse ParseDateeResponseText(
             string? llmResponse,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null,
             bool requireValidatedSignals = false)
         {
+            if (LegacyEntryPointsDisabled)
+            {
+                throw LegacyContractRejected(LegacyTextContractReason, "plain-text");
+            }
+
             if (string.IsNullOrWhiteSpace(llmResponse))
             {
                 return new DateeResponse("", null, null);
@@ -160,10 +174,16 @@ namespace Pinder.LlmAdapters.Anthropic
         /// Gameplay production uses strict validation logic.
         /// </para>
         /// </summary>
+        [Obsolete("Legacy DATEE tool payloads are rejected. Use datee_performance.v1 structured output.")]
         internal static DateeResponse? ParseDateeResponseTool(
             JObject toolInput,
             Action<OperationalDiagnosticEvent>? onDiagnostic = null)
         {
+            if (LegacyEntryPointsDisabled)
+            {
+                throw LegacyContractRejected(LegacyToolContractReason, "tool");
+            }
+
             try
             {
                 if (!TryReadRequiredString(toolInput, "message", out var message))
@@ -250,6 +270,18 @@ namespace Pinder.LlmAdapters.Anthropic
             {
                 return null; // Malformed — fall back to text parsing
             }
+        }
+
+        private static LlmContractException LegacyContractRejected(string reason, string legacyShape)
+        {
+            return new LlmContractException(
+                phase: LlmPhase.DateeResponse,
+                reason: reason,
+                message: "Legacy DATEE " + legacyShape + " parsing is disabled; use datee_performance.v1 structured output.",
+                provider: null,
+                model: null,
+                parserName: LegacyParserName,
+                signalCount: 0);
         }
 
         private static bool TryReadRequiredString(JObject obj, string propertyName, out string value)

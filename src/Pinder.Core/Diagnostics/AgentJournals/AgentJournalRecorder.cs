@@ -420,6 +420,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string outputText,
             AgentJournalUsage? usage,
             string? semanticEntryId = null,
+            IReadOnlyDictionary<string, string>? resultMetadata = null,
             AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown,
             AgentJournalUsageCapture? usageCapture = null)
         {
@@ -430,6 +431,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 validationCode: AgentJournalTerminalCodes.Accepted,
                 errorCode: null,
                 semanticEntryId: semanticEntryId,
+                resultMetadata: resultMetadata,
                 usageStatus: usageStatus,
                 usageCapture: usageCapture);
         }
@@ -438,7 +440,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string validationCode,
             AgentJournalUsage? usage = null,
             AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown,
-            AgentJournalUsageCapture? usageCapture = null)
+            AgentJournalUsageCapture? usageCapture = null,
+            IReadOnlyDictionary<string, string>? resultMetadata = null)
         {
             return CompleteTerminalAsync(
                 AgentJournalTerminalStatus.Rejected,
@@ -449,6 +452,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     : validationCode,
                 errorCode: null,
                 semanticEntryId: null,
+                resultMetadata: resultMetadata,
                 usageStatus: usageStatus,
                 usageCapture: usageCapture);
         }
@@ -468,6 +472,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     ? AgentJournalTerminalCodes.ProviderFailed
                     : errorCode,
                 semanticEntryId: null,
+                resultMetadata: null,
                 usageStatus: usageStatus,
                 usageCapture: usageCapture);
         }
@@ -488,6 +493,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     ? AgentJournalTerminalCodes.Cancelled
                     : errorCode,
                 semanticEntryId: null,
+                resultMetadata: null,
                 usageStatus: usageStatus,
                 usageCapture: usageCapture);
         }
@@ -501,6 +507,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 validationCode: null,
                 errorCode: AgentJournalTerminalCodes.Abandoned,
                 semanticEntryId: null,
+                resultMetadata: null,
                 usageStatus: AgentJournalUsageStatus.Unavailable,
                 usageCapture: null));
         }
@@ -512,6 +519,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string? validationCode,
             string? errorCode,
             string? semanticEntryId,
+            IReadOnlyDictionary<string, string>? resultMetadata,
             AgentJournalUsageStatus usageStatus,
             AgentJournalUsageCapture? usageCapture)
         {
@@ -536,6 +544,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                         validationCode,
                         errorCode,
                         semanticEntryId,
+                        resultMetadata,
                         ResolveEmittedUsageCapture(usageStatus, usage, usageCapture));
                 }
 
@@ -624,6 +633,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string? validationCode,
             string? errorCode,
             string? semanticEntryId,
+            IReadOnlyDictionary<string, string>? resultMetadata,
             AgentJournalUsageCapture usageCapture)
         {
             // Validate the complete immutable terminal payload before reserving lifecycle work.
@@ -647,7 +657,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 effectiveInputTokens: usageCapture.EffectiveInputTokens,
                 effectiveOutputTokens: usageCapture.EffectiveOutputTokens,
                 effectiveTotalTokens: usageCapture.EffectiveTotalTokens,
-                telemetryDiscrepancyCode: usageCapture.TelemetryDiscrepancyCode);
+                telemetryDiscrepancyCode: usageCapture.TelemetryDiscrepancyCode,
+                resultMetadata: resultMetadata);
             ThrowIfInvalidResult(resultRecord);
 
             MessageLinkRecord? linkRecord = null;

@@ -836,7 +836,12 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             }
         }
 
-        private sealed class ScriptedConversationTransport : ILlmTransport, IConversationLlmTransport, ITokenUsageProvider, IAgentJournalAttemptTelemetryProvider
+        private sealed class ScriptedConversationTransport :
+            ILlmTransport,
+            IConversationLlmTransport,
+            IStructuredConversationLlmTransport,
+            ITokenUsageProvider,
+            IAgentJournalAttemptTelemetryProvider
         {
             private readonly object _gate = new object();
             private TelemetryScope? _activeScope;
@@ -851,6 +856,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             private int _callCount;
 
             public bool SupportsConversationMessages => true;
+            public bool SupportsStructuredConversationMessages => true;
             public string? DefaultDialogueOutput { get; set; }
 
             public void Queue(
@@ -903,6 +909,40 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 var captured = _priorMessages.GetOrAdd(phase ?? string.Empty, _ => new ConcurrentQueue<ConversationMessage>());
                 foreach (ConversationMessage message in priorMessages) captured.Enqueue(message);
                 return DequeueAsync(phase, cancellationToken);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+                => DequeueStructuredAsync(request, ct);
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+            {
+                var captured = _priorMessages.GetOrAdd(
+                    request.Phase,
+                    _ => new ConcurrentQueue<ConversationMessage>());
+                foreach (ConversationMessage message in priorMessages) captured.Enqueue(message);
+                return DequeueStructuredAsync(request, cancellationToken);
+            }
+
+            private async Task<StructuredLlmResponse> DequeueStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken cancellationToken)
+            {
+                string output = await DequeueAsync(request.Phase, cancellationToken);
+                if (request.SchemaName == "datee_performance" && !string.IsNullOrWhiteSpace(output))
+                {
+                    output = "{\"schema_version\":\"datee_performance.v1\",\"message\":"
+                        + System.Text.Json.JsonSerializer.Serialize(output)
+                        + ",\"signals\":{\"tell\":null,\"weakness\":null}}";
+                }
+                return new StructuredLlmResponse(
+                    output,
+                    provider: "scripted-provider",
+                    model: "scripted-model");
             }
 
             private Task<string> DequeueAsync(string? phase, CancellationToken cancellationToken)
