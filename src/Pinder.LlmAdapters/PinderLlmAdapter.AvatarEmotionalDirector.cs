@@ -28,15 +28,8 @@ namespace Pinder.LlmAdapters
                 avatarHistory,
                 "avatar").ConfigureAwait(false);
             PiConversationBranch branch = await session.ForkAsync("avatar-private-analysis").ConfigureAwait(false);
-            AgentJournalCallScope? disposalJournal = null;
             try
             {
-                disposalJournal = await StartBranchDisposalJournalAsync(
-                        session,
-                        branch,
-                        context.CurrentTurn,
-                        context.AgentJournalContext)
-                    .ConfigureAwait(false);
                 await ObserveAgentJournalSessionSnapshotAsync("avatar.director.parent.restored", "avatar", session).ConfigureAwait(false);
                 await ObserveAgentJournalBranchSnapshotAsync("avatar.director.branch.restored", "avatar-director", branch).ConfigureAwait(false);
                 IReadOnlyList<ConversationMessage> priorMessages = await branch.BuildSemanticHistoryAsync()
@@ -53,8 +46,6 @@ namespace Pinder.LlmAdapters
                 await ObserveAgentJournalSessionSnapshotAsync("avatar.director.parent.before-dispose", "avatar", session).ConfigureAwait(false);
                 await ObserveAgentJournalBranchSnapshotAsync("avatar.director.branch.before-dispose", "avatar-director", branch).ConfigureAwait(false);
                 await branch.DisposeAsync().ConfigureAwait(false);
-                if (disposalJournal != null)
-                    await disposalJournal.CompleteAcceptedAsync("disposed").ConfigureAwait(false);
             }
         }
 

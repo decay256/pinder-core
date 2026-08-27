@@ -8,7 +8,7 @@ namespace Pinder.Core.Tests.AgentJournals
     {
         [Theory]
         [InlineData(0, AgentJournalUsageStatus.Unavailable, false)]
-        [InlineData(1, AgentJournalUsageStatus.Complete, true)]
+        [InlineData(1, AgentJournalUsageStatus.Incomplete, true)]
         [InlineData(2, AgentJournalUsageStatus.Incomplete, true)]
         public void Cumulative_delta_is_complete_only_for_exactly_one_provider_call(
             int callCount,
@@ -29,6 +29,10 @@ namespace Pinder.Core.Tests.AgentJournals
             AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(measurement);
 
             Assert.Equal(expectedStatus, capture.Status);
+            if (callCount == 1)
+            {
+                Assert.Equal("legacy_cumulative_usage_delta", capture.UsageStatusReason);
+            }
             Assert.Equal(expectsUsage, capture.Usage != null);
             if (expectsUsage)
             {

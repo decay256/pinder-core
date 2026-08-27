@@ -84,6 +84,17 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
             Assert.Null(record.Usage.CacheCreationInputTokens);
             Assert.Null(record.Usage.CacheReadInputTokens);
             Assert.Equal(AgentJournalUsageStatus.Unknown, record.UsageStatus);
+            Assert.Null(record.ProviderId);
+            Assert.Null(record.ModelId);
+            Assert.Null(record.RequestedProviderId);
+            Assert.Null(record.RequestedModelId);
+            Assert.Null(record.ObservedStartedAtUnixMilliseconds);
+            Assert.Null(record.ObservedCompletedAtUnixMilliseconds);
+            Assert.Null(record.ObservedDurationMilliseconds);
+            Assert.Null(record.EffectiveInputTokens);
+            Assert.Null(record.EffectiveOutputTokens);
+            Assert.Null(record.EffectiveTotalTokens);
+            Assert.Null(record.TelemetryDiscrepancyCode);
         }
 
         [Fact]

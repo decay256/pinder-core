@@ -142,8 +142,8 @@ namespace Pinder.LlmAdapters
                 maxAttempts,
                 async (attempt, attemptCancellationToken) =>
                 {
-bool recordOneShotJournal = context.AgentJournal != null;
-                    AgentJournalAttempt? journalAttempt = recordOneShotJournal
+                    bool recordOneShotJournal = context.AgentJournal != null;
+                    AgentJournalCallScope oneShotJournal = recordOneShotJournal
                         ? await StartOneShotJournalAsync(
                                 context.AgentJournal,
                                 LlmPhase.DialogueOptions,
@@ -151,8 +151,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 attemptCancellationToken,
                                 journalDocuments)
                             .ConfigureAwait(false)
-                        : null;
-                    var usageMeasurement = TokenUsageMeasurement.Start(_transport);
+                        : AgentJournalCallScope.Disabled;
                     AgentJournalCallScope journal = context.AgentJournalContext != null || !recordOneShotJournal
                         ? await StartConversationJournalAttemptAsync(
                                 ResolveConversationCallPath(context.AgentJournalContext, GameRunConversationJournalInventory.AvatarReply),
@@ -167,7 +166,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                                 correlationContext: context.AgentJournalContext)
                             .ConfigureAwait(false)
                         : AgentJournalCallScope.Disabled;
-                    string? diagnosticCallId = journal.CallId ?? journalAttempt?.InvocationRecord.Correlation.InvocationId;
+                    string? diagnosticCallId = journal.CallId ?? oneShotJournal.CallId;
                     string? providerOutput = null;
                     try
                     {
@@ -267,28 +266,28 @@ bool recordOneShotJournal = context.AgentJournal != null;
                             WarnIfStakeSkipped(context, parsedOptions);
                         }
 
-                        await CompleteAcceptedOneShotAsync(journalAttempt, providerOutput ?? string.Empty, usageMeasurement)
+                        await CompleteAcceptedOneShotAsync(oneShotJournal, providerOutput ?? string.Empty)
                             .ConfigureAwait(false);
                         await journal.CompleteAcceptedAsync(rawOutput).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Accepted(parsedOptions);
                     }
                     catch (LlmContractException ex)
                     {
-                        await CompleteValidationRejectedOneShotAsync(journalAttempt, ex.Reason, usageMeasurement)
+                        await CompleteValidationRejectedOneShotAsync(oneShotJournal, ex.Reason)
                             .ConfigureAwait(false);
                         await journal.CompleteValidationRejectedAsync(ex.Reason).ConfigureAwait(false);
                         return SemanticOutputRecoveryAttemptResult<DialogueOption[], LlmContractException>.Rejected(ex);
                     }
                     catch (OperationCanceledException)
                     {
-                        await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement)
+                        await CompleteCancelledOneShotAsync(oneShotJournal)
                             .ConfigureAwait(false);
                         await journal.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
                         throw;
                     }
                     catch (Exception ex)
                     {
-                        await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement)
+                        await CompleteProviderFailedOneShotAsync(oneShotJournal, ex)
                             .ConfigureAwait(false);
                         await journal.CompleteProviderFailedAsync(ex.GetType().Name).ConfigureAwait(false);
                         throw;
@@ -417,15 +416,8 @@ bool recordOneShotJournal = context.AgentJournal != null;
             {
                 PiConversationBranch directorBranch = await dateeSession.ForkAsync(
                     "datee-private-analysis").ConfigureAwait(false);
-                AgentJournalCallScope? disposalJournal = null;
                 try
                 {
-                    disposalJournal = await StartBranchDisposalJournalAsync(
-                            dateeSession,
-                            directorBranch,
-                            context.CurrentTurn,
-                            context.AgentJournalContext)
-                        .ConfigureAwait(false);
                     await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.restored", "datee-director", directorBranch).ConfigureAwait(false);
                     IReadOnlyList<ConversationMessage> directorHistory =
                         await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
@@ -442,10 +434,6 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 {
                     await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.before-dispose", "datee-director", directorBranch).ConfigureAwait(false);
                     await directorBranch.DisposeAsync().ConfigureAwait(false);
-                    if (disposalJournal != null)
-                    {
-                        await disposalJournal.CompleteAcceptedAsync("disposed").ConfigureAwait(false);
-                    }
                 }
             }
             else
@@ -908,21 +896,6 @@ bool recordOneShotJournal = context.AgentJournal != null;
             if (documents == null)
             {
                 const string validationCode = "skipped_no_template";
-                AgentJournalAttempt? skippedAttempt = await StartOneShotJournalAsync(
-                        context.AgentJournal,
-                        LlmPhase.Delivery,
-                        1,
-                        ct,
-                        GameRunPromptDocumentBuilder.BuildSuccessImprovementSkippedDocument(validationCode))
-                    .ConfigureAwait(false);
-                if (skippedAttempt != null)
-                {
-                    await skippedAttempt.CompleteValidationRejectedAsync(
-                            validationCode,
-                            usage: null,
-                            usageStatus: AgentJournalUsageStatus.Unavailable)
-                        .ConfigureAwait(false);
-                }
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
                     provider: "primary",
@@ -935,7 +908,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
 
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+            AgentJournalCallScope journalAttempt = await StartOneShotJournalAsync(
                     context.AgentJournal,
                     LlmPhase.Delivery,
                     1,
@@ -943,13 +916,11 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     documents.System,
                     documents.User)
                 .ConfigureAwait(false);
-            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
-
             string? improved;
             bool improvedRejected;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct, callId: journalAttempt.CallId)
                     .ConfigureAwait(false);
                 improved = NormalizeSingleTextOutput(
                     responseText,
@@ -960,25 +931,25 @@ bool recordOneShotJournal = context.AgentJournal != null;
             }
             catch (OperationCanceledException)
             {
-                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                await CompleteCancelledOneShotAsync(journalAttempt).ConfigureAwait(false);
                 throw;
             }
             catch (Exception ex)
             {
-                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex).ConfigureAwait(false);
                 throw;
             }
 
             if (improved == null)
             {
-                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output")
                     .ConfigureAwait(false);
                 return context.DeliveredMessage;
             }
 
             if (improvedRejected)
             {
-                await CompleteValidationRejectedOneShotAsync(journalAttempt, "meta_control_output", usageMeasurement)
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "meta_control_output")
                     .ConfigureAwait(false);
                 RaiseOverlayDegraded(new OverlayDegradedEvent(
                     overlayType: "success_improvement",
@@ -990,7 +961,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 return context.DeliveredMessage;
             }
 
-            await CompleteAcceptedOneShotAsync(journalAttempt, improved, usageMeasurement).ConfigureAwait(false);
+            await CompleteAcceptedOneShotAsync(journalAttempt, improved).ConfigureAwait(false);
             return improved;
         }
 
@@ -1007,7 +978,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     _options.PromptCatalog);
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+            AgentJournalCallScope journalAttempt = await StartOneShotJournalAsync(
                     context.AgentJournal,
                     LlmPhase.Steering,
                     1,
@@ -1015,12 +986,10 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     documents.System,
                     documents.User)
                 .ConfigureAwait(false);
-            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
-
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct, callId: journalAttempt.CallId)
                     .ConfigureAwait(false);
                 // #831: thinking-block stripping is a transport decorator; this trims only.
                 question = NormalizeSingleTextOutput(
@@ -1030,22 +999,22 @@ bool recordOneShotJournal = context.AgentJournal != null;
             }
             catch (OperationCanceledException)
             {
-                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                await CompleteCancelledOneShotAsync(journalAttempt).ConfigureAwait(false);
                 throw;
             }
             catch (Exception ex)
             {
-                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex).ConfigureAwait(false);
                 throw;
             }
             if (question == null)
             {
-                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output")
                     .ConfigureAwait(false);
                 return string.Empty;
             }
 
-            await CompleteAcceptedOneShotAsync(journalAttempt, question, usageMeasurement).ConfigureAwait(false);
+            await CompleteAcceptedOneShotAsync(journalAttempt, question).ConfigureAwait(false);
             return question;
         }
 
@@ -1061,7 +1030,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     _options.PromptCatalog);
             string userContent = documents.User.Text;
             string systemPrompt = documents.System.Text;
-            AgentJournalAttempt? journalAttempt = await StartOneShotJournalAsync(
+            AgentJournalCallScope journalAttempt = await StartOneShotJournalAsync(
                     context.AgentJournal,
                     LlmPhase.HorninessOverlay,
                     1,
@@ -1069,12 +1038,10 @@ bool recordOneShotJournal = context.AgentJournal != null;
                     documents.System,
                     documents.User)
                 .ConfigureAwait(false);
-            var usageMeasurement = TokenUsageMeasurement.Start(_transport);
-
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct, callId: journalAttempt?.InvocationRecord.Correlation.InvocationId)
+                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct, callId: journalAttempt.CallId)
                     .ConfigureAwait(false);
                 question = NormalizeSingleTextOutput(
                     responseText,
@@ -1083,22 +1050,22 @@ bool recordOneShotJournal = context.AgentJournal != null;
             }
             catch (OperationCanceledException)
             {
-                await CompleteCancelledOneShotAsync(journalAttempt, usageMeasurement).ConfigureAwait(false);
+                await CompleteCancelledOneShotAsync(journalAttempt).ConfigureAwait(false);
                 throw;
             }
             catch (Exception ex)
             {
-                await CompleteProviderFailedOneShotAsync(journalAttempt, ex, usageMeasurement).ConfigureAwait(false);
+                await CompleteProviderFailedOneShotAsync(journalAttempt, ex).ConfigureAwait(false);
                 throw;
             }
             if (question == null)
             {
-                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output", usageMeasurement)
+                await CompleteValidationRejectedOneShotAsync(journalAttempt, "empty_output")
                     .ConfigureAwait(false);
                 throw new InvalidOperationException("LLM horniness_question output is empty or whitespace.");
             }
 
-            await CompleteAcceptedOneShotAsync(journalAttempt, question, usageMeasurement).ConfigureAwait(false);
+            await CompleteAcceptedOneShotAsync(journalAttempt, question).ConfigureAwait(false);
             return question;
         }
 
@@ -1537,7 +1504,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
         }
 
 
-        private async Task<AgentJournalAttempt?> StartOneShotJournalAsync(
+        private async Task<AgentJournalCallScope> StartOneShotJournalAsync(
             AgentJournalOneShotContext? journalContext,
             string phase,
             int attemptOrdinal,
@@ -1547,7 +1514,7 @@ bool recordOneShotJournal = context.AgentJournal != null;
             ValidateOneShotJournalConfiguration(journalContext);
             if (_options.AgentJournalHostSink == null || journalContext == null)
             {
-                return null;
+                return AgentJournalCallScope.Disabled;
             }
 
             var inputDocuments = new AgentJournalInputDocument[documents.Length];
@@ -1571,8 +1538,9 @@ bool recordOneShotJournal = context.AgentJournal != null;
                 WriteTimeout = _options.AgentJournalWriteTimeout,
             };
 
-            return await new AgentJournalRecorder(recorderContext).StartAsync(ct)
+            AgentJournalAttempt attempt = await new AgentJournalRecorder(recorderContext).StartAsync(ct)
                 .ConfigureAwait(false);
+            return new AgentJournalCallScope(attempt, _transport);
         }
 
         private void ValidateOneShotJournalConfiguration(AgentJournalOneShotContext? journalContext)
@@ -1581,62 +1549,30 @@ bool recordOneShotJournal = context.AgentJournal != null;
         }
 
         private static async Task CompleteAcceptedOneShotAsync(
-            AgentJournalAttempt? attempt,
-            string outputText,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalCallScope attempt,
+            string outputText)
         {
-            if (attempt != null)
-            {
-                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
-                await attempt.CompleteAcceptedAsync(
-                    outputText,
-                    capture.Usage,
-                    usageStatus: capture.Status).ConfigureAwait(false);
-            }
+            await attempt.CompleteAcceptedAsync(outputText).ConfigureAwait(false);
         }
 
         private static async Task CompleteValidationRejectedOneShotAsync(
-            AgentJournalAttempt? attempt,
-            string validationCode,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalCallScope attempt,
+            string validationCode)
         {
-            if (attempt != null)
-            {
-                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
-                await attempt.CompleteValidationRejectedAsync(
-                    validationCode,
-                    capture.Usage,
-                    capture.Status).ConfigureAwait(false);
-            }
+            await attempt.CompleteValidationRejectedAsync(validationCode).ConfigureAwait(false);
         }
 
         private static async Task CompleteCancelledOneShotAsync(
-            AgentJournalAttempt? attempt,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalCallScope attempt)
         {
-            if (attempt != null)
-            {
-                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
-                await attempt.CompleteCancelledAsync(
-                    AgentJournalTerminalCodes.Cancelled,
-                    usage: capture.Usage,
-                    usageStatus: capture.Status).ConfigureAwait(false);
-            }
+            await attempt.CompleteCancelledAsync(AgentJournalTerminalCodes.Cancelled).ConfigureAwait(false);
         }
 
         private static async Task CompleteProviderFailedOneShotAsync(
-            AgentJournalAttempt? attempt,
-            Exception exception,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalCallScope attempt,
+            Exception exception)
         {
-            if (attempt != null)
-            {
-                AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(usageMeasurement);
-                await attempt.CompleteProviderFailedAsync(
-                    exception.GetType().Name,
-                    capture.Usage,
-                    capture.Status).ConfigureAwait(false);
-            }
+            await attempt.CompleteProviderFailedAsync(exception.GetType().Name).ConfigureAwait(false);
         }
 
         private async Task ObserveAgentJournalSessionSnapshotAsync(

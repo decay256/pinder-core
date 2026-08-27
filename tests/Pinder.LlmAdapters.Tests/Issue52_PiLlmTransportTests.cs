@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
 using Pinder.Core.Conversation;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.LlmAdapters;
 using Pinder.LlmAdapters.Pi;
 using Xunit;
@@ -43,6 +44,110 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(1, usage.CacheCreationInputTokens);
             Assert.Equal(3, usage.OutputTokens);
             Assert.Equal(1, usage.CallCount);
+        }
+
+        [Fact]
+        public async Task AttemptTelemetry_CapturesExactPiUsageProviderModelAndTiming()
+        {
+            long[] timestamps = { 1000L, 1010L, 1042L };
+            int timestampIndex = -1;
+            var final = Response("answer");
+            final.Usage = new Usage { Input = 12, Output = 4, CacheRead = 3, CacheWrite = 2, Cost = new UsageCost() };
+            var transport = new PiLlmTransport(
+                Model("requested-model"),
+                (_, __, ___) => Task.FromResult(final),
+                timestampMilliseconds: () => timestamps[Math.Min(Interlocked.Increment(ref timestampIndex), timestamps.Length - 1)]);
+            var telemetry = Assert.IsAssignableFrom<IAgentJournalAttemptTelemetryProvider>(transport);
+
+            using IAgentJournalAttemptTelemetryScope attempt =
+                telemetry.StartAgentJournalAttemptTelemetry("invocation-usage");
+            string result = await transport.SendAsync("system", "user");
+            AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(attempt);
+
+            Assert.Equal("answer", result);
+            Assert.Equal(AgentJournalUsageStatus.Complete, capture.Status);
+            Assert.Equal("pi_assistant_message_usage", capture.UsageStatusReason);
+            Assert.Equal(12, capture.Usage!.InputTokens);
+            Assert.Equal(4, capture.Usage.OutputTokens);
+            Assert.Equal(3, capture.Usage.CacheReadInputTokens);
+            Assert.Equal(2, capture.Usage.CacheCreationInputTokens);
+            Assert.Equal("openai", capture.ProviderId);
+            Assert.Equal("model-1", capture.ModelId);
+            Assert.Equal(1000L, capture.ObservedStartedAtUnixMilliseconds);
+            Assert.Equal(1042L, capture.ObservedCompletedAtUnixMilliseconds);
+            Assert.Equal(42L, capture.ObservedDurationMilliseconds);
+            Assert.Equal(14, capture.EffectiveInputTokens);
+            Assert.Equal(4, capture.EffectiveOutputTokens);
+            Assert.Equal(18, capture.EffectiveTotalTokens);
+        }
+
+        [Fact]
+        public async Task AttemptTelemetry_ZeroProviderUsageIsComplete()
+        {
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                (_, __, ___) => Task.FromResult(Response("answer")));
+            var telemetry = Assert.IsAssignableFrom<IAgentJournalAttemptTelemetryProvider>(transport);
+
+            using IAgentJournalAttemptTelemetryScope attempt =
+                telemetry.StartAgentJournalAttemptTelemetry("invocation-zero");
+            await transport.SendAsync("system", "user");
+            AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(attempt);
+
+            Assert.Equal(AgentJournalUsageStatus.Complete, capture.Status);
+            Assert.Equal(0, capture.Usage!.InputTokens);
+            Assert.Equal(0, capture.Usage.OutputTokens);
+            Assert.Equal(0, capture.Usage.TotalTokens);
+            Assert.Equal(0, capture.Usage.CacheReadInputTokens);
+            Assert.Equal(0, capture.Usage.CacheCreationInputTokens);
+        }
+
+        [Fact]
+        public async Task AttemptTelemetry_OverlappingPiCallsStayAttemptScoped()
+        {
+            var bothEntered = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            int entered = 0;
+            var transport = new PiLlmTransport(
+                Model("model-1"),
+                async (_, __, ___) =>
+                {
+                    int callNumber = Interlocked.Increment(ref entered);
+                    if (callNumber == 2) bothEntered.SetResult(true);
+                    await bothEntered.Task.ConfigureAwait(false);
+                    var response = Response(callNumber.ToString());
+                    response.Usage = callNumber == 1
+                        ? new Usage { Input = 11, Output = 3, Cost = new UsageCost() }
+                        : new Usage { Input = 22, Output = 6, Cost = new UsageCost() };
+                    return response;
+                });
+            var telemetry = Assert.IsAssignableFrom<IAgentJournalAttemptTelemetryProvider>(transport);
+
+            Task<AgentJournalUsageCapture> first = CaptureAsync(telemetry, transport, "invocation-a");
+            Task<AgentJournalUsageCapture> second = CaptureAsync(telemetry, transport, "invocation-b");
+            AgentJournalUsageCapture[] captures = await Task.WhenAll(first, second);
+
+            Assert.Equal(2, captures.Select(capture => capture.Usage!.InputTokens).Distinct().Count());
+            Assert.All(captures, capture => Assert.Equal(AgentJournalUsageStatus.Complete, capture.Status));
+        }
+
+        [Fact]
+        public async Task AttemptTelemetry_ModelMismatchIsReportedWithoutNormalizingObservedModel()
+        {
+            var final = Response("answer");
+            final.ResponseModel = "observed-model";
+            var transport = new PiLlmTransport(
+                Model("requested-model"),
+                (_, __, ___) => Task.FromResult(final));
+            var telemetry = Assert.IsAssignableFrom<IAgentJournalAttemptTelemetryProvider>(transport);
+
+            using IAgentJournalAttemptTelemetryScope attempt =
+                telemetry.StartAgentJournalAttemptTelemetry("invocation-mismatch");
+            await transport.SendAsync("system", "user");
+            AgentJournalUsageCapture capture = AgentJournalUsageCapture.Capture(attempt);
+
+            Assert.Equal("requested-model", capture.RequestedModelId);
+            Assert.Equal("observed-model", capture.ModelId);
+            Assert.Equal("provider_model_mismatch", capture.TelemetryDiscrepancyCode);
         }
 
         [Fact]
@@ -331,6 +436,17 @@ namespace Pinder.LlmAdapters.Tests
                 Api = KnownApi.OpenAIResponses,
                 Provider = KnownProvider.OpenAI
             };
+        }
+
+        private static async Task<AgentJournalUsageCapture> CaptureAsync(
+            IAgentJournalAttemptTelemetryProvider telemetry,
+            PiLlmTransport transport,
+            string invocationId)
+        {
+            using IAgentJournalAttemptTelemetryScope attempt =
+                telemetry.StartAgentJournalAttemptTelemetry(invocationId);
+            await transport.SendAsync("system", invocationId);
+            return AgentJournalUsageCapture.Capture(attempt);
         }
 
         private static AssistantMessage Response(

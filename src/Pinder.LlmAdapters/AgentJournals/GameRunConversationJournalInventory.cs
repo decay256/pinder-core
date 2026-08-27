@@ -11,7 +11,6 @@ namespace Pinder.LlmAdapters.AgentJournals
         public const string AvatarEmotionalDirector = "game.avatar.emotional-director";
         public const string PrefetchBranchClone = "game.prefetch.option-branch";
         public const string SpeculativeBranchClone = "game.speculation.option-branch";
-        public const string DirectorBranchDisposed = "game.emotional-director.branch-disposed";
 
         private static readonly string[] Approved =
         {
@@ -21,7 +20,6 @@ namespace Pinder.LlmAdapters.AgentJournals
             AvatarEmotionalDirector,
             PrefetchBranchClone,
             SpeculativeBranchClone,
-            DirectorBranchDisposed,
         };
 
         private static readonly HashSet<string> ApprovedSet =

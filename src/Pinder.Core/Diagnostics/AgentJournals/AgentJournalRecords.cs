@@ -346,13 +346,37 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string? validationCode = null,
             string? errorCode = null,
             string? completedAtUtc = null,
-            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown)
+            AgentJournalUsageStatus usageStatus = AgentJournalUsageStatus.Unknown,
+            string? usageStatusReason = null,
+            string? providerId = null,
+            string? modelId = null,
+            string? requestedProviderId = null,
+            string? requestedModelId = null,
+            long? observedStartedAtUnixMilliseconds = null,
+            long? observedCompletedAtUnixMilliseconds = null,
+            long? observedDurationMilliseconds = null,
+            int? effectiveInputTokens = null,
+            int? effectiveOutputTokens = null,
+            int? effectiveTotalTokens = null,
+            string? telemetryDiscrepancyCode = null)
         {
             Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
             TerminalStatus = terminalStatus;
             OutputText = outputText;
             Usage = usage;
             UsageStatus = usageStatus;
+            UsageStatusReason = usageStatusReason;
+            ProviderId = providerId;
+            ModelId = modelId;
+            RequestedProviderId = requestedProviderId;
+            RequestedModelId = requestedModelId;
+            ObservedStartedAtUnixMilliseconds = observedStartedAtUnixMilliseconds;
+            ObservedCompletedAtUnixMilliseconds = observedCompletedAtUnixMilliseconds;
+            ObservedDurationMilliseconds = observedDurationMilliseconds;
+            EffectiveInputTokens = effectiveInputTokens;
+            EffectiveOutputTokens = effectiveOutputTokens;
+            EffectiveTotalTokens = effectiveTotalTokens;
+            TelemetryDiscrepancyCode = telemetryDiscrepancyCode;
             ValidationCode = validationCode;
             ErrorCode = errorCode;
             CompletedAtUtc = completedAtUtc;
@@ -365,6 +389,19 @@ namespace Pinder.Core.Diagnostics.AgentJournals
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public AgentJournalUsageStatus UsageStatus { get; }
+
+        public string? UsageStatusReason { get; }
+        public string? ProviderId { get; }
+        public string? ModelId { get; }
+        public string? RequestedProviderId { get; }
+        public string? RequestedModelId { get; }
+        public long? ObservedStartedAtUnixMilliseconds { get; }
+        public long? ObservedCompletedAtUnixMilliseconds { get; }
+        public long? ObservedDurationMilliseconds { get; }
+        public int? EffectiveInputTokens { get; }
+        public int? EffectiveOutputTokens { get; }
+        public int? EffectiveTotalTokens { get; }
+        public string? TelemetryDiscrepancyCode { get; }
 
         public string? ValidationCode { get; }
         public string? ErrorCode { get; }
