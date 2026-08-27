@@ -22,6 +22,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
     {
         private const string DateePrivatePhaseDirector = "director";
         private const string DateePrivatePhasePerformance = "performance";
+        private const string FormerDirectorBranchDisposedCallPath = "game.emotional-director.branch-disposed";
 
         private const string DialogueOptions =
             "OPTION_1\n[STAT: Charm]\n\"Hey, you come here often?\"\n\n" +
@@ -420,7 +421,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 
         [Fact]
         [Trait("CORE-1375", "director_branch_disposed")]
-        public async Task director_branch_disposed()
+        public async Task director_branch_disposed_does_not_emit_fake_llm_records()
         {
             var sink = new RecordingJournalSink();
             var transport = new ScriptedConversationTransport();
@@ -435,11 +436,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 dateeSession: null,
                 avatarSession: null);
 
-            LlmResultRecord disposed = Assert.Single(sink.Results.Where(record =>
-                record.Correlation.OperationId == GameRunConversationJournalInventory.DirectorBranchDisposed));
-            Assert.Equal(AgentJournalTerminalStatus.Succeeded, disposed.TerminalStatus);
-            Assert.Equal(AgentJournalTerminalCodes.Accepted, disposed.ValidationCode);
-            Assert.Equal("disposed", disposed.OutputText);
+            Assert.DoesNotContain(sink.Invocations, record =>
+                record.Correlation.OperationId == FormerDirectorBranchDisposedCallPath);
+            Assert.DoesNotContain(sink.Results, record =>
+                record.Correlation.OperationId == FormerDirectorBranchDisposedCallPath);
         }
 
         [Fact]
@@ -593,7 +593,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         [Fact]
         public void StaticApprovedInventory_IsClosedForConversationVerifier()
         {
-            Assert.Equal(7, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
+            Assert.Equal(6, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
+            Assert.DoesNotContain(FormerDirectorBranchDisposedCallPath, GameRunConversationJournalInventory.ApprovedCallPaths);
             Assert.All(GameRunConversationJournalInventory.ApprovedCallPaths, id =>
                 Assert.True(GameRunConversationJournalInventory.IsApproved(id), id));
         }
@@ -649,6 +650,17 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             Assert.Equal(inputTokens + outputTokens, record.Usage.TotalTokens);
             Assert.Equal(cacheCreationInputTokens, record.Usage.CacheCreationInputTokens);
             Assert.Equal(cacheReadInputTokens, record.Usage.CacheReadInputTokens);
+            Assert.Equal("test_attempt_usage", record.UsageStatusReason);
+            Assert.Equal("scripted-provider", record.ProviderId);
+            Assert.Equal("scripted-model", record.ModelId);
+            Assert.Equal("scripted-provider", record.RequestedProviderId);
+            Assert.Equal("scripted-model", record.RequestedModelId);
+            Assert.Equal(1000L, record.ObservedStartedAtUnixMilliseconds);
+            Assert.Equal(1030L, record.ObservedCompletedAtUnixMilliseconds);
+            Assert.Equal(30L, record.ObservedDurationMilliseconds);
+            Assert.Equal(inputTokens + cacheCreationInputTokens, record.EffectiveInputTokens);
+            Assert.Equal(outputTokens, record.EffectiveOutputTokens);
+            Assert.Equal(inputTokens + cacheCreationInputTokens + outputTokens, record.EffectiveTotalTokens);
         }
 
         private static void AssertTerminalDiagnosticCallId(
@@ -824,9 +836,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             }
         }
 
-        private sealed class ScriptedConversationTransport : ILlmTransport, IConversationLlmTransport, ITokenUsageProvider
+        private sealed class ScriptedConversationTransport : ILlmTransport, IConversationLlmTransport, ITokenUsageProvider, IAgentJournalAttemptTelemetryProvider
         {
             private readonly object _gate = new object();
+            private TelemetryScope? _activeScope;
             private readonly Queue<(string Phase, string? Output, Exception? Error, UsageStep Usage)> _outputs =
                 new Queue<(string, string?, Exception?, UsageStep)>();
             private readonly ConcurrentDictionary<string, ConcurrentQueue<ConversationMessage>> _priorMessages =
@@ -902,12 +915,16 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                         && (_outputs.Count == 0
                             || _outputs.Peek().Phase != LlmPhase.AvatarEmotionalDirector))
                     {
-                        AddUsage(new UsageStep(11, 7, 0, 0));
+                        var usage = new UsageStep(11, 7, 0, 0);
+                        AddUsage(usage);
+                        ObserveUsage(usage);
                         return Task.FromResult(ValidAvatarDirectionJson());
                     }
                     if (_outputs.Count == 0 && phase == LlmPhase.DialogueOptions && DefaultDialogueOutput != null)
                     {
-                        AddUsage(new UsageStep(11, 7, 0, 0));
+                        var usage = new UsageStep(11, 7, 0, 0);
+                        AddUsage(usage);
+                        ObserveUsage(usage);
                         return Task.FromResult(DefaultDialogueOutput);
                     }
                     next = _outputs.Dequeue();
@@ -916,7 +933,15 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 Assert.Equal(next.Phase, phase);
                 if (next.Error != null) return Task.FromException<string>(next.Error);
                 AddUsage(next.Usage);
+                ObserveUsage(next.Usage);
                 return Task.FromResult(next.Output!);
+            }
+
+            public IAgentJournalAttemptTelemetryScope StartAgentJournalAttemptTelemetry(string invocationId)
+            {
+                var scope = new TelemetryScope(this, invocationId, _activeScope);
+                _activeScope = scope;
+                return scope;
             }
 
             public SessionTokenUsage GetSessionUsage()
@@ -936,6 +961,81 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 _cacheReadInputTokens += usage.CacheReadInputTokens;
                 _cacheCreationInputTokens += usage.CacheCreationInputTokens;
                 _callCount += usage.CallCount;
+            }
+
+            private void ObserveUsage(UsageStep usage)
+                => _activeScope?.Observe(usage);
+
+            private sealed class TelemetryScope : IAgentJournalAttemptTelemetryScope
+            {
+                private readonly ScriptedConversationTransport _owner;
+                private readonly string _invocationId;
+                private readonly TelemetryScope? _parent;
+                private UsageStep _usage;
+                private int _observedCalls;
+                private bool _disposed;
+
+                public TelemetryScope(
+                    ScriptedConversationTransport owner,
+                    string invocationId,
+                    TelemetryScope? parent)
+                {
+                    _owner = owner;
+                    _invocationId = invocationId;
+                    _parent = parent;
+                }
+
+                public void Observe(UsageStep usage)
+                {
+                    _usage = _usage.Add(usage);
+                    _observedCalls += usage.CallCount;
+                }
+
+                public AgentJournalAttemptTelemetry Complete()
+                {
+                    if (_observedCalls == 0)
+                    {
+                        return new AgentJournalAttemptTelemetry(
+                            null,
+                            AgentJournalUsageStatus.Unavailable,
+                            "test_attempt_usage_unavailable",
+                            requestedProviderId: "scripted-provider",
+                            requestedModelId: "scripted-model",
+                            observedStartedAtUnixMilliseconds: 1000L);
+                    }
+
+                    int effectiveInput = _usage.InputTokens + _usage.CacheCreationInputTokens;
+                    bool exact = _observedCalls == 1;
+                    return new AgentJournalAttemptTelemetry(
+                        new AgentJournalUsage(
+                            _usage.InputTokens,
+                            _usage.OutputTokens,
+                            _usage.InputTokens + _usage.OutputTokens,
+                            _usage.CacheCreationInputTokens,
+                            _usage.CacheReadInputTokens),
+                        exact ? AgentJournalUsageStatus.Complete : AgentJournalUsageStatus.Incomplete,
+                        exact ? "test_attempt_usage" : "test_attempt_usage_aggregated",
+                        providerId: "scripted-provider",
+                        modelId: "scripted-model",
+                        requestedProviderId: "scripted-provider",
+                        requestedModelId: "scripted-model",
+                        observedStartedAtUnixMilliseconds: 1000L,
+                        observedCompletedAtUnixMilliseconds: 1030L,
+                        observedDurationMilliseconds: 30L,
+                        effectiveInputTokens: effectiveInput,
+                        effectiveOutputTokens: _usage.OutputTokens,
+                        effectiveTotalTokens: effectiveInput + _usage.OutputTokens);
+                }
+
+                public void Dispose()
+                {
+                    if (_disposed) return;
+                    if (ReferenceEquals(_owner._activeScope, this))
+                    {
+                        _owner._activeScope = _parent;
+                    }
+                    _disposed = true;
+                }
             }
 
             private readonly struct UsageStep
@@ -961,6 +1061,14 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 public int CacheReadInputTokens { get; }
                 public int CacheCreationInputTokens { get; }
                 public int CallCount { get; }
+
+                public UsageStep Add(UsageStep other)
+                    => new UsageStep(
+                        InputTokens + other.InputTokens,
+                        OutputTokens + other.OutputTokens,
+                        CacheReadInputTokens + other.CacheReadInputTokens,
+                        CacheCreationInputTokens + other.CacheCreationInputTokens,
+                        CallCount + other.CallCount);
             }
         }
 

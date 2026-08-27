@@ -106,7 +106,8 @@ namespace Pinder.SessionSetup
                             attempt,
                             attemptCancellationToken)
                         .ConfigureAwait(false);
-                    var usageMeasurement = TokenUsageMeasurement.Start(_transport);
+                    using AgentJournalUsageMeasurementScope usageMeasurement =
+                        StartOneShotUsageMeasurement(journalAttempt);
                     string trimmed;
                     bool isComplete;
                     try
@@ -221,6 +222,13 @@ namespace Pinder.SessionSetup
                 .ConfigureAwait(false);
         }
 
+        private AgentJournalUsageMeasurementScope StartOneShotUsageMeasurement(AgentJournalAttempt? journalAttempt)
+        {
+            return journalAttempt == null
+                ? AgentJournalUsageMeasurementScope.Unavailable()
+                : AgentJournalUsageMeasurementScope.Start(_transport, journalAttempt.InvocationRecord.Correlation.InvocationId);
+        }
+
         private AgentJournalOneShotContext? ResolveAgentJournalContext()
         {
             if (_options.AgentJournal != null)
@@ -251,7 +259,7 @@ namespace Pinder.SessionSetup
         private static async Task CompleteAcceptedOneShotAsync(
             AgentJournalAttempt? attempt,
             string outputText,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalUsageMeasurementScope usageMeasurement)
         {
             if (attempt != null)
             {
@@ -259,14 +267,15 @@ namespace Pinder.SessionSetup
                 await attempt.CompleteAcceptedAsync(
                     outputText,
                     capture.Usage,
-                    usageStatus: capture.Status).ConfigureAwait(false);
+                    usageStatus: capture.Status,
+                    usageCapture: capture).ConfigureAwait(false);
             }
         }
 
         private static async Task CompleteValidationRejectedOneShotAsync(
             AgentJournalAttempt? attempt,
             string validationCode,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalUsageMeasurementScope usageMeasurement)
         {
             if (attempt != null)
             {
@@ -274,13 +283,14 @@ namespace Pinder.SessionSetup
                 await attempt.CompleteValidationRejectedAsync(
                     validationCode,
                     capture.Usage,
-                    capture.Status).ConfigureAwait(false);
+                    capture.Status,
+                    capture).ConfigureAwait(false);
             }
         }
 
         private static async Task CompleteCancelledOneShotAsync(
             AgentJournalAttempt? attempt,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalUsageMeasurementScope usageMeasurement)
         {
             if (attempt != null)
             {
@@ -288,14 +298,15 @@ namespace Pinder.SessionSetup
                 await attempt.CompleteCancelledAsync(
                     AgentJournalTerminalCodes.Cancelled,
                     usage: capture.Usage,
-                    usageStatus: capture.Status).ConfigureAwait(false);
+                    usageStatus: capture.Status,
+                    usageCapture: capture).ConfigureAwait(false);
             }
         }
 
         private static async Task CompleteProviderFailedOneShotAsync(
             AgentJournalAttempt? attempt,
             Exception exception,
-            TokenUsageMeasurement usageMeasurement)
+            AgentJournalUsageMeasurementScope usageMeasurement)
         {
             if (attempt != null)
             {
@@ -303,7 +314,8 @@ namespace Pinder.SessionSetup
                 await attempt.CompleteProviderFailedAsync(
                     exception.GetType().Name,
                     capture.Usage,
-                    capture.Status).ConfigureAwait(false);
+                    capture.Status,
+                    capture).ConfigureAwait(false);
             }
         }
 

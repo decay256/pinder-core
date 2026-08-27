@@ -185,6 +185,45 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
+        public async Task one_shot_attempt_telemetry_records_complete_provider_model_request_and_timing()
+        {
+            var sink = new RecordingJournalSink();
+            var diagnostics = new List<OperationalDiagnosticEvent>();
+            var transport = new TelemetryQueueTransport(
+                DialogueOptionsText(),
+                inputTokens: 17,
+                outputTokens: 5,
+                cacheCreationInputTokens: 3,
+                cacheReadInputTokens: 2);
+            var adapter = Adapter(transport, sink, diagnostics);
+
+            DialogueOption[] options = await adapter.GetDialogueOptionsAsync(
+                DialogueContext("game.dialogue-options.telemetry", "dialogue_options_telemetry"));
+
+            Assert.Equal(3, options.Length);
+            Assert.Equal(AgentJournalUsageStatus.Complete, sink.Result.UsageStatus);
+            Assert.Equal("test_attempt_usage", sink.Result.UsageStatusReason);
+            Assert.Equal(17, sink.Result.Usage!.InputTokens);
+            Assert.Equal(5, sink.Result.Usage.OutputTokens);
+            Assert.Equal(3, sink.Result.Usage.CacheCreationInputTokens);
+            Assert.Equal(2, sink.Result.Usage.CacheReadInputTokens);
+            Assert.Equal("observed-provider", sink.Result.ProviderId);
+            Assert.Equal("observed-model", sink.Result.ModelId);
+            Assert.Equal("requested-provider", sink.Result.RequestedProviderId);
+            Assert.Equal("requested-model", sink.Result.RequestedModelId);
+            Assert.Equal(1000L, sink.Result.ObservedStartedAtUnixMilliseconds);
+            Assert.Equal(1040L, sink.Result.ObservedCompletedAtUnixMilliseconds);
+            Assert.Equal(40L, sink.Result.ObservedDurationMilliseconds);
+            Assert.Equal(20, sink.Result.EffectiveInputTokens);
+            Assert.Equal(5, sink.Result.EffectiveOutputTokens);
+            Assert.Equal(25, sink.Result.EffectiveTotalTokens);
+            Assert.Equal(sink.Invocation.Correlation.InvocationId, transport.InvocationIds.Single());
+            Assert.Contains(diagnostics, diagnostic =>
+                diagnostic.Lifecycle == OperationalDiagnosticLifecycle.Terminal
+                && diagnostic.CallId == sink.Invocation.Correlation.InvocationId);
+        }
+
+        [Fact]
         public async Task success_improvement_records_replacement()
         {
             var sink = new RecordingJournalSink();
@@ -437,11 +476,12 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         }
 
         [Fact]
-        public async Task validation_or_skipped_output_success_improvement_without_template_records_unavailable_usage_skip()
+        public async Task validation_or_skipped_output_success_improvement_without_template_emits_overlay_event_without_llm_records()
         {
             var sink = new RecordingJournalSink();
+            var overlays = new List<OverlayDegradedEvent>();
             var transport = new QueueTransport("provider must not be called");
-            var adapter = Adapter(transport, sink);
+            var adapter = Adapter(transport, sink, overlays: overlays);
             var context = new SuccessImprovementContext(
                 "player prompt",
                 "Bea",
@@ -458,14 +498,12 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             string result = await adapter.GetSuccessImprovementAsync(context);
 
             Assert.Equal("original delivery", result);
-            Assert.Single(sink.Invocations);
-            Assert.Single(sink.Results);
-            Assert.Equal("game.delivery.success-improvement.turn-7.skip", sink.Invocation.Correlation.OperationId);
-            Assert.Equal(AgentJournalTerminalStatus.Rejected, sink.Result.TerminalStatus);
-            Assert.Equal("skipped_no_template", sink.Result.ValidationCode);
-            Assert.Equal(AgentJournalUsageStatus.Unavailable, sink.Result.UsageStatus);
-            Assert.Null(sink.Result.Usage);
+            Assert.Empty(sink.Records);
             Assert.Equal(0, transport.CallCount);
+            OverlayDegradedEvent skipped = Assert.Single(overlays);
+            Assert.Equal("success_improvement", skipped.OverlayType);
+            Assert.Equal("skipped_no_template", skipped.Reason);
+            Assert.Equal(OverlayOutcome.Skipped, skipped.Outcome);
         }
 
         [Fact]
@@ -583,7 +621,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         private static PinderLlmAdapter Adapter(
             ILlmTransport transport,
             RecordingJournalSink sink,
-            List<OperationalDiagnosticEvent>? diagnostics = null)
+            List<OperationalDiagnosticEvent>? diagnostics = null,
+            List<OverlayDegradedEvent>? overlays = null)
             => new PinderLlmAdapter(transport, new PinderLlmAdapterOptions
             {
                 GameDefinition = ConfiguredGameDefinition(),
@@ -592,6 +631,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 AgentJournalHostSink = sink,
                 AgentJournalClock = FixedClock,
                 OnDiagnostic = diagnostics == null ? (Action<OperationalDiagnosticEvent>?)null : diagnostics.Add,
+                OnOverlayDegraded = overlays == null ? (Action<OverlayDegradedEvent>?)null : overlays.Add,
             });
 
         private static GameDefinition ConfiguredGameDefinition()
@@ -738,6 +778,135 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
 
             public SessionTokenUsage GetSessionUsage()
                 => throw new InvalidOperationException("usage diagnostics unavailable");
+        }
+
+        private sealed class TelemetryQueueTransport : ILlmTransport, IAgentJournalAttemptTelemetryProvider
+        {
+            private readonly QueueTransport _inner;
+            private TelemetryScope? _activeScope;
+            private readonly int _inputTokens;
+            private readonly int _outputTokens;
+            private readonly int _cacheCreationInputTokens;
+            private readonly int _cacheReadInputTokens;
+
+            public TelemetryQueueTransport(
+                string response,
+                int inputTokens,
+                int outputTokens,
+                int cacheCreationInputTokens,
+                int cacheReadInputTokens)
+            {
+                _inner = new QueueTransport(response);
+                _inputTokens = inputTokens;
+                _outputTokens = outputTokens;
+                _cacheCreationInputTokens = cacheCreationInputTokens;
+                _cacheReadInputTokens = cacheReadInputTokens;
+            }
+
+            public IReadOnlyList<string> InvocationIds => _completedInvocationIds;
+
+            private readonly List<string> _completedInvocationIds = new List<string>();
+
+            public IAgentJournalAttemptTelemetryScope StartAgentJournalAttemptTelemetry(string invocationId)
+            {
+                var scope = new TelemetryScope(this, invocationId, _activeScope);
+                _activeScope = scope;
+                return scope;
+            }
+
+            public async Task<string> SendAsync(
+                string systemPrompt,
+                string userMessage,
+                double temperature = 0.9,
+                int? maxTokens = null,
+                string? phase = null,
+                CancellationToken ct = default)
+            {
+                TelemetryScope? scope = _activeScope;
+                string result = await _inner.SendAsync(systemPrompt, userMessage, temperature, maxTokens, phase, ct)
+                    .ConfigureAwait(false);
+                scope?.Observe(_inputTokens, _outputTokens, _cacheCreationInputTokens, _cacheReadInputTokens);
+                return result;
+            }
+
+            private sealed class TelemetryScope : IAgentJournalAttemptTelemetryScope
+            {
+                private readonly TelemetryQueueTransport _owner;
+                private readonly string _invocationId;
+                private readonly TelemetryScope? _parent;
+                private bool _observed;
+                private int _inputTokens;
+                private int _outputTokens;
+                private int _cacheCreationInputTokens;
+                private int _cacheReadInputTokens;
+                private bool _disposed;
+
+                public TelemetryScope(TelemetryQueueTransport owner, string invocationId, TelemetryScope? parent)
+                {
+                    _owner = owner;
+                    _invocationId = invocationId;
+                    _parent = parent;
+                }
+
+                public void Observe(
+                    int inputTokens,
+                    int outputTokens,
+                    int cacheCreationInputTokens,
+                    int cacheReadInputTokens)
+                {
+                    _observed = true;
+                    _inputTokens = inputTokens;
+                    _outputTokens = outputTokens;
+                    _cacheCreationInputTokens = cacheCreationInputTokens;
+                    _cacheReadInputTokens = cacheReadInputTokens;
+                    _owner._completedInvocationIds.Add(_invocationId);
+                }
+
+                public AgentJournalAttemptTelemetry Complete()
+                {
+                    if (!_observed)
+                    {
+                        return new AgentJournalAttemptTelemetry(
+                            null,
+                            AgentJournalUsageStatus.Unavailable,
+                            "test_attempt_usage_unavailable",
+                            requestedProviderId: "requested-provider",
+                            requestedModelId: "requested-model",
+                            observedStartedAtUnixMilliseconds: 1000L);
+                    }
+
+                    int effectiveInput = _inputTokens + _cacheCreationInputTokens;
+                    return new AgentJournalAttemptTelemetry(
+                        new AgentJournalUsage(
+                            _inputTokens,
+                            _outputTokens,
+                            _inputTokens + _outputTokens,
+                            _cacheCreationInputTokens,
+                            _cacheReadInputTokens),
+                        AgentJournalUsageStatus.Complete,
+                        "test_attempt_usage",
+                        providerId: "observed-provider",
+                        modelId: "observed-model",
+                        requestedProviderId: "requested-provider",
+                        requestedModelId: "requested-model",
+                        observedStartedAtUnixMilliseconds: 1000L,
+                        observedCompletedAtUnixMilliseconds: 1040L,
+                        observedDurationMilliseconds: 40L,
+                        effectiveInputTokens: effectiveInput,
+                        effectiveOutputTokens: _outputTokens,
+                        effectiveTotalTokens: effectiveInput + _outputTokens);
+                }
+
+                public void Dispose()
+                {
+                    if (_disposed) return;
+                    if (ReferenceEquals(_owner._activeScope, this))
+                    {
+                        _owner._activeScope = _parent;
+                    }
+                    _disposed = true;
+                }
+            }
         }
 
         private sealed class QueueTransport : ILlmTransport, ITokenUsageProvider
@@ -895,7 +1064,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
             int cacheCreationInputTokens = 0,
             int cacheReadInputTokens = 0)
         {
-            Assert.Equal(AgentJournalUsageStatus.Complete, result.UsageStatus);
+            Assert.Equal(AgentJournalUsageStatus.Incomplete, result.UsageStatus);
+            Assert.Equal("legacy_cumulative_usage_delta", result.UsageStatusReason);
             Assert.NotNull(result.Usage);
             Assert.Equal(11, result.Usage!.InputTokens);
             Assert.Equal(7, result.Usage.OutputTokens);

@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Threading;
 using System.Threading.Tasks;
 using Pi.AI;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Pinder.Core.Interfaces;
 
 namespace Pinder.LlmAdapters.Pi
@@ -19,7 +20,7 @@ namespace Pinder.LlmAdapters.Pi
     public sealed class PiLlmTransport : ILlmTransport, IConversationLlmTransport, IStreamingLlmTransport,
         IStructuredLlmTransport, IStructuredConversationLlmTransport, IProgressAwareLlmTransport,
         IProgressAwareConversationLlmTransport, IProgressAwareStructuredLlmTransport,
-        IProgressAwareStructuredConversationLlmTransport, ITokenUsageProvider
+        IProgressAwareStructuredConversationLlmTransport, ITokenUsageProvider, IAgentJournalAttemptTelemetryProvider
     {
         private readonly Model _model;
         private readonly Func<Model, Context, ModelsSimpleStreamOptions, Task<AssistantMessage>> _completeAsync;
@@ -30,6 +31,7 @@ namespace Pinder.LlmAdapters.Pi
         private readonly Func<int?, int?>? _maxTokensResolver;
         private readonly PiStructuredOutputMode _structuredOutputMode;
         private readonly object _usageSync = new object();
+        private readonly AsyncLocal<AttemptTelemetryState?> _activeAttemptTelemetry = new AsyncLocal<AttemptTelemetryState?>();
         private long _inputTokens;
         private long _outputTokens;
         private long _cacheReadTokens;
@@ -270,6 +272,23 @@ namespace Pinder.LlmAdapters.Pi
                 responseStatus).ConfigureAwait(false);
 
             return CreateStructuredResponse(response, request, toolName);
+        }
+
+        public IAgentJournalAttemptTelemetryScope StartAgentJournalAttemptTelemetry(string invocationId)
+        {
+            if (string.IsNullOrWhiteSpace(invocationId))
+            {
+                throw new ArgumentException("Agent journal invocation id is required.", nameof(invocationId));
+            }
+
+            var state = new AttemptTelemetryState(
+                invocationId,
+                _model.Provider.Value,
+                _model.Id,
+                _timestampMilliseconds(),
+                _activeAttemptTelemetry.Value);
+            _activeAttemptTelemetry.Value = state;
+            return new AttemptTelemetryScope(this, state);
         }
 
         public SessionTokenUsage GetSessionUsage()
@@ -574,6 +593,8 @@ namespace Pinder.LlmAdapters.Pi
                 _cacheWriteTokens += response.Usage.CacheWrite;
                 _callCount++;
             }
+            AttemptTelemetryState? telemetry = _activeAttemptTelemetry.Value;
+            telemetry?.Observe(response, _timestampMilliseconds());
             try { _responseObserver?.Invoke(response, phase); }
             catch { }
         }
@@ -632,6 +653,140 @@ namespace Pinder.LlmAdapters.Pi
         {
             if (value <= 0) return 0;
             return value >= int.MaxValue ? int.MaxValue : (int)value;
+        }
+
+        private void EndAttemptTelemetry(AttemptTelemetryState state)
+        {
+            if (ReferenceEquals(_activeAttemptTelemetry.Value, state))
+            {
+                _activeAttemptTelemetry.Value = state.Parent;
+            }
+        }
+
+        private sealed class AttemptTelemetryScope : IAgentJournalAttemptTelemetryScope
+        {
+            private readonly PiLlmTransport _owner;
+            private readonly AttemptTelemetryState _state;
+            private bool _disposed;
+
+            public AttemptTelemetryScope(PiLlmTransport owner, AttemptTelemetryState state)
+            {
+                _owner = owner;
+                _state = state;
+            }
+
+            public AgentJournalAttemptTelemetry Complete() => _state.Complete();
+
+            public void Dispose()
+            {
+                if (_disposed) return;
+                _owner.EndAttemptTelemetry(_state);
+                _disposed = true;
+            }
+        }
+
+        private sealed class AttemptTelemetryState
+        {
+            private readonly object _sync = new object();
+            private readonly string _invocationId;
+            private readonly string? _requestedProviderId;
+            private readonly string? _requestedModelId;
+            private readonly long _startedAtMilliseconds;
+            private AssistantMessage? _response;
+            private long? _completedAtMilliseconds;
+            private int _responseCount;
+
+            public AttemptTelemetryState(
+                string invocationId,
+                string? requestedProviderId,
+                string? requestedModelId,
+                long startedAtMilliseconds,
+                AttemptTelemetryState? parent)
+            {
+                _invocationId = invocationId;
+                _requestedProviderId = requestedProviderId;
+                _requestedModelId = requestedModelId;
+                _startedAtMilliseconds = startedAtMilliseconds;
+                Parent = parent;
+            }
+
+            public AttemptTelemetryState? Parent { get; }
+
+            public void Observe(AssistantMessage response, long completedAtMilliseconds)
+            {
+                lock (_sync)
+                {
+                    _response = response;
+                    _completedAtMilliseconds = completedAtMilliseconds;
+                    _responseCount++;
+                }
+            }
+
+            public AgentJournalAttemptTelemetry Complete()
+            {
+                AssistantMessage? response;
+                long? completedAtMilliseconds;
+                int responseCount;
+                lock (_sync)
+                {
+                    response = _response;
+                    completedAtMilliseconds = _completedAtMilliseconds;
+                    responseCount = _responseCount;
+                }
+
+                if (response == null || !completedAtMilliseconds.HasValue)
+                {
+                    return new AgentJournalAttemptTelemetry(
+                        null,
+                        AgentJournalUsageStatus.Unavailable,
+                        "pi_attempt_telemetry_unavailable",
+                        requestedProviderId: _requestedProviderId,
+                        requestedModelId: _requestedModelId,
+                        observedStartedAtUnixMilliseconds: _startedAtMilliseconds);
+                }
+
+                Usage usage = response.Usage ?? Usage.Zero;
+                int inputTokens = ClampToInt(usage.Input);
+                int outputTokens = ClampToInt(usage.Output);
+                int cacheReadTokens = ClampToInt(usage.CacheRead);
+                int cacheWriteTokens = ClampToInt(usage.CacheWrite);
+                int effectiveInputTokens = ClampToInt((long)inputTokens + cacheWriteTokens);
+                int effectiveTotalTokens = ClampToInt((long)effectiveInputTokens + outputTokens);
+                string? providerId = response.Provider.Value;
+                string? modelId = response.ResponseModel ?? response.Model;
+                string? discrepancy = GetDiscrepancyCode(providerId, modelId);
+
+                return new AgentJournalAttemptTelemetry(
+                    new AgentJournalUsage(
+                        inputTokens,
+                        outputTokens,
+                        inputTokens + outputTokens,
+                        cacheWriteTokens,
+                        cacheReadTokens),
+                    responseCount == 1 ? AgentJournalUsageStatus.Complete : AgentJournalUsageStatus.Incomplete,
+                    responseCount == 1 ? "pi_assistant_message_usage" : "pi_multiple_assistant_messages_observed",
+                    providerId,
+                    modelId,
+                    _requestedProviderId,
+                    _requestedModelId,
+                    _startedAtMilliseconds,
+                    completedAtMilliseconds,
+                    Math.Max(0L, completedAtMilliseconds.Value - _startedAtMilliseconds),
+                    effectiveInputTokens,
+                    outputTokens,
+                    effectiveTotalTokens,
+                    discrepancy);
+            }
+
+            private string? GetDiscrepancyCode(string? providerId, string? modelId)
+            {
+                bool providerMismatch = !string.Equals(providerId, _requestedProviderId, StringComparison.Ordinal);
+                bool modelMismatch = !string.Equals(modelId, _requestedModelId, StringComparison.Ordinal);
+                if (providerMismatch && modelMismatch) return "provider_model_mismatch";
+                if (providerMismatch) return "provider_mismatch";
+                if (modelMismatch) return "provider_model_mismatch";
+                return null;
+            }
         }
 
         private sealed class ResponseStatusCapture

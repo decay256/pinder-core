@@ -116,44 +116,6 @@ namespace Pinder.LlmAdapters
                 correlationContext,
                 measureTransportUsage);
 
-        private async Task<AgentJournalCallScope> StartBranchDisposalJournalAsync(
-            PiConversationSession session,
-            PiConversationBranch branch,
-            int? turnId,
-            GameRunAgentJournalContext? correlationContext)
-        {
-            if (correlationContext == null)
-            {
-                if (_options.AgentJournalHostSink == null)
-                {
-                    return AgentJournalCallScope.Disabled;
-                }
-
-                throw new InvalidOperationException(
-                    "A per-call GameRunAgentJournalContext is required for private branch disposal.");
-            }
-
-            string privateBranchId = await branch.GetAgentSessionIdAsync().ConfigureAwait(false);
-            var disposalContext = new GameRunAgentJournalContext(
-                correlationContext.GameRunId,
-                correlationContext.AgentSessionId,
-                correlationContext.RequestId,
-                privateBranchId,
-                correlationContext.BranchKind);
-            return await StartConversationJournalAttemptAsync(
-                GameRunConversationJournalInventory.DirectorBranchDisposed,
-                "emotional_director_branch_disposal",
-                turnId,
-                1,
-                1,
-                "datee-private-analysis",
-                new[] { BuildRuntimeJournalDocument("datee.emotional-director.branch-disposal", "private director branch disposed") },
-                session: session,
-                branchKind: "datee-private-analysis",
-                correlationContext: disposalContext,
-                measureTransportUsage: false).ConfigureAwait(false);
-        }
-
         private static AnnotatedInvocationDocument BuildRuntimeJournalDocument(string documentId, string text)
         {
             return AnnotatedInvocationDocument.Create(
@@ -249,7 +211,8 @@ namespace Pinder.LlmAdapters
             public static readonly AgentJournalCallScope Disabled = new AgentJournalCallScope();
 
             private readonly AgentJournalAttempt? _attempt;
-            private readonly TokenUsageMeasurement? _usageMeasurement;
+            private readonly AgentJournalUsageMeasurementScope? _usageMeasurement;
+            private AgentJournalUsageCapture? _completedUsage;
 
             private AgentJournalCallScope()
             {
@@ -258,8 +221,8 @@ namespace Pinder.LlmAdapters
             public AgentJournalCallScope(AgentJournalAttempt attempt, object? usageSource)
             {
                 _attempt = attempt ?? throw new ArgumentNullException(nameof(attempt));
-                _usageMeasurement = usageSource == null ? null : TokenUsageMeasurement.Start(usageSource);
                 CallId = attempt.InvocationRecord.Correlation.InvocationId;
+                _usageMeasurement = AgentJournalUsageMeasurementScope.Start(usageSource, CallId);
             }
 
             public string? CallId { get; }
@@ -271,7 +234,8 @@ namespace Pinder.LlmAdapters
                     outputText ?? string.Empty,
                     capture.Usage,
                     semanticEntryId,
-                    capture.Status) ?? Task.CompletedTask;
+                    capture.Status,
+                    capture) ?? Task.CompletedTask;
             }
 
             public Task CompleteValidationRejectedAsync(string validationCode)
@@ -280,7 +244,8 @@ namespace Pinder.LlmAdapters
                 return _attempt?.CompleteValidationRejectedAsync(
                     validationCode,
                     capture.Usage,
-                    capture.Status) ?? Task.CompletedTask;
+                    capture.Status,
+                    capture) ?? Task.CompletedTask;
             }
 
             public Task CompleteProviderFailedAsync(string errorCode)
@@ -289,7 +254,8 @@ namespace Pinder.LlmAdapters
                 return _attempt?.CompleteProviderFailedAsync(
                     errorCode,
                     capture.Usage,
-                    capture.Status) ?? Task.CompletedTask;
+                    capture.Status,
+                    capture) ?? Task.CompletedTask;
             }
 
             public Task CompleteCancelledAsync(string errorCode)
@@ -298,16 +264,28 @@ namespace Pinder.LlmAdapters
                 return _attempt?.CompleteCancelledAsync(
                     errorCode,
                     usage: capture.Usage,
-                    usageStatus: capture.Status) ?? Task.CompletedTask;
+                    usageStatus: capture.Status,
+                    usageCapture: capture) ?? Task.CompletedTask;
             }
 
             public ValueTask DisposeAsync()
-                => _attempt == null ? default : _attempt.DisposeAsync();
+            {
+                _usageMeasurement?.Dispose();
+                return _attempt == null ? default : _attempt.DisposeAsync();
+            }
 
             private AgentJournalUsageCapture CompleteUsage()
-                => _usageMeasurement == null
+            {
+                if (_completedUsage != null)
+                {
+                    return _completedUsage;
+                }
+
+                _completedUsage = _usageMeasurement == null
                     ? AgentJournalUsageCapture.Unavailable
-                    : AgentJournalUsageCapture.Capture(_usageMeasurement);
+                    : _usageMeasurement.Complete();
+                return _completedUsage;
+            }
         }
 
         private sealed class DateeResponseCoreResult
