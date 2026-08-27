@@ -89,9 +89,9 @@ namespace Pinder.LlmAdapters
                 context.PlayerHungerForIntimacy ?? 0,
                 context.PlayerTerrorOfRejection ?? 0,
                 context.AvatarEmotionalDirection,
-                context.CognitiveSubtext,
-                context.ResolvedTarget?.StemText,
-                context.ResolvedTarget?.TransitionStyle,
+                context.CognitiveSubtextFact?.Text,
+                context.AvatarRevelationTarget?.Text,
+                context.AvatarRevelationTarget?.TransitionStyle,
                 SessionDocumentBuilder.BuildDialogueOptionsEngineStateInstruction(
                     context,
                     _options.PromptCatalog),
@@ -163,7 +163,8 @@ namespace Pinder.LlmAdapters
                                 systemDocument,
                                 userDocument,
                                 session: journalSession,
-                                correlationContext: context.AgentJournalContext)
+                                correlationContext: context.AgentJournalContext,
+                                roleFactAccessDecisions: context.PromptFactAccessDecisions)
                             .ConfigureAwait(false)
                         : AgentJournalCallScope.Disabled;
                     string? diagnosticCallId = journal.CallId ?? oneShotJournal.CallId;
@@ -471,7 +472,8 @@ namespace Pinder.LlmAdapters
                             systemDocument,
                             dateeDocument,
                             session: dateeSession,
-                            correlationContext: context.AgentJournalContext)
+                            correlationContext: context.AgentJournalContext,
+                            roleFactAccessDecisions: context.PromptFactAccessDecisions)
                         .ConfigureAwait(false);
                     try
                     {
@@ -547,9 +549,9 @@ namespace Pinder.LlmAdapters
                                 hungerForIntimacy: 0,
                                 terrorOfRejection: 0,
                                 direction: emotionalDirection,
-                                cognitiveSubtext: context.CognitiveSubtext,
-                                transitionTarget: context.ResolvedTarget?.StemText,
-                                transitionStyle: context.ResolvedTarget?.TransitionStyle,
+                                cognitiveSubtext: context.CognitiveSubtextFact?.Text,
+                                transitionTarget: context.DateeReactionTarget?.Text,
+                                transitionStyle: context.DateeReactionTarget?.TransitionStyle,
                                 compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
                                     dateePrompt,
                                     "emotional-reaction-performance-direction"),

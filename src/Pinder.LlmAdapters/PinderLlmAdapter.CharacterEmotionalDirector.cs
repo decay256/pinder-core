@@ -31,6 +31,7 @@ namespace Pinder.LlmAdapters
             public IReadOnlyList<ConversationMessage>? PriorMessages { get; set; }
             public PiConversationBranch? PrivateBranch { get; set; }
             public GameRunAgentJournalContext? JournalContext { get; set; }
+            public IReadOnlyList<RoleFactAccessDecision>? RoleFactAccessDecisions { get; set; }
         }
 
         private async Task<CharacterEmotionalDirection> ExecuteCharacterEmotionalDirectorAsync(
@@ -64,7 +65,8 @@ namespace Pinder.LlmAdapters
                                 userDocument,
                                 branch: invocation.PrivateBranch,
                                 branchKind: invocation.BranchKind,
-                                correlationContext: invocation.JournalContext)
+                                correlationContext: invocation.JournalContext,
+                                roleFactAccessDecisions: invocation.RoleFactAccessDecisions)
                             .ConfigureAwait(false);
 
                         CharacterEmotionalDirection direction;

@@ -15,6 +15,8 @@ namespace Pinder.Core.Tests
 {
     public class Issue1159_OrchestratorCognitiveAndTransitionTests
     {
+        private static readonly Guid PlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000071");
+        private static readonly Guid DateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000072");
         private sealed class FixedDice : IDiceRoller
         {
             private readonly int _value;
@@ -190,8 +192,8 @@ namespace Pinder.Core.Tests
             int hungerForIntimacy = 0,
             int terrorOfRejection = 0)
         {
-            var player = MakeProfile("Velvet", psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
-            var datee = MakeProfile("Sable", psychiatricDiagnosis: dateeDiagnosis);
+            var player = MakeProfile("Velvet", PlayerCharacterId, psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
+            var datee = MakeProfile("Sable", DateeCharacterId, psychiatricDiagnosis: dateeDiagnosis);
 
             return new GameSession(
                 player,
@@ -209,6 +211,7 @@ namespace Pinder.Core.Tests
 
         private static CharacterProfile MakeProfile(
             string name,
+            Guid characterId,
             IReadOnlyDictionary<string, string>? psychiatricDiagnosis)
         {
             return new CharacterProfile(
@@ -217,7 +220,8 @@ namespace Pinder.Core.Tests
                 name,
                 new TimingProfile(5, 1.0f, 0.0f, "neutral"),
                 level: 1,
-                psychiatricDiagnosis: psychiatricDiagnosis);
+                psychiatricDiagnosis: psychiatricDiagnosis,
+                characterId: characterId);
         }
 
     }

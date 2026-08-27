@@ -1,4 +1,5 @@
 using System;
+using Pinder.Core.Diagnostics.AgentJournals;
 
 namespace Pinder.Core.Conversation
 {
@@ -20,13 +21,15 @@ namespace Pinder.Core.Conversation
             string agentSessionId,
             string? requestId = null,
             string? branchId = null,
-            GameRunConversationBranchKind branchKind = GameRunConversationBranchKind.Main)
+            GameRunConversationBranchKind branchKind = GameRunConversationBranchKind.Main,
+            IAgentJournalSink? hostSink = null)
         {
             GameRunId = Required(gameRunId, nameof(gameRunId));
             AgentSessionId = Required(agentSessionId, nameof(agentSessionId));
             RequestId = requestId;
             BranchId = branchId;
             BranchKind = branchKind;
+            HostSink = hostSink;
         }
 
         public string GameRunId { get; }
@@ -34,6 +37,7 @@ namespace Pinder.Core.Conversation
         public string? RequestId { get; }
         public string? BranchId { get; }
         public GameRunConversationBranchKind BranchKind { get; }
+        public IAgentJournalSink? HostSink { get; }
 
         public GameRunAgentJournalContext ForBranch(
             GameRunConversationBranchKind branchKind,
@@ -50,7 +54,8 @@ namespace Pinder.Core.Conversation
                 AgentSessionId,
                 RequestId,
                 Required(branchId, nameof(branchId)),
-                branchKind);
+                branchKind,
+                HostSink);
         }
 
         private static string Required(string value, string parameterName)

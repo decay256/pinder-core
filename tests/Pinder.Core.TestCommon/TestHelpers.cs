@@ -117,7 +117,22 @@ namespace Pinder.Core.TestCommon
                 attributedTextingStyleLines!,
                 consolidatedPersonality,
                 consolidatedBackstory,
-                personalityFragments);
+                personalityFragments,
+                characterId: DeterministicCharacterId(displayName));
+
+        public static Guid DeterministicCharacterId(string displayName)
+        {
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes("pinder-test-character:" + (displayName ?? string.Empty));
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+            {
+                byte[] hash = sha.ComputeHash(bytes);
+                byte[] guidBytes = new byte[16];
+                Array.Copy(hash, guidBytes, guidBytes.Length);
+                guidBytes[7] = (byte)((guidBytes[7] & 0x0F) | 0x50);
+                guidBytes[8] = (byte)((guidBytes[8] & 0x3F) | 0x80);
+                return new Guid(guidBytes);
+            }
+        }
 
         public static IReadOnlyDictionary<string, BackstoryFact> MakeBackstory()
         {

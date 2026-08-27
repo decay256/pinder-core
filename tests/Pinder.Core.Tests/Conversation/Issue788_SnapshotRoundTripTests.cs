@@ -19,6 +19,8 @@ namespace Pinder.Core.Tests.Conversation
     [Trait("Category", "Core")]
     public class Issue788_SnapshotRoundTripTests
     {
+        private static readonly System.Guid PlayerId = TestHelpers.DeterministicCharacterId("P1");
+        private static readonly System.Guid DateeId = TestHelpers.DeterministicCharacterId("P2");
         private static CharacterProfile MakeProfile(string name)
         {
             return TestHelpers.MakeCharacterProfile(
@@ -67,7 +69,7 @@ namespace Pinder.Core.Tests.Conversation
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-            var resim = new ResimulateData
+            var resim = new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 2,
@@ -117,7 +119,7 @@ namespace Pinder.Core.Tests.Conversation
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
-            var resim = new ResimulateData
+            var resim = new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 2,
@@ -152,7 +154,7 @@ namespace Pinder.Core.Tests.Conversation
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
 
             // Pre-load with garbage so we can prove RestoreState clears it.
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 1,
@@ -165,7 +167,7 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(2, session.DateeHistory.Count);
 
             // Now restore with empty datee history — the list should clear.
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 0,
@@ -200,7 +202,7 @@ namespace Pinder.Core.Tests.Conversation
                 new FixedDice(5),
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
-            sessionB.RestoreState(new ResimulateData
+            sessionB.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = snapA.Interest,
                 TurnNumber = snapA.TurnNumber,
@@ -245,7 +247,7 @@ namespace Pinder.Core.Tests.Conversation
             // Engine starts with empty avatar history -> snapshot reflects empty.
             Assert.Empty(session.CreateSnapshot().AvatarHistory);
 
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 2,
@@ -297,7 +299,7 @@ namespace Pinder.Core.Tests.Conversation
                 LlmConversationSessionSnapshot.PiAgentSessionV1,
                 "{\"session\":\"avatar\"}");
 
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = session.CreateSnapshot().Interest,
                 TurnNumber = 2,
@@ -324,7 +326,7 @@ namespace Pinder.Core.Tests.Conversation
                 new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock(), playerShadows: tracker));
 
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = 14,
                 TurnNumber = 3,
@@ -361,7 +363,7 @@ namespace Pinder.Core.Tests.Conversation
                 .Select(m => (m.Role, m.Content))
                 .ToList();
 
-            var badRestore = new ResimulateData
+            var badRestore = new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = 1,
                 TurnNumber = 99,
@@ -429,7 +431,7 @@ namespace Pinder.Core.Tests.Conversation
                 TransitionStyle = "gentle",
             };
 
-            session.RestoreState(new ResimulateData
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
             {
                 TargetInterest = 17,
                 TurnNumber = 4,
@@ -445,7 +447,6 @@ namespace Pinder.Core.Tests.Conversation
                 SpentStakeIndices = new HashSet<int> { 2 },
                 PreviousPhase = "BACKSTORY",
                 PreviousResolvedIndex = 3,
-                CurrentResolvedTarget = target,
                 CurrentCognitiveSubtext = "wants closeness but expects rejection",
                 XpEvents = new List<(string, int)> { ("StrongSuccess", 4), ("Callback", 2) },
                 SessionHorniness = 6,
@@ -479,7 +480,7 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Equal(6, restored.DateeShadowValues[ShadowStatType.Madness.ToString()]);
             Assert.Equal(2, restored.ActiveWeakness!.DcReduction);
             Assert.Equal(StatType.Wit, restored.ActiveTell!.Stat);
-            Assert.Equal(3, restored.CurrentResolvedTarget!.Value.Index);
+            Assert.Null(restored.CurrentResolvedTarget);
         }
 
         [Fact]
@@ -494,5 +495,105 @@ namespace Pinder.Core.Tests.Conversation
             Assert.Throws<ArgumentException>(() =>
                 profile.RestoreSystemPrompts("different base", "unrelated assembled prompt"));
         }
+
+        [Fact]
+        public void CreateSnapshot_RoundTripsRoleSafeTargetTracksAndSpentState()
+        {
+            var player = MakeProfile("P1");
+            var datee = MakeProfile("P2");
+            var session = new GameSession(
+                player,
+                datee,
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+
+            var avatarResolved = new ResolvedRevelationTarget
+            {
+                Registry = EmotionStemSelectionRules.BackstoryRegistry,
+                Index = 0,
+                Field = "BIO_LIE",
+                Manner = "CURATED_BUFFER",
+                StemText = "avatar private target sentinel",
+                TransitionStyle = "sideways",
+            };
+            var dateeResolved = new ResolvedRevelationTarget
+            {
+                Registry = EmotionStemSelectionRules.StakeRegistry,
+                Index = 1,
+                Field = "STAKE_LINE",
+                Manner = "INTIMATE_BREAKTHROUGH",
+                StemText = "datee private target sentinel",
+                TransitionStyle = "direct",
+            };
+            var avatarFact = new OwnedPromptFactV1(
+                player.CharacterId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.Backstory,
+                PromptFactSourceIds.Backstory(player.CharacterId, "age_and_demographics", "bio_lie"),
+                avatarResolved.StemText);
+            var dateeFact = new OwnedPromptFactV1(
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.PsychologicalStake,
+                PromptFactSourceIds.PsychologicalStake(datee.CharacterId, 1),
+                dateeResolved.StemText);
+
+            session.RestoreState(new ResimulateData(PlayerId, DateeId)
+            {
+                TargetInterest = 12,
+                TurnNumber = 4,
+                AvatarSpentBackstoryIndices = new HashSet<int> { 0 },
+                AvatarSpentStakeIndices = new HashSet<int> { 2 },
+                AvatarPreviousPhase = EmotionStemSelectionRules.MacroPhase2,
+                AvatarPreviousResolvedIndex = 7,
+                CurrentAvatarRevelationTarget = AvatarRevelationTarget.Create(player.CharacterId, avatarFact, avatarResolved),
+                CurrentAvatarCognitiveSubtext = "avatar cognitive sentinel",
+                CurrentAvatarCognitiveSubtextFact = avatarFact,
+                DateeSpentBackstoryIndices = new HashSet<int> { 3 },
+                DateeSpentStakeIndices = new HashSet<int> { 1 },
+                DateePreviousPhase = EmotionStemSelectionRules.MacroPhase3,
+                DateePreviousResolvedIndex = 8,
+                CurrentDateeReactionTarget = DateeReactionTarget.Create(datee.CharacterId, dateeFact, dateeResolved),
+                CurrentDateeCognitiveSubtext = "datee cognitive sentinel",
+                CurrentDateeCognitiveSubtextFact = dateeFact,
+            }, new NullTrapRegistry());
+
+            GameStateSnapshot snapshot = session.CreateSnapshot();
+
+            Assert.Contains(0, snapshot.AvatarSpentBackstoryIndices);
+            Assert.Contains(2, snapshot.AvatarSpentStakeIndices);
+            Assert.Contains(3, snapshot.DateeSpentBackstoryIndices);
+            Assert.Contains(1, snapshot.DateeSpentStakeIndices);
+            Assert.Equal(EmotionStemSelectionRules.MacroPhase2, snapshot.AvatarPreviousPhase);
+            Assert.Equal(EmotionStemSelectionRules.MacroPhase3, snapshot.DateePreviousPhase);
+            Assert.Equal(player.CharacterId, snapshot.CurrentAvatarRevelationTarget!.SubjectCharacterId);
+            Assert.Equal(datee.CharacterId, snapshot.CurrentDateeReactionTarget!.SubjectCharacterId);
+            Assert.Equal("avatar private target sentinel", snapshot.CurrentAvatarRevelationTarget.Text);
+            Assert.Equal("datee private target sentinel", snapshot.CurrentDateeReactionTarget.Text);
+            Assert.Equal("avatar cognitive sentinel", snapshot.CurrentAvatarCognitiveSubtext);
+            Assert.Equal("datee cognitive sentinel", snapshot.CurrentDateeCognitiveSubtext);
+
+            var restored = new GameSession(
+                player,
+                datee,
+                new NullLlmAdapter(),
+                new FixedDice(5),
+                new NullTrapRegistry(),
+                new GameSessionConfig(clock: TestHelpers.MakeClock()));
+            restored.RestoreState(session.CreateResimulateData(), new NullTrapRegistry());
+            GameStateSnapshot restoredSnapshot = restored.CreateSnapshot();
+
+            Assert.Equal(player.CharacterId, restoredSnapshot.CurrentAvatarRevelationTarget!.SubjectCharacterId);
+            Assert.Equal(datee.CharacterId, restoredSnapshot.CurrentDateeReactionTarget!.SubjectCharacterId);
+            Assert.Equal("avatar private target sentinel", restoredSnapshot.CurrentAvatarRevelationTarget.Text);
+            Assert.Equal("datee private target sentinel", restoredSnapshot.CurrentDateeReactionTarget.Text);
+            Assert.Contains(0, restoredSnapshot.AvatarSpentBackstoryIndices);
+            Assert.Contains(1, restoredSnapshot.DateeSpentStakeIndices);
+        }
+
     }
 }

@@ -112,6 +112,41 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
             Assert.Equal("semantic-entry-001", record.SemanticEntryId);
         }
 
+
+        [Fact]
+        public void RoleFactPolicyDecision_RoundTripsWithoutProviderInvocationOrPrivateText()
+        {
+            const string secret = "PRIVATE_POLICY_SENTINEL";
+            var record = new AgentJournalRoleFactPolicyDecisionRecord(
+                new AgentJournalRoleFactPolicyCorrelation(
+                    "game-run-001",
+                    "agent-session-datee",
+                    "request-001",
+                    "turn-007",
+                    "branch-main"),
+                "dialogue_options",
+                "character:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb:cognitive-subtext:turn-7",
+                Pinder.Core.Conversation.PromptFactSourceKind.CognitiveSubtext,
+                System.Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                Pinder.Core.Conversation.ConversationParticipantRole.Datee,
+                System.Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                Pinder.Core.Conversation.ConversationParticipantRole.PlayerAvatar,
+                Pinder.Core.Conversation.PromptFactVisibility.PrivateToSubject,
+                "denied.private_to_subject");
+
+            CustomEntry entry = _codec.Encode(record);
+            string json = CanonicalDataJson(entry);
+            Assert.Equal(AgentJournalSchemaNames.RoleFactPolicyDecisionV1, entry.CustomType);
+            Assert.Contains("\"schema_version\":1", json);
+            Assert.DoesNotContain("invocation_id", json);
+            Assert.DoesNotContain(secret, json);
+
+            var decoded = Assert.IsType<AgentJournalRoleFactPolicyDecisionRecord>(_codec.Decode(entry).Record);
+            Assert.Equal(record.FactSourceId, decoded.FactSourceId);
+            Assert.Equal("request-001", decoded.Correlation.RequestId);
+            Assert.Equal("turn-007", decoded.Correlation.TurnId);
+        }
+
         private static void AddPiEnvelope(CustomEntry entry, string id)
         {
             entry.Id = id;

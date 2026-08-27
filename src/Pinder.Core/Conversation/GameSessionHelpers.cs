@@ -149,7 +149,8 @@ namespace Pinder.Core.Conversation
             System.Collections.Generic.IReadOnlyList<ConversationMessage> avatarHistory = null,
             SessionShadowTracker? playerShadows = null,
             LlmConversationSessionSnapshot? dateeSessionSnapshot = null,
-            LlmConversationSessionSnapshot? avatarSessionSnapshot = null)
+            LlmConversationSessionSnapshot? avatarSessionSnapshot = null,
+            GameSessionState? roleState = null)
         {
             var trapNames = traps.AllActive
                 .Select(t => t.Definition.Id)
@@ -202,7 +203,21 @@ namespace Pinder.Core.Conversation
                 avatarHistory: avatarHistorySnapshot,
                 shadowValues: shadowValues,
                 dateeSessionSnapshot: dateeSessionSnapshot,
-                avatarSessionSnapshot: avatarSessionSnapshot);
+                avatarSessionSnapshot: avatarSessionSnapshot,
+                avatarSpentBackstoryIndices: roleState?.AvatarSpentBackstoryIndices,
+                avatarSpentStakeIndices: roleState?.AvatarSpentStakeIndices,
+                avatarPreviousPhase: roleState?.AvatarPreviousPhase,
+                avatarPreviousResolvedIndex: roleState?.AvatarPreviousResolvedIndex ?? 0,
+                currentAvatarRevelationTarget: roleState?.CurrentAvatarRevelationTarget,
+                currentAvatarCognitiveSubtext: roleState?.CurrentAvatarCognitiveSubtext,
+                currentAvatarCognitiveSubtextFact: roleState?.CurrentAvatarCognitiveSubtextFact,
+                dateeSpentBackstoryIndices: roleState?.DateeSpentBackstoryIndices,
+                dateeSpentStakeIndices: roleState?.DateeSpentStakeIndices,
+                dateePreviousPhase: roleState?.DateePreviousPhase,
+                dateePreviousResolvedIndex: roleState?.DateePreviousResolvedIndex ?? 0,
+                currentDateeReactionTarget: roleState?.CurrentDateeReactionTarget,
+                currentDateeCognitiveSubtext: roleState?.CurrentDateeCognitiveSubtext,
+                currentDateeCognitiveSubtextFact: roleState?.CurrentDateeCognitiveSubtextFact);
         }
 
         /// <summary>

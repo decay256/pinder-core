@@ -68,6 +68,7 @@ namespace Pinder.Core.Conversation
                 admitted,
                 code,
                 request.Fact.SourceId,
+                request.Fact.SourceKind,
                 request.Fact.SubjectCharacterId,
                 request.Fact.SubjectRole,
                 request.RecipientCharacterId,

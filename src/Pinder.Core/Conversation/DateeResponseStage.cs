@@ -99,8 +99,8 @@ namespace Pinder.Core.Conversation
                 playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player),
                 horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
                 horninessTier: deliveryStage.HorninessCheckResult.Tier,
-                resolvedTarget: state.CurrentResolvedTarget,
-                cognitiveSubtext: state.CurrentCognitiveSubtext,
+                resolvedTarget: null,
+                cognitiveSubtext: null,
                 interestBeforeState: rollStage.StateBefore,
                 interestAfterState: resolvedFinalInterestAfterState,
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
@@ -112,7 +112,11 @@ namespace Pinder.Core.Conversation
                 playerHungerForIntimacy: playerEmotionalStatus.HungerForIntimacy,
                 playerTerrorOfRejection: playerEmotionalStatus.TerrorOfRejection,
                 dateeHungerForIntimacy: dateeEmotionalStatus.HungerForIntimacy,
-                dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection);
+                dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection,
+                dateeReactionTarget: state.CurrentDateeReactionTarget,
+                cognitiveSubtextFact: state.CurrentDateeCognitiveSubtextFact,
+                recipientCharacterId: datee.CharacterId,
+                onDiagnostic: _onDiagnostic);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
@@ -228,17 +232,13 @@ namespace Pinder.Core.Conversation
             string dateeMessage = dateeResponse.MessageText;
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseCompleted, dateeMessage));
 
-            if (state.CurrentResolvedTarget.HasValue)
+            if (state.CurrentDateeReactionTarget != null)
             {
-                var target = state.CurrentResolvedTarget.Value;
-                if (target.Registry == "BACKSTORY")
-                {
-                    state.SpentBackstoryIndices.Add(target.Index);
-                }
-                else if (target.Registry == "STAKE")
-                {
-                    state.SpentStakeIndices.Add(target.Index);
-                }
+                var target = state.CurrentDateeReactionTarget.ResolvedTarget;
+                if (target.Registry == EmotionStemSelectionRules.BackstoryRegistry)
+                    state.DateeSpentBackstoryIndices.Add(target.Index);
+                else if (target.Registry == EmotionStemSelectionRules.StakeRegistry)
+                    state.DateeSpentStakeIndices.Add(target.Index);
             }
 
             return new DateeResponseStageResult(dateeResponse, responseDelayMinutes, dateeMessage);

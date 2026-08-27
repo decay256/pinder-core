@@ -6,7 +6,7 @@ namespace Pinder.Core.Conversation
     /// Raised when a role/fact prompt-access contract is malformed before any
     /// prompt compiler can ask to expose private character material.
     /// </summary>
-    public sealed class RoleFactContractException : ArgumentException
+    public class RoleFactContractException : ArgumentException
     {
         public RoleFactContractException(string code, string message)
             : base(message)

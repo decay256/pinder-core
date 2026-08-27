@@ -17,6 +17,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
                 WithEnvelope(codec.Encode(AgentJournalAdapterTestRecords.Invocation()), "journal-invocation"),
                 WithEnvelope(codec.Encode(AgentJournalAdapterTestRecords.Result()), "journal-result"),
                 WithEnvelope(codec.Encode(AgentJournalAdapterTestRecords.MessageLink()), "journal-link"),
+                WithEnvelope(codec.Encode(PolicyDecision()), "journal-policy-decision"),
             };
             var options = new SessionContextBuildOptions
             {
@@ -25,10 +26,28 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
 
             var context = SessionContextBuilder.BuildSessionContext(entries, options);
 
-            Assert.Equal(3, options.EntryProjectors.Count);
+            Assert.Equal(4, options.EntryProjectors.Count);
             Assert.Empty(context.Messages);
             Assert.DoesNotContain("assistant text", string.Join("", context.Messages.Select(message => message.ToString())));
         }
+
+        private static AgentJournalRoleFactPolicyDecisionRecord PolicyDecision()
+            => new AgentJournalRoleFactPolicyDecisionRecord(
+                new AgentJournalRoleFactPolicyCorrelation(
+                    "game-run-001",
+                    "agent-session-datee",
+                    "request-001",
+                    "turn-001",
+                    "branch-main"),
+                "dialogue_options",
+                "character:bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb:cognitive-subtext:turn-1",
+                Pinder.Core.Conversation.PromptFactSourceKind.CognitiveSubtext,
+                System.Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                Pinder.Core.Conversation.ConversationParticipantRole.Datee,
+                System.Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                Pinder.Core.Conversation.ConversationParticipantRole.PlayerAvatar,
+                Pinder.Core.Conversation.PromptFactVisibility.PrivateToSubject,
+                "denied.private_to_subject");
 
         private static CustomEntry WithEnvelope(CustomEntry entry, string id)
         {

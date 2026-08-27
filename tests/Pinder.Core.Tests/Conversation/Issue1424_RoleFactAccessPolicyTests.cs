@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using Pinder.Core.Conversation;
+using Pinder.Core.Diagnostics.AgentJournals;
 using Xunit;
 
 namespace Pinder.Core.Tests.Conversation;
@@ -198,8 +199,20 @@ public sealed class Issue1424_RoleFactAccessPolicyTests
     [Fact]
     public void RoleExplicitTargetFactoriesRejectSwappedOwnership()
     {
-        var avatarFact = NewFact(PlayerId, ConversationParticipantRole.PlayerAvatar, PromptFactVisibility.PrivateToSubject, "avatar target");
-        var dateeFact = NewFact(DateeId, ConversationParticipantRole.Datee, PromptFactVisibility.PrivateToSubject, "datee target");
+        var avatarFact = new OwnedPromptFactV1(
+            PlayerId,
+            ConversationParticipantRole.PlayerAvatar,
+            PromptFactVisibility.PrivateToSubject,
+            PromptFactSourceKind.Backstory,
+            PromptFactSourceIds.Backstory(PlayerId, "age_and_demographics", "bio_lie"),
+            "avatar target");
+        var dateeFact = new OwnedPromptFactV1(
+            DateeId,
+            ConversationParticipantRole.Datee,
+            PromptFactVisibility.PrivateToSubject,
+            PromptFactSourceKind.Backstory,
+            PromptFactSourceIds.Backstory(DateeId, "age_and_demographics", "bio_lie"),
+            "datee target");
 
         Assert.Equal(avatarFact, AvatarRevelationTarget.Create(PlayerId, avatarFact).Fact);
         Assert.Equal(dateeFact, DateeReactionTarget.Create(DateeId, dateeFact).Fact);
@@ -445,6 +458,112 @@ public sealed class Issue1424_RoleFactAccessPolicyTests
         Assert.Throws<RoleFactContractException>(() => PromptFactSourceIds.Diagnosis(PlayerId, "repair:requirement"));
         Assert.Throws<RoleFactContractException>(() => PromptFactSourceId.Parse("character:aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa:backstory:sleeping bag:lie"));
         Assert.Throws<RoleFactContractException>(() => PromptFactSourceIds.VisibleMessage(1, (ConversationParticipantRole)0));
+    }
+
+
+    [Fact]
+    public void DialogueAndDateeContextsThrowTypedTextFreeDenialAndEmitJournalDiagnostic()
+    {
+        var avatarFact = NewFact(PlayerId, ConversationParticipantRole.PlayerAvatar, PromptFactVisibility.PrivateToSubject, SecretSentinel);
+        var dateeFact = NewFact(DateeId, ConversationParticipantRole.Datee, PromptFactVisibility.PrivateToSubject, "datee private fact sentinel");
+        var diagnostics = new List<OperationalDiagnosticEvent>();
+
+        RoleFactAccessDeniedException avatarDenial = Assert.Throws<RoleFactAccessDeniedException>(() => new DialogueContext(
+            playerAvatarPrompt: "avatar prompt",
+            dateePrompt: "datee prompt",
+            conversationHistory: Array.Empty<(string Sender, string Text)>(),
+            dateeLastMessage: "",
+            activeTraps: Array.Empty<string>(),
+            currentInterest: 0,
+            cognitiveSubtextFact: dateeFact,
+            recipientCharacterId: PlayerId,
+            onDiagnostic: diagnostics.Add));
+        RoleFactAccessDeniedException dateeDenial = Assert.Throws<RoleFactAccessDeniedException>(() => new DateeContext(
+            dateePrompt: "datee prompt",
+            conversationHistory: Array.Empty<(string Sender, string Text)>(),
+            dateeLastMessage: "",
+            activeTraps: Array.Empty<string>(),
+            currentInterest: 0,
+            playerDeliveredMessage: "hello",
+            interestBefore: 0,
+            interestAfter: 0,
+            responseDelayMinutes: 0,
+            cognitiveSubtextFact: avatarFact,
+            recipientCharacterId: DateeId,
+            onDiagnostic: diagnostics.Add));
+
+        Assert.Equal("prompt_fact.access_denied", avatarDenial.Code);
+        Assert.Equal("denied.private_to_subject", avatarDenial.Decision.Code);
+        Assert.Equal(PromptFactSourceKind.Backstory, avatarDenial.Decision.FactSourceKind);
+        Assert.Equal(PromptFactSourceKind.Backstory, dateeDenial.Decision.FactSourceKind);
+        Assert.Equal(2, diagnostics.Count);
+        Assert.All(diagnostics, diagnostic =>
+        {
+            Assert.Equal(AgentJournalOperationalDiagnostics.RoleFactAccessRejectedEventName, diagnostic.EventName);
+            Assert.Equal(OperationalDiagnosticOutcome.Failed, diagnostic.Outcome);
+            Assert.Equal(AgentJournalOperationalDiagnostics.RoleFactAccessPhaseCode, diagnostic.PhaseCode);
+        });
+        string serialized = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            AvatarDecision = avatarDenial.Decision,
+            DateeDecision = dateeDenial.Decision,
+            Diagnostics = diagnostics.Select(diagnostic => new { diagnostic.Message, diagnostic.CorrelationHints }),
+        });
+        Assert.DoesNotContain(SecretSentinel, serialized, StringComparison.Ordinal);
+        Assert.DoesNotContain("datee private fact sentinel", serialized, StringComparison.Ordinal);
+        Assert.DoesNotContain(SecretSentinel, avatarDenial.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void PromptContextsRejectRawFallbacksAndTypedFactsWithoutRecipientIdentity()
+    {
+        var diagnostics = new List<OperationalDiagnosticEvent>();
+        OwnedPromptFactV1 typedFact = NewFact(
+            DateeId,
+            ConversationParticipantRole.Datee,
+            PromptFactVisibility.PrivateToSubject,
+            SecretSentinel);
+        RoleFactContractException raw = Assert.Throws<RoleFactContractException>(() => new DialogueContext(
+            playerAvatarPrompt: "avatar",
+            dateePrompt: "datee",
+            conversationHistory: Array.Empty<(string Sender, string Text)>(),
+            dateeLastMessage: "",
+            activeTraps: Array.Empty<string>(),
+            currentInterest: 0,
+            cognitiveSubtext: SecretSentinel,
+            onDiagnostic: diagnostics.Add));
+        RoleFactContractException missingIdentity = Assert.Throws<RoleFactContractException>(() => new DateeContext(
+            dateePrompt: "datee",
+            conversationHistory: Array.Empty<(string Sender, string Text)>(),
+            dateeLastMessage: "",
+            activeTraps: Array.Empty<string>(),
+            currentInterest: 0,
+            playerDeliveredMessage: "hello",
+            interestBefore: 0,
+            interestAfter: 0,
+            responseDelayMinutes: 0,
+            cognitiveSubtextFact: typedFact,
+            onDiagnostic: diagnostics.Add));
+
+        Assert.Equal("prompt_fact.raw_fallback_forbidden", raw.Code);
+        Assert.Equal("prompt_fact.recipient_character_id.required", missingIdentity.Code);
+        Assert.DoesNotContain(SecretSentinel, raw.Message);
+        Assert.DoesNotContain(SecretSentinel, missingIdentity.Message);
+        Assert.Equal(2, diagnostics.Count);
+        Assert.All(diagnostics, diagnostic =>
+        {
+            Assert.Equal(AgentJournalOperationalDiagnostics.RoleFactContractRejectedEventName, diagnostic.EventName);
+            Assert.Equal(OperationalDiagnosticOutcome.Failed, diagnostic.Outcome);
+            Assert.Equal(AgentJournalOperationalDiagnostics.RoleFactAccessPhaseCode, diagnostic.PhaseCode);
+        });
+        OperationalDiagnosticEvent missingRecipientDiagnostic = diagnostics[1];
+        Assert.Equal(typedFact.SourceId, missingRecipientDiagnostic.CorrelationHints["fact_source_id"]);
+        Assert.Equal(typedFact.SourceKind.ToString(), missingRecipientDiagnostic.CorrelationHints["fact_source_kind"]);
+        Assert.Equal(typedFact.SubjectCharacterId.ToString("D"), missingRecipientDiagnostic.CorrelationHints["owner_character_id"]);
+        Assert.Equal(typedFact.SubjectRole.ToString(), missingRecipientDiagnostic.CorrelationHints["owner_role"]);
+        string diagnosticJson = System.Text.Json.JsonSerializer.Serialize(diagnostics.Select(
+            diagnostic => new { diagnostic.Message, diagnostic.CorrelationHints }));
+        Assert.DoesNotContain(SecretSentinel, diagnosticJson, StringComparison.Ordinal);
     }
 
     private static string RepoRoot()

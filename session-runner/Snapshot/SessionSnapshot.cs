@@ -3,6 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace Pinder.SessionRunner.Snapshot
 {
+    public static class SessionSnapshotSchema
+    {
+        public const int IdentityBackedLegacyVersion = 1;
+        public const int CurrentVersion = 2;
+    }
+
     /// <summary>
     /// Snapshot of the full session setup written once before turn 1.
     /// Captures everything needed to reconstruct the starting conditions
@@ -10,6 +16,7 @@ namespace Pinder.SessionRunner.Snapshot
     /// </summary>
     public sealed class InitialSessionSnapshot
     {
+        public int SchemaVersion { get; set; }
         // ── Character snapshots ───────────────────────────────────────────
         public CharacterSnapshot Player { get; set; } = null!;
         public CharacterSnapshot Datee { get; set; } = null!;
@@ -38,6 +45,7 @@ namespace Pinder.SessionRunner.Snapshot
     public sealed class CharacterSnapshot
     {
         public string DisplayName { get; set; } = string.Empty;
+        public string CharacterId { get; set; } = string.Empty;
         public int Level { get; set; }
         public int LevelBonus { get; set; }
         public Dictionary<string, int> Stats { get; set; } = new Dictionary<string, int>();  // stat name → value
@@ -123,6 +131,7 @@ namespace Pinder.SessionRunner.Snapshot
     /// </summary>
     public sealed class TurnSnapshot
     {
+        public int SchemaVersion { get; set; }
         public int TurnNumber { get; set; }
         public int Interest { get; set; }
 
@@ -211,6 +220,24 @@ namespace Pinder.SessionRunner.Snapshot
         /// </summary>
         public List<DateeHistoryEntry> AvatarHistory { get; set; } = new List<DateeHistoryEntry>();
 
+        public List<int> AvatarSpentBackstoryIndices { get; set; } = new List<int>();
+        public List<int> AvatarSpentStakeIndices { get; set; } = new List<int>();
+        public string? AvatarPreviousPhase { get; set; }
+        public int AvatarPreviousResolvedIndex { get; set; }
+        public RoleTargetSnapshot? AvatarRevelationTarget { get; set; }
+        public string? AvatarCognitiveSubtext { get; set; }
+        public RoleFactSnapshot? AvatarCognitiveSubtextFact { get; set; }
+
+        public List<int> DateeSpentBackstoryIndices { get; set; } = new List<int>();
+        public List<int> DateeSpentStakeIndices { get; set; } = new List<int>();
+        public string? DateePreviousPhase { get; set; }
+        public int DateePreviousResolvedIndex { get; set; }
+        public RoleTargetSnapshot? DateeReactionTarget { get; set; }
+        public string? DateeCognitiveSubtext { get; set; }
+        public RoleFactSnapshot? DateeCognitiveSubtextFact { get; set; }
+
+        public RoleTargetSnapshot? CurrentResolvedTarget { get; set; }
+
         /// <summary>
         /// Issue #474: events fired on this turn, with their deterministic
         /// human-readable interpretation strings from the i18n catalog.
@@ -248,6 +275,29 @@ namespace Pinder.SessionRunner.Snapshot
         public string Kind { get; set; } = string.Empty;
         public int TurnNumber { get; set; }
         public string EventInterpretation { get; set; } = string.Empty;
+    }
+
+    public sealed class RoleTargetSnapshot
+    {
+        public string Registry { get; set; } = string.Empty;
+        public int Index { get; set; }
+        public string Field { get; set; } = string.Empty;
+        public string Manner { get; set; } = string.Empty;
+        public string StemText { get; set; } = string.Empty;
+        public string TransitionStyle { get; set; } = string.Empty;
+        public RoleFactSnapshot Fact { get; set; } = new RoleFactSnapshot();
+    }
+
+    public sealed class RoleFactSnapshot
+    {
+        public int SchemaVersion { get; set; }
+        public string SubjectCharacterId { get; set; } = string.Empty;
+        public string SubjectRole { get; set; } = string.Empty;
+        public string Visibility { get; set; } = string.Empty;
+        public string SourceKind { get; set; } = string.Empty;
+        public string SourceId { get; set; } = string.Empty;
+        public string? RevealedBy { get; set; }
+        public string Text { get; set; } = string.Empty;
     }
 
     /// <summary>

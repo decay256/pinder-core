@@ -24,17 +24,22 @@ namespace Pinder.Core.Tests.Conversation
     [Trait("Category", "Core")]
     public class Issue903_DateeDefenseSnapshotTests
     {
+        private static readonly Guid RestorePlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000041");
+        private static readonly Guid RestoreDateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000042");
         // ── Helpers ──────────────────────────────────────────────────────────
 
-        private static CharacterProfile MakeProfile(string name, StatBlock? stats = null)
+        private static CharacterProfile MakeProfile(string name, StatBlock? stats = null, Guid? characterId = null)
         {
             stats ??= TestHelpers.MakeStatBlock(2);
-            return TestHelpers.MakeCharacterProfile(
+            return new CharacterProfile(
                 stats: stats,
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                backstory: TestHelpers.MakeBackstory(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
+                characterId: characterId ?? TestHelpers.DeterministicCharacterId(name));
         }
 
         private static GameSession MakeSession(CharacterProfile? datee = null, int startingInterest = 10)
@@ -138,15 +143,15 @@ namespace Pinder.Core.Tests.Conversation
             var trapRegistry = new SingleStatTrapRegistry903(trapDef);
 
             var session = new GameSession(
-                MakeProfile("Player"),
-                MakeProfile("Datee"),
+                MakeProfile("Player", characterId: RestorePlayerCharacterId),
+                MakeProfile("Datee", characterId: RestoreDateeCharacterId),
                 new NullLlmAdapter(),
                 new FixedDice903(5, 5),
                 trapRegistry,
                 new GameSessionConfig(clock: TestHelpers.MakeClock(), startingInterest: 10));
 
             // Inject the trap via RestoreState so we don't need a full Turn-1 cycle.
-            var restoreData = new ResimulateData
+            var restoreData = new ResimulateData(RestorePlayerCharacterId, RestoreDateeCharacterId)
             {
                 TargetInterest  = 10,
                 TurnNumber      = 0,

@@ -24,7 +24,8 @@ namespace Pinder.LlmAdapters
             PiConversationBranch? branch = null,
             string? branchKind = null,
             GameRunAgentJournalContext? correlationContext = null,
-            bool measureTransportUsage = true)
+            bool measureTransportUsage = true,
+            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null)
         {
             GameRunConversationJournalInventory.ThrowIfNotApproved(callPathId);
             if (documents == null) throw new ArgumentNullException(nameof(documents));
@@ -80,6 +81,7 @@ namespace Pinder.LlmAdapters
                 OnDiagnostic = GetDiagnosticSink(),
                 Clock = _options.AgentJournalClock,
                 WriteTimeout = _options.AgentJournalWriteTimeout,
+                RoleFactAccessDecisions = roleFactAccessDecisions,
             };
 
             AgentJournalAttempt attempt = await new AgentJournalRecorder(context)
@@ -101,7 +103,8 @@ namespace Pinder.LlmAdapters
             PiConversationBranch? branch = null,
             string? branchKind = null,
             GameRunAgentJournalContext? correlationContext = null,
-            bool measureTransportUsage = true)
+            bool measureTransportUsage = true,
+            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null)
             => StartConversationJournalAttemptAsync(
                 callPathId,
                 phase,
@@ -114,7 +117,8 @@ namespace Pinder.LlmAdapters
                 branch,
                 branchKind,
                 correlationContext,
-                measureTransportUsage);
+                measureTransportUsage,
+                roleFactAccessDecisions);
 
         private static AnnotatedInvocationDocument BuildRuntimeJournalDocument(string documentId, string text)
         {

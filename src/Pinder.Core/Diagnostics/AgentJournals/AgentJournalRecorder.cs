@@ -21,6 +21,85 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string Source = "AgentJournalRecorder";
         public const string SinkPersistenceFailedEventName = "AgentJournalSinkPersistenceFailed";
         public const string PhaseCode = "agent_journal_persistence";
+        public const string RoleFactAccessRejectedEventName = "AgentJournalRoleFactAccessRejected";
+        public const string RoleFactContractRejectedEventName = "AgentJournalRoleFactContractRejected";
+        public const string RoleFactAccessPhaseCode = "role_fact_access";
+
+        public static OperationalDiagnosticEvent RoleFactAccessRejected(
+            RoleFactAccessDeniedException exception,
+            GameRunAgentJournalContext? journalContext,
+            string operationKind,
+            int turn)
+        {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            RoleFactAccessDecision decision = exception.Decision;
+            string correlationId = journalContext?.RequestId
+                ?? journalContext?.GameRunId
+                ?? string.Empty;
+            return new OperationalDiagnosticEvent(
+                Source,
+                RoleFactAccessRejectedEventName,
+                OperationalDiagnosticSeverity.Error,
+                "A turn-local prompt fact was rejected before provider invocation.",
+                exception,
+                operationKind: operationKind,
+                phaseCode: RoleFactAccessPhaseCode,
+                lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                outcome: OperationalDiagnosticOutcome.Failed,
+                failureClassification: OperationalDiagnosticFailureClassification.Permanent,
+                correlationId: correlationId,
+                correlationHints: new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    ["turn"] = turn.ToString(CultureInfo.InvariantCulture),
+                    ["decision_code"] = decision.Code,
+                    ["fact_source_id"] = decision.FactSourceId,
+                    ["fact_source_kind"] = decision.FactSourceKind.ToString(),
+                    ["subject_character_id"] = decision.SubjectCharacterId.ToString("D"),
+                    ["subject_role"] = decision.SubjectRole.ToString(),
+                    ["recipient_character_id"] = decision.RecipientCharacterId.ToString("D"),
+                    ["recipient_role"] = decision.RecipientRole.ToString(),
+                    ["visibility"] = decision.Visibility.ToString(),
+                },
+                branchId: journalContext?.BranchId);
+        }
+
+
+        public static OperationalDiagnosticEvent RoleFactContractRejected(
+            RoleFactContractException exception,
+            OwnedPromptFactV1? fact,
+            GameRunAgentJournalContext? journalContext,
+            string operationKind,
+            int turn)
+        {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            var hints = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["turn"] = turn.ToString(CultureInfo.InvariantCulture),
+                ["error_code"] = exception.Code,
+            };
+            if (fact != null)
+            {
+                hints["fact_source_id"] = fact.SourceId;
+                hints["fact_source_kind"] = fact.SourceKind.ToString();
+                hints["owner_character_id"] = fact.SubjectCharacterId.ToString("D");
+                hints["owner_role"] = fact.SubjectRole.ToString();
+                hints["visibility"] = fact.Visibility.ToString();
+            }
+            return new OperationalDiagnosticEvent(
+                Source,
+                RoleFactContractRejectedEventName,
+                OperationalDiagnosticSeverity.Error,
+                "A malformed prompt-fact request was rejected before provider invocation.",
+                exception,
+                operationKind: operationKind,
+                phaseCode: RoleFactAccessPhaseCode,
+                lifecycle: OperationalDiagnosticLifecycle.Terminal,
+                outcome: OperationalDiagnosticOutcome.Failed,
+                failureClassification: OperationalDiagnosticFailureClassification.Permanent,
+                correlationId: journalContext?.RequestId ?? journalContext?.GameRunId ?? string.Empty,
+                correlationHints: hints,
+                branchId: journalContext?.BranchId);
+        }
 
         public static OperationalDiagnosticEvent SinkPersistenceFailed(
             AgentJournalSinkRecord record,
@@ -30,6 +109,26 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             if (record == null) throw new ArgumentNullException(nameof(record));
             if (exception == null) throw new ArgumentNullException(nameof(exception));
 
+            AgentJournalCorrelationIds? provider = record.Correlation;
+            AgentJournalRoleFactPolicyCorrelation? policy = record.PolicyCorrelation;
+            var hints = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["record_id"] = record.RecordId,
+                ["custom_type"] = record.CustomType,
+                ["failure_mode"] = failureMode.ToString(),
+                ["game_run_id"] = provider?.GameRunId ?? policy?.GameRunId ?? string.Empty,
+                ["agent_session_id"] = provider?.AgentSessionId ?? policy?.AgentSessionId ?? string.Empty,
+            };
+            if (provider != null)
+            {
+                hints["invocation_id"] = provider.InvocationId;
+                hints["attempt_id"] = provider.AttemptId ?? string.Empty;
+                hints["attempt_ordinal"] = provider.AttemptOrdinal.ToString(CultureInfo.InvariantCulture);
+                hints["owner"] = provider.Owner ?? string.Empty;
+                hints["journal_destination"] = provider.JournalDestination ?? string.Empty;
+                hints["execution_class"] = provider.ExecutionClass ?? string.Empty;
+                hints["output_link_id"] = provider.OutputLinkId ?? string.Empty;
+            }
             return new OperationalDiagnosticEvent(
                 Source,
                 SinkPersistenceFailedEventName,
@@ -41,24 +140,10 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 lifecycle: OperationalDiagnosticLifecycle.Phase,
                 outcome: OperationalDiagnosticOutcome.Degraded,
                 failureClassification: OperationalDiagnostics.ClassifyException(exception),
-                correlationId: record.Correlation.InvocationId,
-                callId: record.Correlation.InvocationId,
-                correlationHints: new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    ["record_id"] = record.RecordId,
-                    ["custom_type"] = record.CustomType,
-                    ["failure_mode"] = failureMode.ToString(),
-                    ["game_run_id"] = record.Correlation.GameRunId,
-                    ["agent_session_id"] = record.Correlation.AgentSessionId ?? string.Empty,
-                    ["invocation_id"] = record.Correlation.InvocationId,
-                    ["attempt_id"] = record.Correlation.AttemptId ?? string.Empty,
-                    ["attempt_ordinal"] = record.Correlation.AttemptOrdinal.ToString(CultureInfo.InvariantCulture),
-                    ["owner"] = record.Correlation.Owner ?? string.Empty,
-                    ["journal_destination"] = record.Correlation.JournalDestination ?? string.Empty,
-                    ["execution_class"] = record.Correlation.ExecutionClass ?? string.Empty,
-                    ["output_link_id"] = record.Correlation.OutputLinkId ?? string.Empty,
-                },
-                branchId: record.Correlation.BranchId);
+                correlationId: provider?.InvocationId ?? policy?.RequestId ?? string.Empty,
+                callId: provider?.InvocationId,
+                correlationHints: hints,
+                branchId: provider?.BranchId ?? policy?.BranchId);
         }
     }
 
@@ -82,6 +167,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public string ModelId { get; }
         public string Phase { get; }
         public IReadOnlyList<AgentJournalInputDocument> InputDocuments { get; }
+        public IReadOnlyList<RoleFactAccessDecision>? RoleFactAccessDecisions { get; set; }
         public IAgentJournalProjectionSink? PiProjectionSink { get; set; }
         public IAgentJournalSink? HostSink { get; set; }
         public AgentJournalSinkFailureMode SinkFailureMode { get; set; } = AgentJournalSinkFailureMode.BestEffort;
@@ -154,7 +240,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                         _context.ModelId,
                         _context.Phase,
                         SnapshotInputDocuments(_context.InputDocuments),
-                        _context.TimestampUtc());
+                        _context.TimestampUtc(),
+                        SnapshotRoleFactAccessDecisions(_context.RoleFactAccessDecisions));
                     ThrowIfInvalid(AgentJournalValidator.Validate(invocation), AgentJournalSchemaNames.LlmInvocationV1);
                     _pendingStart = new PendingStart(
                         invocation,
@@ -237,7 +324,8 @@ namespace Pinder.Core.Diagnostics.AgentJournals
 
             if (_context.PiProjectionSink != null)
             {
-                if (string.IsNullOrWhiteSpace(record.Correlation.AgentSessionId))
+                if (record.Correlation == null
+                    || string.IsNullOrWhiteSpace(record.Correlation.AgentSessionId))
                 {
                     throw new InvalidOperationException(
                         "Agent journal Pi projection requires a real Agent Session id.");
@@ -331,6 +419,17 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             }
 
             return Array.AsReadOnly(documents);
+        }
+
+        private static IReadOnlyList<AgentJournalRoleFactAccessDecision>? SnapshotRoleFactAccessDecisions(
+            IReadOnlyList<RoleFactAccessDecision>? decisions)
+        {
+            if (decisions == null || decisions.Count == 0) return null;
+            var snapshot = new AgentJournalRoleFactAccessDecision[decisions.Count];
+            for (int i = 0; i < decisions.Count; i++)
+                snapshot[i] = AgentJournalRoleFactAccessDecision.From(
+                    decisions[i] ?? throw new ArgumentException("Role fact access decisions cannot contain null entries.", nameof(decisions)));
+            return Array.AsReadOnly(snapshot);
         }
 
         private static async Task WithTimeout(
@@ -799,18 +898,23 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             string recordId,
             string customType,
             object record,
-            AgentJournalCorrelationIds correlation)
+            AgentJournalCorrelationIds? correlation,
+            AgentJournalRoleFactPolicyCorrelation? policyCorrelation = null)
         {
             RecordId = recordId ?? throw new ArgumentNullException(nameof(recordId));
             CustomType = customType ?? throw new ArgumentNullException(nameof(customType));
             Record = record ?? throw new ArgumentNullException(nameof(record));
-            Correlation = correlation ?? throw new ArgumentNullException(nameof(correlation));
+            if ((correlation == null) == (policyCorrelation == null))
+                throw new ArgumentException("Exactly one journal correlation shape is required.");
+            Correlation = correlation;
+            PolicyCorrelation = policyCorrelation;
         }
 
         public string RecordId { get; }
         public string CustomType { get; }
         public object Record { get; }
-        public AgentJournalCorrelationIds Correlation { get; }
+        public AgentJournalCorrelationIds? Correlation { get; }
+        public AgentJournalRoleFactPolicyCorrelation? PolicyCorrelation { get; }
 
         public static AgentJournalSinkRecord Invocation(LlmInvocationRecord record)
         {
@@ -843,6 +947,29 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 AgentJournalSchemaNames.MessageLinkV1,
                 record,
                 correlation);
+        }
+
+
+        public static AgentJournalSinkRecord RoleFactPolicyDecision(
+            AgentJournalRoleFactPolicyDecisionRecord record)
+        {
+            if (record == null) throw new ArgumentNullException(nameof(record));
+            AgentJournalRoleFactPolicyCorrelation policy = record.Correlation;
+            return new AgentJournalSinkRecord(
+                "agent-journal/"
+                    + policy.GameRunId
+                    + "/"
+                    + policy.AgentSessionId
+                    + "/policy/"
+                    + policy.RequestId
+                    + "/"
+                    + policy.TurnId
+                    + "/"
+                    + record.FactSourceId,
+                AgentJournalSchemaNames.RoleFactPolicyDecisionV1,
+                record,
+                correlation: null,
+                policyCorrelation: policy);
         }
 
         private static string BaseRecordId(AgentJournalCorrelationIds correlation)

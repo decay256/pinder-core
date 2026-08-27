@@ -166,6 +166,8 @@ namespace Pinder.Core.Conversation
         /// <param name="trapRegistry">Used to look up trap definitions by stat.</param>
         public void RestoreState(ResimulateData data, ITrapRegistry trapRegistry)
         {
+            if (data == null) throw new ArgumentNullException(nameof(data));
+            data.ValidateForRestore(_player.CharacterId, _datee.CharacterId);
             _state.RestoreFromSnapshot(data, trapRegistry);
         }
 
@@ -178,6 +180,9 @@ namespace Pinder.Core.Conversation
         {
             var data = new ResimulateData
             {
+                SchemaVersion = ResimulateData.CurrentSchemaVersion,
+                PlayerCharacterId = _player.CharacterId,
+                DateeCharacterId = _datee.CharacterId,
                 TargetInterest = _interest.Current,
                 TurnNumber = _turnNumber,
                 MomentumStreak = _momentumStreak,
@@ -192,12 +197,26 @@ namespace Pinder.Core.Conversation
                 DateeSessionSnapshot = _state.DateeSessionSnapshot,
                 AvatarSessionSnapshot = _state.AvatarSessionSnapshot,
                 DateeOutfitDescription = _state.DateeOutfitDescription,
-                SpentBackstoryIndices = new HashSet<int>(_state.SpentBackstoryIndices),
-                SpentStakeIndices = new HashSet<int>(_state.SpentStakeIndices),
-                PreviousPhase = _state.PreviousPhase,
-                PreviousResolvedIndex = _state.PreviousResolvedIndex,
-                CurrentResolvedTarget = _state.CurrentResolvedTarget,
-                CurrentCognitiveSubtext = _state.CurrentCognitiveSubtext,
+                AvatarSpentBackstoryIndices = new HashSet<int>(_state.AvatarSpentBackstoryIndices),
+                AvatarSpentStakeIndices = new HashSet<int>(_state.AvatarSpentStakeIndices),
+                AvatarPreviousPhase = _state.AvatarPreviousPhase,
+                AvatarPreviousResolvedIndex = _state.AvatarPreviousResolvedIndex,
+                CurrentAvatarRevelationTarget = _state.CurrentAvatarRevelationTarget,
+                CurrentAvatarCognitiveSubtext = _state.CurrentAvatarCognitiveSubtext,
+                CurrentAvatarCognitiveSubtextFact = _state.CurrentAvatarCognitiveSubtextFact,
+                DateeSpentBackstoryIndices = new HashSet<int>(_state.DateeSpentBackstoryIndices),
+                DateeSpentStakeIndices = new HashSet<int>(_state.DateeSpentStakeIndices),
+                DateePreviousPhase = _state.DateePreviousPhase,
+                DateePreviousResolvedIndex = _state.DateePreviousResolvedIndex,
+                CurrentDateeReactionTarget = _state.CurrentDateeReactionTarget,
+                CurrentDateeCognitiveSubtext = _state.CurrentDateeCognitiveSubtext,
+                CurrentDateeCognitiveSubtextFact = _state.CurrentDateeCognitiveSubtextFact,
+                SpentBackstoryIndices = new HashSet<int>(_state.AvatarSpentBackstoryIndices),
+                SpentStakeIndices = new HashSet<int>(_state.AvatarSpentStakeIndices),
+                PreviousPhase = _state.AvatarPreviousPhase,
+                PreviousResolvedIndex = _state.AvatarPreviousResolvedIndex,
+                CurrentResolvedTarget = null,
+                CurrentCognitiveSubtext = _state.CurrentDateeCognitiveSubtext,
                 XpEvents = _xpLedger.Events.Select(entry => (entry.Source, entry.Amount)).ToList(),
                 SessionHorniness = _sessionHorniness,
                 HorninessRoll = _horninessRoll,
@@ -255,7 +274,8 @@ namespace Pinder.Core.Conversation
                 _avatarHistory,
                 _playerShadows,
                 _state.DateeSessionSnapshot,
-                _state.AvatarSessionSnapshot);
+                _state.AvatarSessionSnapshot,
+                _state);
         }
     }
 }

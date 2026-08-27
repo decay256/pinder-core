@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,6 +21,8 @@ namespace Pinder.Core.Tests
     [Trait("Category", "Core")]
     public class Issue333_TurnZeroSceneEntriesTests
     {
+        private static readonly Guid PlayerCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000001");
+        private static readonly Guid DateeCharacterId = Guid.Parse("14310000-0000-4000-8000-000000000002");
         [Fact]
         public void SeedSceneEntries_appends_two_bio_scene_entries_to_history()
         {
@@ -118,7 +121,7 @@ namespace Pinder.Core.Tests
             var snapshotHistory = session.ConversationHistory
                 .Select(e => (e.Sender, e.Text))
                 .ToList();
-            var resim = new ResimulateData
+            var resim = new ResimulateData(PlayerCharacterId, DateeCharacterId)
             {
                 ConversationHistory = snapshotHistory,
                 ShadowValues = new Dictionary<string, int>(),
@@ -139,20 +142,22 @@ namespace Pinder.Core.Tests
             llm = new CapturingLlm();
             var dice = new FixedDice(15, 5);
             return new GameSession(
-                MakeProfile("Sable"), MakeProfile("Brick"),
+                MakeProfile("Sable", PlayerCharacterId), MakeProfile("Brick", DateeCharacterId),
                 llm, dice, new NullTrapRegistry(),
                 new GameSessionConfig(clock: TestHelpers.MakeClock()));
         }
 
-        private static CharacterProfile MakeProfile(string name)
+        private static CharacterProfile MakeProfile(string name, Guid characterId)
         {
-            return TestHelpers.MakeCharacterProfile(
+            return new CharacterProfile(
                 stats: TestHelpers.MakeStatBlock(2),
                 assembledSystemPrompt: $"You are {name}.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
                 level: 1,
-                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis());
+                backstory: TestHelpers.MakeBackstory(),
+                psychiatricDiagnosis: TestHelpers.MakePsychiatricDiagnosis(),
+                characterId: characterId);
         }
 
         private sealed class FixedDice : IDiceRoller

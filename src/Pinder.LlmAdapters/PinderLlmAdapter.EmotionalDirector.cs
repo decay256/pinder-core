@@ -66,6 +66,7 @@ namespace Pinder.LlmAdapters
                     PriorMessages = priorMessages,
                     PrivateBranch = privateBranch,
                     JournalContext = context.AgentJournalContext,
+                    RoleFactAccessDecisions = context.PromptFactAccessDecisions,
                     BuildMetadata = attemptPrompt => BuildEmotionalDirectorMetadata(
                         prompt.Metadata,
                         attemptPrompt),

@@ -164,47 +164,36 @@ namespace Pinder.Core.Conversation
             int dateeHfi = dateeStatus.HungerForIntimacy;
             int dateeTor = dateeStatus.TerrorOfRejection;
 
-            ResolvedRevelationTarget? resolvedTarget = null;
+            AvatarRevelationTarget? avatarTarget = null;
+            DateeReactionTarget? dateeTarget = null;
             var llmHistory = TurnOrchestratorHelpers.BuildHistoryForLlmContext(state);
             if (llmHistory.Count > 0)
             {
-                // EmotionStemSelector resolution
-                var conversationState = new ConversationState
-                {
-                    TurnCount = state.TurnNumber,
-                    InterestScore = state.Interest.Current,
-                    PreviousPhase = state.PreviousPhase,
-                    ActiveTraps = activeTrapNames,
-                    SpentBackstoryIndices = state.SpentBackstoryIndices,
-                    SpentStakeIndices = state.SpentStakeIndices,
-                    PlayerStats = new ParticipantStats
-                    {
-                        BaseHFI = playerHfi,
-                        BaseTOR = playerTor
-                    },
-                    DateeStats = new ParticipantStats
-                    {
-                        BaseHFI = dateeHfi,
-                        BaseTOR = dateeTor
-                    },
-                    PreviousResolvedIndex = state.PreviousResolvedIndex
-                };
-
-                var selector = new EmotionStemSelector(
-                    EmotionStemSelectionRules.DeterministicSeedSalt + state.TurnNumber);
-                resolvedTarget = EmotionStemSelector.Hydrate(
-                    selector.Resolve(conversationState),
-                    player.Backstory,
-                    player.StakeLines);
-
-                state.PreviousPhase = resolvedTarget.Value.Registry;
-                state.PreviousResolvedIndex = resolvedTarget.Value.Index;
+                avatarTarget = ResolveAvatarTarget(state, player, activeTrapNames, playerHfi, playerTor, dateeHfi, dateeTor);
+                dateeTarget = ResolveDateeTarget(state, datee, activeTrapNames, playerHfi, playerTor, dateeHfi, dateeTor);
+                state.CurrentAvatarRevelationTarget = avatarTarget;
+                state.CurrentDateeReactionTarget = dateeTarget;
             }
-            state.CurrentResolvedTarget = resolvedTarget;
+            else
+            {
+                state.CurrentAvatarRevelationTarget = null;
+                state.CurrentDateeReactionTarget = null;
+            }
 
             string avatarCognitiveSubtext = BuildCognitiveSubtext(player, state.TurnNumber);
             string dateeCognitiveSubtext = BuildCognitiveSubtext(datee, state.TurnNumber);
-            state.CurrentCognitiveSubtext = dateeCognitiveSubtext;
+            state.CurrentAvatarCognitiveSubtext = avatarCognitiveSubtext;
+            state.CurrentAvatarCognitiveSubtextFact = BuildCognitiveSubtextFact(
+                player,
+                ConversationParticipantRole.PlayerAvatar,
+                avatarCognitiveSubtext,
+                state.TurnNumber);
+            state.CurrentDateeCognitiveSubtext = dateeCognitiveSubtext;
+            state.CurrentDateeCognitiveSubtextFact = BuildCognitiveSubtextFact(
+                datee,
+                ConversationParticipantRole.Datee,
+                dateeCognitiveSubtext,
+                state.TurnNumber);
 
             // Build dialogue context — pass callback topics (#47) and shadow thresholds (#45)
             string playerArchetypeDirective = player.ActiveArchetype?.Directive;
@@ -248,8 +237,8 @@ namespace Pinder.Core.Conversation
                 stakeLines: null,
                 stakeLinesReferenced: null,
                 maxDialogueOptions: _maxDialogueOptions,
-                resolvedTarget: resolvedTarget,
-                cognitiveSubtext: avatarCognitiveSubtext,
+                resolvedTarget: null,
+                cognitiveSubtext: null,
                 playerHungerForIntimacy: playerHfi,
                 playerTerrorOfRejection: playerTor,
                 dateeHungerForIntimacy: dateeHfi,
@@ -265,7 +254,11 @@ namespace Pinder.Core.Conversation
                         ["available_stat_count"] = availableStats.Length.ToString(System.Globalization.CultureInfo.InvariantCulture),
                         ["max_option_count"] = _maxDialogueOptions.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     }),
-                agentJournalContext: _agentJournalContext);
+                agentJournalContext: _agentJournalContext,
+                avatarRevelationTarget: avatarTarget,
+                cognitiveSubtextFact: state.CurrentAvatarCognitiveSubtextFact,
+                recipientCharacterId: player.CharacterId,
+                onDiagnostic: _onDiagnostic);
 
             // Determine the avatar's private emotional writing posture before
             // generating options. The production adapter performs this on a
@@ -423,8 +416,8 @@ namespace Pinder.Core.Conversation
                         playerTor,
                         context.AvatarEmotionalDirection,
                         avatarCognitiveSubtext,
-                        resolvedTarget?.StemText,
-                        resolvedTarget?.TransitionStyle,
+                        avatarTarget?.Text,
+                        avatarTarget?.TransitionStyle,
                         directorInput: context.AvatarEmotionalDirectorInput);
 
             return new TurnStart(
@@ -435,6 +428,129 @@ namespace Pinder.Core.Conversation
                 weaknessDcReduction,
                 avatarEmotionalStatusDebug);
         }
+
+        private static AvatarRevelationTarget ResolveAvatarTarget(
+            GameSessionState state,
+            CharacterProfile player,
+            List<string> activeTrapNames,
+            int playerHfi,
+            int playerTor,
+            int dateeHfi,
+            int dateeTor)
+        {
+            ResolvedRevelationTarget target = SelectTarget(
+                state,
+                activeTrapNames,
+                state.AvatarPreviousPhase,
+                state.AvatarPreviousResolvedIndex,
+                state.AvatarSpentBackstoryIndices,
+                state.AvatarSpentStakeIndices,
+                playerHfi,
+                playerTor,
+                dateeHfi,
+                dateeTor,
+                EmotionStemSelectionRules.DeterministicSeedSalt + (state.TurnNumber * 2) + 1,
+                player);
+            state.AvatarPreviousPhase = target.Registry;
+            state.AvatarPreviousResolvedIndex = target.Index;
+            return AvatarRevelationTarget.FromLegacyResolvedTarget(
+                target,
+                player.CharacterId,
+                player.CharacterId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                BuildTargetSourceId(player.CharacterId, target));
+        }
+
+        private static DateeReactionTarget ResolveDateeTarget(
+            GameSessionState state,
+            CharacterProfile datee,
+            List<string> activeTrapNames,
+            int playerHfi,
+            int playerTor,
+            int dateeHfi,
+            int dateeTor)
+        {
+            ResolvedRevelationTarget target = SelectTarget(
+                state,
+                activeTrapNames,
+                state.DateePreviousPhase,
+                state.DateePreviousResolvedIndex,
+                state.DateeSpentBackstoryIndices,
+                state.DateeSpentStakeIndices,
+                playerHfi,
+                playerTor,
+                dateeHfi,
+                dateeTor,
+                EmotionStemSelectionRules.DeterministicSeedSalt + (state.TurnNumber * 2) + 2,
+                datee);
+            state.DateePreviousPhase = target.Registry;
+            state.DateePreviousResolvedIndex = target.Index;
+            return DateeReactionTarget.FromLegacyResolvedTarget(
+                target,
+                datee.CharacterId,
+                datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                BuildTargetSourceId(datee.CharacterId, target));
+        }
+
+        private static ResolvedRevelationTarget SelectTarget(
+            GameSessionState state,
+            List<string> activeTrapNames,
+            string? previousPhase,
+            int previousResolvedIndex,
+            HashSet<int> spentBackstory,
+            HashSet<int> spentStake,
+            int playerHfi,
+            int playerTor,
+            int dateeHfi,
+            int dateeTor,
+            int seed,
+            CharacterProfile owner)
+        {
+            var conversationState = new ConversationState
+            {
+                TurnCount = state.TurnNumber,
+                InterestScore = state.Interest.Current,
+                PreviousPhase = previousPhase,
+                ActiveTraps = activeTrapNames,
+                SpentBackstoryIndices = spentBackstory,
+                SpentStakeIndices = spentStake,
+                PlayerStats = new ParticipantStats { BaseHFI = playerHfi, BaseTOR = playerTor },
+                DateeStats = new ParticipantStats { BaseHFI = dateeHfi, BaseTOR = dateeTor },
+                PreviousResolvedIndex = previousResolvedIndex
+            };
+            var selector = new EmotionStemSelector(seed);
+            return EmotionStemSelector.Hydrate(selector.Resolve(conversationState), owner.Backstory, owner.StakeLines);
+        }
+
+        private static PromptFactSourceId BuildTargetSourceId(Guid characterId, ResolvedRevelationTarget target)
+        {
+            if (target.Registry == EmotionStemSelectionRules.BackstoryRegistry)
+            {
+                string category = BackstoryValidator.RequiredCategories[target.Index];
+                string field = string.Equals(target.Field, "BIO_LIE", StringComparison.Ordinal)
+                    ? "bio_lie"
+                    : "tragic_reality";
+                return PromptFactSourceIds.Backstory(characterId, category, field);
+            }
+
+            return PromptFactSourceIds.PsychologicalStake(characterId, target.Index);
+        }
+
+        private static OwnedPromptFactV1 BuildCognitiveSubtextFact(
+            CharacterProfile profile,
+            ConversationParticipantRole role,
+            string text,
+            int turnNumber)
+            => new OwnedPromptFactV1(
+                profile.CharacterId,
+                role,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(profile.CharacterId, turnNumber),
+                text);
 
         private AgentJournalOneShotContext? CreateAgentJournalContext(
             string executionClass,

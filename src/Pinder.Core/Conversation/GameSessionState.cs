@@ -24,12 +24,27 @@ namespace Pinder.Core.Conversation
         public List<ConversationMessage> AvatarHistory { get; internal set; } = new List<ConversationMessage>();
         public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; internal set; }
         public LlmConversationSessionSnapshot? AvatarSessionSnapshot { get; internal set; }
-        public HashSet<int> SpentBackstoryIndices { get; internal set; } = new HashSet<int>();
-        public HashSet<int> SpentStakeIndices { get; internal set; } = new HashSet<int>();
-        public string? PreviousPhase { get; set; }
-        public int PreviousResolvedIndex { get; set; }
-        public ResolvedRevelationTarget? CurrentResolvedTarget { get; set; }
-        public string? CurrentCognitiveSubtext { get; set; }
+        public HashSet<int> AvatarSpentBackstoryIndices { get; internal set; } = new HashSet<int>();
+        public HashSet<int> AvatarSpentStakeIndices { get; internal set; } = new HashSet<int>();
+        public string? AvatarPreviousPhase { get; set; }
+        public int AvatarPreviousResolvedIndex { get; set; }
+        public AvatarRevelationTarget? CurrentAvatarRevelationTarget { get; set; }
+        public string? CurrentAvatarCognitiveSubtext { get; set; }
+        public OwnedPromptFactV1? CurrentAvatarCognitiveSubtextFact { get; set; }
+        public HashSet<int> DateeSpentBackstoryIndices { get; internal set; } = new HashSet<int>();
+        public HashSet<int> DateeSpentStakeIndices { get; internal set; } = new HashSet<int>();
+        public string? DateePreviousPhase { get; set; }
+        public int DateePreviousResolvedIndex { get; set; }
+        public DateeReactionTarget? CurrentDateeReactionTarget { get; set; }
+        public ResolvedRevelationTarget? LegacyCurrentResolvedTarget { get; set; }
+        public string? CurrentDateeCognitiveSubtext { get; set; }
+        public OwnedPromptFactV1? CurrentDateeCognitiveSubtextFact { get; set; }
+        public HashSet<int> SpentBackstoryIndices { get => AvatarSpentBackstoryIndices; internal set => AvatarSpentBackstoryIndices = value; }
+        public HashSet<int> SpentStakeIndices { get => AvatarSpentStakeIndices; internal set => AvatarSpentStakeIndices = value; }
+        public string? PreviousPhase { get => AvatarPreviousPhase; set => AvatarPreviousPhase = value; }
+        public int PreviousResolvedIndex { get => AvatarPreviousResolvedIndex; set => AvatarPreviousResolvedIndex = value; }
+        public ResolvedRevelationTarget? CurrentResolvedTarget { get => CurrentAvatarRevelationTarget?.ResolvedTarget ?? LegacyCurrentResolvedTarget; set => LegacyCurrentResolvedTarget = value; }
+        public string? CurrentCognitiveSubtext { get => CurrentDateeCognitiveSubtext; set => CurrentDateeCognitiveSubtext = value; }
         public SessionShadowTracker? PlayerShadows { get; internal set; }
         public SessionShadowTracker? DateeShadows { get; internal set; }
         public ComboTracker ComboTracker { get; internal set; } = new ComboTracker();
@@ -72,12 +87,21 @@ namespace Pinder.Core.Conversation
             clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
             clone.DateeSessionSnapshot = DateeSessionSnapshot;
             clone.AvatarSessionSnapshot = AvatarSessionSnapshot;
-            foreach (var idx in SpentBackstoryIndices) clone.SpentBackstoryIndices.Add(idx);
-            foreach (var idx in SpentStakeIndices) clone.SpentStakeIndices.Add(idx);
-            clone.PreviousPhase = PreviousPhase;
-            clone.PreviousResolvedIndex = PreviousResolvedIndex;
-            clone.CurrentResolvedTarget = CurrentResolvedTarget;
-            clone.CurrentCognitiveSubtext = CurrentCognitiveSubtext;
+            foreach (var idx in AvatarSpentBackstoryIndices) clone.AvatarSpentBackstoryIndices.Add(idx);
+            foreach (var idx in AvatarSpentStakeIndices) clone.AvatarSpentStakeIndices.Add(idx);
+            clone.AvatarPreviousPhase = AvatarPreviousPhase;
+            clone.AvatarPreviousResolvedIndex = AvatarPreviousResolvedIndex;
+            clone.CurrentAvatarRevelationTarget = CurrentAvatarRevelationTarget;
+            clone.CurrentAvatarCognitiveSubtext = CurrentAvatarCognitiveSubtext;
+            clone.CurrentAvatarCognitiveSubtextFact = CurrentAvatarCognitiveSubtextFact;
+            foreach (var idx in DateeSpentBackstoryIndices) clone.DateeSpentBackstoryIndices.Add(idx);
+            foreach (var idx in DateeSpentStakeIndices) clone.DateeSpentStakeIndices.Add(idx);
+            clone.DateePreviousPhase = DateePreviousPhase;
+            clone.DateePreviousResolvedIndex = DateePreviousResolvedIndex;
+            clone.CurrentDateeReactionTarget = CurrentDateeReactionTarget;
+            clone.LegacyCurrentResolvedTarget = LegacyCurrentResolvedTarget;
+            clone.CurrentDateeCognitiveSubtext = CurrentDateeCognitiveSubtext;
+            clone.CurrentDateeCognitiveSubtextFact = CurrentDateeCognitiveSubtextFact;
             clone.PlayerShadows = PlayerShadows?.Clone();
             clone.DateeShadows = DateeShadows?.Clone();
             clone.ComboTracker = ComboTracker.Clone();
@@ -133,12 +157,21 @@ namespace Pinder.Core.Conversation
             AvatarHistory = prepared.AvatarHistory;
             DateeSessionSnapshot = prepared.DateeSessionSnapshot;
             AvatarSessionSnapshot = prepared.AvatarSessionSnapshot;
-            SpentBackstoryIndices = prepared.SpentBackstoryIndices;
-            SpentStakeIndices = prepared.SpentStakeIndices;
-            PreviousPhase = prepared.PreviousPhase;
-            PreviousResolvedIndex = prepared.PreviousResolvedIndex;
-            CurrentResolvedTarget = prepared.CurrentResolvedTarget;
-            CurrentCognitiveSubtext = prepared.CurrentCognitiveSubtext;
+            AvatarSpentBackstoryIndices = prepared.AvatarSpentBackstoryIndices;
+            AvatarSpentStakeIndices = prepared.AvatarSpentStakeIndices;
+            AvatarPreviousPhase = prepared.AvatarPreviousPhase;
+            AvatarPreviousResolvedIndex = prepared.AvatarPreviousResolvedIndex;
+            CurrentAvatarRevelationTarget = prepared.CurrentAvatarRevelationTarget;
+            CurrentAvatarCognitiveSubtext = prepared.CurrentAvatarCognitiveSubtext;
+            CurrentAvatarCognitiveSubtextFact = prepared.CurrentAvatarCognitiveSubtextFact;
+            DateeSpentBackstoryIndices = prepared.DateeSpentBackstoryIndices;
+            DateeSpentStakeIndices = prepared.DateeSpentStakeIndices;
+            DateePreviousPhase = prepared.DateePreviousPhase;
+            DateePreviousResolvedIndex = prepared.DateePreviousResolvedIndex;
+            CurrentDateeReactionTarget = prepared.CurrentDateeReactionTarget;
+            LegacyCurrentResolvedTarget = prepared.LegacyCurrentResolvedTarget;
+            CurrentDateeCognitiveSubtext = prepared.CurrentDateeCognitiveSubtext;
+            CurrentDateeCognitiveSubtextFact = prepared.CurrentDateeCognitiveSubtextFact;
             if (PlayerShadows != null && prepared.PlayerShadows != null)
                 PlayerShadows.AdoptPreparedClone(prepared.PlayerShadows);
             else
@@ -176,6 +209,8 @@ namespace Pinder.Core.Conversation
         public void RestoreFromSnapshot(ResimulateData data, ITrapRegistry trapRegistry)
         {
             if (data == null) throw new ArgumentNullException(nameof(data));
+            if (data.CurrentResolvedTarget != null)
+                throw new InvalidOperationException("restore.role_target.legacy_ambiguous_active_target");
             if (trapRegistry == null) throw new ArgumentNullException(nameof(trapRegistry));
 
             var restoredInterest = new InterestMeter(data.TargetInterest);
@@ -259,16 +294,29 @@ namespace Pinder.Core.Conversation
                 : new List<CallbackOpportunity>();
             PendingMomentumBonus = data.PendingMomentumBonus;
             DateeOutfitDescription = data.DateeOutfitDescription ?? string.Empty;
-            SpentBackstoryIndices = data.SpentBackstoryIndices != null
-                ? new HashSet<int>(data.SpentBackstoryIndices)
+            AvatarSpentBackstoryIndices = data.AvatarSpentBackstoryIndices != null
+                ? new HashSet<int>(data.AvatarSpentBackstoryIndices)
+                : new HashSet<int>(data.SpentBackstoryIndices ?? new HashSet<int>());
+            AvatarSpentStakeIndices = data.AvatarSpentStakeIndices != null
+                ? new HashSet<int>(data.AvatarSpentStakeIndices)
+                : new HashSet<int>(data.SpentStakeIndices ?? new HashSet<int>());
+            AvatarPreviousPhase = data.AvatarPreviousPhase ?? data.PreviousPhase;
+            AvatarPreviousResolvedIndex = data.AvatarPreviousResolvedIndex != 0 ? data.AvatarPreviousResolvedIndex : data.PreviousResolvedIndex;
+            CurrentAvatarRevelationTarget = data.CurrentAvatarRevelationTarget;
+            CurrentAvatarCognitiveSubtext = data.CurrentAvatarCognitiveSubtext;
+            CurrentAvatarCognitiveSubtextFact = data.CurrentAvatarCognitiveSubtextFact;
+            DateeSpentBackstoryIndices = data.DateeSpentBackstoryIndices != null
+                ? new HashSet<int>(data.DateeSpentBackstoryIndices)
                 : new HashSet<int>();
-            SpentStakeIndices = data.SpentStakeIndices != null
-                ? new HashSet<int>(data.SpentStakeIndices)
+            DateeSpentStakeIndices = data.DateeSpentStakeIndices != null
+                ? new HashSet<int>(data.DateeSpentStakeIndices)
                 : new HashSet<int>();
-            PreviousPhase = data.PreviousPhase;
-            PreviousResolvedIndex = data.PreviousResolvedIndex;
-            CurrentResolvedTarget = data.CurrentResolvedTarget;
-            CurrentCognitiveSubtext = data.CurrentCognitiveSubtext;
+            DateePreviousPhase = data.DateePreviousPhase;
+            DateePreviousResolvedIndex = data.DateePreviousResolvedIndex;
+            CurrentDateeReactionTarget = data.CurrentDateeReactionTarget;
+            LegacyCurrentResolvedTarget = null;
+            CurrentDateeCognitiveSubtext = data.CurrentDateeCognitiveSubtext ?? data.CurrentCognitiveSubtext;
+            CurrentDateeCognitiveSubtextFact = data.CurrentDateeCognitiveSubtextFact;
             XpLedger = restoredXpLedger;
             SessionHorniness = data.SessionHorniness;
             HorninessRoll = data.HorninessRoll;

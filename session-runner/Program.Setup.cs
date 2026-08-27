@@ -307,7 +307,7 @@ partial class Program
         // ── Resimulation: restore session state from snapshot ───────────
         if (result.IsResimulation && resimTurnSnapFromSetup != null)
         {
-            var resimData = BuildResimulateData(resimTurnSnapFromSetup);
+            var resimData = BuildResimulateData(resimTurnSnapFromSetup, result.Sable.CharacterId, result.Brick.CharacterId);
             result.Session.RestoreState(resimData, result.TrapRegistry);
         }
 

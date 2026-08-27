@@ -64,6 +64,12 @@ namespace Pinder.LlmAdapters.AgentJournals
             return new CustomEntry(null, null, null, AgentJournalSchemaNames.MessageLinkV1, ToJsonObject(record));
         }
 
+        public CustomEntry Encode(AgentJournalRoleFactPolicyDecisionRecord record)
+        {
+            ThrowIfInvalid(AgentJournalValidator.Validate(record));
+            return new CustomEntry(null, null, null, AgentJournalSchemaNames.RoleFactPolicyDecisionV1, ToJsonObject(record));
+        }
+
         public PiAgentJournalDecodeResult Decode(CustomEntry entry)
         {
             if (entry == null) throw new ArgumentNullException(nameof(entry));
@@ -80,6 +86,8 @@ namespace Pinder.LlmAdapters.AgentJournals
                         return DecodeKnown(AgentJournalJson.Deserialize<LlmResultRecord>(json), customType, json);
                     case AgentJournalSchemaNames.MessageLinkV1:
                         return DecodeKnown(AgentJournalJson.Deserialize<MessageLinkRecord>(json), customType, json);
+                    case AgentJournalSchemaNames.RoleFactPolicyDecisionV1:
+                        return DecodeKnown(AgentJournalJson.Deserialize<AgentJournalRoleFactPolicyDecisionRecord>(json), customType, json);
                     default:
                         return PiAgentJournalDecodeResult.Compatible(DecodeUnknown(customType, json));
                 }
@@ -109,6 +117,11 @@ namespace Pinder.LlmAdapters.AgentJournals
                 : DecodeValidated(record, customType, json, AgentJournalValidator.Validate(record));
 
         private static PiAgentJournalDecodeResult DecodeKnown(MessageLinkRecord? record, string customType, string json)
+            => record == null
+                ? InvalidNullRecord(customType, json)
+                : DecodeValidated(record, customType, json, AgentJournalValidator.Validate(record));
+
+        private static PiAgentJournalDecodeResult DecodeKnown(AgentJournalRoleFactPolicyDecisionRecord? record, string customType, string json)
             => record == null
                 ? InvalidNullRecord(customType, json)
                 : DecodeValidated(record, customType, json, AgentJournalValidator.Validate(record));
