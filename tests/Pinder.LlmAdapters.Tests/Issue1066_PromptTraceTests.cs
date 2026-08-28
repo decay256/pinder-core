@@ -75,6 +75,21 @@ namespace Pinder.LlmAdapters.Tests
                 StemText = "the song I still cannot hear",
                 TransitionStyle = "ACCIDENTAL_SLIP",
             };
+            Guid avatarId = Guid.Parse("10660000-0000-0000-0000-000000000001");
+            var targetFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.PsychologicalStake,
+                PromptFactSourceIds.PsychologicalStake(avatarId, target.Index),
+                target.StemText);
+            var cognitiveFact = new OwnedPromptFactV1(
+                avatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(avatarId, 3),
+                "fear of being too visible");
 
             var dialogueContext = new DialogueContext(
                 playerAvatarPrompt: "player prompt",
@@ -92,8 +107,9 @@ namespace Pinder.LlmAdapters.Tests
                 currentTurn: 3,
                 availableStats: new[] { StatType.Charm, StatType.Rizz, StatType.Honesty },
                 stakeLines: new[] { "1. The song I still cannot hear without leaving the room" },
-                resolvedTarget: target,
-                cognitiveSubtext: "fear of being too visible");
+                avatarRevelationTarget: AvatarRevelationTarget.Create(avatarId, targetFact, target),
+                cognitiveSubtextFact: cognitiveFact,
+                recipientCharacterId: avatarId);
 
             var dialogueTrace = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(dialogueContext);
 
@@ -106,6 +122,30 @@ namespace Pinder.LlmAdapters.Tests
             AssertCatalogSpan(dialogueTrace, "engine-state-transition-style-line");
             AssertCatalogSpan(dialogueTrace, "engine-state-cognitive-subtext-line");
 
+            Guid dateeId = Guid.Parse("10660000-0000-0000-0000-000000000002");
+            var dateeResolvedTarget = new ResolvedRevelationTarget
+            {
+                Registry = target.Registry,
+                Index = target.Index,
+                Field = target.Field,
+                Manner = "INTIMATE_BREAKTHROUGH",
+                StemText = target.StemText,
+                TransitionStyle = "INTIMATE_BREAKTHROUGH",
+            };
+            var dateeTarget = DateeReactionTarget.FromLegacyResolvedTarget(
+                dateeResolvedTarget,
+                dateeId,
+                dateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceIds.PsychologicalStake(dateeId, target.Index));
+            var dateeCognitiveFact = new OwnedPromptFactV1(
+                dateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(dateeId, 3),
+                "fear of being too visible");
             var dateeContext = new DateeContext(
                 dateePrompt: "datee prompt",
                 conversationHistory: new List<(string Sender, string Text)>
@@ -125,18 +165,21 @@ namespace Pinder.LlmAdapters.Tests
                 },
                 playerName: "P",
                 dateeName: "O",
-                resolvedTarget: target,
-                cognitiveSubtext: "fear of being too visible");
+                currentTurn: 3,
+                dateeReactionTarget: dateeTarget,
+                cognitiveSubtextFact: dateeCognitiveFact,
+                recipientCharacterId: dateeId);
 
-            var dateeTrace = SessionDocumentBuilder.BuildDateePromptEx(dateeContext);
+            var dateeTrace = DateePromptTestBuilder.BuildEx(dateeContext);
 
             Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "response-timing-header");
             Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "response-timing-approximate");
             AssertCatalogSpan(dateeTrace, "datee-shadow-state-heading");
             AssertCatalogSpan(dateeTrace, "shadow-taint-fixation");
-            AssertCatalogSpan(dateeTrace, "engine-state-transition-target-line");
-            AssertCatalogSpan(dateeTrace, "engine-state-transition-style-line");
-            AssertCatalogSpan(dateeTrace, "engine-state-cognitive-subtext-line");
+            AssertCatalogSpan(dateeTrace, "datee-response-plan-performance");
+            Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "engine-state-transition-target-line");
+            Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "engine-state-transition-style-line");
+            Assert.DoesNotContain(dateeTrace.Spans, s => s.Key == "engine-state-cognitive-subtext-line");
         }
 
         private static void AssertCatalogSpan(PromptTraceResult trace, string key)

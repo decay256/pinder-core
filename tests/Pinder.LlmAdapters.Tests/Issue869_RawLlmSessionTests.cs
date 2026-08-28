@@ -321,17 +321,19 @@ namespace Pinder.LlmAdapters.Tests
         {
             // CharacterProfile — mirrors Phase0Fixtures.MakeProfile pattern.
             var stats   = MakeStatBlock();
+            var characterId = Guid.NewGuid();
             var profile = new CharacterProfile(
                 stats: stats,
                 assembledSystemPrompt: $"You are {name}, a test character.",
                 displayName: name,
                 timing: new TimingProfile(5, 0.0f, 0.0f, "neutral"),
-                level: 1);
+                level: 1,
+                characterId: characterId);
 
             // CharacterDefinition — minimal valid construction.
             var def = new CharacterDefinition(
                 schemaVersion: 2,
-                characterId: Guid.NewGuid(),
+                characterId: characterId,
                 name: name,
                 genderIdentity: "they/them",
                 bio: "A test character.",

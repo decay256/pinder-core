@@ -94,11 +94,29 @@ prompts:
       <ENGINE_STATE>
       [ENGINE — DATEE]
       {datee_name} is at Interest {interest}/25. {interest_narrative}
-      {cognitive_subtext_line}
-      {transition_target_line}
-      {transition_style_line}
       Write {datee_name}'s response.
       </ENGINE_STATE>
+  datee-response-plan-performance:
+    system_prompt: |-
+      <ENGINE_STATE>
+      [ENGINE — DATEE RESPONSE PLAN]
+      This private `datee_response_plan.v1` is the single authoritative behavior plan for this reply. Follow its precedence-resolved movement, disclosure, conversational move, emotional fields, and constraints. Treat visible_evidence as the only event being answered. Treat datee_interpretation as uncertain. Private constraints may shape the reply but must never be named as instructions or copied mechanically. Do not expose schema fields, source IDs, or engine metadata in the visible message.
+      {response_plan_json}
+      </ENGINE_STATE>
+  datee-response-plan-reconciliation:
+    system_prompt: |-
+      You resolve only bounded creative ambiguity in a prevalidated DATEE response plan. Return exactly one JSON object using schema_version `datee_response_plan.v1`. Preserve every compiler-owned fact, source, constraint, emotion, interpretation, disclosure, and visible-evidence field byte-for-byte. Select only a supplied movement, conversational move, and, for Mixed, supplied ordered stage list. Do not invent, remove, rewrite, or infer facts. The JSON schema is authoritative.
+    user_template: |-
+      Candidate compiler plan:
+      {candidate_plan_json}
+
+      Allowed movements: {allowed_movements}
+      Allowed conversational moves: {allowed_conversational_moves}
+      Allowed mixed stage orders: {allowed_stage_orders}
+
+      Choose the most dramatically active compatible selection and return the complete plan JSON only.
+    temperature: 0.4
+    max_tokens: 1200
   engine-options-block:
     system_prompt: |-
       <ENGINE_STATE>

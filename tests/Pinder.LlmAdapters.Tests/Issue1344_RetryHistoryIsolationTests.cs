@@ -169,7 +169,12 @@ namespace Pinder.LlmAdapters.Tests
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
                     StatType.Honesty,
                     RollOutcomeIntensity.Strong,
-                    TestHelpers.MakePsychiatricDiagnosis()));
+                    TestHelpers.MakePsychiatricDiagnosis()),
+                agentJournalContext: new GameRunAgentJournalContext(
+                    "run-1344",
+                    "datee-session-1344",
+                    requestId: "request-1344",
+                    branchId: "main"));
         }
 
         private static string ValidDirectionJson()

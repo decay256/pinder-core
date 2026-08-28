@@ -56,6 +56,7 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string InvalidUsageCompleteness = "invalid_usage_completeness";
         public const string ForbiddenOwnerId = "forbidden_owner_id";
         public const string InvalidRoleFactDecision = "invalid_role_fact_decision";
+        public const string InvalidDateeResponsePlanArtifact = "invalid_datee_response_plan_artifact";
 
 
         public static AgentJournalValidationResult Validate(AgentJournalRoleFactPolicyDecisionRecord record)
@@ -100,6 +101,74 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             {
                 errors.Add(new AgentJournalValidationError(InvalidRoleFactDecision, "$"));
             }
+            return AgentJournalValidationResult.From(errors);
+        }
+
+        public static AgentJournalValidationResult Validate(AgentJournalDateeResponsePlanRecord record)
+        {
+            var errors = new List<AgentJournalValidationError>();
+            if (record == null)
+            {
+                errors.Add(new AgentJournalValidationError(MissingId, "$"));
+                return AgentJournalValidationResult.From(errors);
+            }
+
+            AddMissing(record.ArtifactId, "$.artifact_id", errors);
+            AddMissing(record.PayloadJson, "$.payload_json", errors);
+            AddOpaqueIdentifier(record.ArtifactId, "$.artifact_id", errors);
+            AddOpaqueIdentifier(record.ParentArtifactId, "$.parent_artifact_id", errors);
+            AddOpaqueIdentifier(record.CompilerOutcome, "$.compiler_outcome", errors);
+            AddJournalRecordLink(
+                record.ReconciliationInvocationId,
+                "invocation",
+                "$.reconciliation_invocation_id",
+                errors);
+            AddJournalRecordLink(
+                record.ReconciliationResultId,
+                "result",
+                "$.reconciliation_result_id",
+                errors);
+            if (record.SchemaVersion != AgentJournalDateeResponsePlanRecord.CurrentSchemaVersion
+                || !Enum.IsDefined(typeof(AgentJournalDateeResponsePlanArtifactKind), record.ArtifactKind))
+            {
+                errors.Add(new AgentJournalValidationError(InvalidDateeResponsePlanArtifact, "$"));
+            }
+
+            if (record.SourceIds == null || record.SourceIds.Count == 0)
+            {
+                errors.Add(new AgentJournalValidationError(MissingId, "$.source_ids"));
+            }
+            else
+            {
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                for (int i = 0; i < record.SourceIds.Count; i++)
+                {
+                    string sourceId = record.SourceIds[i];
+                    AddMissing(sourceId, "$.source_ids[" + i + "]", errors);
+                    AddOpaqueIdentifier(sourceId, "$.source_ids[" + i + "]", errors);
+                    if (!seen.Add(sourceId))
+                        errors.Add(new AgentJournalValidationError(DuplicateId, "$.source_ids[" + i + "]"));
+                }
+            }
+
+            bool isSource = record.ArtifactKind == AgentJournalDateeResponsePlanArtifactKind.SourceInput;
+            if (isSource != string.IsNullOrWhiteSpace(record.ParentArtifactId)
+                || (!isSource && string.IsNullOrWhiteSpace(record.CompilerOutcome))
+                || (string.IsNullOrWhiteSpace(record.ReconciliationInvocationId)
+                    != string.IsNullOrWhiteSpace(record.ReconciliationResultId)))
+            {
+                errors.Add(new AgentJournalValidationError(InvalidDateeResponsePlanArtifact, "$"));
+            }
+
+            try
+            {
+                using (System.Text.Json.JsonDocument.Parse(record.PayloadJson)) { }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                errors.Add(new AgentJournalValidationError(InvalidDateeResponsePlanArtifact, "$.payload_json"));
+            }
+
             return AgentJournalValidationResult.From(errors);
         }
 
@@ -304,7 +373,24 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                     AddMissing(entry.Key, path + ".context.key", errors);
                     AddMissing(entry.Value, path + ".context." + entry.Key, errors);
                     AddForbiddenLink(entry.Key, path + ".context.key", errors);
-                    AddForbiddenLink(entry.Value, path + ".context." + entry.Key, errors);
+                    if (string.Equals(
+                        entry.Key,
+                        AgentJournalDateeResponsePlanRecord.ReconciliationInvocationLinkContextKey,
+                        StringComparison.Ordinal))
+                    {
+                        AddJournalRecordLink(entry.Value, "invocation", path + ".context." + entry.Key, errors);
+                    }
+                    else if (string.Equals(
+                        entry.Key,
+                        AgentJournalDateeResponsePlanRecord.ReconciliationResultLinkContextKey,
+                        StringComparison.Ordinal))
+                    {
+                        AddJournalRecordLink(entry.Value, "result", path + ".context." + entry.Key, errors);
+                    }
+                    else
+                    {
+                        AddForbiddenLink(entry.Value, path + ".context." + entry.Key, errors);
+                    }
                 }
             }
         }
@@ -453,6 +539,35 @@ namespace Pinder.Core.Diagnostics.AgentJournals
             if (errorCode != null)
             {
                 errors.Add(new AgentJournalValidationError(errorCode, path));
+            }
+        }
+
+        private static void AddJournalRecordLink(
+            string? value,
+            string expectedTerminalSegment,
+            string path,
+            ICollection<AgentJournalValidationError> errors)
+        {
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            string[] segments = value.Split('/');
+            if (segments.Length < 6
+                || !string.Equals(segments[0], "agent-journal", StringComparison.Ordinal)
+                || !string.Equals(segments[segments.Length - 1], expectedTerminalSegment, StringComparison.Ordinal))
+            {
+                errors.Add(new AgentJournalValidationError(ForbiddenSourceLink, path));
+                return;
+            }
+
+            for (int i = 0; i < segments.Length; i++)
+            {
+                string? errorCode = AgentJournalSourceIdentifierPolicy.GetErrorCode(segments[i]);
+                if (string.IsNullOrEmpty(segments[i]) || errorCode != null)
+                {
+                    errors.Add(new AgentJournalValidationError(errorCode ?? ForbiddenSourceLink, path));
+                    return;
+                }
             }
         }
 

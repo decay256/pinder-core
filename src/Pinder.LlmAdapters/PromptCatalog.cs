@@ -120,6 +120,7 @@ namespace Pinder.LlmAdapters
             "resistance-date-secured",
             "engine-options-block",
             "engine-datee-block",
+            "datee-response-plan-performance",
             "diagnosis-repair-json",
             "diagnosis-repair-field",
         };
@@ -135,6 +136,7 @@ namespace Pinder.LlmAdapters
             "personality_consolidation",
             "diagnosis",
             "character_generate",
+            "datee-response-plan-reconciliation",
         };
 
         private static readonly RuntimeTokenContract[] RuntimeTokenContracts =
@@ -159,8 +161,8 @@ namespace Pinder.LlmAdapters
             SystemTokens("dialogue-options-structured-json-instruction", "options_count", "available_stats"),
             SystemTokens("engine-options-block", "turn", "player_name", "game_state", "hfi_line", "tor_line",
                 "cognitive_subtext_line", "avatar_emotional_direction", "transition_target_line", "transition_style_line", "options_count", "options_format_list"),
-            SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative",
-                "cognitive_subtext_line", "transition_target_line", "transition_style_line"),
+            SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative"),
+            SystemTokens("datee-response-plan-performance", "response_plan_json"),
             SystemTokens("diagnosis-repair-field", "field"),
             UserTokens("backstory", "characterName", "genderIdentity", "bio", "consolidated_backstory", "consolidated_personality"),
             UserTokens("dramatic_arc", "playerName", "playerStake", "playerBio", "dateeName", "dateeStake", "dateeBio"),
@@ -174,6 +176,7 @@ namespace Pinder.LlmAdapters
             UserTokens("diagnosis", "backstory", "stakes"),
             SystemTokens("character_generate", "items_catalogue", "anatomy_parameters"),
             UserTokens("character_generate", "existing_library", "smart_initialization"),
+            UserTokens("datee-response-plan-reconciliation", "candidate_plan_json", "allowed_movements", "allowed_conversational_moves", "allowed_stage_orders"),
         };
 
         private PromptCatalog(IReadOnlyDictionary<string, PromptEntry> entries)

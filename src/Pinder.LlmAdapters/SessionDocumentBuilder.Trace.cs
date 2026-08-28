@@ -490,7 +490,18 @@ namespace Pinder.LlmAdapters
             DateeContext context,
             PromptCatalog? promptCatalog = null)
         {
-            return BuildDateePromptCore(context, emotionalDirection: null, promptCatalog);
+            throw new InvalidOperationException(
+                "DATEE performance prompt compilation requires an accepted datee_response_plan.v1.");
+        }
+
+        internal static PromptTraceResult BuildDateePerformancePromptEx(
+            DateeContext context,
+            DateeResponsePlan responsePlan,
+            PromptCatalog? promptCatalog = null,
+            bool includeConversationHistory = true)
+        {
+            if (responsePlan == null) throw new ArgumentNullException(nameof(responsePlan));
+            return BuildDateePromptCore(context, responsePlan, promptCatalog, includeConversationHistory);
         }
 
         internal static PromptTraceResult BuildDateePerformancePromptEx(
@@ -500,12 +511,17 @@ namespace Pinder.LlmAdapters
             bool includeConversationHistory = true)
         {
             if (emotionalDirection == null) throw new ArgumentNullException(nameof(emotionalDirection));
-            return BuildDateePromptCore(context, emotionalDirection, promptCatalog, includeConversationHistory);
+
+            PromptCatalog catalog = PromptCatalog.ResolveCatalogOrThrow(promptCatalog);
+            return new EmotionalPromptCompiler(catalog).CompilePerformance(
+                context,
+                emotionalDirection,
+                includeConversationHistory);
         }
 
         private static PromptTraceResult BuildDateePromptCore(
             DateeContext context,
-            CharacterEmotionalDirection? emotionalDirection,
+            DateeResponsePlan responsePlan,
             PromptCatalog? promptCatalog,
             bool includeConversationHistory = true)
         {
@@ -542,7 +558,6 @@ namespace Pinder.LlmAdapters
             {
                 string tierLabel = GetFailureTierName(context.DeliveryTier);
                 sb.AppendLine($"PLAYER'S LAST MESSAGE (delivered after a {tierLabel}):");
-                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
                 sb.AppendLine();
                 sb.AppendLine("FAILURE CONTEXT");
                 sb.AppendLine(GetDateeReactionGuidance(context.DeliveryTier, promptCatalog));
@@ -550,7 +565,6 @@ namespace Pinder.LlmAdapters
             else
             {
                 sb.AppendLine("PLAYER'S LAST MESSAGE");
-                sb.AppendLine($"\"{context.PlayerDeliveredMessage}\"");
             }
 
             sb.AppendLine();
@@ -573,39 +587,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine();
             }
 
-            // [ENGINE — DATEE] injection block with interest narrative
-            string dateeCognitiveSubtextLine = string.Empty;
-            if (!string.IsNullOrWhiteSpace(context.CognitiveSubtextFact?.Text))
-            {
-                dateeCognitiveSubtextLine = RenderTemplate(
-                    GetTemplate(promptCatalog, "engine-state-cognitive-subtext-line"),
-                    new Dictionary<string, string>
-                    {
-                        { "cognitive_subtext", context.CognitiveSubtextFact?.Text ?? string.Empty },
-                    });
-            }
-
-            string dateeTransitionTargetLine = string.Empty;
-            string dateeTransitionStyleLine = string.Empty;
-            if (context.DateeReactionTarget != null)
-            {
-                ResolvedRevelationTarget target = context.DateeReactionTarget.ResolvedTarget;
-                dateeTransitionTargetLine = RenderTemplate(
-                    GetTemplate(promptCatalog, "engine-state-transition-target-line"),
-                    new Dictionary<string, string>
-                    {
-                        { "transition_target", target.StemText ?? string.Empty },
-                        { "transition_scope", "the datee response" },
-                    });
-                dateeTransitionStyleLine = RenderTemplate(
-                    GetTemplate(promptCatalog, "engine-state-transition-style-line"),
-                    new Dictionary<string, string>
-                    {
-                        { "transition_style", target.TransitionStyle ?? string.Empty },
-                        { "transition_scope", "the datee response" },
-                    });
-            }
-
+            // One accepted response plan is the sole private behavior block.
             InterestState dateeInterestState = context.InterestAfterState;
             string interestNarrativeKey = PromptTemplates.GetInterestNarrativeKey(dateeInterestState);
             string interestNarrative = GetTemplate(promptCatalog, interestNarrativeKey);
@@ -619,9 +601,18 @@ namespace Pinder.LlmAdapters
                     { "{datee_name}", (dateeName, engineDateeSource, "engine-datee-block") },
                     { "{interest}", (context.InterestAfter.ToString(), engineDateeSource, "engine-datee-block") },
                     { "{interest_narrative}", (interestNarrative, GetTemplateSource(promptCatalog, interestNarrativeKey), interestNarrativeKey) },
-                    { "{cognitive_subtext_line}", (dateeCognitiveSubtextLine, GetTemplateSource(promptCatalog, "engine-state-cognitive-subtext-line"), "engine-state-cognitive-subtext-line") },
-                    { "{transition_target_line}", (dateeTransitionTargetLine, GetTemplateSource(promptCatalog, "engine-state-transition-target-line"), "engine-state-transition-target-line") },
-                    { "{transition_style_line}", (dateeTransitionStyleLine, GetTemplateSource(promptCatalog, "engine-state-transition-style-line"), "engine-state-transition-style-line") },
+                },
+                promptCatalog);
+            sb.AppendLine();
+
+            string planJson = DateeResponsePlanJson.Serialize(responsePlan);
+            AppendAnnotatedTemplate(
+                sb,
+                GetTemplate(promptCatalog, "datee-response-plan-performance"),
+                "datee-response-plan-performance",
+                new Dictionary<string, (string Value, string SourceFile, string Key)>
+                {
+                    { "{response_plan_json}", (planJson, "runtime:datee-response-plan", DateeResponsePlan.CurrentSchemaVersion) },
                 },
                 promptCatalog);
             sb.AppendLine();
@@ -683,30 +674,6 @@ namespace Pinder.LlmAdapters
 
             const string lengthHint =
                 "Keep it to a natural text-message length guided by your designated texting-style length axis.";
-
-            if (emotionalDirection != null)
-            {
-                AppendAnnotatedTemplate(
-                    sb,
-                    GetTemplate(promptCatalog, "emotional-reaction-performance-direction"),
-                    "emotional-reaction-performance-direction",
-                    new Dictionary<string, (string Value, string SourceFile, string Key)>
-                    {
-                        { "{primary_emotion}", (emotionalDirection.PrimaryEmotion, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.PrimaryEmotion") },
-                        { "{secondary_emotion}", (emotionalDirection.SecondaryEmotion, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.SecondaryEmotion") },
-                        { "{regulatory_state}", (emotionalDirection.RegulatoryState, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.RegulatoryState") },
-                        { "{activation}", (emotionalDirection.Activation.ToString(System.Globalization.CultureInfo.InvariantCulture), CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Activation") },
-                        { "{trajectory}", (emotionalDirection.Trajectory, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Trajectory") },
-                        { "{core_threat_or_desire}", (emotionalDirection.CoreThreatOrDesire, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.CoreThreatOrDesire") },
-                        { "{interpretation}", (emotionalDirection.Interpretation, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Interpretation") },
-                        { "{impulse}", (emotionalDirection.Impulse, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Impulse") },
-                        { "{restraint}", (emotionalDirection.Restraint, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.Restraint") },
-                        { "{response_posture}", (emotionalDirection.ResponsePosture, CharacterEmotionalDirectionRuntimeSource, "CharacterEmotionalDirection.ResponsePosture") },
-                    },
-                    promptCatalog);
-                sb.AppendLine();
-                sb.AppendLine();
-            }
 
             AppendAnnotatedTemplate(
                 sb,

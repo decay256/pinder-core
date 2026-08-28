@@ -72,6 +72,12 @@ namespace Pinder.LlmAdapters.AgentJournals
                         throw InvalidRecordType(record, nameof(AgentJournalRoleFactPolicyDecisionRecord));
                     return _codec.Encode(decision);
 
+                case AgentJournalSchemaNames.DateeResponsePlanV1:
+                    var responsePlan = record.Record as AgentJournalDateeResponsePlanRecord;
+                    if (responsePlan == null)
+                        throw InvalidRecordType(record, nameof(AgentJournalDateeResponsePlanRecord));
+                    return _codec.Encode(responsePlan);
+
                 default:
                     throw new InvalidOperationException("Unsupported Pinder agent journal custom type '" + record.CustomType + "'.");
             }

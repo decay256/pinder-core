@@ -118,6 +118,34 @@ namespace Pinder.Core.Conversation
 
             var dateeResponse = dateeStageResult.DateeResponse;
             string dateeMessage = dateeStageResult.DateeMessage;
+            AcceptedDateeResponsePlanState? acceptedPlanState =
+                dateeResponse.EmotionalReactionDebug?.ResponsePlanState;
+            CharacterEmotionalDirection? acceptedDirection =
+                dateeResponse.EmotionalReactionDebug?.Direction;
+            if (acceptedPlanState != null && acceptedDirection == null)
+                throw new InvalidOperationException("datee_response_replay.emotional_direction.required");
+            DateeResponseReplayState? responseReplayState = acceptedPlanState == null
+                ? null
+                : new DateeResponseReplayState(
+                    responseTurn: state.TurnNumber,
+                    postTurnNumber: state.TurnNumber + 1,
+                    deliveredMessage: deliveryStage.DeliveredMessage,
+                    acceptedDateeMessage: dateeMessage,
+                    responseDelayMinutes: dateeStageResult.ResponseDelayMinutes,
+                    interestBefore: rollStage.InterestBefore,
+                    interestBeforeState: rollStage.StateBefore,
+                    interestAfterState: finalInterestAfterState,
+                    deliveryTier: rollStage.RollResult.Tier,
+                    rollStat: rollStage.RollResult.Stat,
+                    outcomeIntensity: RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
+                    horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
+                    horninessTier: deliveryStage.HorninessCheckResult.Tier,
+                    acceptedEmotionalDirection: CharacterEmotionalDirectionSummary.FromDirection(
+                        state.TurnNumber,
+                        acceptedDirection!),
+                    activeTrapIds: GameSessionHelpers.GetActiveTrapNames(state.Traps),
+                    activeTrapInstructions: GameSessionHelpers.GetActiveTrapInstructions(state.Traps)
+                        ?? Array.Empty<string>());
             if (ShouldSpendAvatarTarget(optionIndex, state.CurrentOptions.Length)
                 && state.CurrentAvatarRevelationTarget != null)
                 MarkTargetSpent(state.CurrentAvatarRevelationTarget.ResolvedTarget, state.AvatarSpentBackstoryIndices, state.AvatarSpentStakeIndices);
@@ -133,6 +161,7 @@ namespace Pinder.Core.Conversation
             state.Traps.AdvanceTurn();
 
             state.TurnNumber++;
+            state.LastDateeResponseReplayState = responseReplayState;
 
             state.CurrentOptions = null;
             state.CurrentDicePools = null;

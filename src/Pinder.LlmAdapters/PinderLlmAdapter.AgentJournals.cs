@@ -25,7 +25,8 @@ namespace Pinder.LlmAdapters
             string? branchKind = null,
             GameRunAgentJournalContext? correlationContext = null,
             bool measureTransportUsage = true,
-            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null)
+            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null,
+            IReadOnlyDictionary<string, string>? journalLinks = null)
         {
             GameRunConversationJournalInventory.ThrowIfNotApproved(callPathId);
             if (documents == null) throw new ArgumentNullException(nameof(documents));
@@ -67,7 +68,8 @@ namespace Pinder.LlmAdapters
                 attemptId: attemptId,
                 requestId: correlationContext.RequestId,
                 turnId: turnId.HasValue ? turnPart : null,
-                branchId: branchId);
+                branchId: branchId,
+                context: journalLinks);
 
             var context = new AgentJournalRecorderContext(
                 correlation,
@@ -104,7 +106,8 @@ namespace Pinder.LlmAdapters
             string? branchKind = null,
             GameRunAgentJournalContext? correlationContext = null,
             bool measureTransportUsage = true,
-            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null)
+            IReadOnlyList<RoleFactAccessDecision>? roleFactAccessDecisions = null,
+            IReadOnlyDictionary<string, string>? journalLinks = null)
             => StartConversationJournalAttemptAsync(
                 callPathId,
                 phase,
@@ -118,7 +121,8 @@ namespace Pinder.LlmAdapters
                 branchKind,
                 correlationContext,
                 measureTransportUsage,
-                roleFactAccessDecisions);
+                roleFactAccessDecisions,
+                journalLinks);
 
         private static AnnotatedInvocationDocument BuildRuntimeJournalDocument(string documentId, string text)
         {
@@ -226,21 +230,27 @@ namespace Pinder.LlmAdapters
             {
                 _attempt = attempt ?? throw new ArgumentNullException(nameof(attempt));
                 CallId = attempt.InvocationRecord.Correlation.InvocationId;
+                InvocationRecordId = AgentJournalSinkRecord.Invocation(attempt.InvocationRecord).RecordId;
                 _usageMeasurement = AgentJournalUsageMeasurementScope.Start(usageSource, CallId);
             }
 
             public string? CallId { get; }
+            public string? InvocationRecordId { get; }
+            public string? ResultRecordId { get; private set; }
 
-            public Task CompleteAcceptedAsync(string outputText, string? semanticEntryId = null, IReadOnlyDictionary<string, string>? resultMetadata = null)
+            public async Task CompleteAcceptedAsync(string outputText, string? semanticEntryId = null, IReadOnlyDictionary<string, string>? resultMetadata = null)
             {
                 AgentJournalUsageCapture capture = CompleteUsage();
-                return _attempt?.CompleteAcceptedAsync(
-                    outputText ?? string.Empty,
-                    capture.Usage,
-                    semanticEntryId,
-                    resultMetadata,
-                    capture.Status,
-                    capture) ?? Task.CompletedTask;
+                if (_attempt == null) return;
+                AgentJournalTerminalResult terminal = await _attempt.CompleteAcceptedAsync(
+                        outputText ?? string.Empty,
+                        capture.Usage,
+                        semanticEntryId,
+                        resultMetadata,
+                        capture.Status,
+                        capture)
+                    .ConfigureAwait(false);
+                ResultRecordId = AgentJournalSinkRecord.Result(terminal.ResultRecord).RecordId;
             }
 
             public Task CompleteValidationRejectedAsync(string validationCode, IReadOnlyDictionary<string, string>? resultMetadata = null)

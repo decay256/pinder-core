@@ -40,7 +40,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var msg = new string('x', 200);
             var ctx = MakeDateeContext(msg);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var prompt = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("guided by your designated texting-style length axis", prompt);
             Assert.DoesNotContain("characters regardless of your texting style", prompt);
@@ -55,7 +55,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var msg = "x"; // 1 char
             var ctx = MakeDateeContext(msg);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var prompt = DateePromptTestBuilder.Build(ctx);
 
             Assert.DoesNotContain("80 characters", prompt);
         }
@@ -69,7 +69,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var msg = new string('y', 500);
             var ctx = MakeDateeContext(msg);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var prompt = DateePromptTestBuilder.Build(ctx);
 
             Assert.DoesNotContain("600 characters", prompt);
         }
@@ -83,7 +83,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var msg = new string('z', 1054);
             var ctx = MakeDateeContext(msg);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var prompt = DateePromptTestBuilder.Build(ctx);
 
             Assert.DoesNotContain("engine-specified ceiling", prompt);
             Assert.DoesNotContain("NOT a hard engine cap", prompt);

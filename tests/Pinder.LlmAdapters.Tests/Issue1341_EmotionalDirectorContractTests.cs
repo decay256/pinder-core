@@ -728,7 +728,8 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Equal(2, transport.PlainCalls);
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
-            Assert.Contains("Primary emotion: relief", transport.LastUserMessage, StringComparison.Ordinal);
+            Assert.Contains("[ENGINE — DATEE RESPONSE PLAN]", transport.LastUserMessage, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"relief\"", transport.LastUserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director source packet", transport.LastUserMessage, StringComparison.Ordinal);
             Assert.Equal("A bounded DATEE reply.", result.Response.MessageText.Trim());
         }
@@ -848,7 +849,7 @@ namespace Pinder.LlmAdapters.Tests
             }.ToString(Formatting.None);
         }
 
-        private class PlainQueueTransport : ILlmTransport
+        private class PlainQueueTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly Queue<string> _responses;
 
@@ -884,6 +885,20 @@ namespace Pinder.LlmAdapters.Tests
                 LastTemperature = temperature;
                 LastMaxTokens = maxTokens;
                 return Task.FromResult(_responses.Dequeue());
+            }
+
+            public virtual async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
             }
         }
 
@@ -924,7 +939,7 @@ namespace Pinder.LlmAdapters.Tests
             public List<StructuredLlmRequest> StructuredRequests { get; } =
                 new List<StructuredLlmRequest>();
 
-            public Task<StructuredLlmResponse> SendStructuredAsync(
+            public override Task<StructuredLlmResponse> SendStructuredAsync(
                 StructuredLlmRequest request,
                 CancellationToken ct = default)
             {

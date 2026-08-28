@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class ParameterDriftFixTests
     {
-        private sealed class TemperatureTrackingTransport : ILlmTransport
+        private sealed class TemperatureTrackingTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _response;
 
@@ -38,6 +38,20 @@ namespace Pinder.LlmAdapters.Tests
                     return Task.FromResult(ValidDirectorJson);
 
                 return Task.FromResult(_response);
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
             }
         }
 

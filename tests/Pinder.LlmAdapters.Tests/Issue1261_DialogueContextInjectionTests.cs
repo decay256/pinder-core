@@ -9,17 +9,37 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class Issue1261_DialogueContextInjectionTests
     {
+        private static readonly Guid AvatarId = Guid.Parse("850cd09b-7808-4b06-a446-9fe0f9782898");
+        private static readonly Guid DateeId = Guid.Parse("9bbc793b-f479-4cef-b35e-fd1f7964a371");
+
+        private static ResolvedRevelationTarget Target()
+            => new ResolvedRevelationTarget
+            {
+                Registry = EmotionStemSelectionRules.StakeRegistry,
+                Index = 13,
+                Field = "STAKE_LINE",
+                Manner = "CURATED_BUFFER",
+                StemText = "laminated Camino map",
+                TransitionStyle = "buffered disclosure",
+            };
+
         private static DialogueContext MakeDialogueContextWithTarget()
         {
-            var target = new ResolvedRevelationTarget 
-            { 
-                Registry = "STAKE", 
-                Index = 13, 
-                Field = "STAKE_LINE", 
-                Manner = "ACCIDENTAL_SLIP", 
-                StemText = "laminated Camino map", 
-                TransitionStyle = "ACCIDENTAL_SLIP" 
-            };
+            ResolvedRevelationTarget target = Target();
+            AvatarRevelationTarget typedTarget = AvatarRevelationTarget.FromLegacyResolvedTarget(
+                target,
+                AvatarId,
+                AvatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceIds.PsychologicalStake(AvatarId, 13));
+            var cognitiveFact = new OwnedPromptFactV1(
+                AvatarId,
+                ConversationParticipantRole.PlayerAvatar,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(AvatarId, 3),
+                "FEAR OF INTIMACY + DEFENSIVE SARCASM");
             
             return new DialogueContext(
                 playerAvatarPrompt: "player prompt",
@@ -32,22 +52,29 @@ namespace Pinder.LlmAdapters.Tests
                 dateeName: "VELVET",
                 currentTurn: 3,
                 availableStats: new[] { StatType.Charm, StatType.Rizz, StatType.Honesty },
-                resolvedTarget: target,
-                cognitiveSubtext: "FEAR OF INTIMACY + DEFENSIVE SARCASM"
+                avatarRevelationTarget: typedTarget,
+                cognitiveSubtextFact: cognitiveFact,
+                recipientCharacterId: AvatarId
             );
         }
 
         private static DateeContext MakeDateeContextWithTarget()
         {
-            var target = new ResolvedRevelationTarget 
-            { 
-                Registry = "STAKE", 
-                Index = 13, 
-                Field = "STAKE_LINE", 
-                Manner = "ACCIDENTAL_SLIP", 
-                StemText = "laminated Camino map", 
-                TransitionStyle = "ACCIDENTAL_SLIP" 
-            };
+            ResolvedRevelationTarget target = Target();
+            DateeReactionTarget typedTarget = DateeReactionTarget.FromLegacyResolvedTarget(
+                target,
+                DateeId,
+                DateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceIds.PsychologicalStake(DateeId, 13));
+            var cognitiveFact = new OwnedPromptFactV1(
+                DateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(DateeId, 3),
+                "FEAR OF INTIMACY + DEFENSIVE SARCASM");
 
             return new DateeContext(
                 dateePrompt: "datee prompt",
@@ -61,8 +88,12 @@ namespace Pinder.LlmAdapters.Tests
                 responseDelayMinutes: 1.0,
                 playerName: "GERALD",
                 dateeName: "VELVET",
-                resolvedTarget: target,
-                cognitiveSubtext: "FEAR OF INTIMACY + DEFENSIVE SARCASM"
+                currentTurn: 3,
+                interestBeforeState: InterestState.Lukewarm,
+                interestAfterState: InterestState.Lukewarm,
+                dateeReactionTarget: typedTarget,
+                cognitiveSubtextFact: cognitiveFact,
+                recipientCharacterId: DateeId
             );
         }
 
@@ -76,7 +107,7 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Contains("Transition target: laminated Camino map", engine);
             Assert.Contains("Apply this specifically to the final option", engine);
-            Assert.Contains("Transition style for the final option: ACCIDENTAL_SLIP", engine);
+            Assert.Contains("Transition style for the final option: buffered disclosure", engine);
             Assert.Contains("Cognitive subtext: FEAR OF INTIMACY + DEFENSIVE SARCASM", engine);
             Assert.DoesNotContain("STAKE", engine);
             Assert.DoesNotContain("#13", engine);
@@ -84,25 +115,35 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void BuildDateePrompt_InjectsTransitionDirective_WhenResolvedTargetIsPresent()
+        public void BuildDateePrompt_UsesAcceptedPlanInsteadOfRawDirectives()
         {
             var context = MakeDateeContextWithTarget();
-            var trace = SessionDocumentBuilder.BuildDateePromptEx(context);
+            var direction = new CharacterEmotionalDirection(
+                "relief",
+                CharacterEmotionalDirection.NoneSecondaryEmotion,
+                "controlled",
+                4,
+                "escalating",
+                "fear of being dismissed",
+                "reads the message as a possible opening",
+                "leans toward a careful answer",
+                "keeps one boundary",
+                "answers with cautious warmth");
+            DateeResponsePlanCompilationResult compiled = new DateeResponsePlanCompiler().Compile(
+                DateeResponsePlanInput.From(context, direction));
+            Assert.Equal(DateeResponsePlanCompilationOutcome.Accepted, compiled.Outcome);
 
-            string engine = ExtractEngineState(trace.Text);
+            var trace = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, compiled.Plan!);
 
-            Assert.Contains("Transition target: laminated Camino map", engine);
-            Assert.Contains("Apply this specifically to the datee response", engine);
-            Assert.Contains("Transition style for the datee response: ACCIDENTAL_SLIP", engine);
-            Assert.Contains("Cognitive subtext: FEAR OF INTIMACY + DEFENSIVE SARCASM", engine);
-            Assert.DoesNotContain("STAKE", engine);
-            Assert.DoesNotContain("#13", engine);
-            Assert.DoesNotContain("STAKE_LINE", engine);
+            Assert.Contains("[ENGINE — DATEE RESPONSE PLAN]", trace.Text, StringComparison.Ordinal);
+            Assert.Contains("\"movement\":\"hold\"", trace.Text, StringComparison.Ordinal);
+            Assert.Contains("\"disclosure\":\"voluntary\"", trace.Text, StringComparison.Ordinal);
+            Assert.DoesNotContain("Transition target:", trace.Text, StringComparison.Ordinal);
+            Assert.DoesNotContain("Transition style for the datee response:", trace.Text, StringComparison.Ordinal);
+            Assert.DoesNotContain("Cognitive subtext:", trace.Text, StringComparison.Ordinal);
             Assert.DoesNotContain(trace.Spans, span => span.Key == "datee-transition-directive");
             Assert.DoesNotContain(trace.Spans, span => span.Key == "cognitive-subtext-directive");
-            AssertCatalogSpan(trace, "engine-state-transition-target-line");
-            AssertCatalogSpan(trace, "engine-state-transition-style-line");
-            AssertCatalogSpan(trace, "engine-state-cognitive-subtext-line");
+            AssertCatalogSpan(trace, "datee-response-plan-performance");
         }
 
         private static string ExtractEngineState(string prompt)

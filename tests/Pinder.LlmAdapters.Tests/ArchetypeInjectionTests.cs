@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_WithArchetypeDirective_InjectsIt()
         {
             var ctx = MakeDateeContext("ACTIVE ARCHETYPE: The Love Bomber (dominant)\nOverwhelming affection.");
-            string prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            string prompt = DateePromptTestBuilder.Build(ctx);
             Assert.Contains("ACTIVE ARCHETYPE: The Love Bomber (dominant)", prompt);
             Assert.Contains("Overwhelming affection.", prompt);
         }
@@ -75,7 +75,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_WithoutArchetypeDirective_DoesNotInject()
         {
             var ctx = MakeDateeContext(null);
-            string prompt = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            string prompt = DateePromptTestBuilder.Build(ctx);
             Assert.DoesNotContain("ACTIVE ARCHETYPE:", prompt);
         }
     }

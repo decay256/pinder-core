@@ -14,7 +14,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Contains("Interested", optionsPrompt);
             Assert.DoesNotContain("Very Into It", optionsPrompt);
 
-            var dateePrompt = SessionDocumentBuilder.BuildDateePrompt(
+            var dateePrompt = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 14, interestAfter: 15));
             Assert.Contains("Sable is at Interest 15/25", dateePrompt);
             Assert.Contains("Engaged but not sold", dateePrompt);

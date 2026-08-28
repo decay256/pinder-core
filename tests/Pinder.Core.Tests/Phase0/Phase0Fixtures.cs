@@ -47,12 +47,18 @@ namespace Pinder.Core.Tests.Phase0
         /// explicitly cloneable — see <see cref="CloneableRandom.RequireCloneable"/>.
         /// </para>
         /// </summary>
-        public static GameSessionConfig MakeConfig(int steeringSeed = 42, int statDrawSeed = 4242)
+        public static GameSessionConfig MakeConfig(
+            int steeringSeed = 42,
+            int statDrawSeed = 4242,
+            int hungerForIntimacy = 0,
+            int terrorOfRejection = 0)
         {
             return new GameSessionConfig(
                 clock: TestHelpers.MakeClock(),
                 steeringRng: new CloneableRandom(steeringSeed),
-                statDrawRng: new CloneableRandom(statDrawSeed));
+                statDrawRng: new CloneableRandom(statDrawSeed),
+                hungerForIntimacy: hungerForIntimacy,
+                terrorOfRejection: terrorOfRejection);
         }
 
         /// <summary>

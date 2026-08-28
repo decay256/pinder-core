@@ -274,8 +274,8 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Provenance
                 GameRunPromptDocumentBuilder.BuildDateeSystemDocument(dateeContext.DateePrompt, gameDefinition));
             yield return GoldenCase.Live(
                 "session.user",
-                SessionDocumentBuilder.BuildDateePromptEx(dateeContext, catalog).Text,
-                GameRunPromptDocumentBuilder.BuildDateeUserDocument(dateeContext, catalog));
+                performance.Text,
+                GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(performance));
             yield return GoldenCase.Live(
                 "datee.emotional-director.system",
                 director.SystemPrompt.Text,

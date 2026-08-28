@@ -18,7 +18,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_PositiveDelta_ShowsPlusSign()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 8, interestAfter: 11, responseDelayMinutes: 2.0));
 
             Assert.Contains("Interest moved from 8 to 11 (+3)", result);
@@ -27,7 +27,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_ZeroDelta_ShowsPlusZero()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 10, responseDelayMinutes: 2.0));
 
             Assert.Contains("Interest moved from 10 to 10 (+0)", result);
@@ -36,7 +36,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_ShowsCurrentInterestOutOf25()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 15));
 
             Assert.Contains("Interest 15/25", result);
@@ -45,7 +45,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_NormalDelay_DoesNotExposeTimingToModel()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(responseDelayMinutes: 5.5));
 
             Assert.DoesNotContain("approximately 5.5 minutes", result);
@@ -55,7 +55,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_SubMinuteDelay_DoesNotExposeTimingToModel()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(responseDelayMinutes: 0.3));
 
             Assert.DoesNotContain("less than 1 minute", result);
@@ -64,7 +64,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest21_ExtremelyInterested()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 20, interestAfter: 21));
 
             Assert.Contains("Basically sold", result);
@@ -73,7 +73,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest13_Engaged()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 13));
 
             Assert.Contains("Engaged but not sold", result);
@@ -82,7 +82,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest9_Lukewarm()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 9));
 
             Assert.Contains("Skeptical", result);
@@ -91,7 +91,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest5_Cooling()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 5));
 
             Assert.Contains("Skeptical", result);
@@ -100,7 +100,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest0_Unmatching()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 2, interestAfter: 0));
 
             Assert.Contains("Unmatched", result);
@@ -109,7 +109,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_ContainsStructuredSignalsInstruction()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 12));
 
             Assert.Contains("datee_performance.v1", result);
@@ -122,7 +122,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_WithTrapInstructions_IncludesThem()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(activeTrapInstructions: new[] { "Trap effect: cringe aura" }));
 
             Assert.Contains("Trap effect: cringe aura", result);
@@ -205,7 +205,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest16_Engaged()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 16));
 
             Assert.Contains("Interested but holding back", result);
@@ -214,7 +214,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest17_VeryInterested()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 17));
 
             Assert.Contains("Interested but holding back", result);
@@ -223,7 +223,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest12_Lukewarm()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 12));
 
             Assert.Contains("Engaged but not sold", result);
@@ -232,7 +232,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest8_Cooling()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 8));
 
             Assert.Contains("Skeptical", result);
@@ -241,7 +241,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest4_Disengaged()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 4));
 
             Assert.Contains("Reconsidering", result);
@@ -250,8 +250,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest25_ExtremelyInterested()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
-                MakeDateeContext(interestBefore: 10, interestAfter: 25));
+            var result = DateePromptTestBuilder.Build(
+                MakeDateeContext(interestBefore: 25, interestAfter: 25));
 
             Assert.Contains("resistance dissolved", result);
         }
@@ -259,7 +259,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_Interest1_Disengaged_NotUnmatching()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 2, interestAfter: 1));
 
             Assert.Contains("Reconsidering", result);

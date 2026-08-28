@@ -42,7 +42,8 @@ namespace Pinder.LlmAdapters.Tests
             var stats = new StatBlock(
                 new Dictionary<StatType, int> { { StatType.Charm, 5 }, { StatType.Rizz, 3 }, { StatType.Honesty, 2 }, { StatType.Chaos, 1 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 0 } },
                 new Dictionary<ShadowStatType, int>());
-            var profile = new CharacterProfile(stats, "prompt", "Test", new TimingProfile(0, 1f, 0f, "neutral"), 1);
+            var profile = new CharacterProfile(stats, "prompt", "Test", new TimingProfile(0, 1f, 0f, "neutral"), 1,
+                characterId: Guid.Parse("48900000-0000-0000-0000-000000000001"));
 
             Assert.Equal(string.Empty, profile.TextingStyleFragment);
         }
@@ -54,7 +55,8 @@ namespace Pinder.LlmAdapters.Tests
                 new Dictionary<StatType, int> { { StatType.Charm, 5 }, { StatType.Rizz, 3 }, { StatType.Honesty, 2 }, { StatType.Chaos, 1 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 0 } },
                 new Dictionary<ShadowStatType, int>());
             var profile = new CharacterProfile(stats, "prompt", "Test", new TimingProfile(0, 1f, 0f, "neutral"), 1,
-                textingStyleFragment: "lowercase-with-intent, precise, ironic");
+                textingStyleFragment: "lowercase-with-intent, precise, ironic",
+                characterId: Guid.Parse("48900000-0000-0000-0000-000000000002"));
 
             Assert.Equal("lowercase-with-intent, precise, ironic", profile.TextingStyleFragment);
         }
@@ -66,7 +68,8 @@ namespace Pinder.LlmAdapters.Tests
                 new Dictionary<StatType, int> { { StatType.Charm, 5 }, { StatType.Rizz, 3 }, { StatType.Honesty, 2 }, { StatType.Chaos, 1 }, { StatType.Wit, 4 }, { StatType.SelfAwareness, 0 } },
                 new Dictionary<ShadowStatType, int>());
             var profile = new CharacterProfile(stats, "prompt", "Test", new TimingProfile(0, 1f, 0f, "neutral"), 1,
-                textingStyleFragment: null);
+                textingStyleFragment: null,
+                characterId: Guid.Parse("48900000-0000-0000-0000-000000000003"));
 
             Assert.Equal(string.Empty, profile.TextingStyleFragment);
         }

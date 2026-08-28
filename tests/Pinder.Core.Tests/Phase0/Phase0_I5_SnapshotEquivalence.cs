@@ -81,7 +81,7 @@ namespace Pinder.Core.Tests.Phase0
                 MakeProfile("Player", PlayerCharacterId),
                 MakeProfile("Datee", DateeCharacterId),
                 adapterB2, diceB2, new NullTrapRegistry(),
-                Phase0Fixtures.MakeConfig());
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
 
             sessionB2.RestoreState(BuildResimData(midSnap, midHistory), new NullTrapRegistry());
             await PlayTwoTurns(sessionB2);
@@ -163,7 +163,7 @@ namespace Pinder.Core.Tests.Phase0
                 MakeProfile("Player", PlayerCharacterId),
                 MakeProfile("Datee", DateeCharacterId),
                 adapter, dice, new NullTrapRegistry(),
-                Phase0Fixtures.MakeConfig());
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
         }
 
         private static CharacterProfile MakeProfile(string name, Guid characterId)

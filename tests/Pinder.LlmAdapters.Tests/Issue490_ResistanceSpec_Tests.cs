@@ -43,7 +43,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC1_BuildDateePrompt_ContainsFundamentalResistanceRule()
         {
             var ctx = MakeContext(12);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Below Interest 25, you are not won over", result);
         }
@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC1_ResistanceRulePresent_BelowDateSecured(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("resistance is always present underneath", result);
         }
@@ -74,7 +74,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC2_Interest1To4_ShowsActiveDisengagement(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -92,7 +92,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC3_Interest10To15_ShowsUnstableAgreement(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -110,7 +110,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC4_Interest21To24_ShowsSubtleResistance(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC5_Interest25_ResistanceDissolves()
         {
             var ctx = MakeContext(25);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.Contains("Current interest: 25/25", result);
@@ -136,7 +136,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC5_Interest25_DoesNotContainNotWonOverLanguage()
         {
             var ctx = MakeContext(25);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             // At 25 the datee IS won over, so "not won over" should not appear
             // (The fundamental rule says "Below Interest 25, you are not won over")
@@ -157,7 +157,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest5To9_ShowsSkepticalInterest(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -175,7 +175,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest16To20_ShowsDeliberateApproach(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -190,7 +190,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Interest0_ReturnsDisengagement()
         {
             var ctx = MakeContext(0);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains("Current interest: 0/25", result);
@@ -307,7 +307,7 @@ namespace Pinder.LlmAdapters.Tests
         public void SectionPlacement_FundamentalRulePresent()
         {
             var ctx = MakeContext(12);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("FUNDAMENTAL RULE", result);
         }
@@ -351,7 +351,7 @@ namespace Pinder.LlmAdapters.Tests
         public void ResistanceBlock_AlwaysPresent_AtEveryInterestLevel(int interest)
         {
             var ctx = MakeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             // The prompt should always contain the resistance section
             Assert.Contains("FUNDAMENTAL RULE", result);

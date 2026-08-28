@@ -210,6 +210,8 @@ namespace Pinder.Core.Conversation
                 dateeSessionSnapshot: dateeSessionSnapshot,
                 avatarSessionSnapshot: avatarSessionSnapshot,
                 dateeEmotionalDirectionHistory: directionHistorySnapshot,
+                shadowDisadvantagedStats: roleState?.ShadowDisadvantagedStats,
+                currentShadowThresholds: roleState?.CurrentShadowThresholds,
                 avatarSpentBackstoryIndices: roleState?.AvatarSpentBackstoryIndices,
                 avatarSpentStakeIndices: roleState?.AvatarSpentStakeIndices,
                 avatarPreviousPhase: roleState?.AvatarPreviousPhase,
@@ -223,7 +225,9 @@ namespace Pinder.Core.Conversation
                 dateePreviousResolvedIndex: roleState?.DateePreviousResolvedIndex ?? 0,
                 currentDateeReactionTarget: roleState?.CurrentDateeReactionTarget,
                 currentDateeCognitiveSubtext: roleState?.CurrentDateeCognitiveSubtext,
-                currentDateeCognitiveSubtextFact: roleState?.CurrentDateeCognitiveSubtextFact);
+                currentDateeCognitiveSubtextFact: roleState?.CurrentDateeCognitiveSubtextFact,
+                lastAcceptedDateeResponsePlanState: roleState?.LastAcceptedDateeResponsePlanState,
+                lastDateeResponseReplayState: roleState?.LastDateeResponseReplayState);
         }
 
         /// <summary>

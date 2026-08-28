@@ -473,6 +473,58 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         }
     }
 
+    public enum AgentJournalDateeResponsePlanArtifactKind
+    {
+        SourceInput,
+        CompilerOutcome,
+        AcceptedPlan,
+        ReuseEvent,
+    }
+
+    /// <summary>
+    /// Private, zero-context provenance for one DATEE response-plan compilation chain.
+    /// PayloadJson is retained by the Agent Journal and is never projected as a semantic message.
+    /// </summary>
+    public sealed class AgentJournalDateeResponsePlanRecord
+    {
+        public const int CurrentSchemaVersion = 2;
+        public const string ReconciliationInvocationLinkContextKey = "response_plan_reconciliation_invocation_id";
+        public const string ReconciliationResultLinkContextKey = "response_plan_reconciliation_result_id";
+
+        public AgentJournalDateeResponsePlanRecord(
+            string artifactId,
+            AgentJournalDateeResponsePlanArtifactKind artifactKind,
+            string payloadJson,
+            IReadOnlyList<string> sourceIds,
+            string? parentArtifactId = null,
+            string? compilerOutcome = null,
+            string? reconciliationInvocationId = null,
+            string? reconciliationResultId = null,
+            int schemaVersion = CurrentSchemaVersion)
+        {
+            SchemaVersion = schemaVersion;
+            ArtifactId = artifactId;
+            ArtifactKind = artifactKind;
+            PayloadJson = payloadJson;
+            SourceIds = new System.Collections.ObjectModel.ReadOnlyCollection<string>(
+                (sourceIds ?? throw new ArgumentNullException(nameof(sourceIds))).ToArray());
+            ParentArtifactId = parentArtifactId;
+            CompilerOutcome = compilerOutcome;
+            ReconciliationInvocationId = reconciliationInvocationId;
+            ReconciliationResultId = reconciliationResultId;
+        }
+
+        public int SchemaVersion { get; }
+        public string ArtifactId { get; }
+        public AgentJournalDateeResponsePlanArtifactKind ArtifactKind { get; }
+        public string PayloadJson { get; }
+        public IReadOnlyList<string> SourceIds { get; }
+        public string? ParentArtifactId { get; }
+        public string? CompilerOutcome { get; }
+        public string? ReconciliationInvocationId { get; }
+        public string? ReconciliationResultId { get; }
+    }
+
     public sealed class LlmInvocationRecord
     {
         public LlmInvocationRecord(

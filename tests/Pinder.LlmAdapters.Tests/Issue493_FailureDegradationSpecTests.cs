@@ -39,8 +39,8 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void AC5_TropeTrap_And_Catastrophe_ProduceDistinctGuidance()
         {
-            var tropeTrapPrompt = SessionDocumentBuilder.BuildDateePrompt(MakeContext(FailureTier.TropeTrap));
-            var catastrophePrompt = SessionDocumentBuilder.BuildDateePrompt(MakeContext(FailureTier.Catastrophe));
+            var tropeTrapPrompt = DateePromptTestBuilder.Build(MakeContext(FailureTier.TropeTrap));
+            var catastrophePrompt = DateePromptTestBuilder.Build(MakeContext(FailureTier.Catastrophe));
 
             // Both should contain FAILURE CONTEXT but with different content
             Assert.Contains("FAILURE CONTEXT", tropeTrapPrompt);
@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC6_Success_NoFailureContext_InPrompt()
         {
             var context = MakeContext(FailureTier.None, interestBefore: 12, interestAfter: 13);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.DoesNotContain("FAILURE CONTEXT", prompt);
         }
@@ -125,7 +125,7 @@ namespace Pinder.LlmAdapters.Tests
         public void EdgeCase_FailureContext_AppearsAfterPlayerMessage()
         {
             var context = MakeContext(FailureTier.Catastrophe);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             int playerMessageIndex = prompt.IndexOf("PLAYER'S LAST MESSAGE", StringComparison.Ordinal);
             int failureContextIndex = prompt.IndexOf("FAILURE CONTEXT", StringComparison.Ordinal);

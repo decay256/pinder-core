@@ -68,7 +68,8 @@ namespace Pinder.LlmAdapters.Tests
                 avatarSession: null);
 
             Assert.Empty(transport.LegacyStructuredRequests);
-            StructuredConversationCall director = Assert.Single(transport.StructuredConversationCalls);
+            StructuredConversationCall director = Assert.Single(transport.StructuredConversationCalls.Where(
+                call => call.Request.SchemaName == "emotional_director"));
             Assert.Equal(canonicalHistory.Select(message => message.Role), director.PriorMessages.Select(message => message.Role));
             Assert.Equal(canonicalHistory.Select(message => message.Content), director.PriorMessages.Select(message => message.Content));
             Assert.Contains("DATEE CHARACTER SYSTEM MARKER", director.Request.SystemPrompt, StringComparison.Ordinal);
@@ -81,9 +82,10 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("legacy duplicate datee reply", director.Request.UserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("canonical prior player line", director.Request.UserMessage, StringComparison.Ordinal);
 
-            ConversationCall performance = Assert.Single(transport.ConversationCalls);
-            Assert.Equal(LlmPhase.OpponentResponse, performance.Phase);
+            StructuredConversationCall performance = Assert.Single(transport.StructuredConversationCalls.Where(
+                call => call.Request.SchemaName == DateePerformanceStructuredContract.SchemaName));
             Assert.Equal(canonicalHistory.Select(message => message.Content), performance.PriorMessages.Select(message => message.Content));
+            Assert.Empty(transport.ConversationCalls);
 
             await using PiConversationSession restored = await PiConversationSession.RestoreOrImportAsync(
                 result.DateeSessionSnapshot,
@@ -116,22 +118,25 @@ namespace Pinder.LlmAdapters.Tests
                 dateeSession: null,
                 avatarSession: null);
 
-            Assert.Equal(2, transport.StructuredConversationCalls.Count);
+            StructuredConversationCall[] directorCalls = transport.StructuredConversationCalls
+                .Where(call => call.Request.SchemaName == "emotional_director")
+                .ToArray();
+            Assert.Equal(2, directorCalls.Length);
             Assert.All(
-                transport.StructuredConversationCalls,
+                directorCalls,
                 call => Assert.Equal(
                     canonicalHistory.Select(message => message.Content),
                     call.PriorMessages.Select(message => message.Content)));
             Assert.Equal(
-                transport.StructuredConversationCalls[0].Request.UserMessage,
-                transport.StructuredConversationCalls[1].Request.UserMessage);
+                directorCalls[0].Request.UserMessage,
+                directorCalls[1].Request.UserMessage);
             Assert.DoesNotContain(
                 "wrong",
-                string.Join("|", transport.StructuredConversationCalls[1].PriorMessages.Select(message => message.Content)),
+                string.Join("|", directorCalls[1].PriorMessages.Select(message => message.Content)),
                 StringComparison.Ordinal);
             Assert.Contains(
                 "previous emotional direction did not satisfy",
-                transport.StructuredConversationCalls[1].Request.SystemPrompt,
+                directorCalls[1].Request.SystemPrompt,
                 StringComparison.OrdinalIgnoreCase);
 
             await using PiConversationSession restored = await PiConversationSession.RestoreOrImportAsync(
@@ -172,7 +177,8 @@ namespace Pinder.LlmAdapters.Tests
                 originalSnapshot,
                 avatarSession: null));
 
-            Assert.Single(transport.StructuredConversationCalls);
+            Assert.Single(transport.StructuredConversationCalls.Where(
+                call => call.Request.SchemaName == "emotional_director"));
             Assert.Empty(transport.ConversationCalls);
             await using PiConversationSession restored = await PiConversationSession.RestoreOrImportAsync(
                 originalSnapshot,
@@ -222,7 +228,12 @@ namespace Pinder.LlmAdapters.Tests
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
                     StatType.Honesty,
                     RollOutcomeIntensity.Strong,
-                    TestHelpers.MakePsychiatricDiagnosis()));
+                    TestHelpers.MakePsychiatricDiagnosis()),
+                agentJournalContext: new GameRunAgentJournalContext(
+                    "run-55",
+                    "datee-session-55",
+                    requestId: "request-55",
+                    branchId: "main"));
 
         private static string ValidDirectionJson()
             => new JObject
@@ -312,7 +323,10 @@ namespace Pinder.LlmAdapters.Tests
                 CancellationToken ct = default)
             {
                 LegacyStructuredRequests.Add(request);
-                return Task.FromResult(new StructuredLlmResponse(_structuredResponses.Dequeue()));
+                string output = request.SchemaName == DateePerformanceStructuredContract.SchemaName
+                    ? _plainResponses.Dequeue()
+                    : _structuredResponses.Dequeue();
+                return Task.FromResult(DateePromptTestBuilder.StructuredResponse(request, output));
             }
 
             public Task<StructuredLlmResponse> SendStructuredConversationAsync(
@@ -325,7 +339,10 @@ namespace Pinder.LlmAdapters.Tests
                     priorMessages.ToArray()));
                 if (CancelDirector)
                     throw new OperationCanceledException(cancellationToken);
-                return Task.FromResult(new StructuredLlmResponse(_structuredResponses.Dequeue()));
+                string output = request.SchemaName == DateePerformanceStructuredContract.SchemaName
+                    ? _plainResponses.Dequeue()
+                    : _structuredResponses.Dequeue();
+                return Task.FromResult(DateePromptTestBuilder.StructuredResponse(request, output));
             }
         }
 

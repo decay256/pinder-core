@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pinder.Core.Conversation
 {
@@ -53,6 +54,11 @@ namespace Pinder.Core.Conversation
         public IReadOnlyList<ConversationMessage> AvatarHistory { get; }
 
         public IReadOnlyList<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; }
+        public DateeResponsePlan? LastAcceptedDateeResponsePlan { get; }
+        public AcceptedDateeResponsePlanState? LastAcceptedDateeResponsePlanState { get; }
+        public DateeResponseReplayState? LastDateeResponseReplayState { get; }
+        public IReadOnlyCollection<Pinder.Core.Stats.StatType>? ShadowDisadvantagedStats { get; }
+        public IReadOnlyDictionary<Pinder.Core.Stats.ShadowStatType, int>? CurrentShadowThresholds { get; }
 
         public LlmConversationSessionSnapshot? DateeSessionSnapshot { get; }
 
@@ -116,7 +122,12 @@ namespace Pinder.Core.Conversation
             int dateePreviousResolvedIndex = 0,
             DateeReactionTarget? currentDateeReactionTarget = null,
             string? currentDateeCognitiveSubtext = null,
-            OwnedPromptFactV1? currentDateeCognitiveSubtextFact = null)
+            OwnedPromptFactV1? currentDateeCognitiveSubtextFact = null,
+            DateeResponsePlan? lastAcceptedDateeResponsePlan = null,
+            AcceptedDateeResponsePlanState? lastAcceptedDateeResponsePlanState = null,
+            DateeResponseReplayState? lastDateeResponseReplayState = null,
+            IReadOnlyCollection<Pinder.Core.Stats.StatType>? shadowDisadvantagedStats = null,
+            IReadOnlyDictionary<Pinder.Core.Stats.ShadowStatType, int>? currentShadowThresholds = null)
         {
             Interest = interest;
             State = state;
@@ -128,6 +139,15 @@ namespace Pinder.Core.Conversation
             DateeHistory = dateeHistory ?? System.Array.Empty<ConversationMessage>();
             AvatarHistory = avatarHistory ?? System.Array.Empty<ConversationMessage>();
             DateeEmotionalDirectionHistory = dateeEmotionalDirectionHistory ?? System.Array.Empty<CharacterEmotionalDirectionSummary>();
+            LastAcceptedDateeResponsePlan = lastAcceptedDateeResponsePlan;
+            LastAcceptedDateeResponsePlanState = lastAcceptedDateeResponsePlanState;
+            LastDateeResponseReplayState = lastDateeResponseReplayState;
+            ShadowDisadvantagedStats = shadowDisadvantagedStats == null
+                ? null
+                : new List<Pinder.Core.Stats.StatType>(shadowDisadvantagedStats);
+            CurrentShadowThresholds = currentShadowThresholds == null
+                ? null
+                : currentShadowThresholds.ToDictionary(entry => entry.Key, entry => entry.Value);
             GhostProbabilityPerTurn = ghostProbabilityPerTurn;
             ShadowValues = shadowValues ?? new Dictionary<string, int>();
             DateeSessionSnapshot = dateeSessionSnapshot;

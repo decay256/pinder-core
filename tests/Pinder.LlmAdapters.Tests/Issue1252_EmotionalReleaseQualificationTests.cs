@@ -315,20 +315,13 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Empty(legacyTransport.Phases);
         }
 
-        [Theory]
-        [InlineData(false, "ERQ-XPROV-PLAIN")]
-        [InlineData(true, "ERQ-XPROV-STRUCTURED")]
-        public async Task ProviderNeutralTransports_RouteEquivalentDirectionAndVisibleSignals(
-            bool structured,
-            string scenarioId)
+        [Fact]
+        public async Task ProviderNeutralStructuredTransport_RoutesDirectionAndVisibleSignals()
         {
-            QualificationTransport transport = structured
-                ? new StructuredQualificationTransport(
-                    ValidDirectionJson(primaryEmotion: "pride"),
-                    VisibleQualifiedReply)
-                : new QualificationTransport(
-                    ValidDirectionJson(primaryEmotion: "pride"),
-                    VisibleQualifiedReply);
+            const string scenarioId = "ERQ-XPROV-STRUCTURED";
+            var transport = new QualificationTransport(
+                ValidDirectionJson(primaryEmotion: "pride"),
+                VisibleQualifiedReply);
             var adapter = CreateAdapter(transport);
 
             StatefulDateeResult result = await adapter.GetDateeResponseAsync(
@@ -342,21 +335,13 @@ namespace Pinder.LlmAdapters.Tests
                     InterestState.Interested),
                 Array.Empty<ConversationMessage>());
 
-            if (structured)
-            {
-                Assert.Equal(1, transport.StructuredCalls);
-                Assert.Equal(1, transport.PlainCalls);
-                Assert.Equal(LlmPhase.EmotionalDirector, transport.LastStructuredRequest!.Phase);
-            }
-            else
-            {
-                Assert.Equal(0, transport.StructuredCalls);
-                Assert.Equal(2, transport.PlainCalls);
-            }
+            Assert.Equal(2, transport.StructuredCalls);
+            Assert.Equal(0, transport.PlainCalls);
+            Assert.Equal(LlmPhase.OpponentResponse, transport.LastStructuredRequest!.Phase);
 
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
-            Assert.Contains("DATEE EMOTIONAL PERFORMANCE DIRECTION", transport.PerformanceUserMessage, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: pride", transport.PerformanceUserMessage, StringComparison.Ordinal);
+            Assert.Contains("[ENGINE — DATEE RESPONSE PLAN]", transport.PerformanceUserMessage, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"pride\"", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director source packet", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.DoesNotContain("Character-specific emotional translation", transport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.Contains("QUALIFICATION COMPLETE CHARACTER VOICE " + scenarioId, transport.PerformanceSystemPrompt, StringComparison.Ordinal);
@@ -411,10 +396,10 @@ namespace Pinder.LlmAdapters.Tests
 
             Assert.Contains(restrainedVoice, restrainedTransport.PerformanceSystemPrompt, StringComparison.Ordinal);
             Assert.DoesNotContain(expressiveVoice, restrainedTransport.PerformanceSystemPrompt, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: " + restrainedEmotion, restrainedTransport.PerformanceUserMessage, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"" + restrainedEmotion + "\"", restrainedTransport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.Contains(expressiveVoice, expressiveTransport.PerformanceSystemPrompt, StringComparison.Ordinal);
             Assert.DoesNotContain(restrainedVoice, expressiveTransport.PerformanceSystemPrompt, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: " + expressiveEmotion, expressiveTransport.PerformanceUserMessage, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"" + expressiveEmotion + "\"", expressiveTransport.PerformanceUserMessage, StringComparison.Ordinal);
             Assert.Equal(restrainedReply, restrained.Response.MessageText);
             Assert.Equal(expressiveReply, expressive.Response.MessageText);
             Assert.NotEqual(restrained.Response.MessageText, expressive.Response.MessageText);
@@ -670,10 +655,9 @@ namespace Pinder.LlmAdapters.Tests
             "that actually lands softer than I expected, and I am still checking the edges.";
 
         private const string VisibleQualifiedReply =
-            VisibleQualifiedMessageOnly + "\n\n" +
-            "[SIGNALS]\n" +
-            "TELL: HONESTY (asks directly whether the warmth is real)\n" +
-            "WEAKNESS: SELF_AWARENESS -2 (lets the guard drop for a second)";
+            "{\"schema_version\":\"datee_performance.v1\",\"message\":\"" + VisibleQualifiedMessageOnly +
+            "\",\"signals\":{\"tell\":{\"stat\":\"HONESTY\",\"description\":\"asks directly whether the warmth is real\"}," +
+            "\"weakness\":{\"defending_stat\":\"SELF_AWARENESS\",\"dc_reduction\":2,\"description\":\"lets the guard drop for a second\"}}}";
 
         private readonly struct Boundary
         {
@@ -698,7 +682,7 @@ namespace Pinder.LlmAdapters.Tests
             public InterestState? AfterState { get; }
         }
 
-        private class QualificationTransport : ILlmTransport
+        private class QualificationTransport : ILlmTransport, IStructuredLlmTransport
         {
             protected readonly Queue<string> Responses;
 
@@ -738,6 +722,26 @@ namespace Pinder.LlmAdapters.Tests
 
                 return Task.FromResult(Responses.Dequeue());
             }
+
+            public virtual Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                ct.ThrowIfCancellationRequested();
+                StructuredCalls++;
+                Phases.Add(request.Phase);
+                LastStructuredRequest = request;
+                if (string.Equals(request.Phase, LlmPhase.OpponentResponse, StringComparison.Ordinal))
+                {
+                    PerformanceSystemPrompt = request.SystemPrompt;
+                    PerformanceUserMessage = request.UserMessage;
+                }
+
+                return Task.FromResult(DateePromptTestBuilder.StructuredResponse(
+                    request,
+                    Responses.Dequeue(),
+                    "structured-mock"));
+            }
         }
 
         private sealed class StructuredQualificationTransport : QualificationTransport, IStructuredLlmTransport
@@ -747,7 +751,7 @@ namespace Pinder.LlmAdapters.Tests
             {
             }
 
-            public Task<StructuredLlmResponse> SendStructuredAsync(
+            public override Task<StructuredLlmResponse> SendStructuredAsync(
                 StructuredLlmRequest request,
                 CancellationToken ct = default)
             {
@@ -755,16 +759,14 @@ namespace Pinder.LlmAdapters.Tests
                 StructuredCalls++;
                 Phases.Add(request.Phase);
                 LastStructuredRequest = request;
-                return Task.FromResult(
-                    new StructuredLlmResponse(
-                        Responses.Dequeue(),
-                        provider: "qualification",
-                        model: "structured-mock",
-                        usedNativeStructuredOutput: true));
+                return Task.FromResult(DateePromptTestBuilder.StructuredResponse(
+                    request,
+                    Responses.Dequeue(),
+                    "structured-mock"));
             }
         }
 
-        private sealed class InputConditionedQualificationTransport : ILlmTransport
+        private sealed class InputConditionedQualificationTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _directorResponse;
             private readonly string _requiredVoice;
@@ -803,8 +805,22 @@ namespace Pinder.LlmAdapters.Tests
                 PerformanceSystemPrompt = systemPrompt;
                 PerformanceUserMessage = userMessage;
                 Assert.Contains(_requiredVoice, systemPrompt, StringComparison.Ordinal);
-                Assert.Contains("Primary emotion: " + _requiredEmotion, userMessage, StringComparison.Ordinal);
+                Assert.Contains("\"primary_emotion\":\"" + _requiredEmotion + "\"", userMessage, StringComparison.Ordinal);
                 return Task.FromResult(_visibleReply);
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
             }
         }
     }

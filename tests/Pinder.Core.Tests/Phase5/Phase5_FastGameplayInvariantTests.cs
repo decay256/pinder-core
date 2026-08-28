@@ -295,7 +295,7 @@ namespace Pinder.Core.Tests.Phase5
                 Phase0Fixtures.MakeProfile("P"),
                 Phase0Fixtures.MakeProfile("O"),
                 adapter, dice, new Pinder.Core.Traps.NullTrapRegistry(),
-                Phase0Fixtures.MakeConfig());
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
             return (session, transport);
         }
     }

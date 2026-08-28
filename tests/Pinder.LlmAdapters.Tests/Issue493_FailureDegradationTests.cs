@@ -37,7 +37,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Success_NoFailureContext()
         {
             var context = MakeContext(FailureTier.None);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("PLAYER'S LAST MESSAGE", prompt);
             Assert.DoesNotContain("FAILURE CONTEXT", prompt);
@@ -48,7 +48,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Fumble_InjectsFailureContextWithSlightCoolness()
         {
             var context = MakeContext(FailureTier.Fumble);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("delivered after a FUMBLE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -60,7 +60,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Misfire_InjectsGuardedReaction()
         {
             var context = MakeContext(FailureTier.Misfire);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("delivered after a MISFIRE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -71,7 +71,7 @@ namespace Pinder.LlmAdapters.Tests
         public void TropeTrap_InjectsVisibleDiscomfort()
         {
             var context = MakeContext(FailureTier.TropeTrap);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("delivered after a TROPE_TRAP", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -82,7 +82,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Catastrophe_InjectsConfusion()
         {
             var context = MakeContext(FailureTier.Catastrophe);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("delivered after a CATASTROPHE", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);
@@ -93,7 +93,7 @@ namespace Pinder.LlmAdapters.Tests
         public void Legendary_InjectsMaximumReaction()
         {
             var context = MakeContext(FailureTier.Legendary);
-            var prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            var prompt = DateePromptTestBuilder.Build(context);
 
             Assert.Contains("delivered after a LEGENDARY", prompt);
             Assert.Contains("FAILURE CONTEXT", prompt);

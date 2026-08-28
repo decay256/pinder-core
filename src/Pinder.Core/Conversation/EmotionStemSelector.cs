@@ -319,7 +319,7 @@ namespace Pinder.Core.Conversation
             "DEFENSIVE_EVASION" => "Approach the disclosure guardedly: acknowledge it, then deflect without making the transition feel abrupt.",
             "INTIMATE_BREAKTHROUGH" => "Let the disclosure arrive as a sincere, unexpectedly intimate breakthrough.",
             "TRAUMATIC_LEAKAGE" => "Let the disclosure slip out involuntarily, with emotion showing before the speaker can contain it.",
-            _ => "Move into the disclosure naturally and keep it emotionally consistent with the conversation."
+            _ => throw new InvalidOperationException($"Unknown transition manner '{manner}'.")
         };
     }
 }

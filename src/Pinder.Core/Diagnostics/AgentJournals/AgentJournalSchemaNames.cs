@@ -6,5 +6,6 @@ namespace Pinder.Core.Diagnostics.AgentJournals
         public const string LlmResultV1 = "pinder.llm-result.v1";
         public const string MessageLinkV1 = "pinder.message-link.v1";
         public const string RoleFactPolicyDecisionV1 = "pinder.role-fact-policy-decision.v1";
+        public const string DateeResponsePlanV1 = "pinder.datee-response-plan.v1";
     }
 }

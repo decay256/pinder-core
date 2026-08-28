@@ -114,6 +114,16 @@ namespace Pinder.Core.Conversation
 
         public IReadOnlyList<CharacterEmotionalDirectionSummary> PreviousAcceptedEmotionalDirections { get; }
 
+        /// <summary>Optional typed host provenance for the soft dramatic-arc intent.</summary>
+        public string? DramaticArcSourceId { get; }
+
+        /// <summary>
+        /// Accepted plan restored for this exact turn, if one exists. Consumers
+        /// must verify canonical visible evidence before reusing it.
+        /// </summary>
+        public DateeResponsePlan? LastAcceptedDateeResponsePlan => AcceptedDateeResponsePlanState?.Plan;
+        public AcceptedDateeResponsePlanState? AcceptedDateeResponsePlanState { get; }
+
         public int? PlayerHungerForIntimacy { get; }
         public int? PlayerTerrorOfRejection { get; }
         public int? DateeHungerForIntimacy { get; }
@@ -157,7 +167,10 @@ namespace Pinder.Core.Conversation
             DateeReactionTarget? dateeReactionTarget = null,
             OwnedPromptFactV1? cognitiveSubtextFact = null,
             Guid? recipientCharacterId = null,
-            Action<OperationalDiagnosticEvent>? onDiagnostic = null)
+            Action<OperationalDiagnosticEvent>? onDiagnostic = null,
+            string? dramaticArcSourceId = null,
+            DateeResponsePlan? lastAcceptedDateeResponsePlan = null,
+            AcceptedDateeResponsePlanState? acceptedDateeResponsePlanState = null)
         {
             PlayerAvatarCard = playerAvatarCard ?? PublicProfileCard.Empty;
             DateePrompt = dateePrompt ?? throw new System.ArgumentNullException(nameof(dateePrompt));
@@ -228,6 +241,10 @@ namespace Pinder.Core.Conversation
             PreviousAcceptedEmotionalDirections = previousAcceptedEmotionalDirections == null
                 ? Array.Empty<CharacterEmotionalDirectionSummary>()
                 : previousAcceptedEmotionalDirections.ToArray();
+            DramaticArcSourceId = string.IsNullOrWhiteSpace(dramaticArcSourceId) ? null : dramaticArcSourceId;
+            if (acceptedDateeResponsePlanState == null && lastAcceptedDateeResponsePlan != null)
+                throw new InvalidOperationException("datee_response_plan.restore_state.required");
+            AcceptedDateeResponsePlanState = acceptedDateeResponsePlanState;
         }
 
         private static RoleFactAccessDecision? DecideFact(

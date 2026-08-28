@@ -166,7 +166,7 @@ namespace Pinder.Core.Tests.Conversation
                 Phase0Fixtures.MakeAdapter(transport),
                 dice,
                 new NullTrapRegistry(),
-                Phase0Fixtures.MakeConfig());
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
         }
 
         private static CharacterProfile MakeProfile(string name)

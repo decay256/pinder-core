@@ -59,7 +59,8 @@ namespace Pinder.Core.Tests.Phase0
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
                 Phase0Fixtures.MakeProfile("Datee"),
-                adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
+                adapter, dice, new NullTrapRegistry(),
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
 
             for (int t = 0; t < 3; t++)
             {
@@ -108,7 +109,8 @@ namespace Pinder.Core.Tests.Phase0
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
                 Phase0Fixtures.MakeProfile("Datee"),
-                adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
+                adapter, dice, new NullTrapRegistry(),
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);
@@ -145,7 +147,8 @@ namespace Pinder.Core.Tests.Phase0
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
                 Phase0Fixtures.MakeProfile("Datee"),
-                adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
+                adapter, dice, new NullTrapRegistry(),
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
 
             for (int t = 0; t < 3; t++)
             {
@@ -197,7 +200,8 @@ namespace Pinder.Core.Tests.Phase0
             var session = new GameSession(
                 Phase0Fixtures.MakeProfile("Player"),
                 Phase0Fixtures.MakeProfile("Datee"),
-                adapter, dice, new NullTrapRegistry(), Phase0Fixtures.MakeConfig());
+                adapter, dice, new NullTrapRegistry(),
+                Phase0Fixtures.MakeConfig(hungerForIntimacy: 12, terrorOfRejection: 2));
 
             await session.StartTurnAsync();
             await session.ResolveTurnAsync(0);

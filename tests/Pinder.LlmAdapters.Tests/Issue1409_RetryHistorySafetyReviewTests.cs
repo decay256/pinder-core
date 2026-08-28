@@ -279,7 +279,7 @@ namespace Pinder.LlmAdapters.Tests
                 .ToArray();
             Assert.Equal(2, performanceResults.Length);
             Assert.Equal(AgentJournalTerminalStatus.Rejected, performanceResults[0].TerminalStatus);
-            Assert.Equal("empty_output", performanceResults[0].ValidationCode);
+            Assert.Equal("invalid_message", performanceResults[0].ValidationCode);
             Assert.Equal(AgentJournalTerminalStatus.Succeeded, performanceResults[1].TerminalStatus);
             Assert.Equal(AgentJournalTerminalCodes.Accepted, performanceResults[1].ValidationCode);
             Assert.DoesNotContain(performanceResults, record => record.TerminalStatus == AgentJournalTerminalStatus.Failed);
@@ -520,7 +520,7 @@ namespace Pinder.LlmAdapters.Tests
             }
         }
 
-        private sealed class RetryingConversationTransport : IConversationLlmTransport, ITokenUsageProvider
+        private sealed class RetryingConversationTransport : IConversationLlmTransport, IStructuredLlmTransport, IStructuredConversationLlmTransport, ITokenUsageProvider
         {
             private readonly Queue<LogicalCallPlan> _plans = new Queue<LogicalCallPlan>();
             private readonly AttemptProgressTransport _inner = new AttemptProgressTransport();
@@ -529,6 +529,7 @@ namespace Pinder.LlmAdapters.Tests
             private int _callCount;
 
             public bool SupportsConversationMessages => true;
+            public bool SupportsStructuredConversationMessages => true;
             public IReadOnlyList<ProviderAttempt> Attempts => _inner.Attempts;
             public IReadOnlyList<LogicalCall> LogicalCalls => _inner.LogicalCalls;
 
@@ -604,6 +605,36 @@ namespace Pinder.LlmAdapters.Tests
                 throw new InvalidOperationException("Provider physical retries exhausted.");
             }
 
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+                => SendStructuredCoreAsync(request, Array.Empty<ConversationMessage>(), ct);
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+                => SendStructuredCoreAsync(request, priorMessages, cancellationToken);
+
+            private async Task<StructuredLlmResponse> SendStructuredCoreAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken)
+            {
+                string output = await SendConversationAsync(
+                    request.SystemPrompt,
+                    priorMessages,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    cancellationToken).ConfigureAwait(false);
+                return new StructuredLlmResponse(
+                    StructuredOutput(request.SchemaName, output),
+                    provider: "test",
+                    model: "retry-script");
+            }
+
             public SessionTokenUsage GetSessionUsage()
                 => new SessionTokenUsage
                 {
@@ -611,6 +642,22 @@ namespace Pinder.LlmAdapters.Tests
                     OutputTokens = _outputTokens,
                     CallCount = _callCount,
                 };
+
+            private static string StructuredOutput(string schemaName, string output)
+            {
+                if (schemaName != DateePerformanceStructuredContract.SchemaName)
+                    return output;
+                return new JObject
+                {
+                    ["schema_version"] = DateePerformanceStructuredContract.SchemaVersion,
+                    ["message"] = output,
+                    ["signals"] = new JObject
+                    {
+                        ["tell"] = JValue.CreateNull(),
+                        ["weakness"] = JValue.CreateNull(),
+                    },
+                }.ToString(Formatting.None);
+            }
         }
 
         private sealed class AttemptProgressTransport : IProgressAwareConversationLlmTransport

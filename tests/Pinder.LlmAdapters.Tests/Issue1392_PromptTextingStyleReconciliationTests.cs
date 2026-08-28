@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests
                 dateeName: "D",
                 dateeTextingStyle: Style);
 
-            string prompt = SessionDocumentBuilder.BuildDateePrompt(context);
+            string prompt = DateePromptTestBuilder.Build(context);
 
             int styleIndex = prompt.IndexOf("YOUR TEXTING STYLE", StringComparison.Ordinal);
             int instructionIndex = prompt.IndexOf("CONTEXT BOUNDARY", StringComparison.Ordinal);
@@ -191,7 +191,8 @@ namespace Pinder.LlmAdapters.Tests
                 dateeTextingStyle: Style);
 
             AnnotatedInvocationDocument player = GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument(dialogueContext, catalog);
-            AnnotatedInvocationDocument datee = GameRunPromptDocumentBuilder.BuildDateeUserDocument(dateeContext, catalog);
+            AnnotatedInvocationDocument datee = GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(
+                DateePromptTestBuilder.BuildEx(dateeContext, catalog));
 
             AssertStyleRanges(player, "DialogueContext.PlayerTextingStyle");
             AssertStyleRanges(datee, "DateeContext.DateeTextingStyle");
@@ -251,7 +252,8 @@ namespace Pinder.LlmAdapters.Tests
                 string[] rendered =
                 {
                     GameRunPromptDocumentBuilder.BuildDialogueOptionsUserDocument(dialogueContext, catalog).Text,
-                    GameRunPromptDocumentBuilder.BuildDateeUserDocument(dateeContext, catalog).Text,
+                    GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(
+                        DateePromptTestBuilder.BuildEx(dateeContext, catalog)).Text,
                     GameRunPromptDocumentBuilder.BuildSuccessImprovementDocuments(
                         new SuccessImprovementContext("player prompt", "D", "P", "hello", StatType.Charm, "strong", history, playerTextingStyle: Style),
                         delivery,

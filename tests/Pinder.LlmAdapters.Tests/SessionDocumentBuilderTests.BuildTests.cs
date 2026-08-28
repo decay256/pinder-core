@@ -57,7 +57,7 @@ namespace Pinder.LlmAdapters.Tests
                 ("VELVET", "Hi")
             };
 
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(conversationHistory: history, playerDeliveredMessage: "How are you?",
                     interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.5,
                     playerName: "GERALD", dateeName: "VELVET"));
@@ -81,7 +81,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_NegativeDelta_FormattedCorrectly()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(playerDeliveredMessage: "Bye",
                     interestBefore: 12, interestAfter: 9, responseDelayMinutes: 5.0));
 
@@ -91,7 +91,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_SmallDelay_ShowsLessThanOneMinute()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(responseDelayMinutes: 0.5));
 
             Assert.DoesNotContain("less than 1 minute", result);
@@ -100,7 +100,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_InterestBehaviourBlock_HighInterest()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 10, interestAfter: 18));
 
             Assert.Contains("Interested but holding back", result);
@@ -109,7 +109,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void BuildDateePrompt_InterestBehaviourBlock_LowInterest()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 5, interestAfter: 3));
 
             Assert.Contains("Reconsidering", result);
@@ -172,7 +172,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_NullContext_Throws()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDateePrompt((DateeContext)null!));
+                DateePromptTestBuilder.Build((DateeContext)null!));
         }
 
         [Fact]
@@ -281,7 +281,7 @@ namespace Pinder.LlmAdapters.Tests
                 ("GERALD_42", "Hey there, I noticed your bio."),
             };
 
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(
                     conversationHistory: historyWithScenes,
                     playerDeliveredMessage: "Hey there, I noticed your bio.",

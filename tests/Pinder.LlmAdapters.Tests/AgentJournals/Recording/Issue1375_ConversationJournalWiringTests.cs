@@ -278,7 +278,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
                 Registry = EmotionStemSelectionRules.BackstoryRegistry,
                 Index = 0,
                 Field = "BIO_LIE",
-                Manner = "CURATED_BUFFER",
+                Manner = "INTIMATE_BREAKTHROUGH",
                 StemText = velvetTargetText,
                 TransitionStyle = "sideways",
             });
@@ -975,7 +975,10 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals.Recording
         [Fact]
         public void StaticApprovedInventory_IsClosedForConversationVerifier()
         {
-            Assert.Equal(6, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
+            Assert.Equal(7, GameRunConversationJournalInventory.ApprovedCallPaths.Count);
+            Assert.Contains(
+                GameRunConversationJournalInventory.DateeResponsePlanReconciliation,
+                GameRunConversationJournalInventory.ApprovedCallPaths);
             Assert.DoesNotContain(FormerDirectorBranchDisposedCallPath, GameRunConversationJournalInventory.ApprovedCallPaths);
             Assert.All(GameRunConversationJournalInventory.ApprovedCallPaths, id =>
                 Assert.True(GameRunConversationJournalInventory.IsApproved(id), id));

@@ -137,6 +137,8 @@ namespace Pinder.SessionRunner.Snapshot
 
         /// <summary>Shadow stat values at end of this turn. Key = ShadowStatType name.</summary>
         public Dictionary<string, int> ShadowValues { get; set; } = new Dictionary<string, int>();
+        public List<string>? ShadowDisadvantagedStats { get; set; }
+        public Dictionary<string, int>? CurrentShadowThresholds { get; set; }
 
         public int MomentumStreak { get; set; }
         public List<TrapSnapshot> ActiveTraps { get; set; } = new List<TrapSnapshot>();
@@ -221,6 +223,8 @@ namespace Pinder.SessionRunner.Snapshot
         public List<DateeHistoryEntry> AvatarHistory { get; set; } = new List<DateeHistoryEntry>();
 
         public List<DateeEmotionalDirectionSummaryEntry> DateeEmotionalDirectionHistory { get; set; } = new List<DateeEmotionalDirectionSummaryEntry>();
+        public AcceptedDateeResponsePlanSnapshot? LastAcceptedDateeResponsePlan { get; set; }
+        public DateeResponseReplaySnapshot? LastDateeResponseReplay { get; set; }
 
         public List<int> AvatarSpentBackstoryIndices { get; set; } = new List<int>();
         public List<int> AvatarSpentStakeIndices { get; set; } = new List<int>();
@@ -322,6 +326,47 @@ namespace Pinder.SessionRunner.Snapshot
         public int Activation { get; set; }
         public string Trajectory { get; set; } = string.Empty;
         public string Impulse { get; set; } = string.Empty;
+    }
+
+    /// <summary>Versioned private snapshot of an accepted DATEE response plan and its provenance.</summary>
+    public sealed class AcceptedDateeResponsePlanSnapshot
+    {
+        public const int CurrentSchemaVersion = 1;
+        public int SchemaVersion { get; set; }
+        public string CanonicalPlanJson { get; set; } = string.Empty;
+        public int OriginatingTurn { get; set; }
+        public string MessageReference { get; set; } = string.Empty;
+        public string VisibleMessageText { get; set; } = string.Empty;
+        public int ProvenanceSchemaVersion { get; set; }
+        public string SourceArtifactId { get; set; } = string.Empty;
+        public string CompilerArtifactId { get; set; } = string.Empty;
+        public string AcceptedArtifactId { get; set; } = string.Empty;
+        public string? ReconciliationInvocationId { get; set; }
+        public string? ReconciliationResultId { get; set; }
+    }
+
+    /// <summary>Versioned immutable context for response-only resimulation.</summary>
+    public sealed class DateeResponseReplaySnapshot
+    {
+        public const int CurrentSchemaVersion = 1;
+        public int SchemaVersion { get; set; }
+        public int ResponseTurn { get; set; }
+        public int PostTurnNumber { get; set; }
+        public string DeliveredMessage { get; set; } = string.Empty;
+        public string AcceptedDateeMessage { get; set; } = string.Empty;
+        public double ResponseDelayMinutes { get; set; }
+        public int InterestBefore { get; set; }
+        public string InterestBeforeState { get; set; } = string.Empty;
+        public string InterestAfterState { get; set; } = string.Empty;
+        public string DeliveryTier { get; set; } = string.Empty;
+        public string RollStat { get; set; } = string.Empty;
+        public string OutcomeIntensity { get; set; } = string.Empty;
+        public bool HorninessOverlayApplied { get; set; }
+        public string HorninessTier { get; set; } = string.Empty;
+        public DateeEmotionalDirectionSummaryEntry AcceptedEmotionalDirection { get; set; } =
+            new DateeEmotionalDirectionSummaryEntry();
+        public List<string> ActiveTrapIds { get; set; } = new List<string>();
+        public List<string> ActiveTrapInstructions { get; set; } = new List<string>();
     }
 
     /// <summary>Active trap state at the time of snapshot.</summary>

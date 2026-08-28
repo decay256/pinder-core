@@ -19,6 +19,8 @@ namespace Pinder.LlmAdapters.Tests
 {
     public sealed class Issue1342_1343_EmotionalDirectorPerformanceTests
     {
+        private static readonly Guid DateeId = Guid.Parse("8fb6db12-c8f7-4f76-bb02-146ec39ef215");
+
         static Issue1342_1343_EmotionalDirectorPerformanceTests()
         {
             PromptCatalogInitializer.Initialize();
@@ -33,35 +35,27 @@ namespace Pinder.LlmAdapters.Tests
             StatefulDateeResult result = await adapter.GetDateeResponseAsync(
                 MakeContext(
                     interestBefore: 4,
-                    interestAfter: 6,
+                    interestAfter: 4,
                     beforeState: InterestState.Bored,
-                    afterState: InterestState.Lukewarm,
+                    afterState: InterestState.Bored,
                     deliveredMessage: "visible delivered line",
-                    cognitiveSubtext: "ABANDONMENT + DEFLECTION",
-                    resolvedTarget: new ResolvedRevelationTarget
-                    {
-                        Registry = "BACKSTORY",
-                        Index = 3,
-                        Field = "BIO_LIE",
-                        StemText = "admit the move was difficult",
-                        TransitionStyle = "buffered disclosure",
-                    }),
+                    cognitiveSubtextFact: CognitivePressure(),
+                    reactionTarget: CuratedBufferTarget()),
                 Array.Empty<ConversationMessage>());
 
             Assert.Equal(new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse }, transport.Phases.ToArray());
             string performancePrompt = transport.UserMessages[1];
-            Assert.Contains("DATEE EMOTIONAL PERFORMANCE DIRECTION", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: relief", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Secondary emotion: none", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Regulatory state: controlled", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Activation: 4", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Trajectory: escalating", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Core threat/desire: fear of being dismissed", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Interpretation: reads the message as specific warmth that is probably meant for them", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Impulse: leans in with a careful question", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Restraint: keeps the reply tentative but available", performancePrompt, StringComparison.Ordinal);
-            Assert.Contains("Response posture: turns warmer while still checking sincerity", performancePrompt, StringComparison.Ordinal);
-            Assert.DoesNotContain("\"primary_emotion\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("[ENGINE — DATEE RESPONSE PLAN]", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"schema_version\":\"datee_response_plan.v1\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"relief\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"regulatory_state\":\"controlled\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"activation\":4", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"trajectory\":\"escalating\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"movement\":\"hold\"", performancePrompt, StringComparison.Ordinal);
+            Assert.Contains("\"disclosure\":\"voluntary\"", performancePrompt, StringComparison.Ordinal);
+            Assert.DoesNotContain("DATEE EMOTIONAL PERFORMANCE DIRECTION", performancePrompt, StringComparison.Ordinal);
+            Assert.DoesNotContain("ABANDONMENT + DEFLECTION", performancePrompt, StringComparison.Ordinal);
+            Assert.DoesNotContain("buffered disclosure", performancePrompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director source packet", performancePrompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Psychiatric diagnosis", performancePrompt, StringComparison.OrdinalIgnoreCase);
             Assert.DoesNotContain(TherapistDiagnosisContract.DerivedFeelingKey, performancePrompt, StringComparison.Ordinal);
@@ -81,39 +75,46 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("admit the move was difficult", result.Response.EmotionalReactionDebug.TransitionTarget);
             Assert.Equal("buffered disclosure", result.Response.EmotionalReactionDebug.TransitionStyle);
             Assert.NotNull(result.Response.EmotionalReactionDebug.CompiledPromptInstruction);
+            Assert.NotNull(result.Response.EmotionalReactionDebug.ResponsePlan);
+            Assert.Equal(DateeResponseMovement.Hold, result.Response.EmotionalReactionDebug.ResponsePlan!.Movement);
+            Assert.Equal(DateeResponseDisclosure.Voluntary, result.Response.EmotionalReactionDebug.ResponsePlan.Disclosure);
             Assert.StartsWith(
-                "DATEE EMOTIONAL PERFORMANCE DIRECTION",
+                "<ENGINE_STATE>",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
             Assert.Contains(
-                "Primary emotion: relief",
+                "\"primary_emotion\":\"relief\"",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
             Assert.Contains(
-                "Response posture: turns warmer while still checking sincerity",
+                "\"movement\":\"hold\"",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
-            Assert.DoesNotContain(
-                "visible delivered line",
+            Assert.Contains(
+                "\"text\":\"visible delivered line\"",
                 result.Response.EmotionalReactionDebug.CompiledPromptInstruction,
                 StringComparison.Ordinal);
         }
 
         [Fact]
-        public async Task StructuredDirectorThenPlainPerformance_UsesStructuredTransportOnlyForDirector()
+        public async Task StructuredDirectorThenStructuredPerformance_UsesProviderNeutralContractsForBothCalls()
         {
-            var transport = new RecordingStructuredTransport(
-                new StructuredLlmResponse(ValidDirectionJson(primaryEmotion: "joy"), provider: "test", model: "structured", usedNativeStructuredOutput: true),
+            var transport = new RecordingTransport(
+                ValidDirectionJson(primaryEmotion: "joy"),
                 "I did not expect that to make me smile.");
             var adapter = CreateAdapter(transport);
 
             await adapter.GetDateeResponseAsync(MakeContext(), Array.Empty<ConversationMessage>());
 
-            Assert.Equal(1, transport.StructuredCalls);
-            Assert.Equal(1, transport.PlainCalls);
-            Assert.Equal(LlmPhase.EmotionalDirector, transport.LastStructuredRequest!.Phase);
-            Assert.Equal(LlmPhase.OpponentResponse, transport.Phases.Single());
-            Assert.Contains("Primary emotion: joy", transport.UserMessages.Single(), StringComparison.Ordinal);
+            Assert.Equal(2, transport.StructuredCalls);
+            Assert.Equal(0, transport.PlainCalls);
+            Assert.Equal(
+                new[] { "emotional_director", DateePerformanceStructuredContract.SchemaName },
+                transport.StructuredRequests.Select(request => request.SchemaName).ToArray());
+            Assert.Equal(
+                new[] { LlmPhase.EmotionalDirector, LlmPhase.OpponentResponse },
+                transport.Phases.ToArray());
+            Assert.Contains("\"primary_emotion\":\"joy\"", transport.UserMessages[1], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -169,7 +170,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(
                 2,
                 transport.UserMessages.Count(message =>
-                    message.Contains("Impulse: wants to answer with a precise invitation", StringComparison.Ordinal)));
+                    message.Contains("\"primary_emotion\":\"relief\"", StringComparison.Ordinal)));
             Assert.Equal(2, result.NewHistoryEntries.Count);
             Assert.Equal(ConversationMessage.UserRole, result.NewHistoryEntries[0].Role);
             Assert.Equal("visible delivered line", result.NewHistoryEntries[0].Content);
@@ -303,50 +304,36 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void PerformancePromptTrace_AttributesYamlWrapperAndSevenRuntimeDirectorFields()
+        public void PerformancePromptTrace_AttributesCatalogPlanWrapperAndCanonicalPlanArtifact()
         {
             PromptCatalog catalog = BuiltInCatalog();
             DateeContext context = MakeContext();
-            var direction = ValidDirection(primaryEmotion: "fear", regulatoryState: "anxious", responsePosture: "lets the reply open one careful door");
+            var direction = ValidDirection(primaryEmotion: "fear", regulatoryState: "controlled", responsePosture: "lets the reply open one careful door");
+            DateeResponsePlan plan = CompilePlan(context, direction);
 
-            PromptTraceResult trace = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, catalog);
+            PromptTraceResult trace = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, plan, catalog);
 
             Assert.Contains(
                 trace.Spans,
-                span => span.SourceFile == "data/prompts/emotional-reactions.yaml"
-                    && span.Key == "emotional-reaction-performance-direction");
-            foreach (string key in new[]
-            {
-                "CharacterEmotionalDirection.PrimaryEmotion",
-                "CharacterEmotionalDirection.SecondaryEmotion",
-                "CharacterEmotionalDirection.RegulatoryState",
-                "CharacterEmotionalDirection.Activation",
-                "CharacterEmotionalDirection.Trajectory",
-                "CharacterEmotionalDirection.CoreThreatOrDesire",
-                "CharacterEmotionalDirection.Interpretation",
-                "CharacterEmotionalDirection.Impulse",
-                "CharacterEmotionalDirection.Restraint",
-                "CharacterEmotionalDirection.ResponsePosture",
-            })
-            {
-                Assert.Contains(
-                    trace.Spans,
-                    span => span.SourceFile == SessionDocumentBuilder.CharacterEmotionalDirectionRuntimeSource
-                        && span.Key == key);
-            }
+                span => span.SourceFile == "data/prompts/templates.yaml"
+                    && span.Key == "datee-response-plan-performance");
+            Assert.Contains(
+                trace.Spans,
+                span => span.SourceFile == "runtime:datee-response-plan"
+                    && span.Key == DateeResponsePlan.CurrentSchemaVersion);
 
-            int performanceIndex = trace.Spans.First(span => span.Key == "emotional-reaction-performance-direction").Start;
+            int performanceIndex = trace.Spans.First(span => span.Key == "datee-response-plan-performance").Start;
             int finalIndex = trace.Spans.First(span => span.Key == "datee-response-instruction").Start;
             Assert.InRange(performanceIndex, 0, finalIndex - 1);
 
             string debugInstruction = SessionDocumentBuilder.ExtractAnnotatedInstruction(
                 trace,
-                "emotional-reaction-performance-direction");
-            Assert.StartsWith("DATEE EMOTIONAL PERFORMANCE DIRECTION", debugInstruction, StringComparison.Ordinal);
-            Assert.Contains("Primary emotion: fear", debugInstruction, StringComparison.Ordinal);
-            Assert.Contains("Regulatory state: anxious", debugInstruction, StringComparison.Ordinal);
-            Assert.Contains("Response posture: lets the reply open one careful door", debugInstruction, StringComparison.Ordinal);
-            Assert.DoesNotContain("visible delivered line", debugInstruction, StringComparison.Ordinal);
+                "datee-response-plan-performance");
+            Assert.StartsWith("<ENGINE_STATE>", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"fear\"", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("\"regulatory_state\":\"controlled\"", debugInstruction, StringComparison.Ordinal);
+            Assert.DoesNotContain("Response posture:", debugInstruction, StringComparison.Ordinal);
+            Assert.Contains("\"text\":\"visible delivered line\"", debugInstruction, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -435,8 +422,9 @@ namespace Pinder.LlmAdapters.Tests
 
             string prompt = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, BuiltInCatalog()).Text;
 
-            Assert.Contains("Primary emotion: " + primaryEmotion, prompt, StringComparison.Ordinal);
-            Assert.Contains("Response posture: " + posture, prompt, StringComparison.Ordinal);
+            Assert.Contains("\"primary_emotion\":\"" + primaryEmotion + "\"", prompt, StringComparison.Ordinal);
+            Assert.Contains("\"schema_version\":\"datee_response_plan.v1\"", prompt, StringComparison.Ordinal);
+            Assert.DoesNotContain("Response posture: " + posture, prompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Private emotional director input", prompt, StringComparison.Ordinal);
             Assert.DoesNotContain("Character-specific emotional translation", prompt, StringComparison.Ordinal);
         }
@@ -465,8 +453,8 @@ namespace Pinder.LlmAdapters.Tests
             InterestState beforeState = InterestState.Lukewarm,
             InterestState afterState = InterestState.Interested,
             RollOutcomeIntensity outcome = RollOutcomeIntensity.Strong,
-            string? cognitiveSubtext = null,
-            ResolvedRevelationTarget? resolvedTarget = null)
+            OwnedPromptFactV1? cognitiveSubtextFact = null,
+            DateeReactionTarget? reactionTarget = null)
         {
             return new DateeContext(
                 dateePrompt: "datee prompt",
@@ -485,14 +473,53 @@ namespace Pinder.LlmAdapters.Tests
                 playerName: "Player",
                 dateeName: "Datee",
                 currentTurn: 7,
-                resolvedTarget: resolvedTarget,
-                cognitiveSubtext: cognitiveSubtext,
                 interestBeforeState: beforeState,
                 interestAfterState: afterState,
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
                     StatType.Honesty,
                     outcome,
-                    TestHelpers.MakePsychiatricDiagnosis()));
+                    TestHelpers.MakePsychiatricDiagnosis()),
+                dateeReactionTarget: reactionTarget,
+                cognitiveSubtextFact: cognitiveSubtextFact,
+                recipientCharacterId: reactionTarget != null || cognitiveSubtextFact != null ? DateeId : (Guid?)null);
+        }
+
+        private static DateeReactionTarget CuratedBufferTarget()
+        {
+            return DateeReactionTarget.FromLegacyResolvedTarget(
+                new ResolvedRevelationTarget
+                {
+                    Registry = EmotionStemSelectionRules.StakeRegistry,
+                    Index = 3,
+                    Field = "STAKE_LINE",
+                    Manner = "CURATED_BUFFER",
+                    StemText = "admit the move was difficult",
+                    TransitionStyle = "buffered disclosure",
+                },
+                DateeId,
+                DateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceIds.PsychologicalStake(DateeId, 3));
+        }
+
+        private static OwnedPromptFactV1 CognitivePressure()
+        {
+            return new OwnedPromptFactV1(
+                DateeId,
+                ConversationParticipantRole.Datee,
+                PromptFactVisibility.PrivateToSubject,
+                PromptFactSourceKind.CognitiveSubtext,
+                PromptFactSourceIds.CognitiveSubtext(DateeId, 7),
+                "ABANDONMENT + DEFLECTION");
+        }
+
+        private static DateeResponsePlan CompilePlan(DateeContext context, CharacterEmotionalDirection direction)
+        {
+            DateeResponsePlanCompilationResult result = new DateeResponsePlanCompiler().Compile(
+                DateeResponsePlanInput.From(context, direction));
+            Assert.Equal(DateeResponsePlanCompilationOutcome.Accepted, result.Outcome);
+            return Assert.IsType<DateeResponsePlan>(result.Plan);
         }
 
         private static DateeContext MakeContextWithoutEmotionalTurnEvent()
@@ -612,7 +639,7 @@ namespace Pinder.LlmAdapters.Tests
             return destination;
         }
 
-        private class RecordingTransport : ILlmTransport
+        private sealed class RecordingTransport : ILlmTransport, IStructuredLlmTransport, IStructuredConversationLlmTransport
         {
             private readonly Queue<string> _responses;
 
@@ -622,10 +649,13 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             public int PlainCalls { get; private set; }
+            public int StructuredCalls { get; private set; }
+            public bool SupportsStructuredConversationMessages => true;
             public List<string?> Phases { get; } = new List<string?>();
             public List<string> UserMessages { get; } = new List<string>();
+            public List<StructuredLlmRequest> StructuredRequests { get; } = new List<StructuredLlmRequest>();
 
-            public virtual Task<string> SendAsync(
+            public Task<string> SendAsync(
                 string systemPrompt,
                 string userMessage,
                 double temperature = 0.9,
@@ -639,33 +669,46 @@ namespace Pinder.LlmAdapters.Tests
                 UserMessages.Add(userMessage);
                 return Task.FromResult(_responses.Dequeue());
             }
-        }
-
-        private sealed class RecordingStructuredTransport : RecordingTransport, IStructuredLlmTransport
-        {
-            private readonly Queue<StructuredLlmResponse> _structuredResponses;
-
-            public RecordingStructuredTransport(StructuredLlmResponse structuredResponse, params string[] plainResponses)
-                : base(plainResponses)
-            {
-                _structuredResponses = new Queue<StructuredLlmResponse>(new[] { structuredResponse });
-            }
-
-            public int StructuredCalls { get; private set; }
-            public StructuredLlmRequest? LastStructuredRequest { get; private set; }
 
             public Task<StructuredLlmResponse> SendStructuredAsync(
                 StructuredLlmRequest request,
                 CancellationToken ct = default)
             {
+                return SendStructuredCore(request, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+            {
+                return SendStructuredCore(request, cancellationToken);
+            }
+
+            private Task<StructuredLlmResponse> SendStructuredCore(
+                StructuredLlmRequest request,
+                CancellationToken ct)
+            {
                 ct.ThrowIfCancellationRequested();
                 StructuredCalls++;
-                LastStructuredRequest = request;
-                return Task.FromResult(_structuredResponses.Dequeue());
+                Phases.Add(request.Phase);
+                UserMessages.Add(request.UserMessage);
+                StructuredRequests.Add(request);
+                string response = _responses.Dequeue();
+                if (request.SchemaName == DateePerformanceStructuredContract.SchemaName)
+                {
+                    response = PerformanceJson(response);
+                }
+
+                return Task.FromResult(new StructuredLlmResponse(
+                    response,
+                    provider: "test",
+                    model: "structured",
+                    usedNativeStructuredOutput: true));
             }
         }
 
-        private sealed class CancelOnPhaseTransport : ILlmTransport
+        private sealed class CancelOnPhaseTransport : ILlmTransport, IStructuredLlmTransport, IStructuredConversationLlmTransport
         {
             private readonly string _phaseToCancel;
 
@@ -675,6 +718,7 @@ namespace Pinder.LlmAdapters.Tests
             }
 
             public List<string?> Phases { get; } = new List<string?>();
+            public bool SupportsStructuredConversationMessages => true;
 
             public Task<string> SendAsync(
                 string systemPrompt,
@@ -692,6 +736,51 @@ namespace Pinder.LlmAdapters.Tests
 
                 return Task.FromResult(ValidDirectionJson());
             }
+
+            public Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                return SendStructuredCore(request, ct);
+            }
+
+            public Task<StructuredLlmResponse> SendStructuredConversationAsync(
+                StructuredLlmRequest request,
+                IReadOnlyList<ConversationMessage> priorMessages,
+                CancellationToken cancellationToken = default)
+            {
+                return SendStructuredCore(request, cancellationToken);
+            }
+
+            private Task<StructuredLlmResponse> SendStructuredCore(
+                StructuredLlmRequest request,
+                CancellationToken ct)
+            {
+                Phases.Add(request.Phase);
+                if (string.Equals(request.Phase, _phaseToCancel, StringComparison.Ordinal))
+                {
+                    throw new OperationCanceledException(ct);
+                }
+
+                string response = request.SchemaName == DateePerformanceStructuredContract.SchemaName
+                    ? PerformanceJson("visible response")
+                    : ValidDirectionJson();
+                return Task.FromResult(new StructuredLlmResponse(response, provider: "test", model: "structured"));
+            }
+        }
+
+        private static string PerformanceJson(string message)
+        {
+            return new JObject
+            {
+                ["schema_version"] = DateePerformanceStructuredContract.SchemaVersion,
+                ["message"] = message,
+                ["signals"] = new JObject
+                {
+                    ["tell"] = JValue.CreateNull(),
+                    ["weakness"] = JValue.CreateNull(),
+                },
+            }.ToString(Formatting.None);
         }
     }
 }

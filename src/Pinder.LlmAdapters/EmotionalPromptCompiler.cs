@@ -123,16 +123,39 @@ namespace Pinder.LlmAdapters
 
         public PromptTraceResult CompilePerformance(
             DateeContext context,
-            CharacterEmotionalDirection direction,
+            DateeResponsePlan plan,
             bool includeConversationHistory = true)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (direction == null) throw new ArgumentNullException(nameof(direction));
+            if (plan == null) throw new ArgumentNullException(nameof(plan));
             return SessionDocumentBuilder.BuildDateePerformancePromptEx(
                 context,
-                direction,
+                plan,
                 _catalog,
                 includeConversationHistory);
+        }
+
+        public PromptTraceResult CompilePerformance(
+            DateeContext context,
+            CharacterEmotionalDirection direction,
+            bool includeConversationHistory = true)
+        {
+            DateeResponsePlanCompilationResult compiled = new DateeResponsePlanCompiler().Compile(
+                DateeResponsePlanInput.From(context, direction));
+            if (compiled.Outcome != DateeResponsePlanCompilationOutcome.Accepted || compiled.Plan == null)
+                throw compiled.Rejection ?? new DateeResponsePlanContractException(
+                    "datee_response_plan_incompatible.preview_requires_reconciliation",
+                    "This preview requires the configured response-plan reconciler.");
+            return CompilePerformance(context, compiled.Plan, includeConversationHistory);
+        }
+
+        public CompiledEmotionalPrompts CompileScenario(
+            DateeContext context,
+            DateeResponsePlan plan)
+        {
+            CompiledEmotionalDirectorPrompt director = CompileDirector(context);
+            PromptTraceResult performance = CompilePerformance(context, plan);
+            return new CompiledEmotionalPrompts(director, performance);
         }
 
         public CompiledEmotionalPrompts CompileScenario(

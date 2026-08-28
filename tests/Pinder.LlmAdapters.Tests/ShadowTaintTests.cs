@@ -174,7 +174,7 @@ namespace Pinder.LlmAdapters.Tests
                 { ShadowStatType.Fixation, 9 }
             };
 
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(shadowThresholds: shadows),
                 TestPromptCatalog.Value);
 

@@ -43,7 +43,7 @@ namespace Pinder.LlmAdapters.Tests
             => SessionDocumentBuilder.BuildDialogueOptionsPrompt(context!, TestPromptCatalog);
 
         private static string BuildDateePrompt(DateeContext? context)
-            => SessionDocumentBuilder.BuildDateePrompt(context!, TestPromptCatalog);
+            => DateePromptTestBuilder.Build(context!, TestPromptCatalog);
 
         // ── Test Helpers ──
 

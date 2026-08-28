@@ -156,7 +156,7 @@ namespace Pinder.LlmAdapters.Tests
                 ("O", "Turn1Opp")
             };
 
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(conversationHistory: history, playerDeliveredMessage: "Turn2Player",
                     interestBefore: 10, interestAfter: 12, responseDelayMinutes: 3.0));
 
