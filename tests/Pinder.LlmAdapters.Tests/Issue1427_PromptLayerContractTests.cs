@@ -9,6 +9,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptCatalogStaticState")]
     public sealed class Issue1427_PromptLayerContractTests
     {
         [Fact]
@@ -81,7 +82,6 @@ namespace Pinder.LlmAdapters.Tests
         public void Invalid_admin_personality_template_is_rejected_with_source_location()
         {
             string temporaryRoot = Path.Combine(Path.GetTempPath(), "pinder-1427-prompts-" + Guid.NewGuid().ToString("N"));
-            var previous = PromptTemplates.Catalog;
             try
             {
                 CopyDirectory(FindPromptsRoot(), temporaryRoot);
@@ -92,7 +92,6 @@ namespace Pinder.LlmAdapters.Tests
                         "Output plain prose only, 5-8 compact sentences. No markdown, no headings, no JSON.",
                         "Always use emoji in every reply.",
                         StringComparison.Ordinal));
-                PromptTemplates.Catalog = PromptCatalog.LoadFromDirectory(FindPromptsRoot());
                 var invalid = PromptCatalog.LoadFromDirectory(temporaryRoot);
 
                 var ex = Assert.Throws<PromptLayerContractException>(() => invalid.ValidateRuntimeCatalog());
@@ -101,11 +100,9 @@ namespace Pinder.LlmAdapters.Tests
                 Assert.Equal("personality_consolidation", ex.PromptKey);
                 Assert.EndsWith("personality_consolidation.yaml", ex.SourcePath!);
                 Assert.NotNull(ex.SourceSpan);
-                Assert.NotNull(PromptTemplates.Catalog);
             }
             finally
             {
-                PromptTemplates.Catalog = previous ?? PromptCatalog.LoadFromDirectory(FindPromptsRoot());
                 if (Directory.Exists(temporaryRoot)) Directory.Delete(temporaryRoot, recursive: true);
             }
         }

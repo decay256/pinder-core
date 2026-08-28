@@ -8,6 +8,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptCatalogStaticState")]
     public sealed class Issue1335_DateeRelationshipPromptSelectionTests
     {
         private static readonly string[] RequiredSemanticRelationshipKeys =

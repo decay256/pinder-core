@@ -5,6 +5,7 @@ using Xunit;
 
 namespace Pinder.LlmAdapters.Tests
 {
+    [Collection("PromptCatalogStaticState")]
     public class PromptCatalogValidationTests
     {
         [Fact]
