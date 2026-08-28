@@ -144,6 +144,7 @@ namespace Pinder.LlmAdapters
                     new CharacterEmotionalDirectorInvocation
                     {
                         Phase = LlmPhase.AvatarEmotionalDirector,
+                        RecipientRole = PromptContractRoleScope.PlayerAvatar,
                         JournalOperation = GameRunConversationJournalInventory.AvatarEmotionalDirector,
                         PrivatePhase = "avatar-private-analysis",
                         BranchKind = "avatar-private-analysis",

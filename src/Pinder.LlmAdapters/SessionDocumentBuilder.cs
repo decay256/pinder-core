@@ -56,32 +56,14 @@ namespace Pinder.LlmAdapters
             string? playerName = null,
             PromptCatalog? promptCatalog = null)
         {
-            if (dateeName == null) throw new ArgumentNullException(nameof(dateeName));
-
-            string thresholdInstruction = GetThresholdInstruction(
+            return BuildInterestChangeBeatPromptEx(
+                dateeName,
                 interestBefore,
                 interestAfter,
                 newState,
-                dateeName,
-                promptCatalog);
-
-            var sb = new StringBuilder();
-
-            // Include recent conversation history so the LLM can reference specific details
-            if (conversationHistory != null && conversationHistory.Count > 0)
-            {
-                sb.AppendLine("RECENT CONVERSATION (for context — reference specific details in your response):");
-                HistoryFormatter.FormatRecent(sb, conversationHistory, playerName);
-                sb.AppendLine();
-            }
-
-            sb.Append(PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-instruction")
-                .Replace("{datee_name}", dateeName)
-                .Replace("{interest_before}", interestBefore.ToString())
-                .Replace("{interest_after}", interestAfter.ToString())
-                .Replace("{threshold_instruction}", thresholdInstruction));
-
-            return sb.ToString();
+                conversationHistory,
+                playerName,
+                promptCatalog).Text;
         }
 
 

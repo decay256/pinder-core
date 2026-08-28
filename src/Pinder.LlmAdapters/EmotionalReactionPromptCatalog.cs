@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Pinder.Core.Conversation;
 using Pinder.Core.Stats;
 
@@ -11,6 +12,42 @@ namespace Pinder.LlmAdapters
     /// </summary>
     public static class EmotionalReactionPromptCatalog
     {
+        private static readonly string[] FixedRuntimeKeys =
+        {
+            "emotional-reaction-compiled-wrapper", "emotional-reaction-compiled-session-wrapper",
+            "emotional-reaction-character-success-wrapper", "emotional-reaction-character-failure-wrapper",
+            "character-emotional-status-context", "character-emotional-status-unavailable",
+            "character-emotional-hfi-low", "character-emotional-hfi-high",
+            "character-emotional-tor-low", "character-emotional-tor-high",
+            "emotional-reaction-history-line", "emotional-reaction-history-empty",
+            "emotional-reaction-performance-direction", "emotional-reaction-director",
+            EmotionalPromptCompiler.DirectorSystemWrapperPromptKey,
+            EmotionalPromptCompiler.PreviousDirectionLinePromptKey,
+            EmotionalPromptCompiler.PreviousDirectionEmptyPromptKey,
+            EmotionalPromptCompiler.DateeResponseRepetitionRepairPromptKey,
+            EmotionalPromptCompiler.DirectorContractRepairPromptKey,
+            EmotionalPromptCompiler.DirectorDraftedChatReplyRepairPromptKey,
+            EmotionalPromptCompiler.DirectorResponsePostureOmitsPrimaryEmotionRepairPromptKey,
+            EmotionalPromptCompiler.DirectorUnsupportedPrimaryEmotionRepairPromptKey,
+            CharacterEmotionCatalog.PromptKey,
+            "avatar-emotional-director-system-wrapper", "avatar-emotional-director-input",
+            "avatar-emotional-performance-direction",
+        };
+
+        /// <summary>Runtime inventory derived from the compiler's supported domains, independently of the ownership registry.</summary>
+        public static IReadOnlyCollection<string> RuntimeActiveKeys
+        {
+            get
+            {
+                var keys = new List<string>(FixedRuntimeKeys);
+                foreach (InterestState state in Enum.GetValues(typeof(InterestState))) keys.Add(GetInterestStateMeaningKey(state));
+                foreach (string transition in RelationshipTransitionKeys) keys.Add(GetRelationshipTransitionInstructionKey(transition));
+                foreach (StatType stat in Enum.GetValues(typeof(StatType)))
+                    foreach (string outcome in OutcomeKeys) keys.Add(GetEventMeaningKey(stat, outcome));
+                return keys.Distinct(StringComparer.Ordinal).ToArray();
+            }
+        }
+
         public static IReadOnlyList<string> OutcomeKeys =>
             StatDeliveryInstructions.OutcomeTierKeys;
 

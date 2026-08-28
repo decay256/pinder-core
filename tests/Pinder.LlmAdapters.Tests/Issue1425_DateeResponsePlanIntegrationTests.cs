@@ -67,6 +67,33 @@ public sealed class Issue1425_DateeResponsePlanIntegrationTests
     }
 
     [Fact]
+    public async Task Reconciliation_contract_conflict_makes_zero_reconciliation_provider_calls()
+    {
+        PromptContractRegistry standard = PromptContractRegistry.CreateDefault();
+        PromptLayerContract Replace(PromptLayerContract contract)
+            => contract.Key == "datee-response-plan-reconciliation"
+                ? new PromptLayerContract(
+                    contract.Key, contract.Phase, PromptContractRoleScope.PlayerAvatar,
+                    contract.Layer, contract.Authority, contract.Knowledge, contract.HardAuthority)
+                : contract;
+        var transport = new RecordingTransport(
+            DirectorJson("conflicted"),
+            ValidPerformanceJson(),
+            reconciliationResponses: new[] { "__candidate__" });
+        var adapter = CreateAdapter(
+            transport,
+            registry: new PromptContractRegistry(standard.Entries.Select(Replace)));
+
+        PromptLayerContractException error = await Assert.ThrowsAsync<PromptLayerContractException>(() =>
+            adapter.GetDateeResponseAsync(Context()));
+
+        Assert.Equal("prompt_contract.role.mismatch", error.ViolationCode);
+        Assert.Equal(1, transport.Count(CharacterEmotionalDirectionContract.SchemaName));
+        Assert.Equal(0, transport.Count(DateeResponsePlanStructuredContract.SchemaName));
+        Assert.Equal(0, transport.Count(DateePerformanceStructuredContract.SchemaName));
+    }
+
+    [Fact]
     public async Task CreativeAmbiguity_AcceptedPlanLinksReconciliationWithoutModelSourceExpansion()
     {
         var transport = new RecordingTransport(
@@ -428,7 +455,8 @@ public sealed class Issue1425_DateeResponsePlanIntegrationTests
     private static PinderLlmAdapter CreateAdapter(
         RecordingTransport transport,
         int retries = 0,
-        IAgentJournalSink? sink = null)
+        IAgentJournalSink? sink = null,
+        PromptContractRegistry? registry = null)
         => new PinderLlmAdapter(
             transport,
             new PinderLlmAdapterOptions
@@ -437,6 +465,7 @@ public sealed class Issue1425_DateeResponsePlanIntegrationTests
                 MaxContractViolationRetries = retries,
                 ContractViolationBackoffMs = 1,
                 AgentJournalHostSink = sink,
+                PromptContractRegistry = registry,
             });
 
     private static DateeContext Context(

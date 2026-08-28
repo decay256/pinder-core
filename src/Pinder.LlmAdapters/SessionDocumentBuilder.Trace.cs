@@ -74,6 +74,49 @@ namespace Pinder.LlmAdapters
             }
         }
 
+        internal static PromptTraceResult BuildInterestChangeBeatPromptEx(
+            string dateeName,
+            int interestBefore,
+            int interestAfter,
+            InterestState newState,
+            IReadOnlyList<(string Sender, string Text)>? conversationHistory = null,
+            string? playerName = null,
+            PromptCatalog? promptCatalog = null)
+        {
+            if (dateeName == null) throw new ArgumentNullException(nameof(dateeName));
+
+            var sb = new AnnotatedStringBuilder();
+            if (conversationHistory != null && conversationHistory.Count > 0)
+            {
+                sb.AppendLine(
+                    "RECENT CONVERSATION (for context — reference specific details in your response):",
+                    "runtime:interest-change",
+                    "InterestChangeContext.ConversationHistoryHeading");
+                var history = new StringBuilder();
+                HistoryFormatter.FormatRecent(history, conversationHistory, playerName);
+                sb.Append(history.ToString(), "conversation-history", "conversation-history");
+                sb.AppendLine();
+            }
+
+            string thresholdKey = GetInterestBeatThresholdPromptKey(
+                interestBefore, interestAfter, newState);
+            string thresholdTemplate = GetTemplate(promptCatalog, thresholdKey);
+            string thresholdInstruction = thresholdTemplate.Replace("{datee_name}", dateeName);
+            AppendAnnotatedTemplate(
+                sb,
+                GetTemplate(promptCatalog, "interest-beat-instruction"),
+                "interest-beat-instruction",
+                new Dictionary<string, (string Value, string SourceFile, string Key)>
+                {
+                    { "{datee_name}", (dateeName, "runtime:interest-change", "InterestChangeContext.DateeName") },
+                    { "{interest_before}", (interestBefore.ToString(), "runtime:interest-change", "InterestChangeContext.InterestBefore") },
+                    { "{interest_after}", (interestAfter.ToString(), "runtime:interest-change", "InterestChangeContext.InterestAfter") },
+                    { "{threshold_instruction}", (thresholdInstruction, GetTemplateSource(promptCatalog, thresholdKey), thresholdKey) },
+                },
+                promptCatalog);
+            return new PromptTraceResult(sb.ToString(), sb.Spans);
+        }
+
         private static bool AppendShadowTaintBlock(
             AnnotatedStringBuilder sb,
             Dictionary<ShadowStatType, int>? thresholds,
