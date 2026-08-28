@@ -56,7 +56,7 @@ namespace Pinder.LlmAdapters.Tests
             );
         }
 
-        private sealed class FixedResponseTransport : ILlmTransport
+        private sealed class FixedResponseTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _response;
             public FixedResponseTransport(string response) => _response = response;
@@ -74,6 +74,20 @@ namespace Pinder.LlmAdapters.Tests
 
                 return Task.FromResult(_response);
             }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
+            }
         }
 
         private const string ValidDirectorJson =
@@ -85,9 +99,9 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeDateeContext();
             const string secretMarker = "SECRETLEAKMARKER12345";
             var transport = new FixedResponseTransport(
-                "This is a message.\n" +
-                "[SIGNALS]\n" +
-                $"TELL: NotAStat ({secretMarker})"
+                "{\"schema_version\":\"datee_performance.v1\",\"message\":\"This is a message.\",\"signals\":{\"tell\":{\"stat\":\"NotAStat\",\"description\":\"" +
+                secretMarker +
+                "\"},\"weakness\":null}}"
             );
             var options = new PinderLlmAdapterOptions { GameDefinition = GameDefinition.PinderDefaults };
             var adapter = new PinderLlmAdapter(transport, options);
@@ -104,8 +118,7 @@ namespace Pinder.LlmAdapters.Tests
 
             // Verify message still contains structured indicators
             Assert.Contains("datee", msg, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("malformed", msg, StringComparison.OrdinalIgnoreCase);
-            Assert.Contains("tell_invalid_stat", msg, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("valid wire stat", msg, StringComparison.OrdinalIgnoreCase);
         }
 
         [Fact]

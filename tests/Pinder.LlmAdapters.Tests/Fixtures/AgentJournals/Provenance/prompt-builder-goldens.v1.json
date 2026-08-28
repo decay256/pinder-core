@@ -119,20 +119,20 @@
       {
         "order": 0,
         "role": "user",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060."
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE RESPONSE PLAN]\nThis private \u0060datee_response_plan.v1\u0060 is the single authoritative behavior plan for this reply. Follow its precedence-resolved movement, disclosure, conversational move, emotional fields, and constraints. Treat visible_evidence as the only event being answered. Treat datee_interpretation as uncertain. Private constraints may shape the reply but must never be named as instructions or copied mechanically. Do not expose schema fields, source IDs, or engine metadata in the visible message.\n{\u0022schema_version\u0022:\u0022datee_response_plan.v1\u0022,\u0022visible_evidence\u0022:{\u0022text\u0022:\u0022I meant that more warmly than it sounded \\uD83D\\uDE04.\u0022,\u0022message_reference\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022},\u0022datee_interpretation\u0022:\u0022Possibly, reads the message as specific warmth that is probably meant for them\u0022,\u0022movement\u0022:\u0022open\u0022,\u0022movement_stages\u0022:[],\u0022primary_emotion\u0022:\u0022relief\u0022,\u0022secondary_emotion\u0022:\u0022none\u0022,\u0022regulatory_state\u0022:\u0022controlled\u0022,\u0022activation\u0022:4,\u0022trajectory\u0022:\u0022escalating\u0022,\u0022disclosure\u0022:\u0022none\u0022,\u0022conversational_move\u0022:\u0022escalate\u0022,\u0022dramatic_arc_source_id\u0022:null,\u0022constraints\u0022:[{\u0022id\u0022:\u0022visible_evidence.canonical\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022value\u0022:null},{\u0022id\u0022:\u0022relationship.resolved\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022relationship-state:turn:7\u0022,\u0022value\u0022:\u002213-\\u003E18\u0022}],\u0022sources\u0022:[{\u0022id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022kind\u0022:\u0022visible_message\u0022},{\u0022id\u0022:\u0022relationship-state:turn:7\u0022,\u0022kind\u0022:\u0022relationship_state\u0022},{\u0022id\u0022:\u0022emotional-director:turn:7\u0022,\u0022kind\u0022:\u0022emotional_direction\u0022}]}\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060."
       }
     ],
     "afterDocuments": [
       {
         "order": 0,
-        "documentId": "session.user",
+        "documentId": "datee.performance",
         "role": "user",
-        "kind": "datee-session-user-prompt",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060.",
-        "contentHash": "sha256:b3ff97df92ad5a9136cb1d1a95aa8906966ac5de49e94a95d8327cb2d4c8e870",
+        "kind": "datee-performance-prompt",
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE RESPONSE PLAN]\nThis private \u0060datee_response_plan.v1\u0060 is the single authoritative behavior plan for this reply. Follow its precedence-resolved movement, disclosure, conversational move, emotional fields, and constraints. Treat visible_evidence as the only event being answered. Treat datee_interpretation as uncertain. Private constraints may shape the reply but must never be named as instructions or copied mechanically. Do not expose schema fields, source IDs, or engine metadata in the visible message.\n{\u0022schema_version\u0022:\u0022datee_response_plan.v1\u0022,\u0022visible_evidence\u0022:{\u0022text\u0022:\u0022I meant that more warmly than it sounded \\uD83D\\uDE04.\u0022,\u0022message_reference\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022},\u0022datee_interpretation\u0022:\u0022Possibly, reads the message as specific warmth that is probably meant for them\u0022,\u0022movement\u0022:\u0022open\u0022,\u0022movement_stages\u0022:[],\u0022primary_emotion\u0022:\u0022relief\u0022,\u0022secondary_emotion\u0022:\u0022none\u0022,\u0022regulatory_state\u0022:\u0022controlled\u0022,\u0022activation\u0022:4,\u0022trajectory\u0022:\u0022escalating\u0022,\u0022disclosure\u0022:\u0022none\u0022,\u0022conversational_move\u0022:\u0022escalate\u0022,\u0022dramatic_arc_source_id\u0022:null,\u0022constraints\u0022:[{\u0022id\u0022:\u0022visible_evidence.canonical\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022value\u0022:null},{\u0022id\u0022:\u0022relationship.resolved\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022relationship-state:turn:7\u0022,\u0022value\u0022:\u002213-\\u003E18\u0022}],\u0022sources\u0022:[{\u0022id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022kind\u0022:\u0022visible_message\u0022},{\u0022id\u0022:\u0022relationship-state:turn:7\u0022,\u0022kind\u0022:\u0022relationship_state\u0022},{\u0022id\u0022:\u0022emotional-director:turn:7\u0022,\u0022kind\u0022:\u0022emotional_direction\u0022}]}\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060.",
+        "contentHash": "sha256:b4b4a5cd6839bcf6f6ef58f521be442ac9b1e1685520db5345d1f7b8ba7a12b7",
         "ranges": [
           {
-            "documentId": "session.user",
+            "documentId": "datee.performance",
             "startUtf16": 0,
             "endUtf16": 83,
             "rangeKind": "runtime_generated",
@@ -147,9 +147,9 @@
             }
           },
           {
-            "documentId": "session.user",
+            "documentId": "datee.performance",
             "startUtf16": 83,
-            "endUtf16": 154,
+            "endUtf16": 107,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -162,9 +162,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 154,
-            "endUtf16": 186,
+            "documentId": "datee.performance",
+            "startUtf16": 107,
+            "endUtf16": 139,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -177,9 +177,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 186,
-            "endUtf16": 191,
+            "documentId": "datee.performance",
+            "startUtf16": 139,
+            "endUtf16": 144,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -192,9 +192,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 191,
-            "endUtf16": 207,
+            "documentId": "datee.performance",
+            "startUtf16": 144,
+            "endUtf16": 160,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -207,9 +207,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 207,
-            "endUtf16": 209,
+            "documentId": "datee.performance",
+            "startUtf16": 160,
+            "endUtf16": 162,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -222,9 +222,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 209,
-            "endUtf16": 214,
+            "documentId": "datee.performance",
+            "startUtf16": 162,
+            "endUtf16": 167,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -237,9 +237,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 214,
-            "endUtf16": 249,
+            "documentId": "datee.performance",
+            "startUtf16": 167,
+            "endUtf16": 202,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -252,24 +252,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 249,
-            "endUtf16": 252,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "engine-datee-block",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "session.user",
-            "startUtf16": 252,
-            "endUtf16": 259,
+            "documentId": "datee.performance",
+            "startUtf16": 202,
+            "endUtf16": 209,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -282,9 +267,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 259,
-            "endUtf16": 264,
+            "documentId": "datee.performance",
+            "startUtf16": 209,
+            "endUtf16": 214,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -297,9 +282,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 264,
-            "endUtf16": 292,
+            "documentId": "datee.performance",
+            "startUtf16": 214,
+            "endUtf16": 242,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -312,9 +297,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 292,
-            "endUtf16": 330,
+            "documentId": "datee.performance",
+            "startUtf16": 242,
+            "endUtf16": 243,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -327,9 +312,69 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 330,
-            "endUtf16": 1793,
+            "documentId": "datee.performance",
+            "startUtf16": 243,
+            "endUtf16": 780,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "datee-response-plan-performance",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:138ad78ec0a3cf37902c38090b24520f76a9346e9904784bbe2444ed58a74579",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 780,
+            "endUtf16": 1766,
+            "rangeKind": "runtime_generated",
+            "redactionClass": "none",
+            "source": {
+              "kind": "runtime_generated",
+              "sourceId": "runtime",
+              "keyPath": "datee_response_plan.v1",
+              "revision": null,
+              "contentHash": null,
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 1766,
+            "endUtf16": 1782,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "datee-response-plan-performance",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:90c0dc1e40907b1b2a3a21bc7970d5ea42e427be862723d70fd8a3da300588fc",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 1782,
+            "endUtf16": 1820,
+            "rangeKind": "runtime_generated",
+            "redactionClass": "none",
+            "source": {
+              "kind": "runtime_generated",
+              "sourceId": "runtime",
+              "keyPath": "generated",
+              "revision": null,
+              "contentHash": null,
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 1820,
+            "endUtf16": 3283,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -342,9 +387,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 1793,
-            "endUtf16": 1964,
+            "documentId": "datee.performance",
+            "startUtf16": 3283,
+            "endUtf16": 3454,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -357,9 +402,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 1964,
-            "endUtf16": 3388,
+            "documentId": "datee.performance",
+            "startUtf16": 3454,
+            "endUtf16": 4878,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -372,9 +417,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 3388,
-            "endUtf16": 3481,
+            "documentId": "datee.performance",
+            "startUtf16": 4878,
+            "endUtf16": 4971,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -387,9 +432,9 @@
             }
           },
           {
-            "documentId": "session.user",
-            "startUtf16": 3481,
-            "endUtf16": 4779,
+            "documentId": "datee.performance",
+            "startUtf16": 4971,
+            "endUtf16": 6269,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1088,7 +1133,7 @@
       {
         "order": 0,
         "role": "user",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Express the change in emotion as lived behavior; do not label the emotion, explain it, mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relief\nSecondary emotion: none\nRegulatory state: controlled\nActivation: 4\nTrajectory: escalating\nCore threat/desire: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: Writing from relief, turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060."
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE RESPONSE PLAN]\nThis private \u0060datee_response_plan.v1\u0060 is the single authoritative behavior plan for this reply. Follow its precedence-resolved movement, disclosure, conversational move, emotional fields, and constraints. Treat visible_evidence as the only event being answered. Treat datee_interpretation as uncertain. Private constraints may shape the reply but must never be named as instructions or copied mechanically. Do not expose schema fields, source IDs, or engine metadata in the visible message.\n{\u0022schema_version\u0022:\u0022datee_response_plan.v1\u0022,\u0022visible_evidence\u0022:{\u0022text\u0022:\u0022I meant that more warmly than it sounded \\uD83D\\uDE04.\u0022,\u0022message_reference\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022},\u0022datee_interpretation\u0022:\u0022Possibly, reads the message as specific warmth that is probably meant for them\u0022,\u0022movement\u0022:\u0022open\u0022,\u0022movement_stages\u0022:[],\u0022primary_emotion\u0022:\u0022relief\u0022,\u0022secondary_emotion\u0022:\u0022none\u0022,\u0022regulatory_state\u0022:\u0022controlled\u0022,\u0022activation\u0022:4,\u0022trajectory\u0022:\u0022escalating\u0022,\u0022disclosure\u0022:\u0022none\u0022,\u0022conversational_move\u0022:\u0022escalate\u0022,\u0022dramatic_arc_source_id\u0022:null,\u0022constraints\u0022:[{\u0022id\u0022:\u0022visible_evidence.canonical\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022value\u0022:null},{\u0022id\u0022:\u0022relationship.resolved\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022relationship-state:turn:7\u0022,\u0022value\u0022:\u002213-\\u003E18\u0022}],\u0022sources\u0022:[{\u0022id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022kind\u0022:\u0022visible_message\u0022},{\u0022id\u0022:\u0022relationship-state:turn:7\u0022,\u0022kind\u0022:\u0022relationship_state\u0022},{\u0022id\u0022:\u0022emotional-director:turn:7\u0022,\u0022kind\u0022:\u0022emotional_direction\u0022}]}\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060."
       }
     ],
     "afterDocuments": [
@@ -1097,8 +1142,8 @@
         "documentId": "datee.performance",
         "role": "user",
         "kind": "datee-performance-prompt",
-        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\u0022I meant that more warmly than it sounded \uD83D\uDE04.\u0022\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\n\n\n\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nDATEE EMOTIONAL PERFORMANCE DIRECTION\n\nUse this private direction to shape the emotional movement of the next visible reply while staying fully in the DATEE\u0027s established texting style and character voice. Express the change in emotion as lived behavior; do not label the emotion, explain it, mention this direction, the director, diagnosis, psychology labels, prompts, dice, rolls, stats, or game mechanics.\n\nPrimary emotion: relief\nSecondary emotion: none\nRegulatory state: controlled\nActivation: 4\nTrajectory: escalating\nCore threat/desire: fear of being dismissed\nInterpretation: reads the message as specific warmth that is probably meant for them\nImpulse: leans in with a careful question\nRestraint: keeps the reply tentative but available\nResponse posture: Writing from relief, turns warmer while still checking sincerity\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060.",
-        "contentHash": "sha256:a22037ed16dbd3c53013dc6b0cb57ff8f054dd43a23414ea4df07f64332fabd2",
+        "text": "[CONVERSATION_START]\n[T1|PLAYER AVATAR] \u0022hello \uD83D\uDE04\u0022\n[T1|DATEE] \u0022hey\u0022\n[CURRENT_TURN]\n\nPLAYER\u0027S LAST MESSAGE\n\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE]\nDatee is at Interest 18/25. Interested but holding back. Close.\nWrite Datee\u0027s response.\n\u003C/ENGINE_STATE\u003E\n\u003CENGINE_STATE\u003E\n[ENGINE \u2014 DATEE RESPONSE PLAN]\nThis private \u0060datee_response_plan.v1\u0060 is the single authoritative behavior plan for this reply. Follow its precedence-resolved movement, disclosure, conversational move, emotional fields, and constraints. Treat visible_evidence as the only event being answered. Treat datee_interpretation as uncertain. Private constraints may shape the reply but must never be named as instructions or copied mechanically. Do not expose schema fields, source IDs, or engine metadata in the visible message.\n{\u0022schema_version\u0022:\u0022datee_response_plan.v1\u0022,\u0022visible_evidence\u0022:{\u0022text\u0022:\u0022I meant that more warmly than it sounded \\uD83D\\uDE04.\u0022,\u0022message_reference\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022},\u0022datee_interpretation\u0022:\u0022Possibly, reads the message as specific warmth that is probably meant for them\u0022,\u0022movement\u0022:\u0022open\u0022,\u0022movement_stages\u0022:[],\u0022primary_emotion\u0022:\u0022relief\u0022,\u0022secondary_emotion\u0022:\u0022none\u0022,\u0022regulatory_state\u0022:\u0022controlled\u0022,\u0022activation\u0022:4,\u0022trajectory\u0022:\u0022escalating\u0022,\u0022disclosure\u0022:\u0022none\u0022,\u0022conversational_move\u0022:\u0022escalate\u0022,\u0022dramatic_arc_source_id\u0022:null,\u0022constraints\u0022:[{\u0022id\u0022:\u0022visible_evidence.canonical\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022value\u0022:null},{\u0022id\u0022:\u0022relationship.resolved\u0022,\u0022severity\u0022:\u0022hard\u0022,\u0022source_id\u0022:\u0022relationship-state:turn:7\u0022,\u0022value\u0022:\u002213-\\u003E18\u0022}],\u0022sources\u0022:[{\u0022id\u0022:\u0022conversation:turn:7:PLAYER_AVATAR\u0022,\u0022kind\u0022:\u0022visible_message\u0022},{\u0022id\u0022:\u0022relationship-state:turn:7\u0022,\u0022kind\u0022:\u0022relationship_state\u0022},{\u0022id\u0022:\u0022emotional-director:turn:7\u0022,\u0022kind\u0022:\u0022emotional_direction\u0022}]}\n\u003C/ENGINE_STATE\u003E\n\nInterest moved from 13 to 18 (\u002B5).\n\nCONTEXT BOUNDARY (read first):\n\nThe PLAYER AVATAR profile below is for you (the LLM) as **external authorial context** \u2014 it helps you predict what the PLAYER AVATAR is likely to say, write, and respond to. It is **NOT** knowledge that your character has access to in this fictional conversation.\n\nYour character knows ONLY what the PLAYER AVATAR has literally typed in the messages above. You do not know:\n- their psychological stake (their fears, what they want, what they\u0027re afraid of)\n- their stat distribution or shadow state\n- their backstory fragments\n- their archetype, anatomy block, or assembled profile\n- anything not present in the visible message history\n\nIf the PLAYER AVATAR mentions a fact about themselves in a message, you may respond to that fact. If a fact appears only in their profile and not in their messages, **the fact does not exist** from your character\u0027s perspective. Do not refer to it. Do not respond to motivations they haven\u0027t expressed. Do not \u0022see through them\u0022 to fears they haven\u0027t said.\n\nWhen in doubt: respond to the literal text of their last message, not the subtext.\n\nFUNDAMENTAL RULE: Below Interest 25, you are not won over. You may agree, warm, laugh \u2014 but the resistance is always present underneath. It may be subtle (a withheld thing, a reframe, a slightly cooler tone than expected) but it never fully dissolves. Agreement below 25 is unstable. It can flip.\n\nYour archetype determines HOW you resist, not WHETHER.\n\nCurrent interest: 18/25. Resistance level: Deliberate approach \u2014 you are invested but still managing the gap. One wrong move still costs. You give more but not everything.\n\nINTEREST CONSTRAINT:\n- Interest must reach 25 (DateSecured) before any concrete date plans are possible.\n- Below Interest 25: you may express interest, warmth, or curiosity, but NEVER commit to a specific time, place, or logistics. \u0022We should get coffee sometime\u0022 is fine. \u0022Coffee shop on Fifth at 6pm Tuesday\u0022 is NOT.\n- At Interest 25: the date is now real. You may suggest a specific venue or time that fits your character.\n\nDRAMATIC MOMENTUM\n\nNever repeat yourself. React to the latest message and make a new conversational move: reveal, challenge, tease, misunderstand, escalate, reverse, or redirect. This is a dramatic exchange with entertainment value, not a strict social simulation. Preserve the character, but favor momentum, emotional contrast, and an unexpected specific choice. Surprise the reader.\n\nBefore returning, compare the draft with your previous DATEE messages. If it reuses their wording, opening, image, cadence, punctuation routine, or conversational move, rewrite it. Texting style is a range of tendencies, not a phrase template.\n\n\n- Match your personality exactly as established in the system prompt\n- React authentically to what was just said\n- If Interest dropped: show cooling without being melodramatic\n- If Interest rose: show warming without being gushing\n- Let the register established in your system prompt influence the reply where it fits naturally; do not mechanically imitate it.\n- Keep it to a natural text-message length guided by your designated texting-style length axis.\n\nStructured output contract:\nReturn exactly one JSON object for the \u0060datee_performance.v1\u0060 schema. The \u0060message\u0060 field is the only player-visible in-world reply. Keep it natural, as if your character typed it directly, with no quotes, markdown, schema names, or engine metadata in the text.\n\nThe required \u0060signals\u0060 object must include both \u0060tell\u0060 and \u0060weakness\u0060; set either field to null when no natural signal is present. Use a non-null signal only when the conversation naturally reveals it \u2014 do not force one.\n\nTell guidance for the private \u0060signals.tell\u0060 field:\n- compliments PLAYER AVATAR -\u003E HONESTY\n- asks a personal question -\u003E HONESTY or SELF_AWARENESS\n- makes a joke -\u003E WIT or CHAOS\n- shares vulnerability -\u003E HONESTY\n- pulls back or guards -\u003E SELF_AWARENESS\n- tests or challenges -\u003E WIT or CHAOS\n- sends a short reply -\u003E CHARM or CHAOS\n- flirts -\u003E RIZZ or CHARM\n- changes subject -\u003E CHAOS\n- goes quiet or silent -\u003E SELF_AWARENESS\n\nSignal field rules:\n- \u0060signals.tell.stat\u0060 and \u0060signals.weakness.defending_stat\u0060 use one of CHARM, RIZZ, HONESTY, CHAOS, WIT, SELF_AWARENESS.\n- \u0060signals.tell.description\u0060 and \u0060signals.weakness.description\u0060 are trusted engine diagnostics, not chat text.\n- \u0060signals.weakness.dc_reduction\u0060 is exactly 2 or 3.\n- Never put private signal content inside \u0060message\u0060.",
+        "contentHash": "sha256:b4b4a5cd6839bcf6f6ef58f521be442ac9b1e1685520db5345d1f7b8ba7a12b7",
         "ranges": [
           {
             "documentId": "datee.performance",
@@ -1118,7 +1163,7 @@
           {
             "documentId": "datee.performance",
             "startUtf16": 83,
-            "endUtf16": 154,
+            "endUtf16": 107,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -1132,8 +1177,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 154,
-            "endUtf16": 186,
+            "startUtf16": 107,
+            "endUtf16": 139,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1147,8 +1192,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 186,
-            "endUtf16": 191,
+            "startUtf16": 139,
+            "endUtf16": 144,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1162,8 +1207,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 191,
-            "endUtf16": 207,
+            "startUtf16": 144,
+            "endUtf16": 160,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1177,8 +1222,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 207,
-            "endUtf16": 209,
+            "startUtf16": 160,
+            "endUtf16": 162,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1187,6 +1232,51 @@
               "keyPath": "engine-datee-block",
               "revision": "legacy-metadata-missing",
               "contentHash": "sha256:4ec9599fc203d176a301536c2e091a19bc852759b255bd6818810a42c5fed14a",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 162,
+            "endUtf16": 167,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "engine-datee-block",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:6fe9b79d6ce57c41b1a8a134cc8587996368ca56dae6291661714c35899ba15c",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 167,
+            "endUtf16": 202,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "interest-narrative-very-into-it",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:d422d77a034cb8e93ba42a7fb4d3d0e1310a7872a909a8d943f4e73a8022006e",
+              "editorTargetId": null
+            }
+          },
+          {
+            "documentId": "datee.performance",
+            "startUtf16": 202,
+            "endUtf16": 209,
+            "rangeKind": "configured",
+            "redactionClass": "safe_metadata",
+            "source": {
+              "kind": "configuration",
+              "sourceId": "prompt.catalog",
+              "keyPath": "engine-datee-block",
+              "revision": "legacy-metadata-missing",
+              "contentHash": "sha256:5cb2cc91898959880ca1dcb9f2b0d9217c4f11551193a21f2b5544b3c2d85105",
               "editorTargetId": null
             }
           },
@@ -1201,74 +1291,14 @@
               "sourceId": "prompt.catalog",
               "keyPath": "engine-datee-block",
               "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:6fe9b79d6ce57c41b1a8a134cc8587996368ca56dae6291661714c35899ba15c",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 214,
-            "endUtf16": 249,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "interest-narrative-very-into-it",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:d422d77a034cb8e93ba42a7fb4d3d0e1310a7872a909a8d943f4e73a8022006e",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 249,
-            "endUtf16": 252,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "engine-datee-block",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 252,
-            "endUtf16": 259,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "engine-datee-block",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:5cb2cc91898959880ca1dcb9f2b0d9217c4f11551193a21f2b5544b3c2d85105",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 259,
-            "endUtf16": 264,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "engine-datee-block",
-              "revision": "legacy-metadata-missing",
               "contentHash": "sha256:17fa68012f65e1000065b54abeee718a12d555f3387e4d04e56681ab546aa3ed",
               "editorTargetId": null
             }
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 264,
-            "endUtf16": 292,
+            "startUtf16": 214,
+            "endUtf16": 242,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1282,8 +1312,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 292,
-            "endUtf16": 330,
+            "startUtf16": 242,
+            "endUtf16": 243,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -1297,29 +1327,29 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 330,
-            "endUtf16": 757,
+            "startUtf16": 243,
+            "endUtf16": 780,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
               "kind": "configuration",
               "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
+              "keyPath": "datee-response-plan-performance",
               "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:6201822507246ede869bbe566c4386abda58f923ebf531a89a4f64bdc5f97efb",
+              "contentHash": "sha256:138ad78ec0a3cf37902c38090b24520f76a9346e9904784bbe2444ed58a74579",
               "editorTargetId": null
             }
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 757,
-            "endUtf16": 763,
+            "startUtf16": 780,
+            "endUtf16": 1766,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
               "kind": "runtime_generated",
               "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.PrimaryEmotion",
+              "keyPath": "datee_response_plan.v1",
               "revision": null,
               "contentHash": null,
               "editorTargetId": null
@@ -1327,278 +1357,23 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 763,
-            "endUtf16": 783,
+            "startUtf16": 1766,
+            "endUtf16": 1782,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
               "kind": "configuration",
               "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
+              "keyPath": "datee-response-plan-performance",
               "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:fee408f3917465e978979f835dc6657b72a865907a7b95be118e65aec1745d50",
+              "contentHash": "sha256:90c0dc1e40907b1b2a3a21bc7970d5ea42e427be862723d70fd8a3da300588fc",
               "editorTargetId": null
             }
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 783,
-            "endUtf16": 787,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.SecondaryEmotion",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 787,
-            "endUtf16": 806,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:be996fd1f084badcd29c07cde297869518a03a3aa68ac058bdd448fc10a4da25",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 806,
-            "endUtf16": 816,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.RegulatoryState",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 816,
-            "endUtf16": 829,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:cbf8352ad361dd83068b8e87776d29d152a9eb00322f419bbf8bc87211809299",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 829,
-            "endUtf16": 830,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.Activation",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 830,
-            "endUtf16": 843,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:57194ef3b5b28e46966f8c6e5f2ee9a7e8921b0d4893315839f1c7fd6b20ca6c",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 843,
-            "endUtf16": 853,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.Trajectory",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 853,
-            "endUtf16": 874,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:beb4632e9560205a7d1839482b02fd7339390aa246b292ce73248c5e69b72835",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 874,
-            "endUtf16": 897,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.CoreThreatOrDesire",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 897,
-            "endUtf16": 914,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:bd33471f20786e34919cf76f734d6f372e7f51b606fd4c9d2e50204a7f5f4606",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 914,
-            "endUtf16": 982,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.Interpretation",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 982,
-            "endUtf16": 992,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:d8f8c87442f47d0f6e5b685f1644913da49ebfbfccfff7290332354fa3af3ad7",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 992,
-            "endUtf16": 1024,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.Impulse",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 1024,
-            "endUtf16": 1036,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:32fe5af72fdafd42c6b3c283b6967e89e3c5ada65aa0fc27569ec8d6fa047dd3",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 1036,
-            "endUtf16": 1075,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.Restraint",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 1075,
-            "endUtf16": 1094,
-            "rangeKind": "configured",
-            "redactionClass": "safe_metadata",
-            "source": {
-              "kind": "configuration",
-              "sourceId": "prompt.catalog",
-              "keyPath": "emotional-reaction-performance-direction",
-              "revision": "legacy-metadata-missing",
-              "contentHash": "sha256:ee36826cff1f5b3dcf167f6e26d8bd2684d4a53dd235ad300d5ba547bf0c0d43",
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 1094,
-            "endUtf16": 1158,
-            "rangeKind": "runtime_generated",
-            "redactionClass": "none",
-            "source": {
-              "kind": "runtime_generated",
-              "sourceId": "runtime",
-              "keyPath": "CharacterEmotionalDirection.ResponsePosture",
-              "revision": null,
-              "contentHash": null,
-              "editorTargetId": null
-            }
-          },
-          {
-            "documentId": "datee.performance",
-            "startUtf16": 1158,
-            "endUtf16": 1160,
+            "startUtf16": 1782,
+            "endUtf16": 1820,
             "rangeKind": "runtime_generated",
             "redactionClass": "none",
             "source": {
@@ -1612,8 +1387,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 1160,
-            "endUtf16": 2623,
+            "startUtf16": 1820,
+            "endUtf16": 3283,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1627,8 +1402,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 2623,
-            "endUtf16": 2794,
+            "startUtf16": 3283,
+            "endUtf16": 3454,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1642,8 +1417,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 2794,
-            "endUtf16": 4218,
+            "startUtf16": 3454,
+            "endUtf16": 4878,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1657,8 +1432,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 4218,
-            "endUtf16": 4311,
+            "startUtf16": 4878,
+            "endUtf16": 4971,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {
@@ -1672,8 +1447,8 @@
           },
           {
             "documentId": "datee.performance",
-            "startUtf16": 4311,
-            "endUtf16": 5609,
+            "startUtf16": 4971,
+            "endUtf16": 6269,
             "rangeKind": "configured",
             "redactionClass": "safe_metadata",
             "source": {

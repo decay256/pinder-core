@@ -81,14 +81,14 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_ContainsEngineDateeBlock()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
             Assert.Contains("[ENGINE — DATEE]", result);
         }
 
         [Fact]
         public void DateePrompt_ContainsDateeNameAndInterest()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestAfter: 14));
             Assert.Contains("Sable is at Interest 14/25", result);
         }
@@ -96,7 +96,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_ContainsWriteInstruction()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
             Assert.Contains("Write Sable's response", result);
         }
 
@@ -119,15 +119,17 @@ namespace Pinder.LlmAdapters.Tests
         [InlineData(25, "resistance dissolved")]
         public void DateePrompt_InterestNarrativeMatchesBand(int interest, string expectedFragment)
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
-                MakeDateeContext(interestAfter: interest));
+            var result = DateePromptTestBuilder.Build(
+                MakeDateeContext(
+                    interestBefore: interest == 25 ? 25 : 10,
+                    interestAfter: interest));
             Assert.Contains(expectedFragment, result);
         }
 
         [Fact]
         public void DateePrompt_Interest0_ShowsUnmatched()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(interestBefore: 2, interestAfter: 0));
             Assert.Contains("Unmatched", result);
         }
@@ -282,7 +284,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_EngineBlockPresentInOutput()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
 
             int engineIdx = result.IndexOf("[ENGINE — DATEE]");
             Assert.True(engineIdx >= 0, "[ENGINE — DATEE] block must be present");

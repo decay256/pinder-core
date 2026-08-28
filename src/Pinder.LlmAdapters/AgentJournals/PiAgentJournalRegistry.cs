@@ -16,6 +16,7 @@ namespace Pinder.LlmAdapters.AgentJournals
                 [AgentJournalSchemaNames.LlmResultV1] = ProjectZeroContext,
                 [AgentJournalSchemaNames.MessageLinkV1] = ProjectZeroContext,
                 [AgentJournalSchemaNames.RoleFactPolicyDecisionV1] = ProjectZeroContext,
+                [AgentJournalSchemaNames.DateeResponsePlanV1] = ProjectZeroContext,
             };
 
         public static IReadOnlyList<AgentMessage> ProjectZeroContext(

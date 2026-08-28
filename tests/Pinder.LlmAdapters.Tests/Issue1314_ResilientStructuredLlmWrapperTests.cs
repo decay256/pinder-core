@@ -471,8 +471,8 @@ OPTION 2
 
             string secondPrompt = transport.UserMessages[1];
             Assert.Equal(1, CountOccurrences(secondPrompt, "[CURRENT_TURN]"));
-            Assert.Equal(1, CountOccurrences(secondPrompt, "<ENGINE_STATE>"));
-            Assert.Equal(1, CountOccurrences(secondPrompt, "</ENGINE_STATE>"));
+            Assert.Equal(2, CountOccurrences(secondPrompt, "<ENGINE_STATE>"));
+            Assert.Equal(2, CountOccurrences(secondPrompt, "</ENGINE_STATE>"));
             Assert.DoesNotContain("[PREVIOUS CONVERSATION CONTEXT]", secondPrompt);
             Assert.Contains("first delivered line", secondPrompt);
             Assert.Contains("Datee reply", secondPrompt);

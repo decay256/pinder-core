@@ -9,6 +9,8 @@ namespace Pinder.LlmAdapters.AgentJournals
         public const string AvatarReply = "game.avatar.reply";
         public const string EmotionalDirector = "game.emotional-director";
         public const string AvatarEmotionalDirector = "game.avatar.emotional-director";
+        public const string DateeResponsePlanReconciliation = "game.datee.response-plan-reconciliation";
+        public const string DateeResponsePlanCompiler = "game.datee.response-plan-compiler";
         public const string PrefetchBranchClone = "game.prefetch.option-branch";
         public const string SpeculativeBranchClone = "game.speculation.option-branch";
 
@@ -18,6 +20,7 @@ namespace Pinder.LlmAdapters.AgentJournals
             AvatarReply,
             EmotionalDirector,
             AvatarEmotionalDirector,
+            DateeResponsePlanReconciliation,
             PrefetchBranchClone,
             SpeculativeBranchClone,
         };

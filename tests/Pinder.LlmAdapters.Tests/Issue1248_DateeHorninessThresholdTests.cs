@@ -54,7 +54,7 @@ public class Issue1248_DateeHorninessThresholdTests
     public void HorninessOverlayApplied_BelowThreshold_GuidanceIsGuardedNegative(int interest)
     {
         var ctx = MakeDateeContext(interest, horninessOverlayApplied: true, horninessTier: FailureTier.Misfire);
-        var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+        var result = DateePromptTestBuilder.Build(ctx);
 
         // The implementer must include "horny" or "too eager"/"too forward" in the prompt text.
         Assert.True(ContainsAny(result, "horny", "too eager", "too forward"), 
@@ -75,7 +75,7 @@ public class Issue1248_DateeHorninessThresholdTests
     public void HorninessOverlayApplied_AtOrAboveThreshold_GuidanceAllowsWarmth(int interest)
     {
         var ctx = MakeDateeContext(interest, horninessOverlayApplied: true, horninessTier: FailureTier.Success);
-        var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+        var result = DateePromptTestBuilder.Build(ctx);
 
         Assert.True(ContainsAny(result, "horny", "too eager", "too forward"),
             "Should contain a recognizable horniness-reaction header/marker.");
@@ -92,7 +92,7 @@ public class Issue1248_DateeHorninessThresholdTests
     public void HorninessOverlayApplied_HighInterest_StillGatedAt25()
     {
         var ctx = MakeDateeContext(24, horninessOverlayApplied: true, horninessTier: FailureTier.Success);
-        var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+        var result = DateePromptTestBuilder.Build(ctx);
 
         // The existing prompt already includes "Below Interest 25" rule.
         Assert.Contains("Below Interest 25", result);
@@ -118,7 +118,7 @@ public class Issue1248_DateeHorninessThresholdTests
     public void NoHorninessOverlay_NoHorninessBlock()
     {
         var ctx = MakeDateeContext(20, horninessOverlayApplied: false);
-        var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+        var result = DateePromptTestBuilder.Build(ctx);
 
         // The rest of the prompt (resistance block etc.) is unchanged, and horniness reaction is absent
         Assert.False(ContainsAny(result, "horny", "too eager", "too forward"));

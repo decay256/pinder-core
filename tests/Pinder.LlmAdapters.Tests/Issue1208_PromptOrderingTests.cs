@@ -91,7 +91,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             var history = new List<(string, string)> { ("O", "Hello") };
             var ctx = MakeDateeContext(history);
-            var result = SessionDocumentBuilder.BuildDateePromptEx(ctx);
+            var result = DateePromptTestBuilder.BuildEx(ctx);
 
             var historySpan = result.Spans.First(s => s.Key == "conversation-history");
             var engineSpan = result.Spans.First(s => s.Key == "engine-datee-block");

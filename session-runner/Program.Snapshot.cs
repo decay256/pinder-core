@@ -192,6 +192,10 @@ partial class Program
             TurnNumber = turnNumber,
             Interest = state.Interest,
             ShadowValues = shadowValues,
+            ShadowDisadvantagedStats = state.ShadowDisadvantagedStats?.Select(value => value.ToString()).ToList(),
+            CurrentShadowThresholds = state.CurrentShadowThresholds?.ToDictionary(
+                entry => entry.Key.ToString(),
+                entry => entry.Value),
             MomentumStreak = state.MomentumStreak,
             ActiveTraps = activeTraps,
             ActiveTell = activeTell,
@@ -208,6 +212,8 @@ partial class Program
             DateeHistory = dateeHistoryEntries,
             AvatarHistory = avatarHistoryEntries,
             DateeEmotionalDirectionHistory = dateeDirectionEntries,
+            LastAcceptedDateeResponsePlan = ToSnapshot(state.LastAcceptedDateeResponsePlanState),
+            LastDateeResponseReplay = ToSnapshot(state.LastDateeResponseReplayState),
             AvatarSpentBackstoryIndices = state.AvatarSpentBackstoryIndices.ToList(),
             AvatarSpentStakeIndices = state.AvatarSpentStakeIndices.ToList(),
             AvatarPreviousPhase = state.AvatarPreviousPhase,
@@ -373,6 +379,16 @@ partial class Program
             TurnNumber           = snap.TurnNumber,
             MomentumStreak       = snap.MomentumStreak,
             ShadowValues         = snap.ShadowValues ?? new Dictionary<string, int>(),
+            ShadowDisadvantagedStats = snap.ShadowDisadvantagedStats == null
+                ? null
+                : snap.ShadowDisadvantagedStats
+                    .Select(value => Enum.Parse<Pinder.Core.Stats.StatType>(value, ignoreCase: false))
+                    .ToHashSet(),
+            CurrentShadowThresholds = snap.CurrentShadowThresholds == null
+                ? null
+                : snap.CurrentShadowThresholds.ToDictionary(
+                    entry => Enum.Parse<Pinder.Core.Stats.ShadowStatType>(entry.Key, ignoreCase: false),
+                    entry => entry.Value),
             ActiveTraps          = (snap.ActiveTraps ?? new List<TrapSnapshot>())
                                      .Select(t => (t.Stat, t.TurnsRemaining))
                                      .ToList(),
@@ -400,6 +416,8 @@ partial class Program
                                          e.Trajectory,
                                          e.Impulse))
                                      .ToList(),
+            LastAcceptedDateeResponsePlanState = ToCoreState(snap.LastAcceptedDateeResponsePlan),
+            LastDateeResponseReplayState = ToCoreState(snap.LastDateeResponseReplay),
             AvatarSpentBackstoryIndices = new HashSet<int>(snap.AvatarSpentBackstoryIndices ?? new List<int>()),
             AvatarSpentStakeIndices = new HashSet<int>(snap.AvatarSpentStakeIndices ?? new List<int>()),
             AvatarPreviousPhase = snap.AvatarPreviousPhase,
@@ -415,6 +433,112 @@ partial class Program
             CurrentDateeCognitiveSubtext = snap.DateeCognitiveSubtext,
             CurrentDateeCognitiveSubtextFact = ToCoreFact(snap.DateeCognitiveSubtextFact),
         };
+    }
+
+    private static AcceptedDateeResponsePlanSnapshot? ToSnapshot(AcceptedDateeResponsePlanState? state)
+    {
+        if (state == null) return null;
+        return new AcceptedDateeResponsePlanSnapshot
+        {
+            SchemaVersion = state.SchemaVersion,
+            CanonicalPlanJson = state.CanonicalPlanJson,
+            OriginatingTurn = state.OriginatingTurn,
+            MessageReference = state.MessageReference,
+            VisibleMessageText = state.VisibleMessageText,
+            ProvenanceSchemaVersion = state.Provenance.SchemaVersion,
+            SourceArtifactId = state.Provenance.SourceArtifactId,
+            CompilerArtifactId = state.Provenance.CompilerArtifactId,
+            AcceptedArtifactId = state.Provenance.AcceptedArtifactId,
+            ReconciliationInvocationId = state.Provenance.ReconciliationInvocationId,
+            ReconciliationResultId = state.Provenance.ReconciliationResultId,
+        };
+    }
+
+    private static AcceptedDateeResponsePlanState? ToCoreState(AcceptedDateeResponsePlanSnapshot? snapshot)
+    {
+        if (snapshot == null) return null;
+        if (snapshot.SchemaVersion != AcceptedDateeResponsePlanSnapshot.CurrentSchemaVersion)
+            throw new InvalidOperationException("snapshot.datee_response_plan.schema_version.unsupported");
+        var provenance = new DateeResponsePlanProvenance(
+            snapshot.SourceArtifactId,
+            snapshot.CompilerArtifactId,
+            snapshot.AcceptedArtifactId,
+            snapshot.ReconciliationInvocationId,
+            snapshot.ReconciliationResultId,
+            snapshot.ProvenanceSchemaVersion);
+        return new AcceptedDateeResponsePlanState(
+            snapshot.CanonicalPlanJson,
+            snapshot.OriginatingTurn,
+            snapshot.MessageReference,
+            snapshot.VisibleMessageText,
+            provenance,
+            snapshot.SchemaVersion);
+    }
+
+    private static DateeResponseReplaySnapshot? ToSnapshot(DateeResponseReplayState? state)
+    {
+        if (state == null) return null;
+        return new DateeResponseReplaySnapshot
+        {
+            SchemaVersion = state.SchemaVersion,
+            ResponseTurn = state.ResponseTurn,
+            PostTurnNumber = state.PostTurnNumber,
+            DeliveredMessage = state.DeliveredMessage,
+            AcceptedDateeMessage = state.AcceptedDateeMessage,
+            ResponseDelayMinutes = state.ResponseDelayMinutes,
+            InterestBefore = state.InterestBefore,
+            InterestBeforeState = state.InterestBeforeState.ToString(),
+            InterestAfterState = state.InterestAfterState.ToString(),
+            DeliveryTier = state.DeliveryTier.ToString(),
+            RollStat = state.RollStat.ToString(),
+            OutcomeIntensity = state.OutcomeIntensity.ToString(),
+            HorninessOverlayApplied = state.HorninessOverlayApplied,
+            HorninessTier = state.HorninessTier.ToString(),
+            AcceptedEmotionalDirection = new DateeEmotionalDirectionSummaryEntry
+            {
+                Turn = state.AcceptedEmotionalDirection.Turn,
+                PrimaryEmotion = state.AcceptedEmotionalDirection.PrimaryEmotion,
+                SecondaryEmotion = state.AcceptedEmotionalDirection.SecondaryEmotion,
+                RegulatoryState = state.AcceptedEmotionalDirection.RegulatoryState,
+                Activation = state.AcceptedEmotionalDirection.Activation,
+                Trajectory = state.AcceptedEmotionalDirection.Trajectory,
+                Impulse = state.AcceptedEmotionalDirection.Impulse,
+            },
+            ActiveTrapIds = state.ActiveTrapIds.ToList(),
+            ActiveTrapInstructions = state.ActiveTrapInstructions.ToList(),
+        };
+    }
+
+    private static DateeResponseReplayState? ToCoreState(DateeResponseReplaySnapshot? snapshot)
+    {
+        if (snapshot == null) return null;
+        if (snapshot.SchemaVersion != DateeResponseReplaySnapshot.CurrentSchemaVersion)
+            throw new InvalidOperationException("snapshot.datee_response_replay.schema_version.unsupported");
+        return new DateeResponseReplayState(
+            snapshot.ResponseTurn,
+            snapshot.PostTurnNumber,
+            snapshot.DeliveredMessage,
+            snapshot.AcceptedDateeMessage,
+            snapshot.ResponseDelayMinutes,
+            snapshot.InterestBefore,
+            Enum.Parse<Pinder.Core.Conversation.InterestState>(snapshot.InterestBeforeState, ignoreCase: false),
+            Enum.Parse<Pinder.Core.Conversation.InterestState>(snapshot.InterestAfterState, ignoreCase: false),
+            Enum.Parse<Pinder.Core.Rolls.FailureTier>(snapshot.DeliveryTier, ignoreCase: false),
+            Enum.Parse<Pinder.Core.Stats.StatType>(snapshot.RollStat, ignoreCase: false),
+            Enum.Parse<Pinder.Core.Rolls.RollOutcomeIntensity>(snapshot.OutcomeIntensity, ignoreCase: false),
+            snapshot.HorninessOverlayApplied,
+            Enum.Parse<Pinder.Core.Rolls.FailureTier>(snapshot.HorninessTier, ignoreCase: false),
+            new Pinder.Core.Conversation.CharacterEmotionalDirectionSummary(
+                snapshot.AcceptedEmotionalDirection.Turn,
+                snapshot.AcceptedEmotionalDirection.PrimaryEmotion,
+                snapshot.AcceptedEmotionalDirection.SecondaryEmotion,
+                snapshot.AcceptedEmotionalDirection.RegulatoryState,
+                snapshot.AcceptedEmotionalDirection.Activation,
+                snapshot.AcceptedEmotionalDirection.Trajectory,
+                snapshot.AcceptedEmotionalDirection.Impulse),
+            snapshot.ActiveTrapIds,
+            snapshot.ActiveTrapInstructions,
+            snapshot.SchemaVersion);
     }
 
     internal static CharacterProfile BuildProfileFromSnapshot(CharacterSnapshot charSnap)

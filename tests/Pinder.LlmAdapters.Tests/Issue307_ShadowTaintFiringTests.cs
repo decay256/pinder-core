@@ -134,7 +134,7 @@ namespace Pinder.LlmAdapters.Tests
                 { ShadowStatType.Dread, 10 }
             };
 
-            var result = SessionDocumentBuilder.BuildDateePrompt(
+            var result = DateePromptTestBuilder.Build(
                 MakeDateeContext(shadows));
 
             Assert.Contains("SHADOW STATE", result);
@@ -152,7 +152,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.DoesNotContain("SHADOW STATE", dialogue);
 
             // #1138: delivery branch removed — BuildDeliveryPrompt is gone (#1125).
-            var datee = SessionDocumentBuilder.BuildDateePrompt(
+            var datee = DateePromptTestBuilder.Build(
                 MakeDateeContext(null));
             Assert.DoesNotContain("SHADOW STATE", datee);
         }

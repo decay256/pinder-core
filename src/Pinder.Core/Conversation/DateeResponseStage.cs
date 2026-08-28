@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Pinder.Core.Characters;
@@ -50,19 +51,48 @@ namespace Pinder.Core.Conversation
             CancellationToken ct,
             InterestState? finalInterestAfterState = null,
             CharacterEmotionalStatus? playerEmotionalStatus = null,
-            CharacterEmotionalStatus? dateeEmotionalStatus = null)
+            CharacterEmotionalStatus? dateeEmotionalStatus = null,
+            DateeResponseReplayState? replayState = null)
         {
+            if (replayState != null)
+            {
+                if (state.TurnNumber != replayState.PostTurnNumber)
+                    throw new InvalidOperationException("datee_response_replay.post_turn.identity.mismatch");
+                if (!string.Equals(
+                    deliveryStage.DeliveredMessage,
+                    replayState.DeliveredMessage,
+                    StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException("datee_response_replay.delivered_message.identity.mismatch");
+                }
+            }
+
             int finalInterestAfter = state.Interest.Current;
             InterestState resolvedFinalInterestAfterState =
-                finalInterestAfterState ?? new InterestMeter(finalInterestAfter).GetState();
+                replayState?.InterestAfterState
+                ?? finalInterestAfterState
+                ?? new InterestMeter(finalInterestAfter).GetState();
             playerEmotionalStatus ??= CharacterEmotionalStatusResolver.Resolve(player, 0, 0);
             dateeEmotionalStatus ??= CharacterEmotionalStatusResolver.Resolve(datee, 0, 0);
+            string deliveredMessage = replayState?.DeliveredMessage ?? deliveryStage.DeliveredMessage;
+            AcceptedDateeResponsePlanState? replayPlanState =
+                state.TakeDateeResponsePlanForReplay(deliveredMessage);
+            int responseTurn = replayPlanState?.OriginatingTurn ?? state.TurnNumber;
+            if (replayState != null && responseTurn != replayState.ResponseTurn)
+                throw new InvalidOperationException("datee_response_replay.response_turn.identity.mismatch");
 
             // Compute response delay
-            double responseDelayMinutes = datee.Timing.ComputeDelay(finalInterestAfter, rollStage.ResolveDice);
+            double responseDelayMinutes = replayState?.ResponseDelayMinutes
+                ?? datee.Timing.ComputeDelay(finalInterestAfter, rollStage.ResolveDice);
 
             // Generate datee response
-            var dateeTrapInstructions = GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
+            IReadOnlyList<string> activeTrapNames = replayState?.ActiveTrapIds
+                ?? GameSessionHelpers.GetActiveTrapNames(state.Traps);
+            string[]? dateeTrapInstructions = replayState != null
+                ? (replayState.ActiveTrapInstructions.Count == 0
+                    ? null
+                    : replayState.ActiveTrapInstructions.ToArray())
+                : GameSessionHelpers.GetActiveTrapInstructions(state.Traps);
 
             Dictionary<ShadowStatType, int>? dateeShadowThresholds = null;
             if (state.DateeShadows != null)
@@ -80,32 +110,34 @@ namespace Pinder.Core.Conversation
                 dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
                 dateeLastMessage: GameSessionHelpers.GetLastDateeMessage(state.History, datee.DisplayName),
-                activeTraps: GameSessionHelpers.GetActiveTrapNames(state.Traps),
+                activeTraps: activeTrapNames,
                 currentInterest: finalInterestAfter,
-                playerDeliveredMessage: deliveryStage.DeliveredMessage,
-                interestBefore: rollStage.InterestBefore,
+                playerDeliveredMessage: deliveredMessage,
+                interestBefore: replayState?.InterestBefore ?? rollStage.InterestBefore,
                 interestAfter: finalInterestAfter,
                 responseDelayMinutes: responseDelayMinutes,
                 activeTrapInstructions: dateeTrapInstructions,
                 playerName: player.DisplayName,
                 dateeName: datee.DisplayName,
-                currentTurn: state.TurnNumber,
+                currentTurn: responseTurn,
                 shadowThresholds: dateeShadowThresholds,
-                deliveryTier: rollStage.RollResult.Tier,
+                deliveryTier: replayState?.DeliveryTier ?? rollStage.RollResult.Tier,
                 activeArchetypeDirective: dateeArchetypeDirective,
                 // #1123 strict bleed isolation: the datee session sees ONLY the
                 // avatar's public dating-app card, never the avatar's full
                 // private system prompt.
                 playerAvatarCard: GameSessionHelpers.BuildPublicProfileCard(player),
-                horninessOverlayApplied: deliveryStage.HorninessCheckResult.OverlayApplied,
-                horninessTier: deliveryStage.HorninessCheckResult.Tier,
+                horninessOverlayApplied: replayState?.HorninessOverlayApplied
+                    ?? deliveryStage.HorninessCheckResult.OverlayApplied,
+                horninessTier: replayState?.HorninessTier
+                    ?? deliveryStage.HorninessCheckResult.Tier,
                 resolvedTarget: null,
                 cognitiveSubtext: null,
-                interestBeforeState: rollStage.StateBefore,
+                interestBeforeState: replayState?.InterestBeforeState ?? rollStage.StateBefore,
                 interestAfterState: resolvedFinalInterestAfterState,
                 emotionalTurnEvent: new DateeEmotionalTurnEvent(
-                    rollStage.RollResult.Stat,
-                    RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
+                    replayState?.RollStat ?? rollStage.RollResult.Stat,
+                    replayState?.OutcomeIntensity ?? RollOutcomeIntensityContract.FromRollResult(rollStage.RollResult),
                     datee.PsychiatricDiagnosis),
                 agentJournalContext: _agentJournalContext,
                 dateeTextingStyle: datee.TextingStyleFragment,
@@ -117,7 +149,8 @@ namespace Pinder.Core.Conversation
                 dateeReactionTarget: state.CurrentDateeReactionTarget,
                 cognitiveSubtextFact: state.CurrentDateeCognitiveSubtextFact,
                 recipientCharacterId: datee.CharacterId,
-                onDiagnostic: _onDiagnostic);
+                onDiagnostic: _onDiagnostic,
+                acceptedDateeResponsePlanState: replayPlanState);
 
             progress?.Report(new TurnProgressEvent(TurnProgressStage.DateeResponseStarted));
 
@@ -135,7 +168,7 @@ namespace Pinder.Core.Conversation
                     callId: callId,
                     correlationHints: new Dictionary<string, string>
                     {
-                        ["turn"] = state.TurnNumber.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        ["turn"] = responseTurn.ToString(System.Globalization.CultureInfo.InvariantCulture),
                     }));
 
             DateeResponse dateeResponse;
@@ -189,7 +222,7 @@ namespace Pinder.Core.Conversation
                     OperationalDiagnosticOperationKind.DateeResponse,
                     LlmPhase.OpponentResponse,
                     callId,
-                    state.TurnNumber);
+                    responseTurn);
             }
             catch (OperationCanceledException ex)
             {
@@ -202,7 +235,7 @@ namespace Pinder.Core.Conversation
                     OperationalDiagnosticOperationKind.DateeResponse,
                     LlmPhase.OpponentResponse,
                     callId,
-                    state.TurnNumber);
+                    responseTurn);
                 throw;
             }
             catch (Exception ex)
@@ -216,21 +249,32 @@ namespace Pinder.Core.Conversation
                     OperationalDiagnosticOperationKind.DateeResponse,
                     LlmPhase.OpponentResponse,
                     callId,
-                    state.TurnNumber);
+                    responseTurn);
                 throw;
             }
 
-            state.DateeHistory.Add(ConversationMessage.User(deliveryStage.DeliveredMessage));
+            state.DateeHistory.Add(ConversationMessage.User(deliveredMessage));
             state.DateeHistory.Add(ConversationMessage.Assistant(dateeResponse.MessageText));
             CharacterEmotionalDirection? acceptedDirection = dateeResponse.EmotionalReactionDebug?.Direction;
             if (acceptedDirection != null)
             {
                 state.RecordAcceptedDateeEmotionalDirection(
-                    CharacterEmotionalDirectionSummary.FromDirection(state.TurnNumber, acceptedDirection));
+                    replayState?.AcceptedEmotionalDirection
+                    ?? CharacterEmotionalDirectionSummary.FromDirection(responseTurn, acceptedDirection));
+            }
+            DateeResponsePlan? acceptedPlan = dateeResponse.EmotionalReactionDebug?.ResponsePlan;
+            if (acceptedPlan != null)
+            {
+                state.LastAcceptedDateeResponsePlan = acceptedPlan;
+            }
+            AcceptedDateeResponsePlanState? acceptedPlanState = dateeResponse.EmotionalReactionDebug?.ResponsePlanState;
+            if (acceptedPlanState != null)
+            {
+                state.LastAcceptedDateeResponsePlanState = acceptedPlanState;
             }
             if (sessionResult != null)
             {
-                state.AvatarHistory.Add(ConversationMessage.Assistant(deliveryStage.DeliveredMessage));
+                state.AvatarHistory.Add(ConversationMessage.Assistant(deliveredMessage));
                 state.AvatarHistory.Add(ConversationMessage.User(dateeResponse.MessageText));
                 state.DateeSessionSnapshot = sessionResult.DateeSessionSnapshot;
                 state.AvatarSessionSnapshot = sessionResult.AvatarSessionSnapshot;

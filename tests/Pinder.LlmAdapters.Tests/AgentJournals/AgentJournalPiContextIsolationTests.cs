@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
 
             var context = SessionContextBuilder.BuildSessionContext(entries, options);
 
-            Assert.Equal(4, options.EntryProjectors.Count);
+            Assert.Equal(5, options.EntryProjectors.Count);
             Assert.Empty(context.Messages);
             Assert.DoesNotContain("assistant text", string.Join("", context.Messages.Select(message => message.ToString())));
         }
@@ -57,4 +57,3 @@ namespace Pinder.LlmAdapters.Tests.AgentJournals
         }
     }
 }
-

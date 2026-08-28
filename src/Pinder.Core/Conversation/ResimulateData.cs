@@ -44,6 +44,17 @@ namespace Pinder.Core.Conversation
                     || CurrentAvatarRevelationTarget != null
                     || CurrentDateeReactionTarget != null))
                 throw new InvalidOperationException("restore.schema_version.legacy_active_target_forbidden");
+            if (DateeResponsePlanReplaySelection != null
+                && (LastAcceptedDateeResponsePlanState == null
+                    || LastDateeResponseReplayState == null
+                    || !DateeResponsePlanReplaySelection.Selects(
+                        LastAcceptedDateeResponsePlanState,
+                        LastAcceptedDateeResponsePlanState.VisibleMessageText)))
+            {
+                throw new InvalidOperationException("restore.datee_response_plan_replay.identity.mismatch");
+            }
+            if (DateeResponsePlanReplaySelection != null)
+                LastDateeResponseReplayState!.ValidateAgainst(LastAcceptedDateeResponsePlanState!);
         }
         /// <summary>Interest to restore (absolute value, not a delta).</summary>
         public int TargetInterest { get; set; }
@@ -91,6 +102,10 @@ namespace Pinder.Core.Conversation
         public List<(string Role, string Content)> DateeHistory { get; set; } = new List<(string, string)>();
 
         public List<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; set; } = new List<CharacterEmotionalDirectionSummary>();
+        public DateeResponsePlan? LastAcceptedDateeResponsePlan { get; set; }
+        public AcceptedDateeResponsePlanState? LastAcceptedDateeResponsePlanState { get; set; }
+        public DateeResponseReplayState? LastDateeResponseReplayState { get; set; }
+        public DateeResponsePlanReplaySelection? DateeResponsePlanReplaySelection { get; set; }
 
         /// <summary>
         /// Engine-owned avatar LLM conversation history (#1123) — the symmetric
@@ -141,6 +156,8 @@ namespace Pinder.Core.Conversation
         public int HorninessTimeModifier { get; set; }
         public bool PendingCritAdvantage { get; set; }
         public StatType? LastStatUsed { get; set; }
+        public HashSet<StatType>? ShadowDisadvantagedStats { get; set; }
+        public Dictionary<ShadowStatType, int>? CurrentShadowThresholds { get; set; }
         public Dictionary<string, int> DateeShadowValues { get; set; } = new Dictionary<string, int>();
         public WeaknessWindow? ActiveWeakness { get; set; }
         public Tell? ActiveTell { get; set; }

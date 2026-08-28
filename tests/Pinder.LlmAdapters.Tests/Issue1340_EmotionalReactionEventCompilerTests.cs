@@ -403,7 +403,7 @@ namespace Pinder.LlmAdapters.Tests
             var context = MakeContext(diagnosis: diagnosis);
 
             PromptTraceResult compiled = new EmotionalReactionEventCompiler().Compile(context);
-            PromptTraceResult visible = SessionDocumentBuilder.BuildDateePromptEx(context, BuiltInCatalog());
+            PromptTraceResult visible = DateePromptTestBuilder.BuildEx(context, BuiltInCatalog());
 
             Assert.Contains("PRIVATE COMPILED SAFE CONNECTION", compiled.Text, StringComparison.Ordinal);
             Assert.DoesNotContain("PRIVATE COMPILED SAFE CONNECTION", visible.Text, StringComparison.Ordinal);
@@ -521,7 +521,7 @@ namespace Pinder.LlmAdapters.Tests
             return destination;
         }
 
-        private sealed class CapturingTransport : ILlmTransport
+        private sealed class CapturingTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _response;
 
@@ -535,6 +535,20 @@ namespace Pinder.LlmAdapters.Tests
             public string PerformanceSystemPrompt { get; private set; } = string.Empty;
 
             public string PerformanceUserMessage { get; private set; } = string.Empty;
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
+            }
 
             public Task<string> SendAsync(
                 string systemPrompt,

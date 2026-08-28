@@ -119,9 +119,9 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal("2", performanceTerminal.CorrelationHints["attempt"]);
             Assert.Equal("2", performanceTerminal.CorrelationHints["total_attempts"]);
             Assert.Equal("datee", performanceTerminal.CorrelationHints["prompt_trace_type"]);
-            Assert.Contains("data/prompts/emotional-reactions.yaml", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
+            Assert.Contains("runtime:datee-response-plan", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
             Assert.Contains("conversation-history", performanceTerminal.CorrelationHints["prompt_trace_sources"], StringComparison.Ordinal);
-            Assert.Contains("emotional-reaction-performance-direction", performanceTerminal.CorrelationHints["prompt_trace_keys"], StringComparison.Ordinal);
+            Assert.Contains(DateeResponsePlan.CurrentSchemaVersion, performanceTerminal.CorrelationHints["prompt_trace_keys"], StringComparison.Ordinal);
             AssertSafePromptTraceHints(performanceTerminal);
             AssertNonNegativeIntHint(performanceTerminal, "elapsed_ms");
             Assert.Equal("ITokenUsageProvider.session_delta", performanceTerminal.CorrelationHints["token_source"]);
@@ -314,6 +314,14 @@ namespace Pinder.LlmAdapters.Tests
                 CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
+                if (request.SchemaName == DateePerformanceStructuredContract.SchemaName)
+                {
+                    AddUsage(23, 11, 5, 4);
+                    return Task.FromResult(DateePromptTestBuilder.StructuredResponse(
+                        request,
+                        _plainResponses.Dequeue(),
+                        "unit-performance-model"));
+                }
                 AddUsage(13, 7, 3, 2);
                 return Task.FromResult(_structuredResponses.Dequeue());
             }
@@ -376,9 +384,11 @@ namespace Pinder.LlmAdapters.Tests
                 CancellationToken ct = default)
             {
                 ct.ThrowIfCancellationRequested();
+                _callCount++;
+                if (request.SchemaName == DateePerformanceStructuredContract.SchemaName)
+                    throw _performanceException;
                 _inputTokens += 13;
                 _outputTokens += 7;
-                _callCount++;
                 return Task.FromResult(_directorResponse);
             }
 

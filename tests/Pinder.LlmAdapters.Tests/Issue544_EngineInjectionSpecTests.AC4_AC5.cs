@@ -117,7 +117,7 @@ namespace Pinder.LlmAdapters.Tests
         public void AC4_InterestNarrative_Band25_DateSecured()
         {
             var result = BuildDateePrompt(
-                MakeDateeContext(interestAfter: 25));
+                MakeDateeContext(interestBefore: 25, interestAfter: 25));
             Assert.Contains("resistance dissolved", result);
         }
 

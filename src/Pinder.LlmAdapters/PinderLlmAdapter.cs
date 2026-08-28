@@ -412,46 +412,73 @@ namespace Pinder.LlmAdapters
             AnnotatedInvocationDocument systemDocument =
                 GameRunPromptDocumentBuilder.BuildDateeSystemDocument(context.DateePrompt, gameDef);
             string systemPrompt = systemDocument.Text;
-            CharacterEmotionalDirectorResult emotionalDirectorResult;
-            if (dateeSession != null)
+            CharacterEmotionalDirection emotionalDirection;
+            CompiledDateeResponsePlan compiledResponsePlan;
+            DateeResponsePlan responsePlan;
+            string directorInput;
+            AcceptedDateeResponsePlanState? restoredState = context.AcceptedDateeResponsePlanState;
+            if (restoredState != null && AppliesToCurrentTurn(restoredState, context))
             {
-                PiConversationBranch directorBranch = await dateeSession.ForkAsync(
-                    "datee-private-analysis").ConfigureAwait(false);
-                try
-                {
-                    await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.restored", "datee-director", directorBranch).ConfigureAwait(false);
-                    IReadOnlyList<ConversationMessage> directorHistory =
-                        await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
-                    emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
-                            context,
-                            emotionalPromptCompiler,
-                            directorHistory,
-                            systemPrompt,
-                            directorBranch,
-                            cancellationToken)
-                        .ConfigureAwait(false);
-                }
-                finally
-                {
-                    await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.before-dispose", "datee-director", directorBranch).ConfigureAwait(false);
-                    await directorBranch.DisposeAsync().ConfigureAwait(false);
-                }
+                responsePlan = restoredState.Plan;
+                compiledResponsePlan = await ReusedEnvelopeAsync(
+                        context,
+                        restoredState,
+                        dateeSession,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+                emotionalDirection = DirectionFromPlan(responsePlan);
+                directorInput = "restored:" + responsePlan.VisibleEvidence.MessageReference.Value;
             }
             else
             {
-                emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
-                        context, emotionalPromptCompiler, priorMessages: null,
-                        dateeSystemPrompt: null, privateBranch: null, cancellationToken)
+                CharacterEmotionalDirectorResult emotionalDirectorResult;
+                if (dateeSession != null)
+                {
+                    PiConversationBranch directorBranch = await dateeSession.ForkAsync(
+                        "datee-private-analysis").ConfigureAwait(false);
+                    try
+                    {
+                        await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.restored", "datee-director", directorBranch).ConfigureAwait(false);
+                        IReadOnlyList<ConversationMessage> directorHistory =
+                            await directorBranch.BuildSemanticHistoryAsync().ConfigureAwait(false);
+                        emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
+                                context,
+                                emotionalPromptCompiler,
+                                directorHistory,
+                                systemPrompt,
+                                directorBranch,
+                                cancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                    finally
+                    {
+                        await ObserveAgentJournalBranchSnapshotAsync("datee.director.branch.before-dispose", "datee-director", directorBranch).ConfigureAwait(false);
+                        await directorBranch.DisposeAsync().ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    emotionalDirectorResult = await GenerateEmotionalDirectorResultAsync(
+                            context, emotionalPromptCompiler, priorMessages: null,
+                            dateeSystemPrompt: null, privateBranch: null, cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                emotionalDirection = emotionalDirectorResult.Direction;
+                directorInput = emotionalDirectorResult.DirectorInput;
+                compiledResponsePlan = await CompileDateeResponsePlanAsync(
+                        context,
+                        emotionalDirection,
+                        dateeSession,
+                        cancellationToken)
                     .ConfigureAwait(false);
+                responsePlan = compiledResponsePlan.Plan;
             }
-            CharacterEmotionalDirection emotionalDirection = emotionalDirectorResult.Direction;
             PromptTraceResult baseDateePrompt = emotionalPromptCompiler.CompilePerformance(
                 context,
-                emotionalDirection,
+                responsePlan,
                 includeConversationHistory: priorMessages == null);
             PromptTraceResult attemptDateePrompt = baseDateePrompt;
             bool includeRepetitionRepairOnNextAttempt = false;
-            string directorInput = emotionalDirectorResult.DirectorInput;
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DateeResponse);
 
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -471,7 +498,9 @@ namespace Pinder.LlmAdapters
                     AnnotatedInvocationDocument dateeDocument =
                         GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(attemptDateePrompt);
                     string userContent = dateeDocument.Text;
-                    var performanceMetadata = BuildDateePerformanceMetadata(attemptDateePrompt);
+                    var performanceMetadata = BuildDateePerformanceMetadata(
+                        attemptDateePrompt,
+                        compiledResponsePlan.JournalLinks());
 
                     AgentJournalCallScope journal = await StartConversationJournalAttemptAsync(
                             ResolveConversationCallPath(context.AgentJournalContext, GameRunConversationJournalInventory.DateePerformance),
@@ -484,7 +513,8 @@ namespace Pinder.LlmAdapters
                             dateeDocument,
                             session: dateeSession,
                             correlationContext: context.AgentJournalContext,
-                            roleFactAccessDecisions: context.PromptFactAccessDecisions)
+                            roleFactAccessDecisions: context.PromptFactAccessDecisions,
+                            journalLinks: compiledResponsePlan.JournalLinks())
                         .ConfigureAwait(false);
                     try
                     {
@@ -565,10 +595,12 @@ namespace Pinder.LlmAdapters
                                     cognitiveSubtext: context.CognitiveSubtextFact?.Text,
                                     transitionTarget: context.DateeReactionTarget?.Text,
                                     transitionStyle: context.DateeReactionTarget?.TransitionStyle,
-                                    compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
-                                        attemptDateePrompt,
-                                        "emotional-reaction-performance-direction"),
-                                    directorInput: directorInput));
+                                     compiledPromptInstruction: SessionDocumentBuilder.ExtractAnnotatedInstruction(
+                                         attemptDateePrompt,
+                                         "datee-response-plan-performance"),
+                                     directorInput: directorInput,
+                                     responsePlan: responsePlan,
+                                     responsePlanState: compiledResponsePlan.State));
                             structuredResponse.ReportValidation("accepted");
 
                             acceptedJournalMetadata = DateePerformanceStructuredContract.BuildAcceptedJournalMetadata(

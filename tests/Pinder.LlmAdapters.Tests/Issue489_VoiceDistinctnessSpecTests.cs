@@ -41,7 +41,8 @@ namespace Pinder.LlmAdapters.Tests
                 new TimingProfile(0, 1f, 0f, "neutral"),
                 1,
                 bio: "",
-                textingStyleFragment: textingStyleFragment);
+                textingStyleFragment: textingStyleFragment,
+                characterId: Guid.Parse("48900000-0000-0000-0000-000000000010"));
         }
 
         private static DialogueContext MakeContext(
@@ -82,7 +83,8 @@ namespace Pinder.LlmAdapters.Tests
         {
             var stats = MakeStats();
             var profile = new CharacterProfile(stats, "prompt", "Test",
-                new TimingProfile(0, 1f, 0f, "neutral"), 1);
+                new TimingProfile(0, 1f, 0f, "neutral"), 1,
+                characterId: Guid.Parse("48900000-0000-0000-0000-000000000011"));
 
             Assert.Equal(string.Empty, profile.TextingStyleFragment);
             Assert.NotNull(profile.TextingStyleFragment);

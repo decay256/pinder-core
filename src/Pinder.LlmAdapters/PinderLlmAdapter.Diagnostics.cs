@@ -14,12 +14,14 @@ namespace Pinder.LlmAdapters
         private const string DateePrivatePhaseDirector = "director";
         private const string DateePrivatePhasePerformance = "performance";
 
-        private static Dictionary<string, string> BuildDateePerformanceMetadata(PromptTraceResult trace)
+        private static Dictionary<string, string> BuildDateePerformanceMetadata(
+            PromptTraceResult trace,
+            IReadOnlyDictionary<string, string>? responsePlanLinks = null)
         {
             if (trace == null) throw new ArgumentNullException(nameof(trace));
 
             return BuildPromptTraceMetadata(
-                new Dictionary<string, string>(StringComparer.Ordinal),
+                responsePlanLinks ?? new Dictionary<string, string>(StringComparer.Ordinal),
                 trace,
                 "datee");
         }

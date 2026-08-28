@@ -52,7 +52,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             PromptCatalogInitializer.Initialize();
 
-            string prompt = SessionDocumentBuilder.BuildDateePrompt(
+            string prompt = DateePromptTestBuilder.Build(
                 MakeContext(15, InterestState.Interested));
 
             Assert.Contains("Engaged but not sold. Evaluating.", prompt);
@@ -66,7 +66,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             PromptCatalogInitializer.Initialize();
 
-            string prompt = SessionDocumentBuilder.BuildDateePrompt(
+            string prompt = DateePromptTestBuilder.Build(
                 MakeContext(16, InterestState.VeryIntoIt));
 
             Assert.Contains("Interested but holding back. Close.", prompt);
@@ -96,7 +96,7 @@ namespace Pinder.LlmAdapters.Tests
         {
             PromptCatalogInitializer.Initialize();
 
-            var trace = SessionDocumentBuilder.BuildDateePromptEx(MakeContext(interest, state));
+            var trace = DateePromptTestBuilder.BuildEx(MakeContext(interest, state));
 
             Assert.Contains(expectedNarrative, trace.Text);
             Assert.Contains(trace.Spans, span => span.Key == expectedResistanceKey);
@@ -153,9 +153,9 @@ namespace Pinder.LlmAdapters.Tests
         {
             PromptCatalogInitializer.Initialize();
 
-            var interestedTrace = SessionDocumentBuilder.BuildDateePromptEx(
+            var interestedTrace = DateePromptTestBuilder.BuildEx(
                 MakeContext(15, InterestState.Interested));
-            var veryIntoItTrace = SessionDocumentBuilder.BuildDateePromptEx(
+            var veryIntoItTrace = DateePromptTestBuilder.BuildEx(
                 MakeContext(16, InterestState.VeryIntoIt));
 
             Assert.Contains(interestedTrace.Spans, span =>

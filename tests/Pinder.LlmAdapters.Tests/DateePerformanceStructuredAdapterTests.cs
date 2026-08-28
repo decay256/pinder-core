@@ -49,7 +49,9 @@ namespace Pinder.LlmAdapters.Tests
             };
 
             StatefulDateeResult result = await adapter.GetDateeResponseAsync(
-                MakeContext(conversationHistory: new List<(string, string)> { ("P", "embedded history should be absent") }),
+                MakeContext(
+                    conversationHistory: new List<(string, string)> { ("P", "embedded history should be absent") },
+                    journal: true),
                 dateeHistory,
                 Array.Empty<ConversationMessage>(),
                 null,

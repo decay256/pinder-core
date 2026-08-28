@@ -195,7 +195,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_NullContext_ThrowsArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                SessionDocumentBuilder.BuildDateePrompt((DateeContext)null!));
+                DateePromptTestBuilder.Build((DateeContext)null!));
         }
 
         [Fact]

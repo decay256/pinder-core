@@ -197,6 +197,9 @@ namespace Pinder.Core.Conversation
                 PendingMomentumBonus = _pendingMomentumBonus,
                 DateeHistory = _dateeHistory.Select(message => (message.Role, message.Content)).ToList(),
                 DateeEmotionalDirectionHistory = _state.DateeEmotionalDirectionHistory.ToList(),
+                LastAcceptedDateeResponsePlan = _state.LastAcceptedDateeResponsePlan,
+                LastAcceptedDateeResponsePlanState = _state.LastAcceptedDateeResponsePlanState,
+                LastDateeResponseReplayState = _state.LastDateeResponseReplayState,
                 AvatarHistory = _avatarHistory.Select(message => (message.Role, message.Content)).ToList(),
                 DateeSessionSnapshot = _state.DateeSessionSnapshot,
                 AvatarSessionSnapshot = _state.AvatarSessionSnapshot,
@@ -227,6 +230,12 @@ namespace Pinder.Core.Conversation
                 HorninessTimeModifier = _horninessTimeModifier,
                 PendingCritAdvantage = _pendingCritAdvantage,
                 LastStatUsed = _lastStatUsed,
+                ShadowDisadvantagedStats = _state.ShadowDisadvantagedStats == null
+                    ? null
+                    : new HashSet<StatType>(_state.ShadowDisadvantagedStats),
+                CurrentShadowThresholds = _state.CurrentShadowThresholds == null
+                    ? null
+                    : new Dictionary<ShadowStatType, int>(_state.CurrentShadowThresholds),
                 ActiveWeakness = _activeWeakness,
                 ActiveTell = _activeTell,
             };
@@ -243,6 +252,63 @@ namespace Pinder.Core.Conversation
                 foreach (ShadowStatType shadow in System.Enum.GetValues(typeof(ShadowStatType)))
                     data.DateeShadowValues[shadow.ToString()] = _dateeShadows.GetEffectiveShadow(shadow);
             }
+            return data;
+        }
+
+        /// <summary>
+        /// Captures an explicit response-only replay. Ordinary continuation uses
+        /// <see cref="CreateResimulateData"/> and never selects an accepted plan.
+        /// </summary>
+        public ResimulateData CreateDateeResponseResimulateData()
+        {
+            ResimulateData data = CreateResimulateData();
+            AcceptedDateeResponsePlanState state = _state.LastAcceptedDateeResponsePlanState
+                ?? throw new InvalidOperationException("datee_response_plan_replay.accepted_plan.required");
+            DateeResponseReplayState replay = _state.LastDateeResponseReplayState
+                ?? throw new InvalidOperationException("datee_response_plan_replay.execution_state.required");
+            replay.ValidateAgainst(state);
+            if (_state.TurnNumber != replay.PostTurnNumber)
+                throw new InvalidOperationException("datee_response_plan_replay.post_turn.identity.mismatch");
+            if (data.DateeHistory.Count < 2
+                || !string.Equals(data.DateeHistory[data.DateeHistory.Count - 2].Role, "user", StringComparison.Ordinal)
+                || !string.Equals(data.DateeHistory[data.DateeHistory.Count - 2].Content, state.VisibleMessageText, StringComparison.Ordinal)
+                || !string.Equals(data.DateeHistory[data.DateeHistory.Count - 1].Role, "assistant", StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("datee_response_plan_replay.semantic_history.identity.mismatch");
+            }
+
+            string acceptedDateeMessage = data.DateeHistory[data.DateeHistory.Count - 1].Content;
+            if (!string.Equals(acceptedDateeMessage, replay.AcceptedDateeMessage, StringComparison.Ordinal))
+                throw new InvalidOperationException("datee_response_plan_replay.accepted_message.identity.mismatch");
+            data.DateeHistory.RemoveRange(data.DateeHistory.Count - 2, 2);
+            if (data.AvatarHistory.Count != 0 && (data.AvatarHistory.Count < 2
+                || !string.Equals(data.AvatarHistory[data.AvatarHistory.Count - 2].Role, "assistant", StringComparison.Ordinal)
+                || !string.Equals(data.AvatarHistory[data.AvatarHistory.Count - 2].Content, state.VisibleMessageText, StringComparison.Ordinal)
+                || !string.Equals(data.AvatarHistory[data.AvatarHistory.Count - 1].Role, "user", StringComparison.Ordinal)
+                || !string.Equals(data.AvatarHistory[data.AvatarHistory.Count - 1].Content, acceptedDateeMessage, StringComparison.Ordinal)))
+            {
+                throw new InvalidOperationException("datee_response_plan_replay.avatar_history.identity.mismatch");
+            }
+            if (data.AvatarHistory.Count != 0)
+                data.AvatarHistory.RemoveRange(data.AvatarHistory.Count - 2, 2);
+            if (data.ConversationHistory.Count < 2
+                || !string.Equals(data.ConversationHistory[data.ConversationHistory.Count - 2].Text, state.VisibleMessageText, StringComparison.Ordinal)
+                || !string.Equals(data.ConversationHistory[data.ConversationHistory.Count - 1].Text, acceptedDateeMessage, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("datee_response_plan_replay.canonical_history.identity.mismatch");
+            }
+            data.ConversationHistory.RemoveRange(data.ConversationHistory.Count - 2, 2);
+            if (data.DateeEmotionalDirectionHistory.Count > 0
+                && data.DateeEmotionalDirectionHistory[data.DateeEmotionalDirectionHistory.Count - 1].Turn == state.OriginatingTurn)
+            {
+                data.DateeEmotionalDirectionHistory.RemoveAt(data.DateeEmotionalDirectionHistory.Count - 1);
+            }
+
+            // Session snapshots are post-performance. Rebuild from the rewound
+            // semantic histories so the accepted output is not already present.
+            data.DateeSessionSnapshot = null;
+            data.AvatarSessionSnapshot = null;
+            data.DateeResponsePlanReplaySelection = DateeResponsePlanReplaySelection.From(state);
             return data;
         }
 

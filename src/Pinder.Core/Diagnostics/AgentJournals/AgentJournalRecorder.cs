@@ -1027,6 +1027,19 @@ namespace Pinder.Core.Diagnostics.AgentJournals
                 policyCorrelation: policy);
         }
 
+        public static AgentJournalSinkRecord DateeResponsePlan(
+            AgentJournalDateeResponsePlanRecord record,
+            AgentJournalCorrelationIds correlation)
+        {
+            if (record == null) throw new ArgumentNullException(nameof(record));
+            if (correlation == null) throw new ArgumentNullException(nameof(correlation));
+            return new AgentJournalSinkRecord(
+                BaseRecordId(correlation) + "/datee-response-plan/" + record.ArtifactId,
+                AgentJournalSchemaNames.DateeResponsePlanV1,
+                record,
+                correlation);
+        }
+
         private static string BaseRecordId(AgentJournalCorrelationIds correlation)
         {
             string ownerSegment = !string.IsNullOrWhiteSpace(correlation.AgentSessionId)

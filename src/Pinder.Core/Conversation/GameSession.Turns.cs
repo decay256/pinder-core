@@ -299,6 +299,55 @@ namespace Pinder.Core.Conversation
         }
 
         /// <summary>
+        /// Replays only the most recently accepted DATEE performance from an
+        /// explicit response-replay snapshot. The snapshot must have been
+        /// created by <see cref="CreateDateeResponseResimulateData"/> and
+        /// restored into this session. Previously committed roll, delivery,
+        /// interest, trap, XP, spending, and turn effects are not reapplied.
+        /// </summary>
+        public Task<DateeResponseReplayResult> ReplayLastDateeResponseAsync(
+            CancellationToken ct = default)
+            => ReplayLastDateeResponseAsync(progress: null, ct);
+
+        /// <summary>Response-only replay with coarse progress reporting.</summary>
+        public async Task<DateeResponseReplayResult> ReplayLastDateeResponseAsync(
+            System.IProgress<TurnProgressEvent>? progress,
+            CancellationToken ct = default)
+        {
+            ct.ThrowIfCancellationRequested();
+            RoleFactAccessGuard.RequireAdmitted(
+                _state.CurrentDateeReactionTarget?.Fact,
+                _datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                _state.LastDateeResponseReplayState?.ResponseTurn ?? _state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
+            RoleFactAccessGuard.RequireAdmitted(
+                _state.CurrentDateeCognitiveSubtextFact,
+                _datee.CharacterId,
+                ConversationParticipantRole.Datee,
+                _onDiagnostic,
+                _agentJournalContext,
+                _state.LastDateeResponseReplayState?.ResponseTurn ?? _state.TurnNumber,
+                OperationalDiagnosticOperationKind.DateeResponse);
+
+            EnsureTransactionalCloneCompatibility();
+            var working = CloneForRequiredTurnTransaction();
+            DateeResponseReplayResult result = await working._turnOrchestrator.ReplayDateeResponseAsync(
+                    working._state,
+                    working._player,
+                    working._datee,
+                    progress,
+                    ct)
+                .ConfigureAwait(false);
+
+            ct.ThrowIfCancellationRequested();
+            AdoptStateFrom(working);
+            return result;
+        }
+
+        /// <summary>
         /// Wait action: −1 interest, advance trap timers. No roll.
         /// Synchronous — no LLM calls.
         /// Self-contained turn action — does NOT require StartTurnAsync() first.

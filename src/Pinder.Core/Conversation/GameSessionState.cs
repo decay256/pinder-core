@@ -20,6 +20,10 @@ namespace Pinder.Core.Conversation
         public string DateeOutfitDescription { get; internal set; } = string.Empty;
         public List<ConversationMessage> DateeHistory { get; internal set; } = new List<ConversationMessage>();
         public List<CharacterEmotionalDirectionSummary> DateeEmotionalDirectionHistory { get; internal set; } = new List<CharacterEmotionalDirectionSummary>();
+        public DateeResponsePlan? LastAcceptedDateeResponsePlan { get; internal set; }
+        public AcceptedDateeResponsePlanState? LastAcceptedDateeResponsePlanState { get; internal set; }
+        public DateeResponseReplayState? LastDateeResponseReplayState { get; internal set; }
+        internal DateeResponsePlanReplaySelection? PendingDateeResponsePlanReplay { get; set; }
         // Avatar-perspective semantic history: what the player character knows.
         // There is no separate delivery-model call; session-capable adapters use
         // this mirror for option generation and future private reasoning.
@@ -87,6 +91,10 @@ namespace Pinder.Core.Conversation
             clone.DateeOutfitDescription = DateeOutfitDescription;
             clone.DateeHistory = new List<ConversationMessage>(DateeHistory);
             clone.DateeEmotionalDirectionHistory = new List<CharacterEmotionalDirectionSummary>(DateeEmotionalDirectionHistory);
+            clone.LastAcceptedDateeResponsePlan = LastAcceptedDateeResponsePlan;
+            clone.LastAcceptedDateeResponsePlanState = LastAcceptedDateeResponsePlanState;
+            clone.LastDateeResponseReplayState = LastDateeResponseReplayState;
+            clone.PendingDateeResponsePlanReplay = PendingDateeResponsePlanReplay;
             clone.AvatarHistory = new List<ConversationMessage>(AvatarHistory);
             clone.DateeSessionSnapshot = DateeSessionSnapshot;
             clone.AvatarSessionSnapshot = AvatarSessionSnapshot;
@@ -158,6 +166,10 @@ namespace Pinder.Core.Conversation
             DateeOutfitDescription = prepared.DateeOutfitDescription;
             DateeHistory = prepared.DateeHistory;
             DateeEmotionalDirectionHistory = prepared.DateeEmotionalDirectionHistory;
+            LastAcceptedDateeResponsePlan = prepared.LastAcceptedDateeResponsePlan;
+            LastAcceptedDateeResponsePlanState = prepared.LastAcceptedDateeResponsePlanState;
+            LastDateeResponseReplayState = prepared.LastDateeResponseReplayState;
+            PendingDateeResponsePlanReplay = prepared.PendingDateeResponsePlanReplay;
             AvatarHistory = prepared.AvatarHistory;
             DateeSessionSnapshot = prepared.DateeSessionSnapshot;
             AvatarSessionSnapshot = prepared.AvatarSessionSnapshot;
@@ -290,6 +302,10 @@ namespace Pinder.Core.Conversation
             History = restoredHistory;
             DateeHistory = restoredDateeHistory;
             DateeEmotionalDirectionHistory = restoredDirectionHistory;
+            LastAcceptedDateeResponsePlan = data.LastAcceptedDateeResponsePlan;
+            LastAcceptedDateeResponsePlanState = data.LastAcceptedDateeResponsePlanState;
+            LastDateeResponseReplayState = data.LastDateeResponseReplayState;
+            PendingDateeResponsePlanReplay = data.DateeResponsePlanReplaySelection;
             AvatarHistory = restoredAvatarHistory;
             DateeSessionSnapshot = data.DateeSessionSnapshot;
             AvatarSessionSnapshot = data.AvatarSessionSnapshot;
@@ -330,6 +346,12 @@ namespace Pinder.Core.Conversation
             HorninessTimeModifier = data.HorninessTimeModifier;
             PendingCritAdvantage = data.PendingCritAdvantage;
             LastStatUsed = data.LastStatUsed;
+            ShadowDisadvantagedStats = data.ShadowDisadvantagedStats == null
+                ? null
+                : new HashSet<StatType>(data.ShadowDisadvantagedStats);
+            CurrentShadowThresholds = data.CurrentShadowThresholds == null
+                ? null
+                : new Dictionary<ShadowStatType, int>(data.CurrentShadowThresholds);
             ActiveWeakness = data.ActiveWeakness;
             ActiveTell = data.ActiveTell;
         }
@@ -340,6 +362,17 @@ namespace Pinder.Core.Conversation
             DateeEmotionalDirectionHistory.Add(summary);
             while (DateeEmotionalDirectionHistory.Count > 2)
                 DateeEmotionalDirectionHistory.RemoveAt(0);
+        }
+
+        internal AcceptedDateeResponsePlanState? TakeDateeResponsePlanForReplay(string deliveredMessage)
+        {
+            DateeResponsePlanReplaySelection? selection = PendingDateeResponsePlanReplay;
+            PendingDateeResponsePlanReplay = null;
+            if (selection == null || LastAcceptedDateeResponsePlanState == null)
+                return null;
+            return selection.Selects(LastAcceptedDateeResponsePlanState, deliveredMessage)
+                ? LastAcceptedDateeResponsePlanState
+                : null;
         }
 
         private static List<CharacterEmotionalDirectionSummary> BuildDirectionHistory(

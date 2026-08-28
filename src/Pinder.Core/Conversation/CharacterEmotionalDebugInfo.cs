@@ -17,7 +17,9 @@ namespace Pinder.Core.Conversation
             string? transitionTarget = null,
             string? transitionStyle = null,
             string? compiledPromptInstruction = null,
-            string? directorInput = null)
+            string? directorInput = null,
+            DateeResponsePlan? responsePlan = null,
+            AcceptedDateeResponsePlanState? responsePlanState = null)
         {
             Direction = direction;
             HungerForIntimacy = hungerForIntimacy;
@@ -27,6 +29,8 @@ namespace Pinder.Core.Conversation
             TransitionStyle = transitionStyle;
             CompiledPromptInstruction = compiledPromptInstruction;
             DirectorInput = directorInput;
+            ResponsePlanState = responsePlanState;
+            ResponsePlan = responsePlanState?.Plan ?? responsePlan;
         }
 
         public CharacterEmotionalDirection? Direction { get; }
@@ -37,6 +41,8 @@ namespace Pinder.Core.Conversation
         public string? TransitionStyle { get; }
         public string? CompiledPromptInstruction { get; }
         public string? DirectorInput { get; }
+        public DateeResponsePlan? ResponsePlan { get; }
+        public AcceptedDateeResponsePlanState? ResponsePlanState { get; }
 
         public CharacterEmotionalDebugInfo WithStatus(
             int hungerForIntimacy,
@@ -50,7 +56,9 @@ namespace Pinder.Core.Conversation
                 TransitionTarget,
                 TransitionStyle,
                 CompiledPromptInstruction,
-                DirectorInput);
+                DirectorInput,
+                ResponsePlan,
+                ResponsePlanState);
         }
     }
 }

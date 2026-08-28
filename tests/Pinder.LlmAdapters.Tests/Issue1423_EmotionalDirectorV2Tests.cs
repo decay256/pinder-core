@@ -99,7 +99,7 @@ namespace Pinder.LlmAdapters.Tests
             Assert.Equal(DateePerformanceStructuredContract.ParserName, violations[0].ParserName);
             Assert.DoesNotContain("REPETITION REPAIR", transport.UserMessages[1], StringComparison.Ordinal);
             Assert.Contains("REPETITION REPAIR", transport.UserMessages[2], StringComparison.Ordinal);
-            Assert.Equal(2, transport.UserMessages.Count(message => message.Contains("Impulse: wants to answer with a precise invitation", StringComparison.Ordinal)));
+            Assert.Equal(2, transport.UserMessages.Count(message => message.Contains("\"schema_version\":\"datee_response_plan.v1\"", StringComparison.Ordinal)));
             Assert.Equal("A new visible reply with a different move.", result.Response.MessageText);
             Assert.DoesNotContain(result.NewHistoryEntries, entry => entry.Content.Contains("that lands softer", StringComparison.OrdinalIgnoreCase));
         }
@@ -156,24 +156,15 @@ namespace Pinder.LlmAdapters.Tests
 
             var direction = Direction();
             PromptTraceResult performance = SessionDocumentBuilder.BuildDateePerformancePromptEx(context, direction, catalog);
-            Assert.Contains("Secondary emotion: none", performance.Text, StringComparison.Ordinal);
-            Assert.Contains("Regulatory state: controlled", performance.Text, StringComparison.Ordinal);
-            Assert.Contains("Activation: 4", performance.Text, StringComparison.Ordinal);
-            Assert.Contains("Trajectory: escalating", performance.Text, StringComparison.Ordinal);
-            Assert.Contains("Core threat/desire: fear of being dismissed", performance.Text, StringComparison.Ordinal);
+            Assert.Contains("\"secondary_emotion\":\"none\"", performance.Text, StringComparison.Ordinal);
+            Assert.Contains("\"regulatory_state\":\"controlled\"", performance.Text, StringComparison.Ordinal);
+            Assert.Contains("\"activation\":4", performance.Text, StringComparison.Ordinal);
+            Assert.Contains("\"trajectory\":\"escalating\"", performance.Text, StringComparison.Ordinal);
             Assert.DoesNotContain("Intensity:", performance.Text, StringComparison.Ordinal);
             Assert.DoesNotContain("Underlying feeling:", performance.Text, StringComparison.Ordinal);
-            foreach (string key in new[]
-            {
-                "CharacterEmotionalDirection.SecondaryEmotion",
-                "CharacterEmotionalDirection.RegulatoryState",
-                "CharacterEmotionalDirection.Activation",
-                "CharacterEmotionalDirection.Trajectory",
-                "CharacterEmotionalDirection.CoreThreatOrDesire",
-            })
-            {
-                Assert.Contains(performance.Spans, span => span.SourceFile == SessionDocumentBuilder.CharacterEmotionalDirectionRuntimeSource && span.Key == key);
-            }
+            Assert.Contains(performance.Spans, span =>
+                span.SourceFile == "runtime:datee-response-plan"
+                && span.Key == DateeResponsePlan.CurrentSchemaVersion);
 
             PromptTraceResult repaired = compiler.CompilePerformanceRepetitionRepairPrompt(performance);
             Assert.Contains("REPETITION REPAIR", repaired.Text, StringComparison.Ordinal);
@@ -194,23 +185,9 @@ namespace Pinder.LlmAdapters.Tests
                 diagnostic.EventName == "LlmTransportSucceeded"
                 && diagnostic.PhaseCode == LlmPhase.OpponentResponse);
             string retainedKeys = terminal.CorrelationHints["prompt_trace_keys"];
-            foreach (string key in new[]
-            {
-                "CharacterEmotionalDirection.PrimaryEmotion",
-                "CharacterEmotionalDirection.SecondaryEmotion",
-                "CharacterEmotionalDirection.RegulatoryState",
-                "CharacterEmotionalDirection.Activation",
-                "CharacterEmotionalDirection.Trajectory",
-                "CharacterEmotionalDirection.CoreThreatOrDesire",
-                "CharacterEmotionalDirection.Interpretation",
-                "CharacterEmotionalDirection.Impulse",
-                "CharacterEmotionalDirection.Restraint",
-                "CharacterEmotionalDirection.ResponsePosture",
-            })
-            {
-                Assert.Contains(key, retainedKeys.Split(','));
-                Assert.True(PromptTraceDiagnosticContract.IsSafeTraceKey(key));
-            }
+            Assert.Contains(DateeResponsePlan.CurrentSchemaVersion, retainedKeys.Split(','));
+            Assert.True(PromptTraceDiagnosticContract.IsSafeTraceKey(DateeResponsePlan.CurrentSchemaVersion));
+            Assert.DoesNotContain("CharacterEmotionalDirection.", retainedKeys, StringComparison.Ordinal);
 
             Assert.DoesNotContain("EmotionalDirector.Intensity", retainedKeys, StringComparison.Ordinal);
             Assert.DoesNotContain("EmotionalDirector.UnderlyingFeeling", retainedKeys, StringComparison.Ordinal);

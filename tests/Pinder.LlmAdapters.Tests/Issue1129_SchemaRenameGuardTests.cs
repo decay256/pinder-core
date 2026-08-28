@@ -19,7 +19,7 @@ namespace Pinder.LlmAdapters.Tests
             PromptCatalogInitializer.Initialize();
 
             PromptTraceResult dialogue = SessionDocumentBuilder.BuildDialogueOptionsPromptEx(MakeDialogueContext());
-            PromptTraceResult datee = SessionDocumentBuilder.BuildDateePromptEx(MakeDateeContext());
+            PromptTraceResult datee = DateePromptTestBuilder.BuildEx(MakeDateeContext());
             PromptTraceResult dialogueSystem = SessionSystemPromptBuilder.BuildPlayerAvatarEx("You are reuben.");
             PromptTraceResult dateeSystem = SessionSystemPromptBuilder.BuildDateeEx("You are velvet.");
 

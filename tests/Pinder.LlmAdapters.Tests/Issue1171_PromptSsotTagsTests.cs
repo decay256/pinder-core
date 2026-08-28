@@ -157,25 +157,25 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_ContainsOpenEngineStateTag()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
             Assert.Contains("<ENGINE_STATE>", result);
         }
 
         [Fact]
         public void DateePrompt_ContainsCloseEngineStateTag()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
             Assert.Contains("</ENGINE_STATE>", result);
         }
 
         [Fact]
         public void DateePrompt_EngineStateTagsAreBalanced()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext());
+            var result = DateePromptTestBuilder.Build(MakeDateeContext());
             int opens = CountOccurrences(result, "<ENGINE_STATE>");
             int closes = CountOccurrences(result, "</ENGINE_STATE>");
-            Assert.Equal(1, opens);
-            Assert.Equal(1, closes);
+            Assert.Equal(2, opens);
+            Assert.Equal(2, closes);
         }
 
         // ── AC3: Injection-fence integrity ────────────────────────────────────
@@ -233,7 +233,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_InterestIsInsideEngineStateBlock()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext(interestAfter: 16));
+            var result = DateePromptTestBuilder.Build(MakeDateeContext(interestAfter: 16));
 
             int engineOpen = result.IndexOf("<ENGINE_STATE>", StringComparison.Ordinal);
             int engineClose = result.IndexOf("</ENGINE_STATE>", StringComparison.Ordinal);
@@ -281,7 +281,7 @@ namespace Pinder.LlmAdapters.Tests
         [Fact]
         public void DateePrompt_EngineStateContainsInterestDelta()
         {
-            var result = SessionDocumentBuilder.BuildDateePrompt(MakeDateeContext(interestBefore: 10, interestAfter: 14));
+            var result = DateePromptTestBuilder.Build(MakeDateeContext(interestBefore: 10, interestAfter: 14));
             // Interest delta is emitted as "Interest moved from 10 to 14 (+4)"
             // This is OUTSIDE the ENGINE_STATE block (post-block in datee prompt)
             Assert.Contains("Interest moved from 10 to 14 (+4)", result);

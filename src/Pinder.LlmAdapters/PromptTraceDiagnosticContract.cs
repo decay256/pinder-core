@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pinder.Core.Characters;
+using Pinder.Core.Conversation;
 
 namespace Pinder.LlmAdapters
 {
@@ -19,6 +20,7 @@ namespace Pinder.LlmAdapters
         public const string LegacyEmotionalDirectorRuntimeSource = "runtime:EmotionalDirectorDirection";
         public const string EmotionalReactionCatalogSource = "data/prompts/emotional-reactions.yaml";
         public const string ConversationHistorySource = "conversation-history";
+        public const string RuntimeDateeResponsePlanSource = "runtime:datee-response-plan";
 
         private static readonly string[] MetadataKeysArray =
         {
@@ -45,6 +47,7 @@ namespace Pinder.LlmAdapters
                 LegacyEmotionalDirectorRuntimeSource,
                 EmotionalReactionCatalogSource,
                 ConversationHistorySource,
+                RuntimeDateeResponsePlanSource,
             };
 
         private static readonly HashSet<string> ExactTraceKeys = BuildExactTraceKeys();
@@ -63,7 +66,9 @@ namespace Pinder.LlmAdapters
             switch (key)
             {
                 case "datee_private_phase":
-                    return value == "director" || value == "performance";
+                    return value == "director"
+                        || value == "performance"
+                        || value == "response-plan-reconciliation";
                 case "prompt_trace_type":
                     return value == "datee" || value == "emotional_director";
                 case "prompt_key":
@@ -134,6 +139,7 @@ namespace Pinder.LlmAdapters
                 "CounterpartName",
                 "CounterpartHfi",
                 "CounterpartTor",
+                DateeResponsePlan.CurrentSchemaVersion,
             };
             return keys;
         }

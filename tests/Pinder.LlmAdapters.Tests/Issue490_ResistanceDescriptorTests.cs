@@ -37,7 +37,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_ContainsFundamentalResistanceRule()
         {
             var ctx = MakeDateeContext(12);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("FUNDAMENTAL RULE: Below Interest 25, you are not won over", result);
         }
@@ -46,7 +46,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_ContainsArchetypeResistanceGuidance()
         {
             var ctx = MakeDateeContext(12);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Your archetype determines HOW you resist, not WHETHER", result);
         }
@@ -60,7 +60,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest1To4_ActiveDisengagement(int interest)
         {
             var ctx = MakeDateeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Active disengagement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -75,7 +75,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest5To9_SkepticalInterest(int interest)
         {
             var ctx = MakeDateeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -90,7 +90,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest10To15_UnstableAgreement(int interest)
         {
             var ctx = MakeDateeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -105,7 +105,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest16To20_DeliberateApproach(int interest)
         {
             var ctx = MakeDateeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -120,7 +120,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest21To24_AlmostConvinced(int interest)
         {
             var ctx = MakeDateeContext(interest);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.Contains($"Current interest: {interest}/25", result);
@@ -132,7 +132,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest25_ResistanceDissolved()
         {
             var ctx = MakeDateeContext(25);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.Contains("Current interest: 25/25", result);
@@ -144,7 +144,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_Interest0_ActiveDisengagement()
         {
             var ctx = MakeDateeContext(0);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Active disengagement", result);
         }
@@ -155,7 +155,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt5_SkepticalNotActive()
         {
             var ctx = MakeDateeContext(5);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Skeptical interest", result);
             Assert.DoesNotContain("Active disengagement", result);
@@ -165,7 +165,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt10_UnstableNotSkeptical()
         {
             var ctx = MakeDateeContext(10);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.DoesNotContain("Skeptical interest", result);
@@ -175,7 +175,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt15_UnstableNotDeliberate()
         {
             var ctx = MakeDateeContext(15);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Unstable agreement", result);
             Assert.DoesNotContain("Deliberate approach", result);
@@ -185,7 +185,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt16_DeliberateNotUnstable()
         {
             var ctx = MakeDateeContext(16);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Deliberate approach", result);
             Assert.DoesNotContain("Unstable agreement", result);
@@ -195,7 +195,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt21_AlmostNotDeliberate()
         {
             var ctx = MakeDateeContext(21);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Almost convinced", result);
             Assert.DoesNotContain("Deliberate approach", result);
@@ -205,7 +205,7 @@ namespace Pinder.LlmAdapters.Tests
         public void BuildDateePrompt_BoundaryAt25_DissolvedNotAlmost()
         {
             var ctx = MakeDateeContext(25);
-            var result = SessionDocumentBuilder.BuildDateePrompt(ctx);
+            var result = DateePromptTestBuilder.Build(ctx);
 
             Assert.Contains("Resistance dissolved", result);
             Assert.DoesNotContain("Almost convinced", result);

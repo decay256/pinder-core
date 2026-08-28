@@ -155,7 +155,7 @@ namespace Pinder.LlmAdapters.Tests
             });
         }
 
-        private sealed class FixedResponseTransport : ILlmTransport
+        private sealed class FixedResponseTransport : ILlmTransport, IStructuredLlmTransport
         {
             private readonly string _response;
             private readonly List<TransportCall> _calls = new List<TransportCall>();
@@ -194,6 +194,20 @@ namespace Pinder.LlmAdapters.Tests
                 }
 
                 return Task.FromResult(_response);
+            }
+
+            public async Task<StructuredLlmResponse> SendStructuredAsync(
+                StructuredLlmRequest request,
+                CancellationToken ct = default)
+            {
+                string response = await SendAsync(
+                    request.SystemPrompt,
+                    request.UserMessage,
+                    request.Temperature,
+                    request.MaxTokens,
+                    request.Phase,
+                    ct).ConfigureAwait(false);
+                return DateePromptTestBuilder.StructuredResponse(request, response);
             }
         }
 

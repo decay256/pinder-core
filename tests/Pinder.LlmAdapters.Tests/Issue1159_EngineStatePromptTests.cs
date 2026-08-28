@@ -26,7 +26,7 @@ namespace Pinder.LlmAdapters.Tests
                 ConversationParticipantRole.PlayerAvatar,
                 PromptFactVisibility.PrivateToSubject,
                 PromptFactSourceKind.Backstory,
-                PromptFactSourceIds.Backstory(avatarId, "age_and_demographics", "bio_lie"),
+                PromptFactSourceIds.Backstory(avatarId, "parental_dynamics", "bio_lie"),
                 resolved.StemText);
             var cognitiveFact = new OwnedPromptFactV1(
                 avatarId,
