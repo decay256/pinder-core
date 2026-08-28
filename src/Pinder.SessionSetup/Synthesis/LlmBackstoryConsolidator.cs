@@ -27,7 +27,7 @@ namespace Pinder.SessionSetup
 
         public async Task<string> GenerateAsync(string characterName, string genderIdentity, string bio,
             string gameSystemPrompt, IReadOnlyList<string> backstoryFragments,
-            IReadOnlyList<string> textingStyleSignals, string stats, CancellationToken cancellationToken = default)
+            string stats, CancellationToken cancellationToken = default)
         {
             var entry = _catalog.Get("backstory_consolidation");
             var userPrompt = PromptCatalog.Substitute(entry.UserTemplate!, new Dictionary<string, string>
@@ -37,7 +37,6 @@ namespace Pinder.SessionSetup
                 { "bio", string.IsNullOrWhiteSpace(bio) ? "(none)" : bio },
                 { "game_system_prompt", gameSystemPrompt },
                 { "backstory_fragments", FormatList(backstoryFragments) },
-                { "texting_style", FormatList(textingStyleSignals) },
                 { "stats", stats }
             });
             var result = (await LlmOptionalTextGeneration.SendRequiredAsync(

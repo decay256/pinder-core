@@ -23,7 +23,4 @@ prompts:
       RAW BACKSTORY FRAGMENTS:
       {backstory_fragments}
 
-      TEXTING STYLE SIGNALS:
-      {texting_style}
-
       Write the consolidated backstory source now.

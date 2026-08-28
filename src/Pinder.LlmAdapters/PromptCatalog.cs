@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Pinder.Core.Characters;
 using Pinder.Core.Prompts;
 using YamlDotNet.RepresentationModel;
@@ -56,6 +57,10 @@ namespace Pinder.LlmAdapters
     public sealed class PromptCatalog
     {
         private readonly IReadOnlyDictionary<string, PromptEntry> _entries;
+
+        private static readonly Regex PlaceholderToken = new Regex(
+            @"\{[A-Za-z_][A-Za-z0-9_]*\}",
+            RegexOptions.CultureInvariant);
 
         private static readonly string[] RuntimeSystemPromptKeys =
         {
@@ -123,7 +128,16 @@ namespace Pinder.LlmAdapters
             "datee-response-plan-performance",
             "diagnosis-repair-json",
             "diagnosis-repair-field",
+            "personality-consolidation-repair-surface-style",
         };
+
+        /// <summary>Runtime inventory independently derived from concrete compiler and lookup call sites.</summary>
+        public static IReadOnlyCollection<string> RuntimeActiveKeys
+            => RuntimeSystemPromptKeys
+                .Concat(RuntimeCompletePromptKeys)
+                .Concat(EmotionalReactionPromptCatalog.RuntimeActiveKeys)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
 
         private static readonly string[] RuntimeCompletePromptKeys =
         {
@@ -164,15 +178,16 @@ namespace Pinder.LlmAdapters
             SystemTokens("engine-datee-block", "datee_name", "interest", "interest_narrative"),
             SystemTokens("datee-response-plan-performance", "response_plan_json"),
             SystemTokens("diagnosis-repair-field", "field"),
+            SystemTokens("personality-consolidation-repair-surface-style", "violation_code"),
             UserTokens("backstory", "characterName", "genderIdentity", "bio", "consolidated_backstory", "consolidated_personality"),
             UserTokens("dramatic_arc", "playerName", "playerStake", "playerBio", "dateeName", "dateeStake", "dateeBio"),
             UserTokens("outfit", "playerName", "playerItems", "dateeName", "dateeItems"),
             UserTokens("stake", "character_profile"),
             UserTokens("backstory_consolidation", "game_system_prompt", "characterName", "genderIdentity",
-                "bio", "stats", "backstory_fragments", "texting_style"),
+                "bio", "stats", "backstory_fragments"),
             UserTokens("bio", "characterName", "genderIdentity", "backstory", "stakes", "diagnosis"),
             UserTokens("personality_consolidation", "game_system_prompt", "characterName", "genderIdentity",
-                "bio", "stats", "personality_fragments", "texting_style"),
+                "bio", "stats", "personality_fragments"),
             UserTokens("diagnosis", "backstory", "stakes"),
             SystemTokens("character_generate", "items_catalogue", "anatomy_parameters"),
             UserTokens("character_generate", "existing_library", "smart_initialization"),
@@ -276,6 +291,19 @@ namespace Pinder.LlmAdapters
                             $"prompt-catalog: key '{contract.Key}' {field} must include required token '{placeholder}'.");
                     }
                 }
+
+                foreach (Match placeholder in PlaceholderToken.Matches(template))
+                {
+                    string token = placeholder.Value.Substring(1, placeholder.Value.Length - 2);
+                    if (!contract.Tokens.Contains(token, StringComparer.Ordinal))
+                    {
+                        string field = contract.UseSystemPrompt ? "system_prompt" : "user_template";
+                        PromptEntry entry = RequireField(contract.Key, contract.UseSystemPrompt);
+                        throw new PromptLayerContractException(
+                            "prompt_contract.placeholder.unresolved", null, PromptContractRoleScope.RoleNeutral,
+                            contract.Key, field, entry.SourceFile, SourceSpan(entry), null);
+                    }
+                }
             }
 
             ValidateDiagnosisPromptContract(
@@ -292,7 +320,47 @@ namespace Pinder.LlmAdapters
                 });
 
             EmotionalReactionPromptCatalog.ValidateRuntimeCatalog(this);
+            PromptContractRegistry.CreateDefault().ValidateCompleteness(this);
+            ValidatePromptLayerOwnership();
         }
+
+        private void ValidatePromptLayerOwnership()
+        {
+            PromptEntry personality = RequireCompleteEntry(
+                "personality_consolidation",
+                "prompt-catalog: missing required key 'personality_consolidation'.");
+            string personalityPrompt = (personality.SystemPrompt ?? string.Empty) + "\n" +
+                (personality.UserTemplate ?? string.Empty);
+            string[] prohibited = { "TEXTING STYLE SIGNALS", "{texting_style}", "texts under pressure" };
+            if (prohibited.Any(phrase =>
+                    personalityPrompt.IndexOf(phrase, StringComparison.OrdinalIgnoreCase) >= 0)
+                || PersonalitySurfaceStyleDetector.FindViolation(personalityPrompt) != null)
+            {
+                throw PersonalitySurfaceStyleFailure(personality);
+            }
+
+            foreach (PromptEntry entry in _entries.Values)
+            {
+                string configured = (entry.SystemPrompt ?? string.Empty) + "\n" +
+                    (entry.UserTemplate ?? string.Empty);
+                if (configured.IndexOf(
+                        "DATEE is another PLAYER's character",
+                        StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    throw new PromptLayerContractException(
+                        "prompt_contract.legacy_datee_ownership", null, PromptContractRoleScope.RoleNeutral,
+                        "active_catalog", "configured_text", entry.SourceFile, SourceSpan(entry), null);
+                }
+            }
+        }
+
+        private static PromptLayerContractException PersonalitySurfaceStyleFailure(PromptEntry entry)
+            => new PromptLayerContractException(
+                "prompt_contract.personality.surface_style", "synthesis", PromptContractRoleScope.RoleNeutral,
+                "personality_consolidation", "configured_text", entry.SourceFile, SourceSpan(entry), null);
+
+        private static string? SourceSpan(PromptEntry entry)
+            => entry.SourceLine.HasValue ? "line:" + entry.SourceLine.Value : null;
 
         private static void ValidateDiagnosisPromptContract(string systemPrompt)
         {
@@ -532,7 +600,8 @@ namespace Pinder.LlmAdapters
                     userTemplate: userTemplate,
                     sourceFile: normalizedPath,
                     temperature: temperature,
-                    maxTokens: maxTokens);
+                    maxTokens: maxTokens,
+                    sourceLine: checked((int)body.Start.Line + 1));
             }
         }
 
@@ -612,14 +681,22 @@ namespace Pinder.LlmAdapters
         public string? SourceFile { get; }
         public double? Temperature { get; }
         public int? MaxTokens { get; }
+        public int? SourceLine { get; }
 
-        public PromptEntry(string? systemPrompt, string? userTemplate, string? sourceFile = null, double? temperature = null, int? maxTokens = null)
+        public PromptEntry(
+            string? systemPrompt,
+            string? userTemplate,
+            string? sourceFile = null,
+            double? temperature = null,
+            int? maxTokens = null,
+            int? sourceLine = null)
         {
             SystemPrompt = systemPrompt;
             UserTemplate = userTemplate;
             SourceFile = sourceFile;
             Temperature = temperature;
             MaxTokens = maxTokens;
+            SourceLine = sourceLine;
         }
     }
 }

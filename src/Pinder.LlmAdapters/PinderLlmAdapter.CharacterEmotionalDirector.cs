@@ -19,6 +19,7 @@ namespace Pinder.LlmAdapters
             public string JournalOperation { get; set; } = string.Empty;
             public string PrivatePhase { get; set; } = string.Empty;
             public string BranchKind { get; set; } = string.Empty;
+            public PromptContractRoleScope RecipientRole { get; set; } = PromptContractRoleScope.Datee;
             public int Turn { get; set; }
             public PromptTraceResult SystemPrompt { get; set; } = null!;
             public PromptTraceResult UserPrompt { get; set; } = null!;
@@ -54,6 +55,7 @@ namespace Pinder.LlmAdapters
                             attemptSystemPrompt);
                         IReadOnlyDictionary<string, string> metadata = invocation.BuildMetadata(
                             attemptSystemPrompt);
+                        ValidatePromptContracts(invocation.Phase, invocation.RecipientRole, systemDocument, userDocument);
                         journal = await StartConversationJournalAttemptAsync(
                                 invocation.JournalOperation,
                                 invocation.Phase,
@@ -97,7 +99,8 @@ namespace Pinder.LlmAdapters
                                     invocation.PrivatePhase,
                                     metadata,
                                     invocation.PriorMessages,
-                                    callId: journal.CallId)
+                                    callId: journal.CallId,
+                                    promptContract: new PromptProviderContract(PromptProviderOperation.EmotionalDirectorStructured, invocation.RecipientRole, new[] { systemDocument, userDocument }, invocation.RoleFactAccessDecisions))
                                 .ConfigureAwait(false);
                             responseText = response.JsonText;
                             try
@@ -134,7 +137,8 @@ namespace Pinder.LlmAdapters
                                     invocation.PrivatePhase,
                                     metadata,
                                     invocation.PriorMessages,
-                                    callId: journal.CallId)
+                                    callId: journal.CallId,
+                                    promptContract: new PromptProviderContract(PromptProviderOperation.EmotionalDirectorUnstructured, invocation.RecipientRole, new[] { systemDocument, userDocument }, invocation.RoleFactAccessDecisions))
                                 .ConfigureAwait(false);
                             direction = ParseCharacterDirectionOrThrow(
                                 responseText,

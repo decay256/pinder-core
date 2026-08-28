@@ -30,6 +30,8 @@ namespace Pinder.LlmAdapters
         /// </summary>
         public PromptCatalog? PromptCatalog { get; set; }
 
+        internal PromptContractRegistry? PromptContractRegistry { get; set; }
+
         /// <summary>
         /// Directory for debug transcript output. When null, debug logging is disabled.
         /// </summary>

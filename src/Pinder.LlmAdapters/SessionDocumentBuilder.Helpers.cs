@@ -60,6 +60,18 @@ namespace Pinder.LlmAdapters
             return "Unmatched \U0001f480";
         }
 
+        internal static string GetInterestBeatThresholdPromptKey(
+            int before,
+            int after,
+            InterestState newState)
+        {
+            if (newState == InterestState.Unmatched) return "interest-beat-unmatched";
+            if (newState == InterestState.DateSecured) return "interest-beat-date-secured";
+            if (after > before && after > 15 && before <= 15) return "interest-beat-above15";
+            if (after < before && after < 8 && before >= 8) return "interest-beat-below8";
+            return "interest-beat-generic";
+        }
+
         private static string GetThresholdInstruction(
             int before,
             int after,
@@ -67,16 +79,9 @@ namespace Pinder.LlmAdapters
             string dateeName,
             PromptCatalog? promptCatalog)
         {
-            if (newState == InterestState.Unmatched)
-                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-unmatched").Replace("{datee_name}", dateeName);
-            if (newState == InterestState.DateSecured)
-                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-date-secured").Replace("{datee_name}", dateeName);
-            if (after > before && after > 15 && before <= 15)
-                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-above15").Replace("{datee_name}", dateeName);
-            if (after < before && after < 8 && before >= 8)
-                return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-below8").Replace("{datee_name}", dateeName);
-
-            return PromptTemplates.GetCatalogString(promptCatalog, "interest-beat-generic").Replace("{datee_name}", dateeName);
+            string key = GetInterestBeatThresholdPromptKey(before, after, newState);
+            return PromptTemplates.GetCatalogString(promptCatalog, key)
+                .Replace("{datee_name}", dateeName);
         }
 
         private static string BuildShadowTaintBlock(Dictionary<ShadowStatType, int>? thresholds)

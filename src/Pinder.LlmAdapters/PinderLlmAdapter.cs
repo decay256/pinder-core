@@ -134,6 +134,7 @@ namespace Pinder.LlmAdapters
                 GameRunPromptDocumentBuilder.BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDef);
             string systemPrompt = systemDocument.Text;
             var journalDocuments = new[] { systemDocument, userDocument };
+            ValidatePromptContracts(LlmPhase.DialogueOptions, PromptContractRoleScope.PlayerAvatar, journalDocuments);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -188,7 +189,8 @@ namespace Pinder.LlmAdapters
                                     context.CurrentTurn,
                                     attemptCancellationToken,
                                     priorMessages: priorMessages,
-                                    callId: diagnosticCallId)
+                                    callId: diagnosticCallId,
+                                    promptContract: new PromptProviderContract(PromptProviderOperation.DialogueOptionsStructured, PromptContractRoleScope.PlayerAvatar, journalDocuments, context.PromptFactAccessDecisions))
                                 .ConfigureAwait(false);
                             providerOutput = structuredResponse.JsonText;
                             rawOutput = structuredResponse.JsonText;
@@ -251,7 +253,8 @@ namespace Pinder.LlmAdapters
                                     context.CurrentTurn,
                                     attemptCancellationToken,
                                     priorMessages: priorMessages,
-                                    callId: diagnosticCallId)
+                                    callId: diagnosticCallId,
+                                    promptContract: new PromptProviderContract(PromptProviderOperation.DialogueOptionsUnstructured, PromptContractRoleScope.PlayerAvatar, journalDocuments, context.PromptFactAccessDecisions))
                                 .ConfigureAwait(false);
                             providerOutput = rawOutput;
 
@@ -497,6 +500,7 @@ namespace Pinder.LlmAdapters
 
                     AnnotatedInvocationDocument dateeDocument =
                         GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(attemptDateePrompt);
+                    ValidatePromptContracts(LlmPhase.OpponentResponse, PromptContractRoleScope.Datee, systemDocument, dateeDocument);
                     string userContent = dateeDocument.Text;
                     var performanceMetadata = BuildDateePerformanceMetadata(
                         attemptDateePrompt,
@@ -557,7 +561,8 @@ namespace Pinder.LlmAdapters
                                     DateePrivatePhasePerformance,
                                     performanceMetadata,
                                     priorMessages,
-                                    callId: journal.CallId)
+                                    callId: journal.CallId,
+                                    promptContract: new PromptProviderContract(PromptProviderOperation.DateePerformance, PromptContractRoleScope.Datee, new[] { systemDocument, dateeDocument }, context.PromptFactAccessDecisions))
                                 .ConfigureAwait(false);
 
                             DateePerformanceStructuredResult parsed = DateePerformanceStructuredContract.ParseStrict(
@@ -667,26 +672,25 @@ namespace Pinder.LlmAdapters
 
             var gameDef = RequireGameDefinition();
 
-            // Build user content with history context
-            var userContent = SessionDocumentBuilder.BuildInterestChangeBeatPrompt(
-                context.DateeName,
-                context.InterestBefore,
-                context.InterestAfter,
-                context.NewState,
-                context.ConversationHistory,
-                context.PlayerName,
-                _options.PromptCatalog);
-
-            // Use datee system prompt if provided, otherwise skip system prompt
-            string systemPrompt = string.IsNullOrWhiteSpace(context.DateePrompt)
-                ? SessionSystemPromptBuilder.BuildDatee("", gameDef)
-                : SessionSystemPromptBuilder.BuildDatee(context.DateePrompt, gameDef);
+            GameRunPromptDocumentPair documents =
+                GameRunPromptDocumentBuilder.BuildInterestChangeBeatDocuments(
+                    context,
+                    gameDef,
+                    _options.PromptCatalog);
+            string userContent = documents.User.Text;
+            string systemPrompt = documents.System.Text;
 
             double temperature = _temperatures.For(PinderLlmAdapterPhase.InterestChangeBeat);
 
             try
             {
-                var responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, temperature, _options.MaxTokens, LlmPhase.InterestChangeBeat, null, ct)
+                var responseText = await SendWithDiagnosticsAsync(
+                        _transport, systemPrompt, userContent, temperature, _options.MaxTokens,
+                        LlmPhase.InterestChangeBeat, null, ct,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.InterestChangeBeat,
+                            PromptContractRoleScope.Datee,
+                            new[] { documents.System, documents.User }))
                     .ConfigureAwait(false);
 
                 return NormalizeSingleTextOutput(
@@ -698,6 +702,10 @@ namespace Pinder.LlmAdapters
             {
                 // Cancellation must propagate — don't bury OCE under the
                 // generic LLM-failure fallback (#794).
+                throw;
+            }
+            catch (PromptLayerContractException)
+            {
                 throw;
             }
             catch (Exception ex)
@@ -743,7 +751,13 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
-                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct)
+                var result = await SendWithDiagnosticsAsync(
+                        _overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens,
+                        LlmPhase.HorninessOverlay, null, ct,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.HorninessOverlay,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { prompt.Documents.System, prompt.Documents.User }))
                     .ConfigureAwait(false);
 
                 var normalized = NormalizeOverlayRewriteResult(result, HorninessOverlayPrompt);
@@ -755,6 +769,10 @@ namespace Pinder.LlmAdapters
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 throw; // #794: cancellation must propagate.
+            }
+            catch (PromptLayerContractException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -801,7 +819,13 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
-                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.TrapOverlay, null, ct)
+                var result = await SendWithDiagnosticsAsync(
+                        _overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens,
+                        LlmPhase.TrapOverlay, null, ct,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.TrapOverlay,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { prompt.Documents.System, prompt.Documents.User }))
                     .ConfigureAwait(false);
 
                 var normalized = NormalizeOverlayRewriteResult(result, TrapOverlayPrompt, trapName);
@@ -813,6 +837,10 @@ namespace Pinder.LlmAdapters
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 throw; // #794: cancellation must propagate.
+            }
+            catch (PromptLayerContractException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -859,7 +887,13 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
-                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.Delivery, null, ct)
+                var result = await SendWithDiagnosticsAsync(
+                        _overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens,
+                        LlmPhase.Delivery, null, ct,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.FailureCorruption,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { prompt.Documents.System, prompt.Documents.User }))
                     .ConfigureAwait(false);
 
                 var normalized = NormalizeOverlayRewriteResult(result, FailureCorruptionPrompt);
@@ -871,6 +905,10 @@ namespace Pinder.LlmAdapters
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 throw; // #794: cancellation must propagate.
+            }
+            catch (PromptLayerContractException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -915,7 +953,13 @@ namespace Pinder.LlmAdapters
             try
             {
                 double temperature = _temperatures.For(PinderLlmAdapterPhase.OverlayRewrite);
-                var result = await SendWithDiagnosticsAsync(_overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens, LlmPhase.ShadowCorruption, null, ct)
+                var result = await SendWithDiagnosticsAsync(
+                        _overlayTransport, prompt.SystemPrompt, prompt.UserContent, temperature, _options.MaxTokens,
+                        LlmPhase.ShadowCorruption, null, ct,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.ShadowCorruption,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { prompt.Documents.System, prompt.Documents.User }))
                     .ConfigureAwait(false);
 
                 var normalized = NormalizeOverlayRewriteResult(result, ShadowCorruptionPrompt);
@@ -927,6 +971,10 @@ namespace Pinder.LlmAdapters
             catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 throw; // #794: cancellation must propagate.
+            }
+            catch (PromptLayerContractException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -983,7 +1031,14 @@ namespace Pinder.LlmAdapters
             bool improvedRejected;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens, LlmPhase.Delivery, null, ct, callId: journalAttempt.CallId)
+                string responseText = await SendWithDiagnosticsAsync(
+                        _transport, systemPrompt, userContent,
+                        _temperatures.For(PinderLlmAdapterPhase.SuccessImprovement), _options.MaxTokens,
+                        LlmPhase.Delivery, null, ct, callId: journalAttempt.CallId,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.SuccessImprovement,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { documents.System, documents.User }))
                     .ConfigureAwait(false);
                 improved = NormalizeSingleTextOutput(
                     responseText,
@@ -1052,7 +1107,14 @@ namespace Pinder.LlmAdapters
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens, LlmPhase.Steering, null, ct, callId: journalAttempt.CallId)
+                string responseText = await SendWithDiagnosticsAsync(
+                        _transport, systemPrompt, userContent,
+                        _temperatures.For(PinderLlmAdapterPhase.SteeringQuestion), _options.MaxTokens,
+                        LlmPhase.Steering, null, ct, callId: journalAttempt.CallId,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.SteeringQuestion,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { documents.System, documents.User }))
                     .ConfigureAwait(false);
                 // #831: thinking-block stripping is a transport decorator; this trims only.
                 question = NormalizeSingleTextOutput(
@@ -1104,7 +1166,14 @@ namespace Pinder.LlmAdapters
             string? question;
             try
             {
-                string responseText = await SendWithDiagnosticsAsync(_transport, systemPrompt, userContent, _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens, LlmPhase.HorninessOverlay, null, ct, callId: journalAttempt.CallId)
+                string responseText = await SendWithDiagnosticsAsync(
+                        _transport, systemPrompt, userContent,
+                        _temperatures.For(PinderLlmAdapterPhase.HorninessQuestion), _options.MaxTokens,
+                        LlmPhase.HorninessOverlay, null, ct, callId: journalAttempt.CallId,
+                        promptContract: new PromptProviderContract(
+                            PromptProviderOperation.HorninessQuestion,
+                            PromptContractRoleScope.PlayerAvatar,
+                            new[] { documents.System, documents.User }))
                     .ConfigureAwait(false);
                 question = NormalizeSingleTextOutput(
                     responseText,
@@ -1502,24 +1571,16 @@ namespace Pinder.LlmAdapters
                 ["archetype_directive"] = archetypeDirective?.Trim() ?? string.Empty,
             };
 
-            string userTemplate = !string.IsNullOrWhiteSpace(archetypeDirective) && template.UserWithArchetype != null
-                ? template.UserWithArchetype
-                : template.User;
-
-            return new RenderedOverlayPrompt(
-                RenderOverlayTemplate(template.System, values),
-                RenderOverlayTemplate(userTemplate, values));
-        }
-
-        private static string RenderOverlayTemplate(string template, IReadOnlyDictionary<string, string> values)
-        {
-            string rendered = template;
-            foreach (var pair in values)
-            {
-                rendered = rendered.Replace("{" + pair.Key + "}", pair.Value);
-            }
-
-            return rendered.Trim();
+            bool useArchetypeTemplate =
+                !string.IsNullOrWhiteSpace(archetypeDirective)
+                && template.UserWithArchetype != null;
+            GameRunPromptDocumentPair documents =
+                GameRunPromptDocumentBuilder.BuildOverlayDocuments(
+                    overlayType,
+                    template,
+                    useArchetypeTemplate,
+                    values);
+            return new RenderedOverlayPrompt(documents);
         }
 
         private static string RenderRequiredTemplate(
@@ -1685,8 +1746,10 @@ namespace Pinder.LlmAdapters
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
             IReadOnlyList<ConversationMessage>? priorMessages = null,
-            string? callId = null)
+            string? callId = null,
+            PromptProviderContract? promptContract = null)
         {
+            ValidateProviderPromptContracts(phase, request.SystemPrompt, request.UserMessage, promptContract, request.SchemaName + ":" + request.SchemaVersion);
             var sink = GetDiagnosticSink();
             callId = string.IsNullOrWhiteSpace(callId)
                 ? OperationalDiagnostics.CreateCallId()
@@ -1816,8 +1879,10 @@ namespace Pinder.LlmAdapters
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
             IReadOnlyList<ConversationMessage>? priorMessages = null,
-            string? callId = null)
+            string? callId = null,
+            PromptProviderContract? promptContract = null)
         {
+            ValidateProviderPromptContracts(phase, systemPrompt, userContent, promptContract, requestSchema: null);
             var sink = GetDiagnosticSink();
             callId = string.IsNullOrWhiteSpace(callId)
                 ? OperationalDiagnostics.CreateCallId()
@@ -2005,15 +2070,14 @@ namespace Pinder.LlmAdapters
 
         private sealed class RenderedOverlayPrompt
         {
-            public RenderedOverlayPrompt(string systemPrompt, string userContent)
+            public RenderedOverlayPrompt(GameRunPromptDocumentPair documents)
             {
-                SystemPrompt = systemPrompt;
-                UserContent = userContent;
+                Documents = documents ?? throw new ArgumentNullException(nameof(documents));
             }
 
-            public string SystemPrompt { get; }
-
-            public string UserContent { get; }
+            public GameRunPromptDocumentPair Documents { get; }
+            public string SystemPrompt => Documents.System.Text;
+            public string UserContent => Documents.User.Text;
         }
 
         private sealed class OverlayRewriteResult

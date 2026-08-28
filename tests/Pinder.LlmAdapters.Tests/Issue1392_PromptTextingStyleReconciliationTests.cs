@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Pinder.Core.Conversation;
 using Pinder.Core.Diagnostics.AgentJournals;
+using Pinder.Core.Interfaces;
 using Pinder.Core.Prompts;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
@@ -160,7 +161,7 @@ namespace Pinder.LlmAdapters.Tests
         }
 
         [Fact]
-        public void SessionDocuments_AttributeConfiguredFramingAndRuntimeStylesHonestly()
+        public void Compiled_DATEE_golden_has_one_runtime_style_authority_with_honest_provenance()
         {
             PromptCatalog catalog = PromptCatalog.LoadFromDirectory(Path.Combine(RepoRoot(), "data", "prompts"));
             var history = new List<(string Sender, string Text)> { ("P", "hello"), ("D", "hey") };
@@ -196,6 +197,18 @@ namespace Pinder.LlmAdapters.Tests
 
             AssertStyleRanges(player, "DialogueContext.PlayerTextingStyle");
             AssertStyleRanges(datee, "DateeContext.DateeTextingStyle");
+            Assert.Equal(1, datee.Text.Split(new[] { Style }, StringSplitOptions.None).Length - 1);
+            Assert.Contains("\"schema_version\":\"datee_response_plan.v1\"", datee.Text, StringComparison.Ordinal);
+            StructuredLlmRequest performanceRequest = DateePerformanceStructuredContract.CreateRequest(
+                "datee system", datee.Text, 0.7, 400, 2,
+                new Dictionary<string, string>());
+            Assert.Equal(DateePerformanceStructuredContract.SchemaName, performanceRequest.SchemaName);
+            Assert.Equal("datee_performance.v1", performanceRequest.SchemaVersion);
+            Assert.DoesNotContain("Cognitive subtext:", datee.Text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Transition style:", datee.Text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("Response posture:", datee.Text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("EMOTIONAL REACTION DIRECTION", datee.Text, StringComparison.OrdinalIgnoreCase);
+            Assert.DoesNotContain("[SIGNALS]", datee.Text, StringComparison.OrdinalIgnoreCase);
             AssertNoMandatoryStyleLanguage(player.Text);
             AssertNoMandatoryStyleLanguage(datee.Text);
         }

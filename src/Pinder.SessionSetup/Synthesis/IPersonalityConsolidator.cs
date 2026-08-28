@@ -12,7 +12,6 @@ namespace Pinder.SessionSetup
             string bio,
             string gameSystemPrompt,
             IReadOnlyList<string> personalityFragments,
-            IReadOnlyList<string> textingStyleSignals,
             string stats,
             CancellationToken cancellationToken = default);
     }

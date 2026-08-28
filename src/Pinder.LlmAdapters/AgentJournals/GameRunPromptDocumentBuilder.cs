@@ -28,6 +28,7 @@ namespace Pinder.LlmAdapters
 
     public static class GameRunPromptDocumentBuilder
     {
+        private const string ReconciliationPromptKey = "datee-response-plan-reconciliation";
         private static readonly IPromptTraceSourceIdentityResolver TraceSourceResolver =
             GameRunPromptSourceIdentityResolver.Instance;
 
@@ -101,6 +102,73 @@ namespace Pinder.LlmAdapters
                 "datee-session-user-prompt");
         }
 
+        public static GameRunPromptDocumentPair BuildInterestChangeBeatDocuments(
+            InterestChangeContext context,
+            GameDefinition gameDefinition,
+            PromptCatalog? promptCatalog)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (gameDefinition == null) throw new ArgumentNullException(nameof(gameDefinition));
+
+            PromptTraceResult userTrace = SessionDocumentBuilder.BuildInterestChangeBeatPromptEx(
+                context.DateeName,
+                context.InterestBefore,
+                context.InterestAfter,
+                context.NewState,
+                context.ConversationHistory,
+                context.PlayerName,
+                promptCatalog);
+            return new GameRunPromptDocumentPair(
+                BuildDateeSystemDocument(context.DateePrompt ?? string.Empty, gameDefinition),
+                FromTrace(
+                    userTrace,
+                    "interest-change-beat.user",
+                    AgentJournalInputRole.User,
+                    "interest-change-beat-user-prompt"));
+        }
+
+        internal static GameRunPromptDocumentPair BuildOverlayDocuments(
+            string overlayType,
+            OverlayPromptTemplate template,
+            bool useArchetypeTemplate,
+            IReadOnlyDictionary<string, string> values)
+        {
+            if (string.IsNullOrWhiteSpace(overlayType))
+                throw new ArgumentException("Overlay type is required.", nameof(overlayType));
+            if (template == null) throw new ArgumentNullException(nameof(template));
+            if (values == null) throw new ArgumentNullException(nameof(values));
+
+            string userField = useArchetypeTemplate ? "user_with_archetype" : "user";
+            string userTemplate = useArchetypeTemplate
+                ? template.UserWithArchetype!
+                : template.User;
+            IReadOnlyDictionary<string, AnnotatedInvocationDocument> substitutions =
+                RuntimeSubstitutions(values);
+            string keyPrefix = "overlay_prompt_templates." + overlayType + ".";
+
+            AnnotatedInvocationDocument system = new AnnotatedInvocationDocumentBuilder()
+                .AppendTemplate(
+                    template.System,
+                    substitutions,
+                    DeliverySource(keyPrefix + "system", template.System))
+                .Trim()
+                .Build(
+                    "overlay." + overlayType + ".system",
+                    AgentJournalInputRole.System,
+                    "overlay-system-prompt");
+            AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
+                .AppendTemplate(
+                    userTemplate,
+                    substitutions,
+                    DeliverySource(keyPrefix + userField, userTemplate))
+                .Trim()
+                .Build(
+                    "overlay." + overlayType + ".user",
+                    AgentJournalInputRole.User,
+                    "overlay-user-prompt");
+            return new GameRunPromptDocumentPair(system, user);
+        }
+
         public static AnnotatedInvocationDocument BuildEmotionalDirectorSystemDocument(
             PromptTraceResult trace)
             => FromTrace(
@@ -161,6 +229,35 @@ namespace Pinder.LlmAdapters
                     "dramatic-arc-user-prompt");
 
             return new GameRunPromptDocumentPair(system, user);
+        }
+
+        public static GameRunPromptDocumentPair BuildReconciliationDocuments(
+            PromptEntry entry,
+            IReadOnlyDictionary<string, string> values)
+        {
+            string systemTemplate = RequireConfiguredPrompt(
+                entry.SystemPrompt, ReconciliationPromptKey + ".system_prompt", nameof(BuildReconciliationDocuments)).Trim();
+            string userTemplate = RequireConfiguredPrompt(
+                entry.UserTemplate, ReconciliationPromptKey + ".user_template", nameof(BuildReconciliationDocuments)).Trim();
+            IReadOnlyDictionary<string, AnnotatedInvocationDocument> substitutions = RuntimeSubstitutions(values);
+
+            return new GameRunPromptDocumentPair(
+                BuildReconciliationDocument(systemTemplate, substitutions, entry.SourceFile, "system_prompt", AgentJournalInputRole.System),
+                BuildReconciliationDocument(userTemplate, substitutions, entry.SourceFile, "user_template", AgentJournalInputRole.User));
+        }
+
+        private static AnnotatedInvocationDocument BuildReconciliationDocument(
+            string template, IReadOnlyDictionary<string, AnnotatedInvocationDocument> values,
+            string? sourceFile, string sourceField, AgentJournalInputRole role)
+        {
+            string side = role == AgentJournalInputRole.System ? "system" : "user";
+            return new AnnotatedInvocationDocumentBuilder()
+                .AppendTemplate(
+                    template, values,
+                    CatalogSource(sourceFile, ReconciliationPromptKey + "." + sourceField, template))
+                .Build(
+                    ReconciliationPromptKey + "." + side, role,
+                    ReconciliationPromptKey + "-" + side);
         }
 
         public static GameRunPromptDocumentPair? BuildSuccessImprovementDocuments(
