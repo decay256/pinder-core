@@ -122,8 +122,10 @@ namespace Pinder.LlmAdapters
                 "prompt-catalog: missing required runtime prompt key 'datee-response-plan-reconciliation'. The yaml file is incomplete or missing.");
             DateeResponsePlan candidate = compilation.Plan!;
             string candidateJson = DateeResponsePlanJson.Serialize(candidate);
-            string userPrompt = RenderReconciliationUserPrompt(prompt, compilation, candidateJson);
-            string systemPrompt = prompt.SystemPrompt!.Trim();
+            GameRunPromptDocumentPair promptDocuments = GameRunPromptDocumentBuilder.BuildReconciliationDocuments(
+                prompt, ReconciliationValues(compilation, candidateJson));
+            string userPrompt = promptDocuments.User.Text;
+            string systemPrompt = promptDocuments.System.Text;
             int maxAttempts = GetContractViolationAttemptLimit();
             LlmContractException? finalRejection = null;
 
@@ -137,8 +139,8 @@ namespace Pinder.LlmAdapters
                         attempt,
                         maxAttempts,
                         "datee-plan-reconciler",
-                        BuildRuntimeJournalDocument("datee-response-plan-reconciliation-system", systemPrompt),
-                        BuildRuntimeJournalDocument("datee-response-plan-reconciliation-user", userPrompt),
+                        promptDocuments.System,
+                        promptDocuments.User,
                         session: dateeSession,
                         correlationContext: context.AgentJournalContext,
                         roleFactAccessDecisions: context.PromptFactAccessDecisions,
@@ -159,7 +161,8 @@ namespace Pinder.LlmAdapters
                             DateePrivatePhaseResponsePlan,
                             metadata,
                             priorMessages: null,
-                            callId: journal.CallId)
+                            callId: journal.CallId,
+                            promptContract: new PromptProviderContract(PromptContractRoleScope.Datee, new[] { promptDocuments.System, promptDocuments.User }, context.PromptFactAccessDecisions, request.SchemaName + ":" + request.SchemaVersion))
                         .ConfigureAwait(false);
                     DateeResponsePlan parsed = DateeResponsePlanStructuredContract.ParseStrict(
                         response.JsonText, context.CurrentTurn, response.Provider, response.Model);
@@ -232,8 +235,7 @@ namespace Pinder.LlmAdapters
                 turnId: context.CurrentTurn);
         }
 
-        private static string RenderReconciliationUserPrompt(
-            PromptEntry prompt,
+        private static IReadOnlyDictionary<string, string> ReconciliationValues(
             DateeResponsePlanCompilationResult compilation,
             string candidateJson)
         {
@@ -243,14 +245,13 @@ namespace Pinder.LlmAdapters
                 ? "none"
                 : string.Join(" | ", compilation.AllowedStageOrders.Select(order =>
                     string.Join("->", order.Select(stage => DateeResponsePlanJson.Token(stage.Movement) + (stage.OwnsDisclosure ? "[disclosure]" : string.Empty)))));
-            string rendered = prompt.UserTemplate!
-                .Replace("{candidate_plan_json}", candidateJson)
-                .Replace("{allowed_movements}", allowedMovements)
-                .Replace("{allowed_conversational_moves}", allowedMoves)
-                .Replace("{allowed_stage_orders}", stageOrders);
-            if (rendered.Contains("{candidate_plan_json}") || rendered.Contains("{allowed_"))
-                throw new InvalidOperationException("Response-plan reconciliation prompt contains unresolved required tokens.");
-            return rendered.Trim();
+            return new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["candidate_plan_json"] = candidateJson,
+                ["allowed_movements"] = allowedMovements,
+                ["allowed_conversational_moves"] = allowedMoves,
+                ["allowed_stage_orders"] = stageOrders,
+            };
         }
 
         private static IReadOnlyDictionary<string, string> BuildResponsePlanMetadata(

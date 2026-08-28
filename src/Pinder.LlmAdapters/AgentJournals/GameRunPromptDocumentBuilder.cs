@@ -8,7 +8,6 @@ using Pinder.Core.Prompts;
 using Pinder.Core.Stats;
 using Pinder.Core.Text;
 using Pinder.LlmAdapters.AgentJournals;
-
 namespace Pinder.LlmAdapters
 {
     public sealed class GameRunPromptDocumentPair
@@ -20,17 +19,14 @@ namespace Pinder.LlmAdapters
             System = system ?? throw new ArgumentNullException(nameof(system));
             User = user ?? throw new ArgumentNullException(nameof(user));
         }
-
         public AnnotatedInvocationDocument System { get; }
-
         public AnnotatedInvocationDocument User { get; }
     }
-
     public static class GameRunPromptDocumentBuilder
     {
+        const string PlanKey="datee-response-plan-reconciliation";
         private static readonly IPromptTraceSourceIdentityResolver TraceSourceResolver =
             GameRunPromptSourceIdentityResolver.Instance;
-
         public static AnnotatedInvocationDocument BuildPlayerAvatarSystemDocument(
             string playerAvatarPrompt,
             GameDefinition gameDefinition)
@@ -44,7 +40,6 @@ namespace Pinder.LlmAdapters
                 AgentJournalInputRole.System,
                 "session-system-prompt");
         }
-
         public static AnnotatedInvocationDocument BuildDateeSystemDocument(
             string dateePrompt,
             GameDefinition gameDefinition)
@@ -58,7 +53,6 @@ namespace Pinder.LlmAdapters
                 AgentJournalInputRole.System,
                 "session-system-prompt");
         }
-
         public static AnnotatedInvocationDocument BuildDialogueOptionsUserDocument(
             DialogueContext context,
             PromptCatalog? promptCatalog)
@@ -72,7 +66,6 @@ namespace Pinder.LlmAdapters
                 AgentJournalInputRole.User,
                 "dialogue-options-user-prompt");
         }
-
         internal static AnnotatedInvocationDocument BuildDialogueOptionsSessionUserDocument(
             DialogueContext context,
             PromptCatalog? promptCatalog)
@@ -86,7 +79,6 @@ namespace Pinder.LlmAdapters
                 AgentJournalInputRole.User,
                 "dialogue-options-user-prompt");
         }
-
         public static AnnotatedInvocationDocument BuildDateeUserDocument(
             DateeContext context,
             PromptCatalog? promptCatalog)
@@ -100,7 +92,6 @@ namespace Pinder.LlmAdapters
                 AgentJournalInputRole.User,
                 "datee-session-user-prompt");
         }
-
         public static AnnotatedInvocationDocument BuildEmotionalDirectorSystemDocument(
             PromptTraceResult trace)
             => FromTrace(
@@ -108,7 +99,6 @@ namespace Pinder.LlmAdapters
                 "datee.emotional-director.system",
                 AgentJournalInputRole.System,
                 "emotional-director-system-prompt");
-
         public static AnnotatedInvocationDocument BuildEmotionalDirectorUserDocument(
             PromptTraceResult trace)
             => FromTrace(
@@ -116,7 +106,6 @@ namespace Pinder.LlmAdapters
                 "datee.emotional-director.user",
                 AgentJournalInputRole.User,
                 "emotional-director-user-prompt");
-
         public static AnnotatedInvocationDocument BuildDateePerformanceDocument(
             PromptTraceResult trace)
             => FromTrace(
@@ -124,7 +113,6 @@ namespace Pinder.LlmAdapters
                 "datee.performance",
                 AgentJournalInputRole.User,
                 "datee-performance-prompt");
-
         public static GameRunPromptDocumentPair BuildDramaticArcDocuments(
             PromptEntry entry,
             IReadOnlyDictionary<string, string> values)
@@ -139,7 +127,6 @@ namespace Pinder.LlmAdapters
                 entry.UserTemplate,
                 "dramatic_arc.user_template",
                 nameof(BuildDramaticArcDocuments));
-
             var substitutions = RuntimeSubstitutions(values);
             AnnotatedInvocationDocument system = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
@@ -159,10 +146,20 @@ namespace Pinder.LlmAdapters
                     "game.setup.dramatic-arc.user",
                     AgentJournalInputRole.User,
                     "dramatic-arc-user-prompt");
-
             return new GameRunPromptDocumentPair(system, user);
         }
-
+        public static GameRunPromptDocumentPair BuildReconciliationDocuments(PromptEntry entry, IReadOnlyDictionary<string, string> values)
+        {
+            string system = RequireConfiguredPrompt(entry.SystemPrompt, PlanKey + ".system_prompt", "reconciliation").Trim();
+            string user = RequireConfiguredPrompt(entry.UserTemplate, PlanKey + ".user_template", "reconciliation").Trim();
+            var runtime = RuntimeSubstitutions(values);
+            return new GameRunPromptDocumentPair(BuildReconciliation(system, runtime, entry.SourceFile, "system_prompt", AgentJournalInputRole.System), BuildReconciliation(user, runtime, entry.SourceFile, "user_template", AgentJournalInputRole.User));
+        }
+        private static AnnotatedInvocationDocument BuildReconciliation(string template, IReadOnlyDictionary<string, AnnotatedInvocationDocument> values, string? source, string field, AgentJournalInputRole role)
+        {
+            string side = role == AgentJournalInputRole.System ? "system" : "user";
+            return new AnnotatedInvocationDocumentBuilder().AppendTemplate(template, values, CatalogSource(source, PlanKey + "." + field, template)).Build(PlanKey + "." + side, role, PlanKey + "-" + side);
+        }
         public static GameRunPromptDocumentPair? BuildSuccessImprovementDocuments(
             SuccessImprovementContext context,
             StatDeliveryInstructions? instructions,
@@ -171,13 +168,11 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (gameDefinition == null) throw new ArgumentNullException(nameof(gameDefinition));
-
             string? template = instructions?.Get(context.Stat, context.TierKey);
             if (string.IsNullOrWhiteSpace(template))
             {
                 return null;
             }
-
             var instructionValues = new Dictionary<string, AnnotatedInvocationDocument>(StringComparer.OrdinalIgnoreCase)
             {
                 ["player_name"] = RuntimeFragment(context.PlayerName, "SuccessImprovementContext.PlayerName"),
@@ -190,7 +185,6 @@ namespace Pinder.LlmAdapters
                 DeliverySource(
                     "delivery_instructions." + StatKey(context.Stat) + "." + context.TierKey,
                     template));
-
             string envelope = RequireConfiguredPrompt(
                 instructions?.GetSuccessImprovementPromptTemplate(),
                 "success_improvement_prompt_template",
@@ -204,7 +198,6 @@ namespace Pinder.LlmAdapters
                 "delivered_message",
                 "conversation_history",
                 "instruction");
-
             var values = new Dictionary<string, AnnotatedInvocationDocument>(StringComparer.OrdinalIgnoreCase)
             {
                 ["player_name"] = RuntimeFragment(context.PlayerName, "SuccessImprovementContext.PlayerName"),
@@ -220,7 +213,6 @@ namespace Pinder.LlmAdapters
                     "SuccessImprovementContext.PlayerTextingStyle",
                     promptCatalog),
             };
-
             AnnotatedInvocationDocument user = new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(
                     envelope,
@@ -235,13 +227,11 @@ namespace Pinder.LlmAdapters
                 BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDefinition),
                 user);
         }
-
         public static AnnotatedInvocationDocument BuildSuccessImprovementSkippedDocument(
             string validationCode)
         {
             if (string.IsNullOrWhiteSpace(validationCode))
                 throw new ArgumentException("Validation code is required.", nameof(validationCode));
-
             return new AnnotatedInvocationDocumentBuilder()
                 .AppendRuntimeGenerated(
                     validationCode,
@@ -251,7 +241,6 @@ namespace Pinder.LlmAdapters
                     AgentJournalInputRole.User,
                     "delivery-success-improvement-skipped");
         }
-
         public static GameRunPromptDocumentPair BuildSteeringQuestionDocuments(
             SteeringContext context,
             GameDefinition gameDefinition,
@@ -259,7 +248,6 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (gameDefinition == null) throw new ArgumentNullException(nameof(gameDefinition));
-
             string template = RequireConfiguredPrompt(
                 gameDefinition.SteeringPrompt,
                 "steering_prompt",
@@ -270,7 +258,6 @@ namespace Pinder.LlmAdapters
                 nameof(BuildSteeringQuestionDocuments),
                 "delivered_message",
                 "conversation_history");
-
             var values = new Dictionary<string, AnnotatedInvocationDocument>(StringComparer.OrdinalIgnoreCase)
             {
                 ["player_name"] = RuntimeFragment(context.PlayerName, "SteeringContext.PlayerName"),
@@ -292,12 +279,10 @@ namespace Pinder.LlmAdapters
                     "delivery.steering-question.user",
                     AgentJournalInputRole.User,
                     "delivery-steering-question-user-prompt");
-
             return new GameRunPromptDocumentPair(
                 BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDefinition),
                 user);
         }
-
         public static GameRunPromptDocumentPair BuildHorninessQuestionDocuments(
             HorninessQuestionContext context,
             GameDefinition gameDefinition,
@@ -305,7 +290,6 @@ namespace Pinder.LlmAdapters
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (gameDefinition == null) throw new ArgumentNullException(nameof(gameDefinition));
-
             string template = RequireConfiguredPrompt(
                 gameDefinition.HorninessPrompt,
                 "horniness_prompt",
@@ -316,7 +300,6 @@ namespace Pinder.LlmAdapters
                 nameof(BuildHorninessQuestionDocuments),
                 "delivered_message",
                 "conversation_history");
-
             var values = new Dictionary<string, AnnotatedInvocationDocument>(StringComparer.OrdinalIgnoreCase)
             {
                 ["player_name"] = RuntimeFragment(context.PlayerName, "HorninessQuestionContext.PlayerName"),
@@ -338,12 +321,10 @@ namespace Pinder.LlmAdapters
                     "delivery.horniness-question.user",
                     AgentJournalInputRole.User,
                     "delivery-horniness-question-user-prompt");
-
             return new GameRunPromptDocumentPair(
                 BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDefinition),
                 user);
         }
-
         private static AnnotatedInvocationDocument FromTrace(
             PromptTraceResult trace,
             string documentId,
@@ -355,7 +336,6 @@ namespace Pinder.LlmAdapters
                 role,
                 kind,
                 TraceSourceResolver);
-
         private static AnnotatedInvocationDocument BuildTemplateFragment(
             string template,
             IReadOnlyDictionary<string, AnnotatedInvocationDocument> values,
@@ -363,7 +343,6 @@ namespace Pinder.LlmAdapters
             => new AnnotatedInvocationDocumentBuilder()
                 .AppendTemplate(template, values, source)
                 .Build("fragment." + source.KeyPath.Replace(':', '.').Replace('_', '-'), AgentJournalInputRole.User, "template-fragment");
-
         private static IReadOnlyDictionary<string, AnnotatedInvocationDocument> RuntimeSubstitutions(
             IReadOnlyDictionary<string, string> values)
         {
@@ -372,15 +351,12 @@ namespace Pinder.LlmAdapters
             {
                 substitutions[pair.Key] = RuntimeFragment(pair.Value, pair.Key);
             }
-
             return substitutions;
         }
-
         private static AnnotatedInvocationDocument RuntimeFragment(string? value, string keyPath)
             => new AnnotatedInvocationDocumentBuilder()
                 .AppendRuntimeGenerated(value ?? string.Empty, keyPath)
                 .Build("fragment." + keyPath.Replace(':', '.').Replace('_', '-'), AgentJournalInputRole.User, "runtime-fragment");
-
         private static AnnotatedInvocationDocument BuildTextingStyleBlockDocument(
             string? textingStyle,
             string runtimeKeyPath,
@@ -390,7 +366,6 @@ namespace Pinder.LlmAdapters
             {
                 return RuntimeFragment(string.Empty, runtimeKeyPath);
             }
-
             string runtimeFraming = PromptTemplates.GetCatalogString(
                 promptCatalog,
                 PromptBuilder.TextingStyleRuntimeFramingKey).Trim();
@@ -409,7 +384,6 @@ namespace Pinder.LlmAdapters
                     AgentJournalInputRole.User,
                     "texting-style-fragment");
         }
-
         private static AnnotatedInvocationDocument FormatConversationHistoryDocument(
             IEnumerable<(string Sender, string Text)> history,
             PromptCatalog? promptCatalog)
@@ -423,13 +397,11 @@ namespace Pinder.LlmAdapters
                 {
                     builder.AppendRuntimeGenerated(Environment.NewLine, "conversation_history.separator");
                 }
-
                 hasEntries = true;
                 builder.AppendRuntimeGenerated(
                     sender + ": " + text,
                     "conversation_history.entry");
             }
-
             if (!hasEntries)
             {
                 string empty = PromptTemplates.GetCatalogString(promptCatalog, "conversation-history-empty");
@@ -440,17 +412,14 @@ namespace Pinder.LlmAdapters
                         "conversation-history-empty",
                         empty));
             }
-
             return builder.Build(
                 "fragment.conversation-history",
                 AgentJournalInputRole.User,
                 "conversation-history-fragment");
         }
-
         private static string GetTemplateSource(PromptCatalog? promptCatalog, string key)
             => PromptCatalog.ResolveCatalogOrThrow(promptCatalog).TryGet(key)?.SourceFile
                 ?? "data/prompts/templates.yaml";
-
         private static string RequireConfiguredPrompt(string? value, string key, string methodName)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -458,10 +427,8 @@ namespace Pinder.LlmAdapters
                 throw new InvalidOperationException(
                     "Production path '" + methodName + "' is missing configured prompt '" + key + "'.");
             }
-
             return value;
         }
-
         private static void RequireTokens(
             string template,
             string key,
@@ -478,28 +445,24 @@ namespace Pinder.LlmAdapters
                 }
             }
         }
-
         private static AgentJournalSourceIdentity CatalogSource(string? sourceFile, string keyPath, string text)
             => new AgentJournalSourceIdentity(
                 AgentJournalSourceKind.Configuration,
                 GameRunPromptSourceIdentityResolver.Instance.ResolveRequired(sourceFile),
                 keyPath,
                 contentHash: ComputeSha256(text));
-
         private static AgentJournalSourceIdentity DeliverySource(string keyPath, string text)
             => new AgentJournalSourceIdentity(
                 AgentJournalSourceKind.Configuration,
                 "delivery.instructions",
                 keyPath,
                 contentHash: ComputeSha256(text));
-
         private static AgentJournalSourceIdentity GameDefinitionSource(string keyPath, string text)
             => new AgentJournalSourceIdentity(
                 AgentJournalSourceKind.Configuration,
                 "game.definition",
                 keyPath,
                 contentHash: ComputeSha256(text));
-
         private static string ComputeSha256(string value)
         {
             using (SHA256 sha = SHA256.Create())
@@ -510,11 +473,9 @@ namespace Pinder.LlmAdapters
                 {
                     builder.Append(hash[i].ToString("x2"));
                 }
-
                 return builder.ToString();
             }
         }
-
         private static string StatKey(StatType stat)
         {
             switch (stat)

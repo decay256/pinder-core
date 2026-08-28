@@ -134,6 +134,7 @@ namespace Pinder.LlmAdapters
                 GameRunPromptDocumentBuilder.BuildPlayerAvatarSystemDocument(context.PlayerAvatarPrompt, gameDef);
             string systemPrompt = systemDocument.Text;
             var journalDocuments = new[] { systemDocument, userDocument };
+            ValidatePromptContracts(LlmPhase.DialogueOptions, PromptContractRoleScope.PlayerAvatar, journalDocuments);
             double temperature = _temperatures.For(PinderLlmAdapterPhase.DialogueOptions);
 
             int maxAttempts = GetContractViolationAttemptLimit();
@@ -188,7 +189,8 @@ namespace Pinder.LlmAdapters
                                     context.CurrentTurn,
                                     attemptCancellationToken,
                                     priorMessages: priorMessages,
-                                    callId: diagnosticCallId)
+                                    callId: diagnosticCallId,
+                                    promptContract: new PromptProviderContract(PromptContractRoleScope.PlayerAvatar, journalDocuments, context.PromptFactAccessDecisions, request.SchemaName + ":" + request.SchemaVersion))
                                 .ConfigureAwait(false);
                             providerOutput = structuredResponse.JsonText;
                             rawOutput = structuredResponse.JsonText;
@@ -251,7 +253,8 @@ namespace Pinder.LlmAdapters
                                     context.CurrentTurn,
                                     attemptCancellationToken,
                                     priorMessages: priorMessages,
-                                    callId: diagnosticCallId)
+                                    callId: diagnosticCallId,
+                                    promptContract: new PromptProviderContract(PromptContractRoleScope.PlayerAvatar, journalDocuments, context.PromptFactAccessDecisions))
                                 .ConfigureAwait(false);
                             providerOutput = rawOutput;
 
@@ -497,6 +500,7 @@ namespace Pinder.LlmAdapters
 
                     AnnotatedInvocationDocument dateeDocument =
                         GameRunPromptDocumentBuilder.BuildDateePerformanceDocument(attemptDateePrompt);
+                    ValidatePromptContracts(LlmPhase.OpponentResponse, PromptContractRoleScope.Datee, systemDocument, dateeDocument);
                     string userContent = dateeDocument.Text;
                     var performanceMetadata = BuildDateePerformanceMetadata(
                         attemptDateePrompt,
@@ -557,7 +561,8 @@ namespace Pinder.LlmAdapters
                                     DateePrivatePhasePerformance,
                                     performanceMetadata,
                                     priorMessages,
-                                    callId: journal.CallId)
+                                    callId: journal.CallId,
+                                    promptContract: new PromptProviderContract(PromptContractRoleScope.Datee, new[] { systemDocument, dateeDocument }, context.PromptFactAccessDecisions, request.SchemaName + ":" + request.SchemaVersion))
                                 .ConfigureAwait(false);
 
                             DateePerformanceStructuredResult parsed = DateePerformanceStructuredContract.ParseStrict(
@@ -1685,8 +1690,10 @@ namespace Pinder.LlmAdapters
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
             IReadOnlyList<ConversationMessage>? priorMessages = null,
-            string? callId = null)
+            string? callId = null,
+            PromptProviderContract? promptContract = null)
         {
+            ValidateProviderPromptContracts(phase, request.SystemPrompt, request.UserMessage, promptContract, request.SchemaName + ":" + request.SchemaVersion);
             var sink = GetDiagnosticSink();
             callId = string.IsNullOrWhiteSpace(callId)
                 ? OperationalDiagnostics.CreateCallId()
@@ -1816,8 +1823,10 @@ namespace Pinder.LlmAdapters
             string? dateePrivatePhase = null,
             IReadOnlyDictionary<string, string>? metadata = null,
             IReadOnlyList<ConversationMessage>? priorMessages = null,
-            string? callId = null)
+            string? callId = null,
+            PromptProviderContract? promptContract = null)
         {
+            ValidateProviderPromptContracts(phase, systemPrompt, userContent, promptContract, requestSchema: null);
             var sink = GetDiagnosticSink();
             callId = string.IsNullOrWhiteSpace(callId)
                 ? OperationalDiagnostics.CreateCallId()
