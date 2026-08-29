@@ -18,6 +18,10 @@ namespace Pinder.LlmAdapters.Tests;
 
 public sealed class Issue1425_DateeResponsePlanIntegrationTests
 {
+    public Issue1425_DateeResponsePlanIntegrationTests()
+    {
+        PromptCatalogInitializer.Initialize();
+    }
     private static readonly Guid GeraldId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     private static readonly Guid VelvetId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
     private const string SleepingBagSecret = "Gerald keeps a GBP 70 Soho silk sleeping bag hidden in plain sight.";

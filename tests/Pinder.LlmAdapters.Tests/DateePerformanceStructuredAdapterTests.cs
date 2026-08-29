@@ -15,6 +15,10 @@ namespace Pinder.LlmAdapters.Tests
 {
     public sealed class DateePerformanceStructuredAdapterTests
     {
+        public DateePerformanceStructuredAdapterTests()
+        {
+            PromptCatalogInitializer.Initialize();
+        }
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
