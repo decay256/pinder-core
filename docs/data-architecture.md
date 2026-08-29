@@ -75,7 +75,7 @@ data/
 | `traps/trap-schema.json` | (validation only) | JSON Schema documenting trap structure. |
 | `timing/response-profiles.json` | response-timing layer | Base profiles for datee reply timing; combined with item/anatomy `response_timing_modifier` deltas. |
 
-All character / item / anatomy fields above are concatenated by `CharacterAssembler` into a `FragmentCollection`, which `PromptBuilder` then renders into the `TEXTING STYLE`, `PERSONALITY`, `BACKSTORY`, `ARCHETYPES`, `EFFECTIVE STATS` blocks of the per-character system prompt.
+All character / item / anatomy fields above are concatenated by `CharacterAssembler` into a `FragmentCollection`, which `PromptBuilder` then renders into the lean `TEXTING STYLE`, `PERSONALITY`, `BACKSTORY`, `ARCHETYPES`, and `EFFECTIVE STATS` blocks of the per-character system prompt (omitting raw diagnosis lists and full 20-category backstory tables to prevent prompt bloat and repetition).
 
 #### Quick reference — "I want to change X, where do I edit?"
 
@@ -117,9 +117,10 @@ The system supports two kinds of runtime configurations with distinct handling p
 ### 4. What the LLM Receives
 
 The LLM is strictly guided by the composed data configuration at runtime:
-- **System Prompt**: The `SessionSystemPromptBuilder` dynamically assembles the final system prompt by combining the `GameDefinition` and the individual `CharacterProfile`.
+- **System Prompt**: The `SessionSystemPromptBuilder` dynamically assembles the final system prompt by combining the `GameDefinition` (with streamlined comedy dating RPG rules) and the individual `CharacterProfile`.
 - **Game Definition**: Loaded directly from `game-definition.yaml` at startup to define the overarching world rules and creative frame.
-- **Character Profile**: Assembled dynamically from character items and anatomy data via the `CharacterAssembler`.
+- **Character Profile**: Assembled dynamically from character items and anatomy data via the `CharacterAssembler` into a lean profile (without static diagnosis dumps or static backstory tables).
+- **Dynamic Turn-by-Turn Enrichment**: The Psychiatrist / Emotional Director dynamically incorporates character neurosis (`psychiatric_diagnosis`), active dramatic arc phase goals (Phases 1-4), and single injected reality facts from `EmotionStemSelector` to output actionable writing direction (`ego_game`, `improvised_flex_or_slip`, `texting_tactics`).
 - **Data Repositories**: Items and anatomy are loaded directly from the `data/` directories via the `Json*Repository` classes.
 
 ### 5. How to Extend

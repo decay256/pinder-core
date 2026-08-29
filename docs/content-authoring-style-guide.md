@@ -2,15 +2,17 @@
 
 ## Character Backstory Migration
 
-As of Issue #1259, character definitions are being migrated to include a structured `backstory_categories` section. This ensures LLM system prompts can selectively surface biographical anchors rather than dumping a massive monolithic bio block.
+Character definitions define a structured `backstory_categories` section containing 20 canonical backstory reality facts (`tragic_reality`). 
+
+This architecture allows the engine and `EmotionStemSelector` to dynamically select and inject specific biographical quirks turn-by-turn across the 4 Dramatic Arc Phases (Setup -> Escalation -> Turning Point -> Resolution) rather than dumping a static 40-entry backstory table or obsolete static lies into the base system prompt.
 
 ### Biographical-Anchor Rules
 1. **Anchors must be specific, not generic.** (e.g., "Left my favourite jacket on the N train in 2019" rather than "I am forgetful".)
-2. **Anchors must be emotionally resonant.** They must tie into the character's Shadow stats (e.g., Fixation, Despair, Horniness).
-3. **No more than 3 anchors should be injected per conversation.** The game engine will selectively rotate them.
+2. **Anchors must be emotionally resonant.** They must tie into the character's Shadow stats and neuroses (e.g., Fixation, Despair, Horniness).
+3. **Dynamic runtime injection.** The game engine selectively injects relevant backstory facts at runtime according to the active dramatic phase and transition manner.
 
 ### The 20 Category Keys
-Every migrated character JSON must have exactly these 20 keys in the `backstory_categories` dictionary:
+Every character JSON defines authoritative reality facts across these 20 keys in the `backstory_categories` dictionary:
 1. `childhood_memory`
 2. `core_wound`
 3. `proudest_moment`

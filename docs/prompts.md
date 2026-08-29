@@ -59,14 +59,46 @@ next `pinder-game-api` (or session-runner) start.
 
 ```
 data/prompts/
-  templates.yaml
   archetypes.yaml
-  structural.yaml
-  narrative.yaml
-  overlay-model-comparison.yaml
+  backstory.yaml
+  backstory_consolidation.yaml
+  bio.yaml
+  character-generation.yaml
+  diagnosis.yaml
+  dramatic_arc.yaml
   emotional-reactions.yaml
+  narrative.yaml
+  outfit.yaml
+  overlay-model-comparison.yaml
+  personality_consolidation.yaml
+  sim_agent.yaml
   stake.yaml
+  structural.yaml
+  templates.yaml
 ```
+
+## Static System Prompt vs. Dynamic Prompt Flow
+
+Pinder prompt architecture decouples static identity framing from dynamic turn-by-turn writing direction:
+
+### 1. Streamlined Static System Prompt
+The static character system prompt (`AssembledSystemPrompt` / `SessionSystemPromptBuilder`) provides lean identity and baseline dating-app rules:
+- **Included**: Character bio, active archetype definition, texting style tendencies, and high-level comedy dating RPG framing.
+- **Pruned / Excluded**:
+  - *No monolithic engine rulebook*: mechanical dice formula and internal C# system docs were pruned from `game-definition.yaml` / `GameMasterPrompt`.
+  - *No raw psychiatric diagnosis dump*: the 11-bullet clinical diagnosis was removed from the static system prompt to prevent clinical psychoanalysis bleed in character dialogue.
+  - *No static 20-category Lie/Reality table*: the full 40-entry backstory table was removed from `PromptBuilder.cs` to prevent token bloat and repetitive backstory recitation.
+
+### 2. Dynamic Turn-by-Turn Emotional Direction & Backstory
+Instead of dumping full character psychology into static prompts, dynamic direction is generated on a per-turn basis:
+- **Psychiatrist / Emotional Director**: Evaluates the character's internal neurosis (from `psychiatric_diagnosis`), the current emotional turn event, and the active phase goal to produce targeted writing direction (`ego_game`, `improvised_flex_or_slip`, `texting_tactics`).
+- **Dynamic Backstory Injection**: `EmotionStemSelector` selects a single authoritative reality fact (`tragic_reality`) at runtime based on the turn's dramatic phase and manner, providing fresh conversational fuel.
+- **4 Dramatic Arc Phases**:
+  1. **Phase 1 (Setup)**: Concrete actionable dating instructions — testing if the match can hold a conversation, establishing high-status positioning vs. playful intrigue, and probing vibe/humor with punchy 1-a.m. dating texts without giving away personal history.
+  2. **Phase 2 (Escalation)**: Escalating tension and status — taking mundane real character facts or quirks and improvising flattering, high-status, or intriguing lies/flexes on the fly to tease or impress the match.
+  3. **Phase 3 (Turning Point)**: Creating genuine intimate tension through a cracked facade — admitting underlying insecurity or reality as a vulnerable slip or tired honesty, immediately followed by a flirtatious pivot back to the match.
+  4. **Phase 4 (Resolution)**: Closing the hookup or meeting logistics on their terms — 100% focused on sealing the date/hookup.
+- **Tone Modulation**: Character behavior across all phases is modulated by individual character neurosis and emotional posture rather than hardcoded universal cynicism.
 
 ## Emotional Reaction Direction
 

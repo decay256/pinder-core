@@ -498,7 +498,7 @@ GameSession makes 4 primary LLM calls per turn (plus 2 conditional), all routed 
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Player system prompt, datee visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats (Avatar Session) |
+| **Context** | Player lean system prompt, datee visible profile (name + bio only), full conversation history, shadow thresholds, active traps + LLM instructions, horniness level, callback opportunities, active tell, archetype directive, 3 drawn stats, active dynamic dramatic arc phase goal (Phases 1-4) & injected backstory fact (Avatar Session) |
 | **Returns** | Array of `DialogueOption` (stat, intended text containing the **full, sendable line**, optional callback turn) |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDialogueOptionsPrompt()` |
 
@@ -510,11 +510,19 @@ No creative LLM call fires here. The chosen full line from option generation is 
 
 Option-generation and this commit step execute on an ephemeral branch. Only the final committed line is persisted, keeping the avatar session history clean.
 
-### 3. Datee Response (`GetDateeResponseAsync`)
+### 3. Emotional Reaction / Director Pass (`GenerateEmotionalDirectionAsync`)
+
+Prior to generating the datee's visible response, the Emotional Director evaluates:
+- Datee's internal neurosis from `psychiatric_diagnosis` (defense reactions, derived feelings, core vulnerabilities).
+- Delivered player message and emotional turn event.
+- Active dramatic arc phase goal and dynamically selected backstory fact from `EmotionStemSelector`.
+- Produces validated writing direction (`ego_game`, `improvised_flex_or_slip`, `texting_tactics`) that guides the datee response.
+
+### 4. Datee Response (`GetDateeResponseAsync`)
 
 | Aspect | Detail |
 |---|---|
-| **Context** | Datee system prompt, prior completed visible history, current player's delivered message (with any failure/overlay contexts), interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level (Datee Session) |
+| **Context** | Datee lean system prompt, prior completed visible history, current player's delivered message (with any failure/overlay contexts), interest before/after, response delay, active traps, datee shadow thresholds, delivery tier, archetype directive, resistance level, and writing direction from the Emotional Director (Datee Session) |
 | **Returns** | `DateeResponse` — message text + optional `WeaknessWindow` + optional `Tell` |
 | **Prompt builder** | `SessionDocumentBuilder.BuildDateePrompt()` |
 
