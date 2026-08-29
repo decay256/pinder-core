@@ -419,7 +419,7 @@ namespace Pinder.Core.Conversation
             => left.Count == right.Count && left.Zip(right, (a, b) => a.Id == b.Id && a.Kind == b.Kind).All(x => x);
         private static bool StagesEqual(IReadOnlyList<DateeResponseMovementStage> left, IReadOnlyList<DateeResponseMovementStage> right)
             => left.Count == right.Count && left.Zip(right, (a, b) => a.Movement == b.Movement && a.OwnsDisclosure == b.OwnsDisclosure).All(x => x);
-        private static bool IsTerminal(InterestState state) => state == InterestState.Unmatched || state == InterestState.DateSecured;
+        private static bool IsTerminal(InterestState state) => state == InterestState.Unmatched;
         private static string EmotionalSource(DateeResponsePlanInput input) => EmotionalSourcePrefix + input.VisibleEvidence.MessageReference.Turn;
         private static string RelationshipSource(DateeResponsePlanInput input) => RelationshipSourcePrefix + input.VisibleEvidence.MessageReference.Turn;
         private static string MannerToken(string manner) => manner.ToLowerInvariant();
