@@ -106,6 +106,23 @@ namespace Pinder.Core.Conversation
 
             string dateeArchetypeDirective = datee.ActiveArchetype?.Directive;
 
+            int interestBefore = replayState?.InterestBefore ?? rollStage.InterestBefore;
+            DateeReactionTarget? admittedDateeReactionTarget = state.CurrentDateeReactionTarget;
+            if (admittedDateeReactionTarget != null)
+            {
+                string? manner = admittedDateeReactionTarget.ResolvedTarget.Manner;
+                if (manner == "CURATED_BUFFER" || manner == "DEFENSIVE_EVASION" || manner == "INTIMATE_BREAKTHROUGH")
+                {
+                    bool compatible = (manner == "CURATED_BUFFER" && finalInterestAfter == interestBefore)
+                        || (manner == "DEFENSIVE_EVASION" && finalInterestAfter < interestBefore)
+                        || (manner == "INTIMATE_BREAKTHROUGH" && finalInterestAfter > interestBefore);
+                    if (!compatible)
+                    {
+                        admittedDateeReactionTarget = null;
+                    }
+                }
+            }
+
             var dateeContext = new DateeContext(
                 dateePrompt: datee.AssembledSystemPrompt,
                 conversationHistory: TurnOrchestratorHelpers.BuildHistoryForLlmContext(state),
@@ -113,7 +130,7 @@ namespace Pinder.Core.Conversation
                 activeTraps: activeTrapNames,
                 currentInterest: finalInterestAfter,
                 playerDeliveredMessage: deliveredMessage,
-                interestBefore: replayState?.InterestBefore ?? rollStage.InterestBefore,
+                interestBefore: interestBefore,
                 interestAfter: finalInterestAfter,
                 responseDelayMinutes: responseDelayMinutes,
                 activeTrapInstructions: dateeTrapInstructions,
@@ -146,7 +163,7 @@ namespace Pinder.Core.Conversation
                 dateeHungerForIntimacy: dateeEmotionalStatus.HungerForIntimacy,
                 dateeTerrorOfRejection: dateeEmotionalStatus.TerrorOfRejection,
                 previousAcceptedEmotionalDirections: state.DateeEmotionalDirectionHistory,
-                dateeReactionTarget: state.CurrentDateeReactionTarget,
+                dateeReactionTarget: admittedDateeReactionTarget,
                 cognitiveSubtextFact: state.CurrentDateeCognitiveSubtextFact,
                 recipientCharacterId: datee.CharacterId,
                 onDiagnostic: _onDiagnostic,

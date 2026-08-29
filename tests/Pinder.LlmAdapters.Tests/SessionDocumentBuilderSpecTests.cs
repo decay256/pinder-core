@@ -13,6 +13,7 @@ namespace Pinder.LlmAdapters.Tests
     /// Spec-based tests for SessionDocumentBuilder and PromptTemplates.
     /// Tests derived from docs/specs/issue-207-spec.md.
     /// </summary>
+    [Collection("PromptCatalogStaticState")]
     public partial class SessionDocumentBuilderSpecTests
     {
         // ── Helpers ──
