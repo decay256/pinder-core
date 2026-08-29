@@ -320,7 +320,6 @@ namespace Pinder.Core.Prompts
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
-            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
             Func<string, string?>? structuralFragmentLookup = null,
             Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
             TextingStyleConflicts? textingStyleConflicts = null)
@@ -334,7 +333,6 @@ namespace Pinder.Core.Prompts
                 characterIdSeed,
                 archetypesEnabled,
                 consolidatedPersonality,
-                generatedBackstory,
                 structuralFragmentLookup,
                 structuralFragmentLookupEx,
                 textingStyleConflicts).Text;
@@ -352,7 +350,6 @@ namespace Pinder.Core.Prompts
             string? characterIdSeed = null,
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
-            IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
             Func<string, string?>? structuralFragmentLookup = null,
             Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
             TextingStyleConflicts? textingStyleConflicts = null)
@@ -402,21 +399,7 @@ namespace Pinder.Core.Prompts
             sb.AppendLine();
 
             sb.AppendLine(framing.Backstory, srcFile, srcKey);
-            if (generatedBackstory != null && generatedBackstory.Count > 0)
-            {
-                foreach (string category in BackstoryValidator.RequiredCategories)
-                {
-                    if (!generatedBackstory.TryGetValue(category, out var fact) || fact == null)
-                        continue;
-                    sb.AppendLine($"- {category}");
-                    sb.AppendLine($"  LIE: {fact.BioLie}");
-                    sb.AppendLine($"  REALITY: {fact.TragicReality}");
-                }
-            }
-            else
-            {
-                AppendBulletList(sb, fragments.BackstoryFragments);
-            }
+            AppendBulletList(sb, fragments.BackstoryFragments);
             sb.AppendLine();
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);

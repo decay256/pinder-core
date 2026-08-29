@@ -66,25 +66,7 @@ namespace Pinder.Core.Tests
         // BACKSTORY ──────────────────────────────────────────────────────
 
         [Fact]
-        public void GeneratedBackstory_ReplacesRawFragmentsWithLieRealityPairs()
-        {
-            var facts = BackstoryValidator.RequiredCategories.ToDictionary(
-                category => category,
-                category => new BackstoryFact($"lie {category}", $"reality {category}"));
-            var fragments = BuildFragments(backstory: new[] { "RAW FRAGMENT MUST NOT APPEAR" });
-
-            string prompt = PromptBuilder.BuildSystemPrompt(
-                "Test", "test", null, fragments, new TrapState(), generatedBackstory: facts);
-            string section = ExtractSection(prompt, "BACKSTORY", "TEXTING STYLE");
-
-            Assert.Contains("- age_and_demographics", section);
-            Assert.Contains("LIE: lie age_and_demographics", section);
-            Assert.Contains("REALITY: reality age_and_demographics", section);
-            Assert.DoesNotContain("RAW FRAGMENT MUST NOT APPEAR", section);
-        }
-
-        [Fact]
-        public void BackstorySection_EmitsBulletList()
+        public void BackstorySection_EmitsBulletList_AndDoesNotDumpLieRealityTable()
         {
             var fragments = BuildFragments(
                 backstory: new[] { "born somewhere", "moved cities", "had a moment" });
@@ -96,6 +78,8 @@ namespace Pinder.Core.Tests
             Assert.Contains("- born somewhere", section);
             Assert.Contains("- moved cities", section);
             Assert.Contains("- had a moment", section);
+            Assert.DoesNotContain("LIE:", prompt);
+            Assert.DoesNotContain("REALITY:", prompt);
         }
 
         [Fact]

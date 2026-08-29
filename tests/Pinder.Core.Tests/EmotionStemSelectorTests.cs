@@ -18,12 +18,12 @@ namespace Pinder.Core.Tests
                 category => new BackstoryFact($"lie for {category}", $"reality for {category}"));
             var target = new ResolvedRevelationTarget
             {
-                Registry = "BACKSTORY", Index = 0, Field = "BIO_LIE", Manner = "CURATED_BUFFER"
+                Registry = "BACKSTORY", Index = 0, Field = "TRAGIC_REALITY", Manner = "CURATED_BUFFER"
             };
 
             var result = EmotionStemSelector.Hydrate(target, facts, null);
 
-            Assert.Equal("lie for age_and_demographics", result.StemText);
+            Assert.Equal("reality for age_and_demographics", result.StemText);
         }
 
         [Fact]
@@ -270,7 +270,50 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Resolve_MacroPhase1_ReturnsBioLieField()
+        public void Resolve_MacroPhase4_ReturnsStakeRegistry_AndResolutionGoal()
+        {
+            // Arrange
+            var selector = new EmotionStemSelector(42);
+            var state = new ConversationState
+            {
+                TurnCount = 13,
+                InterestScore = 90,
+                PreviousPhase = null
+            };
+
+            // Act
+            var result = selector.Resolve(state);
+
+            // Assert
+            Assert.Equal("STAKE", result.Registry);
+            Assert.Contains("Phase 4 (Resolution)", result.TransitionStyle);
+            Assert.Contains("Close the hookup", result.TransitionStyle, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Resolve_ActionableGoals_AcrossPhases_AreSpecificAndDiagnosisModulated()
+        {
+            var selector = new EmotionStemSelector(42);
+
+            var phase1 = selector.Resolve(new ConversationState { TurnCount = 1, InterestScore = 10 });
+            Assert.Contains("Phase 1 (Setup)", phase1.TransitionStyle);
+            Assert.Contains("personal history", phase1.TransitionStyle, StringComparison.OrdinalIgnoreCase);
+
+            var phase2 = selector.Resolve(new ConversationState { TurnCount = 5, InterestScore = 45 });
+            Assert.Contains("Phase 2 (Escalation)", phase2.TransitionStyle);
+            Assert.Contains("real fact", phase2.TransitionStyle, StringComparison.OrdinalIgnoreCase);
+
+            var phase3 = selector.Resolve(new ConversationState { TurnCount = 9, InterestScore = 75 });
+            Assert.Contains("Phase 3 (Turning Point)", phase3.TransitionStyle);
+            Assert.Contains("cracked facade", phase3.TransitionStyle, StringComparison.OrdinalIgnoreCase);
+
+            var phase4 = selector.Resolve(new ConversationState { TurnCount = 14, InterestScore = 90 });
+            Assert.Contains("Phase 4 (Resolution)", phase4.TransitionStyle);
+            Assert.Contains("meeting logistics", phase4.TransitionStyle, StringComparison.OrdinalIgnoreCase);
+        }
+
+        [Fact]
+        public void Resolve_MacroPhase1_ReturnsRealFactField()
         {
             // Arrange
             var selector = new EmotionStemSelector(42);
@@ -285,7 +328,7 @@ namespace Pinder.Core.Tests
             var result = selector.Resolve(state);
 
             // Assert
-            Assert.Equal("BIO_LIE", result.Field);
+            Assert.Equal("TRAGIC_REALITY", result.Field);
         }
 
         [Fact]

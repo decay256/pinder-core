@@ -111,8 +111,21 @@ namespace Pinder.SessionSetup
                 foreach (var prop in doc.RootElement.EnumerateObject())
                 {
                     string cat = prop.Name;
-                    string bioLie = GetValue(prop.Value, "BioLie", "bio_lie") ?? string.Empty;
-                    string tragic = GetValue(prop.Value, "TragicReality", "tragic_reality") ?? string.Empty;
+                    string bioLie = string.Empty;
+                    string tragic = string.Empty;
+
+                    if (prop.Value.ValueKind == JsonValueKind.String)
+                    {
+                        tragic = prop.Value.GetString() ?? string.Empty;
+                    }
+                    else if (prop.Value.ValueKind == JsonValueKind.Object)
+                    {
+                        bioLie = GetValue(prop.Value, "BioLie", "bio_lie") ?? string.Empty;
+                        tragic = GetValue(prop.Value, "TragicReality", "tragic_reality")
+                            ?? GetValue(prop.Value, "Reality", "reality")
+                            ?? GetValue(prop.Value, "Fact", "fact")
+                            ?? string.Empty;
+                    }
 
                     result[cat] = new BackstoryFact
                     {

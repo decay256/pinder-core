@@ -216,7 +216,6 @@ namespace Pinder.SessionSetup
                 characterIdSeed: textingSeed,
                 archetypesEnabled: archetypesEnabled,
                 consolidatedPersonality: def.ConsolidatedPersonality,
-                generatedBackstory: def.Backstory,
                 structuralFragmentLookup: promptRuntimeBinding?.StructuralFragmentLookup,
                 structuralFragmentLookupEx: promptRuntimeBinding?.StructuralFragmentLookupEx,
                 textingStyleConflicts: promptRuntimeBinding?.TextingStyleConflicts);

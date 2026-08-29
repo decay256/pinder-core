@@ -39,7 +39,6 @@ namespace Pinder.Core.Characters
                 if (!facts.TryGetValue(category, out var fact) || fact == null)
                     return false;
                 
-                if (string.IsNullOrWhiteSpace(fact.BioLie)) return false;
                 if (string.IsNullOrWhiteSpace(fact.TragicReality)) return false;
             }
 

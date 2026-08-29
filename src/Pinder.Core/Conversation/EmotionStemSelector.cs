@@ -51,6 +51,7 @@ namespace Pinder.Core.Conversation
         public const string MacroPhase1 = "MacroPhase1";
         public const string MacroPhase2 = "MacroPhase2";
         public const string MacroPhase3 = "MacroPhase3";
+        public const string MacroPhase4 = "MacroPhase4";
         public const string BackstoryRegistry = "BACKSTORY";
         public const string StakeRegistry = "STAKE";
         public const int BackstoryRegistrySize = 20;
@@ -62,6 +63,8 @@ namespace Pinder.Core.Conversation
         public int MacroPhase2InterestThreshold { get; }
         public int MacroPhase3TurnThreshold { get; }
         public int MacroPhase3InterestThreshold { get; }
+        public int MacroPhase4TurnThreshold { get; }
+        public int MacroPhase4InterestThreshold { get; }
         public int MacroPhase1To2HysteresisMinTurn { get; }
         public int MacroPhase1To2HysteresisMaxTurn { get; }
         public int MacroPhase1To2HysteresisMinInterest { get; }
@@ -79,6 +82,8 @@ namespace Pinder.Core.Conversation
             int macroPhase2InterestThreshold = 40,
             int macroPhase3TurnThreshold = 8,
             int macroPhase3InterestThreshold = 70,
+            int macroPhase4TurnThreshold = 12,
+            int macroPhase4InterestThreshold = 85,
             int macroPhase1To2HysteresisMinTurn = 4,
             int macroPhase1To2HysteresisMaxTurn = 5,
             int macroPhase1To2HysteresisMinInterest = 40,
@@ -95,6 +100,8 @@ namespace Pinder.Core.Conversation
             MacroPhase2InterestThreshold = macroPhase2InterestThreshold;
             MacroPhase3TurnThreshold = macroPhase3TurnThreshold;
             MacroPhase3InterestThreshold = macroPhase3InterestThreshold;
+            MacroPhase4TurnThreshold = macroPhase4TurnThreshold;
+            MacroPhase4InterestThreshold = macroPhase4InterestThreshold;
             MacroPhase1To2HysteresisMinTurn = macroPhase1To2HysteresisMinTurn;
             MacroPhase1To2HysteresisMaxTurn = macroPhase1To2HysteresisMaxTurn;
             MacroPhase1To2HysteresisMinInterest = macroPhase1To2HysteresisMinInterest;
@@ -130,7 +137,12 @@ namespace Pinder.Core.Conversation
         {
             // 1. Derive Phase
             string currentPhase = EmotionStemSelectionRules.MacroPhase1;
-            if (state.TurnCount >= _rules.MacroPhase3TurnThreshold ||
+            if (state.TurnCount >= _rules.MacroPhase4TurnThreshold ||
+                state.InterestScore >= _rules.MacroPhase4InterestThreshold)
+            {
+                currentPhase = EmotionStemSelectionRules.MacroPhase4;
+            }
+            else if (state.TurnCount >= _rules.MacroPhase3TurnThreshold ||
                 state.InterestScore >= _rules.MacroPhase3InterestThreshold)
             {
                 currentPhase = EmotionStemSelectionRules.MacroPhase3;
@@ -157,7 +169,7 @@ namespace Pinder.Core.Conversation
                 }
             }
 
-            string registry = currentPhase == EmotionStemSelectionRules.MacroPhase3
+            string registry = (currentPhase == EmotionStemSelectionRules.MacroPhase3 || currentPhase == EmotionStemSelectionRules.MacroPhase4)
                 ? EmotionStemSelectionRules.StakeRegistry
                 : EmotionStemSelectionRules.BackstoryRegistry;
 
@@ -266,10 +278,11 @@ namespace Pinder.Core.Conversation
                 Registry = registry,
                 Index = selectedIndex,
                 Manner = manner,
-                Field = (currentPhase == EmotionStemSelectionRules.MacroPhase1) ? "BIO_LIE" :
-                        (currentPhase == EmotionStemSelectionRules.MacroPhase2) ? "TRAGIC_REALITY" : "STAKE_LINE",
+                Field = (currentPhase == EmotionStemSelectionRules.MacroPhase1 || currentPhase == EmotionStemSelectionRules.MacroPhase2)
+                    ? "TRAGIC_REALITY"
+                    : "STAKE_LINE",
                 StemText = string.Empty,
-                TransitionStyle = ResolveTransitionStyle(manner)
+                TransitionStyle = ResolveTransitionStyle(manner, currentPhase)
             };
         }
 
@@ -292,7 +305,7 @@ namespace Pinder.Core.Conversation
                 if (backstory == null || !backstory.TryGetValue(category, out var fact) || fact == null)
                     throw new InvalidOperationException($"Backstory target '{category}' is missing from the player profile.");
 
-                target.StemText = target.Field == "BIO_LIE" ? fact.BioLie : fact.TragicReality;
+                target.StemText = !string.IsNullOrWhiteSpace(fact.TragicReality) ? fact.TragicReality : fact.BioLie;
             }
             else if (target.Registry == "STAKE")
             {
@@ -313,13 +326,57 @@ namespace Pinder.Core.Conversation
             return target;
         }
 
-        private static string ResolveTransitionStyle(string manner) => manner switch
+        public static string ResolveTransitionStyle(string manner)
+            => ResolveTransitionStyle(manner, EmotionStemSelectionRules.MacroPhase1);
+
+        public static string ResolveTransitionStyle(string manner, string currentPhase)
         {
-            "CURATED_BUFFER" => "Keep the disclosure controlled and carefully buffered, revealing only enough to invite a response.",
-            "DEFENSIVE_EVASION" => "Approach the disclosure guardedly: acknowledge it, then deflect without making the transition feel abrupt.",
-            "INTIMATE_BREAKTHROUGH" => "Let the disclosure arrive as a sincere, unexpectedly intimate breakthrough.",
-            "TRAUMATIC_LEAKAGE" => "Let the disclosure slip out involuntarily, with emotion showing before the speaker can contain it.",
-            _ => throw new InvalidOperationException($"Unknown transition manner '{manner}'.")
-        };
+            if (currentPhase == EmotionStemSelectionRules.MacroPhase1)
+            {
+                return manner switch
+                {
+                    "CURATED_BUFFER" => "Phase 1 (Setup): Test if they can hold a conversation and establish playful intrigue with punchy 1-a.m. dating texts without giving away personal history.",
+                    "DEFENSIVE_EVASION" => "Phase 1 (Setup): Establish high-status positioning and probe their vibe/humor with sharp dating banter while keeping your personal history guarded.",
+                    "INTIMATE_BREAKTHROUGH" => "Phase 1 (Setup): Probe their humor and mutual attraction with playful intrigue, keeping the dynamic engaging without revealing backstory.",
+                    "TRAUMATIC_LEAKAGE" => "Phase 1 (Setup): Test if they can match your energy with punchy dating app texts while keeping personal history private.",
+                    _ => "Phase 1 (Setup): Test if they can hold a conversation, establish high-status positioning vs. playful intrigue, probe their vibe/humor with punchy 1-a.m. dating app texts without giving away personal history."
+                };
+            }
+            if (currentPhase == EmotionStemSelectionRules.MacroPhase2)
+            {
+                return manner switch
+                {
+                    "CURATED_BUFFER" => "Phase 2 (Escalation): Escalate tension and status. Take a mundane real fact or quirk and improvise a flattering, high-status, or intriguing lie or flex on the fly to tease or impress them.",
+                    "DEFENSIVE_EVASION" => "Phase 2 (Escalation): Escalate status and intrigue. Take a mundane real fact or quirk and improvise a high-status flex or intriguing lie on the fly to keep them chasing.",
+                    "INTIMATE_BREAKTHROUGH" => "Phase 2 (Escalation): Escalate romantic and sexual tension. Take a mundane real fact or quirk and spin an intriguing lie or playful flex on the fly to build chemistry.",
+                    "TRAUMATIC_LEAKAGE" => "Phase 2 (Escalation): Escalate tension boldly. Take a real quirk and improvise an unpredictable, intriguing lie or flex on the fly.",
+                    _ => "Phase 2 (Escalation): Escalate tension and status. Take a mundane real fact / quirk and improvise a flattering / high-status / intriguing lie or flex on the fly to tease the match or impress them based on what was just said."
+                };
+            }
+            if (currentPhase == EmotionStemSelectionRules.MacroPhase3)
+            {
+                return manner switch
+                {
+                    "CURATED_BUFFER" => "Phase 3 (Turning Point): Create genuine intimate tension through a cracked facade. Admit the underlying insecurity or reality as tired honesty, but immediately follow with a flirtatious pivot back to the match.",
+                    "DEFENSIVE_EVASION" => "Phase 3 (Turning Point): Let your guard crack. Admit the underlying insecurity or reality as a vulnerable slip, then quickly pivot flirtatiously back to the match.",
+                    "INTIMATE_BREAKTHROUGH" => "Phase 3 (Turning Point): Create genuine intimate breakthrough through a cracked facade. Admit the underlying reality with vulnerable honesty, then immediately pivot flirtatiously back to the match.",
+                    "TRAUMATIC_LEAKAGE" => "Phase 3 (Turning Point): Let the underlying reality or insecurity slip out involuntarily, then immediately follow with a flirtatious pivot back to the match.",
+                    _ => "Phase 3 (Turning Point): Create genuine intimate tension through a cracked facade. Admit the underlying insecurity / reality as a vulnerable slip or tired honesty, but immediately follow with a flirtatious pivot back to the match."
+                };
+            }
+            if (currentPhase == EmotionStemSelectionRules.MacroPhase4)
+            {
+                return "Phase 4 (Resolution): Close the hookup / meeting logistics. No new backstory, 100% focused on sealing the date / hookup on their terms.";
+            }
+
+            return manner switch
+            {
+                "CURATED_BUFFER" => "Keep the disclosure controlled and carefully buffered, revealing only enough to invite a response.",
+                "DEFENSIVE_EVASION" => "Approach the disclosure guardedly: acknowledge it, then deflect without making the transition feel abrupt.",
+                "INTIMATE_BREAKTHROUGH" => "Let the disclosure arrive as a sincere, unexpectedly intimate breakthrough.",
+                "TRAUMATIC_LEAKAGE" => "Let the disclosure slip out involuntarily, with emotion showing before the speaker can contain it.",
+                _ => throw new InvalidOperationException($"Unknown transition manner '{manner}'.")
+            };
+        }
     }
 }
