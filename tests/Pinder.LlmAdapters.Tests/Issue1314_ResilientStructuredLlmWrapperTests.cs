@@ -14,6 +14,10 @@ namespace Pinder.LlmAdapters.Tests
 {
     public class Issue1314_ResilientStructuredLlmWrapperTests
     {
+        public Issue1314_ResilientStructuredLlmWrapperTests()
+        {
+            PromptCatalogInitializer.Initialize();
+        }
         private sealed class FailureSimulatingTransport : ILlmTransport, IStructuredConversationLlmTransport
         {
             public int Calls { get; private set; }

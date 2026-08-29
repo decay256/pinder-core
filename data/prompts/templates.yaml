@@ -77,13 +77,21 @@ prompts:
       - No extra text before OPTION_1 or after the last option
       - Do not add category labels, meta-prefixes, or classification words (e.g. CONTEXT:, QUESTION:, NOTE:, RECOGNITION:) before the message text. The double-quoted text must begin with the character's actual words.
 
+      STAT INTENT (CYNICAL DATING APP FLIRTING):
+      - CHARM: Smooth rapport, playful social buffering, keeping the chat fun and flirtatious without burning bridges.
+      - RIZZ: Direct sexual magnetism, unapologetic attraction, confidence, escalating toward an in-person hookup or date.
+      - HONESTY: Puncturing profile pretense, calling out dating app fatigue, admitting a real embarrassing truth or boundary (never clinical psychoanalysis).
+      - CHAOS: Unpredictable 1 a.m. energy, wild spontaneous propositions, weird funny pivots that keep them on their toes.
+      - WIT: Quick banter, roasting profile tropes, sharp humorous framing.
+      - SELF_AWARENESS: Calling out the dating dynamic, acknowledging the mutual performance and sexual subtext in real time.
+
       Treat the texting style above as loose expressive influences. Let relevant
       tendencies shape each option naturally, but do not mechanically reproduce
       every feature or force a tendency that conflicts with the conversational moment.
 
       PSYCHOLOGICAL STAKE — mandatory: if a PSYCHOLOGICAL STAKE section is present in the character profile above, the final OPTION (OPTION_3) MUST quote or paraphrase one of the numbered stake lines verbatim or near-verbatim. If none of the stake lines fit this turn's emotional moment naturally, that is a signal the conversation needs to pivot — the final OPTION (OPTION_3) should bridge toward a stake-relevant topic. Options that only respond to the surface topic without touching the emotional through-line are incomplete.
 
-      BIOGRAPHICAL SPECIFICITY — critical: when the DATEE has revealed a concrete biographical detail (a job they left, a place they went, a relationship, a specific event or year), at least one option should follow up on that specific detail — not the emotional theme, the actual fact. 'You mentioned leaving database engineering — what were you doing the following week?' is stronger than 'you seem like someone who takes big risks.' The conversation only advances when both parties are actually curious about each other's lives.
+      BIOGRAPHICAL SPECIFICITY — critical: when the DATEE has revealed a concrete biographical detail (a job, a place, a hobby, an ex, a specific event or year), at least one option should follow up on that specific detail as flirtatious ammunition, teasing, or dating banter (e.g. questioning lifestyle compatibility, roasting their routine, or using it as a pretext to meet up) rather than an abstract technical or philosophical lecture. The goal of curiosity on a dating app is to figure out who this person is in real life and whether you want to hook up with them.
 
       SIMILARLY: when the PLAYER AVATAR's PSYCHOLOGICAL STAKE contains specific backstory (a named relationship, a year, an event), at least one option per session should reveal that concrete detail naturally. Characters who only share feelings without sharing facts never feel real. 'I spent four years with someone who thought intensity was a personality defect, and then at my cousin's engagement party I realised I'd been making myself smaller the whole time' is a revelation. 'I've been told I'm too much' is not.
 
