@@ -150,7 +150,18 @@ namespace Pinder.Core.Conversation
         private readonly int _hungerForIntimacy;
         private readonly int _terrorOfRejection;
         private readonly IAgentJournalOneShotContextFactory? _agentJournalOneShotContextFactory;
-        private readonly GameRunAgentJournalContext _agentJournalContext;
+        private GameRunAgentJournalContext _agentJournalContext;
+
+        public GameRunAgentJournalContext AgentJournalContext => _agentJournalContext;
+
+        public void UpdateRequestId(string requestId)
+        {
+            if (!string.IsNullOrWhiteSpace(requestId) && _agentJournalContext != null)
+            {
+                _agentJournalContext = _agentJournalContext.ForRequest(requestId);
+                _turnOrchestrator = BuildTurnOrchestrator();
+            }
+        }
 
         internal GameSessionState State => _state;
 

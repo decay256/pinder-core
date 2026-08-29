@@ -39,6 +39,17 @@ namespace Pinder.Core.Conversation
         public GameRunConversationBranchKind BranchKind { get; }
         public IAgentJournalSink? HostSink { get; }
 
+        public GameRunAgentJournalContext ForRequest(string requestId)
+        {
+            return new GameRunAgentJournalContext(
+                GameRunId,
+                AgentSessionId,
+                Required(requestId, nameof(requestId)),
+                BranchId,
+                BranchKind,
+                HostSink);
+        }
+
         public GameRunAgentJournalContext ForBranch(
             GameRunConversationBranchKind branchKind,
             string branchId)
