@@ -583,7 +583,7 @@ namespace Pinder.LlmAdapters
                 sb.AppendLine(
                     horninessGuidance,
                     GetTemplateSource(promptCatalog, templateKey),
-                    "datee-horniness-reaction");
+                    templateKey);
                 sb.AppendLine();
             }
 
