@@ -217,7 +217,6 @@ namespace Pinder.SessionSetup
                 archetypesEnabled: archetypesEnabled,
                 consolidatedPersonality: def.ConsolidatedPersonality,
                 generatedBackstory: def.Backstory,
-                generatedPsychiatricDiagnosis: def.PsychiatricDiagnosis,
                 structuralFragmentLookup: promptRuntimeBinding?.StructuralFragmentLookup,
                 structuralFragmentLookupEx: promptRuntimeBinding?.StructuralFragmentLookupEx,
                 textingStyleConflicts: promptRuntimeBinding?.TextingStyleConflicts);

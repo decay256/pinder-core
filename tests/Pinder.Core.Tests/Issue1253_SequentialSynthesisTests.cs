@@ -371,7 +371,7 @@ namespace Pinder.Core.Tests
             Assert.Equal(def.PsychologicalStake, assembledProfile.PsychologicalStake);
             Assert.Equal(def.ConsolidatedPersonality, assembledProfile.ConsolidatedPersonality);
             Assert.Equal(def.ConsolidatedBackstory, assembledProfile.ConsolidatedBackstory);
-            Assert.Contains("anxiety", assembledProfile.AssembledSystemPrompt);
+            Assert.DoesNotContain("anxiety", assembledProfile.AssembledSystemPrompt);
             Assert.Contains("Alert, funny, and careful about needing anyone.", assembledProfile.AssembledSystemPrompt);
         }
 

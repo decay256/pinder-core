@@ -321,7 +321,6 @@ namespace Pinder.Core.Prompts
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
             IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
-            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null,
             Func<string, string?>? structuralFragmentLookup = null,
             Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
             TextingStyleConflicts? textingStyleConflicts = null)
@@ -336,7 +335,6 @@ namespace Pinder.Core.Prompts
                 archetypesEnabled,
                 consolidatedPersonality,
                 generatedBackstory,
-                generatedPsychiatricDiagnosis,
                 structuralFragmentLookup,
                 structuralFragmentLookupEx,
                 textingStyleConflicts).Text;
@@ -355,7 +353,6 @@ namespace Pinder.Core.Prompts
             bool archetypesEnabled = false,
             string? consolidatedPersonality = null,
             IReadOnlyDictionary<string, BackstoryFact>? generatedBackstory = null,
-            IReadOnlyDictionary<string, string>? generatedPsychiatricDiagnosis = null,
             Func<string, string?>? structuralFragmentLookup = null,
             Func<string, StructuralPromptResult?>? structuralFragmentLookupEx = null,
             TextingStyleConflicts? textingStyleConflicts = null)
@@ -421,8 +418,6 @@ namespace Pinder.Core.Prompts
                 AppendBulletList(sb, fragments.BackstoryFragments);
             }
             sb.AppendLine();
-
-            AppendPsychiatricDiagnosis(sb, generatedPsychiatricDiagnosis);
 
             sb.AppendLine(framing.TextingStyle, srcFile, srcKey);
             var textingStyleLines = TextingStyleAggregator.AggregateAsList(
@@ -506,67 +501,6 @@ namespace Pinder.Core.Prompts
                 sb.Append("- ");
                 sb.AppendLine(fragment);
             }
-        }
-
-        private static void AppendPsychiatricDiagnosis(
-            AnnotatedStringBuilder sb,
-            IReadOnlyDictionary<string, string>? diagnosis)
-        {
-            if (diagnosis == null || diagnosis.Count == 0)
-                return;
-
-            var keys = new List<string>(diagnosis.Keys);
-            keys.Sort(StringComparer.Ordinal);
-
-            bool emittedHeader = false;
-            foreach (string key in keys)
-            {
-                if (string.IsNullOrWhiteSpace(key))
-                    continue;
-                if (!diagnosis.TryGetValue(key, out var rawValue) || string.IsNullOrWhiteSpace(rawValue))
-                    continue;
-
-                if (!emittedHeader)
-                {
-                    sb.AppendLine("THERAPIST DIAGNOSIS");
-                    emittedHeader = true;
-                }
-
-                sb.Append("- ");
-                sb.Append(FormatDiagnosisKey(key));
-                sb.Append(": ");
-                sb.AppendLine(rawValue.Trim());
-            }
-
-            if (emittedHeader)
-                sb.AppendLine();
-        }
-
-        private static string FormatDiagnosisKey(string key)
-        {
-            var sb = new StringBuilder(key.Length);
-            bool capitalizeNext = true;
-            foreach (char ch in key.Trim())
-            {
-                if (ch == '_' || ch == '-')
-                {
-                    sb.Append(' ');
-                    capitalizeNext = false;
-                    continue;
-                }
-
-                if (capitalizeNext && char.IsLetter(ch))
-                {
-                    sb.Append(char.ToUpperInvariant(ch));
-                    capitalizeNext = false;
-                }
-                else
-                {
-                    sb.Append(ch);
-                    capitalizeNext = false;
-                }
-            }
-            return sb.ToString();
         }
     }
 }

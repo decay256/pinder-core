@@ -567,7 +567,7 @@ namespace Pinder.Core.Tests
         }
 
         [Fact]
-        public void Parse_SystemPrompt_IncludesGeneratedPsychiatricDiagnosis()
+        public void Parse_SystemPrompt_DoesNotIncludeGeneratedPsychiatricDiagnosis()
         {
             var itemRepo = LoadItemRepo();
             var anatomyRepo = LoadAnatomyRepo();
@@ -576,10 +576,12 @@ namespace Pinder.Core.Tests
 
             var profile = CharacterDefinitionLoader.Parse(json, itemRepo, anatomyRepo);
 
-            Assert.Contains("THERAPIST DIAGNOSIS", profile.AssembledSystemPrompt);
-            Assert.Contains("- Defense reaction: turns sincere moments into bits", profile.AssembledSystemPrompt);
-            Assert.Contains("- Derived feeling: terror of being ordinary", profile.AssembledSystemPrompt);
-            Assert.DoesNotContain("derived_feeling", profile.AssembledSystemPrompt);
+            Assert.NotNull(profile.PsychiatricDiagnosis);
+            Assert.Equal("terror of being ordinary", profile.PsychiatricDiagnosis["derived_feeling"]);
+            Assert.Equal("turns sincere moments into bits", profile.PsychiatricDiagnosis["defense_reaction"]);
+            Assert.DoesNotContain("THERAPIST DIAGNOSIS", profile.AssembledSystemPrompt);
+            Assert.DoesNotContain("turns sincere moments into bits", profile.AssembledSystemPrompt);
+            Assert.DoesNotContain("terror of being ordinary", profile.AssembledSystemPrompt);
         }
 
         [Fact]
