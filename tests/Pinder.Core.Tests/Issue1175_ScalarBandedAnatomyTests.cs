@@ -127,7 +127,7 @@ namespace Pinder.Core.Tests
             // veins = 0.30 → band 2 (0.20-0.50) → personality fragment
             Assert.True(
                 fragments.PersonalityFragments.Any(f =>
-                    f.Contains("veins defined but subtle", StringComparison.OrdinalIgnoreCase)),
+                    f.Contains("subtle veins reward anyone attentive", StringComparison.OrdinalIgnoreCase)),
                 "veins=0.30 should resolve to band 2 personality");
 
             // The assembled system prompt must contain PERSONALITY section

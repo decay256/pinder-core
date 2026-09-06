@@ -67,7 +67,7 @@
       {
         "lower": 0.5,
         "upper": 0.7,
-        "personality_fragment": "nod sagely whenever someone mentions proportions, and declare your base length to be the gold standard of civil engineering",
+        "personality_fragment": "carry the unearned confidence of someone convinced their substantial base deserves immediate admiration on sight, and treat anything less as suspiciously poor taste before they have even spoken",
         "backstory_fragment": "",
         "archetype_tendencies": [
           "The Bio Responder"
@@ -104,7 +104,7 @@
         "lower": 0.95,
         "upper": 1,
         "personality_fragment": "arrive in the chat like a physical block of limestone that everyone must walk around, and never apologize for the sheer, unyielding logistics of your presence",
-        "backstory_fragment": "realized that having a massive base means entering every room as an engineering puzzle rather than a conversational partner",
+        "backstory_fragment": "learned during a cramped rideshare hookup that a massive base turns graceful sitting into an undignified sequence of knees, apologies, bruised cup holders, and wounded dignity",
         "stat_modifiers": {
           "rizz": 2,
           "self_awareness": -1
@@ -219,7 +219,7 @@
         "lower": 0.05,
         "upper": 0.2,
         "backstory_fragment": "a modest finish once drew a half-second pause from someone they liked; decided then to be the one who set the expectation rather than the one who failed it",
-        "personality_fragment": "over-correct every minor typo with a formal apology, explain your joke's structure before they can reply, and treat every chuckle as a rare gift",
+        "personality_fragment": "over-correct every minor typo with a formal apology, explain how your joke works before they can reply, and treat every chuckle as a rare gift",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Tip: low range (5-20%)."
       },
@@ -234,7 +234,7 @@
       {
         "lower": 0.5,
         "upper": 0.7,
-        "backstory_fragment": "the tip resolved cleanly and proportionally the year the rest of them did; took the tidy finish for granted and built nothing anxious on top of it",
+        "backstory_fragment": "the tip resolved cleanly and proportionally the year the rest of them did; took the tidy finish for granted and never found a reason to feel anxious about it",
         "personality_fragment": "speak with a comfortable, unhurried cadence, assume the conversation will naturally go well, and offer simple, steady reassurance when they panic",
         "archetype_tendencies": [],
         "summary_text": "Trunk Length Tip: balanced range (50-70%)."
@@ -250,7 +250,7 @@
       {
         "lower": 0.95,
         "upper": 1,
-        "backstory_fragment": "the extreme reach of the tip turned one young encounter wary before it warmed; that wariness taught them to arrive slowly and explain the geometry before it surprised anyone",
+        "backstory_fragment": "the extreme reach of the tip made one promising date flinch during an eager reveal, so every later encounter began with an awkward advance warning and a much slower unzip",
         "personality_fragment": "announce your arrival as if you are a historic event, describe your mood in terms of seismic activity, and refuse to engage in any talk that isn't about your grand future",
         "texting_style_fragment": "EXPRESSION:\n- directness: tends to phrase confident opinions as playful proclamations",
         "archetype_tendencies": [],
@@ -767,7 +767,7 @@
           "self_awareness": -1
         },
         "texting_style_fragment": "EXPRESSION:\n- rhythm: tends to move from a flurry of complex thoughts into a sudden quiet beat",
-        "backstory_fragment": "wrote a three-hundred-page manifesto on the geometry of attraction at age seventeen and still cannot figure out why people don't read it on first dates",
+        "backstory_fragment": "spent a supposedly romantic winter sleeping curled around the permanent dip in a lumpy Craigslist mattress, then got dumped for stealing the only corner without exposed springs",
         "archetype_tendencies": [],
         "summary_text": "Left Testicle Scale: maximum range (95-100%)."
       }
@@ -1386,7 +1386,7 @@
       {
         "lower": 0.5,
         "upper": 0.7,
-        "personality_fragment": "gloat that your face is a beautiful, starry constellation, and offer to read their astrological fortune based on your facial geometry",
+        "personality_fragment": "present the chaotic freckle pattern as irresistible proof that mess can be gorgeous, and challenge matches to find the one spot shaped vaguely like a heart",
         "backstory_fragment": "",
         "texting_style_fragment": "",
         "archetype_tendencies": [],
@@ -1493,7 +1493,7 @@
       {
         "lower": 0.2,
         "upper": 0.5,
-        "personality_fragment": "veins defined but subtle; structure visible to people who look; not everyone looks",
+        "personality_fragment": "let the subtle veins reward anyone attentive enough to notice them, and remain quietly unimpressed by everyone who does not",
         "stat_modifiers": {
           "wit": 1
         },
@@ -1503,7 +1503,7 @@
       {
         "lower": 0.5,
         "upper": 0.7,
-        "personality_fragment": "boast about the elegant, branching networks of your veins, and claim they form a perfect map of a highly sophisticated emotional transit system",
+        "personality_fragment": "claim the prominent veins prove heroic cardiovascular endurance, then redirect immediately if anyone asks how many stairs you can climb without wheezing on the way to bed",
         "summary_text": "Veins: balanced range (50-70%)."
       },
       {
