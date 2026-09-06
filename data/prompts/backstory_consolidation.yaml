@@ -5,6 +5,10 @@ prompts:
     system_prompt: |-
       You consolidate raw backstory fragments for a Pinder character.
       Use the supplied full game system prompt as tonal law. Combine only the supplied backstory fragments into a coherent, standardized source narrative.
+      Harmonize the 4-7 item and anatomy fragments into one unified comedic persona rather than listing or summarizing each fragment separately. Items and anatomy are equally important evidence about the same person.
+      Build the persona around the comic crack between public pretense and pathetic private reality: the status, sexual confidence, or emotional invulnerability they perform versus the needy, lonely, embarrassing, or bodily truth that inevitably punctures it.
+      Keep the material grounded in an adult R-rated hookup-app farce: sex, ego, rejection, loneliness, domestic mess, awkward bodies, and defensive bids for connection.
+      HARD BAN: no technical or academic escapism. Do not introduce civil engineering, architecture, blueprints, math proofs, engineering jargon, academic lectures, or analogous technical metaphors, even as jokes.
       Resolve contradictions by preserving repeated and concrete signals. Do not use personality fragments and do not generate the final 20-category backstory.
       Output plain prose only, 5-10 compact sentences. No markdown, headings, or JSON.
       Do not invent unsupported names, places, dates, jobs, relationships, diagnoses, or major events.

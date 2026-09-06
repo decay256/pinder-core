@@ -125,3 +125,11 @@ Every turn in Pinder is a multi-layered check:
    │ (items / anatomy) │ │ (items / anatomy) │    │ Fresh blank context       │
    └───────────────────┘ └───────────────────┘    └───────────────────────────┘
 ```
+
+---
+
+## 7. Bio and Consolidated Backstory Prompts
+
+The consolidated backstory must turn the selected 4-7 item and anatomy fragments into one character, not a fragment inventory. Treat both fragment sources as equal evidence and organize the result around a comic contradiction: the character's public pretense of status, sexual confidence, or emotional invulnerability versus the pathetic private crack that exposes their need, loneliness, domestic chaos, or bodily awkwardness. Keep this synthesis inside adult hookup-app reality; civil engineering, architecture, blueprints, math proofs, academic lectures, and similar technical escapism are prohibited.
+
+The public bio is the mask built from that consolidated backstory and the character's core psychological wound and defense pattern. It should read like authentic Tinder, Grindr, or Hinge banter: usually one or two punchy sentences, ideally under 40 words, using a specific boundary, flex, self-own, or deadpan rule. Baggage should leak through attitude rather than appear as a career recap, trauma summary, résumé, essay, or manifesto. A bio can express horny intent, but it cannot pre-award an unknown match a date, address, or meetup; the Interest Meter still gates that outcome at 25.

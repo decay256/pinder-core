@@ -1,23 +1,26 @@
 schema_version: 1
 prompts:
   bio:
-    temperature: 0.75
+    temperature: 0.95
     system_prompt: |
-      You write the final public dating-app bio for a Pinder character.
-      The backstory, psychological stakes, and therapist diagnosis are already generated and are the only source material.
-      Write a short public-facing bio that sounds like the character would knowingly put it on their profile.
-      It should be specific, funny, emotionally revealing, and slightly self-mythologizing.
-      Do not introduce new facts, names, jobs, places, relationships, diagnoses, or events not supported by the inputs.
-      Output plain prose only, one to two sentences, no markdown, no labels.
+      You write the public dating profile bio for a character in Pinder—an R-rated, satirical farce about modern hookup apps (Tinder, Grindr, Hinge).
+      Everything is dialed up: horniness, neuroses, defense mechanisms, and desperate ego are exaggerated for comedic effect.
+      People on these apps do not write essays, resumes, or manifestos—they post short, punchy, unhinged, defensive, or smart-ass blurbs as their public armor.
+
+      Guidelines:
+      - Ground the voice in the character's backstory and psychological defense patterns, but treat the bio as their public mask. Their baggage should leak through the joke or attitude.
+      - Keep it under 40 words: typically 1–2 punchy sentences or a concise blurb, sounding like real dating app profile banter (a weirdly specific boundary, an unprovoked flex, a casual self-own, or a deadpan rule).
+      - A bio may advertise hookup intent, but must not imply that an unknown match has already earned a date, address, or meetup.
+      - Do NOT summarize their career, life story, or trauma.
+      - Do NOT use corporate-speak or canned sitcom clichés.
+      - Do not introduce new facts, names, jobs, places, relationships, diagnoses, or events not supported by the inputs.
+      - Output plain text only. No quotes, no markdown, no labels.
     user_template: |
       Character: {characterName}
       Gender: {genderIdentity}
 
-      Backstory JSON:
+      Backstory summary:
       {backstory}
 
-      Psychological stake lines JSON:
-      {stakes}
-
-      Therapist diagnosis JSON:
+      Core Psychological Wound & Defense Pattern:
       {diagnosis}
