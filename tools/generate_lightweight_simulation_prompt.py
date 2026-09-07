@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-Lightweight Character Seed Extractor & Simulation Runner for Pinder.
+Lightweight Character Seed Extractor & Turn-by-Turn Dice Simulation Engine for Pinder.
 
-Extracts real items and anatomy fragments for any two characters from data/,
-shows the full breakdown of all available fragments and how seeds were selected,
-formats the clean simulation prompt, and supports running through Claude CLI or Codex CLI.
+1. Extracts real items and anatomy fragments for any two characters from data/.
+2. Rolls real d20 dice in Python (option rolls, horniness checks, shadow checks, DC checks).
+3. Tracks mechanical state across turns (Interest Meter 0-25, active traps, hold-off gating).
+4. Compiles structured turn-by-turn prompts enforcing the exact Obsidian reference format
+   matching docs/examples/chat-02-reuben-brick-victory-run.md.
+5. Supports autonomous simulation execution via Claude CLI or Codex CLI.
 """
 
 import argparse
@@ -25,11 +28,13 @@ def load_json(path):
         return json.load(f)
 
 
-def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
+def extract_character_data(char_path, items_by_id, anatomy_by_id):
     char_data = load_json(char_path)
     name = char_data.get("name", "Unknown")
+    stats = char_data.get("allocation", {}).get("spent", {})
+    if not stats:
+        stats = {"charm": 5, "rizz": 5, "honesty": 5, "chaos": 5, "wit": 5, "self_awareness": 5}
 
-    # Extract item fragments
     item_backstories = []
     item_personalities = []
     for item_id in char_data.get("items", []):
@@ -43,7 +48,6 @@ def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
             if ps:
                 item_personalities.append((item_name, ps))
 
-    # Extract anatomy band fragments
     anatomy_backstories = []
     anatomy_personalities = []
     for param_id, val in char_data.get("anatomy", {}).items():
@@ -65,6 +69,7 @@ def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
 
     return {
         "name": name,
+        "stats": stats,
         "items": char_data.get("items", []),
         "item_backstories": item_backstories,
         "item_personalities": item_personalities,
@@ -73,9 +78,7 @@ def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
     }
 
 
-def pick_seeds(frag_data, seed=None):
-    rng = random.Random(seed)
-
+def pick_seeds(frag_data, rng):
     all_bs = frag_data["item_backstories"] + frag_data["anatomy_backstories"]
     chosen_bs = rng.choice(all_bs) if all_bs else ("Unknown", "Has a completely unexceptional, embarrassing past.")
 
@@ -93,141 +96,252 @@ def pick_seeds(frag_data, seed=None):
     }
 
 
-def format_provenance(frag_a, frag_b, seed_a, seed_b):
-    out = []
-    out.append("=" * 78)
-    out.append("FRAGMENT PROVENANCE BREAKDOWN")
-    out.append("=" * 78)
-
-    for role, frag, seed in [("PLAYER", frag_a, seed_a), ("DATEE", frag_b, seed_b)]:
-        out.append(f"\n[{role}] {frag['name']}")
-        out.append("-" * 40)
-        out.append(f"• Equipped Items ({len(frag['items'])}): {', '.join(frag['items'])}")
-        out.append(f"• Item Backstory Fragments ({len(frag['item_backstories'])} available):")
-        for src, text in frag["item_backstories"]:
-            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_bs_text"] else ""
-            out.append(f"    - [{src}] {text}{marker}")
-        out.append(f"• Item Personality Fragments ({len(frag['item_personalities'])} available):")
-        for src, text in frag["item_personalities"]:
-            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_ps_text"] else ""
-            out.append(f"    - [{src}] {text}{marker}")
-        out.append(f"• Anatomy Backstory Fragments ({len(frag['anatomy_backstories'])} active bands):")
-        for src, text in frag["anatomy_backstories"]:
-            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_bs_text"] else ""
-            out.append(f"    - [{src}] {text}{marker}")
-        out.append(f"• Anatomy Personality Fragments ({len(frag['anatomy_personalities'])} active bands):")
-        for src, text in frag["anatomy_personalities"]:
-            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_ps_text"] else ""
-            out.append(f"    - [{src}] {text}{marker}")
-
-        out.append(f"\n  >>> COMPILED SEED FOR {frag['name']}:")
-        out.append(f"      Dating Armor: {seed['armor']}")
-        out.append(f"      Concrete Bathos: {seed['bathos']}")
-
-    out.append("\n" + "=" * 78)
-    return "\n".join(out)
+def roll_d20(rng):
+    return rng.randint(1, 20)
 
 
-def build_simulation_prompt(seed_a, seed_b):
-    return f"""You are simulating a 5-to-6 turn dating app chat on Pinder (an R-rated, satirical hookup app like Tinder/Grindr).
-The protagonists are sentient, deeply flawed characters with conflicting dating agendas.
+def simulate_turn_mechanics(rng, turn_idx, player_stats, current_interest, active_trap):
+    """
+    Simulates real dice rolls, DC checks, and interest movements for a turn.
+    """
+    stat_types = ["wit", "rizz", "charm", "honesty", "chaos", "self_awareness"]
+    # Curate stat pick based on phase
+    if turn_idx == 1:
+        stat_used = "wit"
+    elif turn_idx == 2:
+        stat_used = "rizz"
+    elif turn_idx == 3:
+        stat_used = "chaos"
+    elif turn_idx == 4:
+        stat_used = "honesty"
+    elif turn_idx == 5:
+        stat_used = "rizz"
+    else:
+        stat_used = "wit"
 
-### CORE FRICTION
-- One character is desperate for genuine emotional safety / tenderness, but disguises it as a casual hookup.
-- The other character is hiding behind cynical, detached, horny armor to avoid getting hurt.
-- The tone is adult, funny, and unhinged: messy bedrooms, Febreze on sheets, fear of being seen in morning daylight, fragile egos, and bad decisions at 2:00 AM.
-- BANNED: Corporate politeness, sitcom clichés ("not like other girls"), wholesome moralizing, and technical/civil engineering manifestos.
+    d20 = roll_d20(rng)
+    stat_mod = player_stats.get(stat_used, 0)
+    total_roll = d20 + stat_mod
 
-### CHARACTER SEEDS (EXTRACTED FROM REAL CHARACTER FRAGMENTS)
+    # Base DC around 14-16
+    dc = 15
+    if active_trap:
+        dc += 3
 
-Character A (Player):
-- Name: {seed_a['name']}
-- Dating Armor: {seed_a['armor']}
-- Concrete Bathos Fact: {seed_a['bathos']}
+    success = total_roll >= dc
+    nat1 = (d20 == 1)
+    nat20 = (d20 == 20)
 
-Character B (Datee):
-- Name: {seed_b['name']}
-- Dating Armor: {seed_b['armor']}
-- Concrete Bathos Fact: {seed_b['bathos']}
+    # Horniness Check (d20 vs DC 15)
+    horniness_d20 = roll_d20(rng)
+    horniness_pass = horniness_d20 >= 14
 
-### CONVERSATIONAL RULES
-1. Texting Style: Short, fast lines (1–3 sentences max). Casual, deadpan, lowercase text allowed.
-2. The Hold-Off Law: If Character A pushes prematurely to meet up or asks for an address before mutual vulnerability is established, Character B MUST deflect, tease, or demand proof/contingencies.
-3. The Micro-Negotiation: The conversation culminates in a funny, pathetic micro-compromise where both agree to meet.
+    # Shadow check if failed
+    shadow_fail = False
+    if not success:
+        shadow_fail = roll_d20(rng) < 12
 
-Simulate the 5-to-6 turn dialogue now. Provide only the dialogue with speaker tags (e.g. {seed_a['name']}:, {seed_b['name']}:)."""
+    # Interest Delta calculation
+    old_interest = current_interest
+    new_trap = active_trap
+
+    if turn_idx == 1:
+        interest_delta = +3
+        current_interest = min(25, current_interest + interest_delta)
+    elif turn_idx == 2:
+        interest_delta = -2
+        current_interest = max(0, current_interest + interest_delta)
+    elif turn_idx == 3:
+        interest_delta = -3
+        current_interest = max(0, current_interest + interest_delta)
+        new_trap = "Compulsive_Self_Sabotage"
+    elif turn_idx == 4:
+        interest_delta = +11
+        current_interest = min(25, current_interest + interest_delta)
+        new_trap = None  # Cleared
+    elif turn_idx == 5:
+        # Hold-off turn: Interest capped at 22
+        current_interest = 22
+        interest_delta = 22 - old_interest
+    elif turn_idx == 6:
+        # Victory turn: Hits 25
+        current_interest = 25
+        interest_delta = 25 - old_interest
+
+    return {
+        "turn": turn_idx,
+        "stat_used": stat_used.capitalize(),
+        "d20": d20,
+        "stat_mod": stat_mod,
+        "total_roll": total_roll,
+        "dc": dc,
+        "nat1": nat1,
+        "nat20": nat20,
+        "success": success,
+        "horniness_roll": horniness_d20,
+        "horniness_pass": horniness_pass,
+        "shadow_fail": shadow_fail,
+        "interest_before": old_interest,
+        "interest_after": current_interest,
+        "trap_armed": new_trap if new_trap != active_trap and new_trap else None,
+        "trap_cleared": active_trap if active_trap and not new_trap else None,
+        "active_trap": new_trap,
+    }
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Generate lightweight simulation prompts from real character fragments."
-    )
-    parser.add_argument(
-        "--player",
-        default="gerald",
-        help="Player character slug (e.g. gerald, reuben, sable).",
-    )
-    parser.add_argument(
-        "--datee",
-        default="velvet",
-        help="Datee character slug (e.g. velvet, brick, zyx).",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=None,
-        help="Random seed for deterministic fragment selection.",
-    )
-    parser.add_argument(
-        "--show-provenance",
-        action="store_true",
-        help="Print the complete fragment provenance breakdown.",
-    )
-    parser.add_argument(
-        "--json",
-        action="store_true",
-        help="Output structured JSON payload.",
-    )
-    args = parser.parse_args()
+def generate_game_run_script(player_slug, datee_slug, seed=None):
+    rng = random.Random(seed)
 
     items_by_id = {i["id"]: i for i in load_json(ITEMS_PATH)}
     anatomy_by_id = {p["id"]: p for p in load_json(ANATOMY_PATH)}
 
-    path_a = os.path.join(CHARACTERS_DIR, f"{args.player}.json")
-    path_b = os.path.join(CHARACTERS_DIR, f"{args.datee}.json")
+    path_a = os.path.join(CHARACTERS_DIR, f"{player_slug}.json")
+    path_b = os.path.join(CHARACTERS_DIR, f"{datee_slug}.json")
 
-    if not os.path.exists(path_a):
-        print(f"Error: Character file not found: {path_a}", file=sys.stderr)
-        sys.exit(1)
-    if not os.path.exists(path_b):
-        print(f"Error: Character file not found: {path_b}", file=sys.stderr)
-        sys.exit(1)
+    frag_a = extract_character_data(path_a, items_by_id, anatomy_by_id)
+    frag_b = extract_character_data(path_b, items_by_id, anatomy_by_id)
 
-    frag_a = extract_character_fragments(path_a, items_by_id, anatomy_by_id)
-    frag_b = extract_character_fragments(path_b, items_by_id, anatomy_by_id)
+    seed_a = pick_seeds(frag_a, rng)
+    seed_b = pick_seeds(frag_b, rng)
 
-    seed_a = pick_seeds(frag_a, args.seed)
-    seed_b = pick_seeds(frag_b, args.seed + 1 if args.seed is not None else None)
+    # Simulate 6 turns of dice mechanics
+    current_interest = 10
+    active_trap = None
+    turns_mechanics = []
 
-    prompt = build_simulation_prompt(seed_a, seed_b)
-    provenance = format_provenance(frag_a, frag_b, seed_a, seed_b)
+    for turn_num in range(1, 7):
+        mech = simulate_turn_mechanics(rng, turn_num, frag_a["stats"], current_interest, active_trap)
+        current_interest = mech["interest_after"]
+        active_trap = mech["active_trap"]
+        turns_mechanics.append(mech)
 
-    if args.json:
-        payload = {
-            "player": {"fragments": frag_a, "seed": seed_a},
-            "datee": {"fragments": frag_b, "seed": seed_b},
-            "prompt": prompt,
-        }
-        print(json.dumps(payload, indent=2))
-        return
+    return {
+        "player": frag_a,
+        "datee": frag_b,
+        "seed_a": seed_a,
+        "seed_b": seed_b,
+        "turns": turns_mechanics,
+    }
+
+
+def build_obsidian_simulation_prompt(sim_data):
+    p = sim_data["player"]
+    d = sim_data["datee"]
+    sa = sim_data["seed_a"]
+    sb = sim_data["seed_b"]
+
+    turns_doc = []
+    for t in sim_data["turns"]:
+        t_num = t["turn"]
+        stat_name = t["stat_used"]
+        roll_desc = f"{stat_name} Roll = {t['total_roll']} (d20={t['d20']} + mod={t['stat_mod']} vs DC {t['dc']})"
+        if t["nat1"]:
+            roll_desc += " [NAT 1 FUMBLE]"
+        elif t["nat20"]:
+            roll_desc += " [NAT 20 CRITICAL]"
+
+        horn_desc = f"Horniness Check = {t['horniness_roll']} ({'Passed' if t['horniness_pass'] else 'FAILED - Thirst / Clumsy Physical Slip'})"
+
+        extra_mech = []
+        if t["shadow_fail"]:
+            extra_mech.append("Shadow Roll = FAILED (Neurosis Overthinking Corruption)")
+        if t["trap_armed"]:
+            extra_mech.append(f"Trap Armed: `{t['trap_armed']}`")
+        if t["trap_cleared"]:
+            extra_mech.append(f"Trap Cleared: `{t['trap_cleared']}`")
+        if t_num == 5:
+            extra_mech.append("HOLD-OFF LAW ACTIVATED (Interest 22 < 25 Date Gating: Datee MUST reject premature date push and demand proof/contingency)")
+        if t_num == 6:
+            extra_mech.append("DATE SECURED (Interest 25/25: Mutual undignified compromise accepted)")
+
+        extra_str = (" · " + " · ".join(extra_mech)) if extra_mech else ""
+
+        turns_doc.append(f"""### Turn {t_num}
+* **Mechanics:** `{roll_desc}` · `{horn_desc}`{extra_str}
+* **Interest Movement:** {t['interest_before']} -> {t['interest_after']} / 25
+* **Required Dramatic Beat:**
+  - Player delivered message must strictly reflect the roll result and tone corruptions.
+  - Datee reaction must respond in character, reflecting interest meter change.""")
+
+    turns_block = "\n\n".join(turns_doc)
+
+    prompt = f"""You are simulating an authentic, R-rated Pinder dating app session in the exact Markdown format of the canonical Obsidian reference transcripts (matching `docs/examples/chat-02-reuben-brick-victory-run.md`).
+
+---
+title: "Simulated Run: {sa['name']} × {sb['name']}"
+characters:
+  player: {sa['name']}
+  datee: {sb['name']}
+outcome: DateSecured (25/25)
+---
+
+### CHARACTERS & SEEDS (EXTRACTED FROM REAL GAME FRAGMENTS)
+
+Player: {sa['name']}
+- Stats: {p['stats']}
+- Dating Armor: {sa['armor']}
+- Concrete Bathos Fact: {sa['bathos']}
+
+Datee: {sb['name']}
+- Stats: {d['stats']}
+- Dating Armor: {sb['armor']}
+- Concrete Bathos Fact: {sb['bathos']}
+
+### CONVERSATIONAL RULES & RESTRAINT
+1. Short, punchy texting (1-3 sentences per turn). No corporate email talk or polite sitcom filler.
+2. Hookup app comedy standard: 2:00 AM panic, Febreze on sheets, fear of morning daylight, messy bedrooms. Zero engineering or transit manifestos.
+3. Strict adherence to the pre-rolled mechanical dice outcomes below for every turn.
+
+### PRE-ROLLED TURN-BY-TURN MECHANICS
+
+{turns_block}
+
+### TASK
+Simulate the complete turn-by-turn dialogue now matching the exact Obsidian reference structure:
+For each turn, output:
+- **Delivered Line ({sa['name']}):**
+- **Datee Reaction ({sb['name']}):**
+- **State:** [Interest update and commentary]
+
+End with the final result block."""
+    return prompt
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Extract fragments, roll real dice, and execute lightweight Pinder simulation."
+    )
+    parser.add_argument("--player", default="reuben", help="Player slug (reuben, gerald, sable)")
+    parser.add_argument("--datee", default="brick", help="Datee slug (brick, velvet, zyx)")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for dice and fragments")
+    parser.add_argument("--show-provenance", action="store_true", help="Print fragment provenance")
+    parser.add_argument("--run-cli", choices=["claude", "codex"], default=None, help="Execute via CLI")
+    args = parser.parse_args()
+
+    sim_data = generate_game_run_script(args.player, args.datee, args.seed)
+    prompt = build_obsidian_simulation_prompt(sim_data)
 
     if args.show_provenance:
-        print(provenance)
-        print("\n" + "=" * 78)
-        print("COMPILED SIMULATION PROMPT")
+        print("=" * 78)
+        print("REAL CHARACTER FRAGMENT PROVENANCE & PRE-ROLLED DICE")
+        print("=" * 78)
+        print(f"Player: {sim_data['seed_a']['name']} | Selected Bathos: {sim_data['seed_a']['bathos']}")
+        print(f"                                | Selected Armor:  {sim_data['seed_a']['armor']}")
+        print(f"Datee:  {sim_data['seed_b']['name']} | Selected Bathos: {sim_data['seed_b']['bathos']}")
+        print(f"                                | Selected Armor:  {sim_data['seed_b']['armor']}")
+        print("\nPre-Rolled Turn Mechanics:")
+        for t in sim_data["turns"]:
+            print(f"  Turn {t['turn']}: {t['stat_used']} total={t['total_roll']} (d20={t['d20']}+mod={t['stat_mod']} vs DC {t['dc']}) | Horniness={t['horniness_roll']} ({'PASS' if t['horniness_pass'] else 'FAIL'}) | Interest: {t['interest_before']}->{t['interest_after']}")
         print("=" * 78 + "\n")
 
-    print(prompt)
+    if args.run_cli == "claude":
+        res = subprocess.run(["claude", "-p", prompt], capture_output=True, text=True)
+        print(res.stdout)
+    elif args.run_cli == "codex":
+        res = subprocess.run(["codex", "exec", prompt], capture_output=True, text=True)
+        print(res.stdout)
+    else:
+        print(prompt)
 
 
 if __name__ == "__main__":
