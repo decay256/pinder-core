@@ -341,6 +341,67 @@ def generate_game_run_script(player_slug, datee_slug, seed=None, num_turns=6, st
     }
 
 
+def convert_markdown_to_pdf(input_md_path, output_pdf_path, title="Pinder Document"):
+    os.makedirs(os.path.dirname(output_pdf_path), exist_ok=True)
+    cmd = [
+        "pandoc",
+        input_md_path,
+        "-o",
+        output_pdf_path,
+        "--pdf-engine=wkhtmltopdf",
+        f"--metadata=title:{title}",
+        "-V",
+        "margin-top=15mm",
+        "-V",
+        "margin-bottom=15mm",
+        "-V",
+        "margin-left=15mm",
+        "-V",
+        "margin-right=15mm",
+    ]
+    subprocess.run(cmd, check=True, capture_output=True)
+    return output_pdf_path
+
+
+def export_simulation_artifacts_as_pdf(prompt, sim_data, run_slug="simulation-run"):
+    pdf_dir = os.path.join(REPO_ROOT, "docs", "pdf")
+    discord_cache_dir = "/root/.hermes/cache/documents"
+    os.makedirs(pdf_dir, exist_ok=True)
+    os.makedirs(discord_cache_dir, exist_ok=True)
+
+    # 1. Export exact prompt as MD & PDF
+    prompt_md_path = os.path.join(pdf_dir, f"{run_slug}-exact-prompt.md")
+    with open(prompt_md_path, "w", encoding="utf-8") as f:
+        f.write(prompt)
+    prompt_pdf_path = os.path.join(pdf_dir, f"{run_slug}-exact-prompt.pdf")
+    convert_markdown_to_pdf(prompt_md_path, prompt_pdf_path, title=f"Pinder Prompt: {run_slug}")
+
+    # 2. Export guides to PDF
+    guides = [
+        ("docs/comedy-authoring-guide.md", "comedy-authoring-guide.pdf", "Pinder Comedy Authoring Guide"),
+        ("docs/lightweight-session-simulation-guide.md", "lightweight-session-simulation-guide.pdf", "Pinder Lightweight Simulation Guide"),
+    ]
+    exported_pdfs = [prompt_pdf_path]
+    for rel_md, out_name, title in guides:
+        src = os.path.join(REPO_ROOT, rel_md)
+        dst = os.path.join(pdf_dir, out_name)
+        if os.path.exists(src):
+            convert_markdown_to_pdf(src, dst, title=title)
+            exported_pdfs.append(dst)
+
+    # Copy all exported PDFs to Discord media cache for delivery
+    cached_paths = []
+    for pdf_path in exported_pdfs:
+        fname = os.path.basename(pdf_path)
+        cache_dest = os.path.join(discord_cache_dir, fname)
+        subprocess.run(["cp", "-f", pdf_path, cache_dest], check=True)
+        cached_paths.append(cache_dest)
+
+    return {
+        "repo_pdf_dir": pdf_dir,
+        "repo_pdfs": exported_pdfs,
+        "cached_media_paths": cached_paths,
+    }
 def get_git_file_version(rel_path):
     try:
         res = subprocess.run(
@@ -485,6 +546,7 @@ def main():
     parser.add_argument("--turns", type=int, default=6, help="Number of turns to simulate")
     parser.add_argument("--starting-interest", type=int, default=10, help="Starting interest (default 10)")
     parser.add_argument("--show-provenance", action="store_true", help="Print fragment provenance")
+    parser.add_argument("--export-pdf", action="store_true", help="Compile documents and exact prompt to PDF in docs/pdf and Discord cache")
     parser.add_argument("--model-name", default=None, help="Explicit model name for provenance block")
     parser.add_argument("--run-cli", choices=["claude", "codex"], default=None, help="Execute via CLI")
     args = parser.parse_args()
@@ -522,6 +584,20 @@ def main():
                 f"| Delta={delta_str} ({', '.join(t['breakdown'])}) "
                 f"| Interest: {t['interest_before']}->{t['interest_after']} ({t['state_after']})"
             )
+        print("=" * 78 + "\n")
+
+    if args.export_pdf:
+        slug = f"pinder-sim-{args.player}-{args.datee}-s{args.seed}"
+        export_res = export_simulation_artifacts_as_pdf(prompt, sim_data, run_slug=slug)
+        print("\n" + "=" * 78)
+        print("PDF ARTIFACT EXPORT COMPLETE")
+        print("=" * 78)
+        print(f"Repository Directory: {export_res['repo_pdf_dir']}")
+        for p in export_res['repo_pdfs']:
+            print(f"  - File: {p}")
+        print("\nDiscord Media Attachment Directives:")
+        for cp in export_res['cached_media_paths']:
+            print(f"  MEDIA:{cp}")
         print("=" * 78 + "\n")
 
     if args.run_cli == "claude":
