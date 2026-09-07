@@ -416,7 +416,15 @@ def get_git_file_version(rel_path):
         return "unknown"
 
 
-def build_obsidian_simulation_prompt(sim_data, model_name="Claude Sonnet-5 (via Claude Code CLI)"):
+def read_repo_file(rel_path):
+    full_path = os.path.join(REPO_ROOT, rel_path)
+    if os.path.exists(full_path):
+        with open(full_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return ""
+
+
+def build_obsidian_simulation_prompt(sim_data, model_name="Claude Sonnet-5 (via Claude Code CLI)", include_guides=True):
     p = sim_data["player"]
     d = sim_data["datee"]
     sa = sim_data["seed_a"]
@@ -424,6 +432,24 @@ def build_obsidian_simulation_prompt(sim_data, model_name="Claude Sonnet-5 (via 
 
     comedy_guide_ver = get_git_file_version("docs/comedy-authoring-guide.md")
     sim_guide_ver = get_git_file_version("docs/lightweight-session-simulation-guide.md")
+
+    guides_text = ""
+    if include_guides:
+        comedy_guide_content = read_repo_file("docs/comedy-authoring-guide.md")
+        sim_guide_content = read_repo_file("docs/lightweight-session-simulation-guide.md")
+        guides_text = f"""
+### AUTHORING & SIMULATION GUIDES (CANONICAL REFERENCE)
+
+#### 1. Comedy & Character Authoring Guide (docs/comedy-authoring-guide.md @ commit {comedy_guide_ver})
+{comedy_guide_content}
+
+---
+
+#### 2. Lightweight Session Simulation Guide (docs/lightweight-session-simulation-guide.md @ commit {sim_guide_ver})
+{sim_guide_content}
+
+---
+"""
 
     turns_doc = []
     for t in sim_data["turns"]:
@@ -502,7 +528,7 @@ outcome: {sim_data['overall_outcome']} ({sim_data['final_interest']}/25)
 The session has a strict turn limit of {sim_data['num_turns']} turns.
 Winning a date requires reaching Interest >= 25 within {sim_data['num_turns']} turns.
 If the turn cap is reached with Interest < 25, the datee loses interest, the conversation peters out, and the match is lost (Lost Interest / Defeat).
-
+{guides_text}
 ### CHARACTERS & SEEDS (EXTRACTED FROM REAL GAME FRAGMENTS)
 
 Player: {sa['name']}
@@ -547,6 +573,7 @@ def main():
     parser.add_argument("--starting-interest", type=int, default=10, help="Starting interest (default 10)")
     parser.add_argument("--show-provenance", action="store_true", help="Print fragment provenance")
     parser.add_argument("--export-pdf", action="store_true", help="Compile documents and exact prompt to PDF in docs/pdf and Discord cache")
+    parser.add_argument("--no-include-guides", action="store_true", help="Do not inline full guide texts into the prompt")
     parser.add_argument("--model-name", default=None, help="Explicit model name for provenance block")
     parser.add_argument("--run-cli", choices=["claude", "codex"], default=None, help="Execute via CLI")
     args = parser.parse_args()
@@ -563,7 +590,9 @@ def main():
     sim_data = generate_game_run_script(
         args.player, args.datee, args.seed, args.turns, args.starting_interest
     )
-    prompt = build_obsidian_simulation_prompt(sim_data, model_name=model_label)
+    prompt = build_obsidian_simulation_prompt(
+        sim_data, model_name=model_label, include_guides=not args.no_include_guides
+    )
 
     if args.show_provenance:
         print("=" * 78)
