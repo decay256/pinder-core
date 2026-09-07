@@ -451,6 +451,21 @@ def build_obsidian_simulation_prompt(sim_data, model_name="Claude Sonnet-5 (via 
 ---
 """
 
+    def fmt_frags(lst):
+        if not lst:
+            return "  (None)"
+        return "\n".join([f"  * {name}: {txt}" for name, txt in lst])
+
+    p_item_bs = fmt_frags(p["item_backstories"])
+    p_item_ps = fmt_frags(p["item_personalities"])
+    p_anat_bs = fmt_frags(p["anatomy_backstories"])
+    p_anat_ps = fmt_frags(p["anatomy_personalities"])
+
+    d_item_bs = fmt_frags(d["item_backstories"])
+    d_item_ps = fmt_frags(d["item_personalities"])
+    d_anat_bs = fmt_frags(d["anatomy_backstories"])
+    d_anat_ps = fmt_frags(d["anatomy_personalities"])
+
     turns_doc = []
     for t in sim_data["turns"]:
         t_num = t["turn"]
@@ -529,17 +544,43 @@ The session has a strict turn limit of {sim_data['num_turns']} turns.
 Winning a date requires reaching Interest >= 25 within {sim_data['num_turns']} turns.
 If the turn cap is reached with Interest < 25, the datee loses interest, the conversation peters out, and the match is lost (Lost Interest / Defeat).
 {guides_text}
-### CHARACTERS & SEEDS (EXTRACTED FROM REAL GAME FRAGMENTS)
+### CHARACTERS & FRAGMENT CATALOG (REAL GAME FRAGMENTS)
 
 Player: {sa['name']}
 - Stats: {p['stats']}
-- Dating Armor: {sa['armor']}
-- Concrete Bathos Fact: {sa['bathos']}
+- Active Equipped Items ({len(p['items'])}): {', '.join(p['items'])}
+- Active Dating Armor (Personality Seed):
+  * Source: {sa['chosen_ps_source']}
+  * Text: "{sa['chosen_ps_text']}"
+- Active Bathos Fact (Backstory Seed):
+  * Source: {sa['chosen_bs_source']}
+  * Text: "{sa['chosen_bs_text']}"
+- Full Equipped Item Backstory Catalog:
+{p_item_bs}
+- Full Equipped Item Personality Armor Catalog:
+{p_item_ps}
+- Active Anatomy Backstory Bands:
+{p_anat_bs}
+- Active Anatomy Personality Bands:
+{p_anat_ps}
 
 Datee: {sb['name']}
 - Stats: {d['stats']}
-- Dating Armor: {sb['armor']}
-- Concrete Bathos Fact: {sb['bathos']}
+- Active Equipped Items ({len(d['items'])}): {', '.join(d['items'])}
+- Active Dating Armor (Personality Seed):
+  * Source: {sb['chosen_ps_source']}
+  * Text: "{sb['chosen_ps_text']}"
+- Active Bathos Fact (Backstory Seed):
+  * Source: {sb['chosen_bs_source']}
+  * Text: "{sb['chosen_bs_text']}"
+- Full Equipped Item Backstory Catalog:
+{d_item_bs}
+- Full Equipped Item Personality Armor Catalog:
+{d_item_ps}
+- Active Anatomy Backstory Bands:
+{d_anat_bs}
+- Active Anatomy Personality Bands:
+{d_anat_ps}
 
 ### CONVERSATIONAL RULES & RESTRAINT
 1. Short, punchy texting (1-3 sentences per turn). No corporate email talk or polite sitcom filler.
