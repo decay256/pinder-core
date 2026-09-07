@@ -319,6 +319,15 @@ def generate_game_run_script(player_slug, datee_slug, seed=None, num_turns=6, st
         active_trap = mech["active_trap"]
         turns_mechanics.append(mech)
 
+    final_state = get_interest_state(current_interest)
+    # Turn limit rule: If maximum turns reached without securing a date (interest < 25), datee loses interest / session ends in defeat or unmatch
+    if current_interest >= 25:
+        overall_outcome = "DateSecured"
+    elif current_interest == 0:
+        overall_outcome = "Unmatched"
+    else:
+        overall_outcome = "TurnLimitReached_LostInterest"
+
     return {
         "player": frag_a,
         "datee": frag_b,
@@ -326,7 +335,9 @@ def generate_game_run_script(player_slug, datee_slug, seed=None, num_turns=6, st
         "seed_b": seed_b,
         "turns": turns_mechanics,
         "final_interest": current_interest,
-        "final_state": get_interest_state(current_interest),
+        "final_state": final_state,
+        "overall_outcome": overall_outcome,
+        "num_turns": num_turns,
     }
 
 
@@ -362,17 +373,27 @@ def build_obsidian_simulation_prompt(sim_data):
 
         sign = "+" if t["final_delta"] > 0 else ""
         delta_str = f"{sign}{t['final_delta']}" if t["final_delta"] != 0 else "0"
-        status_emoji = "🎯" if t["success"] else "💥"
-        thirst_emoji = "🧊" if t["horniness_pass"] else "🔥"
-        shadow_emoji = "🛡️" if t["shadow_pass"] else "👁️"
-        steer_emoji = "🧭" if t["steering_success"] else "⚓"
+        
+        # Self-evident outcome emoji
+        if t["nat20"]:
+            outcome_badge = "🌟 CRITICAL SUCCESS (Nat 20)"
+        elif t["nat1"]:
+            outcome_badge = "💀 CATASTROPHIC FUMBLE (Nat 1)"
+        elif t["success"]:
+            outcome_badge = "✅ SUCCESS"
+        else:
+            outcome_badge = "❌ FAILED"
+
+        thirst_badge = "🧊 COMPOSED (No slip)" if t["horniness_pass"] else "🔥 THIRST SLIP (Halved delta)"
+        shadow_badge = "🛡️ RESISTED (Clean)" if t["shadow_pass"] else f"👁️ TAINTED ({t['paired_shadow']} cap +1)"
+        steer_badge = "🧭 STEERED (Took wheel)" if t["steering_success"] else "⚓ DRIFT (Datee controls)"
 
         turns_doc.append(f"""### Turn {t_num}
 * Mechanics:
-  - {status_emoji} Primary Roll: {roll_desc}
-  - {thirst_emoji} Horniness: {horn_desc}
-  - {shadow_emoji} Shadow: {shadow_desc}
-  - {steer_emoji} Steering: {steer_desc}
+  - Roll Result: {outcome_badge} [{roll_desc}]
+  - Horniness:   {thirst_badge} [{horn_desc}]
+  - Shadow:      {shadow_badge} [{shadow_desc}]
+  - Steering:    {steer_badge} [{steer_desc}]
 * Outcome & Interest Delta:
   - 📊 Meter: {t['interest_before']} ({t['state_before']}) ➔ {t['interest_after']} ({t['state_after']}) [{delta_str}]
   - ⚙️ Factors: {', '.join(t['breakdown'])}
@@ -382,15 +403,20 @@ def build_obsidian_simulation_prompt(sim_data):
 
     turns_block = "\n\n".join(turns_doc)
 
-    prompt = f"""You are simulating an authentic, R-rated Pinder dating app session in the exact Markdown format of the canonical Obsidian reference transcripts.
+    prompt = f"""You are simulating an authentic, R-rated Pinder dating app session in the exact format of the canonical reference transcripts.
 
 ---
 title: "Simulated Run: {sa['name']} × {sb['name']}"
 characters:
   player: {sa['name']}
   datee: {sb['name']}
-outcome: {sim_data['final_state']} ({sim_data['final_interest']}/25)
+outcome: {sim_data['overall_outcome']} ({sim_data['final_interest']}/25)
 ---
+
+### GAME ENGINE INVARIANT: TURN CAP & WIN CONDITION
+The session has a strict turn limit of {sim_data['num_turns']} turns.
+Winning a date requires reaching Interest >= 25 within {sim_data['num_turns']} turns.
+If the turn cap is reached with Interest < 25, the datee loses interest, the conversation peters out, and the match is lost (Lost Interest / Defeat).
 
 ### CHARACTERS & SEEDS (EXTRACTED FROM REAL GAME FRAGMENTS)
 
