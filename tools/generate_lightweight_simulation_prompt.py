@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-Lightweight Character Seed Extractor & Simulation Prompt Generator for Pinder.
+Lightweight Character Seed Extractor & Simulation Runner for Pinder.
 
-Extracts real items and anatomy fragments for any two characters from data/
-and compiles a clean, rules-free simulation prompt adhering to:
-docs/lightweight-session-simulation-guide.md
+Extracts real items and anatomy fragments for any two characters from data/,
+shows the full breakdown of all available fragments and how seeds were selected,
+formats the clean simulation prompt, and supports running through Claude CLI or Codex CLI.
 """
 
 import argparse
 import json
 import os
 import random
+import subprocess
 import sys
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -64,6 +65,7 @@ def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
 
     return {
         "name": name,
+        "items": char_data.get("items", []),
         "item_backstories": item_backstories,
         "item_personalities": item_personalities,
         "anatomy_backstories": anatomy_backstories,
@@ -74,11 +76,9 @@ def extract_character_fragments(char_path, items_by_id, anatomy_by_id):
 def pick_seeds(frag_data, seed=None):
     rng = random.Random(seed)
 
-    # Pick 1 concrete bathos fact (prefer item backstory, fallback to anatomy)
     all_bs = frag_data["item_backstories"] + frag_data["anatomy_backstories"]
     chosen_bs = rng.choice(all_bs) if all_bs else ("Unknown", "Has a completely unexceptional, embarrassing past.")
 
-    # Pick 1 active dating armor (prefer item personality, fallback to anatomy)
     all_ps = frag_data["item_personalities"] + frag_data["anatomy_personalities"]
     chosen_ps = rng.choice(all_ps) if all_ps else ("Unknown", "Deflects intimacy with defensive skepticism.")
 
@@ -86,30 +86,50 @@ def pick_seeds(frag_data, seed=None):
         "name": frag_data["name"],
         "bathos": f"{chosen_bs[1]} ({chosen_bs[0]})",
         "armor": f"{chosen_ps[1]} ({chosen_ps[0]})",
+        "chosen_bs_source": chosen_bs[0],
+        "chosen_bs_text": chosen_bs[1],
+        "chosen_ps_source": chosen_ps[0],
+        "chosen_ps_text": chosen_ps[1],
     }
 
 
-def build_simulation_prompt(char_a, char_b, seed=None):
-    items_by_id = {i["id"]: i for i in load_json(ITEMS_PATH)}
-    anatomy_by_id = {p["id"]: p for p in load_json(ANATOMY_PATH)}
+def format_provenance(frag_a, frag_b, seed_a, seed_b):
+    out = []
+    out.append("=" * 78)
+    out.append("FRAGMENT PROVENANCE BREAKDOWN")
+    out.append("=" * 78)
 
-    path_a = os.path.join(CHARACTERS_DIR, f"{char_a}.json")
-    path_b = os.path.join(CHARACTERS_DIR, f"{char_b}.json")
+    for role, frag, seed in [("PLAYER", frag_a, seed_a), ("DATEE", frag_b, seed_b)]:
+        out.append(f"\n[{role}] {frag['name']}")
+        out.append("-" * 40)
+        out.append(f"• Equipped Items ({len(frag['items'])}): {', '.join(frag['items'])}")
+        out.append(f"• Item Backstory Fragments ({len(frag['item_backstories'])} available):")
+        for src, text in frag["item_backstories"]:
+            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_bs_text"] else ""
+            out.append(f"    - [{src}] {text}{marker}")
+        out.append(f"• Item Personality Fragments ({len(frag['item_personalities'])} available):")
+        for src, text in frag["item_personalities"]:
+            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_ps_text"] else ""
+            out.append(f"    - [{src}] {text}{marker}")
+        out.append(f"• Anatomy Backstory Fragments ({len(frag['anatomy_backstories'])} active bands):")
+        for src, text in frag["anatomy_backstories"]:
+            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_bs_text"] else ""
+            out.append(f"    - [{src}] {text}{marker}")
+        out.append(f"• Anatomy Personality Fragments ({len(frag['anatomy_personalities'])} active bands):")
+        for src, text in frag["anatomy_personalities"]:
+            marker = " -> [SELECTED AS SEED]" if text == seed["chosen_ps_text"] else ""
+            out.append(f"    - [{src}] {text}{marker}")
 
-    if not os.path.exists(path_a):
-        print(f"Error: Character file not found: {path_a}", file=sys.stderr)
-        sys.exit(1)
-    if not os.path.exists(path_b):
-        print(f"Error: Character file not found: {path_b}", file=sys.stderr)
-        sys.exit(1)
+        out.append(f"\n  >>> COMPILED SEED FOR {frag['name']}:")
+        out.append(f"      Dating Armor: {seed['armor']}")
+        out.append(f"      Concrete Bathos: {seed['bathos']}")
 
-    frag_a = extract_character_fragments(path_a, items_by_id, anatomy_by_id)
-    frag_b = extract_character_fragments(path_b, items_by_id, anatomy_by_id)
+    out.append("\n" + "=" * 78)
+    return "\n".join(out)
 
-    seed_a = pick_seeds(frag_a, seed)
-    seed_b = pick_seeds(frag_b, seed + 1 if seed is not None else None)
 
-    prompt = f"""You are simulating a 5-to-6 turn dating app chat on Pinder (an R-rated, satirical hookup app like Tinder/Grindr).
+def build_simulation_prompt(seed_a, seed_b):
+    return f"""You are simulating a 5-to-6 turn dating app chat on Pinder (an R-rated, satirical hookup app like Tinder/Grindr).
 The protagonists are sentient, deeply flawed characters with conflicting dating agendas.
 
 ### CORE FRICTION
@@ -135,8 +155,7 @@ Character B (Datee):
 2. The Hold-Off Law: If Character A pushes prematurely to meet up or asks for an address before mutual vulnerability is established, Character B MUST deflect, tease, or demand proof/contingencies.
 3. The Micro-Negotiation: The conversation culminates in a funny, pathetic micro-compromise where both agree to meet.
 
-Simulate the 5-to-6 turn dialogue now."""
-    return prompt
+Simulate the 5-to-6 turn dialogue now. Provide only the dialogue with speaker tags (e.g. {seed_a['name']}:, {seed_b['name']}:)."""
 
 
 def main():
@@ -159,9 +178,55 @@ def main():
         default=None,
         help="Random seed for deterministic fragment selection.",
     )
+    parser.add_argument(
+        "--show-provenance",
+        action="store_true",
+        help="Print the complete fragment provenance breakdown.",
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Output structured JSON payload.",
+    )
     args = parser.parse_args()
 
-    prompt = build_simulation_prompt(args.player, args.datee, args.seed)
+    items_by_id = {i["id"]: i for i in load_json(ITEMS_PATH)}
+    anatomy_by_id = {p["id"]: p for p in load_json(ANATOMY_PATH)}
+
+    path_a = os.path.join(CHARACTERS_DIR, f"{args.player}.json")
+    path_b = os.path.join(CHARACTERS_DIR, f"{args.datee}.json")
+
+    if not os.path.exists(path_a):
+        print(f"Error: Character file not found: {path_a}", file=sys.stderr)
+        sys.exit(1)
+    if not os.path.exists(path_b):
+        print(f"Error: Character file not found: {path_b}", file=sys.stderr)
+        sys.exit(1)
+
+    frag_a = extract_character_fragments(path_a, items_by_id, anatomy_by_id)
+    frag_b = extract_character_fragments(path_b, items_by_id, anatomy_by_id)
+
+    seed_a = pick_seeds(frag_a, args.seed)
+    seed_b = pick_seeds(frag_b, args.seed + 1 if args.seed is not None else None)
+
+    prompt = build_simulation_prompt(seed_a, seed_b)
+    provenance = format_provenance(frag_a, frag_b, seed_a, seed_b)
+
+    if args.json:
+        payload = {
+            "player": {"fragments": frag_a, "seed": seed_a},
+            "datee": {"fragments": frag_b, "seed": seed_b},
+            "prompt": prompt,
+        }
+        print(json.dumps(payload, indent=2))
+        return
+
+    if args.show_provenance:
+        print(provenance)
+        print("\n" + "=" * 78)
+        print("COMPILED SIMULATION PROMPT")
+        print("=" * 78 + "\n")
+
     print(prompt)
 
 
