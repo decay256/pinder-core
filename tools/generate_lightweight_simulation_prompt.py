@@ -360,14 +360,23 @@ def build_obsidian_simulation_prompt(sim_data):
         if t["interest_after"] >= 25:
             extra_mech.append("DATE SECURED (Interest 25/25)")
 
-        mech_str = " · ".join([f"`{roll_desc}`"] + [f"`{m}`" for m in extra_mech])
         sign = "+" if t["final_delta"] > 0 else ""
         delta_str = f"{sign}{t['final_delta']}" if t["final_delta"] != 0 else "0"
+        status_emoji = "🎯" if t["success"] else "💥"
+        thirst_emoji = "🧊" if t["horniness_pass"] else "🔥"
+        shadow_emoji = "🛡️" if t["shadow_pass"] else "👁️"
+        steer_emoji = "🧭" if t["steering_success"] else "⚓"
 
         turns_doc.append(f"""### Turn {t_num}
-* **Mechanics:** {mech_str}
-* **Interest Movement:** {t['interest_before']} ({t['state_before']}) -> {t['interest_after']} ({t['state_after']}) [{delta_str}: {', '.join(t['breakdown'])}]
-* **Required Dramatic Beat:**
+* Mechanics:
+  - {status_emoji} Primary Roll: {roll_desc}
+  - {thirst_emoji} Horniness: {horn_desc}
+  - {shadow_emoji} Shadow: {shadow_desc}
+  - {steer_emoji} Steering: {steer_desc}
+* Outcome & Interest Delta:
+  - 📊 Meter: {t['interest_before']} ({t['state_before']}) ➔ {t['interest_after']} ({t['state_after']}) [{delta_str}]
+  - ⚙️ Factors: {', '.join(t['breakdown'])}
+* Required Dramatic Beat:
   - Delivered message must strictly reflect the roll result, horniness slip (if failed), and shadow neurosis (if failed).
   - Datee reaction must respond in character, reflecting interest change and steering question if succeeded.""")
 
