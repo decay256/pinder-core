@@ -341,11 +341,28 @@ def generate_game_run_script(player_slug, datee_slug, seed=None, num_turns=6, st
     }
 
 
-def build_obsidian_simulation_prompt(sim_data):
+def get_git_file_version(rel_path):
+    try:
+        res = subprocess.run(
+            ["git", "-C", REPO_ROOT, "log", "-n", "1", "--format=%h (%cd)", "--date=short", rel_path],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        val = res.stdout.strip()
+        return val if val else "uncommitted"
+    except Exception:
+        return "unknown"
+
+
+def build_obsidian_simulation_prompt(sim_data, model_name="Claude Sonnet-5 (via Claude Code CLI)"):
     p = sim_data["player"]
     d = sim_data["datee"]
     sa = sim_data["seed_a"]
     sb = sim_data["seed_b"]
+
+    comedy_guide_ver = get_git_file_version("docs/comedy-authoring-guide.md")
+    sim_guide_ver = get_git_file_version("docs/lightweight-session-simulation-guide.md")
 
     turns_doc = []
     for t in sim_data["turns"]:
@@ -413,6 +430,13 @@ characters:
 outcome: {sim_data['overall_outcome']} ({sim_data['final_interest']}/25)
 ---
 
+### PROVENANCE & ENGINE RUN METADATA
+* Model: {model_name}
+* Prompt & Mechanics Standards:
+  - Comedy Authoring Guide: docs/comedy-authoring-guide.md @ git commit {comedy_guide_ver}
+  - Simulation Guide: docs/lightweight-session-simulation-guide.md @ git commit {sim_guide_ver}
+  - Engine Rules: Pinder.Core / Pinder.Rules SSOT (SuccessScale, FailureScale, ShadowCaps, HorninessHalving)
+
 ### GAME ENGINE INVARIANT: TURN CAP & WIN CONDITION
 The session has a strict turn limit of {sim_data['num_turns']} turns.
 Winning a date requires reaching Interest >= 25 within {sim_data['num_turns']} turns.
@@ -461,13 +485,23 @@ def main():
     parser.add_argument("--turns", type=int, default=6, help="Number of turns to simulate")
     parser.add_argument("--starting-interest", type=int, default=10, help="Starting interest (default 10)")
     parser.add_argument("--show-provenance", action="store_true", help="Print fragment provenance")
+    parser.add_argument("--model-name", default=None, help="Explicit model name for provenance block")
     parser.add_argument("--run-cli", choices=["claude", "codex"], default=None, help="Execute via CLI")
     args = parser.parse_args()
+
+    model_label = args.model_name
+    if not model_label:
+        if args.run_cli == "claude":
+            model_label = "Claude Sonnet-5 (via Claude Code CLI)"
+        elif args.run_cli == "codex":
+            model_label = "Codex CLI (gpt-4o/o3)"
+        else:
+            model_label = "Claude Sonnet-5 (authoring SSOT)"
 
     sim_data = generate_game_run_script(
         args.player, args.datee, args.seed, args.turns, args.starting_interest
     )
-    prompt = build_obsidian_simulation_prompt(sim_data)
+    prompt = build_obsidian_simulation_prompt(sim_data, model_name=model_label)
 
     if args.show_provenance:
         print("=" * 78)
