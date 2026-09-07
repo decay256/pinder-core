@@ -21,9 +21,18 @@ This heavy context suffocates comedic timing and leads models to fall back on sa
 
 ---
 
-## 2. The Minimal Simulation Prompt (Copy-Pasteable Template)
+## 2. Model Selection & Context-Free Subagent Execution
 
-Use this exact prompt when simulating a session with any LLM (Claude 3.7 Sonnet, DeepSeek, Qwen 3.8, Mistral Large):
+To maintain pristine comedic voice and timing without conversational pollution from debugging, tickets, or prior turns:
+- **Always run simulations in an isolated subagent** (`delegate_task`).
+- **Recommended Model:** Sonnet-5 / Claude 3.7 Sonnet (`anthropic` native provider first, `openrouter` as fallback), as documented in `docs/llm-model-selection-for-comedy.md`.
+- **Zero-Tool Context:** The simulation subagent requires no filesystem or terminal tools—just the prompt generated from real fragments.
+
+---
+
+## 3. The Minimal Simulation Prompt (Copy-Pasteable Template)
+
+Use this exact prompt when simulating a session with any LLM:
 
 ```markdown
 You are simulating a 5-to-6 turn dating app chat on Pinder (an R-rated, satirical hookup app like Tinder/Grindr).
@@ -57,27 +66,22 @@ Simulate the 5-to-6 turn dialogue now.
 
 ---
 
-## 3. The 3 Pillars of Comedic Timing
+## 4. Extracting Real Fragments Dynamically
 
-### 1. The Bathos Drop
-Pretense must be violently punctured by unglamorous adult reality.
-- *Bad:* "I've had a really hard time finding love in this city."
-- *Good (Bathos):* "I flipped the comforter over so the coffee stain is by the footboard. But the intent was pure."
+To run this against the real characters in `pinder-core/data/characters/`, use the repository CLI tool:
 
-### 2. The Hold-Off Dynamic
-Dating app tension dies if someone immediately says "Yes, come over." The datee must throw up barriers:
-- *"look, i'm not coming over if you're going to make me listen to your Spotify playlist or tell me about your ex."*
-- *"if you come over at 2 AM, what's the morning protocol? i don't do awkward lingering."*
+```bash
+cd /root/projects/pinder-core
+./tools/generate_lightweight_simulation_prompt.py --player <player_slug> --datee <datee_slug> [--seed <int>]
+```
 
-### 3. The Absurd Micro-Compromise
-Victory is never a fairytale romance; it is an undignified mutual truce:
-- *"If you try to hold my hand while we're doing it, I'm biting you."*
-- *"...A gentle shoulder touch?"*
-- *"Shoulder is fine. Unlock the front door, I'm getting in an Uber."*
+The script dynamically pulls:
+- Real `backstory_fragment` (bathos) and `personality_fragment` (armor) from equipped items (`data/items/starter-items.json`).
+- Real anatomy band fragments matching character slider values (`data/anatomy/anatomy-parameters.json`).
 
 ---
 
-## 4. Evaluation Checklist (The 5-Point Vibe Check)
+## 5. Evaluation Checklist (The 5-Point Vibe Check)
 
 After generating a lightweight session, evaluate it against these 5 criteria:
 
@@ -91,9 +95,10 @@ After generating a lightweight session, evaluate it against these 5 criteria:
 
 ---
 
-## 5. Reference Examples
+## 6. Reference Transcripts & Benchmark Documentation
 
-See the full documented transcripts generated with this methodology in `docs/examples/`:
-- **`chat-01-gerald-velvet-romantic-friction.md`** — Romantic vs. Transactional Friction.
-- **`chat-02-reuben-brick-victory-run.md`** — Multi-stage victory run with the Hold-Off rule.
-- **`chat-03-reuben-brick-unmatched-fail.md`** — Catastrophic losing run ending in ghosting/unmatch.
+- **`docs/llm-model-selection-for-comedy.md`** — Authoritative model benchmark rankings for comedy and subtext.
+- **`docs/comedy-authoring-guide.md`** — Complete comedy authoring standard, character progression, and Critic Loop.
+- **`docs/examples/chat-01-gerald-velvet-romantic-friction.md`** — Romantic vs. Transactional Friction.
+- **`docs/examples/chat-02-reuben-brick-victory-run.md`** — Multi-stage victory run with the Hold-Off rule.
+- **`docs/examples/chat-03-reuben-brick-unmatched-fail.md`** — Catastrophic losing run ending in ghosting/unmatch.
