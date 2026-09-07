@@ -3,7 +3,12 @@
 Lightweight Character Seed Extractor & Turn-by-Turn Dice Simulation Engine for Pinder.
 
 1. Extracts real items and anatomy fragments for any two characters from data/.
-2. Rolls real d20 dice in Python (option rolls, horniness checks, shadow checks, DC checks).
+2. Rolls real d20 dice in Python adhering directly to C# Pinder engine rules:
+   - Primary Option Roll (d20 + stat vs DC)
+   - Horniness Check (d20 vs Thirst DC)
+   - Shadow Roll (paired neurosis check: Charm->Madness, Rizz->Despair, Honesty->Denial,
+     Chaos->Fixation, Wit->Dread, SelfAwareness->Overthinking)
+   - Steering Roll (Steering Mod = (Charm+Wit+SA)/3 vs DC = 16 + (Datee SA+Rizz+Honesty)/3)
 3. Tracks mechanical state across turns (Interest Meter 0-25, active traps, hold-off gating).
 4. Compiles structured turn-by-turn prompts enforcing the exact Obsidian reference format
    matching docs/examples/chat-02-reuben-brick-victory-run.md.
@@ -21,6 +26,16 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ITEMS_PATH = os.path.join(REPO_ROOT, "data", "items", "starter-items.json")
 ANATOMY_PATH = os.path.join(REPO_ROOT, "data", "anatomy", "anatomy-parameters.json")
 CHARACTERS_DIR = os.path.join(REPO_ROOT, "data", "characters")
+
+# Engine Shadow Pairing SSOT (TurnOrchestrator.Helpers.cs)
+SHADOW_PAIRS = {
+    "Charm": "Madness",
+    "Rizz": "Despair",
+    "Honesty": "Denial",
+    "Chaos": "Fixation",
+    "Wit": "Dread",
+    "SelfAwareness": "Overthinking",
+}
 
 
 def load_json(path):
@@ -100,12 +115,14 @@ def roll_d20(rng):
     return rng.randint(1, 20)
 
 
-def simulate_turn_mechanics(rng, turn_idx, player_stats, current_interest, active_trap):
+def simulate_turn_mechanics(rng, turn_idx, player_stats, datee_stats, current_interest, active_trap):
     """
-    Simulates real dice rolls, DC checks, and interest movements for a turn.
+    Simulates real dice rolls across the 4 engine roll systems:
+    1. Primary Option Roll (d20 + stat vs DC)
+    2. Horniness Check (d20 vs DC 15)
+    3. Shadow Check (Paired neurosis check)
+    4. Steering Roll (Player (Charm+Wit+SA)/3 vs DC 16 + Datee (SA+Rizz+Honesty)/3)
     """
-    stat_types = ["wit", "rizz", "charm", "honesty", "chaos", "self_awareness"]
-    # Curate stat pick based on phase
     if turn_idx == 1:
         stat_used = "wit"
     elif turn_idx == 2:
@@ -119,27 +136,41 @@ def simulate_turn_mechanics(rng, turn_idx, player_stats, current_interest, activ
     else:
         stat_used = "wit"
 
+    # 1. Primary Option Roll
     d20 = roll_d20(rng)
     stat_mod = player_stats.get(stat_used, 0)
     total_roll = d20 + stat_mod
-
-    # Base DC around 14-16
-    dc = 15
-    if active_trap:
-        dc += 3
-
+    dc = 15 + (3 if active_trap else 0)
     success = total_roll >= dc
     nat1 = (d20 == 1)
     nat20 = (d20 == 20)
 
-    # Horniness Check (d20 vs DC 15)
+    # 2. Horniness Check (Thirst DC = 15)
     horniness_d20 = roll_d20(rng)
     horniness_pass = horniness_d20 >= 14
 
-    # Shadow check if failed
-    shadow_fail = False
-    if not success:
-        shadow_fail = roll_d20(rng) < 12
+    # 3. Shadow Roll (Paired Neurosis)
+    paired_shadow = SHADOW_PAIRS.get(stat_used.capitalize(), "Dread")
+    shadow_d20 = roll_d20(rng)
+    # Shadow check passes if roll >= 12, fails and corrupts if < 12
+    shadow_fail = (shadow_d20 < 12) if not success else (shadow_d20 < 6)
+
+    # 4. Steering Roll (SteeringEngine.cs)
+    # Steering mod = (Charm + Wit + SA) / 3
+    player_charm = player_stats.get("charm", 0)
+    player_wit = player_stats.get("wit", 0)
+    player_sa = player_stats.get("self_awareness", 0)
+    steering_mod = (player_charm + player_wit + player_sa) // 3
+
+    # Steering DC = 16 + (Datee SA + Datee Rizz + Datee Honesty) / 3
+    datee_sa = datee_stats.get("self_awareness", 0)
+    datee_rizz = datee_stats.get("rizz", 0)
+    datee_honesty = datee_stats.get("honesty", 0)
+    steering_dc = 16 + (datee_sa + datee_rizz + datee_honesty) // 3
+
+    steering_d20 = roll_d20(rng)
+    steering_total = steering_d20 + steering_mod
+    steering_success = steering_total >= steering_dc
 
     # Interest Delta calculation
     old_interest = current_interest
@@ -180,7 +211,14 @@ def simulate_turn_mechanics(rng, turn_idx, player_stats, current_interest, activ
         "success": success,
         "horniness_roll": horniness_d20,
         "horniness_pass": horniness_pass,
+        "paired_shadow": paired_shadow,
+        "shadow_roll": shadow_d20,
         "shadow_fail": shadow_fail,
+        "steering_d20": steering_d20,
+        "steering_mod": steering_mod,
+        "steering_total": steering_total,
+        "steering_dc": steering_dc,
+        "steering_success": steering_success,
         "interest_before": old_interest,
         "interest_after": current_interest,
         "trap_armed": new_trap if new_trap != active_trap and new_trap else None,
@@ -204,13 +242,14 @@ def generate_game_run_script(player_slug, datee_slug, seed=None):
     seed_a = pick_seeds(frag_a, rng)
     seed_b = pick_seeds(frag_b, rng)
 
-    # Simulate 6 turns of dice mechanics
     current_interest = 10
     active_trap = None
     turns_mechanics = []
 
     for turn_num in range(1, 7):
-        mech = simulate_turn_mechanics(rng, turn_num, frag_a["stats"], current_interest, active_trap)
+        mech = simulate_turn_mechanics(
+            rng, turn_num, frag_a["stats"], frag_b["stats"], current_interest, active_trap
+        )
         current_interest = mech["interest_after"]
         active_trap = mech["active_trap"]
         turns_mechanics.append(mech)
@@ -240,11 +279,11 @@ def build_obsidian_simulation_prompt(sim_data):
         elif t["nat20"]:
             roll_desc += " [NAT 20 CRITICAL]"
 
-        horn_desc = f"Horniness Check = {t['horniness_roll']} ({'Passed' if t['horniness_pass'] else 'FAILED - Thirst / Clumsy Physical Slip'})"
+        horn_desc = f"Horniness Check = {t['horniness_roll']} ({'Passed' if t['horniness_pass'] else 'FAILED — Thirst / Clumsy Physical Slip'})"
+        shadow_desc = f"Shadow Roll ({t['paired_shadow']}) = {t['shadow_roll']} ({'FAILED — Neurosis Corruption' if t['shadow_fail'] else 'Resisted'})"
+        steering_desc = f"Steering Roll = {t['steering_total']} (d20={t['steering_d20']} + mod={t['steering_mod']} vs DC {t['steering_dc']}) -> {'SUCCEEDED (appends date-steering question)' if t['steering_success'] else 'FAILED (no steering)'}"
 
-        extra_mech = []
-        if t["shadow_fail"]:
-            extra_mech.append("Shadow Roll = FAILED (Neurosis Overthinking Corruption)")
+        extra_mech = [horn_desc, shadow_desc, steering_desc]
         if t["trap_armed"]:
             extra_mech.append(f"Trap Armed: `{t['trap_armed']}`")
         if t["trap_cleared"]:
@@ -254,14 +293,14 @@ def build_obsidian_simulation_prompt(sim_data):
         if t_num == 6:
             extra_mech.append("DATE SECURED (Interest 25/25: Mutual undignified compromise accepted)")
 
-        extra_str = (" · " + " · ".join(extra_mech)) if extra_mech else ""
+        mech_str = " · ".join([f"`{roll_desc}`"] + [f"`{m}`" for m in extra_mech])
 
         turns_doc.append(f"""### Turn {t_num}
-* **Mechanics:** `{roll_desc}` · `{horn_desc}`{extra_str}
+* **Mechanics:** {mech_str}
 * **Interest Movement:** {t['interest_before']} -> {t['interest_after']} / 25
 * **Required Dramatic Beat:**
-  - Player delivered message must strictly reflect the roll result and tone corruptions.
-  - Datee reaction must respond in character, reflecting interest meter change.""")
+  - Player delivered message must strictly reflect the primary roll, horniness check, shadow neurosis, and steering outcome.
+  - Datee reaction must respond in character, reflecting interest meter change and steering question.""")
 
     turns_block = "\n\n".join(turns_doc)
 
@@ -290,7 +329,7 @@ Datee: {sb['name']}
 ### CONVERSATIONAL RULES & RESTRAINT
 1. Short, punchy texting (1-3 sentences per turn). No corporate email talk or polite sitcom filler.
 2. Hookup app comedy standard: 2:00 AM panic, Febreze on sheets, fear of morning daylight, messy bedrooms. Zero engineering or transit manifestos.
-3. Strict adherence to the pre-rolled mechanical dice outcomes below for every turn.
+3. Strict adherence to the pre-rolled mechanical dice outcomes below for every turn (Option rolls, Horniness checks, Shadow corruptions, and Steering questions).
 
 ### PRE-ROLLED TURN-BY-TURN MECHANICS
 
@@ -299,6 +338,7 @@ Datee: {sb['name']}
 ### TASK
 Simulate the complete turn-by-turn dialogue now matching the exact Obsidian reference structure:
 For each turn, output:
+- **Mechanics line**
 - **Delivered Line ({sa['name']}):**
 - **Datee Reaction ({sb['name']}):**
 - **State:** [Interest update and commentary]
@@ -323,15 +363,17 @@ def main():
 
     if args.show_provenance:
         print("=" * 78)
-        print("REAL CHARACTER FRAGMENT PROVENANCE & PRE-ROLLED DICE")
+        print("REAL CHARACTER FRAGMENT PROVENANCE & PRE-ROLLED 4-ROLL ENGINE DICE")
         print("=" * 78)
         print(f"Player: {sim_data['seed_a']['name']} | Selected Bathos: {sim_data['seed_a']['bathos']}")
         print(f"                                | Selected Armor:  {sim_data['seed_a']['armor']}")
         print(f"Datee:  {sim_data['seed_b']['name']} | Selected Bathos: {sim_data['seed_b']['bathos']}")
         print(f"                                | Selected Armor:  {sim_data['seed_b']['armor']}")
-        print("\nPre-Rolled Turn Mechanics:")
+        print("\nPre-Rolled Turn Mechanics (Option + Horniness + Shadow + Steering):")
         for t in sim_data["turns"]:
-            print(f"  Turn {t['turn']}: {t['stat_used']} total={t['total_roll']} (d20={t['d20']}+mod={t['stat_mod']} vs DC {t['dc']}) | Horniness={t['horniness_roll']} ({'PASS' if t['horniness_pass'] else 'FAIL'}) | Interest: {t['interest_before']}->{t['interest_after']}")
+            steer_txt = "STEER-OK" if t["steering_success"] else "NO-STEER"
+            shadow_txt = f"{t['paired_shadow']}-FAIL" if t["shadow_fail"] else f"{t['paired_shadow']}-OK"
+            print(f"  Turn {t['turn']}: {t['stat_used']} total={t['total_roll']} vs DC {t['dc']} | Thirst={t['horniness_roll']} | Shadow={shadow_txt} | Steering={t['steering_total']} vs DC {t['steering_dc']} ({steer_txt}) | Interest: {t['interest_before']}->{t['interest_after']}")
         print("=" * 78 + "\n")
 
     if args.run_cli == "claude":
