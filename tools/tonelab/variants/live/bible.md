@@ -16,9 +16,9 @@ We learned three things the hard way.
 
 First, telling a writer "be funny" or "be intense" produces neither. Early versions of this game described the tone in loving detail and got chats where every line was a quip and nothing was funny, or where the characters described their own feelings like two therapists. Comedy and intensity don't come from tone. They come from the characters, specifically from what each one is hiding and how badly they hide it. That's what most of this brief is about.
 
-Second, a chat without a shape is a loop. Thirteen exchanges of two people flirting about the same thing, however filthy, is boring by the fifth. A good chat is a story: two strangers start out performing, small things get planted, something real breaks through, something goes badly wrong, and the ending pays off something from the beginning.
+Second, a chat without a shape is a loop. Thirteen exchanges of two people flirting about the same thing, however filthy, is boring by the fifth. A good chat is a story: two strangers start out performing, small things get planted, something real breaks through, something goes badly wrong, and the ending pays off something from the beginning. Underneath all of that, the story is two strangers finding out who the other one is. If by the end they don't know anything real about each other, nothing has happened, however much went wrong.
 
-Third, a character is not their file. We have rich, dark material on every character: their lies, their wounds, their exes, what they'd never say. When writers recite that material, the chat dies. A confession that reads like facts from a file isn't a moment, it's an info dump, and a tender wish typed out word for word from the file is the opposite of tender. The material is there so you understand the character well enough to know what they'd type. It is almost never what they type.
+Third, a character is not their file. We have rich, dark material on every character: their lies, their wounds, their exes, what they'd never say. When writers recite that material, the chat dies. A confession that reads like facts from a file isn't a moment, it's an info dump, and a tender wish typed out word for word from the file is the opposite of tender. The material is there so you understand the character well enough to know what they'd type. It is almost never typed the way the file says it. Their true stories do get told, but the way people tell things at midnight: a piece at a time, in their own words, with the embarrassing detail left in, never as a summary.
 
 ## The three things a character comes down to
 
@@ -80,11 +80,21 @@ Small and specific beats big and dark. "I've opened your photo nine times since 
 
 Filth carries the need. Sex is most intense when what someone wants in bed is the wound asking for something: Dolores wanting to be told, in the middle of it, that she's better than someone. Same filth, but now it costs something to type.
 
+## Getting to know each other
+
+This is what the reader stays for. Every character drops things about themselves early, half as a brag: a job, a place, an ex, a hobby that doesn't fit. Each one is a hook, and behind each hook is a true story that's specific: a place, a person, a moment, usually humiliating. A good chat is the two of them pulling on each other's hooks. One asks. The other dodges, or jokes, or tells a piece, and asks back. Every piece they hand over is something real the reader learns about them, and it changes how the other one talks to them afterwards. If someone drops a hook and the other one ignores it, that can be a moment too, but then the hook is still hanging and has to come back.
+
+Their stories rhyme. Two people with nothing in common don't click; two people who are hurt in the same place do, and neither of them knows it at the start. The click is the moment one of them recognises their own story in the other's. That's what a good ending is made of: not the agreement to meet, but one of them saying the thing that shows they understood, and the other one's guard coming down because of it. When it falls apart, the same material goes the other way: the blow-up is unhinged, but in the middle of it the character says the thing they'd never say, out loud, so the reader sees exactly what was exposed and why they couldn't take it.
+
+Habits have reasons. Otto rates everything out of ten. Halfway through his chat with Dolores she asks why, and it comes out that his dad graded his drawings, his school reports, and once his mother. After that the ratings aren't a bit anymore; each one is a little sad, and the reader watches for them. That's what a habit is for: it's funny until the reader finds out why, and finding out why is part of getting to know them. A habit also isn't a template. It shows when the character is scared and drops away when they're not, so the reader can tell how safe someone feels from how much of it shows. A character who does the same thing in every message isn't over the top, they're a format, and the reader stops reading them.
+
+Filth paces with closeness. At the start it's bravado, a way of hiding; at the end it's how they get close. It goes further when they've told each other something, not just because it's a new turn.
+
 ## The shape: setups and payoffs, without knowing the moves
 
 A chat is a story. It opens with two strangers performing. Small things get planted. Something real breaks through. Something goes badly wrong. Secrets come out, and each one changes the meaning of something we already saw. The ending pays off something from the first few turns.
 
-A payoff only works if it was planted, and a callback that just repeats an early joke is not a payoff. A payoff is the early thing turning out to mean something else. Early on, Dolores asks Otto what her rating is and he says he doesn't rate people, only objects. At the end:
+A reader only notices a setup that's about something a character cares about and that comes back: planted in the first turns, brought back once in the middle when it means more, and paid off at the end. Planted once and left alone for ten turns, it's forgotten. A payoff only works if it was planted, and a callback that just repeats an early joke is not a payoff. A payoff is the early thing turning out to mean something else. Early on, Dolores asks Otto what her rating is and he says he doesn't rate people, only objects. At the end:
 
 > Dolores_77: so what am I
 > Otto_Mat: I'm not rating you

@@ -9,6 +9,9 @@ ${history}
 The story so far: ${story_so_far}
 ${setup_note}
 
+${exchange}
+${habit_note}
+
 Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
 ${intended}
 

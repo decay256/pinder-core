@@ -13,13 +13,23 @@ What has already happened in the story, and what is still to come, is listed bel
 
 How the match answers: ${datee_name}'s reply follows the interest change, so a drop shows, and so does a rise. Below 25 the match does not agree to meet, however well the message landed. The match is entirely ours, and the match carries most of the story: plants the setups, asks the questions that open things up, delivers their own reveal, and usually has the last line.
 
+What they've told each other so far, and which hooks are still hanging, is listed below. Build on it. What someone has told changes how the other one talks to them; a hanging hook is something to pull on; and nobody tells the same thing twice.
+
+Each character's habit is in the plan, and the game says below how much of it this turn can carry: one message at most, and none when it showed in the turns before. Without the habit they're still entirely themselves: their voice is in what they choose to say.
+
+The filth paces with closeness. It goes further after they've told each other something, not just because it's a new turn.
+
 The shape of the turn, how many messages each of them sends and how long each one is, is set by the game and given below. Keep to it exactly. That's where a chat gets its rhythm: most turns are a few words each way, and the long ones are saved for the moments that need them. A one-word message is a whole message, and it can be the funniest line in the chat. Inside the shape, a character's habits can show or not: a one-word reply has no room for a list.
 
-If this turn is where the setup from the plan gets planted, add one last line that says only: PLANTED. It's for the game and never appears in the chat.
+After the messages, add the notes the game needs, one per line, each starting with its word. They're for the game and never appear in the chat:
+- TOLD: name: what they just gave away from their true story, in a few words. Only something real that the other didn't know before. One line per thing told.
+- HOOK: name: a new hook they dropped, in a few words.
+- PLANTED, alone on a line, if this turn plants the setup from the plan.
+- CALLBACK, alone on a line, if this turn brings the setup back.
 
 This turn's job in the story is given below. Make the turn do that job. If it's one of the named moments (a breakthrough, a catastrophe, a snap, a reveal, the ending), it's what the chat exists for: give it everything, and keep it simple enough that the reader gets it at a glance.
 
-Write exactly this and nothing else: one line per message, ${player_name}'s messages first, then ${datee_name}'s, as many as the shape says.
+Write exactly this and nothing else: one line per message, ${player_name}'s messages first, then ${datee_name}'s, as many as the shape says, then the notes.
 
 ${player_name}: message
 ${datee_name}: message

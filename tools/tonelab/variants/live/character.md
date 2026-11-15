@@ -11,10 +11,7 @@ Who they are: ${personality}
 
 Backstory: ${backstory}
 
-What they say about themselves, and what's actually true:
-${secrets}
-
-Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+Tonight, build their hook and true story around this one. Other matches with this character get a different one, so the same character tells a different story each time:
 ${focus}
 
 What's in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
