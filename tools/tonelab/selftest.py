@@ -7,7 +7,7 @@
    stays within 0..25.
 3. Without --mechanics-only and without an API key the runner refuses to start,
    so the mechanics path is the only one that runs model-free.
-4. The baseline variant renders against real mechanics with no unknown placeholder.
+4. Every variant renders against real mechanics with no unknown placeholder.
 """
 
 import json
@@ -48,13 +48,14 @@ def main():
         check(res.returncode != 0 and "ANTHROPIC_API_KEY not set" in res.stderr,
               "without --mechanics-only and without a key the runner refuses to start")
 
-        variant = os.path.join(tonelab.VARIANTS, "baseline")
-        with open(os.path.join(variant, "variant.json"), encoding="utf-8") as f:
-            knobs = json.load(f)
-        _, system_prompt, prompt, parts = tonelab.build_prompt(variant, knobs, ma, "reuben", "brick")
-        check(len(parts["turn_briefs"]) == len(ma["turns"]), "one prompt brief per played turn")
-        check(bool(system_prompt) and "Turn 1." in prompt and "${" not in prompt,
-              "baseline variant renders with no unresolved placeholder")
+        for name in sorted(os.listdir(tonelab.VARIANTS)):
+            variant = os.path.join(tonelab.VARIANTS, name)
+            with open(os.path.join(variant, "variant.json"), encoding="utf-8") as f:
+                knobs = json.load(f)
+            _, system_prompt, prompt, parts = tonelab.build_prompt(variant, knobs, ma, "reuben", "brick")
+            check(len(parts["turn_briefs"]) == len(ma["turns"]), f"{name}: one prompt brief per played turn")
+            check(bool(system_prompt) and "Turn 1." in prompt and "${" not in system_prompt + prompt,
+                  f"{name}: renders with no unresolved placeholder")
     print("selftest passed")
 
 

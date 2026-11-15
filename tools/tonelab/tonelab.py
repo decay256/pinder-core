@@ -38,6 +38,8 @@ RUNS = os.path.join(REPO, "docs", "tone-lab", "runs")
 RUNNER_PROJECT = os.path.join(REPO, "session-runner", "session-runner.csproj")
 RUNNER_DLL = os.path.join(REPO, "session-runner", "bin", "Release", "net8.0", "session-runner.dll")
 CONSEQUENCES = os.path.join(REPO, "data", "i18n", "en", "consequences.yaml")
+ANATOMY_FILE = os.path.join(REPO, "data", "anatomy", "anatomy-parameters.json")
+ITEMS_FILE = os.path.join(REPO, "data", "items", "starter-items.json")
 VARIANT_FILES = ("system.md", "prompt.md", "character.md", "turn.md")
 DEFAULT_CLOCK = "2026-11-14T23:30:00Z"  # late night: the game's highest horniness band
 
@@ -109,6 +111,62 @@ def render(template, values, where):
         die(f"{where}: {e}")
 
 
+def _load_json(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _band(param, value):
+    for b in param.get("bands") or []:
+        if b["lower"] <= value <= b["upper"]:
+            return b
+    return None
+
+
+# Plain words for the game's three latinate anatomy slider names (a gloss, not game data).
+ANATOMY_GLOSS = {"prepucius": "foreskin", "arrugatis": "wrinkling", "gravitatis": "hang"}
+
+
+def body_lines(c):
+    """The extremes of a character's anatomy, from the game's own slider bands: only
+    sliders in the bottom or top fifth of their range, skin colour left out."""
+    anatomy = c.get("anatomy") or {}
+    out = []
+    for p in _load_json(ANATOMY_FILE):
+        pid = p["id"]
+        if pid not in anatomy or pid.startswith("skin") or pid == "isCircumcised":
+            continue
+        v = anatomy[pid]
+        b = _band(p, v)
+        if b is None or 0.2 <= v <= 0.8:
+            continue
+        name = ANATOMY_GLOSS.get(pid, p["name"].lower())
+        out.append(f"- {name}: {round(b['lower'] * 100)}-{round(b['upper'] * 100)}")
+    if "isCircumcised" in anatomy:
+        out.append("- circumcised" if anatomy["isCircumcised"] else "- uncircumcised")
+    return out
+
+
+def texting_style_lines(c):
+    """Texting-style lines from the character's items and anatomy bands, deduplicated.
+    The game resolves conflicts between them in TextingStyleAggregator; this does not."""
+    items = {i["id"]: i for i in _load_json(ITEMS_FILE)}
+    frags = [(items.get(i) or {}).get("texting_style_fragment") or "" for i in c.get("items") or []]
+    anatomy = c.get("anatomy") or {}
+    for p in _load_json(ANATOMY_FILE):
+        if p["id"] in anatomy:
+            b = _band(p, anatomy[p["id"]])
+            frags.append((b or {}).get("texting_style_fragment") or "")
+    seen, out = set(), []
+    for frag in frags:
+        for line in frag.splitlines():
+            line = line.strip()
+            if line.startswith("- ") and line not in seen:
+                seen.add(line)
+                out.append(line)
+    return out
+
+
 def character_values(slug, engine_side, knobs):
     with open(os.path.join(REPO, "data", "characters", f"{slug}.json"), encoding="utf-8") as f:
         c = json.load(f)
@@ -123,7 +181,7 @@ def character_values(slug, engine_side, knobs):
     stake_lines = (c.get("stake_lines") or [])[: int(knobs.get("stake_lines", 2))]
     diag = c.get("psychiatric_diagnosis") or {}
     stats = engine_side["effective_stats"]
-    return c, diag, {
+    values = {
         "name": engine_side["display_name"],
         "pronouns": c.get("gender_identity", ""),
         "bio": c.get("bio", ""),
@@ -138,7 +196,13 @@ def character_values(slug, engine_side, knobs):
         "safe_connection": diag.get("safe_connection", ""),
         "reactions": "\n".join(f"- {stat}: {diag[key + '_reaction']}" for stat, key in STAT_KEY.items()
                                if diag.get(key + "_reaction")),
+        "body": "\n".join(body_lines(c)),
+        "texting_style": "\n".join(texting_style_lines(c)) or "- nothing distinctive",
+        "drawer": (c.get("psychological_stake") or "").strip(),
     }
+    # A variant may add or override per-character text (variant.json "characters": {slug: {...}}).
+    values.update((knobs.get("characters") or {}).get(slug) or {})
+    return c, diag, values
 
 
 STAT_KEY = {"Charm": "charm", "Rizz": "rizz", "Honesty": "honesty", "Chaos": "chaos",

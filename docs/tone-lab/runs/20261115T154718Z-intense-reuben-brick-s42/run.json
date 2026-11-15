@@ -1,0 +1,85 @@
+{
+  "run_id": "20261115T154718Z-intense-reuben-brick-s42",
+  "created_utc": "20261115T154718Z",
+  "variant": "intense",
+  "variant_sha256": {
+    "system.md": "2f2c3e93f3068688b7a3638b44e4a69c188c0a130abe97f715295eee6d447df1",
+    "prompt.md": "2ca1c40e6c79a143af25196a0b9430d6a862483218e562e72bfddc6ee66dcedb",
+    "character.md": "deb168fef44f8ba398af71aebda10b28a62739ede28b2afca9dc33200ca532dc",
+    "turn.md": "a125b47e806a9b3a2b96c387fc8ebf0069d1f79d7194deda1201e8209f43b409"
+  },
+  "knobs": {
+    "model": "google/gemini-4-argon",
+    "turns": 30,
+    "secret_categories": [
+      "age_and_demographics",
+      "formative_intimacies",
+      "parental_dynamics"
+    ],
+    "characters": {
+      "reuben": {
+        "tonight": "A quick, funny fuck where he gets to keep doing the voice the whole way through, and leave before anyone sees him without the bit.",
+        "would_take": "Someone who holds him down until he can't do the voice, then keeps one hand flat on his back, says 'Reuben', and doesn't need him to be funny for the next ten minutes.",
+        "reactions_voiced": "- Charm: remember something he actually said and he melts. Generic flattery makes him suspicious, and he starts testing you.\n- Rizz: tell him plainly you want him, the actual him, curve and lopsided ball included, and he goes quiet in a good way. A pause, a laugh at the asymmetry, or 'go on then, perform' and he's straight back into the bit, louder.\n- Honesty: straight talk relaxes him because he never has to guess. A cold correction, or going silent on him, and he over-explains until it's unbearable.\n- Chaos: he'll follow a swerve anywhere as long as you're obviously coming back. Vanish mid-topic and he floods the chat trying to drag you back.\n- Wit: fast banter is where he lives. Laugh at him instead of with him, at his volume, his body, how much he cares, and he puts on a whole show to cover it.\n- Self-Awareness: name the need under the act gently and he actually slows down. Make it a diagnosis and the jokes come faster."
+      },
+      "brick": {
+        "tonight": "Something efficient and scheduled, with an agreed end time, with someone who won't make it weird about the size.",
+        "would_take": "Someone who tells her exactly what's going to happen, in order, then does it, and afterwards stays in the bed talking about their commute until she loses track of the time.",
+        "reactions_voiced": "- Charm: specific appreciation of how her mind works gets through. Smooth lines, or gasping at her size, and she clamps shut.\n- Rizz: say you want her, plainly and patiently, as hers and not as a spectacle, and she lets you. Rush her, measure her, or treat her like a ride at the fair and she starts wondering whether anyone has ever wanted anything but the size.\n- Honesty: exact, decent candour is the only thing that convinces her this could survive daylight. Humiliate her, or tell her she's too much, and she's gone.\n- Chaos: a small detour she agreed to is fun. Wreck her plan without asking and she locks everything down.\n- Wit: dry, specific humour that's clearly paying attention warms her up. Jokes about her body, her seriousness or her rules and she goes cold and starts stating terms.\n- Self-Awareness: name her pattern without making it her whole personality, own your half, and she'll listen. Use it to call her a control freak, or demand she open up right now, and the door shuts."
+      }
+    }
+  },
+  "prompt_sha256": "3121e2209e85df69ad49248072c8bf5ea809ddfa0405ee745fcfcedcec808dec",
+  "prompt_chars": 26110,
+  "repo_commit": "864aeda",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 42,
+  "clock": "2026-11-14T23:30:00Z",
+  "turn_cap": 30,
+  "turns_played": 13,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "upstream_provider": "Google",
+  "generation_id": "gen-1794757657-m8zoLP8mBEwtays8gKL3",
+  "finish_reason": "stop",
+  "seconds": 25.0,
+  "usage": {
+    "prompt_tokens": 6382,
+    "completion_tokens": 1023,
+    "total_tokens": 7405,
+    "cost": 0.022994,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.022994,
+      "upstream_inference_prompt_cost": 0.012764,
+      "upstream_inference_completions_cost": 0.01023
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "format_checks": {
+    "turn_markers": 13,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 13,
+    "datee_lines": 13,
+    "words": 717
+  }
+}

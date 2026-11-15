@@ -1,0 +1,21 @@
+{
+  "model": "google/gemini-4-argon",
+  "turns": 30,
+  "secret_categories": [
+    "age_and_demographics",
+    "formative_intimacies",
+    "parental_dynamics"
+  ],
+  "characters": {
+    "reuben": {
+      "tonight": "A quick, funny fuck where he gets to keep doing the voice the whole way through, and leave before anyone sees him without the bit.",
+      "would_take": "Someone who holds him down until he can't do the voice, then keeps one hand flat on his back, says 'Reuben', and doesn't need him to be funny for the next ten minutes.",
+      "reactions_voiced": "- Charm: remember something he actually said and he melts. Generic flattery makes him suspicious, and he starts testing you.\n- Rizz: tell him plainly you want him, the actual him, curve and lopsided ball included, and he goes quiet in a good way. A pause, a laugh at the asymmetry, or 'go on then, perform' and he's straight back into the bit, louder.\n- Honesty: straight talk relaxes him because he never has to guess. A cold correction, or going silent on him, and he over-explains until it's unbearable.\n- Chaos: he'll follow a swerve anywhere as long as you're obviously coming back. Vanish mid-topic and he floods the chat trying to drag you back.\n- Wit: fast banter is where he lives. Laugh at him instead of with him, at his volume, his body, how much he cares, and he puts on a whole show to cover it.\n- Self-Awareness: name the need under the act gently and he actually slows down. Make it a diagnosis and the jokes come faster."
+    },
+    "brick": {
+      "tonight": "Something efficient and scheduled, with an agreed end time, with someone who won't make it weird about the size.",
+      "would_take": "Someone who tells her exactly what's going to happen, in order, then does it, and afterwards stays in the bed talking about their commute until she loses track of the time.",
+      "reactions_voiced": "- Charm: specific appreciation of how her mind works gets through. Smooth lines, or gasping at her size, and she clamps shut.\n- Rizz: say you want her, plainly and patiently, as hers and not as a spectacle, and she lets you. Rush her, measure her, or treat her like a ride at the fair and she starts wondering whether anyone has ever wanted anything but the size.\n- Honesty: exact, decent candour is the only thing that convinces her this could survive daylight. Humiliate her, or tell her she's too much, and she's gone.\n- Chaos: a small detour she agreed to is fun. Wreck her plan without asking and she locks everything down.\n- Wit: dry, specific humour that's clearly paying attention warms her up. Jokes about her body, her seriousness or her rules and she goes cold and starts stating terms.\n- Self-Awareness: name her pattern without making it her whole personality, own your half, and she'll listen. Use it to call her a control freak, or demand she open up right now, and the door shuts."
+    }
+  }
+}
