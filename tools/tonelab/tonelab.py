@@ -250,8 +250,12 @@ def build_prompt(variant_dir, knobs, mech, player, datee):
         "outcome_line": outcome_line(mech, names),
         "time_of_day": mech.get("time_of_day", ""),
     }
-    return files, render(files["system.md"], values, "system.md").strip(), \
-        render(files["prompt.md"], values, "prompt.md").strip() + "\n"
+    system_prompt = render(files["system.md"], values, "system.md").strip()
+    prompt = render(files["prompt.md"], values, "prompt.md").strip() + "\n"
+    # The pieces the report shows, so each turn can be read next to the brief it came from.
+    parts = {"system": system_prompt, "user": prompt, "player_card": values["player_card"],
+             "datee_card": values["datee_card"], "turn_briefs": [b.strip() for b in briefs]}
+    return files, system_prompt, prompt, parts
 
 
 # ── model call ────────────────────────────────────────────────────────────────
@@ -345,9 +349,11 @@ def cmd_run(args):
 
     mech = play_mechanics(args.player, args.datee, args.seed, turns, args.clock,
                           os.path.join(run_dir, "mechanics.json"))
-    files, system_prompt, prompt = build_prompt(variant_dir, knobs, mech, args.player, args.datee)
+    files, system_prompt, prompt, parts = build_prompt(variant_dir, knobs, mech, args.player, args.datee)
     with open(os.path.join(run_dir, "prompt.md"), "w", encoding="utf-8") as f:
         f.write("<!-- system prompt -->\n" + system_prompt + "\n\n<!-- user prompt -->\n" + prompt)
+    with open(os.path.join(run_dir, "prompt_parts.json"), "w", encoding="utf-8") as f:
+        json.dump(parts, f, indent=2, ensure_ascii=False)
 
     record = {
         "run_id": run_id,
@@ -397,7 +403,174 @@ def cmd_run(args):
         })
     with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
+    write_report(run_dir)
     print(os.path.relpath(run_dir, REPO))
+
+
+# ── report: the chat next to the prompt that produced it ──────────────────────
+
+REPORT_CSS = """
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e2e0da;--me:#2f6fed;--me-ink:#fff;
+--them:#ecebe6;--them-ink:#1d1d1f;--ok:#1f7a44;--bad:#b4400b;--code:#f1f0ec}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1c1c1f;--ink:#ececf0;--muted:#9a9aa3;--line:#2e2e34;
+--me:#3b7bff;--me-ink:#fff;--them:#2a2a2f;--them-ink:#ececf0;--ok:#4ade80;--bad:#fb923c;--code:#232328}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 16px 72px}
+h1{font-size:22px;margin:0 0 6px}
+.meta{color:var(--muted);font-size:13px;margin:0 0 4px}
+.meta code{font-size:12px}
+.tools{margin:14px 0 4px;display:flex;gap:8px;flex-wrap:wrap}
+.tools button{font:inherit;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;
+background:var(--panel);color:var(--ink);cursor:pointer}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+summary{cursor:pointer;padding:9px 14px;font-weight:600;font-size:13.5px}
+details pre{margin:0;padding:12px 14px;border-top:1px solid var(--line);background:var(--code);
+white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.55 ui-monospace,Consolas,monospace;border-radius:0 0 10px 10px}
+details details{margin:8px 12px}
+.turn{margin:30px 0 0}
+.head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.head b{color:var(--ink);font-size:14px;margin-right:2px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:0 8px;background:var(--panel)}
+.chip.ok{color:var(--ok);border-color:currentColor}.chip.bad{color:var(--bad);border-color:currentColor}
+.meter{display:inline-block;height:5px;width:90px;background:var(--line);border-radius:3px;overflow:hidden;vertical-align:middle}
+.meter i{display:block;height:100%;background:var(--me)}
+.who{font-size:11px;color:var(--muted);margin:10px 4px 0}.who.me{text-align:right}
+.bubble{width:fit-content;max-width:80%;padding:8px 12px;border-radius:16px;margin:3px 0;white-space:pre-wrap}
+.bubble.me{margin-left:auto;background:var(--me);color:var(--me-ink);border-bottom-right-radius:4px}
+.bubble.them{background:var(--them);color:var(--them-ink);border-bottom-left-radius:4px}
+.end{margin:36px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.warn{color:var(--bad)}
+@media (max-width:480px){.bubble{max-width:92%}}
+"""
+
+
+def parse_chat(output, names):
+    """Turn N blocks of 'Name: message' lines, as the variants ask the model to write them."""
+    turns = {}
+    blocks = re.split(r"(?m)^\s*\**Turn (\d+)\**\s*$", output)
+    for i in range(1, len(blocks), 2):
+        lines = []
+        for line in blocks[i + 1].strip().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            name, sep, text = line.partition(":")
+            name = name.strip().strip("*").strip()
+            if sep and name in names.values():
+                lines.append([name, text.strip()])
+            elif lines:
+                lines[-1][1] += "\n" + line
+            else:
+                lines.append(["?", line])
+        turns[int(blocks[i])] = lines
+    return turns
+
+
+def write_report(run_dir):
+    from html import escape as e
+    with open(os.path.join(run_dir, "run.json"), encoding="utf-8") as f:
+        rec = json.load(f)
+    with open(os.path.join(run_dir, "mechanics.json"), encoding="utf-8") as f:
+        mech = json.load(f)
+    parts_path = os.path.join(run_dir, "prompt_parts.json")
+    if os.path.exists(parts_path):
+        with open(parts_path, encoding="utf-8") as f:
+            parts = json.load(f)
+    else:
+        # Older run: rebuild the pieces, and use them only if they reproduce the prompt that was sent.
+        variant_dir = os.path.join(VARIANTS, rec["variant"])
+        _, system_prompt, prompt, parts = build_prompt(variant_dir, rec.get("knobs") or {}, mech,
+                                                       rec["player"], rec["datee"])
+        if sha256(system_prompt + "\n" + prompt) != rec["prompt_sha256"]:
+            die(f"{rec['run_id']}: variant '{rec['variant']}' changed since this run; per-turn briefs cannot be shown exactly")
+        with open(parts_path, "w", encoding="utf-8") as f:
+            json.dump(parts, f, indent=2, ensure_ascii=False)
+    out_path = os.path.join(run_dir, "output.md")
+    output = open(out_path, encoding="utf-8").read() if os.path.exists(out_path) else ""
+
+    names = {"player": mech["player"]["display_name"], "datee": mech["datee"]["display_name"]}
+    chat = parse_chat(output, names)
+    model = (rec.get("models_reported") or [None])[0] or "no model call (dry run)"
+    reported_by = {"openrouter": "OpenRouter", "claude": "the Claude CLI"}.get(rec.get("provider"), "")
+    h = []
+    h.append(f"<h1>{e(names['player'])} × {e(names['datee'])}</h1>")
+    h.append(f"<p class=meta><b>{e(model)}</b>{' as reported by ' + reported_by if reported_by else ''} · variant "
+             f"<code>{e(rec['variant'])}</code> · seed {rec['seed']} · {e(mech.get('time_of_day', ''))} · "
+             f"<b>{e(rec['outcome'])}</b> after {rec['turns_played']} turns</p>")
+    h.append(f"<p class=meta>Run <code>{e(rec['run_id'])}</code> · commit <code>{e(rec['repo_commit'])}</code>"
+             f"{' (uncommitted changes)' if rec.get('repo_dirty') else ''} · prompt {rec['prompt_chars']:,} characters, "
+             f"sha256 <code>{e(rec['prompt_sha256'][:12])}</code>"
+             f"{' · ' + str(rec['seconds']) + ' s' if rec.get('seconds') else ''}"
+             f"{' · $' + format(rec['usage']['cost'], '.3f') if isinstance(rec.get('usage'), dict) and 'cost' in rec['usage'] else ''}</p>")
+    h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
+             "Each turn's fold shows the brief the model was given for it.</p>")
+    h.append("<div class=tools><button onclick=\"document.querySelectorAll('.turn details').forEach(d=>d.open=true)\">"
+             "Open all turn prompts</button><button onclick=\"document.querySelectorAll('details').forEach(d=>d.open=false)\">"
+             "Close all</button></div>")
+    h.append("<details><summary>The prompt, section by section</summary>"
+             f"<details><summary>System prompt</summary><pre>{e(parts['system'])}</pre></details>"
+             f"<details><summary>{e(names['player'])}'s card</summary><pre>{e(parts['player_card'])}</pre></details>"
+             f"<details><summary>{e(names['datee'])}'s card</summary><pre>{e(parts['datee_card'])}</pre></details>"
+             f"<details><summary>Full user prompt as sent</summary><pre>{e(parts['user'])}</pre></details>"
+             "</details>")
+    briefs = parts["turn_briefs"]
+    for i, t in enumerate(mech["turns"]):
+        r = t["roll"] or {}
+        ok = r.get("success")
+        res = "success" if ok else (r.get("tier") or "miss").lower()
+        if r.get("nat20"):
+            res += ", nat 20"
+        if r.get("nat1"):
+            res += ", nat 1"
+        chips = [f"<span class=chip>{e(t['chosen_stat'])} {r.get('total')} vs {r.get('dc')}</span>",
+                 f"<span class='chip {'ok' if ok else 'bad'}'>{e(res)}</span>"]
+        hc, sc, st = t.get("horniness"), t.get("shadow"), t.get("steering")
+        if hc and hc.get("miss"):
+            chips.append("<span class='chip bad'>horniness slip</span>")
+        if sc and sc.get("miss"):
+            chips.append(f"<span class='chip bad'>{e(sc['shadow'])} shadow</span>")
+        if st and st.get("succeeded"):
+            chips.append("<span class='chip ok'>steering</span>")
+        for trap in sorted(set(t.get("active_traps_after") or []) - set(t.get("active_traps_before") or [])):
+            chips.append(f"<span class='chip bad'>trap: {e(trap)}</span>")
+        if t.get("combo"):
+            chips.append(f"<span class=chip>combo: {e(t['combo'])}</span>")
+        pct = max(0, min(100, round(t["interest_after"] * 4)))
+        chips.append(f"<span>interest {t['interest_before']} → {t['interest_after']} ({t['interest_delta']:+d})</span>"
+                     f"<span class=meter><i style='width:{pct}%'></i></span>")
+        h.append(f"<section class=turn><div class=head><b>Turn {t['turn']}</b>{''.join(chips)}</div>")
+        brief = briefs[i] if i < len(briefs) else ""
+        h.append(f"<details><summary>Prompt for turn {t['turn']}</summary><pre>{e(brief)}</pre></details>")
+        lines = chat.get(t["turn"])
+        if not lines:
+            h.append("<p class='meta warn'>No message for this turn in the model output.</p>")
+        for name, text in lines or []:
+            side = "me" if name == names["player"] else "them"
+            h.append(f"<div class='who {side}'>{e(name)}</div><div class='bubble {side}'>{e(text)}</div>")
+        h.append("</section>")
+    extra = sorted(set(chat) - {t["turn"] for t in mech["turns"]})
+    if extra:
+        h.append(f"<p class='meta warn'>The output also contains turns the game did not play: {extra}.</p>")
+    h.append(f"<div class=end>{e(outcome_line(mech, names))}</div>")
+    doc = ("<!doctype html><html lang=en><head><meta charset=utf-8>"
+           "<meta name=viewport content='width=device-width,initial-scale=1'>"
+           f"<title>{e(names['player'])} × {e(names['datee'])} · {e(rec['variant'])}</title>"
+           f"<style>{REPORT_CSS}</style></head><body><main>{''.join(h)}</main></body></html>\n")
+    path = os.path.join(run_dir, "report.html")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(doc)
+    return path
+
+
+def cmd_report(args):
+    for run in args.runs:
+        run_dir = run if os.path.isabs(run) else os.path.join(REPO, run)
+        if not os.path.isdir(run_dir):
+            run_dir = os.path.join(RUNS, run)
+        if not os.path.exists(os.path.join(run_dir, "run.json")):
+            die(f"not a run directory: {run}")
+        print(os.path.relpath(write_report(run_dir), REPO))
 
 
 def main():
@@ -416,9 +589,13 @@ def main():
                    help="model alias or id, e.g. sonnet, google/gemini-4-argon (default: variant.json, else sonnet)")
     r.add_argument("--key-stdin", action="store_true", help="read the OpenRouter key from the first line of stdin")
     r.add_argument("--dry-run", action="store_true", help="save mechanics and prompt, call no model")
+    rp = sub.add_parser("report", help="(re)write report.html for saved runs: the chat next to each turn's prompt")
+    rp.add_argument("runs", nargs="+", help="run directory or run id")
     args = p.parse_args()
     if args.cmd == "run":
         cmd_run(args)
+    elif args.cmd == "report":
+        cmd_report(args)
 
 
 if __name__ == "__main__":

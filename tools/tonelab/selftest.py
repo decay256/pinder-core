@@ -51,7 +51,8 @@ def main():
         variant = os.path.join(tonelab.VARIANTS, "baseline")
         with open(os.path.join(variant, "variant.json"), encoding="utf-8") as f:
             knobs = json.load(f)
-        _, system_prompt, prompt = tonelab.build_prompt(variant, knobs, ma, "reuben", "brick")
+        _, system_prompt, prompt, parts = tonelab.build_prompt(variant, knobs, ma, "reuben", "brick")
+        check(len(parts["turn_briefs"]) == len(ma["turns"]), "one prompt brief per played turn")
         check(bool(system_prompt) and "Turn 1." in prompt and "${" not in prompt,
               "baseline variant renders with no unresolved placeholder")
     print("selftest passed")
