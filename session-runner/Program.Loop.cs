@@ -148,6 +148,7 @@ partial class Program
             PrintTurnResultRollAndChecks(result, setup, chosen);
             PrintMessagesInterestAndShadow(result, setup, chosen, ref lastDateeMsg, loopResult);
             PrintTrapsAndInterestChange(result, snap, setup, loopResult, result.StateAfter.Interest);
+            setup.Recorder?.RecordTurn(loopResult.Turn, turnStart, chosen, result);
 
             loopResult.Interest = result.StateAfter.Interest;
             loopResult.Momentum = result.StateAfter.MomentumStreak;

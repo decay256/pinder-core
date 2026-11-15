@@ -12,6 +12,11 @@ using Pinder.SessionRunner;
 public class GameSetupResult
 {
     public bool ShouldExit { get; set; }
+    /// <summary>--mechanics-only: run the real GameSession with no model calls.</summary>
+    public bool MechanicsOnly { get; set; }
+    /// <summary>--mechanics-out: where to write per-turn mechanics as JSON.</summary>
+    public string? MechanicsOutPath { get; set; }
+    public MechanicsRecorder? Recorder { get; set; }
     public int ExitCode { get; set; }
 
     public string? ApiKey { get; set; }

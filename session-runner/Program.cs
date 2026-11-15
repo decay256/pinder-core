@@ -14,6 +14,7 @@ partial class Program
         }
 
         var loopResult = await RunGameLoopAsync(setupResult, args);
+        setupResult.Recorder?.Write(setupResult.MechanicsOutPath!, loopResult);
 
         ReportAndShutdown(setupResult, loopResult);
 
