@@ -21,6 +21,7 @@ turns; selftest.py checks that.
 
 import json
 import os
+import random
 import re
 
 import tonelab as tl
@@ -30,6 +31,16 @@ FILES = ("bible.md", "plan.md", "plan_input.md", "options.md", "options_input.md
 BAD_TIERS = {"catastrophe", "legendary"}  # miss tiers bad enough to shake a secret out
 REAL_STATS = {"Honesty", "SelfAwareness"}  # moves that can carry a breakthrough
 ENDINGS = {"DateSecured": "ending_win", "Unmatched": "ending_loss", "Ghosted": "ending_ghost"}
+SPENT = {  # how a fired beat is described to the writer afterwards
+    "breakthrough": "the breakthrough (something real got through)",
+    "forced_breakthrough": "the breakthrough (something real got through)",
+    "catastrophe": "the player character's secret fell out (the planned accident is spent)",
+    "secret_miss": "the player character's secret slipped out (the planned accident is spent)",
+    "discovery": "the match found out the player character's secret",
+    "match_reveal": "the match's reveal (their secret is out)",
+    "player_snap": "the player character snapped (no second snap)",
+    "match_snap": "the match snapped (no second snap)",
+}
 
 
 def read_files(variant_dir):
@@ -50,7 +61,18 @@ class Story:
 
     def __init__(self, knobs):
         self.beats, self.needs_text = knobs["beats"], knobs["needs"]
-        self.fired, self.secret_turn = set(), None
+        self.fired, self.secret_turn, self.log = set(), None, []
+
+    def so_far(self):
+        done = "; ".join(f"turn {n}: {SPENT[k]}" for n, k in self.log) or "nothing named yet"
+        ahead = []
+        if "breakthrough" not in self.fired:
+            ahead.append("the breakthrough")
+        if "secret" not in self.fired:
+            ahead.append("the player character's secret, which stays in until its moment, with the planned accident saved for it")
+        if "match_reveal" not in self.fired:
+            ahead.append("the match's reveal, which stays hidden until then, only cracks showing")
+        return f"Already happened: {done}. Still to come: {', '.join(ahead) or 'the ending'}."
 
     def needs(self, i, interest):
         n = self.needs_text
@@ -100,6 +122,8 @@ class Story:
         f.add(fires)
         if fires == "secret":
             self.secret_turn = i
+        if key in SPENT:
+            self.log.append((t["turn"], key))
         if key not in self.beats:
             tl.die(f"variant.json beats has no '{key}'")
         text = self.beats[key]
@@ -134,12 +158,28 @@ def history(chat):
     return "\n\n".join(f"Turn {n}\n" + "\n".join(f"{who}: {msg}" for who, msg in lines) for n, lines in chat)
 
 
+def tonight(c, values, rng, n_drawer):
+    """Each match draws its own material, so one character does not tell the same story in
+    every match: one backstory pair to build the secret around, and a few drawer lines."""
+    cats = list((c.get("backstory_categories") or {}).values())
+    pair = rng.choice(cats) if cats else None
+    lines = [ln.strip().lstrip("-•*").strip() for ln in (c.get("psychological_stake") or "").splitlines() if ln.strip()]
+    if n_drawer and len(lines) > n_drawer:
+        lines = rng.sample(lines, n_drawer)
+    return {**values,
+            "focus": f"- says: {pair['bio_lie']}\n  truth: {pair['tragic_reality']}" if pair else "- (no backstory pairs)",
+            "drawer": "\n".join(f"- {ln}" for ln in lines)}
+
+
 def play(variant_dir, knobs, mech, player, datee, caller):
     """Write the whole chat turn by turn. caller(system, user, label, effort, ctx) -> text."""
     files = read_files(variant_dir)
     names = {"player": mech["player"]["display_name"], "datee": mech["datee"]["display_name"]}
-    _, _, pv = tl.character_values(player, mech["player"], knobs)
-    _, datee_diag, dv = tl.character_values(datee, mech["datee"], knobs)
+    rng = random.Random(f"{mech.get('seed')}-{player}-{datee}")
+    pc, _, pv = tl.character_values(player, mech["player"], knobs)
+    dc, datee_diag, dv = tl.character_values(datee, mech["datee"], knobs)
+    n_drawer = int(knobs.get("drawer_sample", 0))
+    pv, dv = tonight(pc, pv, rng, n_drawer), tonight(dc, dv, rng, n_drawer)
     common = {
         "player_name": names["player"], "datee_name": names["datee"],
         "time_of_day": mech.get("time_of_day", ""),
@@ -159,7 +199,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         is_last = i == len(turns) - 1
         tv = tl.turn_values(t, cons, names, datee_diag, is_last, mech.get("outcome"))
         needs = story.needs(i, t["interest_before"])
-        base = {**common, "plan": plan, "history": history(chat), "n": t["turn"]}
+        base = {**common, "plan": plan, "history": history(chat), "n": t["turn"], "story_so_far": story.so_far()}
         o_user = tl.render(files["options_input.md"],
                            {**base, "interest": t["interest_before"], "state": t["state_before"],
                             "options": ", ".join(t["options"]), "needs": needs}, "options_input.md").strip() + "\n"
@@ -171,7 +211,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         key, beat = story.beat(i, t, is_last, mech.get("outcome"))
         ghost = key == "ending_ghost"
         d_user = tl.render(files["deliver_input.md"],
-                           {**base, **tv, "options_text": o_text, "intended": intended, "beat": beat},
+                           {**base, **tv, "intended": intended, "beat": beat},
                            "deliver_input.md").strip() + "\n"
         d_text = caller(systems["deliver"], d_user, f"turn {t['turn']} delivery", knobs.get("turn_reasoning"),
                         {"ghost": ghost})

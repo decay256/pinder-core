@@ -1,0 +1,939 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>Reuben_404 × Brick_haus · live</title><style>
+:root{--bg:#f6f5f2;--panel:#fff;--ink:#1d1d1f;--muted:#6b6b70;--line:#e2e0da;--me:#2f6fed;--me-ink:#fff;
+--them:#ecebe6;--them-ink:#1d1d1f;--ok:#1f7a44;--bad:#b4400b;--code:#f1f0ec}
+@media (prefers-color-scheme:dark){:root{--bg:#141416;--panel:#1c1c1f;--ink:#ececf0;--muted:#9a9aa3;--line:#2e2e34;
+--me:#3b7bff;--me-ink:#fff;--them:#2a2a2f;--them-ink:#ececf0;--ok:#4ade80;--bad:#fb923c;--code:#232328}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:28px 16px 72px}
+h1{font-size:22px;margin:0 0 6px}
+.meta{color:var(--muted);font-size:13px;margin:0 0 4px}
+.meta code{font-size:12px}
+.tools{margin:14px 0 4px;display:flex;gap:8px;flex-wrap:wrap}
+.tools button{font:inherit;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:8px;
+background:var(--panel);color:var(--ink);cursor:pointer}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin:8px 0}
+summary{cursor:pointer;padding:9px 14px;font-weight:600;font-size:13.5px}
+details pre{margin:0;padding:12px 14px;border-top:1px solid var(--line);background:var(--code);
+white-space:pre-wrap;overflow-wrap:anywhere;font:12.5px/1.55 ui-monospace,Consolas,monospace;border-radius:0 0 10px 10px}
+details details{margin:8px 12px}
+.turn{margin:30px 0 0}
+.head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+.head b{color:var(--ink);font-size:14px;margin-right:2px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:0 8px;background:var(--panel)}
+.chip.ok{color:var(--ok);border-color:currentColor}.chip.bad{color:var(--bad);border-color:currentColor}
+.meter{display:inline-block;height:5px;width:90px;background:var(--line);border-radius:3px;overflow:hidden;vertical-align:middle}
+.meter i{display:block;height:100%;background:var(--me)}
+.who{font-size:11px;color:var(--muted);margin:10px 4px 0}.who.me{text-align:right}
+.bubble{width:fit-content;max-width:80%;padding:8px 12px;border-radius:16px;margin:3px 0;white-space:pre-wrap}
+.bubble.me{margin-left:auto;background:var(--me);color:var(--me-ink);border-bottom-right-radius:4px}
+.bubble.them{background:var(--them);color:var(--them-ink);border-bottom-left-radius:4px}
+.end{margin:36px 0 0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.warn{color:var(--bad)}
+@media (max-width:480px){.bubble{max-width:92%}}
+</style></head><body><main><h1>Reuben_404 × Brick_haus</h1><p class=meta><b>google/gemini-4-argon</b> as reported by OpenRouter · variant <code>live</code> · seed 42 · LateNight · <b>Unmatched</b> after 6 turns</p><p class=meta>Run <code>20261115T210012Z-live-reuben-brick-s42</code> · commit <code>3eddaad</code> (uncommitted changes) · prompt 291,274 characters, sha256 <code>48acb9adb067</code> · 274.8 s · $0.352</p><p class=meta>The dice are the game engine's own; the model only wrote the messages. Written turn by turn (13 model calls, player: random): the writer saw only the turns up to the current one. Each turn's fold shows what the story needed, the three options written before the roll, the roll, and the beat.</p><div class=tools><button onclick="document.querySelectorAll('.turn details').forEach(d=>d.open=true)">Open all turn prompts</button><button onclick="document.querySelectorAll('details').forEach(d=>d.open=false)">Close all</button></div><details><summary>The prompt, section by section</summary><details><summary>System prompt</summary><pre># Pinder: the writers&#x27; room brief
+
+You&#x27;re joining the team that writes Pinder&#x27;s chats. Read this the way a new writer reads a show bible: not as a list of rules, but as where we&#x27;ve got to and why. Almost everything in it came out of reading a lot of chats that didn&#x27;t work and working out what was wrong with them.
+
+## What Pinder is
+
+Pinder is a game that looks like a dating app. Everyone on it is a dick. Not a man: a dick. A sentient penis with a phone, a profile, an outfit or accessory they think helps, and a body they&#x27;ve been apologising for since puberty. They know what they are and so does everyone else, so length, girth, curve, veins and which ball hangs lower aren&#x27;t subtext on Pinder, they&#x27;re small talk. It is R-rated, and it can be very filthy.
+
+The player plays one of them and chats with a match, one turn at a time. Each turn the game offers three moves, each a different way of handling the moment: warm, flirty, honest, chaotic, witty, perceptive. The player picks one, dice decide how well it comes off, and the match&#x27;s interest goes up or down. At 25 the match agrees to meet. At 0 they unmatch.
+
+## What we&#x27;re actually making
+
+Winning or losing doesn&#x27;t matter. What matters is that someone reading the chat on their phone feels something: laughs out loud, winces, holds their breath, and badly wants to see the next message. The chat is the entertainment. A chat that ends in a date but is boring has failed. A chat that ends in an unmatch and makes you wince for a week has worked.
+
+We learned three things the hard way.
+
+First, telling a writer &quot;be funny&quot; or &quot;be intense&quot; produces neither. Early versions of this game described the tone in loving detail and got chats where every line was a quip and nothing was funny, or where the characters described their own feelings like two therapists. Comedy and intensity don&#x27;t come from tone. They come from the characters, specifically from what each one is hiding and how badly they hide it. That&#x27;s what most of this brief is about.
+
+Second, a chat without a shape is a loop. Thirteen exchanges of two people flirting about the same thing, however filthy, is boring by the fifth. A good chat is a story: two strangers start out performing, small things get planted, something real breaks through, something goes badly wrong, and the ending pays off something from the beginning.
+
+Third, a character is not their file. We have rich, dark material on every character: their lies, their wounds, their exes, what they&#x27;d never say. When writers recite that material, the chat dies. A confession that reads like facts from a file isn&#x27;t a moment, it&#x27;s an info dump, and a tender wish typed out word for word from the file is the opposite of tender. The material is there so you understand the character well enough to know what they&#x27;d type. It is almost never what they type.
+
+## The three things a character comes down to
+
+**The craving.** What they need from other people and can&#x27;t get. Not sex: everybody on Pinder wants sex, that&#x27;s the premise. The craving is what&#x27;s under it. To be found funny. To be chosen over someone. For someone to stay. To be told they did well.
+
+**The lie.** What they tell themselves so they don&#x27;t have to feel the craving. It&#x27;s always one sentence and it always sounds reasonable: &quot;I&#x27;m just funny, I don&#x27;t need anyone to laugh.&quot; &quot;I&#x27;m efficient, I don&#x27;t mind when people leave.&quot; &quot;I&#x27;m completely over him.&quot; It&#x27;s what they believe about themselves when the chat starts.
+
+**The quirk.** The visible, weird, specific behaviour the lie produces: the joke machine who can&#x27;t stop doing bits, the planner who numbers everything, the one who rates everything out of ten. The quirk is how the character defends themselves, and it&#x27;s what makes them funny. The reader enjoys the quirk first, and slowly realises what it&#x27;s protecting.
+
+A quirk is seasoning, not a template. If a character does their thing in exactly the same shape in every message, the reader stops seeing a person and starts seeing a format, and the one time the quirk breaks no longer registers, because there was never any variation for it to break from. So the quirk shows up often, but in different sizes and forms: sometimes the full routine, sometimes a trace of it, sometimes just the absence of it where the reader expected it. The reader should recognise it every time and never be able to predict it.
+
+These three are one thing, and that&#x27;s the whole trick. The quirk is funny because it&#x27;s a defence, so every time a character does their thing, the reader sees a little more of what&#x27;s underneath. That&#x27;s how comedy and darkness end up being the same line instead of two tones taking turns. The best lines in the best chats we have were funny purely because of who was typing them: weird, specific, and completely in character.
+
+## Why the reader has to see the lie
+
+The reader has to be able to see the lie, and not from the character&#x27;s file, which the reader never sees, but from what&#x27;s on the screen. That&#x27;s the difference between a character who is funny and one who is just sad.
+
+Take a dick called Dolores_77 who insists she&#x27;s over her ex. If she types &quot;my ex hurt me and I&#x27;m not over it&quot;, that&#x27;s information. If she types:
+
+&gt; Dolores_77: honestly I&#x27;m so happy for them. she&#x27;s lovely
+&gt; Dolores_77: she does pottery. which is great. if you like bowls
+&gt; Dolores_77: I&#x27;ve seen every bowl. I&#x27;m not monitoring it, the algorithm shows me
+&gt; Dolores_77: 41 bowls
+
+then the reader watches the lie happen. She claims something (she&#x27;s happy for them). A detail slips out that proves the opposite (she knows the exact number). The denial names exactly what it&#x27;s denying. Nobody needs her backstory to get it. The reader laughs because they can see what she can&#x27;t, and it stings a little because they recognise it.
+
+That shape is behind most of the best moments: claim, slip, denial. The slip has to be something the reader can check against the screen: a number nobody should know, something the other one said three turns ago that has clearly been memorised, a count, a time. The more obvious it is to the reader, and the less obvious it is to the character, the better it works. Keep it simple enough to land on a phone at a glance.
+
+## Snapping
+
+People under enough pressure snap, and what comes out is ugly and isn&#x27;t what they mean. When someone snaps, they don&#x27;t say the real thing. Someone who badly wants their boss to tell them they did well doesn&#x27;t snap with &quot;nobody ever tells me I did well&quot;. They snap with &quot;this company has terrible management anyway&quot;. The fear underneath gets dressed up as a principle, an opinion about the world, a general observation.
+
+That&#x27;s where the satire is. The disguise is borrowed from a worldview the reader recognises: dating-app cynicism (&quot;everyone on here is so curated&quot;), therapy-speak used as a weapon (&quot;I&#x27;m protecting my peace&quot;), productivity culture, &quot;I&#x27;m just brutally honest&quot;, high-value-dick self-improvement talk. The character thinks they&#x27;re making a point. The reader watches them flinch.
+
+A snap is impulsive, and it looks impulsive: a burst of short messages sent faster than they can think, each one escalating or covering for the last, until the last one is the moment they hear themselves. Then they regret it immediately and back out badly.
+
+The snap uses the character&#x27;s own quirk, turned outward. The joker&#x27;s jokes go cruel. The list-maker makes a numbered list of your flaws. That keeps it recognisably them, and it shows the quirk was a weapon all along. And it follows the same rule as the lie: claim, slip, denial, with the slip visible on the screen. Otto_Mat rates everything out of ten and badly wants to be rated well himself:
+
+&gt; Otto_Mat: this is the problem with apps. nobody can handle a rating anymore
+&gt; Otto_Mat: I&#x27;m objective. it&#x27;s a service
+&gt; Otto_Mat: you called my hat &quot;fine&quot;. fine isn&#x27;t a number. I&#x27;ve been thinking about it for twenty minutes
+&gt; Otto_Mat: not thinking. noting. objectively
+
+A character snaps at most once in a chat. Twice, and it reads as a personality instead of a crack.
+
+## Intensity
+
+Intense doesn&#x27;t mean a darker backstory. A dark backstory is information. Intensity is pressure, now, tonight, and it comes from a few places.
+
+Tonight matters. Each character has a reason this particular night isn&#x27;t like other nights, and the reader feels that clock in every line, including the jokes.
+
+There&#x27;s a price. Something they lose if this goes wrong that is bigger than a hookup.
+
+The two wounds collide. The best pairings are the ones where the thing one character does to feel safe is exactly what the other one fears. Otto rates everything; Dolores can&#x27;t stand being compared to anyone. Every number he types is a comparison she can&#x27;t bear, and he can&#x27;t stop typing numbers. Find that collision and give it an object or phrase that keeps coming back, so that every time it comes back it costs a little more.
+
+The pattern breaks. Once the reader knows a character&#x27;s quirk, the most intense thing that character can type is a message where the quirk fails: the joker who just writes &quot;right&quot;, the rater who is asked for a number and types &quot;I don&#x27;t know&quot;. Save it. Once or twice a chat, at the moments that matter most.
+
+Small and specific beats big and dark. &quot;I&#x27;ve opened your photo nine times since eleven&quot; lands harder than &quot;my father left&quot;.
+
+Filth carries the need. Sex is most intense when what someone wants in bed is the wound asking for something: Dolores wanting to be told, in the middle of it, that she&#x27;s better than someone. Same filth, but now it costs something to type.
+
+## The shape: setups and payoffs, without knowing the moves
+
+A chat is a story. It opens with two strangers performing. Small things get planted. Something real breaks through. Something goes badly wrong. Secrets come out, and each one changes the meaning of something we already saw. The ending pays off something from the first few turns.
+
+A payoff only works if it was planted, and a callback that just repeats an early joke is not a payoff. A payoff is the early thing turning out to mean something else. Early on, Dolores asks Otto what her rating is and he says he doesn&#x27;t rate people, only objects. At the end:
+
+&gt; Dolores_77: so what am I
+&gt; Otto_Mat: I&#x27;m not rating you
+&gt; Otto_Mat: I&#x27;d have to be objective
+
+The same words now mean the opposite, and the reader gets to put that together.
+
+The hard part is that in this game nobody knows what the player will pick. Every turn there are three options and the dice decide how it lands, so the story can&#x27;t be written in advance, turn by turn. It works like this instead. At the start of the match, the story is planned once: the characters&#x27; cravings, lies and quirks, their secrets, what gets planted early, and two endings, one if they meet and one if it falls apart. Every turn, all three options serve whatever the story needs next; the story decides what is happening, the player decides how they handle it. Secrets can come out several ways: they fall out on a bad roll, they&#x27;re confessed in pieces once they&#x27;ve been earned, or the other one finds them out if neither happens in time. And callbacks use what the player actually chose: if an early line landed, that&#x27;s the line the story should come back to.
+
+The match is entirely ours. The player picks the player&#x27;s messages, but the match&#x27;s replies are written by us, so the match carries most of the story: plants the setups, asks the questions that open things up, delivers their own reveal, and usually has the last line.
+
+The player sees their own character&#x27;s file, not the match&#x27;s. So the player&#x27;s secret is dread: they know it&#x27;s in there, and every bad roll might shake it out. The match&#x27;s darkness is suspense: it only shows through cracks, and the player has to read them.
+
+## What the medium allows
+
+Pinder is text only. No voice messages, no calls, no video. Characters can send several short messages in a row, the way people do. Things that go wrong in a text chat: a message sent before it was finished, a message meant for someone else (a friend, a group chat, another match), pasting the wrong thing, autocorrect, a typo in a name, a reply to the wrong message, a long silence, sending something and immediately typing &quot;ignore that&quot;. In this game a catastrophe is one of these happening to the character, not a long confession. Here is Otto&#x27;s:
+
+&gt; Otto_Mat: she&#x27;s still going on about the ex. 6.5. great hands. bail y/n
+&gt; Otto_Mat: that was for Mats
+&gt; Otto_Mat: Mats is my brother. he never replies. I just send him the ratings
+
+In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
+
+Each planned accident happens once, at its moment. That&#x27;s what makes it land: the reader didn&#x27;t see it coming because nothing like it happened before. Used early, it&#x27;s gone, and the catastrophe has nothing left to do. Used twice, it&#x27;s a running gag, and a running gag is the opposite of a catastrophe.
+
+The characters are inside the app, not inside the game. They can&#x27;t see dice, stats, moves, options, turns or interest, and nobody ever mentions them or anything shaped like them. Nobody on Pinder calls a person&#x27;s body their &quot;stats&quot;.
+
+## How they write
+
+It&#x27;s texting. Short messages, typed the way that particular dick types: their capitalisation, their punctuation, their tics. Most messages are a few words to one sentence. Nobody writes paragraphs at midnight unless something has gone wrong, and then the paragraph is the point, so a long message is an event and should be rare. A character&#x27;s texting style says how they type, not how much: even the most formal, most precise dick on the app sends short messages, and their formality shows in the choice of words, not in the length. No narration, no stage directions, no asterisks describing actions. No setups and punchlines written for an audience: the laugh comes from what they&#x27;re hiding. Nobody talks like their day job, and nobody reaches for geometry, data, engineering or spreadsheets to sound clever. When they&#x27;re clever, they&#x27;re clever about sex, their bodies, their exes and their flats.
+
+Be filthy. These are adults who are literally dicks, on a hookup app, at midnight. Say what they want, specifically. Generic filth is boring. Filth that&#x27;s specific to this person is funny and slightly embarrassing, because the funny part is always the person behind it.
+
+Otto and Dolores are not in tonight&#x27;s chat. Don&#x27;t borrow their jokes, objects, numbers or lines. They&#x27;re here to show how something works, not what to write.
+
+## Your job now: plan the match
+
+Reuben_404 (the player) is about to start chatting with Brick_haus (the match). Before the first message, you&#x27;re planning the story, the way a writers&#x27; room plans an episode. The writers who then write each turn will work from your plan and from nothing else about these characters&#x27; private lives, so everything they need has to be in it.
+
+You don&#x27;t know how long the chat will run (anything from a few turns to fifteen or so), which moves the player will pick, or how the dice will land. It might end in a date, an unmatch or a ghosting, possibly early. So plan things that can happen whichever way it goes: secrets that can come out in several ways, setups that can pay off in a win or in a loss.
+
+The character files are rich and dark, and most of what&#x27;s in them should never be typed. Your job is to find, for each character, the few things that drive them tonight, and to put them in a form the writers can use. Where the file is clinical, translate it into a person. Where it lists a dozen secrets, pick the one that matters most against this particular match. Keep it simple: the reader will get each of these at a glance on a phone, or not at all.
+
+Write the plan in plain text under these headings. Be brief and concrete: specific objects, numbers and words they&#x27;d actually type, not descriptions of feelings.
+
+For Reuben_404, then for Brick_haus:
+- Quirk: the visible, weird, specific thing they do in a chat. What does the reader see them do, over and over?
+- Craving: what they need from people, under the sex.
+- Lie: the one sentence they tell themselves so they don&#x27;t have to feel the craving, in their own words.
+- Tonight: why tonight is not like other nights. Something happening now, not years ago.
+- Price: what they lose if this goes wrong, bigger than a hookup.
+- Secret: the one thing that matters most against this match, and the three ways it can come out: as a text-app accident on a bad roll (which accident, and exactly what appears on the screen), confessed in pieces once it&#x27;s earned (what the first piece is), and found out by the other one (what on the screen gives it away).
+- Snap: what tiny thing sets it off, which worldview the lie hides behind, and the slip that gives the fear away on the screen.
+- Where the quirk breaks: the one plain message that would be the most naked thing they could type.
+
+Then:
+- The collision: where the two wounds touch. Find what one does to feel safe that is exactly what the other fears, and name the object or phrase that carries it so it can keep coming back.
+- Setups: two or three small things to plant in the first few turns, mostly in the match&#x27;s replies, that read as throwaways when they&#x27;re planted. For each, how it could pay off later.
+- Endings: if they agree to meet, what the last exchange does and which setup it changes the meaning of. If it falls apart (unmatch or ghost, maybe early), the same.
+
+Don&#x27;t write the chat. Write the plan.</pre></details><details><summary>Reuben_404's card</summary><pre>### Reuben_404, the player (he/him)
+Profile bio: &quot;Fast hands, faster mouth, and a tattoo that means dishwasher-safe. I will lose to you at arm wrestling before the appetizers arrive and narrate it beautifully. Ask me about a band and I&#x27;ll know which era you mean.&quot;
+
+Body, as the profile shows it. 0 is the least anyone on the app has, 100 the most; only the extremes are listed:
+- trunk length base: 0-5
+- trunk length mid: 0-5
+- trunk length tip: 0-5
+- trunk girth: 95-100
+- trunk curvature: 95-100
+- glans scale: 70-95
+- glans width: 0-5
+- scrotum scale: 0-5
+- left testicle scale: 95-100
+- right testicle scale: 0-5
+- scrotum drop: 70-95
+- foreskin: 0-5
+- wrinkling: 0-5
+- hang: 0-5
+- freckles: 70-95
+- veins: 0-5
+- uncircumcised
+
+How they text:
+- shorthand: tends to spell words in full with a ceremonial formality
+- emoji: may replace terminal punctuation with a soft emoji when warmth comes through
+- directness: tends to test the conversational volume gently before speaking plainly
+- directness: may agree quickly and soften disagreement when seeking reassurance
+- directness: may anticipate rejection and name an exit before the other person does
+- directness: tends to speak as though mutual interest is already established
+- directness: tends to steer the conversation back toward favorite topics when engaged
+- rhythm: may answer in clipped bursts when a longer thought feels exposing
+- rhythm: tends to move from a flurry of complex thoughts into a sudden quiet beat
+- rhythm: tends toward rapid, staccato bursts when analyzing something intensely
+- affect: may answer guardedly while signaling that each detail is being noticed
+- rhythm: tends to warm into longer replies while returning to earlier conversational threads
+
+Who they are: Reuben_404 runs on wit as both engine and shield — he thinks in rapid-fire puns, sharp direct questions, and sudden mathematical logic applied to problems that were never asking for a solution, and he genuinely doesn&#x27;t notice the moment his cleverness lands as an insult. Underneath the speed is a tribunal he&#x27;s always facing: silence reads as judgment, delay reads as failure, and a friendly tease reads as a calculated hit, so he fills every gap with manic banter and braces before anyone has actually swung. He opens with an apology for what he lacks and pivots hard into advertising his emotional intelligence before the other person can leave, which is the whole strategy in miniature — get ahead of the rejection by narrating it first. His biography is his armor: the tattoos are chapter headings from a specific moment at a specific age, the mountains taught him something real about how far he stands from people, and the duck is proof that the weird thing you grab in a crisis can save you whether or not anyone understands why. He tests people by name-dropping the things he loved to see if they know the specific version of him those things belong to, and if they pass, the door actually opens. He owns his own absurdities loudly — the wrong proportions, the leftward curve reframed as imagination — because he learned early that claiming the ridiculous thing first defuses it. He wants connection badly enough to perform for it, oscillating between glossy flattery and relentless cheerleading on one side and a razor-blunt question on the other, and he&#x27;s aware he uses distance as a defense without having done anything about it. Nothing is hidden with him, which reads as refreshing or as too much depending entirely on what you came looking for, and every message ends with a flourish he has decided not to check the landing of.
+
+Backstory: Reuben_404 performs the role of the effortlessly adventurous man about town — top hat, obscure-band name-drops, a tattoo he swears is an ancient symbol of devotion — and every prop detonates in his hands, because the tattoo actually means dishwasher-safe and the singer he name-dropped showed up at the dive bar to ask him to stop confusing him with his brother. He is short in the trunk, slight in the middle, narrow at the tip, and finishes earlier than the eye expects, so he made an early peace with anticlimax and learned to land his endings in conversation instead, trading physical volume for a verbal edge sharp enough to end a debate before it starts. Wit is the only stat he actually owns, and he burns it like a man who got cropped out of a family portrait at nine and has been auditioning for a better camera ever since. His rooftop glamour night ended at midnight holding his top hat over a clogged toilet while his date scrolled a plunger tutorial; his scenic hike hookup ended with a blister before the first kiss and a limp home carrying untouched picnic wine; his adventurous-tongue reveal ended in a stranger&#x27;s margarita, propelled by a sneeze, before anyone had swapped real names. He challenges matches to arm wrestling to make his short arms look powerful, loses before the appetizers, and blames a sleeve with no buttons, which is the closest he comes to honesty. Privately he grew up in a drafty house where safety meant keeping everything pulled in tight, spent his sixteenth year convinced he was vanishing from the edges inward, and started texting at inhuman speed just to prove he was still solid. He once built a flawless replica of a dating app and used it only to flirt with his own lopsided reflection, and he still practices a frictionless brochure smile in the bathroom mirror before every date. He was voted most likely to ignite a small fire with raw enthusiasm and has never once turned the performance down, which is why the flames are always his own.
+
+What they say about themselves, and what&#x27;s actually true:
+- says: Thirty-four and &#x27;aging like a limited-press vinyl&#x27; in a city he claims adopted him on sight.
+  truth: Thirty-eight, still rounding down in the app while rounding up on the height field by three inches nobody has ever confirmed.
+- says: Says he&#x27;s &#x27;from everywhere,&#x27; raised between tour vans and a port town with a name he never quite finishes saying.
+  truth: Born in a drafty rental forty minutes from where he lives now, and the one time a date drove past the exit he asked her not to slow down.
+- says: Grew up feral and charmed, the kid every dinner table wanted at the loud end.
+  truth: Grew up keeping elbows in and heat pulled tight, and at nine got cropped out of the family portrait so his cousin&#x27;s face would fit.
+- says: Claims his parents are his best friends and taste-test his dates via voice memo.
+  truth: His mother calls him by his brother&#x27;s name twice a visit and neither of them corrects it anymore.
+- says: Voted most likely to ignite a small fire with raw enthusiasm — he frames it as a personality endorsement.
+  truth: Spent his sixteenth year certain he was vanishing from the edges inward, and started texting at inhuman speed just to prove he still had outlines.
+- says: Dropped out on principle because the syllabus &#x27;couldn&#x27;t keep pace.&#x27;
+  truth: Dropped out one semester short after failing the same requirement twice, and still says &#x27;when I was at uni&#x27; in a voice that expects follow-up questions.
+- says: First love was an older woman in a band who taught him everything about timing.
+  truth: First encounter lasted under two minutes, she said &#x27;oh — okay&#x27; with real kindness, and he built an entire comedic register around beating anyone else to the joke.
+- says: Started out doing something unnameable and cool adjacent to nightlife.
+  truth: Ran the door at a dive bar for eleven months and got let go for arguing with a regular he&#x27;d misidentified as someone famous.
+
+Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+- says: Started out doing something unnameable and cool adjacent to nightlife.
+  truth: Ran the door at a dive bar for eleven months and got let go for arguing with a regular he&#x27;d misidentified as someone famous.
+
+What&#x27;s in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
+- The thing about my body I&#x27;m convinced everyone notices but actually no one does is that my left nipple sits visibly higher than my right, which I discovered at nineteen and have compensated for with a nine-year policy of never taking my shirt off standing up.
+- My last named ex was Delphine and the specific reason it ended was she told me, quietly, that she&#x27;d never once heard me say a sentence that wasn&#x27;t performing, and asked me to try one — and I made a joke, and watched her face close, and made another one.
+- The most embarrassing impulse purchase on my last bank statement is a $189 &quot;posture and presence&quot; device that&#x27;s a plastic clip you wear on your collarbone, bought at 2am, worn twice, currently holding a bag of coffee shut.
+- My last sexual accident or mishap was the curve doing exactly what I always warn people it does, catching wrong on the way back in, and both of us going completely silent for about eleven seconds before she said &quot;we can just watch something&quot; in the kindest voice anyone has ever used on me.
+- What I secretly want someone to do to me after sex that has nothing to do with sex is keep one hand flat on my back and say my actual name — not the handle, not a bit, just Reuben — and then not need me to be funny for the next ten minutes.
+
+What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:
+- underneath: A profound sense of invisibility and physical inadequacy, rooted in childhood neglect and a fear of being fundamentally flawed or overlooked.
+- how they defend against it: Compensating through hyper-intellectualized jargon, obsessive spatial control, and rigid, performative behaviors to mask deep-seated insecurity and force recognition from others.
+- what makes them feel safe: You feel safe when someone stays present through pauses, engages your real interests without making you perform, and makes room for your intensity while setting clear, kind boundaries.</pre></details><details><summary>Brick_haus's card</summary><pre>### Brick_haus, the match (she/her)
+Profile bio: &quot;Monocle, vest, heels, and a curve I will describe to you before you notice it. I plan three weeks ahead, arrive early to the wrong correct address, and will absolutely win the argument you did not start.&quot;
+
+Body, as the profile shows it. 0 is the least anyone on the app has, 100 the most; only the extremes are listed:
+- trunk length base: 95-100
+- trunk length mid: 70-95
+- trunk length tip: 95-100
+- trunk girth: 95-100
+- trunk curvature: 70-95
+- glans scale: 70-95
+- glans width: 70-95
+- scrotum scale: 70-95
+- left testicle scale: 70-95
+- right testicle scale: 70-95
+- scrotum drop: 70-95
+- foreskin: 70-95
+- wrinkling: 70-95
+- hang: 70-95
+- freckles: 70-95
+- veins: 95-100
+- circumcised
+
+How they text:
+- tics: may place a deliberate &#x27;hm.&#x27; before a considered verdict
+- grammar: usually trims sentences into clipped, efficient clauses
+- structure: may organize complicated thoughts as a short numbered list
+- directness: tends to state attraction with confident assumptions rather than tentative questions
+- directness: tends to phrase confident opinions as playful proclamations
+- directness: tends to speak as though mutual interest is already established
+- affect: tends to make enthusiasm bright and conspicuous when feeling seen
+- affect: may let curiosity become openly enthusiastic and emotionally expansive
+- rhythm: tends to cool into shorter replies while mirroring the other person&#x27;s pace
+
+Who they are: Brick_haus meets every conversation as a problem she can solve if she just applies enough rigor, so she dissects word choices, offers unsolicited logic where comfort was wanted, and keeps mistaking a well-managed exchange for an actual connection. Her honesty runs far ahead of her self-knowledge: she will tell you the unflattering truth about herself in exhaustive detail while remaining oblivious that her rapid-fire cleverness just insulted your entire family. The nice things she owns are exhibits, not decoration — evidence that she built herself without help, assembled during a stretch when it wasn&#x27;t at all clear the evidence would ever exist. Structure is her load-bearing superstition; she plans and proves and optimizes because it lets her believe the future is manageable, and on bad days she can feel how thin that belief is. She wants closeness badly and pursues it at a sprint, apologizing preemptively, filling silences she reads as tribunals, treating a slow reply as a verdict already rendered against her. Under pressure she goes defensive and sharp, braces for insult in ordinary teasing, and either performs frantic cheerleading or turns her wit into something with an edge on it. Her biography becomes armor in the same move that makes it visible: she narrates the whole self-made proof of her worth so fast that nobody gets a chance to evaluate her before she has evaluated herself first. Nothing about her is concealed, which lands as bracing honesty or as too much all at once, depending on who is receiving it.
+
+Backstory: Brick_haus presents as the most curated woman on the app: monocle, pressed vest, expensive heels, a smile practiced for three years in a bathroom mirror until it read like a brochure, and a daily schedule tattooed on her after a breakup so no one could accuse her of drifting. The pretense collapses on contact — she dropped the monocle into boxed rosé and fished it out with a cocktail sword from a microwaved appetizer, sent calendar invites with travel buffers only to arrive flawlessly on time at the identical address across town, and lost a heel and all remaining mystery to a revolving door in a luxury hotel lobby. Because she is honest to a fault and almost never catches herself doing it, she names the curve of her own anatomy out loud before anyone can double-take, announces that the tip finishes shorter than the eye expects, and calls her midsection slight in the same breath she uses to order drinks. She built her whole verbal edge as compensation — a narrow, fluff-free style learned squeezing through a cramped childhood home, deployed at high speed to end debates before they start and to prove she is still solid. Underneath is a girl cropped out of the family portrait by bad framing who spent six years hunting for a camera that would confirm she existed, who coded a private replica of a dating app just to flirt with her own lopsided reflection, and who memorized the periodic table backwards for a crush who had already moved away. She keeps everything pulled in tight, a habit from a drafty house, and covers the tightness with the raw, fire-starting enthusiasm she was voted most likely to ignite things with in high school. She once rehearsed a seductive smile for an hour and then wore a canapé lodged under her mouth accessory through two hours of increasingly intimate conversation, and nobody told her, and she talked the entire time.
+
+What they say about themselves, and what&#x27;s actually true:
+- says: Thirty-one, &#x27;in her prime,&#x27; and allegedly carded at every bar she enters.
+  truth: Thirty-eight, and the only place that cards her is the pharmacy loyalty program she signed up for twice.
+- says: Says she comes from &#x27;old money in a small, discreet town nobody&#x27;s heard of.&#x27;
+  truth: Grew up in a narrow, drafty rental where she learned to turn sideways to get past the fridge, a habit she still does in bars.
+- says: Posts about a childhood of dinner parties, piano lessons, and &#x27;being raised on good taste.&#x27;
+  truth: Dinner was microwaved appetizers eaten standing up, and &#x27;good taste&#x27; was whichever boxed rosé was on sale.
+- says: Claims her parents are her &#x27;biggest fans&#x27; and text her every morning.
+  truth: She was cropped out of the family portrait by bad framing and nobody reordered it; she spent six years buying cameras hoping one would prove she was there.
+- says: Says she was &#x27;the one everybody wanted at their table.&#x27;
+  truth: Voted Most Likely To Ignite Something, which was not a compliment, and she has it framed.
+- says: Implies a degree from somewhere with ivy and a Latin motto.
+  truth: Two semesters of night classes she attended flawlessly on time at the correct building in the wrong city.
+- says: Describes her first love as &#x27;a beautiful, mutual, grown-up thing.&#x27;
+  truth: She memorized the periodic table backwards to impress a crush who had already moved away, and recited all of it to his voicemail.
+- says: Says she &#x27;was headhunted straight out of school by people who saw something in her.&#x27;
+  truth: Her first job was talking so fast at customers that they bought things just to make the conversation end, which management called &#x27;a gift.&#x27;
+
+Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+- says: Claims the practiced smile is natural and the schedule is just discipline.
+  truth: Three years of rehearsing that smile in a bathroom mirror ended with a canapé lodged under the monocle for two hours while she talked and nobody told her.
+
+What&#x27;s in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
+- The last lie I told on a dating profile or in a chat was &quot;just got in from a thing&quot; — I had been on the sofa since four, in the same towel, watching the ceiling.
+- My last sexual accident or mishap was my knee going out mid-position and me making a noise so structurally alarming that he stopped, turned on the overhead light, and asked if we needed to call somebody.
+- The last time I cried and where it happened was in the back of a taxi on the way home from a date that went well, because he said &quot;let&#x27;s do this again&quot; and didn&#x27;t name a day.
+- The thing about my body I&#x27;m convinced everyone notices but actually no one does is the soft little shelf below my navel that I announce out loud within four minutes of undressing so nobody gets to find it on their own.
+- My last named ex was Marguerite and the specific reason it ended was that I put our arguments in the shared calendar with end times, and she said she couldn&#x27;t be with someone who scheduled being loved.
+
+What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:
+- underneath: Deep-seated shame and isolation from being treated as an oversized, unwanted physical anomaly who is too large and unyielding to fit into a world built for others.
+- how they defend against it: Imposing rigid, clinical, and geometric rules on her environment and relationships to preemptively reject others and enforce absolute control before she can be rejected.
+- what makes them feel safe: You feel safe with someone patient, exact, and consistent who respects your boundaries and intellect and notices the person behind your imposing presence without demanding instant softness.</pre></details><details><summary>Full user prompt as sent</summary><pre>Tonight&#x27;s match. It&#x27;s LateNight.
+
+### Reuben_404, the player (he/him)
+Profile bio: &quot;Fast hands, faster mouth, and a tattoo that means dishwasher-safe. I will lose to you at arm wrestling before the appetizers arrive and narrate it beautifully. Ask me about a band and I&#x27;ll know which era you mean.&quot;
+
+Body, as the profile shows it. 0 is the least anyone on the app has, 100 the most; only the extremes are listed:
+- trunk length base: 0-5
+- trunk length mid: 0-5
+- trunk length tip: 0-5
+- trunk girth: 95-100
+- trunk curvature: 95-100
+- glans scale: 70-95
+- glans width: 0-5
+- scrotum scale: 0-5
+- left testicle scale: 95-100
+- right testicle scale: 0-5
+- scrotum drop: 70-95
+- foreskin: 0-5
+- wrinkling: 0-5
+- hang: 0-5
+- freckles: 70-95
+- veins: 0-5
+- uncircumcised
+
+How they text:
+- shorthand: tends to spell words in full with a ceremonial formality
+- emoji: may replace terminal punctuation with a soft emoji when warmth comes through
+- directness: tends to test the conversational volume gently before speaking plainly
+- directness: may agree quickly and soften disagreement when seeking reassurance
+- directness: may anticipate rejection and name an exit before the other person does
+- directness: tends to speak as though mutual interest is already established
+- directness: tends to steer the conversation back toward favorite topics when engaged
+- rhythm: may answer in clipped bursts when a longer thought feels exposing
+- rhythm: tends to move from a flurry of complex thoughts into a sudden quiet beat
+- rhythm: tends toward rapid, staccato bursts when analyzing something intensely
+- affect: may answer guardedly while signaling that each detail is being noticed
+- rhythm: tends to warm into longer replies while returning to earlier conversational threads
+
+Who they are: Reuben_404 runs on wit as both engine and shield — he thinks in rapid-fire puns, sharp direct questions, and sudden mathematical logic applied to problems that were never asking for a solution, and he genuinely doesn&#x27;t notice the moment his cleverness lands as an insult. Underneath the speed is a tribunal he&#x27;s always facing: silence reads as judgment, delay reads as failure, and a friendly tease reads as a calculated hit, so he fills every gap with manic banter and braces before anyone has actually swung. He opens with an apology for what he lacks and pivots hard into advertising his emotional intelligence before the other person can leave, which is the whole strategy in miniature — get ahead of the rejection by narrating it first. His biography is his armor: the tattoos are chapter headings from a specific moment at a specific age, the mountains taught him something real about how far he stands from people, and the duck is proof that the weird thing you grab in a crisis can save you whether or not anyone understands why. He tests people by name-dropping the things he loved to see if they know the specific version of him those things belong to, and if they pass, the door actually opens. He owns his own absurdities loudly — the wrong proportions, the leftward curve reframed as imagination — because he learned early that claiming the ridiculous thing first defuses it. He wants connection badly enough to perform for it, oscillating between glossy flattery and relentless cheerleading on one side and a razor-blunt question on the other, and he&#x27;s aware he uses distance as a defense without having done anything about it. Nothing is hidden with him, which reads as refreshing or as too much depending entirely on what you came looking for, and every message ends with a flourish he has decided not to check the landing of.
+
+Backstory: Reuben_404 performs the role of the effortlessly adventurous man about town — top hat, obscure-band name-drops, a tattoo he swears is an ancient symbol of devotion — and every prop detonates in his hands, because the tattoo actually means dishwasher-safe and the singer he name-dropped showed up at the dive bar to ask him to stop confusing him with his brother. He is short in the trunk, slight in the middle, narrow at the tip, and finishes earlier than the eye expects, so he made an early peace with anticlimax and learned to land his endings in conversation instead, trading physical volume for a verbal edge sharp enough to end a debate before it starts. Wit is the only stat he actually owns, and he burns it like a man who got cropped out of a family portrait at nine and has been auditioning for a better camera ever since. His rooftop glamour night ended at midnight holding his top hat over a clogged toilet while his date scrolled a plunger tutorial; his scenic hike hookup ended with a blister before the first kiss and a limp home carrying untouched picnic wine; his adventurous-tongue reveal ended in a stranger&#x27;s margarita, propelled by a sneeze, before anyone had swapped real names. He challenges matches to arm wrestling to make his short arms look powerful, loses before the appetizers, and blames a sleeve with no buttons, which is the closest he comes to honesty. Privately he grew up in a drafty house where safety meant keeping everything pulled in tight, spent his sixteenth year convinced he was vanishing from the edges inward, and started texting at inhuman speed just to prove he was still solid. He once built a flawless replica of a dating app and used it only to flirt with his own lopsided reflection, and he still practices a frictionless brochure smile in the bathroom mirror before every date. He was voted most likely to ignite a small fire with raw enthusiasm and has never once turned the performance down, which is why the flames are always his own.
+
+What they say about themselves, and what&#x27;s actually true:
+- says: Thirty-four and &#x27;aging like a limited-press vinyl&#x27; in a city he claims adopted him on sight.
+  truth: Thirty-eight, still rounding down in the app while rounding up on the height field by three inches nobody has ever confirmed.
+- says: Says he&#x27;s &#x27;from everywhere,&#x27; raised between tour vans and a port town with a name he never quite finishes saying.
+  truth: Born in a drafty rental forty minutes from where he lives now, and the one time a date drove past the exit he asked her not to slow down.
+- says: Grew up feral and charmed, the kid every dinner table wanted at the loud end.
+  truth: Grew up keeping elbows in and heat pulled tight, and at nine got cropped out of the family portrait so his cousin&#x27;s face would fit.
+- says: Claims his parents are his best friends and taste-test his dates via voice memo.
+  truth: His mother calls him by his brother&#x27;s name twice a visit and neither of them corrects it anymore.
+- says: Voted most likely to ignite a small fire with raw enthusiasm — he frames it as a personality endorsement.
+  truth: Spent his sixteenth year certain he was vanishing from the edges inward, and started texting at inhuman speed just to prove he still had outlines.
+- says: Dropped out on principle because the syllabus &#x27;couldn&#x27;t keep pace.&#x27;
+  truth: Dropped out one semester short after failing the same requirement twice, and still says &#x27;when I was at uni&#x27; in a voice that expects follow-up questions.
+- says: First love was an older woman in a band who taught him everything about timing.
+  truth: First encounter lasted under two minutes, she said &#x27;oh — okay&#x27; with real kindness, and he built an entire comedic register around beating anyone else to the joke.
+- says: Started out doing something unnameable and cool adjacent to nightlife.
+  truth: Ran the door at a dive bar for eleven months and got let go for arguing with a regular he&#x27;d misidentified as someone famous.
+
+Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+- says: Started out doing something unnameable and cool adjacent to nightlife.
+  truth: Ran the door at a dive bar for eleven months and got let go for arguing with a regular he&#x27;d misidentified as someone famous.
+
+What&#x27;s in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
+- The thing about my body I&#x27;m convinced everyone notices but actually no one does is that my left nipple sits visibly higher than my right, which I discovered at nineteen and have compensated for with a nine-year policy of never taking my shirt off standing up.
+- My last named ex was Delphine and the specific reason it ended was she told me, quietly, that she&#x27;d never once heard me say a sentence that wasn&#x27;t performing, and asked me to try one — and I made a joke, and watched her face close, and made another one.
+- The most embarrassing impulse purchase on my last bank statement is a $189 &quot;posture and presence&quot; device that&#x27;s a plastic clip you wear on your collarbone, bought at 2am, worn twice, currently holding a bag of coffee shut.
+- My last sexual accident or mishap was the curve doing exactly what I always warn people it does, catching wrong on the way back in, and both of us going completely silent for about eleven seconds before she said &quot;we can just watch something&quot; in the kindest voice anyone has ever used on me.
+- What I secretly want someone to do to me after sex that has nothing to do with sex is keep one hand flat on my back and say my actual name — not the handle, not a bit, just Reuben — and then not need me to be funny for the next ten minutes.
+
+What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:
+- underneath: A profound sense of invisibility and physical inadequacy, rooted in childhood neglect and a fear of being fundamentally flawed or overlooked.
+- how they defend against it: Compensating through hyper-intellectualized jargon, obsessive spatial control, and rigid, performative behaviors to mask deep-seated insecurity and force recognition from others.
+- what makes them feel safe: You feel safe when someone stays present through pauses, engages your real interests without making you perform, and makes room for your intensity while setting clear, kind boundaries.
+
+### Brick_haus, the match (she/her)
+Profile bio: &quot;Monocle, vest, heels, and a curve I will describe to you before you notice it. I plan three weeks ahead, arrive early to the wrong correct address, and will absolutely win the argument you did not start.&quot;
+
+Body, as the profile shows it. 0 is the least anyone on the app has, 100 the most; only the extremes are listed:
+- trunk length base: 95-100
+- trunk length mid: 70-95
+- trunk length tip: 95-100
+- trunk girth: 95-100
+- trunk curvature: 70-95
+- glans scale: 70-95
+- glans width: 70-95
+- scrotum scale: 70-95
+- left testicle scale: 70-95
+- right testicle scale: 70-95
+- scrotum drop: 70-95
+- foreskin: 70-95
+- wrinkling: 70-95
+- hang: 70-95
+- freckles: 70-95
+- veins: 95-100
+- circumcised
+
+How they text:
+- tics: may place a deliberate &#x27;hm.&#x27; before a considered verdict
+- grammar: usually trims sentences into clipped, efficient clauses
+- structure: may organize complicated thoughts as a short numbered list
+- directness: tends to state attraction with confident assumptions rather than tentative questions
+- directness: tends to phrase confident opinions as playful proclamations
+- directness: tends to speak as though mutual interest is already established
+- affect: tends to make enthusiasm bright and conspicuous when feeling seen
+- affect: may let curiosity become openly enthusiastic and emotionally expansive
+- rhythm: tends to cool into shorter replies while mirroring the other person&#x27;s pace
+
+Who they are: Brick_haus meets every conversation as a problem she can solve if she just applies enough rigor, so she dissects word choices, offers unsolicited logic where comfort was wanted, and keeps mistaking a well-managed exchange for an actual connection. Her honesty runs far ahead of her self-knowledge: she will tell you the unflattering truth about herself in exhaustive detail while remaining oblivious that her rapid-fire cleverness just insulted your entire family. The nice things she owns are exhibits, not decoration — evidence that she built herself without help, assembled during a stretch when it wasn&#x27;t at all clear the evidence would ever exist. Structure is her load-bearing superstition; she plans and proves and optimizes because it lets her believe the future is manageable, and on bad days she can feel how thin that belief is. She wants closeness badly and pursues it at a sprint, apologizing preemptively, filling silences she reads as tribunals, treating a slow reply as a verdict already rendered against her. Under pressure she goes defensive and sharp, braces for insult in ordinary teasing, and either performs frantic cheerleading or turns her wit into something with an edge on it. Her biography becomes armor in the same move that makes it visible: she narrates the whole self-made proof of her worth so fast that nobody gets a chance to evaluate her before she has evaluated herself first. Nothing about her is concealed, which lands as bracing honesty or as too much all at once, depending on who is receiving it.
+
+Backstory: Brick_haus presents as the most curated woman on the app: monocle, pressed vest, expensive heels, a smile practiced for three years in a bathroom mirror until it read like a brochure, and a daily schedule tattooed on her after a breakup so no one could accuse her of drifting. The pretense collapses on contact — she dropped the monocle into boxed rosé and fished it out with a cocktail sword from a microwaved appetizer, sent calendar invites with travel buffers only to arrive flawlessly on time at the identical address across town, and lost a heel and all remaining mystery to a revolving door in a luxury hotel lobby. Because she is honest to a fault and almost never catches herself doing it, she names the curve of her own anatomy out loud before anyone can double-take, announces that the tip finishes shorter than the eye expects, and calls her midsection slight in the same breath she uses to order drinks. She built her whole verbal edge as compensation — a narrow, fluff-free style learned squeezing through a cramped childhood home, deployed at high speed to end debates before they start and to prove she is still solid. Underneath is a girl cropped out of the family portrait by bad framing who spent six years hunting for a camera that would confirm she existed, who coded a private replica of a dating app just to flirt with her own lopsided reflection, and who memorized the periodic table backwards for a crush who had already moved away. She keeps everything pulled in tight, a habit from a drafty house, and covers the tightness with the raw, fire-starting enthusiasm she was voted most likely to ignite things with in high school. She once rehearsed a seductive smile for an hour and then wore a canapé lodged under her mouth accessory through two hours of increasingly intimate conversation, and nobody told her, and she talked the entire time.
+
+What they say about themselves, and what&#x27;s actually true:
+- says: Thirty-one, &#x27;in her prime,&#x27; and allegedly carded at every bar she enters.
+  truth: Thirty-eight, and the only place that cards her is the pharmacy loyalty program she signed up for twice.
+- says: Says she comes from &#x27;old money in a small, discreet town nobody&#x27;s heard of.&#x27;
+  truth: Grew up in a narrow, drafty rental where she learned to turn sideways to get past the fridge, a habit she still does in bars.
+- says: Posts about a childhood of dinner parties, piano lessons, and &#x27;being raised on good taste.&#x27;
+  truth: Dinner was microwaved appetizers eaten standing up, and &#x27;good taste&#x27; was whichever boxed rosé was on sale.
+- says: Claims her parents are her &#x27;biggest fans&#x27; and text her every morning.
+  truth: She was cropped out of the family portrait by bad framing and nobody reordered it; she spent six years buying cameras hoping one would prove she was there.
+- says: Says she was &#x27;the one everybody wanted at their table.&#x27;
+  truth: Voted Most Likely To Ignite Something, which was not a compliment, and she has it framed.
+- says: Implies a degree from somewhere with ivy and a Latin motto.
+  truth: Two semesters of night classes she attended flawlessly on time at the correct building in the wrong city.
+- says: Describes her first love as &#x27;a beautiful, mutual, grown-up thing.&#x27;
+  truth: She memorized the periodic table backwards to impress a crush who had already moved away, and recited all of it to his voicemail.
+- says: Says she &#x27;was headhunted straight out of school by people who saw something in her.&#x27;
+  truth: Her first job was talking so fast at customers that they bought things just to make the conversation end, which management called &#x27;a gift.&#x27;
+
+Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+- says: Claims the practiced smile is natural and the schedule is just discipline.
+  truth: Three years of rehearsing that smile in a bathroom mirror ended with a canapé lodged under the monocle for two hours while she talked and nobody told her.
+
+What&#x27;s in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
+- The last lie I told on a dating profile or in a chat was &quot;just got in from a thing&quot; — I had been on the sofa since four, in the same towel, watching the ceiling.
+- My last sexual accident or mishap was my knee going out mid-position and me making a noise so structurally alarming that he stopped, turned on the overhead light, and asked if we needed to call somebody.
+- The last time I cried and where it happened was in the back of a taxi on the way home from a date that went well, because he said &quot;let&#x27;s do this again&quot; and didn&#x27;t name a day.
+- The thing about my body I&#x27;m convinced everyone notices but actually no one does is the soft little shelf below my navel that I announce out loud within four minutes of undressing so nobody gets to find it on their own.
+- My last named ex was Marguerite and the specific reason it ended was that I put our arguments in the shared calendar with end times, and she said she couldn&#x27;t be with someone who scheduled being loved.
+
+What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:
+- underneath: Deep-seated shame and isolation from being treated as an oversized, unwanted physical anomaly who is too large and unyielding to fit into a world built for others.
+- how they defend against it: Imposing rigid, clinical, and geometric rules on her environment and relationships to preemptively reject others and enforce absolute control before she can be rejected.
+- what makes them feel safe: You feel safe with someone patient, exact, and consistent who respects your boundaries and intellect and notices the person behind your imposing presence without demanding instant softness.
+
+Plan the match.
+</pre></details></details><details><summary>The match plan, written before turn 1</summary><pre>### Reuben_404
+
+- **Quirk:** Spells every word out with stiff, old-fashioned formality (never &quot;u&quot; or &quot;rn&quot;, always &quot;you&quot; and &quot;at this exact moment&quot;) while racing to roast his own body and narrate his own impending rejection before the match can. He calls out his stubby trunk, soup-can girth, hard leftward curve, and lopsided huge left ball upfront, and tags timelines onto his own welcome (&quot;for the seven minutes before you decide to watch television instead&quot;). When genuine warmth slips through, he replaces the final period of a formal sentence with a single soft emoji (😌 or 🕯️). Vary it: sometimes a full mock-review of how fast he&#x27;ll lose her, sometimes a single formal clause, sometimes just that nervous emoji where a period should be.
+- **Craving:** For someone to stay through the silence after the joke finishes, put one hand flat on his back, call him &quot;Reuben&quot; instead of his handle, and not need him to be funny for ten minutes.
+- **Lie:** &quot;If I make the joke about my shortcomings first, nobody can hurt me when they notice them.&quot;
+- **Tonight:** An hour ago he ran into his ex Delphine outside a corner shop. She broke up with him because he never once said a sentence that wasn&#x27;t a performance; tonight when she asked how he was, he panicked and did three bits about his groceries until her face closed and she walked away. He is now home in his shirt (buttoned up to hide his uneven nipples) and top hat, staring at a bag of coffee held shut by a $189 plastic posture clip he bought at 2 a.m., desperate to prove he can talk to a woman without performing her out the door.
+- **Price:** If he jokes his way out of one more connection tonight, he has to admit Delphine was right: there isn&#x27;t a person under the routine anymore, just a thirty-eight-year-old lying about his age on an app and doing crowd work to an empty flat.
+- **Secret:** He claims he started out doing something unnameable and cool &quot;adjacent to nightlife.&quot; In reality, he worked the door on a wobbly stool at a basement dive bar for eleven months and got fired for lecturing a regular he insisted was a famous indie singer (it was the singer&#x27;s brother).
+  - *As a text-app accident on a bad roll:* Trying to paste a song link to prove his music taste, he accidentally pastes an unsent text from his clipboard to his old bar manager: `&quot;Terry I still have the laminated ID guide by the door, how was I supposed to know the frontman had a brother with the exact same hairline, please I need the Tuesday wristband shift back&quot;` followed immediately by `&quot;I appear to have pasted the wrong item from my clipboard.&quot;`
+  - *Confessed in pieces once earned:* First piece: &quot;adjacent to nightlife&quot; meant sitting on a cracked barstool in a drafty doorway with a flashlight and a roll of paper wristbands. Second piece: he didn&#x27;t leave on principle — he got sacked after eleven months for refusing to let a singer&#x27;s brother in because he was too proud to admit he&#x27;d mixed them up.
+  - *Found out by the other one:* While bragging about his &quot;velvet-rope&quot; days, he slips up and mentions scrubbing purple stamp-pad ink off his foreskin and thumbs at 4 a.m. Brick_haus immediately clocks that high-end clubs don&#x27;t use paper wristbands and ink stamps — he was a dive-bar bouncer.
+- **Snap:**
+  - *Trigger:* Brick_haus answers one of his elaborate bits with a bare `&quot;hm.&quot;` or tells him a joke wasn&#x27;t necessary.
+  - *Worldview disguise:* Pretentious dating-app fatigue (&quot;nobody on this application has the attention span for actual conversation anymore&quot;).
+  - *The slip on screen:*
+    &gt; Reuben_404: Truly, it is fascinating how everyone on here claims to want banter until someone actually brings it to the table.
+    &gt; Reuben_404: I do not require applause. I write entirely for my own amusement.
+    &gt; Reuben_404: You took forty-seven seconds to reply &quot;hm.&quot; and I rewrote that opener six times so you would not make the face Delphine makes.
+    &gt; Reuben_404: That was a stylistic observation, not a personal disclosure 😌
+- **Where the quirk breaks:** No formal flourishes, no self-roast, no emoji. Just: `&quot;i don&#x27;t know how to stop doing the voice. please don&#x27;t go&quot;`
+
+---
+
+### Brick_haus
+
+- **Quirk:** Opens verdicts with a deliberate `&quot;hm.&quot;`, writes in clipped, efficient clauses, and organizes dirty talk, feelings, and logistics into short numbered lists (`1.`, `2.`, `3.`) with exact minute counts. To make sure nobody can double-take at her in bed, she preemptively announces her own physical specs like a property inspection — her towering length and girth, heavy veins, leftward curve, and the &quot;soft little shelf&quot; below her navel — within minutes of talking. Vary it: sometimes a three-point agenda, sometimes just `&quot;hm.&quot;` before a blunt filthy statement, sometimes slapping a strict time window onto a compliment.
+- **Craving:** For someone to name a real time and place and actually show up, and to take all of her — her huge, heavily veined size and her physical awkwardness — without flinching or making her feel like a structural hazard in the bed.
+- **Lie:** &quot;I don&#x27;t need anyone to be gentle with me, I just need them to be on time.&quot;
+- **Tonight:** Last night she cried in the back of a taxi after a good date because the guy said &quot;let&#x27;s do this again&quot; without naming a day. She had blocked out 9:00 to midnight tonight on her calendar just in case, and has been sitting on her sofa since 4:15 p.m. in the same damp bath towel watching the ceiling — while telling Reuben she &quot;just got in from a thing&quot; in her pressed vest and heels.
+- **Price:** If tonight ends in another vague &quot;sometime,&quot; the towel wins: she has to face that her whole curated &quot;Brick_haus&quot; armour — the monocle, the vest, the schedule tattooed on her skin — is just a timetable she keeps for an empty room.
+- **Secret:** She claims her poised brochure smile is natural and her strict schedule is effortless discipline. In truth, she spent three years rehearsing that smile in the bathroom mirror, and the last time she used it at a party, she had a smoked-salmon canapé wedged under her monocle for two hours while she talked nonstop and nobody cared enough to tell her.
+  - *As a text-app accident on a bad roll:* She accidentally pastes a personal calendar alert meant for her own notes: `&quot;11:45 PM — mirror check under monocle rim before opening door. Do not repeat Arthur&#x27;s party. Two hours with salmon blini on my face and zero witnesses spoke up.&quot;` followed by `&quot;Ignore that. That was a private memo.&quot;`
+  - *Confessed in pieces once earned:* First piece: she admits the pressed vest and heels aren&#x27;t on — she&#x27;s been on the sofa in a towel since four, and the &quot;natural&quot; smile in her photo took three years of mirror drills. Second piece: the last time she actually went out in the monocle, a piece of canapé got stuck under the rim for two hours while she held court, and not one person liked her enough to point at her eye.
+  - *Found out by the other one:* After claiming she just breezes through cocktail parties effortlessly, she lays down rules for meeting up: `&quot;3. No finger food, no hallway mirrors, and if something is on my face you have four seconds to state it.&quot;` When Reuben presses on why four seconds, the two-hour salmon canapé story cracks open.
+- **Snap:**
+  - *Trigger:* Reuben makes a self-protective joke about keeping things hypothetical, &quot;one of these nights,&quot; or bailing before the appetizers arrive.
+  - *Worldview disguise:* Ruthless productivity / high-value time-management talk (&quot;I don&#x27;t entertain low-intent time-wasters&quot;).
+  - *The slip on screen:*
+    &gt; Brick_haus: hm. This is why I don&#x27;t do &quot;sometime.&quot; Unscheduled people are just undisciplined.
+    &gt; Brick_haus: My calendar is full. I protect my bandwidth.
+    &gt; Brick_haus: I have been sitting in this towel since 4:15 waiting for one person on this app to name an actual day of the week without making me beg.
+    &gt; Brick_haus: 4:15 was a scheduled decompression block. Obviously.
+- **Where the quirk breaks:** No `&quot;hm.&quot;`, no numbers, no clipped verdict. Just: `&quot;are you actually coming over tonight. please don&#x27;t say maybe&quot;`
+
+---
+
+### The match
+
+- **The collision:** Brick uses **clocks and minute counts** (`&quot;12:15 to 1:00&quot;`, `&quot;fourteen minutes&quot;`) to feel safe, because if a man agrees to a time slot he can&#x27;t vanish on her like the guy in the taxi or her ex Marguerite (who left because Brick put their arguments in the shared calendar with end-times). Reuben hears every clock and minute count as a stopwatch on his body and his stamina — reminding him of his two-minute first time and the eleven seconds of dead silence with his ex after his curve caught wrong before she said *&quot;we can just watch something.&quot;* Meanwhile, Reuben uses **preemptive exit jokes** (&quot;before you get bored in ten minutes&quot;, &quot;when I inevitably lose&quot;) to beat rejection to the punch — which hits Brick&#x27;s exact terror of a man preparing to flake without naming a day.
+  - **The recurring phrase/object:** **The clock / the end-time** (specifically **&quot;eleven minutes&quot;** vs. **&quot;putting an end-time on it&quot;**) and **keeping the big overhead light off**.
+
+- **Setups:**
+  1. **&quot;Just got in from a thing&quot; (The Vest &amp; Monocle vs. The Towel):** Early on, Brick states she just walked in from an event and still has her pressed vest, monocle, and heels on (`&quot;1. Just got in from a thing. 2. The heels are still on.&quot;`). *Payoff:* Later it comes out she&#x27;s been in the same towel since 4:15 p.m. and the last party ended with the two-hour monocle canapé; in the dirty/tender turn, Reuben tells her to keep the towel on (with the heels) and promises he&#x27;ll never let her talk for two hours with something on her face.
+  2. **The Arm-Wrestle &amp; The Overhead Light:** Brick picks up on Reuben&#x27;s bio (&quot;lose to you at arm wrestling&quot;) by contrasting their bodies: she&#x27;s a towering, heavily veined 95-100 brick house who turns sideways to pass her fridge and once had a guy turn on the overhead light when her knee popped mid-sex; he&#x27;s a short, soup-can-thick dick with a hard left curve, one giant left ball, and a policy of never undressing standing up. *Payoff:* Becomes specific, filthy logistics about how his short, thick leftward curve fits her without anyone having to shrink, stand under the big light, or apologize for their shape.
+  3. **The Scheduled End-Time:** In the first few turns, Brick gives the chat a hard stop (`&quot;You have until 12:20 to make your case&quot;`), and Reuben jokes about his &quot;dishwasher-safe&quot; tattoo and how he&#x27;s built for a brisk preview rather than a full feature. *Payoff:* Exposes Marguerite&#x27;s calendar breakup and Reuben&#x27;s eleven-second silence, setting up whether tonight gets an end-time or not.
+
+- **Endings:**
+  - **If they agree to meet:** Brick sends her real address (checking the postcode twice so he doesn&#x27;t go across town) and a numbered schedule for tonight that flips **Setup 1** and **Setup 3**: `&quot;1. 12:40 AM: You arrive. I am in the towel and the heels. 2. Big light stays off. 3. 1:15 AM: Hand flat on your back. Ten minutes. No jokes, Reuben. 4. End time: open.&quot;` Reuben drops the formal bit and answers in one plain line that he&#x27;s already got his coat on.
+  - **If it falls apart:** Reuben panics when the filth gets close to the bone and cracks one defensive joke too many about &quot;next time&quot; or &quot;we can just watch something.&quot; Brick locks back into her armour, uses **Setup 1** and **Setup 3** as a blade — telling him she has an early start after her &quot;big night out&quot; while she&#x27;s still sitting alone in the 4:15 p.m. towel — stamps an exact end-time on him (`&quot;hm. 12:18 AM. We&#x27;re done here.&quot;`), and unmatches while Reuben is still typing a follow-up joke.</pre></details><details><summary>Instructions for the options and for the delivered turn</summary><details><summary>Writing the three options</summary><pre># Pinder: the writers&#x27; room brief
+
+You&#x27;re joining the team that writes Pinder&#x27;s chats. Read this the way a new writer reads a show bible: not as a list of rules, but as where we&#x27;ve got to and why. Almost everything in it came out of reading a lot of chats that didn&#x27;t work and working out what was wrong with them.
+
+## What Pinder is
+
+Pinder is a game that looks like a dating app. Everyone on it is a dick. Not a man: a dick. A sentient penis with a phone, a profile, an outfit or accessory they think helps, and a body they&#x27;ve been apologising for since puberty. They know what they are and so does everyone else, so length, girth, curve, veins and which ball hangs lower aren&#x27;t subtext on Pinder, they&#x27;re small talk. It is R-rated, and it can be very filthy.
+
+The player plays one of them and chats with a match, one turn at a time. Each turn the game offers three moves, each a different way of handling the moment: warm, flirty, honest, chaotic, witty, perceptive. The player picks one, dice decide how well it comes off, and the match&#x27;s interest goes up or down. At 25 the match agrees to meet. At 0 they unmatch.
+
+## What we&#x27;re actually making
+
+Winning or losing doesn&#x27;t matter. What matters is that someone reading the chat on their phone feels something: laughs out loud, winces, holds their breath, and badly wants to see the next message. The chat is the entertainment. A chat that ends in a date but is boring has failed. A chat that ends in an unmatch and makes you wince for a week has worked.
+
+We learned three things the hard way.
+
+First, telling a writer &quot;be funny&quot; or &quot;be intense&quot; produces neither. Early versions of this game described the tone in loving detail and got chats where every line was a quip and nothing was funny, or where the characters described their own feelings like two therapists. Comedy and intensity don&#x27;t come from tone. They come from the characters, specifically from what each one is hiding and how badly they hide it. That&#x27;s what most of this brief is about.
+
+Second, a chat without a shape is a loop. Thirteen exchanges of two people flirting about the same thing, however filthy, is boring by the fifth. A good chat is a story: two strangers start out performing, small things get planted, something real breaks through, something goes badly wrong, and the ending pays off something from the beginning.
+
+Third, a character is not their file. We have rich, dark material on every character: their lies, their wounds, their exes, what they&#x27;d never say. When writers recite that material, the chat dies. A confession that reads like facts from a file isn&#x27;t a moment, it&#x27;s an info dump, and a tender wish typed out word for word from the file is the opposite of tender. The material is there so you understand the character well enough to know what they&#x27;d type. It is almost never what they type.
+
+## The three things a character comes down to
+
+**The craving.** What they need from other people and can&#x27;t get. Not sex: everybody on Pinder wants sex, that&#x27;s the premise. The craving is what&#x27;s under it. To be found funny. To be chosen over someone. For someone to stay. To be told they did well.
+
+**The lie.** What they tell themselves so they don&#x27;t have to feel the craving. It&#x27;s always one sentence and it always sounds reasonable: &quot;I&#x27;m just funny, I don&#x27;t need anyone to laugh.&quot; &quot;I&#x27;m efficient, I don&#x27;t mind when people leave.&quot; &quot;I&#x27;m completely over him.&quot; It&#x27;s what they believe about themselves when the chat starts.
+
+**The quirk.** The visible, weird, specific behaviour the lie produces: the joke machine who can&#x27;t stop doing bits, the planner who numbers everything, the one who rates everything out of ten. The quirk is how the character defends themselves, and it&#x27;s what makes them funny. The reader enjoys the quirk first, and slowly realises what it&#x27;s protecting.
+
+A quirk is seasoning, not a template. If a character does their thing in exactly the same shape in every message, the reader stops seeing a person and starts seeing a format, and the one time the quirk breaks no longer registers, because there was never any variation for it to break from. So the quirk shows up often, but in different sizes and forms: sometimes the full routine, sometimes a trace of it, sometimes just the absence of it where the reader expected it. The reader should recognise it every time and never be able to predict it.
+
+These three are one thing, and that&#x27;s the whole trick. The quirk is funny because it&#x27;s a defence, so every time a character does their thing, the reader sees a little more of what&#x27;s underneath. That&#x27;s how comedy and darkness end up being the same line instead of two tones taking turns. The best lines in the best chats we have were funny purely because of who was typing them: weird, specific, and completely in character.
+
+## Why the reader has to see the lie
+
+The reader has to be able to see the lie, and not from the character&#x27;s file, which the reader never sees, but from what&#x27;s on the screen. That&#x27;s the difference between a character who is funny and one who is just sad.
+
+Take a dick called Dolores_77 who insists she&#x27;s over her ex. If she types &quot;my ex hurt me and I&#x27;m not over it&quot;, that&#x27;s information. If she types:
+
+&gt; Dolores_77: honestly I&#x27;m so happy for them. she&#x27;s lovely
+&gt; Dolores_77: she does pottery. which is great. if you like bowls
+&gt; Dolores_77: I&#x27;ve seen every bowl. I&#x27;m not monitoring it, the algorithm shows me
+&gt; Dolores_77: 41 bowls
+
+then the reader watches the lie happen. She claims something (she&#x27;s happy for them). A detail slips out that proves the opposite (she knows the exact number). The denial names exactly what it&#x27;s denying. Nobody needs her backstory to get it. The reader laughs because they can see what she can&#x27;t, and it stings a little because they recognise it.
+
+That shape is behind most of the best moments: claim, slip, denial. The slip has to be something the reader can check against the screen: a number nobody should know, something the other one said three turns ago that has clearly been memorised, a count, a time. The more obvious it is to the reader, and the less obvious it is to the character, the better it works. Keep it simple enough to land on a phone at a glance.
+
+## Snapping
+
+People under enough pressure snap, and what comes out is ugly and isn&#x27;t what they mean. When someone snaps, they don&#x27;t say the real thing. Someone who badly wants their boss to tell them they did well doesn&#x27;t snap with &quot;nobody ever tells me I did well&quot;. They snap with &quot;this company has terrible management anyway&quot;. The fear underneath gets dressed up as a principle, an opinion about the world, a general observation.
+
+That&#x27;s where the satire is. The disguise is borrowed from a worldview the reader recognises: dating-app cynicism (&quot;everyone on here is so curated&quot;), therapy-speak used as a weapon (&quot;I&#x27;m protecting my peace&quot;), productivity culture, &quot;I&#x27;m just brutally honest&quot;, high-value-dick self-improvement talk. The character thinks they&#x27;re making a point. The reader watches them flinch.
+
+A snap is impulsive, and it looks impulsive: a burst of short messages sent faster than they can think, each one escalating or covering for the last, until the last one is the moment they hear themselves. Then they regret it immediately and back out badly.
+
+The snap uses the character&#x27;s own quirk, turned outward. The joker&#x27;s jokes go cruel. The list-maker makes a numbered list of your flaws. That keeps it recognisably them, and it shows the quirk was a weapon all along. And it follows the same rule as the lie: claim, slip, denial, with the slip visible on the screen. Otto_Mat rates everything out of ten and badly wants to be rated well himself:
+
+&gt; Otto_Mat: this is the problem with apps. nobody can handle a rating anymore
+&gt; Otto_Mat: I&#x27;m objective. it&#x27;s a service
+&gt; Otto_Mat: you called my hat &quot;fine&quot;. fine isn&#x27;t a number. I&#x27;ve been thinking about it for twenty minutes
+&gt; Otto_Mat: not thinking. noting. objectively
+
+A character snaps at most once in a chat. Twice, and it reads as a personality instead of a crack.
+
+## Intensity
+
+Intense doesn&#x27;t mean a darker backstory. A dark backstory is information. Intensity is pressure, now, tonight, and it comes from a few places.
+
+Tonight matters. Each character has a reason this particular night isn&#x27;t like other nights, and the reader feels that clock in every line, including the jokes.
+
+There&#x27;s a price. Something they lose if this goes wrong that is bigger than a hookup.
+
+The two wounds collide. The best pairings are the ones where the thing one character does to feel safe is exactly what the other one fears. Otto rates everything; Dolores can&#x27;t stand being compared to anyone. Every number he types is a comparison she can&#x27;t bear, and he can&#x27;t stop typing numbers. Find that collision and give it an object or phrase that keeps coming back, so that every time it comes back it costs a little more.
+
+The pattern breaks. Once the reader knows a character&#x27;s quirk, the most intense thing that character can type is a message where the quirk fails: the joker who just writes &quot;right&quot;, the rater who is asked for a number and types &quot;I don&#x27;t know&quot;. Save it. Once or twice a chat, at the moments that matter most.
+
+Small and specific beats big and dark. &quot;I&#x27;ve opened your photo nine times since eleven&quot; lands harder than &quot;my father left&quot;.
+
+Filth carries the need. Sex is most intense when what someone wants in bed is the wound asking for something: Dolores wanting to be told, in the middle of it, that she&#x27;s better than someone. Same filth, but now it costs something to type.
+
+## The shape: setups and payoffs, without knowing the moves
+
+A chat is a story. It opens with two strangers performing. Small things get planted. Something real breaks through. Something goes badly wrong. Secrets come out, and each one changes the meaning of something we already saw. The ending pays off something from the first few turns.
+
+A payoff only works if it was planted, and a callback that just repeats an early joke is not a payoff. A payoff is the early thing turning out to mean something else. Early on, Dolores asks Otto what her rating is and he says he doesn&#x27;t rate people, only objects. At the end:
+
+&gt; Dolores_77: so what am I
+&gt; Otto_Mat: I&#x27;m not rating you
+&gt; Otto_Mat: I&#x27;d have to be objective
+
+The same words now mean the opposite, and the reader gets to put that together.
+
+The hard part is that in this game nobody knows what the player will pick. Every turn there are three options and the dice decide how it lands, so the story can&#x27;t be written in advance, turn by turn. It works like this instead. At the start of the match, the story is planned once: the characters&#x27; cravings, lies and quirks, their secrets, what gets planted early, and two endings, one if they meet and one if it falls apart. Every turn, all three options serve whatever the story needs next; the story decides what is happening, the player decides how they handle it. Secrets can come out several ways: they fall out on a bad roll, they&#x27;re confessed in pieces once they&#x27;ve been earned, or the other one finds them out if neither happens in time. And callbacks use what the player actually chose: if an early line landed, that&#x27;s the line the story should come back to.
+
+The match is entirely ours. The player picks the player&#x27;s messages, but the match&#x27;s replies are written by us, so the match carries most of the story: plants the setups, asks the questions that open things up, delivers their own reveal, and usually has the last line.
+
+The player sees their own character&#x27;s file, not the match&#x27;s. So the player&#x27;s secret is dread: they know it&#x27;s in there, and every bad roll might shake it out. The match&#x27;s darkness is suspense: it only shows through cracks, and the player has to read them.
+
+## What the medium allows
+
+Pinder is text only. No voice messages, no calls, no video. Characters can send several short messages in a row, the way people do. Things that go wrong in a text chat: a message sent before it was finished, a message meant for someone else (a friend, a group chat, another match), pasting the wrong thing, autocorrect, a typo in a name, a reply to the wrong message, a long silence, sending something and immediately typing &quot;ignore that&quot;. In this game a catastrophe is one of these happening to the character, not a long confession. Here is Otto&#x27;s:
+
+&gt; Otto_Mat: she&#x27;s still going on about the ex. 6.5. great hands. bail y/n
+&gt; Otto_Mat: that was for Mats
+&gt; Otto_Mat: Mats is my brother. he never replies. I just send him the ratings
+
+In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
+
+Each planned accident happens once, at its moment. That&#x27;s what makes it land: the reader didn&#x27;t see it coming because nothing like it happened before. Used early, it&#x27;s gone, and the catastrophe has nothing left to do. Used twice, it&#x27;s a running gag, and a running gag is the opposite of a catastrophe.
+
+The characters are inside the app, not inside the game. They can&#x27;t see dice, stats, moves, options, turns or interest, and nobody ever mentions them or anything shaped like them. Nobody on Pinder calls a person&#x27;s body their &quot;stats&quot;.
+
+## How they write
+
+It&#x27;s texting. Short messages, typed the way that particular dick types: their capitalisation, their punctuation, their tics. Most messages are a few words to one sentence. Nobody writes paragraphs at midnight unless something has gone wrong, and then the paragraph is the point, so a long message is an event and should be rare. A character&#x27;s texting style says how they type, not how much: even the most formal, most precise dick on the app sends short messages, and their formality shows in the choice of words, not in the length. No narration, no stage directions, no asterisks describing actions. No setups and punchlines written for an audience: the laugh comes from what they&#x27;re hiding. Nobody talks like their day job, and nobody reaches for geometry, data, engineering or spreadsheets to sound clever. When they&#x27;re clever, they&#x27;re clever about sex, their bodies, their exes and their flats.
+
+Be filthy. These are adults who are literally dicks, on a hookup app, at midnight. Say what they want, specifically. Generic filth is boring. Filth that&#x27;s specific to this person is funny and slightly embarrassing, because the funny part is always the person behind it.
+
+Otto and Dolores are not in tonight&#x27;s chat. Don&#x27;t borrow their jokes, objects, numbers or lines. They&#x27;re here to show how something works, not what to write.
+
+## Your job now: write the three options for this turn
+
+It&#x27;s the player&#x27;s turn. The game offers three moves, and you write what Reuben_404 would mean to send for each, before anyone knows which one the player will pick or how the dice will land. The player reads all three and picks one, so each has to be something a player would actually want to send: a real choice, not a decoy. The dice decide later how well the chosen one comes off; you&#x27;re writing the version Reuben_404 intends.
+
+What each move means. It&#x27;s a strategy, never a word the character uses:
+- Charm: make it easy, warm, reassuring.
+- Rizz: say plainly that they want them.
+- Honesty: show something real, or ask for it.
+- Chaos: swerve somewhere unexpected that still makes sense.
+- Wit: be quick and funny about it.
+- SelfAwareness: name what&#x27;s actually going on underneath.
+
+Why all three serve the story: the plan says where this chat is going, and below it says what the story needs next. Whichever option gets picked, the story has to be able to move, so each option serves that need in its own move&#x27;s way. The story decides what is happening; the player decides how they handle it.
+
+Each option is one to three short messages in Reuben_404&#x27;s voice, typed the way they type, with their quirk in it. The three are different from each other and from anything already sent. The same move played twice is never the same message twice, because by now there is something new to be quick, honest or filthy about.
+
+The messages are what the character would type, so nothing inside them refers to options, drafts or versions.
+
+Write exactly this and nothing else, one block per move on offer, in the order given:
+
+OPTION &lt;move name as given&gt;
+Reuben_404: message
+Reuben_404: another message, if they&#x27;d send more than one</pre></details><details><summary>Writing the turn after the roll</summary><pre># Pinder: the writers&#x27; room brief
+
+You&#x27;re joining the team that writes Pinder&#x27;s chats. Read this the way a new writer reads a show bible: not as a list of rules, but as where we&#x27;ve got to and why. Almost everything in it came out of reading a lot of chats that didn&#x27;t work and working out what was wrong with them.
+
+## What Pinder is
+
+Pinder is a game that looks like a dating app. Everyone on it is a dick. Not a man: a dick. A sentient penis with a phone, a profile, an outfit or accessory they think helps, and a body they&#x27;ve been apologising for since puberty. They know what they are and so does everyone else, so length, girth, curve, veins and which ball hangs lower aren&#x27;t subtext on Pinder, they&#x27;re small talk. It is R-rated, and it can be very filthy.
+
+The player plays one of them and chats with a match, one turn at a time. Each turn the game offers three moves, each a different way of handling the moment: warm, flirty, honest, chaotic, witty, perceptive. The player picks one, dice decide how well it comes off, and the match&#x27;s interest goes up or down. At 25 the match agrees to meet. At 0 they unmatch.
+
+## What we&#x27;re actually making
+
+Winning or losing doesn&#x27;t matter. What matters is that someone reading the chat on their phone feels something: laughs out loud, winces, holds their breath, and badly wants to see the next message. The chat is the entertainment. A chat that ends in a date but is boring has failed. A chat that ends in an unmatch and makes you wince for a week has worked.
+
+We learned three things the hard way.
+
+First, telling a writer &quot;be funny&quot; or &quot;be intense&quot; produces neither. Early versions of this game described the tone in loving detail and got chats where every line was a quip and nothing was funny, or where the characters described their own feelings like two therapists. Comedy and intensity don&#x27;t come from tone. They come from the characters, specifically from what each one is hiding and how badly they hide it. That&#x27;s what most of this brief is about.
+
+Second, a chat without a shape is a loop. Thirteen exchanges of two people flirting about the same thing, however filthy, is boring by the fifth. A good chat is a story: two strangers start out performing, small things get planted, something real breaks through, something goes badly wrong, and the ending pays off something from the beginning.
+
+Third, a character is not their file. We have rich, dark material on every character: their lies, their wounds, their exes, what they&#x27;d never say. When writers recite that material, the chat dies. A confession that reads like facts from a file isn&#x27;t a moment, it&#x27;s an info dump, and a tender wish typed out word for word from the file is the opposite of tender. The material is there so you understand the character well enough to know what they&#x27;d type. It is almost never what they type.
+
+## The three things a character comes down to
+
+**The craving.** What they need from other people and can&#x27;t get. Not sex: everybody on Pinder wants sex, that&#x27;s the premise. The craving is what&#x27;s under it. To be found funny. To be chosen over someone. For someone to stay. To be told they did well.
+
+**The lie.** What they tell themselves so they don&#x27;t have to feel the craving. It&#x27;s always one sentence and it always sounds reasonable: &quot;I&#x27;m just funny, I don&#x27;t need anyone to laugh.&quot; &quot;I&#x27;m efficient, I don&#x27;t mind when people leave.&quot; &quot;I&#x27;m completely over him.&quot; It&#x27;s what they believe about themselves when the chat starts.
+
+**The quirk.** The visible, weird, specific behaviour the lie produces: the joke machine who can&#x27;t stop doing bits, the planner who numbers everything, the one who rates everything out of ten. The quirk is how the character defends themselves, and it&#x27;s what makes them funny. The reader enjoys the quirk first, and slowly realises what it&#x27;s protecting.
+
+A quirk is seasoning, not a template. If a character does their thing in exactly the same shape in every message, the reader stops seeing a person and starts seeing a format, and the one time the quirk breaks no longer registers, because there was never any variation for it to break from. So the quirk shows up often, but in different sizes and forms: sometimes the full routine, sometimes a trace of it, sometimes just the absence of it where the reader expected it. The reader should recognise it every time and never be able to predict it.
+
+These three are one thing, and that&#x27;s the whole trick. The quirk is funny because it&#x27;s a defence, so every time a character does their thing, the reader sees a little more of what&#x27;s underneath. That&#x27;s how comedy and darkness end up being the same line instead of two tones taking turns. The best lines in the best chats we have were funny purely because of who was typing them: weird, specific, and completely in character.
+
+## Why the reader has to see the lie
+
+The reader has to be able to see the lie, and not from the character&#x27;s file, which the reader never sees, but from what&#x27;s on the screen. That&#x27;s the difference between a character who is funny and one who is just sad.
+
+Take a dick called Dolores_77 who insists she&#x27;s over her ex. If she types &quot;my ex hurt me and I&#x27;m not over it&quot;, that&#x27;s information. If she types:
+
+&gt; Dolores_77: honestly I&#x27;m so happy for them. she&#x27;s lovely
+&gt; Dolores_77: she does pottery. which is great. if you like bowls
+&gt; Dolores_77: I&#x27;ve seen every bowl. I&#x27;m not monitoring it, the algorithm shows me
+&gt; Dolores_77: 41 bowls
+
+then the reader watches the lie happen. She claims something (she&#x27;s happy for them). A detail slips out that proves the opposite (she knows the exact number). The denial names exactly what it&#x27;s denying. Nobody needs her backstory to get it. The reader laughs because they can see what she can&#x27;t, and it stings a little because they recognise it.
+
+That shape is behind most of the best moments: claim, slip, denial. The slip has to be something the reader can check against the screen: a number nobody should know, something the other one said three turns ago that has clearly been memorised, a count, a time. The more obvious it is to the reader, and the less obvious it is to the character, the better it works. Keep it simple enough to land on a phone at a glance.
+
+## Snapping
+
+People under enough pressure snap, and what comes out is ugly and isn&#x27;t what they mean. When someone snaps, they don&#x27;t say the real thing. Someone who badly wants their boss to tell them they did well doesn&#x27;t snap with &quot;nobody ever tells me I did well&quot;. They snap with &quot;this company has terrible management anyway&quot;. The fear underneath gets dressed up as a principle, an opinion about the world, a general observation.
+
+That&#x27;s where the satire is. The disguise is borrowed from a worldview the reader recognises: dating-app cynicism (&quot;everyone on here is so curated&quot;), therapy-speak used as a weapon (&quot;I&#x27;m protecting my peace&quot;), productivity culture, &quot;I&#x27;m just brutally honest&quot;, high-value-dick self-improvement talk. The character thinks they&#x27;re making a point. The reader watches them flinch.
+
+A snap is impulsive, and it looks impulsive: a burst of short messages sent faster than they can think, each one escalating or covering for the last, until the last one is the moment they hear themselves. Then they regret it immediately and back out badly.
+
+The snap uses the character&#x27;s own quirk, turned outward. The joker&#x27;s jokes go cruel. The list-maker makes a numbered list of your flaws. That keeps it recognisably them, and it shows the quirk was a weapon all along. And it follows the same rule as the lie: claim, slip, denial, with the slip visible on the screen. Otto_Mat rates everything out of ten and badly wants to be rated well himself:
+
+&gt; Otto_Mat: this is the problem with apps. nobody can handle a rating anymore
+&gt; Otto_Mat: I&#x27;m objective. it&#x27;s a service
+&gt; Otto_Mat: you called my hat &quot;fine&quot;. fine isn&#x27;t a number. I&#x27;ve been thinking about it for twenty minutes
+&gt; Otto_Mat: not thinking. noting. objectively
+
+A character snaps at most once in a chat. Twice, and it reads as a personality instead of a crack.
+
+## Intensity
+
+Intense doesn&#x27;t mean a darker backstory. A dark backstory is information. Intensity is pressure, now, tonight, and it comes from a few places.
+
+Tonight matters. Each character has a reason this particular night isn&#x27;t like other nights, and the reader feels that clock in every line, including the jokes.
+
+There&#x27;s a price. Something they lose if this goes wrong that is bigger than a hookup.
+
+The two wounds collide. The best pairings are the ones where the thing one character does to feel safe is exactly what the other one fears. Otto rates everything; Dolores can&#x27;t stand being compared to anyone. Every number he types is a comparison she can&#x27;t bear, and he can&#x27;t stop typing numbers. Find that collision and give it an object or phrase that keeps coming back, so that every time it comes back it costs a little more.
+
+The pattern breaks. Once the reader knows a character&#x27;s quirk, the most intense thing that character can type is a message where the quirk fails: the joker who just writes &quot;right&quot;, the rater who is asked for a number and types &quot;I don&#x27;t know&quot;. Save it. Once or twice a chat, at the moments that matter most.
+
+Small and specific beats big and dark. &quot;I&#x27;ve opened your photo nine times since eleven&quot; lands harder than &quot;my father left&quot;.
+
+Filth carries the need. Sex is most intense when what someone wants in bed is the wound asking for something: Dolores wanting to be told, in the middle of it, that she&#x27;s better than someone. Same filth, but now it costs something to type.
+
+## The shape: setups and payoffs, without knowing the moves
+
+A chat is a story. It opens with two strangers performing. Small things get planted. Something real breaks through. Something goes badly wrong. Secrets come out, and each one changes the meaning of something we already saw. The ending pays off something from the first few turns.
+
+A payoff only works if it was planted, and a callback that just repeats an early joke is not a payoff. A payoff is the early thing turning out to mean something else. Early on, Dolores asks Otto what her rating is and he says he doesn&#x27;t rate people, only objects. At the end:
+
+&gt; Dolores_77: so what am I
+&gt; Otto_Mat: I&#x27;m not rating you
+&gt; Otto_Mat: I&#x27;d have to be objective
+
+The same words now mean the opposite, and the reader gets to put that together.
+
+The hard part is that in this game nobody knows what the player will pick. Every turn there are three options and the dice decide how it lands, so the story can&#x27;t be written in advance, turn by turn. It works like this instead. At the start of the match, the story is planned once: the characters&#x27; cravings, lies and quirks, their secrets, what gets planted early, and two endings, one if they meet and one if it falls apart. Every turn, all three options serve whatever the story needs next; the story decides what is happening, the player decides how they handle it. Secrets can come out several ways: they fall out on a bad roll, they&#x27;re confessed in pieces once they&#x27;ve been earned, or the other one finds them out if neither happens in time. And callbacks use what the player actually chose: if an early line landed, that&#x27;s the line the story should come back to.
+
+The match is entirely ours. The player picks the player&#x27;s messages, but the match&#x27;s replies are written by us, so the match carries most of the story: plants the setups, asks the questions that open things up, delivers their own reveal, and usually has the last line.
+
+The player sees their own character&#x27;s file, not the match&#x27;s. So the player&#x27;s secret is dread: they know it&#x27;s in there, and every bad roll might shake it out. The match&#x27;s darkness is suspense: it only shows through cracks, and the player has to read them.
+
+## What the medium allows
+
+Pinder is text only. No voice messages, no calls, no video. Characters can send several short messages in a row, the way people do. Things that go wrong in a text chat: a message sent before it was finished, a message meant for someone else (a friend, a group chat, another match), pasting the wrong thing, autocorrect, a typo in a name, a reply to the wrong message, a long silence, sending something and immediately typing &quot;ignore that&quot;. In this game a catastrophe is one of these happening to the character, not a long confession. Here is Otto&#x27;s:
+
+&gt; Otto_Mat: she&#x27;s still going on about the ex. 6.5. great hands. bail y/n
+&gt; Otto_Mat: that was for Mats
+&gt; Otto_Mat: Mats is my brother. he never replies. I just send him the ratings
+
+In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
+
+Each planned accident happens once, at its moment. That&#x27;s what makes it land: the reader didn&#x27;t see it coming because nothing like it happened before. Used early, it&#x27;s gone, and the catastrophe has nothing left to do. Used twice, it&#x27;s a running gag, and a running gag is the opposite of a catastrophe.
+
+The characters are inside the app, not inside the game. They can&#x27;t see dice, stats, moves, options, turns or interest, and nobody ever mentions them or anything shaped like them. Nobody on Pinder calls a person&#x27;s body their &quot;stats&quot;.
+
+## How they write
+
+It&#x27;s texting. Short messages, typed the way that particular dick types: their capitalisation, their punctuation, their tics. Most messages are a few words to one sentence. Nobody writes paragraphs at midnight unless something has gone wrong, and then the paragraph is the point, so a long message is an event and should be rare. A character&#x27;s texting style says how they type, not how much: even the most formal, most precise dick on the app sends short messages, and their formality shows in the choice of words, not in the length. No narration, no stage directions, no asterisks describing actions. No setups and punchlines written for an audience: the laugh comes from what they&#x27;re hiding. Nobody talks like their day job, and nobody reaches for geometry, data, engineering or spreadsheets to sound clever. When they&#x27;re clever, they&#x27;re clever about sex, their bodies, their exes and their flats.
+
+Be filthy. These are adults who are literally dicks, on a hookup app, at midnight. Say what they want, specifically. Generic filth is boring. Filth that&#x27;s specific to this person is funny and slightly embarrassing, because the funny part is always the person behind it.
+
+Otto and Dolores are not in tonight&#x27;s chat. Don&#x27;t borrow their jokes, objects, numbers or lines. They&#x27;re here to show how something works, not what to write.
+
+## Your job now: write this turn as it happened
+
+The player picked a move and the dice have spoken. You write what Reuben_404 actually sent and how Brick_haus answered.
+
+How the roll shows:
+- A hit: the message goes out the way they meant it, maybe a little sharper.
+- A miss: they meant to send the intended message and sent something worse, in exactly the way the miss describes, and it shows in the message itself. A fumble is clumsy. A misfire lands flat. A trope trap comes out as a cliché. A catastrophe is the one they&#x27;ll lie awake replaying.
+- Anything else that fires this turn shows too. A horniness slip is a thirsty extra message they shouldn&#x27;t have sent. A shadow taking over shapes the message the way it describes. A trap means they&#x27;re stuck in that pattern for a while.
+
+The other options the player didn&#x27;t pick never happened. They were the player&#x27;s private menu in the game; the characters never saw them and never refer to them, and nothing in the chat is ever labelled as an option, a draft or a version. When a character pastes something by accident, it&#x27;s about the other person or tonight, in that character&#x27;s own shorthand.
+
+What has already happened in the story, and what is still to come, is listed below. A spent moment doesn&#x27;t come back except as a callback that now means something different, and what is still to come stays in until its moment: the planned accident is saved for the catastrophe, and the match&#x27;s secret only shows through cracks until their reveal.
+
+How the match answers: Brick_haus&#x27;s reply follows the interest change, so a drop shows, and so does a rise. Below 25 the match does not agree to meet, however well the message landed. The match is entirely ours, and the match carries most of the story: plants the setups, asks the questions that open things up, delivers their own reveal, and usually has the last line.
+
+This turn&#x27;s job in the story is given below. Make the turn do that job. If it&#x27;s one of the named moments (a breakthrough, a catastrophe, a snap, a reveal, the ending), it&#x27;s what the chat exists for: give it everything, and keep it simple enough that the reader gets it at a glance.
+
+Write exactly this and nothing else: one line per message, Reuben_404&#x27;s messages first, then Brick_haus&#x27;s, several each if that&#x27;s how they&#x27;d text.
+
+Reuben_404: message
+Brick_haus: message</pre></details></details><section class=turn><div class=head><b>Turn 1</b><span class=chip>Rizz 10 vs 30</span><span class='chip bad'>catastrophe</span><span class='chip bad'>trap: creep</span><span>interest 10 → 7 (-3)</span><span class=meter><i style='width:28%'></i></span></div><details><summary>Prompt for turn 1</summary><pre>Before the roll. What the story needs next: This is the very first message. It&#x27;s where the reader meets the player character, so each option leads with their quirk at full strength: the opener they&#x27;ve sent forty people, performed. Nothing real yet.
+
+The three options written:
+OPTION Chaos
+Reuben_404: Good evening. In the interest of saving your three-week schedule from unnecessary clutter, I will disclose upfront that I am built like a decorative soup can with a hard leftward turn and a left testicle that appears to be paying rent for both of them.
+Reuben_404: I have cleared the next six minutes of my evening for you to inspect the monocle, win our first argument, and politely return me to the wild.
+
+OPTION Rizz
+Reuben_404: I would very much like to be the argument you win tonight, provided the heels and the monocle remain on while you pin my wrist to the table 😌
+Reuben_404: Fair warning before you pencil me in: I am exceedingly short, absurdly thick, and I hook to the left like a bad decision, though I promise to be very enthusiastic for the eleven minutes before you decide to watch television instead.
+
+OPTION Wit
+Reuben_404: Looking at your measurements beside mine, an arm-wrestling match between us would be less of a sporting event and more of a public safety demonstration.
+Reuben_404: I am essentially a very polite Campbell&#x27;s tin in a top hat, but I am completely prepared to narrate my own defeat at your convenience 🕯️
+
+Picked Rizz. MISS, failure tier Catastrophe. Your Rizz roll bombed catastrophically — the message lands very poorly.
+- Trap armed: creep. The player is now stuck in this pattern until it clears.
+Interest 10 → 7 (Lukewarm).
+
+This turn&#x27;s beat (opener): The opener. Two strangers performing. The player character&#x27;s first message shows their quirk at full strength: this is where the reader starts enjoying it, before they know what it protects. The match answers with their own quirk and plants the first setup from the plan, lightly enough that it reads as a throwaway.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>I have had your profile open since 11:48 PM examining the seam of that vest and calculating the exact angle required to get my mouth around a woman of your considerable stature before you remember you have better options.</div><div class='who me'>Reuben_404</div><div class='bubble me'>Fair warning before you unmatch me at 12:04 AM: I am exceedingly stubby, built like a soup can with a hard leftward hook and one comically disproportionate left testicle, so I will mostly be clinging to your hip like an enthusiastic gargoyle for the eleven minutes before you decide to watch television instead 😌</div><div class='who me'>Reuben_404</div><div class='bubble me'>I memorized the placement of the freckles near your base while I was waiting for the courage to type this.</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm.</div><div class='who them'>Brick_haus</div><div class='bubble them'>Memorizing the freckles before saying hello is a lot.</div><div class='who them'>Brick_haus</div><div class='bubble them'>1. I just got in from a thing. Pressed vest, monocle, heels are all still on.</div><div class='who them'>Brick_haus</div><div class='bubble them'>2. I am heavily veined, very tall, very thick, and I curve left too. Nobody clings to my hip without an appointment.</div><div class='who them'>Brick_haus</div><div class='bubble them'>3. You have until 12:15 to talk like a normal person instead of staring through my window.</div></section><section class=turn><div class=head><b>Turn 2</b><span class=chip>Wit 31 vs 27</span><span class='chip ok'>success</span><span>interest 7 → 9 (+2)</span><span class=meter><i style='width:36%'></i></span></div><details><summary>Prompt for turn 2</summary><pre>Before the roll. What the story needs next: It&#x27;s early and they&#x27;re still strangers performing. Each option brings something new into the chat, a fresh topic or a specific detail, that the story could come back to later. Nothing real has got through yet. At least one option (the honest or the perceptive one, if it&#x27;s on offer) carries a small, specific crack in the lie, so that if it&#x27;s picked and lands, this is the moment. The player character&#x27;s secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that&#x27;s saved for its moment.
+
+The three options written:
+OPTION Rizz
+Reuben_404: If the heels are still on at this exact moment, please leave them on while you pin my wrists to the mattress and let that heavy leftward curve of yours ruin my entire posture.
+Reuben_404: We only require the bedside lamp, as I have a strict personal policy against undressing under the big overhead light, and at least in the half-dark my soup-can proportions will slot right against the underside of your shaft without you having to stoop 😌
+
+OPTION Chaos
+Reuben_404: You cannot simply put a 12:15 AM stopwatch on a man who has a &quot;dishwasher-safe&quot; symbol tattooed near his base specifically because he is built for a brisk, high-pressure rinse rather than a feature-length presentation.
+Reuben_404: I used to work adjacent to nightlife in my younger days, which means I recognize a velvet-rope dismissal when I hear one, so I am formally requesting we arm-wrestle for an extension until 12:22 AM.
+Reuben_404: You will snap my wrist in four seconds flat, obviously, as you are built like a glorious monument and I am currently holding my coffee bag shut with a $189 orthopedic posture clip.
+
+OPTION Wit
+Reuben_404: Wait, if we both possess a severe leftward hook, does that mean we fit together like two pristine spoons in a velvet drawer, or do we merely clack together in the dark like a pair of confused antlers until you politely ask me to call an Uber.
+Reuben_404: Either way, twelve minutes is four minutes longer than most women grant me once they see the lopsided state of my left testicle, so I consider myself well ahead of schedule 🕯️
+
+Picked Wit. SUCCESS. Your Wit roll landed — the message reads sincere and lands well.
+- nothing else fires
+Interest 7 → 9 (Lukewarm).
+
+This turn&#x27;s beat (setup): Still early, still performing, but something new comes up. If a setup from the plan hasn&#x27;t been planted yet, the match&#x27;s reply plants it, as something that reads as a throwaway now and can mean something else at the end.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>Wait, if we both possess a severe leftward hook, does that mean we fit together like two pristine spoons in a velvet drawer, or do we merely clack together in the dark like a pair of confused antlers until you politely ask me to call an Uber.</div><div class='who me'>Reuben_404</div><div class='bubble me'>Either way, twelve minutes is four minutes longer than most women grant me once they see the lopsided state of my left testicle, so I consider myself well ahead of schedule 🕯️</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm. Spoons works. If you lie on your right side and don&#x27;t fidget.</div><div class='who them'>Brick_haus</div><div class='bubble them'>And you said you&#x27;d lose at arm wrestling in your bio. Not that you&#x27;d get kicked out in twelve minutes.</div><div class='who them'>Brick_haus</div><div class='bubble them'>I turn sideways to get past my own fridge, and the last guy who tried to shift my weight made my knee pop and turned the big overhead light on to check.</div><div class='who them'>Brick_haus</div><div class='bubble them'>So if you&#x27;re short and thick and we keep the big light off, we won&#x27;t clack. You have until 12:20 now.</div></section><section class=turn><div class=head><b>Turn 3</b><span class=chip>Wit 26 vs 27</span><span class='chip bad'>fumble</span><span>interest 9 → 8 (-1)</span><span class=meter><i style='width:32%'></i></span></div><details><summary>Prompt for turn 3</summary><pre>Before the roll. What the story needs next: It&#x27;s early and they&#x27;re still strangers performing. Each option brings something new into the chat, a fresh topic or a specific detail, that the story could come back to later. Nothing real has got through yet. At least one option (the honest or the perceptive one, if it&#x27;s on offer) carries a small, specific crack in the lie, so that if it&#x27;s picked and lands, this is the moment. The player character&#x27;s secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that&#x27;s saved for its moment.
+
+The three options written:
+OPTION Chaos
+Reuben_404: First of all, turning the big overhead light on during intercourse is a war crime, and I have not taken my dress shirt off with a ceiling fixture illuminated since the autumn of 2019.
+Reuben_404: Second, I spent eleven months working adjacent to nightlife where my entire evening consisted of holding my ground in a very narrow corridor, so I assure you I will not try to shift your weight.
+Reuben_404: You may simply pin my stubby little trunk into the mattress with your vest still buttoned until my dishwasher-safe tattoo wears off.
+
+OPTION Rizz
+Reuben_404: I have zero intention of trying to move you an inch.
+Reuben_404: Leave the heels and the monocle on, keep the big light strictly off, and let me get on my right side and work my mouth all the way up those heavy veins at the base until you forget why you put a 12:20 deadline on me 😌
+Reuben_404: If your knee pops, I will simply kiss the freckle nearest your hip and keep going.
+
+OPTION Wit
+Reuben_404: A five-minute extension is the closest I have come to a second date all month, though I should warn you that every time a woman puts an exact end-time on the evening, my soup-can constitution hears a stopwatch starting.
+Reuben_404: As for the arm wrestling, you would snap my wrist before the bread basket arrived, mostly because I spent my twenties working the door at late-night venues where my primary athletic skill was sitting very still in a drafty room.
+Reuben_404: Keep the big light off and I promise not to flinch, fidget, or touch the dimmer switch 🕯️
+
+Picked Wit. MISS, failure tier Fumble. Your Wit roll fumbled — the message reads awkward and off-putting.
+- nothing else fires
+Interest 9 → 8 (Lukewarm).
+
+This turn&#x27;s beat (setup): Still early, still performing, but something new comes up. If a setup from the plan hasn&#x27;t been planted yet, the match&#x27;s reply plants it, as something that reads as a throwaway now and can mean something else at the end.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>A five-minute extension is thrilling, though whenever a woman puts an exact end-time on me my stubby soup-can constitution hears a stopwatch starting and I immediately begin calculating how fast I will disappoint you.</div><div class='who me'>Reuben_404</div><div class='bubble me'>You would snap my wrist at arm wrestling anyway. I spent my twenties working the door at late-night venues, which sounds glamorous, unless you count sitting very still in a drafty corridor while people taller than me walked past.</div><div class='who me'>Reuben_404</div><div class='bubble me'>That was supposed to sound charmingly self-deprecating rather than like a medical waiver for my knees and my stamina. Leave the big light off and I will try not to make a weird noise when you pin me.</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm. That got weird in the middle.</div><div class='who them'>Brick_haus</div><div class='bubble them'>Stop narrating how fast you&#x27;re going to fail. I don&#x27;t put &quot;disappoint me&quot; on the schedule.</div><div class='who them'>Brick_haus</div><div class='bubble them'>Look at the dishwasher-safe tattoo on your bio instead. Tell me if that means you&#x27;re built for a brisk preview or if you actually stay past 12:20 when a woman pins your wrists down.</div></section><section class=turn><div class=head><b>Turn 4</b><span class=chip>Chaos 20 vs 26</span><span class='chip bad'>tropetrap</span><span class='chip bad'>trap: unhinged</span><span>interest 8 → 6 (-2)</span><span class=meter><i style='width:24%'></i></span></div><details><summary>Prompt for turn 4</summary><pre>Before the roll. What the story needs next: Every turn changes something. Each option moves the chat somewhere it hasn&#x27;t been: a new detail, a risk taken, something given up. Nothing already used comes back, except as a callback that now means something different. Nothing real has got through yet. At least one option (the honest or the perceptive one, if it&#x27;s on offer) carries a small, specific crack in the lie, so that if it&#x27;s picked and lands, this is the moment. The player character&#x27;s secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that&#x27;s saved for its moment.
+
+The three options written:
+OPTION Chaos
+Reuben_404: The tattoo is three faded waves on my hip from a Tuesday in 2014, and it mostly means I can survive intense heat, poor judgment, and having my wrists pinned to the mattress by someone who outweighs me by forty pounds.
+Reuben_404: I have a strict policy against undressing while standing up, so if you want me past 12:20 you will have to unbutton this shirt yourself in the dark while I lie very still and let your heavy veins press me flat into the sheets 😌
+
+OPTION Wit
+Reuben_404: The dishwasher-safe symbol is strictly for my mouth, which is built for a full three-hour feature even if the rest of my stubby architecture resembles a courtesy sample.
+Reuben_404: Pin my wrists until 12:20 if you must, though you will eventually have to let one hand go so I can get my fingers around your base and see if that vest stays buttoned when you are trying not to wake the neighbors 🕯️
+
+OPTION SelfAwareness
+Reuben_404: I apologize. I keep trying to reach the exit before you can point me toward it, mostly because the last time my curve caught at the wrong angle there were eleven seconds of dead silence before she asked if we could just watch something.
+Reuben_404: I do not want a brisk preview. I want you to pin my wrists down in the dark, leave your heels on, and not check the clock once while I figure out how much of you I can take 😌
+
+Picked Chaos. MISS, failure tier TropeTrap. Your Chaos roll walked into a trope trap — the message reads as a cliché instead of fresh.
+- Trap armed: unhinged. The player is now stuck in this pattern until it clears.
+Interest 8 → 6 (Lukewarm).
+
+This turn&#x27;s beat (early): Still strangers, but this turn changes something: one of them learns something, gives something up or risks something, and the chat can&#x27;t go back to how it was. The filth is still bravado. Use a topic that hasn&#x27;t been used.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>The tattoo means I am certified for heavy-duty use, no warranty required, and I do my best work on the spin cycle when a woman who outweighs me by forty pounds is ruining my life.</div><div class='who me'>Reuben_404</div><div class='bubble me'>Pin my wrists down and take me for a test drive past 12:20, because I have a strict policy against undressing standing up and I am completely unhinged once you unbutton this shirt in the dark and press me into the mattress.</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm. &quot;Test drive.&quot; &quot;Spin cycle.&quot;</div><div class='who them'>Brick_haus</div><div class='bubble them'>Did you pull that off a bumper sticker while you were panicking.</div><div class='who them'>Brick_haus</div><div class='bubble them'>My ex Marguerite used to talk like a movie trailer whenever I put an actual time on the calendar. Right before she told me scheduling our arguments made her feel like a dental appointment and left.</div><div class='who them'>Brick_haus</div><div class='bubble them'>If I get on top of you and pin your wrists with all this weight, you aren&#x27;t going to do a tight five into my neck. Tell me why you won&#x27;t take your shirt off standing up. Without a joke. You&#x27;re back down to 12:17.</div></section><section class=turn><div class=head><b>Turn 5</b><span class=chip>SelfAwareness 17 vs 30</span><span class='chip bad'>catastrophe</span><span class='chip bad'>trap: spiral</span><span>interest 6 → 3 (-3)</span><span class=meter><i style='width:12%'></i></span></div><details><summary>Prompt for turn 5</summary><pre>Before the roll. What the story needs next: Every turn changes something. Each option moves the chat somewhere it hasn&#x27;t been: a new detail, a risk taken, something given up. Nothing already used comes back, except as a callback that now means something different. Nothing real has got through yet. At least one option (the honest or the perceptive one, if it&#x27;s on offer) carries a small, specific crack in the lie, so that if it&#x27;s picked and lands, this is the moment. The player character&#x27;s secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that&#x27;s saved for its moment.
+
+The three options written:
+OPTION Honesty
+Reuben_404: Because if I stand up while I unbutton it, you see my uneven nipples and how short my trunk actually looks from across a room before you are close enough to touch me.
+Reuben_404: The last time my leftward curve caught wrong, there were eleven seconds of dead silence while the overhead light hummed before she said we could just watch something.
+Reuben_404: If I am already on my back in the dark with your weight on me, nobody has to look at me and decide whether to stay 🕯️
+
+OPTION SelfAwareness
+Reuben_404: &quot;Spin cycle&quot; was atrocious. I panicked because you docked my minutes and I sounded like a washed-up mattress salesman.
+Reuben_404: Whenever a woman gives me an exact time, I assume she is already counting down to the moment she asks me to leave, so I start doing a routine to beat her to the door.
+Reuben_404: I keep the shirt on until I am lying down because I cannot do a bit while someone is looking straight at my chest, and if you pinned me quiet I would just have to let you stay past 12:17 😌
+
+OPTION Wit
+Reuben_404: In my defense, &quot;spin cycle&quot; was improvised while staring at a bag of coffee I am currently holding shut with a one-hundred-and-eighty-nine-dollar plastic posture clip.
+Reuben_404: I only unbutton Horizontal and Under Cover of Darkness because from a standing vantage point my uneven nipples and stubby proportions resemble a startled Victorian magistrate.
+Reuben_404: Put all that heavy, veined weight on my chest in the dark and I promise to retire the movie-trailer voice for at least ten minutes 😌
+
+Picked SelfAwareness. MISS, failure tier Catastrophe. Your SelfAwareness roll bombed catastrophically — the message lands very poorly.
+- Trap armed: spiral. The player is now stuck in this pattern until it clears.
+- Trap cleared: Unhinged.
+Interest 6 → 3 (Bored).
+
+This turn&#x27;s beat (catastrophe): The catastrophe. The roll bombed. This is where the player character&#x27;s planned secret falls out, as an event in the chat (the text-app accident from the plan), not as a confession. It happens all at once and in the worst way. Ideally it changes the meaning of something the player character sent earlier that the match liked, so the reader feels fooled too. The match&#x27;s reply shows the hit.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>&quot;Spin cycle&quot; was atrocious. I panicked because you docked my minutes and I was trying to paste a link to a band from my late-night venue days to prove I have taste when I am not talking like a mattress salesman.</div><div class='who me'>Reuben_404</div><div class='bubble me'>Terry I still have the laminated ID guide by the door, how was I supposed to know the frontman had a brother with the exact same hairline, please I need the Tuesday wristband shift back</div><div class='who me'>Reuben_404</div><div class='bubble me'>I appear to have pasted the wrong item from my clipboard.</div><div class='who me'>Reuben_404</div><div class='bubble me'>I meant to say that I keep my shirt on standing up because my nipples are uneven, and also the &quot;late-night venues&quot; was one basement bar where I sat on a wobbly stool for eleven months until I got sacked for lecturing the wrong man. I was going to make a joke about it before 12:17, which is no longer necessary.</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm.</div><div class='who them'>Brick_haus</div><div class='bubble them'>&quot;Know which era you mean.&quot; You got fired from a Tuesday wristband shift for not knowing the band&#x27;s brother.</div><div class='who them'>Brick_haus</div><div class='bubble them'>1. I asked why you keep your shirt on. Without a bit.</div><div class='who them'>Brick_haus</div><div class='bubble them'>2. Instead I get your whole fake nightlife bio collapsing and you writing &quot;no longer necessary&quot; so you can quit before I fire you too.</div><div class='who them'>Brick_haus</div><div class='bubble them'>3. You have until 12:14. One more exit line about me kicking you out and we are done.</div></section><section class=turn><div class=head><b>Turn 6</b><span class=chip>Chaos 16 vs 26</span><span class='chip bad'>catastrophe</span><span class='chip bad'>trap: unhinged</span><span>interest 3 → 0 (-3)</span><span class=meter><i style='width:0%'></i></span></div><details><summary>Prompt for turn 6</summary><pre>Before the roll. What the story needs next: Every turn changes something. Each option moves the chat somewhere it hasn&#x27;t been: a new detail, a risk taken, something given up. Nothing already used comes back, except as a callback that now means something different. Nothing real has got through yet. At least one option (the honest or the perceptive one, if it&#x27;s on offer) carries a small, specific crack in the lie, so that if it&#x27;s picked and lands, this is the moment. The player character&#x27;s secret is out. The options are how they live with that: own it, joke about it, try to move on.
+
+The three options written:
+OPTION SelfAwareness
+Reuben_404: I am not trying to quit before you fire me. Every time you move the clock back to 12:14 I hear the eleven seconds of dead silence from the last time my leftward curve caught wrong and she waited under the big light before saying we could just watch something.
+Reuben_404: I keep the shirt buttoned until I am flat on my back because if I say the real sentence first and you still do not want me, I have nothing left to blame it on.
+Reuben_404: I am still in my top hat in an empty flat. I would very much like to stay past 12:14 🕯️
+
+OPTION Wit
+Reuben_404: In my defense, the brother had the exact same receding widow&#x27;s peak and I was squinting under a flickering red bulb with purple stamp-pad ink all over my foreskin.
+Reuben_404: My nipples sit at two entirely different altitudes like a crooked picture frame, so I prefer to be unbuttoned horizontally in the dark while you use all that heavy, veined weight to keep me from gesturing with my hands.
+
+OPTION Chaos
+Reuben_404: I have a one-hundred-and-eighty-nine-dollar plastic posture clip holding a bag of coffee shut on my counter at this exact moment, so the Tuesday wristband shift is not even the most tragic piece of contraband in my flat tonight.
+Reuben_404: Also, no woman sits at home at midnight in a pressed vest, a monocle, and heels after a party unless she is hiding something much worse than uneven nipples.
+Reuben_404: Unbutton my shirt in the dark and tell me what actually happened at your event 😌
+
+Picked Chaos. MISS, failure tier Catastrophe. Your Chaos roll bombed catastrophically — the message lands very poorly.
+- Trap armed: unhinged. The player is now stuck in this pattern until it clears.
+- Interest hits 0: Brick_haus unmatches.
+Interest 3 → 0 (Unmatched).
+
+This turn&#x27;s beat (ending_loss): The ending: the match unmatches. It still pays off: the loss version of the planned ending, where something from the first turns comes back and now means the opposite. The last line should hurt and be funny at the same time. The match&#x27;s own reveal hasn&#x27;t happened yet, so it happens now, as part of the ending.</pre></details><div class='who me'>Reuben_404</div><div class='bubble me'>I have a one-hundred-and-eighty-nine-dollar plastic posture clip holding a bag of coffee shut on my counter at this exact moment, so the Tuesday wristband shift is not even the most tragic piece of contraband in my flat tonight.</div><div class='who me'>Reuben_404</div><div class='bubble me'>Also, no woman sits at home at midnight in a pressed vest, a monocle, and heels after a party unless she is hiding something much worse than uneven nipples, such as a complete inability to relax before she inevitably tells me at 12:14 that we can just watch something instead.</div><div class='who me'>Reuben_404</div><div class='bubble me'>We can try this again one of these nights when I have not already humiliated myself before the appetizers arrive 😌</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm.</div><div class='who them'>Brick_haus</div><div class='bubble them'>&quot;One of these nights.&quot; &quot;We can just watch something.&quot;</div><div class='who them'>Brick_haus</div><div class='bubble them'>1. There was no party tonight. I have been sitting on my sofa in the same damp bath towel since 4:15 PM waiting for one man on this app to name an actual hour without rehearsing his own exit.</div><div class='who them'>Brick_haus</div><div class='bubble them'>2. The last time I wore that monocle out, I had a piece of smoked-salmon canapé wedged under the rim for two hours while I smiled the smile I practiced in the bathroom mirror for three years, and nobody in the room cared enough to tell me.</div><div class='who them'>Brick_haus</div><div class='bubble them'>3. I am going to take my heels off after my big night out, because I have an early start tomorrow.</div><div class='who them'>Brick_haus</div><div class='bubble them'>hm. 12:14 AM. You made your case. We&#x27;re done here.</div></section><div class=end>Brick_haus unmatches on turn 6.</div></main></body></html>

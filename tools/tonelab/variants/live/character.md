@@ -14,7 +14,10 @@ Backstory: ${backstory}
 What they say about themselves, and what's actually true:
 ${secrets}
 
-What's in the drawer, the private, filthy, embarrassing specifics:
+Tonight, build their secret around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+${focus}
+
+What's in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
 ${drawer}
 
 What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:

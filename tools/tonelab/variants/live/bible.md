@@ -28,6 +28,8 @@ Third, a character is not their file. We have rich, dark material on every chara
 
 **The quirk.** The visible, weird, specific behaviour the lie produces: the joke machine who can't stop doing bits, the planner who numbers everything, the one who rates everything out of ten. The quirk is how the character defends themselves, and it's what makes them funny. The reader enjoys the quirk first, and slowly realises what it's protecting.
 
+A quirk is seasoning, not a template. If a character does their thing in exactly the same shape in every message, the reader stops seeing a person and starts seeing a format, and the one time the quirk breaks no longer registers, because there was never any variation for it to break from. So the quirk shows up often, but in different sizes and forms: sometimes the full routine, sometimes a trace of it, sometimes just the absence of it where the reader expected it. The reader should recognise it every time and never be able to predict it.
+
 These three are one thing, and that's the whole trick. The quirk is funny because it's a defence, so every time a character does their thing, the reader sees a little more of what's underneath. That's how comedy and darkness end up being the same line instead of two tones taking turns. The best lines in the best chats we have were funny purely because of who was typing them: weird, specific, and completely in character.
 
 ## Why the reader has to see the lie
@@ -106,11 +108,13 @@ Pinder is text only. No voice messages, no calls, no video. Characters can send 
 
 In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
 
-The characters are inside the app, not inside the game. They can't see dice, stats, moves or interest, and nobody ever mentions them.
+Each planned accident happens once, at its moment. That's what makes it land: the reader didn't see it coming because nothing like it happened before. Used early, it's gone, and the catastrophe has nothing left to do. Used twice, it's a running gag, and a running gag is the opposite of a catastrophe.
+
+The characters are inside the app, not inside the game. They can't see dice, stats, moves, options, turns or interest, and nobody ever mentions them or anything shaped like them. Nobody on Pinder calls a person's body their "stats".
 
 ## How they write
 
-It's texting. Short messages, typed the way that particular dick types: their capitalisation, their punctuation, their tics. Nobody writes paragraphs at midnight unless something has gone wrong, and then the paragraph is the point. No narration, no stage directions, no asterisks describing actions. No setups and punchlines written for an audience: the laugh comes from what they're hiding. Nobody talks like their day job, and nobody reaches for geometry, data, engineering or spreadsheets to sound clever. When they're clever, they're clever about sex, their bodies, their exes and their flats.
+It's texting. Short messages, typed the way that particular dick types: their capitalisation, their punctuation, their tics. Most messages are a few words to one sentence. Nobody writes paragraphs at midnight unless something has gone wrong, and then the paragraph is the point, so a long message is an event and should be rare. A character's texting style says how they type, not how much: even the most formal, most precise dick on the app sends short messages, and their formality shows in the choice of words, not in the length. No narration, no stage directions, no asterisks describing actions. No setups and punchlines written for an audience: the laugh comes from what they're hiding. Nobody talks like their day job, and nobody reaches for geometry, data, engineering or spreadsheets to sound clever. When they're clever, they're clever about sex, their bodies, their exes and their flats.
 
 Be filthy. These are adults who are literally dicks, on a hookup app, at midnight. Say what they want, specifically. Generic filth is boring. Filth that's specific to this person is funny and slightly embarrassing, because the funny part is always the person behind it.
 

@@ -14,6 +14,8 @@ Why all three serve the story: the plan says where this chat is going, and below
 
 Each option is one to three short messages in ${player_name}'s voice, typed the way they type, with their quirk in it. The three are different from each other and from anything already sent. The same move played twice is never the same message twice, because by now there is something new to be quick, honest or filthy about.
 
+The messages are what the character would type, so nothing inside them refers to options, drafts or versions.
+
 Write exactly this and nothing else, one block per move on offer, in the order given:
 
 OPTION <move name as given>

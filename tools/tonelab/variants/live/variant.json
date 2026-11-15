@@ -12,7 +12,7 @@
     "early": "It's early and they're still strangers performing. Each option brings something new into the chat, a fresh topic or a specific detail, that the story could come back to later.",
     "middle": "Every turn changes something. Each option moves the chat somewhere it hasn't been: a new detail, a risk taken, something given up. Nothing already used comes back, except as a callback that now means something different.",
     "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
-    "secret": "The player character's secret is still in. Options can come near it without giving it away; a bad roll could shake it out.",
+    "secret": "The player character's secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that's saved for its moment.",
     "reveal": "The player character's secret is out. The options are how they live with that: own it, joke about it, try to move on.",
     "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
   },
@@ -35,5 +35,6 @@
     "ending_ghost": "The ending: the match ghosts. The player character sends their message and no reply ever comes. Write only the player character's messages: maybe one, maybe a few more into the silence, each telling the reader what the silence means. Pay off something from the first turns.",
     "ending_open": "The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.",
     "reveal_pending": "The match's own reveal hasn't happened yet, so it happens now, as part of the ending."
-  }
+  },
+  "drawer_sample": 5
 }

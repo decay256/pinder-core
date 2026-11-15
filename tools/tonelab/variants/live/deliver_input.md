@@ -12,11 +12,9 @@ The chat so far:
 
 ${history}
 
-Turn ${n}. Before the roll, ${player_name} was offered these:
+The story so far: ${story_so_far}
 
-${options_text}
-
-The player picked ${stat}. What ${player_name} meant to send:
+Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
 ${intended}
 
 What the dice did: ${result}
