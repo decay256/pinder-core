@@ -28,6 +28,8 @@ import subprocess
 import sys
 import tempfile
 import time
+import urllib.error
+import urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))
@@ -56,7 +58,7 @@ def git(*args):
 def model_free_env():
     """Environment for child processes: never pass API credentials on."""
     env = dict(os.environ)
-    for key in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
+    for key in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "OPENROUTER_API_KEY"):
         env.pop(key, None)
     return env
 
@@ -274,6 +276,32 @@ def call_claude(system_prompt, prompt, model):
     return data, round(time.time() - started, 1)
 
 
+OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
+
+
+def call_openrouter(system_prompt, prompt, model, key, knobs):
+    """One chat-completions call through OpenRouter. Optional knobs passed through
+    unchanged: temperature, top_p, max_tokens, reasoning."""
+    body = {"model": model,
+            "messages": [{"role": "system", "content": system_prompt},
+                         {"role": "user", "content": prompt}]}
+    for k in ("temperature", "top_p", "max_tokens", "reasoning"):
+        if k in knobs:
+            body[k] = knobs[k]
+    req = urllib.request.Request(OPENROUTER_URL, data=json.dumps(body).encode("utf-8"),
+                                 headers={"Authorization": f"Bearer {key}",
+                                          "Content-Type": "application/json"})
+    started = time.time()
+    try:
+        with urllib.request.urlopen(req, timeout=900) as resp:
+            data = json.load(resp)
+    except urllib.error.HTTPError as e:
+        die(f"openrouter HTTP {e.code}: {e.read().decode('utf-8', 'replace')[:2000]}")
+    if data.get("error"):
+        die(f"openrouter error: {json.dumps(data['error'])[:2000]}")
+    return data, round(time.time() - started, 1)
+
+
 def format_checks(output, names, turns_played):
     markers = re.findall(r"(?m)^\s*\**Turn (\d+)\**\s*$", output)
     return {
@@ -298,8 +326,17 @@ def cmd_run(args):
     if os.path.exists(knobs_path):
         with open(knobs_path, encoding="utf-8") as f:
             knobs = json.load(f)
+    provider = args.provider or knobs.get("provider", "claude")
     model = args.model or knobs.get("model", "sonnet")
     turns = args.turns or int(knobs.get("turns", 30))
+    key = None
+    if provider == "openrouter" and not args.dry_run:
+        # The key arrives on stdin or in the environment, is held in memory only, and
+        # is stripped from every child process.
+        key = sys.stdin.readline() if args.key_stdin else os.environ.get("OPENROUTER_API_KEY", "")
+        key = key.lstrip("﻿").strip()  # Windows pipes may prepend a byte-order mark
+        if not key:
+            die("openrouter needs a key: OPENROUTER_API_KEY, or --key-stdin")
 
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     run_id = f"{stamp}-{args.variant}-{args.player}-{args.datee}-s{args.seed}"
@@ -325,18 +362,33 @@ def cmd_run(args):
         "player": args.player, "datee": args.datee, "seed": args.seed, "clock": args.clock,
         "turn_cap": turns, "turns_played": mech["turns_played"],
         "final_interest": mech["final_interest"], "outcome": mech.get("outcome") or "NoTerminalOutcome",
+        "provider": None if args.dry_run else provider,
         "model_requested": None if args.dry_run else model,
     }
     if not args.dry_run:
-        data, seconds = call_claude(system_prompt, prompt, model)
-        output = (data.get("result") or "").strip() + "\n"
+        if provider == "openrouter":
+            data, seconds = call_openrouter(system_prompt, prompt, model, key, knobs)
+            output = ((data.get("choices") or [{}])[0].get("message") or {}).get("content") or ""
+            record.update({
+                # What OpenRouter says served the call: the label comes from here, not from a default.
+                "models_reported": [data.get("model")],
+                "upstream_provider": data.get("provider"),
+                "generation_id": data.get("id"),
+                "finish_reason": (data.get("choices") or [{}])[0].get("finish_reason"),
+            })
+        else:
+            data, seconds = call_claude(system_prompt, prompt, model)
+            output = data.get("result") or ""
+            record.update({
+                # The model(s) the CLI says served the call: the label comes from here, not from a default.
+                "models_reported": sorted((data.get("modelUsage") or {}).keys()),
+                "cli_session_id": data.get("session_id"),
+                "cli_version": subprocess.run(["claude", "--version"], capture_output=True, text=True).stdout.strip(),
+            })
+        output = output.strip() + "\n"
         with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:
             f.write(output)
         record.update({
-            # The model(s) the CLI says served the call: the label comes from here, not from a default.
-            "models_reported": sorted((data.get("modelUsage") or {}).keys()),
-            "cli_session_id": data.get("session_id"),
-            "cli_version": subprocess.run(["claude", "--version"], capture_output=True, text=True).stdout.strip(),
             "seconds": seconds,
             "usage": data.get("usage"),
             "format_checks": format_checks(output, {"player": mech["player"]["display_name"],
@@ -358,7 +410,11 @@ def main():
     r.add_argument("--turns", type=int, default=None, help="turn cap (default: variant.json, else the game's 30)")
     r.add_argument("--clock", default=DEFAULT_CLOCK, help="session clock, ISO-8601 (sets time-of-day horniness)")
     r.add_argument("--variant", default="baseline")
-    r.add_argument("--model", default=None, help="CLI model alias or id (default: variant.json, else sonnet)")
+    r.add_argument("--provider", choices=["claude", "openrouter"], default=None,
+                   help="claude: subscription CLI; openrouter: chat completions (default: variant.json, else claude)")
+    r.add_argument("--model", default=None,
+                   help="model alias or id, e.g. sonnet, google/gemini-4-argon (default: variant.json, else sonnet)")
+    r.add_argument("--key-stdin", action="store_true", help="read the OpenRouter key from the first line of stdin")
     r.add_argument("--dry-run", action="store_true", help="save mechanics and prompt, call no model")
     args = p.parse_args()
     if args.cmd == "run":

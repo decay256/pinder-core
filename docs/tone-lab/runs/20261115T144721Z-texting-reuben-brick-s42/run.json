@@ -1,0 +1,70 @@
+{
+  "run_id": "20261115T144721Z-texting-reuben-brick-s42",
+  "created_utc": "20261115T144721Z",
+  "variant": "texting",
+  "variant_sha256": {
+    "system.md": "c6d8b3be51799102473f96e695e864e94321a75f26abcf2673afe5893e34c3c9",
+    "prompt.md": "c8b4a16b7c5f43bc81c0dc38d285c852f069f05748939eccdacde8e3388c3637",
+    "character.md": "ab37cf2c26277feb8a923ffae8eff1bc713bb75adc08d96f3aacb892dd3d0312",
+    "turn.md": "af098cc338abb8472976f717ab1ace047e5ebb9a5c7363a834611db12e57bb4e"
+  },
+  "knobs": {
+    "model": "sonnet",
+    "turns": 30,
+    "secrets": 4,
+    "stake_lines": 2
+  },
+  "prompt_sha256": "cea794f6149e89cd4a509c6919eae53f5ff55522ca4f1ec8eb1cad2d601edab5",
+  "prompt_chars": 16099,
+  "repo_commit": "652b7ec",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 42,
+  "clock": "2026-11-14T23:30:00Z",
+  "turn_cap": 30,
+  "turns_played": 13,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "upstream_provider": "Google",
+  "generation_id": "gen-1794754056-Ptctg0DFFW2yDT3iCtik",
+  "finish_reason": "stop",
+  "seconds": 28.8,
+  "usage": {
+    "prompt_tokens": 3961,
+    "completion_tokens": 1132,
+    "total_tokens": 5093,
+    "cost": 0.019242,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.019242,
+      "upstream_inference_prompt_cost": 0.007922,
+      "upstream_inference_completions_cost": 0.01132
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "format_checks": {
+    "turn_markers": 13,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 13,
+    "datee_lines": 13,
+    "words": 767
+  }
+}

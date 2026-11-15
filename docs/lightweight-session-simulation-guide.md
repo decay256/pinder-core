@@ -55,7 +55,9 @@ tools/tonelab/tonelab.py run --variant my-variant --seed 42 --dry-run   # prompt
 tools/tonelab/selftest.py                                              # reproducibility and rendering check, no model call
 ```
 
-The model is called once, through the subscription Claude CLI in print mode. The call
+By default the model is called once through the subscription Claude CLI in print mode. `--provider openrouter --model <id>` (for example `google/gemini-4-argon`) calls OpenRouter instead; the key comes from `OPENROUTER_API_KEY` or, with `--key-stdin`, from the first line of stdin, is held in memory only and is stripped from every child process. Optional `temperature`, `top_p`, `max_tokens` and `reasoning` knobs in `variant.json` are passed through.
+
+For the Claude CLI route: The call
 has no tools, no settings files and a neutral working directory, so only the prompt
 reaches the model. API credentials are stripped from the child environment.
 

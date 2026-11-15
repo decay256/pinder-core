@@ -1,0 +1,70 @@
+{
+  "run_id": "20261115T144518Z-baseline-reuben-brick-s42",
+  "created_utc": "20261115T144518Z",
+  "variant": "baseline",
+  "variant_sha256": {
+    "system.md": "c6d8b3be51799102473f96e695e864e94321a75f26abcf2673afe5893e34c3c9",
+    "prompt.md": "43532a5f2348c9e3945a76de0c7add70d931acd118efa55e33b486e1302bc4f9",
+    "character.md": "ab37cf2c26277feb8a923ffae8eff1bc713bb75adc08d96f3aacb892dd3d0312",
+    "turn.md": "af098cc338abb8472976f717ab1ace047e5ebb9a5c7363a834611db12e57bb4e"
+  },
+  "knobs": {
+    "model": "sonnet",
+    "turns": 30,
+    "secrets": 4,
+    "stake_lines": 2
+  },
+  "prompt_sha256": "7e172f53bdde59241e77b3b44f192b418da53009e089f957612f7f79160e7aed",
+  "prompt_chars": 15828,
+  "repo_commit": "652b7ec",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 42,
+  "clock": "2026-11-14T23:30:00Z",
+  "turn_cap": 30,
+  "turns_played": 13,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "upstream_provider": "Google",
+  "generation_id": "gen-1794753948-fCdCW0kBtNB5PTCfrk2A",
+  "finish_reason": "stop",
+  "seconds": 60.0,
+  "usage": {
+    "prompt_tokens": 3896,
+    "completion_tokens": 2231,
+    "total_tokens": 6127,
+    "cost": 0.030102,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.030102,
+      "upstream_inference_prompt_cost": 0.007792,
+      "upstream_inference_completions_cost": 0.02231
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "format_checks": {
+    "turn_markers": 13,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 13,
+    "datee_lines": 13,
+    "words": 1599
+  }
+}
