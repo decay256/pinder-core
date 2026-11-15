@@ -1,0 +1,79 @@
+{
+  "run_id": "20261115T143401Z-baseline-reuben-brick-s42",
+  "created_utc": "20261115T143401Z",
+  "variant": "baseline",
+  "variant_sha256": {
+    "system.md": "c6d8b3be51799102473f96e695e864e94321a75f26abcf2673afe5893e34c3c9",
+    "prompt.md": "43532a5f2348c9e3945a76de0c7add70d931acd118efa55e33b486e1302bc4f9",
+    "character.md": "ab37cf2c26277feb8a923ffae8eff1bc713bb75adc08d96f3aacb892dd3d0312",
+    "turn.md": "af098cc338abb8472976f717ab1ace047e5ebb9a5c7363a834611db12e57bb4e"
+  },
+  "knobs": {
+    "model": "sonnet",
+    "turns": 30,
+    "secrets": 4,
+    "stake_lines": 2
+  },
+  "prompt_sha256": "7e172f53bdde59241e77b3b44f192b418da53009e089f957612f7f79160e7aed",
+  "prompt_chars": 15828,
+  "repo_commit": "7f52569",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 42,
+  "clock": "2026-11-14T23:30:00Z",
+  "turn_cap": 30,
+  "turns_played": 13,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "model_requested": "sonnet",
+  "models_reported": [
+    "claude-sonnet-5-5"
+  ],
+  "cli_session_id": "ed45d610-cc59-4fcd-947c-692cb30bbd41",
+  "cli_version": "2.1.322 (Claude Code)",
+  "seconds": 54.6,
+  "usage": {
+    "input_tokens": 2,
+    "cache_creation_input_tokens": 6371,
+    "cache_read_input_tokens": 0,
+    "output_tokens": 5850,
+    "output_tokens_details": {
+      "thinking_tokens": 3960
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6371,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 5850,
+        "cache_read_input_tokens": 0,
+        "cache_creation_input_tokens": 6371,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 6371
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "format_checks": {
+    "turn_markers": 13,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 13,
+    "datee_lines": 13,
+    "words": 926
+  }
+}

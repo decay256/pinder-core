@@ -1,0 +1,6 @@
+{
+  "model": "sonnet",
+  "turns": 30,
+  "secrets": 4,
+  "stake_lines": 2
+}
