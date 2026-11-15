@@ -1,0 +1,311 @@
+{
+  "run_id": "20261115T215645Z-live-reuben-brick-s7",
+  "created_utc": "20261115T215645Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "bible.md": "1312f952bae1d85be9eac664557fea2a4eff723e67bcbdd7c37ac06da4942e81",
+    "plan.md": "4694332e669bb3cd7e0f798ccc7a07b13b9d0281308a36279d3ce78d3c45e472",
+    "plan_input.md": "5f714d1c6fbee938430b0b24995c2cc4d479a8860d4642132298c562d30df23d",
+    "options.md": "4809bef9ae52a4ddec87d10e9014a9fad72477e9f49798aabbdd54706600fd21",
+    "options_input.md": "80170b65757f012984d0f686c97fa373aa5abebd126c9515f38d105decc1b471",
+    "deliver.md": "4d2b12882c194263f9678d621a7656fd81c98380a78a6d1d31b8bdb6cd3fbdb1",
+    "deliver_input.md": "1d9dc996938e14b8604128e211c375b23dfcb690725a2c7c2e4afc2d7874e298",
+    "character.md": "d1f21aee5fdab6a0022ef820ee427e62d8cfdc9fe7f08b4c4d2560268132fe0f"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "needs": {
+      "opener": "This is the very first message. It's where the reader meets the player character, so each option leads with their quirk at full strength: the opener they've sent forty people, performed. Nothing real yet.",
+      "early": "It's early and they're still strangers performing. Each option brings something new into the chat, a fresh topic or a specific detail, that the story could come back to later.",
+      "middle": "Every turn changes something. Each option moves the chat somewhere it hasn't been: a new detail, a risk taken, something given up. Nothing already used comes back, except as a callback that now means something different.",
+      "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
+      "secret": "The player character's secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that's saved for its moment.",
+      "reveal": "The player character's secret is out. The options are how they live with that: own it, joke about it, try to move on.",
+      "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
+    },
+    "beats": {
+      "opener": "The opener. Two strangers performing. The player character's first message shows their quirk at full strength: this is where the reader starts enjoying it, before they know what it protects. The match answers with their own quirk and plants the first setup from the plan, lightly enough that it reads as a throwaway.",
+      "setup": "Still early, still performing, but something new comes up. If the setup from the plan hasn't been planted yet, the match's reply plants it now, as something that reads as a throwaway.",
+      "early": "Still strangers, but this turn changes something: one of them learns something, gives something up or risks something, and the chat can't go back to how it was. The filth is still bravado. Use a topic that hasn't been used.",
+      "warming": "Warming up. They want each other now and are working out how much to risk for it. The filth gets specific and personal. The lie is under strain: a slip can show, quickly covered with something filthier. This turn changes something.",
+      "close": "Close. It's nearly happening, so whatever they're hiding matters more than ever, and every message costs something. This turn changes something.",
+      "breakthrough": "The breakthrough. The move landed, and for the first time something real gets through the quirk: a crack in the lie, small and specific. Both of them notice. The match answers it instead of stepping past it, and gives a little of their own back. The most naked line here may be very short.",
+      "forced_breakthrough": "Nothing real has been said yet, and it's time. Whatever move was picked, the match asks for something real, in their own voice and through their own quirk, and the player character's message gives a little: a crack in the lie, small and specific.",
+      "catastrophe": "The catastrophe. The roll bombed. This is where the player character's planned secret falls out, as an event in the chat (the text-app accident from the plan), not as a confession. It happens all at once and in the worst way. Ideally it changes the meaning of something the player character sent earlier that the match liked, so the reader feels fooled too. The match's reply shows the hit.",
+      "secret_miss": "The player character's secret should have come out by now. The roll missed, so this is where it slips out: as an event in the chat (the text-app accident from the plan), smaller than a catastrophe, but still something that happens to them, not a confession.",
+      "discovery": "The player character's secret should have come out by now, and they've managed to keep it in. So the match finds it: something on the screen that doesn't add up, a detail they caught a few turns ago. They say so, in their own voice, and the player character's message has to deal with being caught.",
+      "match_reveal": "The player character's secret is out, and the match can't step over it. This is the match's turn: their own lie cracks, and their reveal comes out in their own format and quirk. It should change the meaning of something they did earlier in the chat. The roll decides how the player character's message lands; it doesn't stop the match's reveal.",
+      "player_snap": "The player character snaps: their shadow took over. The fear comes out dressed as a principle. Claim, slip, denial, as a burst of short, impulsive messages, with their quirk turned outward as a weapon and the worldview from the plan as the disguise. The slip must be something the reader can check against what's on the screen. In the last message they hear themselves, too late. The match reacts, whichever way the interest change supports: sees through it, snaps back, or takes it at face value.",
+      "match_snap": "The match had let themselves hope, and that message hurt. The match snaps: claim, slip, denial, short impulsive messages, their quirk turned outward, the worldview from the plan as the disguise, the slip checkable on the screen. Then they regret it and back out badly.",
+      "ending_win": "The ending: the match agrees to meet. Pay off the plan: the last exchange changes the meaning of something from the first turns instead of just repeating it. The match usually has the last line. If a quirk breaks for good, it's here, and it's the most naked thing in the chat.",
+      "ending_loss": "The ending: the match unmatches. It still pays off: the loss version of the planned ending, where something from the first turns comes back and now means the opposite. The last line should hurt and be funny at the same time.",
+      "ending_ghost": "The ending: the match ghosts. The player character sends their message and no reply ever comes. Write only the player character's messages: maybe one, maybe a few more into the silence, each telling the reader what the silence means. Pay off something from the first turns.",
+      "ending_open": "The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.",
+      "reveal_pending": "The match's own reveal hasn't happened yet, so it happens now, as part of the ending."
+    },
+    "drawer_sample": 5,
+    "shapes": {
+      "_doc": "Per beat: how many messages each side sends (min, max) and the word caps drawn per message; long names the side whose one message may run to 40 words (the accident).",
+      "default": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ],
+        "words": [
+          1,
+          4,
+          6,
+          8,
+          12,
+          15
+        ]
+      },
+      "opener": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "words": [
+          6,
+          10,
+          14
+        ]
+      },
+      "breakthrough": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "words": [
+          4,
+          8,
+          12
+        ]
+      },
+      "forced_breakthrough": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "words": [
+          4,
+          8,
+          12
+        ]
+      },
+      "catastrophe": {
+        "player": [
+          2,
+          3
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "words": [
+          3,
+          6,
+          10
+        ],
+        "long": "player"
+      },
+      "secret_miss": {
+        "player": [
+          2,
+          3
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "words": [
+          3,
+          6,
+          10
+        ],
+        "long": "player"
+      },
+      "discovery": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ],
+        "words": [
+          4,
+          8,
+          12
+        ]
+      },
+      "match_reveal": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          2,
+          4
+        ],
+        "words": [
+          5,
+          10,
+          15
+        ]
+      },
+      "player_snap": {
+        "player": [
+          3,
+          5
+        ],
+        "datee": [
+          1,
+          1
+        ],
+        "words": [
+          4,
+          6,
+          9
+        ]
+      },
+      "match_snap": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          3,
+          5
+        ],
+        "words": [
+          4,
+          6,
+          9
+        ]
+      },
+      "ending_win": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ],
+        "words": [
+          3,
+          6,
+          10
+        ]
+      },
+      "ending_loss": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ],
+        "words": [
+          3,
+          6,
+          10
+        ]
+      },
+      "ending_ghost": {
+        "player": [
+          1,
+          3
+        ],
+        "datee": [
+          0,
+          0
+        ],
+        "words": [
+          3,
+          6,
+          10
+        ]
+      }
+    }
+  },
+  "prompt_sha256": "893cfc05074c6e8a577f496818e7c70252cac1df00c8ded912d4558aa816e42f",
+  "prompt_chars": 176304,
+  "model_calls": 23,
+  "repo_commit": "68795e3",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 7,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 340.1,
+  "usage": {
+    "cost": 0.4042295,
+    "prompt_tokens": 126462,
+    "completion_tokens": 18295,
+    "reasoning_tokens": 15388
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "catastrophe",
+    "match_reveal",
+    "warming",
+    "early",
+    "breakthrough",
+    "warming",
+    "match_snap",
+    "close",
+    "ending_win"
+  ],
+  "plan_words": 386,
+  "planted_turn": 1,
+  "shape_retries": 0,
+  "turns_off_shape": [],
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 16,
+    "datee_lines": 21,
+    "words": 361
+  }
+}

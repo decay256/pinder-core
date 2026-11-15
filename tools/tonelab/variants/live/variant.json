@@ -18,7 +18,7 @@
   },
   "beats": {
     "opener": "The opener. Two strangers performing. The player character's first message shows their quirk at full strength: this is where the reader starts enjoying it, before they know what it protects. The match answers with their own quirk and plants the first setup from the plan, lightly enough that it reads as a throwaway.",
-    "setup": "Still early, still performing, but something new comes up. If a setup from the plan hasn't been planted yet, the match's reply plants it, as something that reads as a throwaway now and can mean something else at the end.",
+    "setup": "Still early, still performing, but something new comes up. If the setup from the plan hasn't been planted yet, the match's reply plants it now, as something that reads as a throwaway.",
     "early": "Still strangers, but this turn changes something: one of them learns something, gives something up or risks something, and the chat can't go back to how it was. The filth is still bravado. Use a topic that hasn't been used.",
     "warming": "Warming up. They want each other now and are working out how much to risk for it. The filth gets specific and personal. The lie is under strain: a slip can show, quickly covered with something filthier. This turn changes something.",
     "close": "Close. It's nearly happening, so whatever they're hiding matters more than ever, and every message costs something. This turn changes something.",
@@ -36,5 +36,208 @@
     "ending_open": "The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.",
     "reveal_pending": "The match's own reveal hasn't happened yet, so it happens now, as part of the ending."
   },
-  "drawer_sample": 5
+  "drawer_sample": 5,
+  "shapes": {
+    "_doc": "Per beat: how many messages each side sends (min, max) and the word caps drawn per message; long names the side whose one message may run to 40 words (the accident).",
+    "default": {
+      "player": [
+        1,
+        2
+      ],
+      "datee": [
+        1,
+        3
+      ],
+      "words": [
+        1,
+        4,
+        6,
+        8,
+        12,
+        15
+      ]
+    },
+    "opener": {
+      "player": [
+        1,
+        2
+      ],
+      "datee": [
+        1,
+        2
+      ],
+      "words": [
+        6,
+        10,
+        14
+      ]
+    },
+    "breakthrough": {
+      "player": [
+        1,
+        1
+      ],
+      "datee": [
+        1,
+        2
+      ],
+      "words": [
+        4,
+        8,
+        12
+      ]
+    },
+    "forced_breakthrough": {
+      "player": [
+        1,
+        1
+      ],
+      "datee": [
+        1,
+        2
+      ],
+      "words": [
+        4,
+        8,
+        12
+      ]
+    },
+    "catastrophe": {
+      "player": [
+        2,
+        3
+      ],
+      "datee": [
+        1,
+        2
+      ],
+      "words": [
+        3,
+        6,
+        10
+      ],
+      "long": "player"
+    },
+    "secret_miss": {
+      "player": [
+        2,
+        3
+      ],
+      "datee": [
+        1,
+        2
+      ],
+      "words": [
+        3,
+        6,
+        10
+      ],
+      "long": "player"
+    },
+    "discovery": {
+      "player": [
+        1,
+        2
+      ],
+      "datee": [
+        1,
+        3
+      ],
+      "words": [
+        4,
+        8,
+        12
+      ]
+    },
+    "match_reveal": {
+      "player": [
+        1,
+        1
+      ],
+      "datee": [
+        2,
+        4
+      ],
+      "words": [
+        5,
+        10,
+        15
+      ]
+    },
+    "player_snap": {
+      "player": [
+        3,
+        5
+      ],
+      "datee": [
+        1,
+        1
+      ],
+      "words": [
+        4,
+        6,
+        9
+      ]
+    },
+    "match_snap": {
+      "player": [
+        1,
+        1
+      ],
+      "datee": [
+        3,
+        5
+      ],
+      "words": [
+        4,
+        6,
+        9
+      ]
+    },
+    "ending_win": {
+      "player": [
+        1,
+        2
+      ],
+      "datee": [
+        1,
+        3
+      ],
+      "words": [
+        3,
+        6,
+        10
+      ]
+    },
+    "ending_loss": {
+      "player": [
+        1,
+        2
+      ],
+      "datee": [
+        1,
+        3
+      ],
+      "words": [
+        3,
+        6,
+        10
+      ]
+    },
+    "ending_ghost": {
+      "player": [
+        1,
+        3
+      ],
+      "datee": [
+        0,
+        0
+      ],
+      "words": [
+        3,
+        6,
+        10
+      ]
+    }
+  }
 }

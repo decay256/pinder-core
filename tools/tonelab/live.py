@@ -12,6 +12,13 @@ turn. This mode tests whether a story still holds under that constraint:
 3. The engine's result for that turn is then revealed (which move the player picked, how
    the dice landed) and a second call writes what was actually sent and the match's reply.
 
+The per-turn calls see the plan and the chat so far, never the character files: the plan
+is the only channel from the files to the chat, which keeps file wording (a texting trait
+asking for long, formal replies, say) from overriding the brief. The shape of each turn,
+how many messages each side sends and how long each is, is drawn here from the beat and
+the seed, and a turn that breaks it is asked for once more. Variety in rhythm has to come
+from outside the model: each call reads every earlier turn and copies its shape.
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -27,7 +34,8 @@ import re
 import tonelab as tl
 
 FILES = ("bible.md", "plan.md", "plan_input.md", "options.md", "options_input.md",
-         "deliver.md", "deliver_input.md", "character.md", "visible.md")
+         "deliver.md", "deliver_input.md", "character.md")
+LONG_WORDS = 40  # the one message an accident may take
 BAD_TIERS = {"catastrophe", "legendary"}  # miss tiers bad enough to shake a secret out
 REAL_STATS = {"Honesty", "SelfAwareness"}  # moves that can carry a breakthrough
 ENDINGS = {"DateSecured": "ending_win", "Unmatched": "ending_loss", "Ghosted": "ending_ghost"}
@@ -132,6 +140,63 @@ class Story:
         return key, text
 
 
+def draw_shape(knobs, key, seed, turn):
+    spec = knobs["shapes"].get(key) or knobs["shapes"]["default"]
+    rng = random.Random(f"{seed}-{turn}-shape")
+    shape = {side: [rng.choice(spec["words"]) for _ in range(rng.randint(*spec[side]))]
+             for side in ("player", "datee")}
+    shape["long"] = spec.get("long")
+    return shape
+
+
+def shape_text(shape, names):
+    parts = []
+    for side in ("player", "datee"):
+        caps = shape[side]
+        if not caps:
+            parts.append(f"{names[side]} sends nothing: no reply ever comes.")
+            continue
+        each = "; ".join("one word" if c == 1 else f"up to {c} words" for c in caps)
+        line = f"{names[side]} sends {len(caps)} message{'s' if len(caps) > 1 else ''} ({each})."
+        if shape.get("long") == side:
+            line += f" One of them may be the accident itself and run to {LONG_WORDS} words."
+        parts.append(line)
+    return " ".join(parts)
+
+
+def shape_problems(lines, shape, names):
+    problems = []
+    for side in ("player", "datee"):
+        msgs = [m for who, m in lines if who == names[side]]
+        caps = shape[side]
+        if len(msgs) != len(caps):
+            problems.append(f"{names[side]} sent {len(msgs)} messages, the shape says {len(caps)}")
+        long_used = False
+        for j, (m, cap) in enumerate(zip(msgs, caps)):
+            n = len(m.split())
+            if n <= cap + max(2, cap // 3):
+                continue
+            if shape.get("long") == side and not long_used and n <= LONG_WORDS:
+                long_used = True
+                continue
+            problems.append(f"{names[side]}'s message {j + 1} has {n} words, the shape says up to {cap}")
+    return problems
+
+
+def strip_planted(text):
+    kept = [ln for ln in text.splitlines() if ln.strip().strip("*").upper() != "PLANTED"]
+    return "\n".join(kept).strip(), len(kept) != len(text.splitlines())
+
+
+def setup_note(planted, i):
+    if planted:
+        n, lines = planted
+        said = "\n".join(f"{who}: {msg}" for who, msg in lines)
+        return (f"The setup was planted on turn {n}:\n{said}\nIt waits for its payoff at the end; "
+                "don't spend it before then, though a light callback can keep it alive.")
+    return "The setup from the plan hasn't been planted yet." + (" Plant it soon, in the match's reply." if i else "")
+
+
 def beat_keys(knobs, turns, outcome):
     story = Story(knobs)
     return [story.beat(i, t, i == len(turns) - 1, outcome)[0] for i, t in enumerate(turns)]
@@ -185,8 +250,6 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         "time_of_day": mech.get("time_of_day", ""),
         "player_card": tl.render(files["character.md"], {**pv, "role": "the player"}, "character.md").strip(),
         "datee_card": tl.render(files["character.md"], {**dv, "role": "the match"}, "character.md").strip(),
-        "player_visible": tl.render(files["visible.md"], {**pv, "role": "the player"}, "visible.md").strip(),
-        "datee_visible": tl.render(files["visible.md"], {**dv, "role": "the match"}, "visible.md").strip(),
     }
     bible = tl.render(files["bible.md"], common, "bible.md").strip()
     systems = {k: bible + "\n\n" + tl.render(files[k + ".md"], common, k + ".md").strip()
@@ -195,11 +258,13 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     plan = caller(systems["plan"], plan_user, "plan", knobs.get("plan_reasoning"), {})
 
     story, cons, turns, chat, out = Story(knobs), tl.load_consequences(), mech["turns"], [], []
+    planted = None
     for i, t in enumerate(turns):
         is_last = i == len(turns) - 1
         tv = tl.turn_values(t, cons, names, datee_diag, is_last, mech.get("outcome"))
         needs = story.needs(i, t["interest_before"])
-        base = {**common, "plan": plan, "history": history(chat), "n": t["turn"], "story_so_far": story.so_far()}
+        base = {**common, "plan": plan, "history": history(chat), "n": t["turn"], "story_so_far": story.so_far(),
+                "setup_note": setup_note(planted, i)}
         o_user = tl.render(files["options_input.md"],
                            {**base, "interest": t["interest_before"], "state": t["state_before"],
                             "options": ", ".join(t["options"]), "needs": needs}, "options_input.md").strip() + "\n"
@@ -210,26 +275,44 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             tl.die(f"turn {t['turn']}: the options output has no block for the picked move {t['chosen_stat']}:\n{o_text[:1500]}")
         key, beat = story.beat(i, t, is_last, mech.get("outcome"))
         ghost = key == "ending_ghost"
+        shape = draw_shape(knobs, key, mech.get("seed"), t["turn"])
         d_user = tl.render(files["deliver_input.md"],
-                           {**base, **tv, "intended": intended, "beat": beat},
+                           {**base, **tv, "intended": intended, "beat": beat, "shape": shape_text(shape, names)},
                            "deliver_input.md").strip() + "\n"
         d_text = caller(systems["deliver"], d_user, f"turn {t['turn']} delivery", knobs.get("turn_reasoning"),
-                        {"ghost": ghost})
-        lines = parse_lines(d_text, names)
+                        {"ghost": ghost, "shape": shape})
+        text, was_planted = strip_planted(d_text)
+        lines = parse_lines(text, names)
+        problems, retried = shape_problems(lines, shape, names), False
+        if problems:
+            retried = True
+            again = (d_user + "\nYour answer was:\n\n" + d_text + "\n\nIt broke this turn's shape: " +
+                     "; ".join(problems) + f". Write turn {t['turn']} again so it fits the shape exactly.\n")
+            d_text = caller(systems["deliver"], again, f"turn {t['turn']} delivery retry", knobs.get("turn_reasoning"),
+                            {"ghost": ghost, "shape": shape})
+            text, was_planted = strip_planted(d_text)
+            lines = parse_lines(text, names)
+            problems = shape_problems(lines, shape, names)
+        if was_planted and planted is None:
+            planted = (t["turn"], lines)
         who = {w for w, _ in lines}
-        if names["player"] not in who or (names["datee"] not in who and not ghost):
+        if names["player"] not in who or (names["datee"] not in who and shape["datee"]):
             tl.die(f"turn {t['turn']}: the delivery output is missing a speaker:\n{d_text[:1500]}")
         chat.append((t["turn"], lines))
         brief = (f"Before the roll. What the story needs next: {needs}\n\n"
                  f"The three options written:\n{o_text}\n\n"
                  f"Picked {t['chosen_stat']}. {tv['result']}\n{tv['checks']}\n"
                  f"Interest {t['interest_before']} → {t['interest_after']} ({t['state_after']}).\n\n"
-                 f"This turn's beat ({key}): {beat}")
+                 f"This turn's beat ({key}): {beat}\n\nShape: {shape_text(shape, names)}"
+                 + (f"\nShape still broken after a retry: {'; '.join(problems)}" if problems else
+                    " (kept after a retry)" if retried else "")
+                 + (f"\nThe setup was planted on this turn." if planted and planted[0] == t["turn"] else ""))
         out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options": o_text,
-                    "deliver_user": d_user, "delivered": d_text, "brief": brief})
+                    "deliver_user": d_user, "delivered": d_text, "brief": brief, "shape": shape,
+                    "retried": retried, "shape_problems": problems})
     output = "\n\n".join(f"Turn {n}\n" + "\n".join(f"{w}: {m}" for w, m in lines) for n, lines in chat) + "\n"
     return {"names": names, "common": common, "systems": systems, "plan_user": plan_user, "plan": plan,
-            "turns": out, "output": output}
+            "turns": out, "output": output, "planted_turn": planted[0] if planted else None}
 
 
 def dry_caller(names):
@@ -238,8 +321,8 @@ def dry_caller(names):
             return "(dry run: no plan)"
         if label.endswith("options"):
             return "\n\n".join(f"OPTION {s}\n{names['player']}: (dry run, {s})" for s in ctx["offered"])
-        line = f"{names['player']}: (dry run)"
-        return line if ctx.get("ghost") else line + f"\n{names['datee']}: (dry run)"
+        shape = ctx["shape"]
+        return "\n".join([f"{names['player']}: dry"] * len(shape["player"]) + [f"{names['datee']}: dry"] * len(shape["datee"]))
     return caller
 
 
@@ -316,6 +399,10 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "seconds": round(sum(c.get("seconds") or 0 for c in calls), 1),
         "usage": None if args.dry_run else totals,
         "beats": parts["beats"],
+        "plan_words": len(result["plan"].split()),
+        "planted_turn": result["planted_turn"],
+        "shape_retries": sum(t["retried"] for t in result["turns"]),
+        "turns_off_shape": [t["turn"] for t in result["turns"] if t["shape_problems"]],
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
     with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:
