@@ -279,6 +279,32 @@ def outcome_line(mech, names):
     }.get(outcome, f"The chat stops after turn {n} with interest at {interest}: no date yet, nothing resolved.")
 
 
+def arc_beats(mech, texts):
+    """Where each turn falls in the story, read off the engine's interest path: the
+    biggest rise is the breakthrough, the biggest drop the crisis, the turn after a
+    crisis that recovers the repair; other turns by interest level. The wording comes
+    from the variant (variant.json "beats"); without it every beat is empty."""
+    turns = mech["turns"]
+    if not texts or not turns:
+        return [""] * len(turns)
+    deltas = [t["interest_after"] - t["interest_before"] for t in turns]
+    keys = []
+    for t in turns:
+        lvl = t["interest_before"]
+        keys.append("early" if lvl < 12 else "warming" if lvl < 18 else "close")
+    rise = max(range(len(turns)), key=lambda i: deltas[i])
+    drop = min(range(len(turns)), key=lambda i: deltas[i])
+    if deltas[rise] >= 3:
+        keys[rise] = "breakthrough"
+    if deltas[drop] <= -2:
+        keys[drop] = "crisis"
+        if drop + 1 < len(turns) and deltas[drop + 1] > 0:
+            keys[drop + 1] = "repair"
+    keys[0] = "opener"
+    keys[-1] = "ending"
+    return [texts.get(k, "") for k in keys]
+
+
 def build_prompt(variant_dir, knobs, mech, player, datee):
     files = {}
     for name in VARIANT_FILES:
@@ -296,8 +322,10 @@ def build_prompt(variant_dir, knobs, mech, player, datee):
 
     cons = load_consequences()
     turns = mech["turns"]
+    beats = arc_beats(mech, knobs.get("beats"))
     briefs = [render(files["turn.md"],
-                     turn_values(t, cons, names, datee_diag, i == len(turns) - 1, mech.get("outcome")),
+                     {**turn_values(t, cons, names, datee_diag, i == len(turns) - 1, mech.get("outcome")),
+                      "beat": beats[i]},
                      "turn.md") for i, t in enumerate(turns)]
     path = [mech["starting_interest"]] + [t["interest_after"] for t in turns]
     values = {

@@ -1,0 +1,98 @@
+{
+  "run_id": "20261115T163717Z-arc-reasoning-reuben-brick-s42",
+  "created_utc": "20261115T163717Z",
+  "variant": "arc-reasoning",
+  "variant_sha256": {
+    "system.md": "9b7045de0b5ff79e139c1c9d2386f4d3bc85d4c17f13e8a2830c307a9c096a1d",
+    "prompt.md": "2ca1c40e6c79a143af25196a0b9430d6a862483218e562e72bfddc6ee66dcedb",
+    "character.md": "deb168fef44f8ba398af71aebda10b28a62739ede28b2afca9dc33200ca532dc",
+    "turn.md": "13c0c8ef9a4033def1d9fbed0e42b5b337f5069d478a13c74189e1223c7ee081"
+  },
+  "knobs": {
+    "model": "google/gemini-4-argon",
+    "turns": 30,
+    "secret_categories": [
+      "age_and_demographics",
+      "formative_intimacies",
+      "parental_dynamics"
+    ],
+    "characters": {
+      "reuben": {
+        "tonight": "A quick, funny fuck where he gets to keep doing the voice the whole way through, and leave before anyone sees him without the bit.",
+        "would_take": "One hand flat on his back, his actual name said out loud, and ten minutes where nobody needs him to be funny.",
+        "reactions_voiced": "- Charm: remember something he actually said and he melts. Generic flattery makes him suspicious, and he starts testing you.\n- Rizz: tell him plainly you want him, the actual him, curve and lopsided ball included, and he goes quiet in a good way. A pause, a laugh at the asymmetry, or 'go on then, perform' and he's straight back into the bit, louder.\n- Honesty: straight talk relaxes him because he never has to guess. A cold correction, or going silent on him, and he over-explains until it's unbearable.\n- Chaos: he'll follow a swerve anywhere as long as you're obviously coming back. Vanish mid-topic and he floods the chat trying to drag you back.\n- Wit: fast banter is where he lives. Laugh at him instead of with him, at his volume, his body, how much he cares, and he puts on a whole show to cover it.\n- Self-Awareness: name the need under the act gently and he actually slows down. Make it a diagnosis and the jokes come faster."
+      },
+      "brick": {
+        "tonight": "Something efficient and scheduled, with an agreed end time, with someone who won't make it weird about the size.",
+        "would_take": "Someone who stays in the bed afterwards talking about something boring, their commute, a sister's kitchen, until she loses track of the time.",
+        "reactions_voiced": "- Charm: specific appreciation of how her mind works gets through. Smooth lines, or gasping at her size, and she clamps shut.\n- Rizz: say you want her, plainly and patiently, as hers and not as a spectacle, and she lets you. Rush her, measure her, or treat her like a ride at the fair and she starts wondering whether anyone has ever wanted anything but the size.\n- Honesty: exact, decent candour is the only thing that convinces her this could survive daylight. Humiliate her, or tell her she's too much, and she's gone.\n- Chaos: a small detour she agreed to is fun. Wreck her plan without asking and she locks everything down.\n- Wit: dry, specific humour that's clearly paying attention warms her up. Jokes about her body, her seriousness or her rules and she goes cold and starts stating terms.\n- Self-Awareness: name her pattern without making it her whole personality, own your half, and she'll listen. Use it to call her a control freak, or demand she open up right now, and the door shuts."
+      }
+    },
+    "beats": {
+      "opener": "The opener. Two strangers performing: bravado, the bio, the line they've sent forty people.",
+      "early": "Still strangers. Testing each other, nothing real said yet, but something new comes up every turn.",
+      "warming": "Warming up. They want each other now and are working out how much to risk for it.",
+      "close": "Close. It's nearly happening, so whatever they're hiding matters more than ever.",
+      "breakthrough": "The breakthrough. For the first time something real gets through, and both of them notice it.",
+      "crisis": "The crisis. The worst moment of the chat, the one they'll replay at 4am.",
+      "repair": "The repair. One of them has to decide whether what just fell out is a dealbreaker.",
+      "ending": "The ending. They're not where they started, and both of them know it."
+    },
+    "reasoning": {
+      "effort": "high"
+    }
+  },
+  "prompt_sha256": "19bcbec97b9700ccc0159970d5a4a0b8410ac416a5706c71a8dd5e5e9110e4bd",
+  "prompt_chars": 28142,
+  "repo_commit": "278c648",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 42,
+  "clock": "2026-11-14T23:30:00Z",
+  "turn_cap": 30,
+  "turns_played": 13,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "upstream_provider": "Google",
+  "generation_id": "gen-1794760670-iP81OJMbtCkSqOJklcvU",
+  "finish_reason": "stop",
+  "seconds": 151.5,
+  "usage": {
+    "prompt_tokens": 6870,
+    "completion_tokens": 9512,
+    "total_tokens": 16382,
+    "cost": 0.10886,
+    "is_byok": false,
+    "prompt_tokens_details": {
+      "cached_tokens": 0,
+      "cache_write_tokens": 0,
+      "audio_tokens": 0,
+      "video_tokens": 0
+    },
+    "cost_details": {
+      "upstream_inference_cost": 0.10886,
+      "upstream_inference_prompt_cost": 0.01374,
+      "upstream_inference_completions_cost": 0.09512
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 8495,
+      "image_tokens": 0,
+      "audio_tokens": 0
+    }
+  },
+  "format_checks": {
+    "turn_markers": 13,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 13,
+    "datee_lines": 13,
+    "words": 708
+  }
+}
