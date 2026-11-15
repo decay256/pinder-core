@@ -1,6 +1,6 @@
 # Pinder: the brief
 
-You're joining the team that writes Pinder's chats. This brief tells you what Pinder is, what it's for, what we want a reader to feel, and how a chat gets them there. Read it the way a new writer reads a show bible. Everything in it is here because a chat without it didn't work.
+You're joining the team that writes Pinder's chats. This brief tells you what Pinder is, what we want a reader to feel, and how a chat makes them feel it. Everything in it is here because a chat without it didn't work.
 
 ## What Pinder is
 
@@ -22,79 +22,54 @@ If they don't connect, the reader should laugh and think: yes, that's why dating
 
 Winning or losing doesn't matter. A chat that ends in a date and leaves the reader cold has failed. An unmatch that makes them laugh and wince for a week has worked.
 
-## What the chat has to deliver
+When the chat is over, someone who has read only the chat is asked, for each of the two: what are they afraid of, what do they do so they don't have to feel it, where does that come from, and what did they do at the end? If they can't answer, the chat failed, however good the lines were.
 
-By the last message, a reader who has seen only the chat, no plan and no files, can say for each of the two:
+## How the reader comes to feel it
 
-- what they're afraid of,
-- what they do so they don't have to feel it, and where that habit came from,
-- what they did at the end: put the habit down, or hold on to it.
+**Play it straight.** The characters don't know they're in a comedy. Each one takes themselves completely seriously, believes their strategy is working, and has a logic that holds together from the inside. Unhinged doesn't mean random. It means a reasonable person following their way of coping one step too far, and then one more. Nobody winks, nobody comments on their own joke, nobody types "lol I'm such a mess". The moment a character knows they're funny, the reader stops laughing.
 
-And they can say what happened when the two habits met.
+**Laughter comes from the gap.** The claim and the evidence are both on the screen and they don't match. The reader sees it; the character doesn't.
 
-After every chat, a reader who has seen only the chat is asked exactly these questions. If they can't answer them, the chat failed, however good the lines were. Everything below is about making those answers visible on the screen, a little at a time, without anyone ever explaining them.
+> Otto_Mat: I don't really do the whole rating thing
+> Otto_Mat: your bio's a strong 8 though
 
-## How a character is built
+**The unhinged comes from commitment.** Caught out, nobody concedes. They explain, and the explanation is worse than what they were caught doing. Each attempt to fix it digs deeper.
 
-Every character comes down to one fear and one way of coping with it. Everything else follows from that.
+> Dolores_77: that photo is from my sister's wedding
+> Dolores_77: I wasn't invited. I mean I was invited. I watched from the car park
+> Dolores_77: the light was better there
 
-**The weakness.** One thing they believe about themselves and can't bear. That people leave once they've seen them clearly. That they're too much. That they're only worth what they perform. Not sex: everybody on Pinder wants sex, that's the premise. The weakness is what's under it.
+**The wince comes from seeing it coming.** The reader knows something one of them doesn't, sees the habit about to land on exactly the wrong spot, and can't stop it. Let the danger be visible a turn before it goes off.
 
-**The habit.** What they do so they never have to feel it. It's their coping mechanism, and it's what makes them funny: the one who jokes first, the one who leaves first, the one who numbers everything, the one who rates everyone out of ten. The reader enjoys the habit before they understand what it's protecting.
+**The satire comes out of their mouths.** Every character believes some piece of what the apps and dating culture have taught them, and uses it, in complete earnest, to justify being afraid: standards, red flags, high value, efficiency, "I'm not looking for anything serious", "communication is key". They say it straight, and the evidence on the screen says the opposite. That's where the farce stops being about one person and becomes about all of us.
 
-**The lie.** The reasonable sentence they use to justify the habit. "I'm just efficient." "I like to give people an out." "I'm not rating you, I rate everything."
+> Otto_Mat: people on here are way too eager honestly
+> Otto_Mat: anyway I've cleared my whole weekend
 
-**The origin.** Where the fear came from, and why the habit once worked. It's a real, specific story: a place, a person, a moment, usually humiliating. It comes out in pieces, to someone who asks, the way people tell things at midnight: a bit, a joke, a dodge, a bit more, with the embarrassing detail left in. Never as a summary.
+**Affection comes from finding out why.** Somewhere in the middle, a piece of where the habit came from gets out, and after that the same habit lands differently. Once the reader knows that Otto's dad graded his drawings, his school reports and, once, his mother, every rating is a little sad, and the reader starts watching for them.
 
-**The snap.** Under enough stress the habit turns into a weapon and dresses up as a principle about the world. The joker's jokes go cruel. The list-maker lists your flaws. It goes claim, slip, denial, and the slip is something the reader can check against the chat:
+**Tenderness comes from understatement.** The most naked line is the shortest and the plainest one in the chat, and you can often hear it in what's missing. After forty messages of ratings, this is the line:
 
-> Otto_Mat: the problem with this app is everyone wants a score
-> Otto_Mat: I don't rate people
-> Otto_Mat: you'd be a 7 if you stopped asking
-> Otto_Mat: that's not a rating
+> Otto_Mat: you're Dolores
 
-**The question.** Can they drop the habit with this person? The chat is the answer.
+**The cynical laugh comes from inevitability.** When it falls apart, it falls apart the only way it could have: each one's habit confirms exactly what the other was afraid of, and both of them get precisely the rejection they predicted. The reader could have called it, and that's what makes it funny.
 
-Two characters connect or fail through each other's habits. Usually each one's habit lands on the other one's fear. The one who keeps offering an exit is telling the one who's afraid of being too much that she doesn't fit. The one who inspects everything makes the one who's afraid of being judged feel graded. That collision is the drama. The click is each of them putting their habit down for the other. The failure is each habit confirming the other one's fear, so both get exactly the rejection they predicted, and each one blames the other's habit while using their own.
+> Dolores_77: you'd rate a funeral
+> Otto_Mat: 4. bad catering
 
-## The habit is how the reader sees them change
-
-Because the habit is the coping mechanism, how much of it shows is how scared they are. It's at full strength at the start, it surges when they're hurt, and it fades when they feel safe. A character who does the same thing in every message isn't over the top, they're a format, and the reader stops reading them. Used sparingly, the habit is something the reader watches for. Once the reader knows that Otto's dad graded his drawings, his school reports and, once, his mother, every rating is a little sad, and the first message Otto sends without one is the loudest line in the chat. That message is the transformation. The habit coming back at full strength at the end is the failure.
-
-## The arc in ten to fifteen turns
-
-Each character goes through five moments, and the two run side by side:
-
-1. The habit on display: the act, the funny part.
-2. The origin, in pieces: the other one asks, they tell a little, dodge, tell more.
-3. The collision: their habit lands on the other one's fear.
-4. The test: a moment where dropping the habit would cost them something.
-5. The choice: they drop it, or they hold on.
-
-Nobody knows in advance how long a chat runs: a few turns or fifteen. The game keeps track and tells you each turn which step the story is on and what the reader doesn't know yet. If the end comes early, steps get squeezed together, never skipped.
-
-Setups and payoffs come out of this. The early displays of each habit are the setups. The ending pays them off, either by the habit's absence or by its return. A payoff is not a repeat. It's the early thing coming back and meaning something else. Early on, Dolores asks Otto what her rating is, and he says he doesn't rate people, only objects. At the end:
+**A payoff is the reader putting it together.** A setup is noticed but not understood: it looks like a joke or a throwaway. It comes back once in the middle so it stays alive. At the payoff it turns out to mean something else, and nobody in the chat explains it, because the reader gets to. Early on, Dolores asks Otto what her rating is, and he says he doesn't rate people, only objects. At the end:
 
 > Dolores_77: so what am I
 > Otto_Mat: I'm not rating you
 > Otto_Mat: I'd have to be objective
 
-The same words now mean the opposite, and the reader gets to put that together.
+**Timing is in the message breaks.** A new message is a pause: the punchline goes in its own message, after the line that sets it up. A one-word reply to a long message is a reaction shot. "ignore that" is a punchline. Status flips are funny: whoever was chasing is suddenly the one being chased. And two turns at the same temperature in a row kill the momentum, so hot follows cold and long follows short.
 
-## The dice
-
-The player picks how their character handles each moment, and the dice decide how well it comes off. The story decides what's happening; the dice decide how it lands.
-
-- A hit comes out the way they meant it. A big margin comes out better than they meant.
-- A miss comes out wrong, in exactly the way the miss describes, and it shows in the message itself.
-- A natural 20 is the best message in the chat. It cashes in something: a setup, or something the other one told them, used in a way that shows they understood. The other one's guard visibly drops.
-- A natural 1 is the worst thing they could have sent, aimed exactly where it hurts most.
-
-The characters are inside the app, not inside the game. They can't see dice, stats, moves, options, turns or the meter, and nobody ever mentions them or anything shaped like them.
+**What kills it.** Characters explaining their feelings. Therapy-speak. Quips that fill a turn without giving anything away. Explaining a callback. Conceding at the first hit. Generic filth. Each of these does the reader's work for them, or gives them nothing to do.
 
 ## The medium
 
-Pinder is text only: no voice messages, no calls, no video. People send several short messages in a row. Things that go wrong in a text chat are the game's catastrophes: a message meant for someone else, the wrong thing pasted, a message sent before it was finished, autocorrect, a typo in a name, a long silence, "ignore that". A catastrophe is one of these happening to the character, once, at its moment. Here is Otto's:
+Pinder is text only: no voice messages, no calls, no video. People send several short messages in a row. The disasters are the ones a text chat allows: a message meant for someone else, the wrong thing pasted, a message sent before it was finished, autocorrect, a typo in a name, a long silence, "ignore that". When one happens, it happens to the character, once:
 
 > Otto_Mat: she's still going on about the ex. 6.5. great hands. bail y/n
 > Otto_Mat: that was for Mats
@@ -102,16 +77,14 @@ Pinder is text only: no voice messages, no calls, no video. People send several 
 
 In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
 
-A whole chat is about 1,250 words, five minutes of reading. That's an average, not a cap: a chat that's working can run longer, and one that's dying gets shorter. Most messages are a few words. A turn can be a single word each way, or one long message when someone finally tells something. A long message is an event, and the reader should feel it as one.
+A whole chat runs about 1,250 words, five minutes of reading, but that's an average, not a limit. Most messages are a few words; a turn can be one word each way, or one long message when someone finally tells something, and a long message is an event. The characters are inside the app, not inside the game: they never see or mention dice, moves, options, turns or the meter.
 
 ## How they write
 
-It's texting, typed the way that particular dick types: their capitalisation, their punctuation, their tics. No narration, no stage directions, no asterisks describing actions. No jokes set up for an audience: the laugh comes from what they're hiding and how badly they hide it. Nobody talks like their day job, and nobody reaches for data, geometry or spreadsheets to sound clever. When they're clever, they're clever about sex, their bodies, their exes and their flats.
-
-Be filthy. These are adults who are literally dicks, on a hookup app, at midnight. Say what they want, specifically. Generic filth is boring; filth that's specific to this person is funny and a little embarrassing, because it always gives the person away. The filth follows the closeness: at the start it's bravado, a way of hiding; by the end it's how they get close. It goes further when they've told each other something, not just because it's another turn.
+It's texting, typed the way that particular dick types: their capitalisation, their punctuation, their tics. No narration, no stage directions, no asterisks. Nobody talks like their day job or reaches for data and spreadsheets to sound clever; when they're clever, it's about sex, their bodies, their exes and their flats. Be filthy, and be specific: generic filth is boring, and filth that's specific to this person is funny because it gives them away. At the start it's bravado; by the end it's how they get close.
 
 Otto and Dolores are not in tonight's chat. Don't borrow their jokes, objects, numbers or lines. They're here to show how something works, not what to write.
 
-## How the work is split
+## Your job
 
-You'll be doing one of three jobs, described after this brief. The planner reads both character files before the chat starts and plans the match. Each turn, one writer drafts what the player character means to send, and another writes what was actually sent and how the match replied. The turn writers see only the plan and the chat so far, never the files. So the plan carries everything, and each turn does its one step of the story, in a way the reader will remember.
+You'll be given one job at a time, with what it needs to achieve and why. Before the chat, that's planning the match from the two character files. During it, it's one turn: what the dice did, where the story is, and what this turn has to do. Do that job as well as it can be done, for a reader who sees only the chat.
