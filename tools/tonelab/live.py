@@ -26,6 +26,14 @@ every later prompt, a middle turn that hands over nothing real is asked for agai
 setup has to come back once in the middle. Each character's habit marker is read from the
 plan and rationed: one message a turn at most, and none after two turns in a row.
 
+v5: the brief says what Pinder is and what the reader should feel; what each turn has to do
+comes from here, per turn. The game keeps a story clock (turns left, estimated from the
+meter), tracks each character's origin in three pieces, the collision of their habits and
+three setups, and tells each turn what is due. Each roll gets a meaning (a natural 20 has to
+cash something in). Turn length comes from a word budget for the whole chat (an average,
+not a cap). After the chat a reader who sees only the chat answers what they should know
+by the end, and a second call grades that against the plan.
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -152,16 +160,93 @@ class Story:
 
 EXCHANGE_BEATS = {"early", "warming", "close", "callback"}  # middle turns that must hand over something real
 SNAPS = {"player_snap": "player", "match_snap": "datee"}  # the snapper's habit is the weapon, so it isn't rationed
+BIG_BEATS = {"breakthrough", "forced_breakthrough", "catastrophe", "secret_miss", "discovery", "match_reveal",
+             "player_snap", "match_snap"}
+STRONG = {"VeryIntoIt", "AlmostThere", "DateSecured"}
 NOTE = re.compile(r"^[\s*_>\-]*(TOLD|HOOK)\s*[:\-]\s*([^:]+?)\s*:\s*(.+?)\s*$", re.I)
-FLAG = re.compile(r"^[\s*_>\-]*(PLANTED|CALLBACK)[\s*_.!]*$", re.I)
+SETUP = re.compile(r"^[\s*_>\-]*(PLANTED|CALLBACK|PAID)\s*(?:[:\-]\s*(.*?))?[\s*_]*$", re.I)
+FLAG = re.compile(r"^[\s*_>\-]*COLLIDED[\s*_.!]*$", re.I)
+STAT_HIT = {
+    "Charm": "warm and easy, and it puts them at ease",
+    "Rizz": "plainly wanting them, and it works",
+    "Honesty": "something real, and it gets through",
+    "Chaos": "a swerve that somehow makes perfect sense",
+    "Wit": "quick and funny, and it gets a real laugh",
+    "SelfAwareness": "naming what's actually going on, and it's right",
+}
 
 
-def draw_shape(knobs, key, seed, turn):
+def estimate_left(past, interest):
+    """Turns left, estimated from the meter: the distance to 25 (or to 0) over the recent
+    pace. The game ends at either, and nobody knows which in advance."""
+    deltas = [t["interest_delta"] for t in past[-3:]]
+    pace = sum(deltas) / len(deltas) if deltas else 2.0
+    if pace > 0.3:
+        left = (25 - interest) / pace
+    elif pace < -0.3:
+        left = interest / -pace
+    else:
+        left = 6
+    return max(1, min(12, round(left)))
+
+
+def dice_meaning(t):
+    r, stat = t["roll"] or {}, t["chosen_stat"]
+    hit = STAT_HIT.get(stat, "the way they meant it")
+    margin = (r.get("total") or 0) - (r.get("dc") or 0)
+    if r.get("nat20"):
+        return (f"A natural 20. This is the best message in the chat: {hit}. It cashes something in, a setup or "
+                "something the other one told them, used in a way that shows they understood, and the other one's "
+                "guard visibly drops.")
+    if r.get("nat1"):
+        return ("A natural 1. The worst thing they could have sent, and it lands exactly where it hurts the other "
+                "one most: on their fear, or on something they told them.")
+    if r.get("success"):
+        if margin >= 6:
+            return f"A big hit: {hit}, better than they meant it."
+        if margin <= 1:
+            return f"It only just lands: {hit}, barely, and it nearly went wrong."
+        return f"A clean hit: {hit}."
+    return "It came out wrong, in exactly the way the miss describes, and that shows in the message itself."
+
+
+def turn_target(knobs, key, seed, turn, spent, left, past, state, nat20):
+    """This turn's share of the word budget. The budget is an average for the whole chat,
+    not a cap: big moments draw more, routine turns less, and the seed varies it so long and
+    short turns sit next to each other. Once it's spent, a chat that's dying gets terse and
+    one that's working keeps its pace."""
+    budget = knobs.get("word_budget", 1250)
+    rng = random.Random(f"{seed}-{turn}-budget")
+    remaining, ending = budget - spent, key.startswith("ending")
+    if remaining <= 0:
+        last = past[-1]["interest_delta"] if past else 0
+        if last < 0 and not ending:
+            return rng.randint(4, 14)
+        if state in STRONG or ending:
+            return max(30, round(spent / max(1, len(past))))
+        return rng.randint(15, 35)
+    weight = 1.6 if ending else 1.5 if key in BIG_BEATS else 0.7 if key in ("opener", "setup") else 1.0
+    if nat20:
+        weight *= 1.4
+    target = remaining / (max(1, left) + (0 if ending else 2)) * weight * rng.uniform(0.5, 1.5)
+    if not ending:
+        target = min(target, max(10, remaining - budget * 0.12))  # the ending's share stays reserved
+    return int(max(4, min(130, target)))
+
+
+def draw_shape(knobs, key, seed, turn, target):
     spec = knobs["shapes"].get(key) or knobs["shapes"]["default"]
     rng = random.Random(f"{seed}-{turn}-shape")
-    shape = {side: [rng.choice(spec["words"]) for _ in range(rng.randint(*spec[side]))]
-             for side in ("player", "datee")}
+    counts = {side: rng.randint(*spec[side]) for side in ("player", "datee")}
+    want = min(6, max(1, round(target / 20)))
+    while counts["player"] + counts["datee"] < want:
+        side = "datee" if counts["datee"] and counts["datee"] <= counts["player"] + 1 else "player"
+        counts[side] += 1
+    weights = {side: [rng.choice((0.3, 0.6, 1, 1, 1.5, 2.5)) for _ in range(counts[side])] for side in counts}
+    total = sum(sum(w) for w in weights.values()) or 1
+    shape = {side: [max(1, min(45, round(target * w / total))) for w in weights[side]] for side in counts}
     shape["long"], shape["long_words"] = spec.get("long"), spec.get("long_words", LONG_WORDS)
+    shape["target"] = target
     return shape
 
 
@@ -177,8 +262,7 @@ def shape_text(shape, names):
         if shape.get("long") == side:
             line += f" One of them may be the accident itself and run to {lw} words."
         parts.append(line)
-    if shape.get("long") == "either":
-        parts.append(f"One message in this turn, from whichever of them is telling something real, may run to {lw} words.")
+    parts.append(f"About {shape['target']} words in all this turn.")
     return " ".join(parts)
 
 
@@ -201,13 +285,16 @@ def shape_problems(lines, shape, names):
 
 
 def strip_notes(text, names):
-    """Take the writer's notes for the game out of the chat: TOLD and HOOK lines
-    (name: what), and PLANTED and CALLBACK flags."""
-    kept, notes = [], {"planted": False, "callback": False, "told": [], "hooks": []}
+    """Take the writer's notes for the game out of the chat."""
+    kept = []
+    notes = {"told": [], "hooks": [], "planted": [], "callback": [], "paid": [], "collided": False}
     for ln in text.splitlines():
-        m = FLAG.match(ln)
+        if FLAG.match(ln):
+            notes["collided"] = True
+            continue
+        m = SETUP.match(ln)
         if m:
-            notes[m.group(1).lower()] = True
+            notes[m.group(1).lower()].append((m.group(2) or "").strip().strip("*_ ").strip())
             continue
         m = NOTE.match(ln)
         if m:
@@ -219,18 +306,110 @@ def strip_notes(text, names):
     return "\n".join(kept).strip(), notes
 
 
-def setup_note(planted, i):
-    if planted:
-        n, lines = planted
-        said = "\n".join(f"{who}: {msg}" for who, msg in lines)
-        return (f"The setup was planted on turn {n}:\n{said}\nIt comes back once in the middle, when the game says so, "
-                "and pays off at the end. Leave it alone otherwise.")
-    return "The setup from the plan hasn't been planted yet." + (" Plant it soon." if i else "")
+def piece_of(what):
+    m = re.match(r"\s*(?:piece\s*)?([123])\s*[:.)\-]\s*(.*)$", what, re.I)
+    return (int(m.group(1)), m.group(2).strip() or what) if m else (None, what)
+
+
+def setup_no(x):
+    m = re.search(r"[123]", x or "")
+    return int(m.group()) if m else None
+
+
+def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
+    """Where the story stands and what this turn has to move: the game's story clock, built
+    only from what has actually happened so far. Returns the text and the notes it requires.
+    key is None before the roll, when nothing is required yet."""
+    key = key or ""
+    turn, lines, need = i + 1, [], []
+    lines.append("This is the last turn." if is_last else
+                 f"Going by the meter, the chat probably has about {left} turn{'s' if left != 1 else ''} left.")
+    for side in ("player", "datee"):
+        name = names[side]
+        got = sorted(pieces[name])
+        nxt = next((k for k in (1, 2, 3) if k not in got), None)
+        known = (f"The reader knows piece{'s' if len(got) > 1 else ''} {', '.join(map(str, got))} of {name}'s origin"
+                 if got else f"The reader knows nothing of {name}'s origin yet")
+        if nxt is None:
+            lines.append(f"- {known}: all of it.")
+        elif nxt == 3:
+            lines.append(f"- {known}; piece 3, the part they'd never say, is saved for the end.")
+        else:
+            due = bool(key) and key != "opener" and not key.startswith("ending") and left <= (3 - nxt) + 1
+            lines.append(f"- {known}; next is piece {nxt}" + (", and it has to come out this turn." if due else "."))
+            if due:
+                need.append(f"TOLD:{name}")
+    if key in EXCHANGE_BEATS and not need and any(len(pieces[names[s]] & {1, 2}) < 2 for s in ("player", "datee")):
+        need.append("TOLD:any")
+    if collided:
+        lines.append(f"- Their habits collided on turn {collided}.")
+    elif key and key not in ("opener", "setup") and (
+            (i >= 3 and all(pieces[names[s]] for s in ("player", "datee"))) or left <= 3 or key.startswith("ending")):
+        lines.append("- Their habits haven't collided yet, and it's time: one's habit lands on the other one's fear, "
+                     "the way the plan's Collision says.")
+        need.append("COLLIDED")
+    else:
+        lines.append("- Their habits haven't collided yet.")
+    setup_need = None
+    if key.startswith("ending") and any(s.get("planted") and not s.get("paid") for s in setups.values()):
+        setup_need = "PAID"
+    elif nat20:
+        setup_need = "PAID"
+    for n in (1, 2, 3):
+        st = setups.get(n, {})
+        if st.get("paid"):
+            lines.append(f"- Setup {n}: paid off on turn {st['paid']}.")
+        elif st.get("called"):
+            lines.append(f"- Setup {n}: planted on turn {st['planted']}, came back on turn {st['called']}, "
+                         "waiting for its payoff" + (", which is now." if key.startswith("ending") else "."))
+        elif st.get("planted"):
+            due = (turn - st["planted"] >= 3 and setup_need is None and not key.startswith("ending")
+                   and (key in EXCHANGE_BEATS or key == "callback"))
+            lines.append(f"- Setup {n}: planted on turn {st['planted']}, not back yet"
+                         + ("; it comes back this turn, meaning more by now." if due else "."))
+            if due:
+                setup_need = "CALLBACK"
+        else:
+            due = (i >= 2 and setup_need is None and key and key not in BIG_BEATS and not key.startswith("ending"))
+            lines.append(f"- Setup {n}: not planted yet" + ("; plant it this turn, as a throwaway." if due else "."))
+            if due:
+                setup_need = "PLANTED"
+    if key == "callback" and setup_need is None:
+        setup_need = "CALLBACK" if any(s.get("planted") and not s.get("called") for s in setups.values()) else "PLANTED"
+    if setup_need:
+        need.append(setup_need)
+    if nat20:
+        lines.append("- A natural 20 this turn: something gets cashed in.")
+    if key == "ending_ghost":
+        need = [x for x in need if x == "PAID"]
+    return "\n".join(lines), need
+
+
+def notes_problems(notes, need, names, is_end):
+    problems, told_by = [], [w for w, _ in notes["told"]]
+    for n in need:
+        if n == "TOLD:any" and not notes["told"]:
+            problems.append("nothing new from either origin came out (no TOLD note)")
+        elif n.startswith("TOLD:") and n != "TOLD:any" and n[5:] not in told_by:
+            problems.append(f"the next piece of {n[5:]}'s origin didn't come out (no TOLD note for them)")
+        elif n == "COLLIDED" and not notes["collided"]:
+            problems.append("their habits didn't collide (no COLLIDED note)")
+        elif n in ("PLANTED", "CALLBACK", "PAID") and not notes[n.lower()]:
+            problems.append({"PLANTED": "the setup due to be planted wasn't (no PLANTED note)",
+                             "CALLBACK": "the setup due to come back didn't (no CALLBACK note)",
+                             "PAID": "nothing was cashed in (no PAID note)"}[n])
+    if not is_end:
+        for name in set(names.values()):
+            ks = {piece_of(w)[0] for who, w in notes["told"] if who == name}
+            if len(ks - {None}) > 1:
+                problems.append(f"{name} gave away more than one piece of their origin in one turn")
+    return problems
 
 
 def exchange_text(told, hooks):
     if told:
-        out = "What they've told each other so far:\n" + "\n".join(f"- turn {n}, {who}: {fact}" for n, who, fact in told)
+        out = "What they've told each other so far:\n" + "\n".join(
+            f"- turn {n}, {who}" + (f" (piece {k})" if k else "") + f": {fact}" for n, who, k, fact in told)
     else:
         out = "Neither of them has told the other anything real yet."
     if hooks:
@@ -250,7 +429,7 @@ def habit_markers(plan, names):
                 current = names[side]
         m = re.match(r"(?i)^[\s*_\-]*habit marker[\s*_]*:\s*(.+)$", ln)
         if m and current and current not in found:
-            marks = [x.strip().strip("\"'`*\u201c\u201d\u2018\u2019").strip() for x in m.group(1).split("|")]
+            marks = [x.strip().strip("\"'`*“”‘’").strip() for x in m.group(1).split("|")]
             found[current] = [x for x in marks if x and x.lower().rstrip(".") not in ("none", "n/a", "-") and len(x) <= 30]
     return {k: v for k, v in found.items() if v}
 
@@ -288,6 +467,34 @@ def habit_problems(lines, habits, banned, exempt):
         elif n > 1:
             problems.append(f"{name}'s habit showed in {n} messages, one at most")
     return problems
+
+
+READER_SYSTEM = ("You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a "
+                 "sentient dick. Answer only from what is in the chat. If the chat doesn't show it, say \"can't tell\". "
+                 "One or two short sentences per answer.")
+GRADER_SYSTEM = "You check whether a finished piece of writing delivered what its plan intended. Be strict and brief."
+
+
+def reader_check(caller, plan, output, names):
+    """A reader who sees only the finished chat answers what the reader should know by the
+    end; a second call grades the answers against the plan. The writer's own notes prove only
+    that it says it delivered; this checks what reached the page."""
+    qs = []
+    for n in (names["player"], names["datee"]):
+        qs += [f"What is {n} afraid of?", f"What does {n} keep doing so they don't have to feel it?",
+               f"Where does that come from, for {n}?", f"At the end, did {n} drop that habit or hold on to it?"]
+    qs += ["What happened when the two of them ran into each other's habits?",
+           "Which line would you remember tomorrow, and why?", "Where, if anywhere, did you laugh?"]
+    user = "The chat:\n\n" + output + "\nAnswer these, numbered:\n" + "\n".join(f"{k + 1}. {q}" for k, q in enumerate(qs))
+    answers = caller(READER_SYSTEM, user, "reader check", "low", {})
+    g_user = ("A writers' room planned a chat, and a reader who saw only the finished chat answered questions about it. "
+              "For each of the first nine answers, say whether the reader got what the plan intended: yes, partly or "
+              "no, with a few words why. Then one last line: SCORE: the number of yes answers plus half a point for "
+              "each partly, out of 9.\n\n"
+              f"The plan:\n\n{plan}\n\nThe questions and the reader's answers:\n\n{answers}\n")
+    grade = caller(GRADER_SYSTEM, g_user, "reader grade", "low", {})
+    m = re.search(r"SCORE:\s*\**\s*([\d.]+)", grade)
+    return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None}
 
 
 def beat_keys(knobs, turns, outcome):
@@ -351,18 +558,25 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     plan = caller(systems["plan"], plan_user, "plan", knobs.get("plan_reasoning"), {})
 
     story, cons, turns, chat, out = Story(knobs), tl.load_consequences(), mech["turns"], [], []
-    planted, callback_turn, told, hooks = None, None, [], []
+    told, hooks, setups = [], [], {}
+    pieces = {names["player"]: set(), names["datee"]: set()}
+    collided, spent, seed = None, 0, mech.get("seed")
     habits = habit_markers(plan, names)
     for i, t in enumerate(turns):
         is_last = i == len(turns) - 1
+        r = t["roll"] or {}
         tv = tl.turn_values(t, cons, names, datee_diag, is_last, mech.get("outcome"))
+        if r.get("success"):  # the generic pass text says "sincere" for every move; the meaning comes separately
+            tv["result"] = "SUCCESS" + (" (natural 20)" if r.get("nat20") else "") + f". The {t['chosen_stat']} roll landed."
+        left = estimate_left(turns[:i], t["interest_before"])
         needs = story.needs(i, t["interest_before"])
         banned = habit_banned(chat, habits)
         h_note = habit_note(habits, banned)
+        pre_step, _ = story_step(i, None, False, left, names, pieces, setups, collided, False)
         base = {**common, "plan": plan, "history": history(chat), "n": t["turn"], "story_so_far": story.so_far(),
-                "setup_note": setup_note(planted, i), "exchange": exchange_text(told, hooks), "habit_note": h_note}
+                "exchange": exchange_text(told, hooks), "habit_note": h_note}
         o_user = tl.render(files["options_input.md"],
-                           {**base, "interest": t["interest_before"], "state": t["state_before"],
+                           {**base, "step": pre_step, "interest": t["interest_before"], "state": t["state_before"],
                             "options": ", ".join(t["options"]), "needs": needs}, "options_input.md").strip() + "\n"
         o_text = caller(systems["options"], o_user, f"turn {t['turn']} options", knobs.get("turn_reasoning"),
                         {"offered": t["options"]})
@@ -370,23 +584,24 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         if not intended:
             tl.die(f"turn {t['turn']}: the options output has no block for the picked move {t['chosen_stat']}:\n{o_text[:1500]}")
         key, beat = story.beat(i, t, is_last, mech.get("outcome"))
-        ghost = key == "ending_ghost"
-        shape = draw_shape(knobs, key, mech.get("seed"), t["turn"])
+        ghost, nat20 = key == "ending_ghost", bool(r.get("nat20"))
+        now_left = 1 if is_last else left
+        step, need = story_step(i, key, is_last, now_left, names, pieces, setups, collided, nat20)
+        target = turn_target(knobs, key, seed, t["turn"], spent, now_left, turns[:i], t["state_after"], nat20)
+        shape = draw_shape(knobs, key, seed, t["turn"], target)
+        meaning = dice_meaning(t)
         d_user = tl.render(files["deliver_input.md"],
-                           {**base, **tv, "intended": intended, "beat": beat, "shape": shape_text(shape, names)},
-                           "deliver_input.md").strip() + "\n"
-        ctx = {"ghost": ghost, "shape": shape, "beat": key}
+                           {**base, **tv, "step": step, "dice_meaning": meaning, "intended": intended, "beat": beat,
+                            "shape": shape_text(shape, names)}, "deliver_input.md").strip() + "\n"
+        ctx = {"ghost": ghost, "shape": shape, "beat": key, "required": need}
         exempt = names[SNAPS[key]] if key in SNAPS else None
 
         def attempt(prompt, label):
             raw = caller(systems["deliver"], prompt, label, knobs.get("turn_reasoning"), ctx)
             text, notes = strip_notes(raw, names)
             lines = parse_lines(text, names)
-            problems = shape_problems(lines, shape, names) + habit_problems(lines, habits, banned, exempt)
-            if key in EXCHANGE_BEATS and not notes["told"]:
-                problems.append("nothing real from either true story was told this turn (no TOLD note)")
-            if key == "callback" and not notes["callback"]:
-                problems.append("the setup didn't come back (no CALLBACK note)")
+            problems = (shape_problems(lines, shape, names) + habit_problems(lines, habits, banned, exempt)
+                        + notes_problems(notes, need, names, key.startswith("ending")))
             return raw, notes, lines, problems
 
         d_text, notes, lines, problems = attempt(d_user, f"turn {t['turn']} delivery")
@@ -395,53 +610,79 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             again = (d_user + "\nYour answer was:\n\n" + d_text + "\n\nIt broke this turn's rules: " +
                      "; ".join(problems) + f". Write turn {t['turn']} again so it keeps all of them.\n")
             d_text, notes, lines, problems = attempt(again, f"turn {t['turn']} delivery retry")
-        if notes["planted"] and planted is None:
-            planted = (t["turn"], lines)
-        if notes["callback"] and callback_turn is None:
-            callback_turn = t["turn"]
-        for who_told, fact in notes["told"]:
-            told.append((t["turn"], who_told, fact))
-            j = next((k for k, h in enumerate(hooks) if h[1] == who_told), None)
+        for who_told, what in notes["told"]:
+            k, fact = piece_of(what)
+            if who_told in pieces:
+                if k is None:
+                    k = next((x for x in (1, 2, 3) if x not in pieces[who_told]), 3)
+                pieces[who_told].add(k)
+            told.append((t["turn"], who_told, k, fact))
+            j = next((x for x, h in enumerate(hooks) if h[1] == who_told), None)
             if j is not None:
                 hooks.pop(j)
         hooks.extend((t["turn"], w, h) for w, h in notes["hooks"])
+        for kind, field in (("planted", "planted"), ("callback", "called"), ("paid", "paid")):
+            for x in notes[kind]:
+                n = setup_no(x)
+                if n is None:
+                    pick = {"planted": lambda s: not s.get("planted"),
+                            "callback": lambda s: s.get("planted") and not s.get("called") and not s.get("paid"),
+                            "paid": lambda s: s.get("planted") and not s.get("paid")}[kind]
+                    n = next((k for k in (1, 2, 3) if pick(setups.get(k, {}))), None)
+                if n is not None:
+                    setups.setdefault(n, {}).setdefault(field, t["turn"])
+                    setups[n].setdefault("planted", t["turn"])
+        if notes["collided"] and collided is None:
+            collided = t["turn"]
         who = {w for w, _ in lines}
         if names["player"] not in who or (names["datee"] not in who and shape["datee"]):
             tl.die(f"turn {t['turn']}: the delivery output is missing a speaker:\n{d_text[:1500]}")
+        words = sum(len(m.split()) for _, m in lines)
+        spent += words
         chat.append((t["turn"], lines))
+        noted = ([f"Told, {w}: {f}" for w, f in notes["told"]] + [f"Hook dropped, {w}: {h}" for w, h in notes["hooks"]]
+                 + [f"{k.capitalize()}: {x or '?'}" for k in ("planted", "callback", "paid") for x in notes[k]]
+                 + (["Their habits collided."] if notes["collided"] else []))
         brief = (f"Before the roll. What the story needs next: {needs}\n\n"
                  f"The three options written:\n{o_text}\n\n"
-                 f"Picked {t['chosen_stat']}. {tv['result']}\n{tv['checks']}\n"
+                 f"Picked {t['chosen_stat']}. {tv['result']}\nWhat it means: {meaning}\n{tv['checks']}\n"
                  f"Interest {t['interest_before']} → {t['interest_after']} ({t['state_after']}).\n\n"
-                 f"This turn's beat ({key}): {beat}\n\nShape: {shape_text(shape, names)}"
+                 f"This turn's beat ({key}): {beat}\n\nWhere the story stood:\n{step}\n"
+                 f"Required notes: {', '.join(need) or 'none'}\n\nShape: {shape_text(shape, names)} "
+                 f"Written: {words} words; {spent} of the {knobs.get('word_budget', 1250)} budget spent."
                  + (f"\n\nHabits: {h_note}" if h_note else "")
                  + (f"\nRules still broken after a retry: {'; '.join(problems)}" if problems else
                     "\n(kept the rules after a retry)" if retried else "")
-                 + "".join(f"\nTold, {w}: {f}" for w, f in notes["told"])
-                 + "".join(f"\nHook dropped, {w}: {h}" for w, h in notes["hooks"])
-                 + ("\nThe setup was planted on this turn." if planted and planted[0] == t["turn"] else "")
-                 + ("\nThe setup came back on this turn." if notes["callback"] else ""))
+                 + ("\n\n" + "\n".join(noted) if noted else ""))
         out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options": o_text,
                     "deliver_user": d_user, "delivered": d_text, "brief": brief, "shape": shape,
-                    "retried": retried, "shape_problems": problems, "notes": notes, "habit_note": h_note})
+                    "retried": retried, "shape_problems": problems, "notes": notes, "habit_note": h_note,
+                    "step": step, "required": need, "target": target, "words": words})
     output = "\n\n".join(f"Turn {n}\n" + "\n".join(f"{w}: {m}" for w, m in lines) for n, lines in chat) + "\n"
+    planted_turns = [s["planted"] for s in setups.values() if s.get("planted")]
+    called_turns = [s["called"] for s in setups.values() if s.get("called")]
     return {"names": names, "common": common, "systems": systems, "plan_user": plan_user, "plan": plan,
-            "turns": out, "output": output, "planted_turn": planted[0] if planted else None,
-            "callback_turn": callback_turn, "told": told, "hooks_open": hooks, "habits": habits}
+            "turns": out, "output": output, "planted_turn": min(planted_turns) if planted_turns else None,
+            "callback_turn": min(called_turns) if called_turns else None, "told": told, "hooks_open": hooks,
+            "habits": habits, "pieces": {k: sorted(v) for k, v in pieces.items()},
+            "setups": {str(k): v for k, v in sorted(setups.items())}, "collided_turn": collided, "words": spent}
 
 
 def dry_caller(names):
     def caller(system, user, label, effort, ctx):
         if label == "plan":
             return "(dry run: no plan)"
+        if label.startswith("reader"):
+            return "(dry run)\nSCORE: 0"
         if label.endswith("options"):
             return "\n\n".join(f"OPTION {s}\n{names['player']}: (dry run, {s})" for s in ctx["offered"])
         shape = ctx["shape"]
         lines = [f"{names['player']}: dry"] * len(shape["player"]) + [f"{names['datee']}: dry"] * len(shape["datee"])
-        if ctx.get("beat") in EXCHANGE_BEATS:
-            lines.append(f"TOLD: {names['player']}: dry")
-        if ctx.get("beat") == "callback":
-            lines.append("CALLBACK")
+        for n in ctx.get("required", []):
+            if n.startswith("TOLD:"):
+                lines.append(f"TOLD: {names['player'] if n == 'TOLD:any' else n[5:]}: dry")
+            else:
+                lines.append(n)
         return "\n".join(lines)
     return caller
 
@@ -482,6 +723,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         return text.strip()
 
     result = play(variant_dir, knobs, mech, args.player, args.datee, caller)
+    reader = reader_check(caller, result["plan"], result["output"], names)
     systems = result["systems"]
     with open(os.path.join(run_dir, "prompt.md"), "w", encoding="utf-8") as f:
         f.write("".join(f"<!-- system prompt: {k} -->\n{v}\n\n" for k, v in systems.items()) +
@@ -525,8 +767,12 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "turns_off_shape": [t["turn"] for t in result["turns"] if t["shape_problems"]],
         "callback_turn": result["callback_turn"],
         "told": [list(x) for x in result["told"]],
+        "required_missed": [[t["turn"], t["shape_problems"]] for t in result["turns"] if t["shape_problems"]],
         "hooks_open": [list(x) for x in result["hooks_open"]],
         "habits": result["habits"],
+        "words": result["words"], "word_budget": knobs.get("word_budget", 1250),
+        "pieces": result["pieces"], "setups": result["setups"], "collided_turn": result["collided_turn"],
+        "reader_score": reader["score"], "reader": reader,
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
     with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:
@@ -534,4 +780,21 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
     with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
     tl.write_report(run_dir)
+    add_reader_to_report(run_dir, reader)
     print(os.path.relpath(run_dir, tl.REPO))
+
+
+def add_reader_to_report(run_dir, reader):
+    import html
+    path = os.path.join(run_dir, "report.html")
+    if not os.path.exists(path):
+        return
+    with open(path, encoding="utf-8") as f:
+        page = f.read()
+    sec = ("<section><h2>Reader check</h2><p>A reader who saw only the chat answered these questions; a second call "
+           f"graded the answers against the plan. Score: {reader['score']} of 9.</p>"
+           f"<pre>{html.escape(reader['answers'])}</pre>"
+           f"<details><summary>Grade against the plan</summary><pre>{html.escape(reader['grade'])}</pre></details></section>")
+    page = page.replace("</body>", sec + "</body>", 1) if "</body>" in page else page + sec
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(page)

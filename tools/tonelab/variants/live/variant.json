@@ -8,38 +8,38 @@
   "plan_reasoning": "high",
   "turn_reasoning": "medium",
   "needs": {
-    "opener": "This is the very first message. It's where the reader meets the player character: the opener they've sent forty people, performed, with a hook of theirs dropped in it.",
-    "early": "It's early and they're still strangers performing, but they're dropping hooks. At least one option drops one of the player character's hooks or pulls on one the match dropped.",
-    "middle": "Every turn the two of them learn something about each other. At least one option pulls on a hook that's still hanging, and at least one gives a piece of the player character's true story. Nothing already said comes back, except as a callback that means something new.",
+    "opener": "This is the very first message: the act at full strength, the opener they've sent forty people, with piece 1 of their origin in it as a hook if it fits.",
+    "early": "It's early and they're still performing, but they're dropping hooks. At least one option drops piece 1 of the player character's origin or pulls on a hook the match dropped.",
+    "middle": "Every turn the two of them learn something about each other. At least one option pulls on a hook that's still hanging, and at least one gives the next piece of the player character's origin when it's due. Nothing already said comes back, except as a callback that means something new.",
     "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
-    "secret": "The player character's secret is still in. Options can come near it without giving it away, and none of them uses the planned accident: that's saved for its moment.",
-    "reveal": "The player character's secret is out. The options are how they live with that: own it, joke about it, try to move on.",
+    "secret": "Piece 2 of the player character's origin is still in. Options can come near it without giving it away, and none of them uses the accident from the plan: that's saved for its moment.",
+    "reveal": "Piece 2 of the player character's origin is out. The options are how they live with that: own it, joke about it, explain it, which makes it worse.",
     "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
   },
   "beats": {
-    "opener": "The opener. Two strangers performing. The player character's first message shows their quirk at full strength: this is where the reader starts enjoying it, before they know what it protects. The match answers with their own quirk and plants the first setup from the plan, lightly enough that it reads as a throwaway.",
-    "setup": "Still early, still performing, but they're dropping hooks: something about themselves a curious person would ask about. If the setup from the plan hasn't been planted yet, the match's reply plants it now, as something that reads as a throwaway.",
-    "early": "Getting to know each other. One of them pulls on a hook that's hanging: asks about it, specifically, in their own voice. The other tells a piece of their true story, a real and specific fact, and asks something back, or dodges, and the dodge gives something away. Either way the reader learns something new about one of them. The filth is still bravado.",
-    "warming": "Getting closer. They want each other now, and what they've told each other starts to matter: one of them uses something the other told them, gently or as a joke, and gets a bigger piece back. The filth gets personal, because it's about what they now know.",
-    "close": "Close. It's nearly happening, and they know enough about each other that every message costs something. Another real piece comes out, nearer to the thing they'd never say.",
-    "breakthrough": "The breakthrough. The move landed, and for the first time something real gets through the quirk: a crack in the lie, small and specific. Both of them notice. The match answers it instead of stepping past it, and gives a little of their own back. The most naked line here may be very short.",
-    "forced_breakthrough": "Nothing real has been said yet, and it's time. Whatever move was picked, the match asks for something real, in their own voice and through their own quirk, and the player character's message gives a little: a crack in the lie, small and specific.",
-    "catastrophe": "The catastrophe. The roll bombed. This is where the player character's true story falls out, as an event in the chat (the text-app accident from the plan), not as a confession. It happens all at once and in the worst way. Ideally it changes the meaning of something the player character sent earlier that the match liked, so the reader feels fooled too. The match's reply shows the hit.",
-    "secret_miss": "The player character's secret should have come out by now. The roll missed, so this is where it slips out: as an event in the chat (the text-app accident from the plan), smaller than a catastrophe, but still something that happens to them, not a confession.",
-    "discovery": "The player character's secret should have come out by now, and they've managed to keep it in. So the match finds it: something on the screen that doesn't add up, a detail they caught a few turns ago. They say so, in their own voice, and the player character's message has to deal with being caught.",
-    "match_reveal": "The player character's secret is out, and the match can't step over it. This is the match's turn: their own lie cracks, and their reveal comes out in their own format and quirk. It should change the meaning of something they did earlier in the chat. The roll decides how the player character's message lands; it doesn't stop the match's reveal.",
-    "player_snap": "The player character snaps: their shadow took over. The fear comes out dressed as a principle. Claim, slip, denial, as a burst of short, impulsive messages, with their quirk turned outward as a weapon and the worldview from the plan as the disguise. The slip must be something the reader can check against what's on the screen. In the last message they hear themselves, too late. The match reacts, whichever way the interest change supports: sees through it, snaps back, or takes it at face value.",
-    "match_snap": "The match had let themselves hope, and that message hurt. The match snaps: claim, slip, denial, short impulsive messages, their quirk turned outward, the worldview from the plan as the disguise, the slip checkable on the screen. Then they regret it and back out badly.",
-    "ending_win": "The ending: the match agrees to meet. This is the click. One of them says the thing that shows they understood the other's true story, using what they were told tonight, and the other one's guard comes down: their habit drops, and if their \"never says\" comes out, it's here, short and naked. The setup comes back one last time and means something new. The match usually has the last line.",
-    "ending_loss": "The ending: the match unmatches. It's unhinged: a burst, the habit turned into a weapon. But in the middle of it someone says their \"never says\" out loud, so the reader sees exactly what was exposed and why it couldn't hold. If nothing real has been told yet, it all comes out now, at once, too much and too late. The setup comes back and means the opposite. The last line should hurt and be funny at the same time.",
-    "ending_ghost": "The ending: the match ghosts. The player character sends their message and no reply ever comes. Write only the player character's messages: maybe one, maybe a few more into the silence, each telling the reader what the silence means. Pay off something from the first turns.",
+    "opener": "The opener. Two strangers performing. The player character's first message is the act at full strength. The match answers with their own act, and may plant a setup lightly enough that it reads as a throwaway.",
+    "setup": "Still early, still performing. They drop hooks, the half-brag version of their origin, and the other one notices. A setup from the plan can go in here, as a throwaway.",
+    "early": "Getting to know each other. One of them pulls on a hook, specifically, in their own voice. The other gives the next piece of their origin and asks something back, or dodges, and the dodge gives something away. The reader learns something new about one of them.",
+    "warming": "Getting closer. They want each other, and what they've told each other starts to matter: one of them uses something the other told them, gently or as a joke, and gets more back. The filth gets personal because it's about what they now know.",
+    "close": "Close. It's nearly happening, and they know enough about each other that every message costs something. The habits are under strain.",
+    "breakthrough": "The breakthrough. The move landed, and for the first time the habit drops for a moment: a crack, small and specific. Both of them notice. The match answers it instead of stepping past it, and gives a little back. The most naked line may be very short.",
+    "forced_breakthrough": "Nothing real has got through yet, and it's time. Whatever move was picked, the match asks for something real, in their own voice, and the player character's habit drops for a moment.",
+    "catastrophe": "The catastrophe. The roll bombed, and the player character's accident from the plan happens: piece 2 of their origin falls out as an event on the screen, not a confession, all at once and in the worst way. Ideally it changes the meaning of something they sent earlier that the match liked. Then they commit: they explain, and the explanation makes it worse. The match's reply shows the hit.",
+    "secret_miss": "Piece 2 of the player character's origin should be out by now. The roll missed, so the accident happens, smaller than a catastrophe, but it happens to them, and their explanation doesn't help.",
+    "discovery": "Piece 2 of the player character's origin should be out by now, and they've kept it in. So the match finds it: something on the screen that doesn't add up. They say so, in their own voice, and the player character has to deal with being caught.",
+    "match_reveal": "The player character's story is out, and the match can't step over it. The match's act cracks: a piece of their own origin comes out, in their own habit's format, and it changes the meaning of something they did earlier. The roll decides how the player character's message lands; it doesn't stop the match.",
+    "player_snap": "The player character snaps. Under stress the habit turns into a weapon, dressed up as their dating-app wisdom from the plan and said in complete earnest. Claim, slip, denial, as a burst of short, impulsive messages; the slip is something the reader can check against the chat. In the last message they hear themselves, too late. The match reacts the way the interest change supports.",
+    "match_snap": "The match had let themselves hope, and that hurt. The match snaps: the habit as a weapon, the dating-app wisdom as the disguise, claim, slip, denial, the slip checkable on the screen. Then they regret it and back out badly.",
+    "ending_win": "The ending: the match agrees to meet. The click. Each of them puts their habit down for the other, and the reader knows what that costs because they know where it came from. Piece 3, the part one of them would never say, can come out here, short and plain. The setups pay off: early lines come back meaning something else, and nobody explains them. The match usually has the last line.",
+    "ending_loss": "The ending: the match unmatches. Each one's habit confirms exactly what the other was afraid of, and both get the rejection they predicted. It's unhinged: the habit at full volume, the dating-app wisdom said in earnest. But in the middle of it piece 3 comes out, too much and too late. The setups pay off the opposite way. The last line should hurt and be funny at the same time.",
+    "ending_ghost": "The ending: the match ghosts. Only the player character's messages: one, or a few more into the silence, each one their habit at full strength, each one telling the reader what the silence means. A setup comes back and means the opposite.",
     "ending_open": "The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.",
     "reveal_pending": "The match's own reveal hasn't happened yet, so it happens now, as part of the ending.",
-    "callback": "The setup from the plan comes back, once, here in the middle. By now some of the other's true story is out, so the line means more than when it was planted, and at least one of them notices. If the setup was never planted, plant it now. Something real from a true story comes out this turn too."
+    "callback": "A setup from the plan comes back, here in the middle. The reader knows more by now, so it means more than when it was planted, and at least one of them notices."
   },
   "drawer_sample": 5,
   "shapes": {
-    "_doc": "Per beat: how many messages each side sends (min, max) and the word caps drawn per message. long names the side whose one message may run to long_words (default 40): player for the accident, either for the one turn-message that tells something real.",
+    "_doc": "Per beat: how many messages each side sends (min, max); the game adds messages when the turn's share of the word budget is large and splits that share unevenly across them. long names the side whose one message may run to long_words (default 40), for the accident.",
     "default": {
       "player": [
         1,
@@ -48,14 +48,6 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        1,
-        4,
-        6,
-        8,
-        12,
-        15
       ]
     },
     "opener": {
@@ -66,11 +58,6 @@
       "datee": [
         1,
         2
-      ],
-      "words": [
-        6,
-        10,
-        14
       ]
     },
     "breakthrough": {
@@ -81,11 +68,6 @@
       "datee": [
         1,
         2
-      ],
-      "words": [
-        4,
-        8,
-        12
       ]
     },
     "forced_breakthrough": {
@@ -96,11 +78,6 @@
       "datee": [
         1,
         2
-      ],
-      "words": [
-        4,
-        8,
-        12
       ]
     },
     "catastrophe": {
@@ -111,11 +88,6 @@
       "datee": [
         1,
         2
-      ],
-      "words": [
-        3,
-        6,
-        10
       ],
       "long": "player"
     },
@@ -128,11 +100,6 @@
         1,
         2
       ],
-      "words": [
-        3,
-        6,
-        10
-      ],
       "long": "player"
     },
     "discovery": {
@@ -143,11 +110,6 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        4,
-        8,
-        12
       ]
     },
     "match_reveal": {
@@ -158,11 +120,6 @@
       "datee": [
         2,
         4
-      ],
-      "words": [
-        5,
-        10,
-        15
       ]
     },
     "player_snap": {
@@ -173,11 +130,6 @@
       "datee": [
         1,
         1
-      ],
-      "words": [
-        4,
-        6,
-        9
       ]
     },
     "match_snap": {
@@ -188,11 +140,6 @@
       "datee": [
         3,
         5
-      ],
-      "words": [
-        4,
-        6,
-        9
       ]
     },
     "ending_win": {
@@ -203,14 +150,7 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        3,
-        6,
-        10
-      ],
-      "long": "either",
-      "long_words": 22
+      ]
     },
     "ending_loss": {
       "player": [
@@ -220,15 +160,7 @@
       "datee": [
         2,
         4
-      ],
-      "words": [
-        3,
-        6,
-        10,
-        15
-      ],
-      "long": "either",
-      "long_words": 25
+      ]
     },
     "ending_ghost": {
       "player": [
@@ -238,11 +170,6 @@
       "datee": [
         0,
         0
-      ],
-      "words": [
-        3,
-        6,
-        10
       ]
     },
     "early": {
@@ -253,17 +180,7 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        1,
-        4,
-        6,
-        8,
-        12,
-        15
-      ],
-      "long": "either",
-      "long_words": 22
+      ]
     },
     "warming": {
       "player": [
@@ -273,17 +190,7 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        1,
-        4,
-        6,
-        8,
-        12,
-        15
-      ],
-      "long": "either",
-      "long_words": 22
+      ]
     },
     "close": {
       "player": [
@@ -293,17 +200,7 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        1,
-        4,
-        6,
-        8,
-        12,
-        15
-      ],
-      "long": "either",
-      "long_words": 22
+      ]
     },
     "callback": {
       "player": [
@@ -313,17 +210,8 @@
       "datee": [
         1,
         3
-      ],
-      "words": [
-        1,
-        4,
-        6,
-        8,
-        12,
-        15
-      ],
-      "long": "either",
-      "long_words": 22
+      ]
     }
-  }
+  },
+  "word_budget": 1250
 }

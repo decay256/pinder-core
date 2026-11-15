@@ -6,8 +6,8 @@ The chat so far:
 
 ${history}
 
-The story so far: ${story_so_far}
-${setup_note}
+Where the story stands. ${story_so_far}
+${step}
 
 ${exchange}
 ${habit_note}
@@ -16,6 +16,7 @@ Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
 ${intended}
 
 What the dice did: ${result}
+What that means for the message: ${dice_meaning}
 ${checks}
 Interest ${interest_before} → ${interest_after} (${state_after}).
 

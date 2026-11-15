@@ -6,8 +6,8 @@ The chat so far:
 
 ${history}
 
-The story so far: ${story_so_far}
-${setup_note}
+Where the story stands. ${story_so_far}
+${step}
 
 ${exchange}
 ${habit_note}
