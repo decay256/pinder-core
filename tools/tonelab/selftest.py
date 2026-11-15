@@ -7,7 +7,8 @@
    stays within 0..25.
 3. Without --mechanics-only and without an API key the runner refuses to start,
    so the mechanics path is the only one that runs model-free.
-4. Every variant renders against real mechanics with no unknown placeholder.
+4. Every variant renders against real mechanics with no unknown placeholder; a live
+   variant renders every call of a few whole games, and its beats never look ahead.
 """
 
 import json
@@ -24,6 +25,28 @@ def check(cond, msg):
     if not cond:
         sys.exit(f"FAIL: {msg}")
     print(f"ok: {msg}")
+
+
+def check_live(name, variant, knobs, tmp):
+    """A live variant: every prompt renders on every turn of a few real games, and the story
+    beats never look ahead (a game cut short gives the same beats up to the cut)."""
+    import live
+    for seed in (7, 23, 42):
+        path = os.path.join(tmp, f"{name}-{seed}.json")
+        m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))
+        names = {"player": m["player"]["display_name"], "datee": m["datee"]["display_name"]}
+        prompts = []
+
+        def caller(system, user, label, effort, ctx):
+            prompts.append(system + user)
+            return live.dry_caller(names)(system, user, label, effort, ctx)
+        res = live.play(variant, knobs, m, "reuben", "brick", caller)
+        check(len(res["turns"]) == len(m["turns"]) and len(prompts) == 1 + 2 * len(m["turns"]),
+              f"{name} seed {seed}: a plan call and two calls per played turn ({len(m['turns'])} turns)")
+        check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
+        full = live.beat_keys(knobs, m["turns"], m.get("outcome"))
+        same = all(live.beat_keys(knobs, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, len(m["turns"]) + 1))
+        check(same, f"{name} seed {seed}: beats never depend on later turns ({' '.join(full)})")
 
 
 def main():
@@ -52,6 +75,9 @@ def main():
             variant = os.path.join(tonelab.VARIANTS, name)
             with open(os.path.join(variant, "variant.json"), encoding="utf-8") as f:
                 knobs = json.load(f)
+            if knobs.get("mode") == "live":
+                check_live(name, variant, knobs, tmp)
+                continue
             _, system_prompt, prompt, parts = tonelab.build_prompt(variant, knobs, ma, "reuben", "brick")
             check(len(parts["turn_briefs"]) == len(ma["turns"]), f"{name}: one prompt brief per played turn")
             check(bool(system_prompt) and "Turn 1." in prompt and "${" not in system_prompt + prompt,

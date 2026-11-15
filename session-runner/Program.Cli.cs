@@ -112,7 +112,7 @@ partial class Program
         Console.Error.WriteLine();
         Console.Error.WriteLine("Options:");
         Console.Error.WriteLine("  --turns <N>        Override maximum session turns (default: 30)");
-        Console.Error.WriteLine("  --agent <type>      Select decision agent: score, llm, human (default: score)");
+        Console.Error.WriteLine("  --agent <type>      Select decision agent: score, llm, human, random (default: score)");
         Console.Error.WriteLine($"  --model <spec>      Game-turn LLM target (default: {AnthropicModelIds.DefaultModel})");
         Console.Error.WriteLine($"  --setup-model <m>   Setup generator model (default: same as --model; env: {SessionSetupModelEnvVar})");
         Console.Error.WriteLine($"  --player-agent-model <m> LLM player decision model (default: {AnthropicModelIds.DefaultModel}; env: {PlayerAgentModelEnvVar})");

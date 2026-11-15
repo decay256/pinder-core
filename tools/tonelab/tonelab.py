@@ -12,6 +12,10 @@ The split is deliberate:
 * Every run is saved with the exact prompt, the mechanics, the output and a record of
   what produced it, including the model the CLI reports it actually used.
 
+A variant with "mode": "live" in variant.json is written turn by turn instead, the
+way the game will play it: a match plan first, then each turn's three options before
+the roll and the delivered turn after it. See live.py.
+
 Usage:
   tools/tonelab/tonelab.py run --player reuben --datee brick --seed 42
   tools/tonelab/tonelab.py run --variant my-variant --seed 7 --dry-run
@@ -67,7 +71,7 @@ def model_free_env():
 
 # ── mechanics: from the engine, never computed here ───────────────────────────
 
-def play_mechanics(player, datee, seed, turns, clock, out_path):
+def play_mechanics(player, datee, seed, turns, clock, out_path, agent=None):
     build = subprocess.run(
         ["dotnet", "build", RUNNER_PROJECT, "-c", "Release", "-nologo", "-v", "q"],
         capture_output=True, text=True, env=model_free_env())
@@ -79,7 +83,7 @@ def play_mechanics(player, datee, seed, turns, clock, out_path):
         res = subprocess.run(
             ["dotnet", RUNNER_DLL, "--mechanics-only", "--player", player, "--datee", datee,
              "--seed", str(seed), "--turns", str(turns), "--clock", clock,
-             "--mechanics-out", out_path],
+             "--mechanics-out", out_path] + (["--agent", agent] if agent else []),
             capture_output=True, text=True, env=env, timeout=600)
     if res.returncode != 0 or not os.path.exists(out_path):
         die(f"session-runner --mechanics-only failed (exit {res.returncode}):\n{res.stderr[-3000:]}")
@@ -440,7 +444,11 @@ def cmd_run(args):
     os.makedirs(run_dir)
 
     mech = play_mechanics(args.player, args.datee, args.seed, turns, args.clock,
-                          os.path.join(run_dir, "mechanics.json"))
+                          os.path.join(run_dir, "mechanics.json"), knobs.get("agent"))
+    if knobs.get("mode") == "live":
+        sys.path.insert(0, HERE)
+        import live
+        return live.run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, model, key, turns)
     files, system_prompt, prompt, parts = build_prompt(variant_dir, knobs, mech, args.player, args.datee)
     with open(os.path.join(run_dir, "prompt.md"), "w", encoding="utf-8") as f:
         f.write("<!-- system prompt -->\n" + system_prompt + "\n\n<!-- user prompt -->\n" + prompt)
@@ -595,8 +603,14 @@ def write_report(run_dir):
              f"sha256 <code>{e(rec['prompt_sha256'][:12])}</code>"
              f"{' · ' + str(rec['seconds']) + ' s' if rec.get('seconds') else ''}"
              f"{' · $' + format(rec['usage']['cost'], '.3f') if isinstance(rec.get('usage'), dict) and 'cost' in rec['usage'] else ''}</p>")
-    h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
-             "Each turn's fold shows the brief the model was given for it.</p>")
+    if parts.get("plan"):
+        h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
+                 f"Written turn by turn ({rec.get('model_calls', '?')} model calls, player: {e(rec.get('agent', ''))}): "
+                 "the writer saw only the turns up to the current one. Each turn's fold shows what the "
+                 "story needed, the three options written before the roll, the roll, and the beat.</p>")
+    else:
+        h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
+                 "Each turn's fold shows the brief the model was given for it.</p>")
     h.append("<div class=tools><button onclick=\"document.querySelectorAll('.turn details').forEach(d=>d.open=true)\">"
              "Open all turn prompts</button><button onclick=\"document.querySelectorAll('details').forEach(d=>d.open=false)\">"
              "Close all</button></div>")
@@ -606,6 +620,13 @@ def write_report(run_dir):
              f"<details><summary>{e(names['datee'])}'s card</summary><pre>{e(parts['datee_card'])}</pre></details>"
              f"<details><summary>Full user prompt as sent</summary><pre>{e(parts['user'])}</pre></details>"
              "</details>")
+    if parts.get("plan"):
+        h.append("<details><summary>The match plan, written before turn 1</summary>"
+                 f"<pre>{e(parts['plan'])}</pre></details>"
+                 "<details><summary>Instructions for the options and for the delivered turn</summary>"
+                 f"<details><summary>Writing the three options</summary><pre>{e(parts.get('options_system', ''))}</pre></details>"
+                 f"<details><summary>Writing the turn after the roll</summary><pre>{e(parts.get('deliver_system', ''))}</pre></details>"
+                 "</details>")
     briefs = parts["turn_briefs"]
     for i, t in enumerate(mech["turns"]):
         r = t["roll"] or {}

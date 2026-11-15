@@ -380,6 +380,11 @@ partial class Program
         {
             result.Agent = new HumanPlayerAgent();
         }
+        else if (agentType.Equals("random", StringComparison.OrdinalIgnoreCase))
+        {
+            // Its own stream, offset from the dice and the other seeded RNGs above.
+            result.Agent = new RandomPlayerAgent(unchecked((diceSeed ?? Environment.TickCount) * 31 + 3));
+        }
         else
         {
             result.Agent = new ScoringPlayerAgent();
