@@ -48,7 +48,8 @@ def check_live(name, variant, knobs, tmp):
         check(len(res["turns"]) == len(m["turns"]) and len(prompts) == 1 + 4 * len(m["turns"]),
               f"{name} seed {seed}: a plan call and four calls per played turn, two of them the director's "
               f"({len(m['turns'])} turns)")
-        check(all("If they click" not in u and "Collision:" not in u and "Origin:" not in u for u in writers),
+        check(all("If they click" not in u and "Collision:" not in u and "Origin" not in u and "dry-origin" not in u
+                  and "dry-accident" not in u for u in writers),
               f"{name} seed {seed}: the writers never see the plan's origins, collision or endings")
         check([n for n, _ in director] == list(range(0, 2 * len(director), 2)),
               f"{name} seed {seed}: the director is one session, each call carrying every earlier message")

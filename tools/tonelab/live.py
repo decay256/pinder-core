@@ -54,6 +54,16 @@ what's stale, whether its last direction landed); notes missing a heading are as
 again. The report shows every prompt exactly as sent, labelled by who received it, and the
 game's own per-turn log separately, labelled as not a prompt.
 
+v8: the director edits meaning, not material. Its directions had become inventories ("tips
+his top hat ... (origin piece 1) ... (Setup 1) ... (+3 interest)") that crammed several plan
+items into one short message, and the writers delivered sentences nobody would send. Now
+every message is one thing one person means; before the roll the director says what the
+turn should do to the reader and what each option means, after the roll it first says
+what the meant message actually says and whether a person would send it. Game labels go
+only in a last "For the notes" line; a direction that uses them elsewhere, or runs long,
+is asked for again. The cast sheet now recognises a long-form heading ("Origin, in three
+pieces, ...") and the run stops if any origin or accident line reaches the writers.
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -441,15 +451,16 @@ def exchange_text(told, hooks):
 
 CAST_KEEP = {"shows", "fear", "habit", "habit marker", "lie", "voice"}
 SHARED = {"collision", "setups", "if they click", "if it falls apart", "heat"}
+FIELDS = CAST_KEEP | SHARED | {"origin", "accident", "snap"}
 
 
 def cast_sheet(plan, names):
     """Who the two characters are, cut from the plan for the writers: what they show, their
-    fear, habit, lie and voice, and where the heat starts. Origins, accidents, setups, the
-    collision and both endings stay with the director, so the writers react to the chat
+    fear, habit, lie and voice. Origins, accidents, setups, the collision, the heat (which
+    names what has to happen first) and both endings stay with the director, so the writers react to the chat
     instead of steering toward lines and props they've already read."""
     parts = {names["player"]: [], names["datee"]: []}
-    heat, current, field = [], None, None
+    heat, hidden, current, field = [], [], None, None
     for ln in plan.splitlines():
         bare = ln.strip().strip("#*_ ").strip()
         if not bare:
@@ -459,23 +470,32 @@ def cast_sheet(plan, names):
         if who:
             current, field = who, None
             continue
-        m = re.match(r"^([A-Za-z][A-Za-z ]{1,24}?)[\s*_]*:[\s*_]*(.*)$", bare)
-        if m:
+        # a heading may run on before its colon ("Origin, in three pieces, from the surface ...:")
+        m = re.match(r"^([A-Za-z][A-Za-z ]{1,24}?)(?:\s*[,(][^:]{0,200})?[\s*_]*:[\s*_]*(.*)$", bare)
+        if m and m.group(1).strip().lower() in FIELDS:
             field = m.group(1).strip().lower()
             if field in SHARED:
                 current = None
-            line = f"{m.group(1).strip()}: {m.group(2).strip()}".rstrip()
+            line, rest = f"{m.group(1).strip()}: {m.group(2).strip()}".rstrip(), m.group(2).strip()
         else:
-            line = bare
+            line = rest = bare
         if current and field in CAST_KEEP:
             parts[current].append(line)
         elif current is None and field == "heat":
             heat.append(line)
+        elif current and field in ("origin", "accident") and rest:
+            hidden.append(rest)
     for name, got in parts.items():
         low = [x.lower() for x in got]
         if not any(x.startswith("fear:") for x in low) or not any(x.startswith("habit:") for x in low):
             tl.die(f"the plan has no Fear and Habit for {name}, so the writers' cast sheet can't be cut from it:\n{plan[:2000]}")
-    return "\n\n".join(n + "\n" + "\n".join(g) for n, g in parts.items()) + ("\n\n" + "\n".join(heat) if heat else "")
+    sheet = "\n\n".join(n + "\n" + "\n".join(g) for n, g in parts.items())
+    low = sheet.lower()
+    leaked = [h for h in hidden if len(h) > 12 and h.lower() in low]
+    if leaked or re.search(r"(?im)^\s*(origin|accident)\b", sheet):
+        tl.die("the writers' cast sheet would carry an origin or accident from the plan:\n" + "\n".join(leaked[:3])
+               + "\n\n" + sheet[:2000])
+    return sheet
 
 
 DIRECTION = re.compile(r"(?ims)^[\s*_#>\-]*DIRECTION[\s*_]*:[\s*_]*(.+)")
@@ -491,6 +511,21 @@ def notes_of(text):
     m = DIRECTION.search(text)
     head = text[:m.start()] if m else text
     return re.sub(r"(?is)^.*?NOTES[\s*_]*:", "", head, count=1).strip()
+
+
+LABELS = re.compile(r"(?i)\b(?:setup|piece)\s*#?\d|\binterest\b|\(\s*[+-]\d|\b(?:TOLD|PLANTED|CALLBACK|PAID|COLLIDED)\b")
+
+
+def direction_problems(direction):
+    """A direction is plain sentences about meaning; the game's labels go only in its notes line."""
+    body = re.split(r"(?i)For the notes\s*:", direction)[0]
+    out, n = [], len(body.split())
+    if n > 140:
+        out.append(f"the direction runs {n} words before the notes line, more than 120")
+    hits = sorted({m.group(0) for m in LABELS.finditer(body)}, key=str.lower)
+    if hits:
+        out.append("the direction uses the game's labels outside the notes line (" + ", ".join(hits) + ")")
+    return out
 
 
 def notes_missing(text):
@@ -516,6 +551,7 @@ CALL_TITLES = {
     "direction before the roll retry": ("Director, before the roll, asked again", True),
     "options": ("Options writer", False),
     "direction": ("Director, after the roll", True),
+    "direction retry": ("Director, after the roll, asked again", True),
     "delivery": ("Turn writer", False),
     "delivery retry": ("Turn writer, second attempt", False),
 }
@@ -737,10 +773,11 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                             {**base, "since": since, "step": pre_step, "interest": t["interest_before"], "state": t["state_before"],
                              "options": ", ".join(t["options"]), "needs": needs}, "direct_options_input.md").strip() + "\n"
         o_raw = director.ask(do_user, f"turn {t['turn']} direction before the roll")
-        missing = notes_missing(o_raw)
-        if missing:
-            o_raw = director.ask(f"Your answer is missing: {', '.join(missing)}. Write the notes and the direction again, "
-                                 "in the format asked for.", f"turn {t['turn']} direction before the roll retry")
+        o_problems = notes_missing(o_raw) + direction_problems(direction_of(o_raw))
+        if o_problems:
+            o_raw = director.ask(f"Your answer broke the format: {'; '.join(o_problems)}. Write the notes and the "
+                                 "direction again, in the format asked for.", f"turn {t['turn']} direction before the roll retry")
+            o_problems = notes_missing(o_raw) + direction_problems(direction_of(o_raw))
         o_direction, d_notes = direction_of(o_raw), notes_of(o_raw)
         o_user = tl.render(files["options_input.md"],
                            {**base, "options": ", ".join(t["options"]), "direction": o_direction},
@@ -762,6 +799,11 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                              "beat_key": key, "must": must, "shape": shape_text(shape, names)},
                             "direct_turn_input.md").strip() + "\n"
         direction = direction_of(director.ask(dt_user, f"turn {t['turn']} direction"))
+        t_problems = direction_problems(direction)
+        if t_problems:
+            direction = direction_of(director.ask(f"Your direction broke the format: {'; '.join(t_problems)}. Write the "
+                                                  "direction again.", f"turn {t['turn']} direction retry"))
+            t_problems = direction_problems(direction)
         d_user = tl.render(files["deliver_input.md"],
                            {**base, **tv, "intended": intended, "roll_line": roll_line(t),
                             "mood": mood_text(t, names, is_last, mech.get("outcome")), "direction": direction,
@@ -825,6 +867,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options": o_text,
                     "direct_options_user": do_user, "direction_options": o_direction,
                     "direct_user": dt_user, "direction": direction, "director_notes": d_notes,
+                    "direction_problems": o_problems + t_problems,
                     "deliver_user": d_user, "delivered": d_text, "brief": brief, "shape": shape,
                     "retried": retried, "shape_problems": problems, "notes": notes, "habit_note": h_note,
                     "step": step, "required": need, "target": target, "words": words})
@@ -841,7 +884,9 @@ def play(variant_dir, knobs, mech, player, datee, caller):
 def dry_caller(names):
     def caller(system, user, label, effort, ctx):
         if label == "plan":
-            return "\n\n".join(f"{n}\nShows: dry\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\nOrigin:\n1. dry\n"
+            return "\n\n".join(f"{n}\nShows: dry\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\n"
+                               "Origin, in three pieces, from the surface to the part they'd never say:\n"
+                               "1. dry-origin-one\n2. dry-origin-two\n3. dry-origin-three\nAccident: dry-accident-line\n"
                                f"Voice: dry\n- dry" for n in (names["player"], names["datee"])) + \
                 "\n\nCollision: dry\nIf they click: dry\nHeat: dry"
         if "direction before the roll" in label:
