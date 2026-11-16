@@ -379,12 +379,13 @@ def call_claude(system_prompt, prompt, model):
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
-def call_openrouter(system_prompt, prompt, model, key, knobs):
+def call_openrouter(system_prompt, prompt, model, key, knobs, history=None):
     """One chat-completions call through OpenRouter. Optional knobs passed through
-    unchanged: temperature, top_p, max_tokens, reasoning."""
+    unchanged: temperature, top_p, max_tokens, reasoning. history: the earlier messages of
+    the same session ({role, content}), sent before this one."""
     body = {"model": model,
-            "messages": [{"role": "system", "content": system_prompt},
-                         {"role": "user", "content": prompt}]}
+            "messages": [{"role": "system", "content": system_prompt}] + list(history or [])
+                        + [{"role": "user", "content": prompt}]}
     for k in ("temperature", "top_p", "max_tokens", "reasoning"):
         if k in knobs:
             body[k] = knobs[k]
@@ -606,26 +607,31 @@ def write_report(run_dir):
     if parts.get("plan"):
         h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
                  f"Written turn by turn ({rec.get('model_calls', '?')} model calls, player: {e(rec.get('agent', ''))}): "
-                 "the writer saw only the turns up to the current one. Each turn's fold shows what the "
-                 "story needed, the three options written before the roll, the roll, and the beat.</p>")
+                 "nobody saw a turn before it was played. Each turn's folds are every prompt sent that turn, "
+                 "exactly as sent and in order, each with its reply, then the game's own log for the turn, which "
+                 "is not a prompt and no model saw.</p>")
     else:
         h.append("<p class=meta>The dice are the game engine's own; the model only wrote the messages. "
                  "Each turn's fold shows the brief the model was given for it.</p>")
     h.append("<div class=tools><button onclick=\"document.querySelectorAll('.turn details').forEach(d=>d.open=true)\">"
              "Open all turn prompts</button><button onclick=\"document.querySelectorAll('details').forEach(d=>d.open=false)\">"
              "Close all</button></div>")
-    h.append("<details><summary>The prompt, section by section</summary>"
-             f"<details><summary>System prompt</summary><pre>{e(parts['system'])}</pre></details>"
-             f"<details><summary>{e(names['player'])}'s card</summary><pre>{e(parts['player_card'])}</pre></details>"
-             f"<details><summary>{e(names['datee'])}'s card</summary><pre>{e(parts['datee_card'])}</pre></details>"
-             f"<details><summary>Full user prompt as sent</summary><pre>{e(parts['user'])}</pre></details>"
-             "</details>")
     if parts.get("plan"):
-        h.append("<details><summary>The match plan, written before turn 1</summary>"
-                 f"<pre>{e(parts['plan'])}</pre></details>"
-                 "<details><summary>Instructions for the options and for the delivered turn</summary>"
-                 f"<details><summary>Writing the three options</summary><pre>{e(parts.get('options_system', ''))}</pre></details>"
-                 f"<details><summary>Writing the turn after the roll</summary><pre>{e(parts.get('deliver_system', ''))}</pre></details>"
+        once = [("Plan call: system prompt", parts.get("system", "")),
+                ("Plan call: user prompt as sent, with both character cards", parts.get("user", "")),
+                ("Plan call: reply, the match plan (only the director sees it)", parts.get("plan", "")),
+                ("Director session: system prompt", parts.get("direct_system", "")),
+                ("Options writer: system prompt", parts.get("options_system", "")),
+                ("Turn writer: system prompt", parts.get("deliver_system", "")),
+                ("Cast sheet: cut from the plan by the game, part of every writer prompt", parts.get("cast", ""))]
+        h.append("<details><summary>Prompts sent once</summary>" + "".join(
+            f"<details><summary>{e(title)}</summary><pre>{e(x)}</pre></details>" for title, x in once if x) + "</details>")
+    else:
+        h.append("<details><summary>The prompt, section by section</summary>"
+                 f"<details><summary>System prompt</summary><pre>{e(parts['system'])}</pre></details>"
+                 f"<details><summary>{e(names['player'])}'s card</summary><pre>{e(parts['player_card'])}</pre></details>"
+                 f"<details><summary>{e(names['datee'])}'s card</summary><pre>{e(parts['datee_card'])}</pre></details>"
+                 f"<details><summary>Full user prompt as sent</summary><pre>{e(parts['user'])}</pre></details>"
                  "</details>")
     briefs = parts["turn_briefs"]
     for i, t in enumerate(mech["turns"]):
@@ -654,7 +660,16 @@ def write_report(run_dir):
                      f"<span class=meter><i style='width:{pct}%'></i></span>")
         h.append(f"<section class=turn><div class=head><b>Turn {t['turn']}</b>{''.join(chips)}</div>")
         brief = briefs[i] if i < len(briefs) else ""
-        h.append(f"<details><summary>Prompt for turn {t['turn']}</summary><pre>{e(brief)}</pre></details>")
+        sent = parts.get("turn_calls")
+        if sent:
+            for c in (sent[i] if i < len(sent) else []):
+                h.append(f"<details><summary>{e(c['title'])}</summary><p class=meta>{e(c['note'])}</p>"
+                         f"<pre>{e(c['user'])}</pre><details><summary>Reply</summary><pre>{e(c['output'])}</pre>"
+                         "</details></details>")
+            h.append(f"<details><summary>Game log for turn {t['turn']}: not a prompt, no model saw it</summary>"
+                     f"<pre>{e(brief)}</pre></details>")
+        else:
+            h.append(f"<details><summary>Prompt for turn {t['turn']}</summary><pre>{e(brief)}</pre></details>")
         lines = chat.get(t["turn"])
         if not lines:
             h.append("<p class='meta warn'>No message for this turn in the model output.</p>")

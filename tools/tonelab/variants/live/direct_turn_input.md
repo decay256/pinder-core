@@ -1,17 +1,3 @@
-The plan for this match:
-
-${plan}
-
-The chat so far:
-
-${history}
-
-The game's state. ${story_so_far}
-${step}
-
-${exchange}
-${habit_note}
-
 Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
 ${intended}
 

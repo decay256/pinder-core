@@ -1,0 +1,392 @@
+{
+  "run_id": "20261116T133331Z-live-reuben-brick-s23",
+  "created_utc": "20261116T133331Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "bible.md": "60ee54317ce29e37af222d1f7138eec171be8e5e3be4feea9088ce58ecd25db6",
+    "plan.md": "1503a33ef28da3e24f53d9361ee7a840724058c767a5e5b3481c604226cc9bd6",
+    "plan_input.md": "5f714d1c6fbee938430b0b24995c2cc4d479a8860d4642132298c562d30df23d",
+    "options.md": "cc51541963627fd11026a77a2f4cda1af5d76db14adfdbc3ea8739bd7dde4e74",
+    "options_input.md": "e47192c43fa451a1099af0fecfdbb3c741732af94a66db32f46b787cfcc75958",
+    "deliver.md": "2a3b6bfd22ff2738235a527c48b958b67a76e5ad674181673076a6a93a0bcd62",
+    "deliver_input.md": "42c8c3cd0d82cbe6a5ad559821328b24c484ae75fac2f6a818fb21fd628e3855",
+    "character.md": "690b98069f8d23253ee90590b84c327566c1beab3fac8eb5b0e32a4138e16355",
+    "direct.md": "c7e45569f4daaf81d6805d7a710695a692595a135492e4b17bb5b1d0c8c5a475",
+    "direct_options_input.md": "06f0accb19311289b8a2154d8f8a250d6a7013a722678934d79bd832cbb41899",
+    "direct_turn_input.md": "9d596f4c55589b310bb15e1cf05ee6383456733bc6c877ba5d02f98029c558f3"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "needs": {
+      "opener": "This is the very first message: the act at full strength, the opener they've sent forty people, with piece 1 of their origin in it as a hook if it fits.",
+      "early": "It's early and they're still performing, but they're dropping hooks. At least one option drops piece 1 of the player character's origin or pulls on a hook the match dropped.",
+      "middle": "Every turn the two of them learn something about each other. At least one option pulls on a hook that's still hanging, and at least one gives the next piece of the player character's origin when it's due. Nothing already said comes back, except as a callback that means something new.",
+      "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
+      "secret": "Piece 2 of the player character's origin is still in. Options can come near it without giving it away, and none of them uses the accident from the plan: that's saved for its moment.",
+      "reveal": "Piece 2 of the player character's origin is out. The options are how they live with that: own it, joke about it, explain it, which makes it worse.",
+      "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
+    },
+    "beats": {
+      "opener": "The opener. Two strangers performing. The player character's first message is the act at full strength. The match answers with their own act, and may plant a setup lightly enough that it reads as a throwaway.",
+      "setup": "Still early, still performing. They drop hooks, the half-brag version of their origin, and the other one notices. A setup from the plan can go in here, as a throwaway.",
+      "early": "Getting to know each other. One of them pulls on a hook, specifically, in their own voice. The other gives the next piece of their origin and asks something back, or dodges, and the dodge gives something away. The reader learns something new about one of them.",
+      "warming": "Getting closer. They want each other, and what they've told each other starts to matter: one of them uses something the other told them, gently or as a joke, and gets more back. The filth gets personal because it's about what they now know.",
+      "close": "Close. It's nearly happening, and they know enough about each other that every message costs something. The habits are under strain.",
+      "breakthrough": "The breakthrough. The move landed, and for the first time the habit drops for a moment: a crack, small and specific. Both of them notice. The match answers it instead of stepping past it, and gives a little back. The most naked line may be very short.",
+      "forced_breakthrough": "Nothing real has got through yet, and it's time. Whatever move was picked, the match asks for something real, in their own voice, and the player character's habit drops for a moment.",
+      "catastrophe": "The catastrophe. The roll bombed, and the player character's accident from the plan happens: piece 2 of their origin falls out as an event on the screen, not a confession, all at once and in the worst way. Ideally it changes the meaning of something they sent earlier that the match liked. Then they commit: they explain, and the explanation makes it worse. The match's reply shows the hit.",
+      "secret_miss": "Piece 2 of the player character's origin should be out by now. The roll missed, so the accident happens, smaller than a catastrophe, but it happens to them, and their explanation doesn't help.",
+      "discovery": "Piece 2 of the player character's origin should be out by now, and they've kept it in. So the match finds it: something on the screen that doesn't add up. They say so, in their own voice, and the player character has to deal with being caught.",
+      "match_reveal": "The player character's story is out, and the match can't step over it. The match's act cracks: a piece of their own origin comes out, in their own habit's format, and it changes the meaning of something they did earlier. The roll decides how the player character's message lands; it doesn't stop the match.",
+      "player_snap": "The player character snaps. Under stress the habit turns into a weapon, dressed up as their dating-app wisdom from the plan and said in complete earnest. Claim, slip, denial, as a burst of short, impulsive messages; the slip is something the reader can check against the chat. In the last message they hear themselves, too late. The match reacts the way the interest change supports.",
+      "match_snap": "The match had let themselves hope, and that hurt. The match snaps: the habit as a weapon, the dating-app wisdom as the disguise, claim, slip, denial, the slip checkable on the screen. Then they regret it and back out badly.",
+      "ending_win": "The ending: the match agrees to meet. The click. Each of them puts their habit down for the other, and the reader knows what that costs because they know where it came from. Piece 3, the part one of them would never say, can come out here, short and plain. The setups pay off: early lines come back meaning something else, and nobody explains them. The match usually has the last line.",
+      "ending_loss": "The ending: the match unmatches. Each one's habit confirms exactly what the other was afraid of, and both get the rejection they predicted. It's unhinged: the habit at full volume, the dating-app wisdom said in earnest. But in the middle of it piece 3 comes out, too much and too late. The setups pay off the opposite way. The last line should hurt and be funny at the same time.",
+      "ending_ghost": "The ending: the match ghosts. Only the player character's messages: one, or a few more into the silence, each one their habit at full strength, each one telling the reader what the silence means. A setup comes back and means the opposite.",
+      "ending_open": "The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.",
+      "reveal_pending": "The match's own reveal hasn't happened yet, so it happens now, as part of the ending.",
+      "callback": "A setup from the plan comes back, here in the middle. The reader knows more by now, so it means more than when it was planted, and at least one of them notices."
+    },
+    "drawer_sample": 5,
+    "shapes": {
+      "_doc": "Per beat: how many messages each side sends (min, max); the game adds messages when the turn's share of the word budget is large and splits that share unevenly across them. long names the side whose one message may run to long_words (default 40), for the accident.",
+      "default": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "opener": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          2
+        ]
+      },
+      "breakthrough": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          1,
+          2
+        ]
+      },
+      "forced_breakthrough": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          1,
+          2
+        ]
+      },
+      "catastrophe": {
+        "player": [
+          2,
+          3
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "long": "player"
+      },
+      "secret_miss": {
+        "player": [
+          2,
+          3
+        ],
+        "datee": [
+          1,
+          2
+        ],
+        "long": "player"
+      },
+      "discovery": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "match_reveal": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          2,
+          4
+        ]
+      },
+      "player_snap": {
+        "player": [
+          3,
+          5
+        ],
+        "datee": [
+          1,
+          1
+        ]
+      },
+      "match_snap": {
+        "player": [
+          1,
+          1
+        ],
+        "datee": [
+          3,
+          5
+        ]
+      },
+      "ending_win": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "ending_loss": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          2,
+          4
+        ]
+      },
+      "ending_ghost": {
+        "player": [
+          1,
+          3
+        ],
+        "datee": [
+          0,
+          0
+        ]
+      },
+      "early": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "warming": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "close": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      },
+      "callback": {
+        "player": [
+          1,
+          2
+        ],
+        "datee": [
+          1,
+          3
+        ]
+      }
+    },
+    "word_budget": 1250
+  },
+  "prompt_sha256": "c1a578627d8110338cb3b38813d35db3c5009c2920178a6a658c9035b0c760f7",
+  "prompt_chars": 275603,
+  "model_calls": 47,
+  "repo_commit": "b0d588c",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 465.7,
+  "usage": {
+    "cost": 0.5007217,
+    "prompt_tokens": 407848,
+    "completion_tokens": 12848,
+    "reasoning_tokens": 1339
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 651,
+  "planted_turn": 1,
+  "shape_retries": 0,
+  "turns_off_shape": [],
+  "callback_turn": 3,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "worked an unnameable role in underground music circles"
+    ],
+    [
+      1,
+      "Brick_haus",
+      1,
+      "on a \"strategic career pause\" on her own terms"
+    ],
+    [
+      2,
+      "Brick_haus",
+      2,
+      "limped into interview on one heel, argued 40 minutes about door rotation speed"
+    ],
+    [
+      4,
+      "Reuben_404",
+      2,
+      "fired after 11 months on dive-bar door for lecturing a regular he mistook for an indie singer's brother"
+    ],
+    [
+      5,
+      "Reuben_404",
+      3,
+      "rehearses curvature disclosure in bathroom mirror testing shrug versus grin after eleven days of lentils"
+    ],
+    [
+      6,
+      "Brick_haus",
+      3,
+      "drank boxed rosé in a towel practicing three smiles in the mirror"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [],
+  "habits": {
+    "Reuben_404": [
+      "In full disclosure",
+      "To save you the suspense",
+      "I shall see myself out"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 877,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 1,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 3,
+      "paid": 11
+    },
+    "3": {
+      "planted": 2,
+      "called": 3,
+      "paid": 10
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 9.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid that their \"lopsided stub with one giant ball\" will vanish beside or get crushed by Brick_haus's massive scale. \n2. They rehearse gestures in the bathroom mirror, use scripted cue-card lines and formal wording like \"audit,\" and repeatedly threaten to leave early (\"I shall see myself out\") before they can be rejected.\n3. It comes from being a short, lopsided left hook with one giant ball and getting fired from a dive bar door job after lecturing a regular.\n4. They dropped it, deleting their scripted options, giving up the mirror grin, and promising not to leave early.\n5. Brick_haus is terrified that their massive, veined scale will break someone or scare people into evacuating before they even cross the threshold.\n6. They speak in numbered lists (\"hm. 1... 2...\"), blame architectural clearances for career pauses, shout to cover their fear, and secretly practice smiles in the mirror while drinking boxed rosé so they won't look scary.\n7. It comes from having a massive, veined shaft that makes everyone evacuate a room, and an interview where they lost a heel in a revolving door and shouted at the panel for forty minutes out of terror that their size had broken the room.\n8. They dropped it, kicking the posture harness down the hall, leaving the boxed rosé out, and explicitly saying \"No numbers\" at the end.\n9. Whenever Reuben_404 threatened to bow out early or used stiff, rehearsed phrasing, it triggered Brick_haus's fear of scaring them off, causing Brick_haus to pull back with numbered lists until they both called out each other's masks and agreed to meet unscripted.\n10. \"Option B (casual grin): Yes it hooks hard left, call it ergonomic. DO NOT MENTION THE ELEVEN-DAY LENTILS.\" It is unforgettable because accidentally pasting private stage directions—especially about eleven-day-old lentils—instantly blows up Reuben_404's smooth facade.\n11. I laughed in Turn 8 and 9 when Brick_haus defensively claimed they were pouring the second glass of boxed rosé back into the box and that \"It was water for the plants,\" and Reuben_404 pointed out you cannot pour wine back up a plastic spigot for houseplants.",
+    "grade": "1. **Yes** — Captures his fear of being physically negligible, short, lopsided, and vanishing next to her scale.\n2. **Yes** — Identifies his formal wording, preemptive exits (\"I shall see myself out\"), and mirror rehearsals.\n3. **Yes** — Correctly cites his physical proportions and getting fired from the dive bar door job for lecturing a regular.\n4. **Yes** — Matches the planned \"click\" ending: promising not to leave early and dropping the mirror-rehearsed lines.\n5. **Yes** — Captures her fear of being too massive and breaking things or scaring people away.\n6. **Yes** — Identifies her habit marker (\"hm. 1... 2...\"), numbered lists, and mirror-rehearsal prep with boxed rosé.\n7. **Yes** — Cites her massive scale and the origin story of losing a heel in a revolving door and arguing with the interview panel for forty minutes.\n8. **Yes** — Matches the planned payoff: dropping the posture harness prop and explicitly saying \"No numbers.\"\n9. **Yes** — Captures the planned collision where Reuben's preemptive exits trigger Brick's fear of crushing him and her numbered lists push back.\n\nSCORE: 9 out of 9",
+    "score": 9.0
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 17,
+    "datee_lines": 36,
+    "words": 952
+  }
+}

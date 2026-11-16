@@ -1,12 +1,6 @@
-The plan for this match:
+${since}
 
-${plan}
-
-The chat so far:
-
-${history}
-
-The game's state. ${story_so_far}
+The game's state now. ${story_so_far}
 ${step}
 
 ${exchange}
@@ -16,4 +10,4 @@ Turn ${n}, before the roll. Interest is ${interest} out of 25 (${state}). The mo
 
 The template for this point in a chat: ${needs}
 
-Direct the options writer for turn ${n}.
+Write your notes, looking back over the whole chat and at how your last direction came out. Then direct the options writer for turn ${n}.

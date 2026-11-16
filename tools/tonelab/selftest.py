@@ -35,10 +35,12 @@ def check_live(name, variant, knobs, tmp):
         path = os.path.join(tmp, f"{name}-{seed}.json")
         m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))
         names = {"player": m["player"]["display_name"], "datee": m["datee"]["display_name"]}
-        prompts, writers = [], []
+        prompts, writers, director = [], [], []
 
         def caller(system, user, label, effort, ctx):
             prompts.append(system + user)
+            if "direction" in label:
+                director.append((len(ctx.get("history") or []), user))
             if label.endswith(" options") or " delivery" in label:
                 writers.append(user)
             return live.dry_caller(names)(system, user, label, effort, ctx)
@@ -48,6 +50,10 @@ def check_live(name, variant, knobs, tmp):
               f"({len(m['turns'])} turns)")
         check(all("If they click" not in u and "Collision:" not in u and "Origin:" not in u for u in writers),
               f"{name} seed {seed}: the writers never see the plan's origins, collision or endings")
+        check([n for n, _ in director] == list(range(0, 2 * len(director), 2)),
+              f"{name} seed {seed}: the director is one session, each call carrying every earlier message")
+        check("If they click" in director[0][1] and not any("If they click" in u for _, u in director[1:]),
+              f"{name} seed {seed}: the plan goes into the director's session once, at the start")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
         full = live.beat_keys(knobs, m["turns"], m.get("outcome"))
         same = all(live.beat_keys(knobs, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, len(m["turns"]) + 1))
