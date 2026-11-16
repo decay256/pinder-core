@@ -7,26 +7,5 @@
   "secrets": 8,
   "plan_reasoning": "high",
   "turn_reasoning": "medium",
-  "needs": {
-    "opener": "This is the very first message: the act at full strength, the opener they've sent forty people, with piece 1 of their origin in it as a hook if it fits.",
-    "early": "It's early and they're still performing, but they're dropping hooks. At least one option drops piece 1 of the player character's origin or pulls on a hook the match dropped.",
-    "middle": "Every turn the two of them learn something about each other. At least one option pulls on a hook that's still hanging, and at least one gives the next piece of the player character's origin when it's due. Nothing already said comes back, except as a callback that means something new.",
-    "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
-    "secret": "Piece 2 of the player character's origin is still in. Options can come near it without giving it away, and none of them uses the accident from the plan: that's saved for its moment.",
-    "reveal": "Piece 2 of the player character's origin is out. The options are how they live with that: own it, joke about it, explain it, which makes it worse.",
-    "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
-  },
-  "drawer_sample": 5,
-  "word_budget": 1250,
-  "checklist": [
-    "Where are they? Each alone in their own place, apart. Does any line put them in one place, or let one see or know where the other is?",
-    "What did the other one just say, give away or dodge, and does this answer it?",
-    "What does this do to the reader: a laugh, a wince, seeing through a lie, an ache?",
-    "What does it cost the one who sends it? Is their fear nearer the surface than last turn?",
-    "What does the chat need at this interest level, and does this do it?",
-    "Is anything stale back: a prop, a joke, a description, a habit, a line?",
-    "Does each line sound like the one who sends it, carry one thing, and read like something a person would type?",
-    "Options only: are the three different decisions about this moment, each clearly its move, each worth clicking?",
-    "Turn only: does the roll show in the message itself, and does the match's answer follow how their interest moved?"
-  ]
+  "drawer_sample": 5
 }

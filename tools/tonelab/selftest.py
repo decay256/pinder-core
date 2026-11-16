@@ -33,6 +33,15 @@ def check_live(name, variant, knobs, tmp):
     to the cut)."""
     import live
     table = live.load_table(variant)
+    import html as _html
+    import situations
+    page = situations.page(table)
+    texts = list(situations.texts(table))
+    missing = [x for x in texts if _html.escape(x) not in page]
+    check(len(texts) > 300 and not missing,
+          f"the situation page shows every text in the table ({len(texts)} texts; missing: {missing[:2]})")
+    with open(situations.PAGE, encoding="utf-8") as f:
+        check(f.read() == page, "the committed situation page is rendered from the current table")
     for seed in (7, 23, 42):
         path = os.path.join(tmp, f"{name}-{seed}.json")
         m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))
@@ -57,6 +66,10 @@ def check_live(name, variant, knobs, tmp):
                                       "Limits, checked:" in u for u in after),
               f"{name} seed {seed}: every turn reads the roll, its reception and the limits from the situation table")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
+        st = m["player"]["effective_stats"]
+        best = max(st, key=st.get)
+        check(f"strong at {best} ({st[best]})" in res["common"]["player_card"] and "${" not in res["common"]["datee_card"],
+              f"{name} seed {seed}: each card says what the character is strong and weak at ({best} {st[best]})")
         full = live.beat_keys(knobs, table, m["turns"], m.get("outcome"))
         same = all(live.beat_keys(knobs, table, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, n + 1))
         check(same, f"{name} seed {seed}: beats never depend on later turns ({' '.join(full)})")

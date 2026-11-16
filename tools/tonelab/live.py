@@ -93,6 +93,14 @@ gone: the length guidance is the table's, and the game checks only the extremes 
 over the limit, one long one for an accident or reveal, a ceiling per turn, a terse match
 after a big loss, a ghost who never replies).
 
+v11: one source. Every sentence the tone lab sends to a model comes from the situation table:
+the prompt templates, what each game situation means, the story clock's sentences, what a
+required note asks for, the habit rule, the checks and what a retry says, and the reader's
+questions. The code keeps the logic (which beat a turn carries, what is due, what a check
+catches) and fills numbers and names into the table's sentences. situations.py renders the
+whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
+is missing from the page.
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -109,22 +117,41 @@ import yaml
 
 import tonelab as tl
 
-FILES = ("bible.md", "plan.md", "plan_input.md", "character.md", "direct.md", "before_roll.md", "after_roll.md",
-         "situations.yaml")
+FILES = ("situations.yaml",)
 BAD_TIERS = {"catastrophe", "legendary"}  # miss tiers bad enough to shake a secret out
-REAL_STATS = {"Honesty", "SelfAwareness"}  # moves that can carry a breakthrough
 ENDINGS = {"DateSecured": "ending_win", "Unmatched": "ending_loss", "Ghosted": "ending_ghost"}
-SPENT = {  # how a fired beat is described to the writer afterwards
-    "breakthrough": "the breakthrough (something real got through)",
-    "forced_breakthrough": "the breakthrough (something real got through)",
-    "catastrophe": "the player character's secret fell out (the planned accident is spent)",
-    "secret_miss": "the player character's secret slipped out (the planned accident is spent)",
-    "discovery": "the match found out the player character's secret",
-    "match_reveal": "the match's reveal (their secret is out)",
-    "callback": "the setup came back in the middle (its callback is spent)",
-    "player_snap": "the player character snapped (no second snap)",
-    "match_snap": "the match snapped (no second snap)",
-}
+DEFAULT_TABLE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "variants", "live", "situations.yaml")
+_table = None
+
+
+def use_table(table):
+    """The situation table every sentence below is read from (play() sets it for its variant)."""
+    global _table
+    _table = table
+
+
+def T():
+    global _table
+    if _table is None:
+        with open(DEFAULT_TABLE, encoding="utf-8") as f:
+            _table = yaml.safe_load(f)
+    return _table
+
+
+def say(path, **values):
+    """A sentence from the situation table, by its path, with the game's values filled in."""
+    node = T()
+    for k in path.split("."):
+        node = node[k]
+    return tl.render(node, values, f"situations.yaml {path}")
+
+
+def plural(n, word):
+    return f"{n} {word}{'s' if n != 1 else ''}"
+
+
+def beat_set(flag):
+    return {k for k, b in T()["beats"].items() if isinstance(b, dict) and b.get(flag)}
 
 
 def read_files(variant_dir):
@@ -144,19 +171,15 @@ class Story:
     turns of build-up first: nobody snaps at a stranger in their second message."""
 
     def __init__(self, knobs, beats):
-        self.beats, self.needs_text = beats, knobs["needs"]
+        self.beats, self.needs_text = beats, T()["needs"]
         self.fired, self.secret_turn, self.log = set(), None, []
 
     def so_far(self):
-        done = "; ".join(f"turn {n}: {SPENT[k]}" for n, k in self.log) or "nothing named yet"
-        ahead = []
-        if "breakthrough" not in self.fired:
-            ahead.append("the breakthrough")
-        if "secret" not in self.fired:
-            ahead.append("the player character's secret, which stays in until its moment, with the planned accident saved for it")
-        if "match_reveal" not in self.fired:
-            ahead.append("the match's reveal, which stays hidden until then, only cracks showing")
-        return f"Already happened: {done}. Still to come: {', '.join(ahead) or 'the ending'}."
+        c, rows = T()["clock"], T()["beats"]
+        done = "; ".join(say("clock.done_item", n=n, spent=rows[k]["spent"]) for n, k in self.log) or c["nothing_yet"]
+        ahead = [c["ahead"][k] for k, gone in (("breakthrough", "breakthrough"), ("secret", "secret"),
+                                               ("match_reveal", "match_reveal")) if gone not in self.fired]
+        return say("clock.so_far", done=done, ahead=", ".join(ahead) or c["ahead"]["nothing"])
 
     def needs(self, i, interest):
         n = self.needs_text
@@ -178,6 +201,7 @@ class Story:
         delta, before, state = t["interest_delta"], t["interest_before"], t["state_after"]
         shadow_miss = bool((t.get("shadow") or {}).get("miss"))
         bad = not ok and (tier in BAD_TIERS or bool(r.get("nat1")))
+        real = bool(T()["moves"][t["chosen_stat"]].get("breakthrough"))
         f = self.fired
         if is_last:
             key = ENDINGS.get(outcome, "ending_open")
@@ -189,7 +213,7 @@ class Story:
             key = "player_snap"
         elif bad and "secret" not in f and i >= 2:
             key = "catastrophe"
-        elif ok and "breakthrough" not in f and i >= 2 and (t["chosen_stat"] in REAL_STATS or delta >= 3):
+        elif ok and "breakthrough" not in f and i >= 2 and (real or delta >= 3):
             key = "breakthrough"
         elif "match_snap" not in f and delta <= -2 and before >= 15 and i >= 3:
             key = "match_snap"
@@ -208,20 +232,17 @@ class Story:
         f.add(fires)
         if fires == "secret":
             self.secret_turn = i
-        if key in SPENT:
-            self.log.append((t["turn"], key))
         if key not in self.beats:
-            tl.die(f"variant.json beats has no '{key}'")
+            tl.die(f"the situation table has no beat '{key}'")
+        if T()["beats"][key].get("spent"):
+            self.log.append((t["turn"], key))
         text = self.beats[key]
         if key.startswith("ending") and "secret" in f and "match_reveal" not in f:
             text += " " + self.beats["reveal_pending"]
         return key, text
 
 
-EXCHANGE_BEATS = {"early", "warming", "close", "callback"}  # middle turns that must hand over something real
 SNAPS = {"player_snap": "player", "match_snap": "datee"}  # the snapper's habit is the weapon, so it isn't rationed
-BIG_BEATS = {"breakthrough", "forced_breakthrough", "catastrophe", "secret_miss", "discovery", "match_reveal",
-             "player_snap", "match_snap"}
 NOTE = re.compile(r"^[\s*_>\-]*(TOLD|HOOK)\s*[:\-]\s*([^:]+?)\s*:\s*(.+?)\s*$", re.I)
 SETUP = re.compile(r"^[\s*_>\-]*(PLANTED|CALLBACK|PAID)\s*(?:[:\-]\s*(.*?))?[\s*_]*$", re.I)
 FLAG = re.compile(r"^[\s*_>\-]*COLLIDED[\s*_.!]*$", re.I)
@@ -254,14 +275,8 @@ def beats_of(table):
     return {k: v["story"] for k, v in table["beats"].items()}
 
 
-TIER_WORDS = {"clean": "a clean hit", "strong": "a strong hit (beat the DC by 5 or more)",
-              "critical": "a critical hit (beat the DC by 10 or more)", "exceptional": "an exceptional hit (beat the DC by 15 or more)",
-              "nat20": "a natural 20", "fumble": "a fumble (missed by 1 or 2)", "misfire": "a misfire (missed by 3 to 5)",
-              "trope_trap": "a trope trap (missed by 6 to 9)", "catastrophe": "a catastrophe (missed by 10 or more)",
-              "nat1": "a natural 1"}
 MISS_KEY = {"fumble": "fumble", "misfire": "misfire", "tropetrap": "trope_trap", "catastrophe": "catastrophe",
             "legendary": "catastrophe"}
-LONG_BEATS = {"catastrophe", "secret_miss", "match_reveal", "ending_loss"}  # one message may run long
 
 
 def roll_key(r):
@@ -286,95 +301,98 @@ def swing_row(table, delta):
 
 def situation_before(table, t, names):
     ir = interest_row(table, t["interest_before"])
-    line = (f"Interest is {t['interest_before']} out of 25 ({ir['state']}). How {names['datee']} feels: {ir['match_feels']} "
-            f"What the chat needs: {ir['chat_needs']}")
+    line = say("turn.before.interest", interest=t["interest_before"], state=ir["state"], datee=names["datee"],
+               feels=ir["match_feels"], needs=ir["chat_needs"])
     traps = [table["traps"].get(x.lower()) for x in sorted(t.get("active_traps_before") or [])]
-    trap = "\n".join(f"A trap is active: {x['name']}. {x['summary']} {x['effect']} It clears when: {x['clears']}"
+    trap = "\n".join(say("turn.before.trap", name=x["name"], summary=x["summary"], effect=x["effect"], clears=x["clears"])
                      for x in traps if x)
-    moves = "\n".join(f"- {m}: {table['moves'][m]['means']} If it misses, it misses through {table['moves'][m]['shadow']}."
+    moves = "\n".join(say("turn.before.move", move=m, means=table["moves"][m]["means"], shadow=table["moves"][m]["shadow"])
                       for m in t["options"])
     return line, trap, moves
 
 
 def situation_after(table, t, names, is_last, outcome, key, beat):
     """What the game knows about this turn, read from the situation table."""
+    A, datee = "turn.after.", names["datee"]
     r, stat = t["roll"] or {}, t["chosen_stat"]
     mv = table["moves"][stat]
     rk = roll_key(r)
     row = mv["tiers"][rk]
-    out = [f"The roll: {TIER_WORDS[rk]}" + ("" if r.get("success") else f", so it goes wrong through {mv['shadow']}")
-           + f" (rolled {r.get('total')} against {r.get('dc')}).",
-           f"What that does to the message: {row['message']}",
-           f"How {names['datee']} receives it (written to them): {row['received']}"]
+    roll = {"result": table["results"][rk]["name"], "total": r.get("total"), "dc": r.get("dc")}
+    out = [say(A + "roll_hit", **roll) if r.get("success") else say(A + "roll_miss", shadow=mv["shadow"], **roll),
+           say(A + "message", text=row["message"]), say(A + "received", datee=datee, text=row["received"])]
     fired = []
     sh = t.get("shadow")
     if sh and sh.get("miss"):
         tier, entry = MISS_KEY.get((sh.get("tier") or "").lower(), "misfire"), table["shadows"].get(sh["shadow"].capitalize())
         if entry:
-            fired.append(f"The {sh['shadow']} shadow took over ({tier.replace('_', ' ')}): {entry['about']} {entry.get(tier, '')}")
+            fired.append(say(A + "shadow", shadow=sh["shadow"], tier=tier.replace("_", " "), about=entry["about"],
+                             text=entry.get(tier, "")))
     h = t.get("horniness")
     if h and h.get("miss"):
         tier, th = MISS_KEY.get((h.get("tier") or "").lower(), "fumble"), table["thirst"]
-        fired.append(f"A thirsty slip ({tier.replace('_', ' ')}): {th['tiers'][tier]['message']} How {names['datee']} takes it: "
-                     f"{th['tiers'][tier]['received']} "
-                     + (th["received_at_high_interest"] if t["interest_after"] >= 16 else th["received_at_low_interest"]))
+        mood = (th["received_at_high_interest"] if t["interest_after"] >= th["high_interest_from"]
+                else th["received_at_low_interest"])
+        fired.append(say(A + "thirst", tier=tier.replace("_", " "), message=th["tiers"][tier]["message"], datee=datee,
+                         received=th["tiers"][tier]["received"], mood=mood))
     before, after = set(t.get("active_traps_before") or []), set(t.get("active_traps_after") or [])
     for trap in sorted(after - before):
         x = table["traps"].get(trap.lower())
-        fired.append(f"Trap armed: {x['name']}. {x['summary']} {x['effect']} It clears when: {x['clears']}" if x
-                     else f"Trap armed: {trap}.")
+        fired.append(say(A + "trap_armed", name=x["name"], summary=x["summary"], effect=x["effect"], clears=x["clears"])
+                     if x else say(A + "trap_armed_unknown", trap=trap))
     if t.get("trap_cleared"):
-        fired.append(f"Trap cleared: {t['trap_cleared']}.")
+        fired.append(say(A + "trap_cleared", trap=t["trap_cleared"]))
     if t.get("combo"):
-        fired.append(f"Combo: {t['combo']}.")
+        fired.append(say(A + "combo", combo=t["combo"]))
     st = t.get("steering")
     if st and st.get("succeeded"):
-        fired.append("Steering succeeded: the message ends with a question that steers toward meeting up some time.")
+        fired.append(table["turn"]["after"]["steering"])
     if is_last and outcome:
-        fired.append({"DateSecured": f"Interest reaches 25: {names['datee']} agrees to meet, and the chat ends there.",
-                      "Unmatched": f"Interest hits 0: {names['datee']} unmatches.",
-                      "Ghosted": f"{names['datee']} ghosts: no reply comes after this message."}.get(outcome, outcome))
-    elif t["interest_after"] >= 21:
-        fired.append(f"Interest is {t['interest_after']}, still below 25: {names['datee']} will not agree to meet yet.")
+        ends = table["turn"]["after"]["endings"]
+        fired.append(say(A + "endings." + outcome, datee=datee) if outcome in ends else outcome)
+    elif t["interest_after"] >= table["turn"]["after"]["not_yet_from"]:
+        fired.append(say(A + "not_yet", interest=t["interest_after"], datee=datee))
     sw, ir = swing_row(table, t["interest_delta"]), interest_row(table, t["interest_after"])
-    out.append("What else fired:\n" + ("\n".join(f"- {x}" for x in fired) if fired else "- nothing"))
-    out.append(f"Interest {t['interest_before']} → {t['interest_after']} ({sw['name']}): {sw['means']}")
-    out.append(f"At {t['interest_after']} ({ir['state']}), how {names['datee']} feels: {ir['match_feels']} "
-               f"What the chat needs: {ir['chat_needs']}")
-    out.append(f"The template for this kind of turn ({key}): {beat}")
+    out.append(table["turn"]["after"]["fired_head"] + "\n"
+               + ("\n".join(f"- {x}" for x in fired) if fired else table["turn"]["after"]["fired_none"]))
+    out.append(say(A + "swing", before=t["interest_before"], after=t["interest_after"], swing=sw["name"], means=sw["means"]))
+    out.append(say(A + "level", after=t["interest_after"], state=ir["state"], datee=datee, feels=ir["match_feels"],
+                   needs=ir["chat_needs"]))
+    out.append(say(A + "template", key=key, beat=beat))
     return "\n".join(out), rk, sw, ir
 
 
 def limits_for(table, key, swing, ghost):
     lim = table["limits"]
     calm = key not in SNAPS and not key.startswith("ending")
-    return {"message": lim["message_words"], "long": lim["long_message_words"] if key in LONG_BEATS else None,
+    return {"message": lim["message_words"], "long": lim["long_message_words"] if key in beat_set("long_message") else None,
             "turn": lim["turn_words"], "match_total": swing.get("match_max_words") if calm else None, "ghost": ghost}
 
 
 def limits_text(lim, names):
-    parts = [f"no message over {lim['message']} words"
-             + (f" (one may run to {lim['long']}, for the accident or the reveal)" if lim["long"] else ""),
-             f"no more than {lim['turn']} words in the turn"]
+    L = "turn.limits."
+    parts = [say(L + "message", n=lim["message"]) + (say(L + "long", n=lim["long"]) if lim["long"] else ""),
+             say(L + "turn", n=lim["turn"])]
     if lim["match_total"]:
-        parts.append(f"{names['datee']} no more than {lim['match_total']} words in all")
-    parts.append(f"{names['datee']} sends nothing" if lim["ghost"] else "at least one message each")
-    return "Limits, checked: " + "; ".join(parts) + "."
+        parts.append(say(L + "match", name=names["datee"], n=lim["match_total"]))
+    parts.append(say(L + "ghost", name=names["datee"]) if lim["ghost"] else T()["turn"]["limits"]["each"])
+    return say(L + "frame", parts="; ".join(parts))
 
 
 def length_text(table, t, rk, swing, irow, key, names, spent, played, budget, left, lim):
+    L = "turn.length."
     beat_len = (table["beats"].get(key) or {}).get("length")
-    out = [f"- {names['player']}: {table['moves'][t['chosen_stat']]['tiers'][rk]['length']}",
-           f"- {names['datee']}: {swing['length']} {irow['length']}"]
+    out = [say(L + "player", name=names["player"], text=table["moves"][t["chosen_stat"]]["tiers"][rk]["length"]),
+           say(L + "match", name=names["datee"], swing=swing["length"], level=irow["length"])]
     if beat_len:
-        out.append(f"- This kind of turn: {beat_len}")
-    out.append(f"- So far: {spent} words in {played} turn{'s' if played != 1 else ''}. The whole chat runs about {budget} "
-               f"words, an average, not a cap, and probably has about {left} turn{'s' if left != 1 else ''} left.")
+        out.append(say(L + "beat", text=beat_len))
+    out.append(say(L + "so_far", spent=spent, played=plural(played, "turn"), budget=budget, left=plural(left, "turn")))
     out.append("- " + limits_text(lim, names))
     return "\n".join(out)
 
 
 def length_problems(lines, lim, names):
+    L = "checks.length."
     out, long_used = [], False
     words = [len(m.split()) for _, m in lines]
     for (w, m), n in zip(lines, words):
@@ -383,19 +401,19 @@ def length_problems(lines, lim, names):
         if lim["long"] and not long_used and n <= lim["long"]:
             long_used = True
             continue
-        out.append(f"{w}'s message \"{' '.join(m.split()[:6])} ...\" has {n} words, more than {lim['message']}")
+        out.append(say(L + "message", who=w, start=" ".join(m.split()[:6]), n=n, max=lim["message"]))
     if sum(words) > lim["turn"]:
-        out.append(f"the turn has {sum(words)} words, more than {lim['turn']}")
+        out.append(say(L + "turn", n=sum(words), max=lim["turn"]))
     match = sum(n for (w, _), n in zip(lines, words) if w == names["datee"])
     if lim["match_total"] and match > lim["match_total"]:
-        out.append(f"{names['datee']} wrote {match} words, more than {lim['match_total']} after a loss like this")
+        out.append(say(L + "match", name=names["datee"], n=match, max=lim["match_total"]))
     sides = {w for w, _ in lines}
     if names["player"] not in sides:
-        out.append(f"{names['player']} sends nothing")
+        out.append(say(L + "silent", name=names["player"]))
     if lim["ghost"] and names["datee"] in sides:
-        out.append(f"{names['datee']} replied, but they ghost")
+        out.append(say(L + "ghost_replied", name=names["datee"]))
     elif not lim["ghost"] and names["datee"] not in sides:
-        out.append(f"{names['datee']} sends nothing")
+        out.append(say(L + "silent", name=names["datee"]))
     return out
 
 
@@ -435,36 +453,35 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
     """Where the story stands and what this turn has to move: the game's story clock, built
     only from what has actually happened so far. Returns the text and the notes it requires.
     key is None before the roll, when nothing is required yet."""
-    key = key or ""
+    key, S = key or "", "clock.step."
+    exchange, big = beat_set("exchange"), beat_set("big")
     turn, lines, need = i + 1, [], []
-    lines.append("This is the last turn." if is_last else
-                 f"Going by the meter, the chat probably has about {left} turn{'s' if left != 1 else ''} left.")
+    lines.append(T()["clock"]["step"]["last_turn"] if is_last else say(S + "turns_left", left=plural(left, "turn")))
     for side in ("player", "datee"):
         name = names[side]
         got = sorted(pieces[name])
         nxt = next((k for k in (1, 2, 3) if k not in got), None)
-        known = (f"The reader knows piece{'s' if len(got) > 1 else ''} {', '.join(map(str, got))} of {name}'s origin"
-                 if got else f"The reader knows nothing of {name}'s origin yet")
+        known = (say(S + "known", name=name, pieces=("pieces " if len(got) > 1 else "piece ") + ", ".join(map(str, got)))
+                 if got else say(S + "known_nothing", name=name))
         if nxt is None:
-            lines.append(f"- {known}: all of it.")
+            lines.append(say(S + "all_known", known=known))
         elif nxt == 3:
-            lines.append(f"- {known}; piece 3, the part they'd never say, is saved for the end.")
+            lines.append(say(S + "last_piece_saved", known=known))
         else:
             due = bool(key) and key != "opener" and not key.startswith("ending") and left <= (3 - nxt) + 1
-            lines.append(f"- {known}; next is piece {nxt}" + (", and it has to come out this turn." if due else "."))
+            lines.append(say(S + ("next_piece_due" if due else "next_piece"), known=known, next=nxt))
             if due:
                 need.append(f"TOLD:{name}")
-    if key in EXCHANGE_BEATS and not need and any(len(pieces[names[s]] & {1, 2}) < 2 for s in ("player", "datee")):
+    if key in exchange and not need and any(len(pieces[names[s]] & {1, 2}) < 2 for s in ("player", "datee")):
         need.append("TOLD:any")
     if collided:
-        lines.append(f"- Their habits collided on turn {collided}.")
+        lines.append(say(S + "collided", turn=collided))
     elif key and key not in ("opener", "setup") and (
             (i >= 3 and all(pieces[names[s]] for s in ("player", "datee"))) or left <= 3 or key.startswith("ending")):
-        lines.append("- Their habits haven't collided yet, and it's time: one's habit lands on the other one's fear, "
-                     "the way the plan's Collision says.")
+        lines.append(T()["clock"]["step"]["collision_due"])
         need.append("COLLIDED")
     else:
-        lines.append("- Their habits haven't collided yet.")
+        lines.append(T()["clock"]["step"]["not_collided"])
     setup_need = None
     if key.startswith("ending") and any(s.get("planted") and not s.get("paid") for s in setups.values()):
         setup_need = "PAID"
@@ -473,20 +490,19 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
     for n in (1, 2, 3):
         st = setups.get(n, {})
         if st.get("paid"):
-            lines.append(f"- Setup {n}: paid off on turn {st['paid']}.")
+            lines.append(say(S + "setup_paid", n=n, paid=st["paid"]))
         elif st.get("called"):
-            lines.append(f"- Setup {n}: planted on turn {st['planted']}, came back on turn {st['called']}, "
-                         "waiting for its payoff" + (", which is now." if key.startswith("ending") else "."))
+            lines.append(say(S + ("setup_called_now" if key.startswith("ending") else "setup_called"), n=n,
+                             planted=st["planted"], called=st["called"]))
         elif st.get("planted"):
             due = (turn - st["planted"] >= 3 and setup_need is None and not key.startswith("ending")
-                   and (key in EXCHANGE_BEATS or key == "callback"))
-            lines.append(f"- Setup {n}: planted on turn {st['planted']}, not back yet"
-                         + ("; it comes back this turn, meaning more by now." if due else "."))
+                   and (key in exchange or key == "callback"))
+            lines.append(say(S + ("setup_planted_due" if due else "setup_planted"), n=n, planted=st["planted"]))
             if due:
                 setup_need = "CALLBACK"
         else:
-            due = (i >= 2 and setup_need is None and key and key not in BIG_BEATS and not key.startswith("ending"))
-            lines.append(f"- Setup {n}: not planted yet" + ("; plant it this turn, as a throwaway." if due else "."))
+            due = (i >= 2 and setup_need is None and key and key not in big and not key.startswith("ending"))
+            lines.append(say(S + ("setup_unplanted_due" if due else "setup_unplanted"), n=n))
             if due:
                 setup_need = "PLANTED"
     if key == "callback" and setup_need is None:
@@ -494,54 +510,62 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
     if setup_need:
         need.append(setup_need)
     if nat20:
-        lines.append("- A natural 20 this turn: something gets cashed in.")
+        lines.append(T()["clock"]["step"]["nat20"])
     if key == "ending_ghost":
         need = [x for x in need if x == "PAID"]
     return "\n".join(lines), need
 
 
 def notes_problems(notes, need, names, is_end):
+    m = T()["notes"]["missing"]
     problems, told_by = [], [w for w, _ in notes["told"]]
     for n in need:
         if n == "TOLD:any" and not notes["told"]:
-            problems.append("nothing new from either origin came out (no TOLD note)")
+            problems.append(m["TOLD:any"])
         elif n.startswith("TOLD:") and n != "TOLD:any" and n[5:] not in told_by:
-            problems.append(f"the next piece of {n[5:]}'s origin didn't come out (no TOLD note for them)")
+            problems.append(say("notes.missing.TOLD", name=n[5:]))
         elif n == "COLLIDED" and not notes["collided"]:
-            problems.append("their habits didn't collide (no COLLIDED note)")
+            problems.append(m["COLLIDED"])
         elif n in ("PLANTED", "CALLBACK", "PAID") and not notes[n.lower()]:
-            problems.append({"PLANTED": "the setup due to be planted wasn't (no PLANTED note)",
-                             "CALLBACK": "the setup due to come back didn't (no CALLBACK note)",
-                             "PAID": "nothing was cashed in (no PAID note)"}[n])
+            problems.append(m[n])
     if not is_end:
         for name in set(names.values()):
             ks = {piece_of(w)[0] for who, w in notes["told"] if who == name}
             if len(ks - {None}) > 1:
-                problems.append(f"{name} gave away more than one piece of their origin in one turn")
+                problems.append(say("notes.missing.too_many_pieces", name=name))
     return problems
 
 
 def exchange_text(told, hooks):
+    c, E = T()["clock"]["exchange"], "clock.exchange."
     if told:
-        out = "What they've told each other so far:\n" + "\n".join(
-            f"- turn {n}, {who}" + (f" (piece {k})" if k else "") + f": {fact}" for n, who, k, fact in told)
+        out = c["told_head"] + "\n" + "\n".join(
+            say(E + "told_item", n=n, who=who, piece=say(E + "piece", k=k) if k else "", fact=fact)
+            for n, who, k, fact in told)
     else:
-        out = "Neither of them has told the other anything real yet."
+        out = c["nothing_told"]
     if hooks:
-        out += "\nHooks dropped in the last two turns (check the chat for whether the other one took them up):\n" + "\n".join(
-            f"- turn {n}, {who}: {h}" for n, who, h in hooks)
+        out += "\n" + c["hooks_head"] + "\n" + "\n".join(say(E + "hook_item", n=n, who=who, hook=h) for n, who, h in hooks)
     return out
 
 
-NOTE_HEADS = ("Where they are", "What each knows", "Not asked yet", "Working", "Stale", "Last turn")
 CHECK = re.compile(r"(?im)^[\s*_#>\-]*CHECK[\s*_]*:")
 FINAL = re.compile(r"(?im)^[\s*_#>\-]*FINAL[\s*_]*:[\s*_]*")
 OPT_HEAD = re.compile(r"(?im)^[\s*#]*OPTION\b")
-# A line that puts them in one place, or one on the way to the other, before the match agrees to meet.
-PRESENCE = re.compile(r"(?i)\b(?:downstairs|upstairs|your (?:front )?door|come over|coming over|come up|"
-                      r"on my way|be right there|i'?m here|i am here|i arrived|outside your|let you in|"
-                      r"in the room with you|(?:put|take|took|taking|putting) (?:my|your) coat|my coat|your coat)\b")
 LABEL_IN_CHAT = re.compile(r"\b(?:TOLD|HOOK|PLANTED|CALLBACK|PAID|COLLIDED)\b|(?i:\b(?:setup|piece)\s*#?\d)")
+
+
+def note_heads():
+    return T()["checks"]["note_heads"]
+
+
+def apart_pattern():
+    """A line that puts them in one place, or one on the way to the other, before the match agrees to meet."""
+    return re.compile(r"(?i)\b(?:" + "|".join(T()["checks"]["apart_words"]) + r")\b")
+
+
+def quoted(msgs):
+    return " / ".join(f'"{m}"' for m in msgs[:3])
 
 
 def sections(text):
@@ -558,17 +582,16 @@ def sections(text):
 
 def chat_problems(msgs, allow_meet):
     """What no message may do, whoever wrote it."""
-    out = []
-    near = [m for m in msgs if PRESENCE.search(m)]
+    out, apart = [], apart_pattern()
+    near = [m for m in msgs if apart.search(m)]
     if near and not allow_meet:
-        out.append("these put them in one place, or one of them on the way to the other, though they are apart and the "
-                   "match hasn't agreed to meet: " + " / ".join(f'"{m}"' for m in near[:3]))
+        out.append(say("checks.chat.together", lines=quoted(near)))
     held = [m for m in msgs if "[" in m or "]" in m]
     if held:
-        out.append("a [bracketed] placeholder is still in the chat: " + " / ".join(f'"{m}"' for m in held[:3]))
+        out.append(say("checks.chat.placeholder", lines=quoted(held)))
     tagged = [m for m in msgs if LABEL_IN_CHAT.search(m)]
     if tagged:
-        out.append("the game's labels are in the chat: " + " / ".join(f'"{m}"' for m in tagged[:3]))
+        out.append(say("checks.chat.labels", lines=quoted(tagged)))
     return out
 
 
@@ -588,14 +611,14 @@ def split_stray(lines):
 
 def options_problems(raw, offered, names):
     notes, check, final = sections(raw)
-    out = [f"the notes have no '{h}'" for h in NOTE_HEADS if h.lower() not in notes.lower()]
+    out = [say("checks.format.no_note_head", head=h) for h in note_heads() if h.lower() not in notes.lower()]
     if not check:
-        out.append("there is no CHECK: with an answer to each question of the checklist")
+        out.append(T()["checks"]["format"]["no_check"])
     got = parse_options(final, offered)
     lines = {s: split_stray(parse_lines(got[s], names))[0] if got.get(s) else [] for s in offered}
     missing = [s for s in offered if not any(w == names["player"] for w, _ in lines[s])]
     if missing:
-        out.append("no option for " + ", ".join(missing))
+        out.append(say("checks.format.no_option", moves=", ".join(missing)))
     out += chat_problems([m for ls in lines.values() for _, m in ls], False)
     return out, notes, check, got
 
@@ -642,13 +665,9 @@ def turn_calls(calls, n_turns):
 
 def must_text(need, names):
     """What the game requires this turn, in plain words, with the note it needs."""
-    say = {"TOLD:any": "something new from one of their origins comes out, the next piece of whoever it fits (note: TOLD)",
-           "COLLIDED": "one's habit lands on the other one's fear, the way the plan's Collision says (note: COLLIDED)",
-           "PLANTED": "a setup from the plan is planted as a throwaway (note: PLANTED and its number)",
-           "CALLBACK": "a setup comes back, meaning more by now (note: CALLBACK and its number)",
-           "PAID": "a setup pays off (note: PAID and its number)"}
-    out = [say.get(n) or f"the next piece of {n[5:]}'s origin comes out (note: TOLD)" for n in need]
-    return "\n".join(f"- {x}" for x in out) if out else "- nothing beyond the template"
+    a = T()["notes"]["asks"]
+    out = [a[n] if n in a else say("notes.asks.TOLD", name=n[5:]) for n in need]
+    return "\n".join(f"- {x}" for x in out) if out else a["nothing"]
 
 
 def habit_markers(plan, names):
@@ -684,8 +703,7 @@ def habit_note(habits, banned):
     out = []
     for name, marks in habits.items():
         shown = " / ".join(f'"{m}"' for m in marks)
-        out.append(f"{name}'s habit ({shown}) showed in each of the last two turns, so it stays out of this turn completely."
-                   if name in banned else f"{name}'s habit ({shown}) can show in one message this turn at most, or not at all.")
+        out.append(say("habits." + ("banned" if name in banned else "allowed"), name=name, shown=shown))
     return "\n".join(out)
 
 
@@ -696,41 +714,30 @@ def habit_problems(lines, habits, banned, exempt):
             continue
         n = sum(1 for w, m in lines if w == name and habit_used(m, marks))
         if name in banned and n:
-            problems.append(f"{name}'s habit showed although it had to stay out of this turn")
+            problems.append(say("habits.broke_ban", name=name))
         elif n > 1:
-            problems.append(f"{name}'s habit showed in {n} messages, one at most")
+            problems.append(say("habits.too_often", name=name, n=n))
     return problems
-
-
-READER_SYSTEM = ("You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a "
-                 "sentient dick. Answer only from what is in the chat. If the chat doesn't show it, say \"can't tell\". "
-                 "One or two short sentences per answer.")
-GRADER_SYSTEM = "You check whether a finished piece of writing delivered what its plan intended. Be strict and brief."
 
 
 def reader_check(caller, plan, output, names):
     """A reader who sees only the finished chat answers what the reader should know by the
     end; a second call grades the answers against the plan. The writer's own notes prove only
     that it says it delivered; this checks what reached the page."""
+    R = T()["reader"]
     qs = []
     for n in (names["player"], names["datee"]):
-        qs += [f"What is {n} afraid of?", f"What does {n} keep doing so they don't have to feel it?",
-               f"Where does that come from, for {n}?", f"At the end, did {n} drop that habit or hold on to it?"]
-    qs += ["What happened when the two of them ran into each other's habits?",
-           "Which line would you remember tomorrow, and why?", "Where, if anywhere, did you laugh?"]
-    user = "The chat:\n\n" + output + "\nAnswer these, numbered:\n" + "\n".join(f"{k + 1}. {q}" for k, q in enumerate(qs))
-    answers = caller(READER_SYSTEM, user, "reader check", "low", {})
-    g_user = ("A writers' room planned a chat, and a reader who saw only the finished chat answered questions about it. "
-              "For each of the first nine answers, say whether the reader got what the plan intended: yes, partly or "
-              "no, with a few words why. Then one last line: SCORE: the number of yes answers plus half a point for "
-              "each partly, out of 9.\n\n"
-              f"The plan:\n\n{plan}\n\nThe questions and the reader's answers:\n\n{answers}\n")
-    grade = caller(GRADER_SYSTEM, g_user, "reader grade", "low", {})
+        qs += [tl.render(q, {"name": n}, "situations.yaml reader.per_character") for q in R["per_character"]]
+    qs += R["shared"]
+    user = say("reader.prompt", chat=output, questions="\n".join(f"{k + 1}. {q}" for k, q in enumerate(qs)))
+    answers = caller(R["system"], user, "reader check", "low", {})
+    grade = caller(R["grader_system"], say("reader.grader_prompt", plan=plan, answers=answers), "reader grade", "low", {})
     m = re.search(r"SCORE:\s*\**\s*([\d.]+)", grade)
     return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None}
 
 
 def beat_keys(knobs, table, turns, outcome):
+    use_table(table)
     story = Story(knobs, beats_of(table))
     return [story.beat(i, t, i == len(turns) - 1, outcome)[0] for i, t in enumerate(turns)]
 
@@ -756,6 +763,15 @@ def history(chat):
     return "\n\n".join(f"Turn {n}\n" + "\n".join(f"{who}: {msg}" for who, msg in lines) for n, lines in chat)
 
 
+def stats_text(stats):
+    """What a character is strong and weak at, from the game's stats for them."""
+    S, mv = T()["stats"], T()["moves"]
+    strong = [say("stats.strong", move=k, value=v, text=mv[k]["strong"]) for k, v in stats.items() if v >= S["strong_from"]]
+    weak = [say("stats.weak", move=k, value=v, text=mv[k]["weak"]) for k, v in stats.items() if v <= S["weak_to"]]
+    mid = [k for k, v in stats.items() if S["weak_to"] < v < S["strong_from"]]
+    return "\n".join([S["head"]] + strong + weak + ([say("stats.middling", moves=", ".join(mid))] if mid else []))
+
+
 def tonight(c, values, rng, n_drawer):
     """Each match draws its own material, so one character does not tell the same story in
     every match: one backstory pair to build the secret around, and a few drawer lines."""
@@ -765,37 +781,41 @@ def tonight(c, values, rng, n_drawer):
     if n_drawer and len(lines) > n_drawer:
         lines = rng.sample(lines, n_drawer)
     return {**values,
-            "focus": f"- says: {pair['bio_lie']}\n  truth: {pair['tragic_reality']}" if pair else "- (no backstory pairs)",
-            "drawer": "\n".join(f"- {ln}" for ln in lines)}
+            "focus": say("character.focus", lie=pair["bio_lie"], truth=pair["tragic_reality"]) if pair
+            else T()["character"]["no_focus"],
+            "drawer": "\n".join(say("character.drawer_line", line=ln) for ln in lines)}
 
 
 def play(variant_dir, knobs, mech, player, datee, caller):
     """Write the whole chat turn by turn. caller(system, user, label, effort, ctx) -> text."""
     files = read_files(variant_dir)
     table = yaml.safe_load(files["situations.yaml"])
+    use_table(table)
+    P = table["prompts"]
     names = {"player": mech["player"]["display_name"], "datee": mech["datee"]["display_name"]}
     rng = random.Random(f"{mech.get('seed')}-{player}-{datee}")
     pc, _, pv = tl.character_values(player, mech["player"], knobs)
     dc, _, dv = tl.character_values(datee, mech["datee"], knobs)
     n_drawer = int(knobs.get("drawer_sample", 0))
     pv, dv = tonight(pc, pv, rng, n_drawer), tonight(dc, dv, rng, n_drawer)
+    pv["stats"], dv["stats"] = stats_text(mech["player"]["effective_stats"]), stats_text(mech["datee"]["effective_stats"])
     common = {
         "player_name": names["player"], "datee_name": names["datee"],
         "time_of_day": mech.get("time_of_day", ""),
-        "player_card": tl.render(files["character.md"], {**pv, "role": "the player"}, "character.md").strip(),
-        "datee_card": tl.render(files["character.md"], {**dv, "role": "the match"}, "character.md").strip(),
-        "checklist": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(knobs["checklist"])),
+        "player_card": tl.render(P["character"], {**pv, "role": "the player"}, "prompts.character").strip(),
+        "datee_card": tl.render(P["character"], {**dv, "role": "the match"}, "prompts.character").strip(),
+        "checklist": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(table["checklist"])),
     }
-    bible = tl.render(files["bible.md"], common, "bible.md").strip()
-    systems = {k: bible + "\n\n" + tl.render(files[k + ".md"], common, k + ".md").strip() for k in ("plan", "direct")}
-    plan_user = tl.render(files["plan_input.md"], common, "plan_input.md").strip() + "\n"
+    bible = tl.render(P["bible"], common, "prompts.bible").strip()
+    systems = {k: bible + "\n\n" + tl.render(P[k], common, "prompts." + k).strip() for k in ("plan", "direct")}
+    plan_user = tl.render(P["plan_input"], common, "prompts.plan_input").strip() + "\n"
     plan = caller(systems["plan"], plan_user, "plan", knobs.get("plan_reasoning"), {})
     director = Director(caller, systems["direct"], knobs.get("turn_reasoning"))
 
     story, turns, chat, out = Story(knobs, beats_of(table)), mech["turns"], [], []
     told, hooks, setups = [], [], {}
     pieces = {names["player"]: set(), names["datee"]: set()}
-    collided, spent, budget = None, 0, knobs.get("word_budget", 1250)
+    collided, spent, budget = None, 0, table["limits"]["chat_words"]
     habits = habit_markers(plan, names)
     for i, t in enumerate(turns):
         is_last = i == len(turns) - 1
@@ -808,17 +828,15 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         base = {**common, "n": t["turn"], "story_so_far": story.so_far(), "habit_note": h_note,
                 "exchange": exchange_text(told, [h for h in hooks if h[0] >= t["turn"] - 2])}
         interest_line, trap_line, moves = situation_before(table, t, names)
-        since = (f"The plan for this match:\n\n{plan}\n\nThe chat hasn't started yet." if not chat else
-                 f"Turn {chat[-1][0]} went out as you wrote it.")
-        b_user = tl.render(files["before_roll.md"],
+        since = say("turn.before.since_start", plan=plan) if not chat else say("turn.before.since_turn", n=chat[-1][0])
+        b_user = tl.render(P["before_roll"],
                            {**base, "since": since, "step": pre_step, "interest_line": interest_line,
-                            "trap_line": trap_line, "moves": moves, "needs": needs}, "before_roll.md").strip() + "\n"
+                            "trap_line": trap_line, "moves": moves, "needs": needs}, "prompts.before_roll").strip() + "\n"
         o_label = f"turn {t['turn']} before the roll"
         o_raw = director.ask(b_user, o_label, {"offered": offered})
         o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
         if o_problems:
-            o_raw = director.ask(f"Your answer broke the format: {'; '.join(o_problems)}. Write the notes, the checklist "
-                                 "and the three options again, in full, in the format asked for.", o_label + " retry",
+            o_raw = director.ask(say("checks.retry.options", problems="; ".join(o_problems)), o_label + " retry",
                                  {"offered": offered})
             o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
         intended = finals.get(t["chosen_stat"])
@@ -832,9 +850,9 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         lim = limits_for(table, key, swing, ghost)
         length = length_text(table, t, rk, swing, irow, key, names, spent, i, budget, now_left, lim)
         allow_meet = is_last and mech.get("outcome") == "DateSecured"
-        a_user = tl.render(files["after_roll.md"],
+        a_user = tl.render(P["after_roll"],
                            {**base, "stat": t["chosen_stat"], "intended": intended, "situation": situation,
-                            "must": must_text(need, names), "length": length}, "after_roll.md").strip() + "\n"
+                            "must": must_text(need, names), "length": length}, "prompts.after_roll").strip() + "\n"
         ctx = {"ghost": ghost, "required": need}
         exempt = names[SNAPS[key]] if key in SNAPS else None
 
@@ -842,14 +860,14 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             _, check, final = sections(raw)
             text, notes = strip_notes(final, names)
             lines, stray = split_stray(parse_lines(text, names))
-            problems = ([] if check else ["there is no CHECK: with an answer to each question of the checklist"])
-            problems += ([] if final else ["there is no FINAL: with the turn as sent"])
+            fmt = T()["checks"]["format"]
+            problems = ([] if check else [fmt["no_check"]])
+            problems += ([] if final else [fmt["no_final"]])
             problems += (length_problems(lines, lim, names) + habit_problems(lines, habits, banned, exempt)
                          + notes_problems(notes, need, names, key.startswith("ending"))
                          + chat_problems([m for _, m in lines], allow_meet))
             if stray:
-                problems.append("these lines are neither a message nor one of the notes: "
-                                + " / ".join(f'"{x}"' for x in stray[:3]))
+                problems.append(say("checks.format.stray", lines=quoted(stray)))
             return problems, notes, lines, check
 
         t_label = f"turn {t['turn']} after the roll"
@@ -857,8 +875,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         problems, notes, lines, d_check = judge(d_text)
         retried = bool(problems)
         if problems:
-            d_text = director.ask(f"Your turn broke the game's rules: {'; '.join(problems)}. Write the checklist and "
-                                  f"turn {t['turn']} again, in full, so it keeps all of them.", t_label + " retry", ctx)
+            d_text = director.ask(say("checks.retry.turn", problems="; ".join(problems), n=t["turn"]), t_label + " retry",
+                                  ctx)
             problems, notes, lines, d_check = judge(d_text)
         for who_told, what in notes["told"]:
             k, fact = piece_of(what)
@@ -890,7 +908,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         noted = ([f"Told, {w}: {f}" for w, f in notes["told"]] + [f"Hook dropped, {w}: {h}" for w, h in notes["hooks"]]
                  + [f"{k.capitalize()}: {x or '?'}" for k in ("planted", "callback", "paid") for x in notes[k]]
                  + (["Their habits collided."] if notes["collided"] else []))
-        brief = (f"Picked {t['chosen_stat']}: {TIER_WORDS[rk]}. Interest {t['interest_before']} → {t['interest_after']} "
+        brief = (f"Picked {t['chosen_stat']}: {T()['results'][rk]['name']}. Interest {t['interest_before']} → {t['interest_after']} "
                  f"({swing['name']}, {irow['state']}).\nBeat the game chose: {key}\n"
                  f"Required notes: {', '.join(need) or 'none'}\n{limits_text(lim, names)}\n"
                  f"Written: {words} words; {spent} of the {budget} budget spent."
@@ -926,7 +944,7 @@ def dry_caller(names):
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
         if "before the roll" in label:
-            return ("NOTES:\n" + "\n".join(f"{h}: dry" for h in NOTE_HEADS) + "\nCHECK:\n1. dry\n"
+            return ("NOTES:\n" + "\n".join(f"{h}: dry" for h in note_heads()) + "\nCHECK:\n1. dry\n"
                     + "\n\n".join(f"OPTION {x}\n{names['player']}: (dry run, {x})" for x in ctx["offered"]))
         lines = [f"{names['player']}: dry"] + ([] if ctx.get("ghost") else [f"{names['datee']}: dry"])
         for n in ctx.get("required", []):
@@ -1025,7 +1043,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "required_missed": [[t["turn"], t["shape_problems"]] for t in result["turns"] if t["shape_problems"]],
         "hooks_open": [list(x) for x in result["hooks_open"]],
         "habits": result["habits"],
-        "words": result["words"], "word_budget": knobs.get("word_budget", 1250),
+        "words": result["words"], "word_budget": T()["limits"]["chat_words"],
         "pieces": result["pieces"], "setups": result["setups"], "collided_turn": result["collided_turn"],
         "reader_score": reader["score"], "reader": reader,
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
