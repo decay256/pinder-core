@@ -55,16 +55,17 @@ def check_live(name, variant, knobs, tmp):
             return live.dry_caller(names)(system, user, label, effort, ctx)
         res = live.play(variant, knobs, m, "reuben", "brick", caller)
         n = len(m["turns"])
-        check(len(res["turns"]) == n and len(prompts) == 1 + 2 * n,
-              f"{name} seed {seed}: a plan call and two calls per played turn, both in one session ({n} turns)")
+        check(len(res["turns"]) == n and len(prompts) == 1 + n,
+              f"{name} seed {seed}: a plan call and one call per played turn, in one session ({n} turns)")
         check([k for k, _, _ in session] == list(range(0, 2 * len(session), 2)),
               f"{name} seed {seed}: the session carries every earlier message into each call")
         check("If they click" in session[0][2] and not any("If they click" in u for _, _, u in session[1:]),
               f"{name} seed {seed}: the plan goes into the session once, at the start")
-        after = [u for _, label, u in session if label.endswith("after the roll")]
-        check(len(after) == n and all("What that does to the message:" in u and "receives it" in u and
-                                      "Limits, checked:" in u for u in after),
-              f"{name} seed {seed}: every turn reads the roll, its reception and the limits from the situation table")
+        turn_users = [u for _, _, u in session]
+        check(len(turn_users) == n and all("The player picked " + t["chosen_stat"] in u and "What that does to the message:" in u
+                                           and "receives it" in u and "Limits, checked:" in u
+                                           for u, t in zip(turn_users, m["turns"])),
+              f"{name} seed {seed}: every turn reads the picked move, the roll, its reception and the limits from the situation table")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
         st = m["player"]["effective_stats"]
         best = max(st, key=st.get)

@@ -4,38 +4,38 @@ about: 'The tone lab''s situation table: the one source for everything the tone 
 sections:
   limits: The only lengths the game checks; a turn that breaks one is sent back once. chat_words is the average
     length of a whole chat, which the director is told as a budget, not a cap.
-  moves: Before the roll the director sees what each move on offer means and which shadow it misses through; after
-    the roll, what that result did to the meant message, how the match receives it, and how long the player character
-    writes. breakthrough marks the moves that can carry the breakthrough beat.
-  results: The name of each roll result, as the director reads it after the roll.
+  moves: The director sees what the picked move means, what the roll did to the message the player character meant
+    to send, how the match receives it, and how long the player character writes. breakthrough marks the moves that
+    can carry the breakthrough beat.
+  results: The name of each roll result, as the director reads it.
   interest: 'Every turn: how the match feels at this level, what the chat needs, and how much the match writes.'
-  swings: 'After the roll: what this turn''s change in interest does to the match''s reply and how long it runs.
-    The match word limit after a big loss is checked.'
-  beats: The story clock picks one beat per turn from the game so far. story is the template shown after the roll;
+  swings: What this turn's change in interest does to the match's reply and how long it runs. The match word limit
+    after a big loss is checked.
+  beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
     length joins the length guidance; spent is how the beat is listed under 'Already happened'. big beats plant
     no setup, exchange beats must hand over something real, and in a long_message beat one message may run to the
     long limit.
-  needs: Before the roll, the template for this point in the chat, built from these parts by where the chat is.
-  shadows: After the roll, when a shadow takes over the message.
-  traps: Before the roll while a trap is active, and after the roll when one is armed.
-  thirst: After the roll, when a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
+  needs: The template for this point in the chat, built from these parts by where the chat is.
+  shadows: When a shadow takes over the message.
+  traps: While a trap is active, and when one is armed.
+  thirst: When a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
     or above.
   clock: 'The story clock''s sentences: what has happened, what is still to come, which origin pieces and setups
     are due, and what the two have told each other.'
-  notes: What each required note asks for (after the roll) and what a retry says when it is missing.
+  notes: What each required note asks for and what a retry says when it is missing.
   habits: The habit rule shown every turn, and what a retry says when it is broken.
   checklist: The questions the director answers before writing anything that goes out; part of its system prompt.
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
-    that put the two of them in one place; note_heads are the notes the director must write before the roll.
-  turn: The frames of the director's two messages each turn; the game fills in the numbers, the names and the rows
-    of the sections above.
+    that put the two of them in one place; note_heads are the notes the director writes every turn before the checklist.
+  turn: The frame of the director's message each turn; the game fills in the numbers, the names and the rows of
+    the sections above.
   reader: The reader who sees only the finished chat, and the grader who scores the reader's answers against the
     plan.
   character: 'Pieces of each character card drawn fresh for each match. The rest of the card comes from the game''s
     character file: bio, body, texting style, personality, backstory, the drawer and the diagnosis.'
   prompts: The prompt templates. bible opens every system prompt; plan and direct are the planner's and the director's
-    own; plan_input is the planner's message; character is each character card; before_roll and after_roll are the
-    director's two messages each turn.
+    own; plan_input is the planner's message; character is each character card; turn is the director's message each
+    turn.
   stats: Each character card lists what the character is strong and weak at, read from the game's stats for that
     character; each move's strong and weak lines are under Moves.
 limits:
@@ -1105,18 +1105,18 @@ beats:
 needs:
   opener: 'This is the very first message: the act at full strength, the opener they''ve sent forty people, with
     piece 1 of their origin in it as a hook if it fits.'
-  early: It's early and they're still performing, but they're dropping hooks. At least one option drops piece 1
-    of the player character's origin or pulls on a hook the match dropped.
-  middle: Every turn the two of them learn something about each other. At least one option pulls on a hook that's
-    still hanging, and at least one gives the next piece of the player character's origin when it's due. Nothing
-    already said comes back, except as a callback that means something new.
-  breakthrough: Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's
-    on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.
-  secret: 'Piece 2 of the player character''s origin is still in. Options can come near it without giving it away,
-    and none of them uses the accident from the plan: that''s saved for its moment.'
-  reveal: 'Piece 2 of the player character''s origin is out. The options are how they live with that: own it, joke
+  early: It's early and they're still performing, but they're dropping hooks. This turn drops piece 1 of the player
+    character's origin or pulls on a hook the match dropped.
+  middle: Every turn the two of them learn something about each other. This turn pulls on a hook that's still hanging,
+    or gives the next piece of the player character's origin when it's due. Nothing already said comes back, except
+    as a callback that means something new.
+  breakthrough: 'Nothing real has got through yet. If the honest or the perceptive move was picked and lands, this
+    is the moment: a small, specific crack in the lie.'
+  secret: 'Piece 2 of the player character''s origin is still in. The turn can come near it without giving it away,
+    and it doesn''t use the accident from the plan: that''s saved for its moment.'
+  reveal: 'Piece 2 of the player character''s origin is out. This turn is how they live with that: own it, joke
     about it, explain it, which makes it worse.'
-  close: Interest is high and the planned ending is getting near. The options give the ending something to pay off.
+  close: Interest is high and the planned ending is getting near. The turn gives the ending something to pay off.
   source: 'new: written for the tone lab'
 shadows:
   Madness:
@@ -1629,8 +1629,7 @@ checklist:
 - What does the chat need at this interest level, and does this do it?
 - 'Is anything stale back: a prop, a joke, a description, a habit, a line?'
 - Does each line sound like the one who sends it, carry one thing, and read like something a person would type?
-- 'Options only: are the three different decisions about this moment, each clearly its move, each worth clicking?'
-- 'Turn only: does the roll show in the message itself, and does the match''s answer follow how their interest moved?'
+- Does the roll show in the message itself, and does the match's answer follow how their interest moved?
 checks:
   apart_words:
   - downstairs
@@ -1657,6 +1656,7 @@ checks:
   - Working
   - Stale
   - Last turn
+  - Meant
   chat:
     together: 'these put them in one place, or one of them on the way to the other, though they are apart and the
       match hasn''t agreed to meet: ${lines}'
@@ -1666,7 +1666,6 @@ checks:
     no_note_head: the notes have no '${head}'
     no_check: 'there is no CHECK: with an answer to each question of the checklist'
     no_final: 'there is no FINAL: with the turn as sent'
-    no_option: no option for ${moves}
     stray: 'these lines are neither a message nor one of the notes: ${lines}'
   length:
     message: ${who}'s message "${start} ..." has ${n} words, more than ${max}
@@ -1675,13 +1674,11 @@ checks:
     silent: ${name} sends nothing
     ghost_replied: ${name} replied, but they ghost
   retry:
-    options: 'Your answer broke the format: ${problems}. Write the notes, the checklist and the three options again,
-      in full, in the format asked for.'
-    turn: 'Your turn broke the game''s rules: ${problems}. Write the checklist and turn ${n} again, in full, so
-      it keeps all of them.'
+    turn: 'Your turn broke the game''s rules: ${problems}. Write the notes, the checklist and turn ${n} again, in
+      full, so it keeps all of them.'
   source: 'new: written for the tone lab'
 turn:
-  before:
+  state:
     since_start: |-
       The plan for this match:
 
@@ -1691,8 +1688,8 @@ turn:
     since_turn: Turn ${n} went out as you wrote it.
     interest: 'Interest is ${interest} out of 25 (${state}). How ${datee} feels: ${feels} What the chat needs: ${needs}'
     trap: 'A trap is active: ${name}. ${summary} ${effect} It clears when: ${clears}'
-    move: '- ${move}: ${means} If it misses, it misses through ${shadow}.'
-  after:
+    picked: 'The player picked ${move}: ${means}'
+  roll:
     roll_hit: 'The roll: ${result} (rolled ${total} against ${dc}).'
     roll_miss: 'The roll: ${result}, so it goes wrong through ${shadow} (rolled ${total} against ${dc}).'
     message: 'What that does to the message: ${text}'
@@ -1936,7 +1933,7 @@ prompts:
   direct: |
     ## Your job: write this chat, turn by turn
 
-    You write a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan, every turn you wrote and every note you made. Each turn has two steps. Before the roll you write the three options the player sees: what ${player_name} would mean to send for each move on offer. The player picks one and the dice decide how it comes off. After the roll you write the turn as it is sent: ${player_name}'s messages, then ${datee_name}'s answer.
+    You write a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan, every turn you wrote and every note you made. The game has already played each turn: the player picked one of the moves on offer and the dice landed. Each message tells you what happened, and you write the turn as it is sent: ${player_name}'s messages, then ${datee_name}'s answer.
 
     Each message from the game tells you what it knows: where the story stands, what the roll did to the message, how the match takes it, what the interest level and its change mean, what has to happen and how long it runs. Some of these descriptions are written as orders to the game's own rewriter ("You must…", "keep the same length"). Read them as what the situation looks like; the words and the length are yours, within the limits the game checks.
 
@@ -1955,16 +1952,15 @@ prompts:
     - Working: what got a real reply, a laugh or a rise in interest, and why.
     - Stale: lines, props, jokes, habits and descriptions of their bodies already used. They only come back as a payoff that means something new.
     - Last turn: the thing in it that worked least, and why.
+    - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
     A line or two each.
 
-    The checklist. Every time you write something that goes out, answer each question about it first, a few words each, then make it true to your answers.
+    The checklist. Every turn, after your notes, answer each question about the turn you are about to send, a few words each, then write it true to your answers.
     ${checklist}
 
-    The options are three different decisions about this moment, each recognisably its move (a strategy, never a word the character uses), and each one a player would want to click. Each is one or two short messages under 12 words, in ${player_name}'s voice. Nothing in them refers to options, drafts or versions.
+    The move the player picked is what ${player_name} is trying to do this turn (a strategy, never a word the character uses). The meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A natural 20 is the best line in the chat. The match's answer follows how their interest moved.
 
-    In the turn, the meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A natural 20 is the best line in the chat. The match's answer follows how their interest moved.
-
-    Before the roll, write exactly this and nothing else:
+    Every turn, write exactly this and nothing else:
 
     NOTES:
     Where they are: ...
@@ -1973,16 +1969,7 @@ prompts:
     Working: ...
     Stale: ...
     Last turn: ...
-    CHECK:
-    1. ...
-    (one answer per question)
-    OPTION <move name as given>
-    ${player_name}: message
-    ${player_name}: another message, if they'd send more than one
-    (one block per move on offer, in the order given)
-
-    After the roll, write exactly this and nothing else:
-
+    Meant: ...
     CHECK:
     1. ...
     (one answer per question)
@@ -1998,7 +1985,7 @@ prompts:
     PAID: setup number
     COLLIDED, alone on a line, when one's habit lands on the other one's fear.
     Nothing else goes after FINAL: anything that isn't a message or one of these notes is a mistake.
-  before_roll: |
+  turn: |
     ${since}
 
     The game's state now. ${story_so_far}
@@ -2007,18 +1994,11 @@ prompts:
     ${exchange}
     ${habit_note}
 
-    Turn ${n}, before the roll. ${interest_line}
+    Turn ${n}. ${interest_line}
     ${trap_line}
-    The moves on offer (nobody knows yet which one the player picks or how the dice land):
-    ${moves}
-
     The template for this point in a chat: ${needs}
 
-    Write your notes, go through the checklist for these options, then write the three options the player sees for turn ${n}.
-  after_roll: |
-    Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
-    ${intended}
-
+    ${picked}
     ${situation}
 
     What the game requires this turn, checked afterwards:
@@ -2027,6 +2007,4 @@ prompts:
     How long:
     ${length}
 
-    ${habit_note}
-
-    Go through the checklist for this turn, then write turn ${n} as it is sent.
+    Write your notes, go through the checklist, then write turn ${n} as it is sent.
