@@ -8,8 +8,7 @@ ${history}
 
 ${habit_note}
 
-Turn ${n}. The moves on offer: ${options}.
+Turn ${n}. Interest is ${interest} out of 25. At this level: ${interest_goal}
+The moves on offer: ${options}.
 
-From the director: ${direction}
-
-Write the three options for ${player_name}.
+Draft the three options for ${player_name}.

@@ -213,5 +213,60 @@
       ]
     }
   },
-  "word_budget": 1250
+  "word_budget": 1250,
+  "interest_goals": [
+    {
+      "state": "Unmatched",
+      "from": 0,
+      "to": 0,
+      "goal": "It's over."
+    },
+    {
+      "state": "Bored",
+      "from": 1,
+      "to": 4,
+      "goal": "The match is one message from leaving. The act has failed; only something true could keep them, and it may not be enough. If it ends here, it ends unhinged, with the vulnerability showing."
+    },
+    {
+      "state": "Lukewarm",
+      "from": 5,
+      "to": 9,
+      "goal": "The match isn't convinced. The act is in the way: something real has to get through, or they drift."
+    },
+    {
+      "state": "Interested",
+      "from": 10,
+      "to": 15,
+      "goal": "Curious. They trade hooks and each learns one thing about the other; the lie shows its first crack."
+    },
+    {
+      "state": "Very Into It",
+      "from": 16,
+      "to": 20,
+      "goal": "They want each other. What they've told each other matters now, the filth gets personal, and every honest line costs something."
+    },
+    {
+      "state": "Almost There",
+      "from": 21,
+      "to": 24,
+      "goal": "Meeting is on the table and the last guard is up. Only the habit put down, or the part they'd never say, gets them over it."
+    },
+    {
+      "state": "Date Secured",
+      "from": 25,
+      "to": 25,
+      "goal": "They agree to meet: a connection the reader feels, each of them putting the habit down for the other."
+    }
+  ],
+  "checklist": [
+    "Where are they? Each alone in their own place, apart. Does any line put them in one place, or let one see or know where the other is?",
+    "What did the other one just say, give away or dodge, and does this answer it?",
+    "What does this do to the reader: a laugh, a wince, seeing through a lie, an ache?",
+    "What does it cost the one who sends it? Is their fear nearer the surface than last turn?",
+    "What does the chat need at this interest level, and does this do it?",
+    "Is anything stale back: a prop, a joke, a description, a habit, a line?",
+    "Does each line sound like the one who sends it, carry one thing, and read like something a person would type?",
+    "Options only: are the three different decisions about this moment, each clearly its move, each worth clicking?",
+    "Turn only: does the roll show in the message itself, and does the match's answer follow how their interest moved?"
+  ]
 }

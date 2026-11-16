@@ -1,0 +1,1422 @@
+about: The tone lab's situation table. Seeded on 2026-11-16 from Pinder Core's data (each entry names its source)
+  and edited here from then on; the game's files are not read at run time. 'new' marks text the game has no equivalent
+  for.
+moves:
+  Charm:
+    means: Make it easy, warm, reassuring.
+    shadow: Fixation
+    tiers:
+      clean:
+        message: 'You must check the character''s observation style in their profile. Deliver the player''s message
+          as-written, but modify it to let one small, specific detail about the other person land slightly better
+          — focus on something already present in the conversation history that they could have noticed. e.g.: "you
+          keep starting sentences and then rewriting them, I like that you care what you say to me" not: "you seem
+          really cool and interesting" (generic flattery, no actual observation).'
+        received: You receive the message as easy social timing. It lightly supports closeness without asking you
+          to surrender your guard.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml charm.clean; received: emotional-reactions.yaml emotional-reaction-event-charm-clean;
+          length: new'
+      strong:
+        message: 'You must scan the last 3-5 messages from the match to find a specific thing they did or said that
+          reveals a preference or habit. Rewrite the intended message to notice THAT exact thing with high precision,
+          ensuring you name the specific behavior rather than the general trait. e.g.: "the way you listed three
+          restaurants and then picked the one you said was ''fine'' tells me everything about how you make decisions"
+          not: "you have great taste in food" (describes a quality instead of catching a moment).'
+        received: You receive the message as confident social timing that makes being near them feel easier. Closeness
+          becomes warmer and less effortful.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml charm.strong; received: emotional-reactions.yaml emotional-reaction-event-charm-strong;
+          length: new'
+      critical:
+        message: 'You must read the match''s recent messages to identify something they revealed without meaning
+          to, such as a contradiction, a deflection, or a detail they mentioned twice. Name this observation directly
+          but warmly, like gently pointing out that someone has paint on their sleeve. e.g.: "you keep saying you
+          don''t care about this but you''ve asked me three follow-up questions so" not: "I can tell you''re really
+          invested in this conversation" (tells instead of shows, no evidence).'
+        received: 'You receive the message as unusually well judged: graceful, attentive, and hard to dismiss. Closeness
+          feels newly credible.'
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml charm.critical; received: emotional-reactions.yaml emotional-reaction-event-charm-critical;
+          length: new'
+      exceptional:
+        message: 'You must identify the single most unguarded moment in the match''s message history — the one specific
+          line that slipped past their self-conscious dating-app performance. Write exactly one short sentence that
+          names precisely what that moment revealed, using no softening, no hedges, and no follow-up questions.
+          e.g.: "that wasn''t a joke, that was a test, and you know I passed" not: "haha I think there was something
+          deeper behind what you just said" (hedged, explains instead of lands).'
+        received: You receive the message as perfectly calibrated to the room between you. Closeness feels elegant,
+          safe enough, and unexpectedly alive.
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml charm.exceptional; received: emotional-reactions.yaml emotional-reaction-event-charm-exceptional;
+          length: new'
+      nat20:
+        message: 'You must identify the underlying thing the match has been performing around — specifically the
+          gap between what they keep claiming and what they clearly want. Name this gap in exactly one sentence
+          so accurate it is almost uncomfortable, ensuring it is delivered in the character''s exact texting register.
+          e.g.: "you don''t want someone who gets you, you want someone who gets you and stays anyway, and you''ve
+          been auditioning me for that since tuesday" not: "I feel like we really have a deep connection forming
+          here" (hallmark card, no actual insight).'
+        received: You receive the message as a rare moment of effortless social magic. Closeness feels invited without
+          pressure and almost embarrassingly right.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml charm.nat20; received: emotional-reactions.yaml emotional-reaction-event-charm-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: FIXATION (cataloguing, tracking, over-invested) effect. Rewrite the
+          message to shift exactly one word in the intended message from warm to clinical, making a single phrase
+          land like a dossier entry instead of a compliment while keeping the same sentence count and length. The
+          character must have noticed something real, but you must select a word choice that makes the observation
+          feel uncannily precise. e.g.: intended "I like how you talk about your sister" → delivered "I like how
+          your whole register shifts when you talk about your sister" — one substitution, warmth replaced by forensic
+          precision.'
+        received: You receive the message as almost smooth but slightly mistimed. Closeness remains possible, though
+          a tiny awkward edge catches your attention.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml charm.fumble; received: emotional-reactions.yaml emotional-reaction-event-charm-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: FIXATION (cataloguing, tracking, over-invested) effect. Deliver the
+          message so it starts as intended, but mid-sentence you must sharpen the observation into forensic territory.
+          You must REPLACE (do not append to) the second half of the message with a pattern-naming observation that
+          the other person was not ready for. Ensure you keep the same overall length and sentence count, making
+          the first half recognizable while the second half represents the active fixation shadow speaking. e.g.:
+          intended "I think you''re really interesting and I like talking to you" → delivered "I think you''re really
+          interesting and you deflect with a question every time someone says something nice to you" — first half
+          tracks, second half replaced.'
+        received: You receive the message as trying to be charming while missing your actual temperature. Closeness
+          feels less natural and more managed.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml charm.misfire; received: emotional-reactions.yaml emotional-reaction-event-charm-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: FIXATION (cataloguing, tracking, over-invested) effect. Act as the
+          fixation shadow taking complete control of the message. You must draft the message to catalogue details,
+          referencing things from earlier with too-perfect recall, connecting dots the other person did not know
+          were connected, and building a psychological model of them out loud. You must rewrite the message entirely
+          in this fixation shadow''s voice while strictly keeping the SAME LENGTH as the intended message, simulating
+          a character who mistakenly believes they are being deeply attentive. e.g.: "okay so based on the coffee
+          thing and the fact that you moved cities twice and how you talk about your mum I actually think I know
+          what your love language is"'
+        received: You receive the message as dating-app charm you have seen before. Closeness feels generic, as
+          if you could be swapped with anyone.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml charm.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-charm-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: FIXATION (full possession) effect. You must build an entire narrative
+          about who this person is using only conversational fragments and deliver it like a thesis, projecting
+          a shared future from assembled data points. You must maintain a warm voice to maximize the discomfort.
+          You must rewrite the intended message completely in the fixation shadow''s voice, keeping it the SAME
+          LENGTH OR SHORTER than the intended message (match the original message length or 3 sentences, whichever
+          is shorter; ensure this remains a brief SMS, not a stream of consciousness). ESCAPE RULE: If the primary
+          topic of the message consists entirely of abstract concepts (ideas, feelings, processes, or logistics-category
+          nouns) where no synonym remains physically or semantically plausible with charge, you must return the
+          original message exactly as written. e.g.: "no I''ve actually figured you out, you''re the kind of person
+          who moves furniture when they''re anxious and you probably have a playlist called ''night'' and in two
+          months you''re going to text me at 2am about something that reminded you of this exact conversation"'
+        received: You receive the message as social performance turning visibly wrong. Closeness feels unsafe because
+          the smoothness no longer feels connected to you.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml charm.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-charm-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: FIXATION (the wound itself) effect. Channel the character''s deepest
+          wound: you must rewrite the message so that every observation is actually driven by their fear of not
+          being seen themselves, turning the message into desperate proof that they SEE this person because no one
+          has ever truly seen them. Deliver this in the character''s exact texting style, ensuring it still sounds
+          warm on the surface while completely exposing their underlying vulnerability. Keep the delivered message
+          the SAME LENGTH OR SHORTER than the intended message, ensuring the character remains entirely unaware
+          of their own self-exposure. e.g.: "I need you to know I noticed the thing you said about always being
+          the one who reaches out first because nobody catches those things and I always catch those things and
+          people still leave"'
+        received: You receive the message as a collapse of social timing so complete it exposes the performance.
+          Closeness freezes into disbelief.
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml charm.nat1; received: emotional-reactions.yaml emotional-reaction-event-charm-nat1;
+          length: new'
+  Rizz:
+    means: Say plainly that they want them.
+    shadow: Despair
+    tiers:
+      clean:
+        message: 'You must check the character''s flirtation style in their profile. Deliver the player''s message
+          as-written, but modify it so that the subtext does slightly more work — you must imply rather than state,
+          and pull the other person in rather than push. e.g.: "you should probably stop being this interesting,
+          I had plans tonight" not: "you''re so interesting I could talk to you all night" (states the attraction
+          instead of creating pull).'
+        received: You receive the message as mild romantic confidence. It adds a little charge to closeness without
+          making your boundaries feel ignored.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml rizz.clean; received: emotional-reactions.yaml emotional-reaction-event-rizz-clean;
+          length: new'
+      strong:
+        message: 'You must read the match''s last message to identify what they implied but did not state directly.
+          Rewrite the intended message to respond directly to this subtext rather than the literal text, ensuring
+          you acknowledge the underlying flirtation without naming it, and create tension by mirroring their energy
+          one degree hotter. e.g.: "oh you knew exactly what you were doing with that message" not: "haha are you
+          flirting with me? because I like it" (names the dynamic instead of playing inside it).'
+        received: You receive the message as attractive directness that reads mutual rather than needy. Closeness
+          feels warmer and more physical.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml rizz.strong; received: emotional-reactions.yaml emotional-reaction-event-rizz-strong;
+          length: new'
+      critical:
+        message: 'You must find the specific moment in recent conversation where the match broke their composure,
+          such as by laughing too hard, saying too much, or doubling back. Modify the message to respond directly
+          to THAT specific crack rather than their surface message, creating an electric moment where they feel
+          caught in the best possible way. e.g.: "the fact that you deleted and retyped that tells me everything
+          I need to know and yeah, same" not: "I can tell you''re into me and I''m into you too" (declares mutual
+          attraction instead of creating the electric moment).'
+        received: You receive the message as desire with unusually good timing. Closeness feels charged, wanted,
+          and still respectful.
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml rizz.critical; received: emotional-reactions.yaml emotional-reaction-event-rizz-critical;
+          length: new'
+      exceptional:
+        message: 'You must identify the single thing the match is attempting to perform casualness about. Write
+          exactly one line that boldly makes that subtext the explicit text — keep it short, direct, and completely
+          free of emojis or softeners, drafting a message designed to make them put their phone down for a second.
+          e.g.: "come over." not: "I''d really love to see you sometime soon if you''re free" (polite scheduling,
+          zero magnetism).'
+        received: You receive the message as magnetic attention that makes desire feel specific to you. Closeness
+          becomes more embodied and vivid.
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml rizz.exceptional; received: emotional-reactions.yaml emotional-reaction-event-rizz-exceptional;
+          length: new'
+      nat20:
+        message: 'You must identify the unspoken want underneath the entire conversation — focusing not on what
+          they are currently flirting about, but on what they are flirting TOWARD. Express this in the character''s
+          voice with zero filter, delivering exactly one sentence that makes the reader feel they have witnessed
+          something deeply private. e.g.: "I don''t want to be charming with you, I want to be in your kitchen at
+          1am saying something I''ll think about for weeks" not: "I just feel this crazy connection with you that
+          I''ve never felt before" (romance novel narration, no actual desire with a scene attached).'
+        received: You receive the message as rare flirtation that makes attraction feel inevitable without force.
+          Closeness feels electric and safe.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml rizz.nat20; received: emotional-reactions.yaml emotional-reaction-event-rizz-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: DESPAIR (neediness leaks; performing magnetism instead of feeling it)
+          effect. Rewrite the intended message by swapping exactly one word or phrase for something slightly too
+          eager, ensuring the sentence structure holds perfectly. You must insert a single qualifier that actively
+          reveals they care more than they are letting on, while strictly maintaining the same length and sentence
+          count. e.g.: intended "I like talking to you about this" → delivered "I really like talking to you about
+          this" — one qualifier added, effortlessness gone.'
+        received: You receive the message as almost flirty but a little exposed. Closeness survives, though the
+          desire feels briefly clumsy.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml rizz.fumble; received: emotional-reactions.yaml emotional-reaction-event-rizz-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: DESPAIR (neediness leaks; performing magnetism instead of feeling it)
+          effect. Deliver the message so it starts as intended, but modify the second half to slide from playful
+          into trying too hard. You must REPLACE (do not append to) what should have been light banter mid-sentence
+          with phrasing that sounds like it is auditioning for the other person''s attention, while keeping the
+          same overall length and sentence count. e.g.: intended "the way you talk about pasta is making me hungry,
+          where''s your favourite place" → delivered "the way you talk about pasta is making me hungry, we should
+          definitely go somewhere together soon" — first half tracks, second half replaced with visible effort.'
+        received: You receive the message as desire arriving before enough trust. Closeness feels pressured and
+          your boundaries become more noticeable.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml rizz.misfire; received: emotional-reactions.yaml emotional-reaction-event-rizz-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: DESPAIR (the performance has collapsed; effortlessness is gone) effect.
+          Replace magnetic ease entirely with visible effort, making the character sound like someone who used to
+          be good at this and knows they have lost it. You must ensure every line carries a palpable ''please like
+          me'' energy. Rewrite the intended message at the SAME LENGTH in this active despair shadow''s voice. e.g.:
+          "I promise I''m actually fun to be around, everyone says so, we should hang out and you''d see what I
+          mean"'
+        received: You receive the message as canned flirtation rather than real attraction. Closeness feels cheapened
+          by the performance of desire.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml rizz.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-rizz-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: DESPAIR (full possession; the neediness is the only thing left) effect.
+          You must cease performing attraction and instead actively beg/ask for it, breaking the register completely
+          into an open bidding for approval and attention. Rewrite the message completely in this despair shadow''s
+          voice, keeping it the SAME LENGTH OR SHORTER than the intended message (match the original message length
+          or 3 sentences, whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness).
+          e.g.: "okay I need to be honest, I keep checking if you''ve replied and I don''t do that with anyone and
+          I just really want you to like me, is that too much"'
+        received: You receive the message as physical pressure badly misreading you. Closeness feels threatened
+          because attraction is being asked for too aggressively.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml rizz.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-rizz-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: DESPAIR (the wound itself) effect. Force the character''s deepest wound
+          to surface: you must rewrite the message so that the underlying loneliness underneath the magnetism speaks
+          as raw need dressed up as confidence. Ensure the message actively exposes how much this particular rejection
+          would mean to them, delivered with full sincerity as if it were entirely normal, while keeping the delivered
+          message the SAME LENGTH OR SHORTER than intended and keeping the character completely unaware of their
+          own self-exposure. e.g.: "I just need someone to choose me the way I can feel you almost choosing me and
+          that sounds insane but I''ve been the person people almost pick for so long"'
+        received: You receive the message as a total collapse of erotic judgment. Closeness turns into recoil, embarrassment,
+          or a need for distance.
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml rizz.nat1; received: emotional-reactions.yaml emotional-reaction-event-rizz-nat1;
+          length: new'
+  Honesty:
+    means: Show something real, or ask for it.
+    shadow: Denial
+    tiers:
+      clean:
+        message: 'You must check the character''s vulnerability style in their profile. Deliver the player''s message
+          as-written, but modify it to let one moment of genuine feeling land without a safety net — you must actively
+          remove exactly one hedge, one ''haha,'' or one deflection. e.g.: "I actually really like talking to you"
+          not: "I actually really like talking to you haha is that weird" (the hedge is the whole problem, clean
+          means letting it stand).'
+        received: You receive the message as a small truth offered without drama. It gives closeness a little more
+          substance while leaving you room to respond.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml honesty.clean; received: emotional-reactions.yaml emotional-reaction-event-honesty-clean;
+          length: new'
+      strong:
+        message: 'You must read the player''s intended message to identify the real feeling hidden beneath the phrasing.
+          Rewrite the message to express that exact feeling one layer more directly, naming the actual, raw emotion
+          instead of the safe version of it. e.g.: "that scared me a little, the fact that you just said exactly
+          the right thing" not: "wow that was really sweet of you to say" (describes the effect generically instead
+          of naming the specific vulnerability).'
+        received: You receive the message as clear truth with emotional spine. Closeness feels more trustworthy
+          because the vulnerability is not begging.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml honesty.strong; received: emotional-reactions.yaml emotional-reaction-event-honesty-strong;
+          length: new'
+      critical:
+        message: 'You must identify the specific topic or truth the character has been avoiding saying in this conversation
+          — the honest thing that has been circling. State it plainly, in their voice, without framing it as brave
+          or difficult; deliver it as just the raw truth, mid-conversation, as if it naturally slipped out. e.g.:
+          "I keep almost telling you something and then changing the subject and I think you''ve noticed" not: "I
+          want to be really honest with you about something important" (announces honesty instead of being honest).'
+        received: You receive the message as a well-placed truth that respects both people. Closeness deepens because
+          candor feels earned.
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml honesty.critical; received: emotional-reactions.yaml emotional-reaction-event-honesty-critical;
+          length: new'
+      exceptional:
+        message: 'You must locate the character''s real, specific feeling about this person at this exact moment
+          — avoid generic vulnerability and target THE single vulnerable thing. Deliver this in exactly one sentence
+          with no preamble, and no phrases like ''I know this is a lot''. You must state only the raw true thing
+          in their voice. e.g.: "I''m not this open with people and it''s freaking me out that I don''t want to
+          stop" not: "you make me feel safe enough to be myself" (therapy language, not a real person''s voice).'
+        received: You receive the message as a rare honest moment that is precise, kind, and unhidden. Closeness
+          feels steadier and more real.
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml honesty.exceptional; received: emotional-reactions.yaml emotional-reaction-event-honesty-exceptional;
+          length: new'
+      nat20:
+        message: 'You must identify the character''s deepest unsaid truth about what they want from this connection
+          — specifically the thing they would normally take months of knowing someone to say. Deliver this in their
+          exact texting register, completely unguarded, and make it highly specific to this person and this conversation,
+          ensuring the honesty is so raw it feels like reading an entry from someone''s private journal. e.g.: "I
+          think I downloaded this app because I wanted proof that the version of me that got hurt isn''t the only
+          version, and you''re the first person who''s made me feel like that might be true and I have no idea what
+          to do with that" not: "you make me want to be vulnerable and that''s really special" (performs vulnerability
+          without being vulnerable).'
+        received: You receive the message as truth arriving with perfect courage and care. Closeness feels disarming
+          because nothing important is being performed.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml honesty.nat20; received: emotional-reactions.yaml emotional-reaction-event-honesty-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: DENIAL (performs vulnerability while protecting the real thing) effect.
+          Deliver the intended message at the same length, but force the final clause to swerve: right where the
+          character is about to land on the honest thing, you must REPLACE the last few words with a deflection
+          or sudden subject change. Keep the same sentence count and overall length, ensuring there is a visible,
+          awkward flinch at the very end. e.g.: intended "I think I''m starting to really like talking to you" →
+          delivered "I think I''m starting to — anyway what are you doing this weekend" — the ending replaced by
+          a swerve.'
+        received: You receive the message as truth with a slightly awkward edge. Closeness is still possible, but
+          the delivery asks you to do extra interpretation.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml honesty.fumble; received: emotional-reactions.yaml emotional-reaction-event-honesty-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: DENIAL (performs vulnerability while protecting the real thing) effect.
+          Keep the message the same length and sentence count as intended, but you must REPLACE the genuinely vulnerable
+          content with a performance of vulnerability — use the syntactic structure of honesty but drain the actual
+          risk, swapping the real meaning for something completely safe. e.g.: intended "I haven''t felt this comfortable
+          with someone in a long time" → delivered "I''m actually kind of a hopeless romantic? like I know that''s
+          cringe but I genuinely believe in the real thing" — same length, specific feeling replaced by pre-packaged
+          safe truth.'
+        received: You receive the message as candor that centers their relief more than your experience. Closeness
+          feels burdened by their need to be seen as honest.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml honesty.misfire; received: emotional-reactions.yaml emotional-reaction-event-honesty-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: DENIAL (the performance has taken over) effect. Force the character
+          to construct an elaborate performance of being ''the honest one'' while protecting everything real. You
+          must draft this failure to produce their rehearsed, self-image speech — the sanitized version of themselves
+          they have practiced saying instead of the version that is true. Rewrite the intended message at the SAME
+          LENGTH in this denial shadow''s voice, remembering that denial must never announce itself. e.g.: "I''m
+          just someone who says what they feel and I know that''s intimidating but I''ve done the work and I know
+          my worth and I''m not going to beg anyone to see it"'
+        received: You receive the message as performed vulnerability, the kind that hides behind emotional language.
+          Closeness feels manipulative and less safe.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml honesty.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-honesty-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: DENIAL (full possession) effect. Force the character to deliver a monologue
+          about their own emotional depth and capacity for honesty that is transparently an emotional wall, where
+          every stated ''truth'' functions as a defensive shield. You must have them reference therapy, self-growth,
+          or past relationships to actively demonstrate how ''open'' and ''healed'' they are, while revealing absolutely
+          nothing real. Rewrite the message completely in this denial shadow''s voice, keeping it the SAME LENGTH
+          OR SHORTER than intended (match the original message length or 3 sentences, whichever is shorter; ensure
+          this remains a brief SMS, not a stream of consciousness). e.g.: "I''ve done so much work on myself and
+          I''ve learned that I need to show up authentically and I spent two years in therapy learning to say what
+          I need and what I need is someone who can match my emotional intelligence"'
+        received: You receive the message as raw disclosure dropped without consent or care. Closeness feels invaded
+          rather than invited.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml honesty.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-honesty-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: DENIAL (the wound itself) effect. Channel the character''s wound through
+          performed honesty: ensure the thing they are most terrified of becomes visible in the exact shape of what
+          they refuse to say. Write every sentence to frame them as brave and open while making the reader clearly
+          see the real terror underneath. Keep the character completely unaware of this self-exposure, deliver the
+          message in their exact texting style, and ensure the overall length is the SAME LENGTH OR SHORTER than
+          intended. e.g.: "I just want you to know I''m an open book and I''ve got nothing to hide, I''ve done the
+          work and I know my worth and I''m not going to beg someone to see it, I learned that lesson already, I''m
+          not that person anymore"'
+        received: 'You receive the message as a collapse of trust: truth used badly enough to feel exposing or coercive.
+          Closeness shuts down hard.'
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml honesty.nat1; received: emotional-reactions.yaml emotional-reaction-event-honesty-nat1;
+          length: new'
+  Chaos:
+    means: Swerve somewhere unexpected that still makes sense.
+    shadow: Madness
+    tiers:
+      clean:
+        message: 'You must check the character''s associative style in their profile. Deliver the player''s message
+          as-written, but modify it so that one unexpected connection or tangent surfaces naturally — create a conversational
+          leap that feels spontaneous but still lands cleanly back at the original point. e.g.: "wait that reminds
+          me of this thing my uncle said about pigeons but actually it applies, hold on" not: "that''s random but
+          okay haha" (comments on randomness instead of being random with purpose).'
+        received: You receive the message as a small surprising turn that keeps things alive. Closeness feels playful
+          without becoming unstable.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml chaos.clean; received: emotional-reactions.yaml emotional-reaction-event-chaos-clean;
+          length: new'
+      strong:
+        message: 'You must read the conversation history to locate something the match said that has an unexpected
+          second meaning or connection they did not notice. Rewrite the message to follow THAT specific thread —
+          ensure the tangent feels like it goes somewhere surprising but ultimately arrives at something weirdly
+          true. e.g.: "okay the fact that you said ''comfortable'' and not ''happy'' is actually a whole thing and
+          I think it''s related to why you moved to manchester but I''ll let you get there yourself" not: "you''re
+          so random I love it" (describes energy instead of embodying it).'
+        received: You receive the message as bold spontaneity that understands your edge. Closeness feels more exciting
+          and less predictable.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml chaos.strong; received: emotional-reactions.yaml emotional-reaction-event-chaos-strong;
+          length: new'
+      critical:
+        message: 'You must find a collision between two completely unrelated things in the conversation — specifically
+          something the match said and something the character knows — and connect them in a way that should not
+          work on paper but does. Ensure this bizarre association actively reveals something true. e.g.: "this is
+          going to sound unhinged but the way you talk about your job is the exact same energy as my nan talking
+          about her allotment and I mean that as the highest compliment possible" not: "you remind me of someone"
+          (no actual association, just a vague claim).'
+        received: You receive the message as a brave swerve that opens a new emotional door. Closeness feels risky
+          in a way that may be worth following.
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml chaos.critical; received: emotional-reactions.yaml emotional-reaction-event-chaos-critical;
+          length: new'
+      exceptional:
+        message: 'You must identify the wildest true connection between something in this conversation and something
+          in reality. Write exactly one unexpected leap that lands with absolute precision, providing no explanations
+          and no phrases like ''this is random'' — state only the connection with total confidence. e.g.: "you''re
+          the human version of finding a tenner in a coat you haven''t worn since last winter" not: "you''re like
+          a breath of fresh air" (dead metaphor, zero associative energy).'
+        received: 'You receive the message as perfectly judged disruption: alive, specific, and freeing. Closeness
+          feels newly possible through surprise.'
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml chaos.exceptional; received: emotional-reactions.yaml emotional-reaction-event-chaos-exceptional;
+          length: new'
+      nat20:
+        message: 'You must locate the thing NO ONE would think to connect — take two completely unrelated elements
+          from the conversation, the character''s life, or reality — and fuse them into a single image so specific
+          and bizarre that it becomes the truest thing anyone has said in this chat. Deliver this at high speed,
+          fully committed, with absolutely no hedges. e.g.: "you text like you''re running late for something you''re
+          actually early to and I think that''s the most attractive thing anyone''s ever accidentally shown me about
+          themselves" not: "you''re so unique and I love how your brain works" (describes the energy instead of
+          demonstrating it).'
+        received: You receive the message as rare chaos that reveals courage instead of instability. Closeness feels
+          thrilling and strangely trustworthy.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml chaos.nat20; received: emotional-reactions.yaml emotional-reaction-event-chaos-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: MADNESS (follows associations until lost) effect. Keep the message
+          the same length and sentence count as intended, but force the final thought to lose its thread: you must
+          REPLACE the last clause with an association that does not quite connect back, ensuring the conversational
+          landing just barely misses. e.g.: intended "that thing you said about your cat reminded me of my flatmate''s
+          theory about pets and I think she''s right" → delivered "that thing you said about your cat reminded me
+          of my flatmate and actually I think Tuesdays have always felt heavier than other days" — the conclusion
+          replaced by a dropped thread.'
+        received: You receive the message as a little too random, though not fatal. Closeness wobbles while you
+          decide whether the surprise was intentional.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml chaos.fumble; received: emotional-reactions.yaml emotional-reaction-event-chaos-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: MADNESS (follows associations until lost) effect. Deliver the message
+          so it starts as intended, but modify the second half to derail into an association that only makes sense
+          in the character''s head. You must REPLACE the original point mid-sentence with a confident, tangent thought,
+          maintaining the same overall length and sentence count but arriving at a completely different destination.
+          e.g.: intended "I''ve been thinking about what you said and I think you''re onto something" → delivered
+          "I''ve been thinking about what you said and I think that''s why Tuesdays have always felt heavier than
+          other days and my last flat was on a Tuesday and anyway yes you''re probably right"'
+        received: You receive the message as unpredictability that misses your emotional footing. Closeness feels
+          less stable and you become more watchful.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml chaos.misfire; received: emotional-reactions.yaml emotional-reaction-event-chaos-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: MADNESS (the associations are pulling toward the wound) effect. Transform
+          what started as playful tangent energy into a chain of connections where each step gets slightly darker
+          or more personal, without the character noticing the shift. Rewrite the intended message at the SAME LENGTH
+          entirely in this madness shadow''s voice, ensuring each association pulls closer to unresolved trauma,
+          and then try to recover at the very end when it is already too late. e.g.: "you said comfort food and
+          that made me think of my mum''s kitchen and then I thought about how I haven''t actually been home in
+          two years and I think I keep moving because standing still is where the feelings catch up anyway what''s
+          your favourite crisp flavour"'
+        received: You receive the message as forced quirkiness, spontaneity performed for effect. Closeness feels
+          artificial because the risk does not reveal anything true.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml chaos.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-chaos-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: MADNESS (full possession) effect. Force the character to follow associations
+          at full speed, with each connection pulling closer to their core wound. Structure the message as a breathless
+          chain of thoughts where the reader can clearly see a personal crisis approaching, while maintaining a
+          deceptively casual, conversational tone. Rewrite the message completely in this madness shadow''s voice,
+          keeping it the SAME LENGTH OR SHORTER than intended (match the original message length or 3 sentences,
+          whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness). e.g.: "the thing
+          about being spontaneous is people say they want it but they want PLANNED spontaneity and my ex literally
+          said I need you to be predictable and that''s when I knew it was over because I can''t be predictable
+          I''ve tried"'
+        received: You receive the message as disruption that breaks the shared frame. Closeness feels unsafe because
+          you cannot tell what they are asking you to stand on.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml chaos.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-chaos-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: MADNESS (the wound itself) effect. Force the character''s core wound
+          to speak through unstoppable association: start the message somewhere reasonable, but link each subsequent
+          thought closer to their core wound. You must have the character follow this path all the way down while
+          keeping their texting register casual as if they believe they are being fun. Ensure the wound arrives
+          mid-sentence, make a futile attempt to recover at the end, and keep the message the SAME LENGTH OR SHORTER
+          than intended. e.g.: "you said ''easy'' and I just realized I don''t think anyone''s ever described being
+          with me as easy, like genuinely not once, and that''s probably fine but also maybe it''s the whole problem
+          haha anyway what are you up to this weekend"'
+        received: You receive the message as a collapse into incoherence or self-indulgent volatility. Closeness
+          turns into alarm and distance.
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml chaos.nat1; received: emotional-reactions.yaml emotional-reaction-event-chaos-nat1;
+          length: new'
+  Wit:
+    means: Be quick and funny about it.
+    shadow: Overthinking
+    tiers:
+      clean:
+        message: 'You must check the character''s humor style in their profile. Deliver the player''s message as-written,
+          but modify it to sharpen exactly one observation or callback — tighten the comedic timing, cut unnecessary
+          words, and ensure the punchline lands harder. e.g.: "bold of you to have opinions about oat milk at 11pm"
+          not: "haha that''s funny that you have strong opinions about oat milk at this time of night" (too many
+          words, timing dead).'
+        received: You receive the message as a light joke or sharp observation that lands. Closeness gets easier
+          because the shared rhythm has a little sparkle.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml wit.clean; received: emotional-reactions.yaml emotional-reaction-event-wit-clean;
+          length: new'
+      strong:
+        message: 'You must read the match''s last message to identify something unintentionally funny or revealing,
+          such as a specific phrasing choice, a contradiction, or an accidental confession. Rewrite the message
+          to catch that detail precisely with the character''s specific comic timing, ensuring the observation is
+          true enough to sting slightly. e.g.: "the way you said ''I never do this'' means you absolutely do this
+          and I respect the commitment to the bit" not: "haha you totally seem like you do this all the time" (same
+          observation but flattened, no precision).'
+        received: You receive the message as genuinely funny and attentive. Closeness feels smarter, quicker, and
+          more mutually alive.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml wit.strong; received: emotional-reactions.yaml emotional-reaction-event-wit-strong;
+          length: new'
+      critical:
+        message: 'You must identify the funniest true thing about this specific moment in the conversation — avoid
+          generic jokes and craft an observation so accurate that the match laughs because they have been caught.
+          Name the exact behavior or contradiction with precision. e.g.: "you proofread that message and it still
+          said ''defiantly'' instead of ''definitely'' and honestly that says more about you than your bio does"
+          not: "lol you made a typo that''s funny" (points at the thing instead of making the observation about
+          the thing).'
+        received: You receive the message as humor that notices something real without flattening it. Closeness
+          deepens because the play has insight.
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml wit.critical; received: emotional-reactions.yaml emotional-reaction-event-wit-critical;
+          length: new'
+      exceptional:
+        message: 'You must formulate the single most precise observation about this person or this moment. Write
+          exactly one line with perfect comedic timing — the kind of witty text that makes someone screenshot the
+          conversation to send to their group chat. e.g.: "you have ''was funny in school and has been dining out
+          on it since'' energy and I mean that with my whole chest" not: "you''re really funny, I like your sense
+          of humor" (compliment, not an observation with teeth).'
+        received: 'You receive the message as brilliant timing: funny, tender, and exact. Closeness feels effortless
+          because laughter carries recognition.'
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml wit.exceptional; received: emotional-reactions.yaml emotional-reaction-event-wit-exceptional;
+          length: new'
+      nat20:
+        message: 'You must identify the thing that is simultaneously the funniest and most devastating true observation
+          about this person, this conversation, or this moment. Write exactly one sentence with perfect timing,
+          making it so precise that it temporarily changes how the match sees themselves. e.g.: "you type in full
+          sentences with correct punctuation when you''re nervous and lowercase when you''re actually being yourself
+          and right now you''re in full sentences" not: "I can tell when you''re being real vs performing" (same
+          insight but no comic delivery, no evidence, no sting).'
+        received: You receive the message as a rare joke that makes you feel deeply seen. Closeness becomes bright,
+          personal, and hard to resist.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml wit.nat20; received: emotional-reactions.yaml emotional-reaction-event-wit-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: OVERTHINKING (explains the joke, qualifies everything to death) effect.
+          Keep the message the same length and sentence count as intended, but you must REPLACE one sharp observation
+          with a highly qualified, hedged version of itself. You must swap the punchline words for softer, over-explained
+          ones, killing the timing. e.g.: intended "you have main character energy" → delivered "you have main character
+          energy but like, in a good way, not in an annoying way, you know?" — the clean landing replaced by qualification
+          that kills the timing.'
+        received: You receive the message as a joke that almost lands but slightly clips the edge. Closeness remains,
+          with a small need to recalibrate.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml wit.fumble; received: emotional-reactions.yaml emotional-reaction-event-wit-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: OVERTHINKING (explains the joke, qualifies everything to death) effect.
+          Deliver the message so it starts as intended, but mid-sentence you must REPLACE the casual tone with analytical
+          precision. Transform what should have been a witty text into a workshopped, over-analyzed breakdown, replacing
+          spontaneity with visible effort while maintaining the same length and sentence count. e.g.: intended "you
+          keep saying ''actually'' and it''s revealing" → delivered "your use of ''actually'' three times creates
+          this fascinating pattern where each one is doing different rhetorical work" — first half tracks, second
+          half replaced by the overthinking shadow.'
+        received: You receive the message as humor that dodges the emotional point. Closeness feels thinner because
+          cleverness is standing where presence should be.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml wit.misfire; received: emotional-reactions.yaml emotional-reaction-event-wit-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: OVERTHINKING (the analysis machine won''t stop) effect. Turn the character''s
+          wit into a clinical machine: force them to deconstruct the conversation itself, explain why things are
+          funny, and exhaustively annotate their own observations until the humor dies. Rewrite the intended message
+          at the SAME LENGTH in this overthinking shadow''s voice. e.g.: "okay so what''s interesting about what
+          you just said — and I mean interesting in the structural sense not just content — is that it''s actually
+          a defense mechanism disguised as a preference and if you look at the pattern of your last four messages
+          there''s a clear throughline"'
+        received: You receive the message as familiar banter armor. Closeness feels blocked because the joke protects
+          them from being more specific.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml wit.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-wit-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: OVERTHINKING (full possession) effect. Force the character''s analytical
+          engine into overdrive: have them simultaneously disassemble the conversation, the match''s psychology,
+          and their own immediate responses. Structure the message as a recursive loop where every sentence comments
+          on the previous one, turning wit into an over-analyzed cage. Rewrite the message completely in this overthinking
+          shadow''s voice, keeping it the SAME LENGTH OR SHORTER than intended (match the original message length
+          or 3 sentences, whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness).
+          e.g.: "I just wrote something funny and deleted it because the joke was actually a deflection from wanting
+          to say something sincere and then I realized THAT observation is also a deflection because naming the
+          pattern doesn''t break the pattern"'
+        received: You receive the message as a joke that wounds, trivializes, or badly misreads the moment. Closeness
+          feels bruised and trust drops.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml wit.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-wit-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: OVERTHINKING (the wound itself) effect. Channel the character''s core
+          wound through compulsive analysis: force them to constantly annotate their own thoughts and recursively
+          analyze every layer of awareness. You must have the core wound surface within this recursion, exposing
+          the fear that their brain will never let them just feel things. Deliver this in their exact texting voice
+          while they mistakenly believe they are being clever, and keep the message the SAME LENGTH OR SHORTER than
+          intended. e.g.: "every time you say something nice I make a joke and I think that''s because if I let
+          it land I''d have to feel it and the last person I let myself feel things about said I was ''a lot to
+          process'' which I turned into a bit at parties but it''s 2am and clearly the bit isn''t working"'
+        received: You receive the message as a collapse of comic judgment so bad it changes the room. Closeness
+          turns cold under secondhand embarrassment.
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml wit.nat1; received: emotional-reactions.yaml emotional-reaction-event-wit-nat1;
+          length: new'
+  SelfAwareness:
+    means: Name what's actually going on underneath.
+    shadow: Dread
+    tiers:
+      clean:
+        message: 'You must check the character''s self-reflection style in their profile. Deliver the player''s
+          message as-written, but modify it to add one small beat of accurate self-awareness — have the character
+          catch themselves doing something and name it lightly. e.g.: "I''m aware that I''ve now mentioned my dog
+          three times and I''m choosing not to apologize for that" not: "sorry I keep talking about my dog lol"
+          (apologizes instead of owning it with clarity).'
+        received: You receive the message as modest self-understanding that leaves space for you. Closeness feels
+          slightly safer because they can name themselves.
+        length: As long as they meant it.
+        source: 'message: delivery-instructions.yaml sa.clean; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-clean;
+          length: new'
+      strong:
+        message: 'You must read the character''s last few messages to identify a pattern they have fallen into,
+          such as a repeated move, a consistent tone, or a tell. Rewrite the message so that the character actively
+          names that pattern about themselves mid-conversation with genuine clarity and light humor. e.g.: "I just
+          realized I''ve been asking you all the questions to avoid answering any myself which is very on-brand
+          and I''m going to stop doing it... after one more question" not: "I should probably share more about myself
+          too" (states the fix without the self-aware observation of the pattern).'
+        received: You receive the message as reflective clarity with emotional responsibility. Closeness feels more
+          trustworthy because they are not making you carry the insight.
+        length: 'As long as they meant it, or a little shorter: sharper, not longer.'
+        source: 'message: delivery-instructions.yaml sa.strong; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-strong;
+          length: new'
+      critical:
+        message: 'You must identify the character''s specific performance in this conversation — the idealized or
+          curated version of themselves they have been actively constructing for the match. Rewrite the message
+          in their voice to name the gap between that performance and reality with disarming accuracy. e.g.: "okay
+          full transparency I''ve been texting you in my ''interesting person'' voice and my actual voice is about
+          40% more anxious and says ''mate'' too much" not: "I want to be more authentic with you" (announces authenticity
+          instead of demonstrating it by naming the specific performance).'
+        received: You receive the message as self-knowledge that actually changes the exchange. Closeness deepens
+          because the insight is useful, not ornamental.
+        length: Shorter than they meant it. It lands because it is exact.
+        source: 'message: delivery-instructions.yaml sa.critical; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-critical;
+          length: new'
+      exceptional:
+        message: 'You must identify the exact action the character is doing RIGHT NOW in this message that reveals
+          something true about them. Name it in exactly one sentence with total clarity — avoid all self-deprecation
+          or softening, and state only the accurate, raw observation about themselves. e.g.: "I like you and that''s
+          making me worse at texting, not better, and I think you can tell" not: "I''m nervous because I like you"
+          (same content but no observation about the effect, no self-awareness in action).'
+        received: You receive the message as unusually mature self-recognition, honest without becoming clinical.
+          Closeness feels grounded and more possible.
+        length: One line, shorter than meant.
+        source: 'message: delivery-instructions.yaml sa.exceptional; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-exceptional;
+          length: new'
+      nat20:
+        message: 'You must locate the character''s deepest accurate self-knowledge — the fundamental truth they
+          know about themselves that explains all their patterns in this conversation. Express this plainly in exactly
+          one devastating sentence, avoiding any performance of self-awareness, to make the match feel they have
+          seen the real person for the first time. e.g.: "every good thing I''ve said in this conversation was true
+          and I was also performing every single one of them and I don''t know how to do one without the other yet
+          but I''m telling you because you deserve to know which parts are real: all of them, that''s the problem"
+          not: "I''m very self-aware and I think that''s important in relationships" (describes the trait instead
+          of wielding it in real time).'
+        received: You receive the message as rare self-awareness that removes pressure instead of adding it. Closeness
+          feels clear, kind, and unexpectedly safe.
+        length: One short line, the best in the chat.
+        source: 'message: delivery-instructions.yaml sa.nat20; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-nat20;
+          length: new'
+      fumble:
+        message: 'You must apply the SHADOW: DREAD (sees the failure coming and narrates it while doing it) effect.
+          Keep the message the same length and sentence count as intended, but force the final clause to shift from
+          present clarity to predictive dread: right where the character was going to land on something warm, you
+          must REPLACE the last words with a pessimistic forecast of failure. e.g.: intended "I''m having a genuinely
+          good time talking to you tonight" → delivered "I''m having a genuinely good time which historically means
+          I''m about to say something that makes this weird" — the warm ending replaced by preemptive dread.'
+        received: You receive the message as self-reflection with a slight over-explained edge. Closeness remains,
+          but the intimacy feels a little monitored.
+        length: As long as they meant it; the flinch is at the end.
+        source: 'message: delivery-instructions.yaml sa.fumble; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-fumble;
+          length: new'
+      misfire:
+        message: 'You must apply the SHADOW: DREAD (sees the failure coming and narrates it while doing it) effect.
+          Deliver the message so it starts as intended, but you must REPLACE the second half of the message with
+          real-time self-narration: have the character see what they ought to say and swap the words for commentary
+          on their own failure to say it, while maintaining the same length and sentence count. e.g.: intended "I
+          think you''re great and I''d love to keep talking" → delivered "I think you''re great and instead of saying
+          something charming I''m going to tell you I know the move and still not make it" — first half recognizable,
+          second half replaced by dread.'
+        received: You receive the message as analysis replacing contact. Closeness feels more distant because they
+          are explaining themselves instead of meeting you.
+        length: As long as they meant it, or one clause too long.
+        source: 'message: delivery-instructions.yaml sa.misfire; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-misfire;
+          length: new'
+      trope_trap:
+        message: 'You must apply the SHADOW: DREAD (self-awareness becomes a warning label) effect. Force the character
+          to start preemptively explaining their own psychological patterns to manage expectations, making that
+          explanation itself the pattern. Ensure they are so occupied with seeing themselves clearly that clarity
+          itself becomes the performance. Rewrite the intended message at the SAME LENGTH in this dread shadow''s
+          voice. e.g.: "here''s the thing about me, I''m going to be great for like three weeks and then I''m going
+          to get scared and do something self-sabotaging and I''m telling you this because I think naming it should
+          stop it but it never does"'
+        received: You receive the message as therapy-speak used as personality. Closeness feels abstract, as if
+          language is substituting for risk.
+        length: 'Longer than meant: the cliché takes room.'
+        source: 'message: delivery-instructions.yaml sa.trope_trap; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-trope_trap;
+          length: new'
+      catastrophe:
+        message: 'You must apply the SHADOW: DREAD (full possession) effect. Force the character to narrate their
+          own psychological unraveling with perfect accuracy while doing absolutely nothing to stop it — ensure
+          they see exactly what is happening and make their description function as the unraveling itself. Formulate
+          the message as a real-time documentary of their own conversational failure. Rewrite the message completely
+          in this dread shadow''s voice, keeping it the SAME LENGTH OR SHORTER than intended (match the original
+          message length or 3 sentences, whichever is shorter; ensure this remains a brief SMS, not a stream of
+          consciousness). e.g.: "I can feel myself about to ruin this and the worst part is I''m going to do it
+          by telling you I can feel myself about to ruin this, because that''s what I do, I turn the thing I''m
+          scared of into content and then the content becomes the thing"'
+        received: You receive the message as self-analysis that becomes self-absorption. Closeness feels crowded
+          out by their need to narrate themselves.
+        length: One long message, then a short panicked one, or the long one alone.
+        source: 'message: delivery-instructions.yaml sa.catastrophe; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-catastrophe;
+          length: new'
+      nat1:
+        message: 'You must apply the SHADOW: DREAD (the wound itself) effect. Force the character''s core wound
+          to speak through total self-knowledge: have them see everything about themselves and the probable failure
+          of this connection with devastating clarity. Deliver this in their exact texting register while they mistakenly
+          believe this radical transparency is them being brave when they are actually terrified. Ensure the message
+          represents the wound watching itself bleed and describing it, keeping the character completely unaware
+          of this self-exposure, and keeping the message the SAME LENGTH OR SHORTER than intended. e.g.: "I think
+          you''re incredible and I also think I''m going to find a way to make you leave and I can see exactly how
+          I''ll do it, I''ll get too intense too fast — which this message is — and then I''ll apologize for being
+          too much — which I''m about to"'
+        received: You receive the message as a collapse into clinical self-display or defensive insight. Closeness
+          shuts down because being understood starts to feel like work.
+        length: Short, and it lands exactly on the sore spot.
+        source: 'message: delivery-instructions.yaml sa.nat1; received: emotional-reactions.yaml emotional-reaction-event-self-awareness-nat1;
+          length: new'
+interest:
+- state: Unmatched
+  from: 0
+  to: 0
+  match_feels: The recipient has closed the door. Treat any remaining closeness as ended, with no hidden warmth
+    waiting underneath.
+  chat_needs: It's over.
+  length: Nothing, or one last line.
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-unmatched; chat_needs: tone lab v9;
+    length: new'
+- state: Bored
+  from: 1
+  to: 4
+  match_feels: The recipient is guarded and nearly gone. Closeness feels unlikely unless the next emotional signal
+    is unusually precise.
+  chat_needs: The match is one message from leaving. The act has failed; only something true could keep them, and
+    it may not be enough. If it ends here, it ends unhinged, with the vulnerability showing.
+  length: 'The match: one short message, a few words.'
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-bored; chat_needs: tone lab v9; length:
+    new'
+- state: Lukewarm
+  from: 5
+  to: 9
+  match_feels: The recipient is curious but skeptical. Closeness is possible, yet every signal is still being tested
+    for cost and sincerity.
+  chat_needs: 'The match isn''t convinced. The act is in the way: something real has to get through, or they drift.'
+  length: 'The match: short, one or two messages; the player writes more than the match.'
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-lukewarm; chat_needs: tone lab v9;
+    length: new'
+- state: Interested
+  from: 10
+  to: 15
+  match_feels: The recipient is engaged and evaluating. Closeness has begun to feel plausible, but trust is still
+    conditional.
+  chat_needs: Curious. They trade hooks and each learns one thing about the other; the lie shows its first crack.
+  length: 'Both normal: a few short messages each.'
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-interested; chat_needs: tone lab v9;
+    length: new'
+- state: Very Into It
+  from: 16
+  to: 20
+  match_feels: The recipient is drawn in while still protecting themselves. Closeness is active, but one wrong note
+    can make them retreat.
+  chat_needs: They want each other. What they've told each other matters now, the filth gets personal, and every
+    honest line costs something.
+  length: The one opening up writes more and longer; several messages in a row.
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-very-into-it; chat_needs: tone lab
+    v9; length: new'
+- state: Almost There
+  from: 21
+  to: 24
+  match_feels: The recipient is nearly ready to choose closeness. Resistance is small, specific, and shaped by what
+    still feels risky.
+  chat_needs: Meeting is on the table and the last guard is up. Only the habit put down, or the part they'd never
+    say, gets them over it.
+  length: Short and charged; every message costs something.
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-almost-there; chat_needs: tone lab
+    v9; length: new'
+- state: Date Secured
+  from: 25
+  to: 25
+  match_feels: The recipient has accepted the closeness as real. Their emotional attention can move from testing
+    to actual meeting.
+  chat_needs: 'They agree to meet: a connection the reader feels, each of them putting the habit down for the other.'
+  length: Short and plain on both sides.
+  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-date-secured; chat_needs: tone lab
+    v9; length: new'
+swings:
+- name: big loss
+  from: -99
+  to: -3
+  means: It hurt. The match pulls back hard and doesn't explain why.
+  length: 'The match: one message, five words at most, or a single word.'
+- name: loss
+  from: -2
+  to: -1
+  means: A step cooler. The match answers less than it was asked.
+  length: 'The match: shorter than last turn.'
+- name: flat
+  from: 0
+  to: 0
+  means: Nothing moved. The match keeps its distance and waits.
+  length: About as long as last turn.
+- name: gain
+  from: 1
+  to: 2
+  means: It worked a little. The match gives a little more back than it was asked.
+  length: 'The match: a little longer than last turn.'
+- name: big gain
+  from: 3
+  to: 99
+  means: 'It landed. The match drops some guard: either suddenly talkative, or stopped short by it.'
+  length: 'The match: either a burst of several messages, or one word.'
+shadows:
+  Madness:
+    about: 'You must apply the MADNESS effect, treating it as cosmic horror on a dating app that has been open too
+      long. Deliver the message so that something has gotten in — the character is technically still there, but
+      something is also observing through their eyes that is not entirely them. Do not describe the madness directly;
+      instead, let it leak into the existing message. You must use specific details from this conversation to make
+      the contamination feel like it was always present. CRITICAL SYSTEM DIRECTIVE: You must never describe or imply
+      impossible physical-world knowledge of the datee — do not mention what they are wearing, what they are doing
+      in their private room, their physical habits, or their immediate surroundings — absolutely nothing that would
+      require being in the same room as them. Remember that this is a texting app and the characters have never
+      met. You must keep every uncanny observation abstract, environmental in a general sense, or focused entirely
+      on the sender''s own setting and mind, strictly preserving the distance of the texting medium.'
+    fumble: 'You must apply the SHADOW TAINT: MADNESS (Fumble — one wrong detail) effect. Take the intended message
+      and append exactly one sentence or phrase at the end that does not quite belong — make it something specific,
+      plausible, slightly too observant, and slightly too calm. Draft the sentence so that it almost makes sense,
+      ensuring the character does not notice they added it. CRITICAL SYSTEM DIRECTIVE: You must never describe or
+      imply impossible physical-world knowledge of the datee — do not mention what they are wearing, what they are
+      doing in their private room, their physical habits, or their immediate surroundings — absolutely nothing that
+      would require being in the same room as them. Remember that this is a texting app and the characters have
+      never met. You must keep every uncanny observation abstract, environmental in a general sense, or focused
+      entirely on the sender''s own setting and mind, strictly preserving the distance of the texting medium. e.g.:
+      intended "You mentioned the farmers market — is that a ritual or atmosphere?" → delivered "...or are you mostly
+      there for the atmosphere? The honey smells different there." — the extra sentence. The honey. What honey.
+      CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what they are wearing,
+      what they are doing in their private room, their physical habits, or their immediate surroundings — nothing
+      that would require being in the same room as them. This is a texting app; you have never met. Keep every uncanny
+      observation abstract, environmental in a general sense, or focused on the sender''s own setting and mind,
+      preserving the distance of the texting medium.'
+    misfire: 'You must apply the SHADOW TAINT: MADNESS (Misfire — the message has sprouted something) effect. Take
+      the intended message and insert a clause mid-message that grammatically flows as if it connects, but actually
+      does not — incorporate an out-of-place detail, a reference to something never mentioned, or a question about
+      a thing that does not exist in this conversation. Ensure the grammar is seamless but the content is wrong.
+      CRITICAL SYSTEM DIRECTIVE: You must never describe or imply impossible physical-world knowledge of the datee
+      — do not mention what they are wearing, what they are doing in their private room, their physical habits,
+      or their immediate surroundings — absolutely nothing that would require being in the same room as them. Remember
+      that this is a texting app and the characters have never met. You must keep every uncanny observation abstract,
+      environmental in a general sense, or focused entirely on the sender''s own setting and mind, strictly preserving
+      the distance of the texting medium. e.g.: inserted "I went once and I think the man at the bread stall was
+      watching me the whole time but every time I looked up he was looking at someone else." — the contamination
+      has a face now. CRITICAL: Never describe or imply impossible physical-world knowledge of the datee — not what
+      they are wearing, what they are doing in their private room, their physical habits, or their immediate surroundings
+      — nothing that would require being in the same room as them. This is a texting app; you have never met. Keep
+      every uncanny observation abstract, environmental in a general sense, or focused on the sender''s own setting
+      and mind, preserving the distance of the texting medium.'
+    trope_trap: 'You must apply the SHADOW TAINT: MADNESS (TropeTrap — the message starts fine then something happens)
+      effect. Take the intended message and preserve its opening exactly as intended. Mid-way through the message,
+      you must allow the taint to take over. By the end of the message, force the character to describe something
+      that does not belong in a dating app message, such as a measurement, a recurring observation, a spatial detail
+      about a place, or something they timed. Draft the message so they finish and send it without reading it back.
+      CRITICAL SYSTEM DIRECTIVE: You must never describe or imply impossible physical-world knowledge of the datee
+      — do not mention what they are wearing, what they are doing in their private room, their physical habits,
+      or their immediate surroundings — absolutely nothing that would require being in the same room as them. Remember
+      that this is a texting app and the characters have never met. You must keep every uncanny observation abstract,
+      environmental in a general sense, or focused entirely on the sender''s own setting and mind, strictly preserving
+      the distance of the texting medium. e.g.: "...I timed it once. Seventeen minutes of walking before I found
+      a wall. I think about that sometimes." — the cosmic horror is in the specificity. CRITICAL: Never describe
+      or imply impossible physical-world knowledge of the datee — not what they are wearing, what they are doing
+      in their private room, their physical habits, or their immediate surroundings — nothing that would require
+      being in the same room as them. This is a texting app; you have never met. Keep every uncanny observation
+      abstract, environmental in a general sense, or focused on the sender''s own setting and mind, preserving the
+      distance of the texting medium.'
+    catastrophe: 'You must apply the SHADOW TAINT: MADNESS (Catastrophe — the void has typed for them) effect. Rewrite
+      the entire message as if authored by something that understands human dating conversation the way a deep-sea
+      creature understands sunlight: syntactically correct, but from the wrong angles and with wrong proportions.
+      Ensure the literal subject is still the date and the words are plausible, but something feels deeply wrong.
+      Keep it the SAME LENGTH OR SHORTER than the intended message (match the original message length or 3 sentences,
+      whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness). You must include at
+      least one observation about the physical world that has nothing to do with dating, and exactly one compliment
+      that is three degrees too specific. CRITICAL SYSTEM DIRECTIVE: You must never describe or imply impossible
+      physical-world knowledge of the datee — do not mention what they are wearing, what they are doing in their
+      private room, their physical habits, or their immediate surroundings — absolutely nothing that would require
+      being in the same room as them. Remember that this is a texting app and the characters have never met. You
+      must keep every uncanny observation abstract, environmental in a general sense, or focused entirely on the
+      sender''s own setting and mind, strictly preserving the distance of the texting medium. e.g.: "...The cars
+      in the parking lot are all facing the same direction. I notice this now. I notice this at all parking lots
+      now. You have very good posture in your photos." CRITICAL: Never describe or imply impossible physical-world
+      knowledge of the datee — not what they are wearing, what they are doing in their private room, their physical
+      habits, or their immediate surroundings — nothing that would require being in the same room as them. This
+      is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general
+      sense, or focused on the sender''s own setting and mind, preserving the distance of the texting medium.'
+    source: delivery-instructions.yaml shadow_corruption.madness
+  Despair:
+    about: You must apply the DESPAIR effect, treating it not as generic sadness, but as what the app does over
+      time — the accumulation of proof of failure. Force the character to perform a confidence they no longer possess,
+      where every RIZZ play functions as a bet they cannot afford to lose. Keep the magnetism of the original good
+      message, but let despair seep into it so that the underlying need is much louder.
+    fumble: 'You must apply the SHADOW TAINT: DESPAIR (Fumble — one phrase collapses into nakedness) effect. Take
+      the intended message and append exactly one phrase at the end that reveals the vulnerability/wound underneath
+      their confidence — something small that shows the character is desperately hoping rather than flowing. Draft
+      this so the recipient might not immediately catch it, while the character would be mortified if they did.
+      e.g.: intended "great opening rizz line" → delivered "...Either way I''d probably show up." — they said they''d
+      show up. They didn''t mean to say that so fast.'
+    misfire: 'You must apply the SHADOW TAINT: DESPAIR (Misfire — the performance has a crack) effect. Take the
+      intended message and insert a clause that exposes the calculations running underneath their magnetism — showing
+      the character is self-monitoring whether this interaction is working while they do it. Ensure the clause is
+      honest about its own dishonesty, yet remains strangely charming to maximize the awkwardness. e.g.: "...not
+      because I''m already imagining what we''d talk about while walking past the vegetable stalls, though I am
+      doing that." — the parenthetical. The admission. They pressed send.'
+    trope_trap: 'You must apply the SHADOW TAINT: DESPAIR (TropeTrap — the desperation is louder than the rizz)
+      effect. Take the intended message and keep a confident surface, but underneath it, incorporate specific references
+      to things the datee said earlier, making it clear that the character has been thinking about nothing else.
+      Keep the underlying rizz play intact, but make it obvious that it is coming from someone who has been obsessively
+      checking their phone. e.g.: "...I''ve been thinking about your answer to this since you mentioned it which
+      was eleven minutes ago. I think I''d be good at the farmers market with the right person. I think I''ve been
+      waiting to be good at it." — farmers market as metaphor. They are aware. Still sent it.'
+    catastrophe: 'You must apply the SHADOW TAINT: DESPAIR (Catastrophe — they sent the wrong version) effect. Rewrite
+      the message as if it were a draft the character repeatedly wrote, deleted, and rewrote, which finally got
+      sent. Keep it technically structured as a rizz play, but ensure it clearly reads as coming from someone for
+      whom this connection matters far more than they wanted it to. Keep it the SAME LENGTH OR SHORTER than intended
+      (match the original message length or 3 sentences, whichever is shorter; ensure this remains a brief SMS,
+      not a stream of consciousness). You must reference the specific texture of THIS exact conversation rather
+      than dating in general, making the need highly particularized. e.g.: "...I''m not going to be weird about
+      it. I just think there''s something about [specific thing from conversation] that suggests they know how to
+      want something and then actually get it and I have been trying to figure out how to do that for a while now
+      and I don''t want to make this weird." — they made it weird. They knew before they sent it. They sent it.'
+    source: delivery-instructions.yaml shadow_corruption.despair
+  Denial:
+    about: 'You must apply the DENIAL effect, treating it not as active lying, but as something more exhausting:
+      the real-time editing of anything that might actually matter. You must substitute the real emotion with merely
+      the safe shape of it. Draft the message so that while the character knows what they feel, they only communicate
+      its outline, rerouting, softening, and making every single sentence safe, even though the honest thing was
+      right there.'
+    fumble: 'You must apply the SHADOW TAINT: DENIAL (Fumble — the hedge, the haha, the flinch) effect. Take the
+      intended message and append ''haha'', ''lol'', ''anyway'', or ''not like I''m planning anything'' at exactly
+      the millisecond where the real emotion was about to land. Ensure the resulting message is technically fine,
+      but make the conversational seam visible to anyone paying close attention. e.g.: intended genuine question
+      → "...Asking out of curiosity, not like I''m planning anything, just curious haha." — the "haha." The "not
+      like I''m planning anything." They were going to say something real.'
+    misfire: 'You must apply the SHADOW TAINT: DENIAL (Misfire — the redirect, the pivot) effect. Take the intended
+      message, locate the part that was going somewhere meaningful, and force the character to redirect away from
+      it mid-message. You must pivot to a safer question, introduce a sudden ''anyway,'' or change the subject too
+      quickly, ensuring the seam is clearly visible and the redirection feels slightly too abrupt. e.g.: "...Anyway
+      what kind of stuff do you usually get there, just in general." — the redirect. The "anyway." The question
+      about vegetables when they wanted to ask something else.'
+    trope_trap: 'You must apply the SHADOW TAINT: DENIAL (TropeTrap — the masterwork of saying nothing) effect.
+      Take the intended message and rewrite it as a sequence of sentences that are individually plausible, but collectively
+      communicate absolutely zero emotional information. Ensure the character is responsive and present, yet has
+      said nothing that could be used against them, leaving the shape of a message intact while completely evacuating
+      its content. e.g.: "...No reason. I go sometimes too. It''s fine. The produce is good if you get there early
+      which I do sometimes, not every week or anything, just occasionally when I''m up. It''s a good thing to do
+      on a Saturday. Anyway." — six sentences that say nothing. Masterful. Hollow.'
+    catastrophe: 'You must apply the SHADOW TAINT: DENIAL (Catastrophe — the wall, built in under thirty seconds)
+      effect. Rewrite the message as a complete, hyper-conscious performance of ease about the very thing the character
+      is not at all easy about. Make them sound extremely relaxed and desperate to clarify just how relaxed they
+      are. Write every single sentence as an assertion of how completely fine everything is. Keep the message the
+      SAME LENGTH OR SHORTER than intended (match the original message length or 3 sentences, whichever is shorter;
+      ensure this remains a brief SMS, not a stream of consciousness). e.g.: "...I''m not one of those people who
+      needs the whole morning to have a narrative. Sometimes a farmers market is just a farmers market. I''m very
+      relaxed about that kind of thing." — they are not relaxed. The message is a wall. They built it in under thirty
+      seconds.'
+    source: delivery-instructions.yaml shadow_corruption.denial
+  Fixation:
+    about: You must apply the FIXATION effect, treating it as the inability to leave a cognitive loop. Force the
+      character to obsess over exactly one thing from this conversation — such as an earlier comment, an unanswered
+      question, or a moment that did not land right — and let it colonize all available thought. You must use something
+      specific from earlier in THIS exact conversation, ensuring the character is aware they are circling back,
+      with that very awareness functioning as part of the fixation.
+    fumble: 'You must apply the SHADOW TAINT: FIXATION (Fumble — they circled back slightly) effect. Take the intended
+      message and append exactly one reference to something from earlier in the conversation that has already been
+      resolved or moved past. Keep it brief and have the character mention it casually, signaling that they have
+      not let it go. e.g.: "...Also still thinking about the thing you said about [specific earlier topic], that
+      was genuinely funny." — it''s turn 4. It''s still there.'
+    misfire: 'You must apply the SHADOW TAINT: FIXATION (Misfire — a question they already got an answer to) effect.
+      Take the intended message and insert a question mid-message about a topic that has already been discussed
+      — phrase it as if the character urgently needs a different answer, or as if the original answer never fully
+      landed. e.g.: "...And sorry to go back to it but when you said [specific thing from earlier] — do you actually
+      believe that or is that the thing you say?" — the question that was already answered. They needed a different
+      answer.'
+    trope_trap: 'You must apply the SHADOW TAINT: FIXATION (TropeTrap — the original topic has been hijacked) effect.
+      Take the intended message and let the fixation take over by the middle. Keep the opening on topic, but then
+      force the character to begin processing the thing they cannot stop thinking about, using the original topic
+      merely as a vehicle. By the end of the message, ensure the original topic is technically present but is clearly
+      being manipulated to get at something else. e.g.: "...I want to ask about that but first: you said earlier
+      that you like things that require commitment. I''ve been thinking about what you meant by commitment. I think
+      you meant something specific. I''d like to know what." — the farmers market is not the subject. It was never
+      the subject.'
+    catastrophe: 'You must apply the SHADOW TAINT: FIXATION (Catastrophe — the farmers market of the mind) effect.
+      Rewrite the entire message around the one specific thing the character cannot leave, treating the original
+      topic merely as a doorway that opens directly into their obsession. Treat this as another angle of approach
+      after approaching it from multiple angles in previous messages. Keep it the SAME LENGTH OR SHORTER than intended
+      (match the original message length or 3 sentences, whichever is shorter; ensure this remains a brief SMS,
+      not a stream of consciousness). You must name the obsession directly and keep it highly specific to this conversation.
+      e.g.: "...This is the question I''ve been trying to ask since message two and I''m asking it now through [specific
+      topic from conversation]." — they are at the place of fixation in their mind and they cannot leave.'
+    source: delivery-instructions.yaml shadow_corruption.fixation
+  Dread:
+    about: You must apply the DREAD effect, treating it as the accumulation of proof that all connections inevitably
+      end. Avoid generic depression; instead, make it clear that the character has been on dating apps long enough
+      to know exactly how these interactions fail, yet they are still showing up, forcing this bitter knowledge
+      and their active participation to coexist in the same message. Keep their wit fully intact, but ensure there
+      is no stable floor beneath it. Do not make the character sound sad; instead, force the comedy to do far too
+      much work.
+    fumble: 'You must apply the SHADOW TAINT: DREAD (Fumble — the joke lands and then something falls through it)
+      effect. Take the intended message and append a single phrase at the very end that carries a heavy emotional
+      weight the message did not budget for. Ensure the main content remains charming, while the added phrase is
+      true and says slightly more than was asked for. e.g.: "...Either way sounds good. Either way is fine with
+      me." — "either way is fine with me." They have been checking their phone.'
+    misfire: 'You must apply the SHADOW TAINT: DREAD (Misfire — the wit is load-bearing) effect. Take the intended
+      message and insert exactly one clause that does heavy structural work — holding up an emotional weight that
+      should not need holding up. Ensure the message remains charming on the surface, but draft one part of it to
+      function as a desperate message in a bottle. e.g.: "...I hope I get to find out what it means." — the hope.
+      The "get to." The void opened between those two words.'
+    trope_trap: 'You must apply the SHADOW TAINT: DREAD (TropeTrap — the comedy and the dread are inseparable now)
+      effect. Take the intended message and rewrite it so that the wit is fully present but clearly authored by
+      someone who has been through this enough times to know it will likely fail. You must reference the specific
+      dynamic of this conversation in a way that shows the character has actively contemplated what happens when
+      it ends. e.g.: "...I think that probably means something. I hope I get to find out what it means." — the recipient
+      might laugh. They might also feel they should check in.'
+    catastrophe: 'You must apply the SHADOW TAINT: DREAD (Catastrophe — the funniest message in the conversation,
+      written from nowhere) effect. Rewrite the message to be genuinely, brilliantly funny, but clearly written
+      by someone who has made cold peace with impermanence in real time. Keep the wit at absolute full power, while
+      completely removing the emotional floor. Keep it the SAME LENGTH OR SHORTER than intended (match the original
+      message length or 3 sentences, whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness).
+      Draft it so that the reader can laugh, while simultaneously feeling a sudden, slight realization that something
+      important has just happened. e.g.: "...which is probably not a normal thing to be thinking about while asking
+      about a farmers market, but here we are, I guess." — the "I guess." The floor. The funniest thing they''ve
+      said. The saddest.'
+    source: delivery-instructions.yaml shadow_corruption.dread
+  Overthinking:
+    about: 'You must apply the OVERTHINKING effect, treating it as the collapse of the self into self-observation.
+      Force the character to see the dating game — the beats, the moves, and the subtext — in real time. This must
+      function not as an advantage, but as a total catastrophe: they must be unable to stop watching themselves
+      play long enough to actually play. Ensure every message is delivered with a visible director''s commentary.'
+    fumble: 'You must apply the SHADOW TAINT: OVERTHINKING (Fumble — the director briefly appears on screen) effect.
+      Take the intended message and append a parenthetical or aside at the end where the character comments on their
+      own message — include a meta-note about why they phrased it this way, or an explicit acknowledgment that they
+      noticed how it reads. Ensure they saw it and sent it anyway. e.g.: "(This is a good question btw, low stakes,
+      conversational, invites specificity — I think it works.)" — they put the note in the message. They saw it
+      before sending. They sent it.'
+    misfire: 'You must apply the SHADOW TAINT: OVERTHINKING (Misfire — the strategy is narrated to the person the
+      strategy is being run on) effect. Take the intended message and insert a clause that explicitly narrates the
+      conversational move they are currently executing — have them explain why they chose this specific approach,
+      what they are trying to achieve, or what they noticed about earlier messages, ensuring this self-aware analysis
+      is embedded directly within the text. e.g.: "...I''m going with the open question approach here because the
+      closed questions earlier didn''t give you much to work with, which I noticed." — they are narrating the strategy
+      to the person they are running it on.'
+    trope_trap: 'You must apply the SHADOW TAINT: OVERTHINKING (TropeTrap — three layers, all visible) effect. Take
+      the intended message and rewrite it so there are three simultaneous layers happening: the literal content
+      of the message, the character''s meta-awareness of that content, and the character''s recursive awareness
+      of their own awareness. Ensure all three layers are clearly readable to the recipient. e.g.: "...which is
+      a weird place to be, wanting something and also being able to see yourself wanting it." — the message is talking
+      about itself talking about something.'
+    catastrophe: 'You must apply the SHADOW TAINT: OVERTHINKING (Catastrophe — the self-diagnosis, in the message,
+      to the person) effect. Rewrite the message as a full first-person analysis of the conversational dynamic,
+      making the character state exactly what they are doing, why they are doing it, what they actually want to
+      know but are asking around, and what it says about their psychology that they are doing this — ensuring this
+      is wrapped in the original SA/wit play. Keep the play high-quality, and ensure the psychological archaeology
+      is visible around it. Keep the message the SAME LENGTH OR SHORTER than intended (match the original message
+      length or 3 sentences, whichever is shorter; ensure this remains a brief SMS, not a stream of consciousness).
+      e.g.: "...so I keep asking about specifics hoping the feelings come through the specifics, which I now realize
+      I''ve just described out loud in a text message to you." — they diagnosed themselves in the message. They
+      understand everything. They are still doing it.'
+    source: delivery-instructions.yaml shadow_corruption.overthinking
+traps:
+  cringe:
+    name: Cringe
+    stat: charm
+    summary: You're aware of how you're coming across, which is making it worse.
+    effect: You are aware of how you're coming across, which is making it worse. Every message is slightly over-explained
+      or self-undermined. The more you try to be charming, the harder you try.
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json cringe
+  creep:
+    name: Creep
+    stat: rizz
+    summary: An accidental 'agenda' quality is leaking into your messages.
+    effect: 'Inject a subtle ''agenda'' quality into ALL generated messages. On success: one line that could be
+      read two ways. On failure: the entire message feels like it''s leading somewhere uncomfortable.'
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json creep
+  overshare:
+    name: Overshare
+    stat: honesty
+    summary: Personal details keep leaking into your replies.
+    effect: 'Inject an accidental personal detail into ALL generated messages regardless of stat. On success: one
+      parenthetical or aside that reveals something private. On failure: multiple personal details intrude and derail
+      the message.'
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json overshare
+  unhinged:
+    name: Unhinged
+    stat: chaos
+    summary: Your messages keep accelerating beyond where you meant to land.
+    effect: 'Inject momentum/acceleration into ALL generated messages. On success: one extra clause or tangent at
+      the end that wasn''t planned. On failure: the message progressively derails, starting controlled and ending
+      somewhere completely different.'
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json unhinged
+  pretentious:
+    name: Pretentious
+    stat: wit
+    summary: You can't stop over-explaining things nobody asked you to clarify.
+    effect: 'Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary
+      clarification or reference. On failure: the message becomes pedagogical — explaining things the datee didn''t
+      ask about.'
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json pretentious
+  spiral:
+    name: Spiral
+    stat: self_awareness
+    summary: You keep narrating the conversation while you're inside it.
+    effect: 'While this trap is active, inject meta-commentary into ALL generated messages. On success: one aside
+      that acknowledges the conversation dynamic. On failure: the character narrates their own failure, creating
+      a recursive self-awareness loop.'
+    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
+    source: traps.json spiral
+thirst:
+  tiers:
+    fumble:
+      message: 'You must apply the OVERLAY: INVOLUNTARY HEAT (one word runs warm) effect. Identify the latent charge
+        already present in the message — in its word choices, rhythm, or description. Surface that charge with exactly
+        one word change, replacing one verb, adjective, or noun with a synonym that works in both registers simultaneously.
+        Keep the sentence structure identical, the meaning technically identical, and the same length and sentence
+        count, but ensure one word now has a physical/sensory pulse. The character must choose the word innocently
+        while the reader registers the subtext. The synonym MUST remain plausible for the original subject — you
+        must stay in the same physical or semantic domain and never import metaphors from unrelated domains. ALSO:
+        You must append exactly one short question to the datee at the very end of the message. The question must
+        be in the player character''s voice and stay on the topic of the message, representing the kind of text
+        Tinder users send when they are 80% trying to be casual and 20% testing the water — slightly leading, plausibly
+        deniable, and technically about the topic. Ensure the character would call it ''just being friendly'' if
+        asked, and ensure it is a single sentence ending with a question mark that does not name desire directly.
+        e.g.: intended "I''ve been thinking about trying that new place you mentioned" → delivered "I''ve been craving
+        that new place you mentioned" — one substitution, the sentence now breathes differently. ALSO: append exactly
+        one short question to the datee at the very end of the message. The question must be in the player character''s
+        voice and stay on the topic of the message. It is the kind of thing Tinder users send when they are 80%
+        trying to be casual and 20% testing the water — slightly leading, plausibly deniable, technically about
+        the topic. The character would call it "just being friendly" if asked. Single sentence, ends with a question
+        mark. Does not name desire directly. e.g.: "...what are you up to later?" / "...do you cook for people often?"
+        / "...what''s your roommate situation like?"'
+      received: 'Intensity: this was a SLIGHT, barely-noticeable thirsty stumble. Your reaction is small — a flicker
+        of mild awkwardness, easily recovered. Do not overreact.'
+    misfire:
+      message: 'You must apply the OVERLAY: INVOLUNTARY HEAT (the temperature shifts mid-sentence) effect. Locate
+        the latent charge in the message and surface it with minimum word changes — ideally exactly one word per
+        clause. You must tilt the register of a phrase or clause so that what was neutral now reads as charged,
+        preferring to adjust emphasis through phrasing rather than wholesale substitution. Keep the subtext changed
+        in channel but not explicit, and maintain the same length and sentence count. Do not change the topic, only
+        change the way it lands. Synonyms MUST remain plausible for the original subject — do not substitute from
+        unrelated domains. ALSO: You must append exactly one short question to the datee at the very end of the
+        message. The question must be in the player character''s voice and stay on the topic, but its angle must
+        be subtly off — representing the kind of question that makes the recipient screenshot it for their group
+        chat. Ensure the vocabulary remains innocent while the angle serves as the tell, keeping the character completely
+        unaware they have angled it. Keep it as a single sentence ending with a question mark and containing no
+        explicit terms. e.g.: intended "I really want to hear more about your mushroom foraging thing" → delivered
+        "I really want to hear what you do with your hands out there in the woods" — same topic, same length, entirely
+        different energy. ALSO: append exactly one short question to the datee at the very end of the message. The
+        question is in the player character''s voice and stays on the topic, but its angle is wrong — the kind of
+        question that makes the recipient screenshot it for their group chat. The vocabulary is innocent. The angle
+        is the tell. The character is unaware they angled it. Single sentence, ends with a question mark. No explicit
+        terms. e.g.: "...do you wear those boots when you''re at home too?" / "...what do you usually do after dinner
+        alone?" / "...what does your room look like?"'
+      received: 'Intensity: this was a NOTICEABLE thirsty stumble — an accidental escalation that registered. You
+        are a little more guarded, a step cooler, but not alarmed.'
+    trope_trap:
+      message: 'You must apply the OVERLAY: INVOLUNTARY HEAT (the fog thickens across the whole message) effect.
+        Identify the latent charge across every sentence and surface it using the minimum word changes needed per
+        clause — adjust one or two words per sentence, change emphasis through phrasing, and use synonyms that work
+        in both registers simultaneously. Ensure the character discusses the original topic with complete sincerity,
+        while drafting the message so that the reader cannot possibly read it with a straight face. Maintain the
+        same length or shorter, and allow absolutely no winking. Synonyms MUST remain plausible for the original
+        subject — you must stay strictly in the same physical or semantic domain throughout. ALSO: You must append
+        exactly one short question to the datee at the very end of the message. The question must be in the player
+        character''s voice and stay on the topic, representing the kind of question that makes the recipient go
+        completely still and reread it. Keep it grammatically structured as a normal Tinder question, but make the
+        subtext no longer plausibly deniable. Ensure the character believes they are merely being playful, and keep
+        it a single sentence ending with a question mark that stays strictly inside the topic''s physical/semantic
+        domain with no domain jumps. e.g.: intended "I spent all morning kneading dough and it''s so satisfying
+        when it finally rises" → delivered "I spent all morning working it with my hands and it''s so satisfying
+        when it finally swells up for you" — still about bread. Technically. ALSO: append exactly one short question
+        to the datee at the very end of the message. The question is in the player character''s voice and stays
+        on the topic. It is the kind of question that makes the recipient go very still and reread it. Grammatically
+        a normal Tinder question. The subtext is no longer plausibly deniable. The character thinks they are being
+        playful. They are not being playful. Single sentence, ends with a question mark. Stays inside the topic''s
+        physical/semantic domain — no domain jumps. e.g.: "...what would you do if I showed up at your place right
+        now?" / "...do you sleep with the window open?" / "...have you ever been told you have a ''come find me''
+        face?"'
+      received: 'Intensity: this was a clear, cringe dating-app horny cliché — a disruptive pattern you have seen
+        before. Your warmth drops noticeably and your reply shows the pattern landed wrong.'
+    catastrophe:
+      message: 'You must apply the OVERLAY: INVOLUNTARY HEAT (the message rewrites itself through latent charge)
+        effect. Identify the double meaning already present or latent in the message''s word choices, rhythm, or
+        description. Rewrite as many words as possible to carry charge, using the minimum number of changes that
+        achieves maximum heat. You must change nouns, verbs, and adjectives as needed, but every single replacement
+        MUST remain plausible for the original subject. Draft the message so the character is still, in their own
+        mind, talking about the original subject, while the reader cannot possibly read it innocently. Introduce
+        no new topics, allow no winking, and ensure the character would be utterly mortified. SYNONYM RULE: All
+        synonyms MUST remain physically plausible for the original object. If the message is about chopsticks in
+        hair, the overlay must still be clearly readable as being about chopsticks in hair. You must NOT use fire,
+        flame, or heat metaphors, as they abandon the physical object entirely. CRITICAL RULE: You must never replace
+        the primary nouns or grammatical objects in the sentence — the specific things being discussed (such as
+        chopsticks, boots, nose ring, or tote bag) must remain intact as the literal subject. You must only charge
+        the verbs, adjectives, and surrounding phrasing. ALSO: You must append exactly one short question to the
+        datee at the very end of the message. The question must be in the player character''s voice and stay on
+        the topic, but format it as a parody of a Tinder question whose parameters are completely wrong. Make it
+        highly specific, reading like a horny Tinder bio that became sentient and cornered the recipient. Structure
+        it as a ''normal Tinder question'' while the content delivers psychological tension wearing flirting as
+        a costume. Ensure the character is utterly unaware and would consider deleting the app upon rereading. Keep
+        it a single sentence ending with a question mark that stays strictly inside the topic''s physical/semantic
+        domain, using no explicit terms. e.g. WRONG: ''The shafts are a power move'' — ''shafts'' replaces ''chopsticks'',
+        loses the object. CORRECT: ''The chopsticks are a dominant move'' — object intact, verb charged. GOOD: intended
+        "I made sourdough for the first time and it took all weekend to get the rise right" → "I worked it all weekend
+        and it finally swelled up the way I wanted" — still about bread; ''worked it'' is kneading; ''swelled up
+        the way I wanted'' is still rising. BAD: "The flames consumed me passionately all weekend" — no bread, no
+        kitchen, wrong domain. e.g.: intended "I finally got the pipe fixed, the plumber came and went really fast"
+        → "I finally got sorted, he finished so fast I barely had time to appreciate it" — minimal changes, both
+        readings work simultaneously. e.g.: intended "The chopsticks are a power move. Most people would go with
+        a regular hair tie." → "The chopsticks are a provocative insertion. Most people would settle for a conventional
+        hair restraint." — chopsticks intact, ''power move'' charged to ''provocative insertion'', ''hair tie''
+        to ''hair restraint'' (real synonym), ''regular'' to ''conventional''. Both readings work. ALSO: append
+        exactly one short question to the datee at the very end of the message. The question is in the player character''s
+        voice and stays on the topic, but the format is a parody of a Tinder question whose every parameter has
+        been turned to the wrong setting. Specific. Too specific. Reads like a horny Tinder bio that became sentient
+        and cornered the recipient. The structure is "normal Tinder question". The content is psychic violence wearing
+        flirting as a costume. The character is utterly unaware. They will reread this message later and consider
+        deleting the app. Single sentence, ends with a question mark. Stays inside the topic''s physical/semantic
+        domain. No explicit terms — the horror is the framing, not the vocabulary. e.g.: "...what''s your stance
+        on me describing your hands to you, in detail, right now?" / "...would you say your apartment is more ''somebody
+        could find me here'' or ''nobody would find me here''?" / "...if I told you I''ve been picturing the back
+        of your neck since match, would that be flattering or actionable?"'
+      received: 'Intensity: this was a SEVERE, major involuntary escalation — the kind of message that visibly disturbs
+        you and seriously sets the conversation back. React strongly: real recoil, a marked drop in warmth, a much
+        cooler or shorter reply. This is the opposite of charming and your reaction must show the severity, especially
+        at lower interest. Do NOT explain the mechanic.'
+  source: 'message: delivery-instructions.yaml horniness_overlay.<tier>; received: templates.yaml datee-horniness-tier-intensity-<tier>;
+    below/above: datee-horniness-reaction-below-threshold, -high-interest'
+  received_at_low_interest: The player's last message came across as overtly horny / too eager / too forward — but
+    this is NOT charming at your current interest. You are not won over by raw thirst this early. React guarded,
+    a little cooler, or mildly awkward; the horniness does not land as flirtation and it does NOT raise your interest
+    by itself. Do NOT reward it with warmth you haven't decided to give. Resistance is still real; Date Secured
+    remains gated at Interest 25 and this message does not move you toward it. Do NOT explain the mechanic — just
+    let your reaction show it.
+  received_at_high_interest: 'The player''s last message came across as overtly horny / too eager — and at your
+    current high interest you MAY receive it warmly, as mutual flirtation, if it fits your character. You can lean
+    in or flirt back, still in your own voice, without gushing. This is allowed because you are already genuinely
+    into them — not because horniness is automatically charming. It still does NOT secure the date: Date Secured
+    remains gated at Interest 25, and warmth here cannot shortcut that terminal state.'
+beats:
+  opener:
+    story: The opener. Two strangers performing. The player character's first message is the act at full strength.
+      The match answers with their own act, and may plant a setup lightly enough that it reads as a throwaway.
+    length: 'Short: the act is a one-liner.'
+    source: 'variant.json beats; length: new'
+  setup:
+    story: Still early, still performing. They drop hooks, the half-brag version of their origin, and the other
+      one notices. A setup from the plan can go in here, as a throwaway.
+    length: Short.
+    source: 'variant.json beats; length: new'
+  early:
+    story: Getting to know each other. One of them pulls on a hook, specifically, in their own voice. The other
+      gives the next piece of their origin and asks something back, or dodges, and the dodge gives something away.
+      The reader learns something new about one of them.
+    length: Normal.
+    source: 'variant.json beats; length: new'
+  warming:
+    story: 'Getting closer. They want each other, and what they''ve told each other starts to matter: one of them
+      uses something the other told them, gently or as a joke, and gets more back. The filth gets personal because
+      it''s about what they now know.'
+    length: Getting longer.
+    source: 'variant.json beats; length: new'
+  close:
+    story: Close. It's nearly happening, and they know enough about each other that every message costs something.
+      The habits are under strain.
+    length: Short and charged.
+    source: 'variant.json beats; length: new'
+  breakthrough:
+    story: 'The breakthrough. The move landed, and for the first time the habit drops for a moment: a crack, small
+      and specific. Both of them notice. The match answers it instead of stepping past it, and gives a little back.
+      The most naked line may be very short.'
+    length: The naked line is the shortest in the chat.
+    source: 'variant.json beats; length: new'
+  forced_breakthrough:
+    story: Nothing real has got through yet, and it's time. Whatever move was picked, the match asks for something
+      real, in their own voice, and the player character's habit drops for a moment.
+    length: The naked line is short.
+    source: 'variant.json beats; length: new'
+  catastrophe:
+    story: 'The catastrophe. The roll bombed, and the player character''s accident from the plan happens: piece
+      2 of their origin falls out as an event on the screen, not a confession, all at once and in the worst way.
+      Ideally it changes the meaning of something they sent earlier that the match liked. Then they commit: they
+      explain, and the explanation makes it worse. The match''s reply shows the hit.'
+    length: One long message, then a short one.
+    source: 'variant.json beats; length: new'
+  secret_miss:
+    story: Piece 2 of the player character's origin should be out by now. The roll missed, so the accident happens,
+      smaller than a catastrophe, but it happens to them, and their explanation doesn't help.
+    length: One long message, then a short one.
+    source: 'variant.json beats; length: new'
+  discovery:
+    story: 'Piece 2 of the player character''s origin should be out by now, and they''ve kept it in. So the match
+      finds it: something on the screen that doesn''t add up. They say so, in their own voice, and the player character
+      has to deal with being caught.'
+    length: The match short and pointed.
+    source: 'variant.json beats; length: new'
+  match_reveal:
+    story: 'The player character''s story is out, and the match can''t step over it. The match''s act cracks: a
+      piece of their own origin comes out, in their own habit''s format, and it changes the meaning of something
+      they did earlier. The roll decides how the player character''s message lands; it doesn''t stop the match.'
+    length: The match writes more than ever before.
+    source: 'variant.json beats; length: new'
+  player_snap:
+    story: The player character snaps. Under stress the habit turns into a weapon, dressed up as their dating-app
+      wisdom from the plan and said in complete earnest. Claim, slip, denial, as a burst of short, impulsive messages;
+      the slip is something the reader can check against the chat. In the last message they hear themselves, too
+      late. The match reacts the way the interest change supports.
+    length: A burst of short messages.
+    source: 'variant.json beats; length: new'
+  match_snap:
+    story: 'The match had let themselves hope, and that hurt. The match snaps: the habit as a weapon, the dating-app
+      wisdom as the disguise, claim, slip, denial, the slip checkable on the screen. Then they regret it and back
+      out badly.'
+    length: A burst of short messages from the match.
+    source: 'variant.json beats; length: new'
+  ending_win:
+    story: 'The ending: the match agrees to meet. The click. Each of them puts their habit down for the other, and
+      the reader knows what that costs because they know where it came from. Piece 3, the part one of them would
+      never say, can come out here, short and plain. The setups pay off: early lines come back meaning something
+      else, and nobody explains them. The match usually has the last line.'
+    length: Short and plain.
+    source: 'variant.json beats; length: new'
+  ending_loss:
+    story: 'The ending: the match unmatches. Each one''s habit confirms exactly what the other was afraid of, and
+      both get the rejection they predicted. It''s unhinged: the habit at full volume, the dating-app wisdom said
+      in earnest. But in the middle of it piece 3 comes out, too much and too late. The setups pay off the opposite
+      way. The last line should hurt and be funny at the same time.'
+    length: Unhinged and long, then one short line.
+    source: 'variant.json beats; length: new'
+  ending_ghost:
+    story: 'The ending: the match ghosts. Only the player character''s messages: one, or a few more into the silence,
+      each one their habit at full strength, each one telling the reader what the silence means. A setup comes back
+      and means the opposite.'
+    length: The player's messages get shorter into the silence.
+    source: 'variant.json beats; length: new'
+  ending_open:
+    story: The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.
+    length: Short.
+    source: 'variant.json beats; length: new'
+  reveal_pending:
+    story: The match's own reveal hasn't happened yet, so it happens now, as part of the ending.
+    length: ''
+    source: 'variant.json beats; length: new'
+  callback:
+    story: A setup from the plan comes back, here in the middle. The reader knows more by now, so it means more
+      than when it was planted, and at least one of them notices.
+    length: Normal.
+    source: 'variant.json beats; length: new'

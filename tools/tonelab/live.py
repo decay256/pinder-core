@@ -64,6 +64,22 @@ only in a last "For the notes" line; a direction that uses them elsewhere, or ru
 is asked for again. The cast sheet now recognises a long-form heading ("Origin, in three
 pieces, ...") and the run stops if any origin or accident line reaches the writers.
 
+v9: the writers draft and the director has the final say. In v8 the director's directions
+were still a layer the writers could ignore or over-obey (in turn 2 all three options carried
+the same prop because the direction said "in every option"), and the fiction drifted into
+one building ("meet downstairs", "the doorway") while the director's own notes said they
+were apart. Now each writer drafts from the game's prompt alone (who they are, where each is
+tonight, the chat, the interest level, the template, the shape), and the director, in its
+session, gets that draft, answers a fixed checklist about it (where are they, what did the
+other just say, what does this cost, what does this interest level need, what is stale,
+does it sound like them) and writes the version that goes out, the options the player sees
+and the turn as sent. The game's checks (shape, habit, required notes) run on the
+director's version, plus three new ones: a line that puts them in one place before the
+match agrees to meet, a [bracketed] fact the writer left for the director, and a line that
+is neither a message nor a note. Each interest level now names what the chat needs from
+it, and the turns-left estimate no longer jumps with the meter (v8's went 4, 8, 3, 12 in
+four turns, and the turn it said 3 demanded an origin piece and the collision at once).
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -208,17 +224,36 @@ STAT_HIT = {
 
 
 def estimate_left(past, interest):
-    """Turns left, estimated from the meter: the distance to 25 (or to 0) over the recent
-    pace. The game ends at either, and nobody knows which in advance."""
-    deltas = [t["interest_delta"] for t in past[-3:]]
-    pace = sum(deltas) / len(deltas) if deltas else 2.0
+    """Turns left, estimated from the meter: the distance to 25 (or to 0) over the pace. The
+    game ends at either, and nobody knows which in advance. The meter swings by several
+    points a turn, and v8's estimate from the last three turns jumped between three and
+    twelve, which made the game demand an origin piece and the collision in one turn and
+    then nothing for three. Now the pace is the whole chat's average, pulled toward a typical
+    1.25 a turn, and since a chat usually runs ten to fifteen turns the estimate stays between
+    eight and fourteen turns from the start while the meter is in the middle."""
+    i, deltas = len(past), [t["interest_delta"] for t in past]
+    pace = (sum(deltas) + 1.25 * 4) / (len(deltas) + 4)
     if pace > 0.3:
         left = (25 - interest) / pace
     elif pace < -0.3:
         left = interest / -pace
     else:
         left = 6
-    return max(1, min(12, round(left)))
+    lo = 8 - i if 5 <= interest <= 20 else 1
+    return max(1, min(12, 14 - i, max(lo, round(left))))
+
+
+def interest_goal(knobs, interest):
+    """What the chat needs at this interest level."""
+    for g in knobs["interest_goals"]:
+        if g["from"] <= interest <= g["to"]:
+            return g["goal"]
+    return ""
+
+
+def interest_goals_text(knobs):
+    return "\n".join(f"- {g['state']} ({g['from']}" + (f" to {g['to']}" if g["to"] != g["from"] else "") + f"): {g['goal']}"
+                     for g in knobs["interest_goals"])
 
 
 def dice_meaning(t):
@@ -449,14 +484,14 @@ def exchange_text(told, hooks):
     return out
 
 
-CAST_KEEP = {"shows", "fear", "habit", "habit marker", "lie", "voice"}
+CAST_KEEP = {"shows", "tonight", "fear", "habit", "habit marker", "lie", "voice"}
 SHARED = {"collision", "setups", "if they click", "if it falls apart", "heat"}
 FIELDS = CAST_KEEP | SHARED | {"origin", "accident", "snap"}
 
 
 def cast_sheet(plan, names):
     """Who the two characters are, cut from the plan for the writers: what they show, their
-    fear, habit, lie and voice. Origins, accidents, setups, the collision, the heat (which
+    where they are tonight, fear, habit, lie and voice. Origins, accidents, setups, the collision, the heat (which
     names what has to happen first) and both endings stay with the director, so the writers react to the chat
     instead of steering toward lines and props they've already read."""
     parts = {names["player"]: [], names["datee"]: []}
@@ -498,62 +533,93 @@ def cast_sheet(plan, names):
     return sheet
 
 
-DIRECTION = re.compile(r"(?ims)^[\s*_#>\-]*DIRECTION[\s*_]*:[\s*_]*(.+)")
-NOTE_HEADS = ("Where they are", "What each knows", "Not asked yet", "Working", "Stale", "Last direction")
+NOTE_HEADS = ("Where they are", "What each knows", "Not asked yet", "Working", "Stale", "Last turn")
+CHECK = re.compile(r"(?im)^[\s*_#>\-]*CHECK[\s*_]*:")
+FINAL = re.compile(r"(?im)^[\s*_#>\-]*FINAL[\s*_]*:[\s*_]*")
+OPT_HEAD = re.compile(r"(?im)^[\s*#]*OPTION\b")
+# A line that puts them in one place, or one on the way to the other, before the match agrees to meet.
+PRESENCE = re.compile(r"(?i)\b(?:downstairs|upstairs|your (?:front )?door|come over|coming over|come up|"
+                      r"on my way|be right there|i'?m here|i am here|i arrived|outside your|let you in|"
+                      r"in the room with you|(?:put|take|took|taking|putting) (?:my|your) coat|my coat|your coat)\b")
+LABEL_IN_CHAT = re.compile(r"\b(?:TOLD|HOOK|PLANTED|CALLBACK|PAID|COLLIDED)\b|(?i:\b(?:setup|piece)\s*#?\d)")
 
 
-def direction_of(text):
-    m = DIRECTION.search(text)
-    return (m.group(1) if m else text).strip()
+def sections(text):
+    """A director answer split into its notes, its checklist answers and the version that goes out."""
+    c = CHECK.search(text)
+    body = text[c.end():] if c else text
+    m = FINAL.search(body) or OPT_HEAD.search(body)
+    head = text[:c.start()] if c else (body[:m.start()] if m else text)
+    notes = re.sub(r"(?is)^.*?NOTES[\s*_]*:", "", head, count=1).strip()
+    check = (body[:m.start()] if m else body).strip() if c else ""
+    final = FINAL.sub("", body[m.start():], count=1).strip() if m else ""
+    return notes, check, final
 
 
-def notes_of(text):
-    m = DIRECTION.search(text)
-    head = text[:m.start()] if m else text
-    return re.sub(r"(?is)^.*?NOTES[\s*_]*:", "", head, count=1).strip()
-
-
-LABELS = re.compile(r"(?i)\b(?:setup|piece)\s*#?\d|\binterest\b|\(\s*[+-]\d|\b(?:TOLD|PLANTED|CALLBACK|PAID|COLLIDED)\b")
-
-
-def direction_problems(direction):
-    """A direction is plain sentences about meaning; the game's labels go only in its notes line."""
-    body = re.split(r"(?i)For the notes\s*:", direction)[0]
-    out, n = [], len(body.split())
-    if n > 140:
-        out.append(f"the direction runs {n} words before the notes line, more than 120")
-    hits = sorted({m.group(0) for m in LABELS.finditer(body)}, key=str.lower)
-    if hits:
-        out.append("the direction uses the game's labels outside the notes line (" + ", ".join(hits) + ")")
+def chat_problems(msgs, allow_meet):
+    """What no message may do, whoever wrote it."""
+    out = []
+    near = [m for m in msgs if PRESENCE.search(m)]
+    if near and not allow_meet:
+        out.append("these put them in one place, or one of them on the way to the other, though they are apart and the "
+                   "match hasn't agreed to meet: " + " / ".join(f'"{m}"' for m in near[:3]))
+    held = [m for m in msgs if "[" in m or "]" in m]
+    if held:
+        out.append("a [bracketed] placeholder is still in the chat: " + " / ".join(f'"{m}"' for m in held[:3]))
+    tagged = [m for m in msgs if LABEL_IN_CHAT.search(m)]
+    if tagged:
+        out.append("the game's labels are in the chat: " + " / ".join(f'"{m}"' for m in tagged[:3]))
     return out
 
 
-def notes_missing(text):
-    n = notes_of(text).lower()
-    return [h for h in NOTE_HEADS if h.lower() not in n] + ([] if DIRECTION.search(text) else ["the direction"])
+def split_stray(lines):
+    """Messages, and the lines that are neither a message nor a note (parse_chat glues those
+    onto the message before them)."""
+    kept, stray = [], []
+    for w, m in lines:
+        first, _, extra = m.partition("\n")
+        stray += [x for x in extra.splitlines() if x.strip()]
+        if w == "?":
+            stray.append(first)
+        else:
+            kept.append((w, first.strip()))
+    return kept, stray
+
+
+def options_problems(raw, offered, names):
+    notes, check, final = sections(raw)
+    out = [f"the notes have no '{h}'" for h in NOTE_HEADS if h.lower() not in notes.lower()]
+    if not check:
+        out.append("there is no CHECK: with an answer to each question of the checklist")
+    got = parse_options(final, offered)
+    lines = {s: split_stray(parse_lines(got[s], names))[0] if got.get(s) else [] for s in offered}
+    missing = [s for s in offered if not any(w == names["player"] for w, _ in lines[s])]
+    if missing:
+        out.append("no option for " + ", ".join(missing))
+    out += chat_problems([m for ls in lines.values() for _, m in ls], False)
+    return out, notes, check, got
 
 
 class Director:
     """One session for the whole chat: every message and every reply stays in it, so the
-    director remembers what it noted and asked for, and sees whether it worked."""
+    director remembers what it noted and wrote, and sees whether it worked."""
 
     def __init__(self, caller, system, effort):
         self.caller, self.system, self.effort, self.messages = caller, system, effort, []
 
-    def ask(self, user, label):
-        out = self.caller(self.system, user, label, self.effort, {"history": list(self.messages)})
+    def ask(self, user, label, ctx=None):
+        out = self.caller(self.system, user, label, self.effort, {**(ctx or {}), "history": list(self.messages)})
         self.messages += [{"role": "user", "content": user}, {"role": "assistant", "content": out}]
         return out
 
 
 CALL_TITLES = {
-    "direction before the roll": ("Director, before the roll", True),
-    "direction before the roll retry": ("Director, before the roll, asked again", True),
-    "options": ("Options writer", False),
-    "direction": ("Director, after the roll", True),
-    "direction retry": ("Director, after the roll, asked again", True),
-    "delivery": ("Turn writer", False),
-    "delivery retry": ("Turn writer, second attempt", False),
+    "options": ("Options writer, draft", False),
+    "director before the roll": ("Director, before the roll: notes, checklist and the options the player sees", True),
+    "director before the roll retry": ("Director, before the roll, asked again", True),
+    "delivery": ("Turn writer, draft", False),
+    "director after the roll": ("Director, after the roll: checklist and the turn as sent", True),
+    "director after the roll retry": ("Director, after the roll, asked again", True),
 }
 
 
@@ -576,23 +642,32 @@ def turn_calls(calls, n_turns):
     return out
 
 
-def must_text(need, names):
-    """What the game requires this turn, in plain words; the director says which piece or setup."""
-    say = {"TOLD:any": "something new from one of their origins comes out, the piece the director names (note: TOLD)",
-           "COLLIDED": "one's habit lands on the other one's fear (note: COLLIDED)",
-           "PLANTED": "a setup is planted as a throwaway, the one the director names (note: PLANTED and its number)",
-           "CALLBACK": "a setup comes back, meaning more by now, the one the director names (note: CALLBACK and its number)",
-           "PAID": "something pays off, the one the director names (note: PAID and its number)"}
-    out = [say.get(n) or f"the next piece of {n[5:]}'s origin comes out, the one the director names (note: TOLD)"
-           for n in need]
-    return "\n".join(f"- {x}" for x in out) if out else "- nothing beyond what the director says"
+def must_text(need, names, director):
+    """What the game requires this turn, in plain words: with the note it needs for the
+    director, who knows the plan; as a moment to leave room for, for the writer, who doesn't."""
+    if director:
+        say = {"TOLD:any": "something new from one of their origins comes out, the next piece of whoever it fits (note: TOLD)",
+               "COLLIDED": "one's habit lands on the other one's fear, the way the plan's Collision says (note: COLLIDED)",
+               "PLANTED": "a setup from the plan is planted as a throwaway (note: PLANTED and its number)",
+               "CALLBACK": "a setup comes back, meaning more by now (note: CALLBACK and its number)",
+               "PAID": "a setup pays off (note: PAID and its number)"}
+        piece = "the next piece of {}'s origin comes out (note: TOLD)"
+    else:
+        say = {"TOLD:any": "something new comes out of one of their pasts: write the moment, the fact in square brackets",
+               "COLLIDED": "one's habit lands on the other one's fear",
+               "PLANTED": "a throwaway line that will matter later; the director picks it, so leave room for one",
+               "CALLBACK": "something from earlier in the chat comes back, meaning more by now",
+               "PAID": "something from earlier in the chat pays off"}
+        piece = "something new comes out of {}'s past: write the moment, the fact in square brackets"
+    out = [say.get(n) or piece.format(n[5:]) for n in need]
+    return "\n".join(f"- {x}" for x in out) if out else "- nothing beyond the template"
 
 
 def roll_line(t):
     r = t["roll"] or {}
     if r.get("success") or r.get("nat1"):
         return dice_meaning(t)
-    return "It misses: what they meant comes out wrong, the way the director describes."
+    return "It misses: what they meant comes out wrong, in a way that fits who they are, and it shows in the message itself."
 
 
 def mood_text(t, names, is_last, outcome):
@@ -739,6 +814,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         "time_of_day": mech.get("time_of_day", ""),
         "player_card": tl.render(files["character.md"], {**pv, "role": "the player"}, "character.md").strip(),
         "datee_card": tl.render(files["character.md"], {**dv, "role": "the match"}, "character.md").strip(),
+        "interest_goals": interest_goals_text(knobs),
+        "checklist": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(knobs["checklist"])),
     }
     bible = tl.render(files["bible.md"], common, "bible.md").strip()
     systems = {k: bible + "\n\n" + tl.render(files[k + ".md"], common, k + ".md").strip()
@@ -764,67 +841,79 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         banned = habit_banned(chat, habits)
         h_note = habit_note(habits, banned)
         pre_step, _ = story_step(i, None, False, left, names, pieces, setups, collided, False)
+        offered = t["options"]
         base = {**common, "plan": plan, "cast": cast, "history": history(chat), "n": t["turn"],
                 "story_so_far": story.so_far(), "habit_note": h_note,
                 "exchange": exchange_text(told, [h for h in hooks if h[0] >= t["turn"] - 2])}
-        since = (f"The plan for this match:\n\n{plan}\n\nThe chat hasn't started yet." if not chat else
-                 f"Turn {chat[-1][0]} as the writer delivered it:\n" + "\n".join(f"{w}: {m}" for w, m in chat[-1][1]))
-        do_user = tl.render(files["direct_options_input.md"],
-                            {**base, "since": since, "step": pre_step, "interest": t["interest_before"], "state": t["state_before"],
-                             "options": ", ".join(t["options"]), "needs": needs}, "direct_options_input.md").strip() + "\n"
-        o_raw = director.ask(do_user, f"turn {t['turn']} direction before the roll")
-        o_problems = notes_missing(o_raw) + direction_problems(direction_of(o_raw))
-        if o_problems:
-            o_raw = director.ask(f"Your answer broke the format: {'; '.join(o_problems)}. Write the notes and the "
-                                 "direction again, in the format asked for.", f"turn {t['turn']} direction before the roll retry")
-            o_problems = notes_missing(o_raw) + direction_problems(direction_of(o_raw))
-        o_direction, d_notes = direction_of(o_raw), notes_of(o_raw)
+        goal_before = interest_goal(knobs, t["interest_before"])
         o_user = tl.render(files["options_input.md"],
-                           {**base, "options": ", ".join(t["options"]), "direction": o_direction},
-                           "options_input.md").strip() + "\n"
-        o_text = caller(systems["options"], o_user, f"turn {t['turn']} options", knobs.get("turn_reasoning"),
-                        {"offered": t["options"]})
-        intended = parse_options(o_text, t["options"]).get(t["chosen_stat"])
+                           {**base, "options": ", ".join(offered), "interest": t["interest_before"],
+                            "interest_goal": goal_before}, "options_input.md").strip() + "\n"
+        o_draft = caller(systems["options"], o_user, f"turn {t['turn']} options", knobs.get("turn_reasoning"),
+                         {"offered": offered})
+        since = (f"The plan for this match:\n\n{plan}\n\nThe chat hasn't started yet." if not chat else
+                 f"Turn {chat[-1][0]} went out as you wrote it.")
+        do_user = tl.render(files["direct_options_input.md"],
+                            {**base, "since": since, "step": pre_step, "interest": t["interest_before"],
+                             "state": t["state_before"], "interest_goal": goal_before, "options": ", ".join(offered),
+                             "needs": needs, "draft": o_draft.strip()}, "direct_options_input.md").strip() + "\n"
+        o_label = f"turn {t['turn']} director before the roll"
+        o_raw = director.ask(do_user, o_label, {"offered": offered})
+        o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
+        if o_problems:
+            o_raw = director.ask(f"Your answer broke the format: {'; '.join(o_problems)}. Write the notes, the checklist "
+                                 "and the three options again, in full, in the format asked for.", o_label + " retry",
+                                 {"offered": offered})
+            o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
+        drafts = parse_options(o_draft, offered)
+        shown = {s: finals.get(s) or drafts.get(s) for s in offered}  # the director's, or the draft where it gave none
+        intended = shown.get(t["chosen_stat"])
         if not intended:
-            tl.die(f"turn {t['turn']}: the options output has no block for the picked move {t['chosen_stat']}:\n{o_text[:1500]}")
+            tl.die(f"turn {t['turn']}: neither the director nor the draft has an option for the picked move "
+                   f"{t['chosen_stat']}:\n{o_raw[:1500]}")
         key, beat = story.beat(i, t, is_last, mech.get("outcome"))
         ghost, nat20 = key == "ending_ghost", bool(r.get("nat20"))
         now_left = 1 if is_last else left
         step, need = story_step(i, key, is_last, now_left, names, pieces, setups, collided, nat20)
         target = turn_target(knobs, key, seed, t["turn"], spent, now_left, turns[:i], t["state_after"], nat20)
         shape = draw_shape(knobs, key, seed, t["turn"], target)
-        meaning, must = dice_meaning(t), must_text(need, names)
-        dt_user = tl.render(files["direct_turn_input.md"],
-                            {**base, **tv, "step": step, "dice_meaning": meaning, "intended": intended, "beat": beat,
-                             "beat_key": key, "must": must, "shape": shape_text(shape, names)},
-                            "direct_turn_input.md").strip() + "\n"
-        direction = direction_of(director.ask(dt_user, f"turn {t['turn']} direction"))
-        t_problems = direction_problems(direction)
-        if t_problems:
-            direction = direction_of(director.ask(f"Your direction broke the format: {'; '.join(t_problems)}. Write the "
-                                                  "direction again.", f"turn {t['turn']} direction retry"))
-            t_problems = direction_problems(direction)
-        d_user = tl.render(files["deliver_input.md"],
-                           {**base, **tv, "intended": intended, "roll_line": roll_line(t),
-                            "mood": mood_text(t, names, is_last, mech.get("outcome")), "direction": direction,
-                            "must": must, "shape": shape_text(shape, names)}, "deliver_input.md").strip() + "\n"
+        mood, goal_after = mood_text(t, names, is_last, mech.get("outcome")), interest_goal(knobs, t["interest_after"])
+        allow_meet = is_last and mech.get("outcome") == "DateSecured"
         ctx = {"ghost": ghost, "shape": shape, "beat": key, "required": need}
+        d_user = tl.render(files["deliver_input.md"],
+                           {**base, **tv, "intended": intended, "roll_line": roll_line(t), "mood": mood,
+                            "interest_goal": goal_after, "beat": beat, "must": must_text(need, names, False),
+                            "shape": shape_text(shape, names)}, "deliver_input.md").strip() + "\n"
+        d_draft = caller(systems["deliver"], d_user, f"turn {t['turn']} delivery", knobs.get("turn_reasoning"), ctx)
+        dt_user = tl.render(files["direct_turn_input.md"],
+                            {**base, **tv, "step": step, "dice_meaning": dice_meaning(t), "intended": intended,
+                             "beat": beat, "beat_key": key, "must": must_text(need, names, True), "mood": mood,
+                             "interest_goal": goal_after, "shape": shape_text(shape, names), "draft": d_draft.strip()},
+                            "direct_turn_input.md").strip() + "\n"
         exempt = names[SNAPS[key]] if key in SNAPS else None
 
-        def attempt(prompt, label):
-            raw = caller(systems["deliver"], prompt, label, knobs.get("turn_reasoning"), ctx)
-            text, notes = strip_notes(raw, names)
-            lines = parse_lines(text, names)
-            problems = (shape_problems(lines, shape, names) + habit_problems(lines, habits, banned, exempt)
-                        + notes_problems(notes, need, names, key.startswith("ending")))
-            return raw, notes, lines, problems
+        def judge(raw):
+            _, check, final = sections(raw)
+            text, notes = strip_notes(final, names)
+            lines, stray = split_stray(parse_lines(text, names))
+            problems = ([] if check else ["there is no CHECK: with an answer to each question of the checklist"])
+            problems += ([] if final else ["there is no FINAL: with the turn as sent"])
+            problems += (shape_problems(lines, shape, names) + habit_problems(lines, habits, banned, exempt)
+                         + notes_problems(notes, need, names, key.startswith("ending"))
+                         + chat_problems([m for _, m in lines], allow_meet))
+            if stray:
+                problems.append("these lines are neither a message nor one of the notes: "
+                                + " / ".join(f'"{x}"' for x in stray[:3]))
+            return problems, notes, lines, check
 
-        d_text, notes, lines, problems = attempt(d_user, f"turn {t['turn']} delivery")
+        t_label = f"turn {t['turn']} director after the roll"
+        d_text = director.ask(dt_user, t_label, ctx)
+        problems, notes, lines, d_check = judge(d_text)
         retried = bool(problems)
         if problems:
-            again = (d_user + "\nYour answer was:\n\n" + d_text + "\n\nIt broke this turn's rules: " +
-                     "; ".join(problems) + f". Write turn {t['turn']} again so it keeps all of them.\n")
-            d_text, notes, lines, problems = attempt(again, f"turn {t['turn']} delivery retry")
+            d_text = director.ask(f"Your version broke this turn's rules: {'; '.join(problems)}. Write the checklist and "
+                                  f"turn {t['turn']} again, in full, so it keeps all of them.", t_label + " retry", ctx)
+            problems, notes, lines, d_check = judge(d_text)
         for who_told, what in notes["told"]:
             k, fact = piece_of(what)
             if who_told in pieces:
@@ -848,7 +937,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             collided = t["turn"]
         who = {w for w, _ in lines}
         if names["player"] not in who or (names["datee"] not in who and shape["datee"]):
-            tl.die(f"turn {t['turn']}: the delivery output is missing a speaker:\n{d_text[:1500]}")
+            tl.die(f"turn {t['turn']}: the director's turn is missing a speaker:\n{d_text[:1500]}")
         words = sum(len(m.split()) for _, m in lines)
         spent += words
         chat.append((t["turn"], lines))
@@ -861,14 +950,16 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                  f"Required notes: {', '.join(need) or 'none'}\n\nShape: {shape_text(shape, names)} "
                  f"Written: {words} words; {spent} of the {knobs.get('word_budget', 1250)} budget spent."
                  + (f"\n\nHabits: {h_note}" if h_note else "")
+                 + (f"\nThe director's options broke the format after a retry: {'; '.join(o_problems)}" if o_problems else "")
                  + (f"\nRules still broken after a retry: {'; '.join(problems)}" if problems else
                     "\n(kept the rules after a retry)" if retried else "")
                  + ("\n\n" + "\n".join(noted) if noted else ""))
-        out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options": o_text,
-                    "direct_options_user": do_user, "direction_options": o_direction,
-                    "direct_user": dt_user, "direction": direction, "director_notes": d_notes,
-                    "direction_problems": o_problems + t_problems,
-                    "deliver_user": d_user, "delivered": d_text, "brief": brief, "shape": shape,
+        out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options_draft": o_draft,
+                    "options": "\n\n".join(f"OPTION {s}\n{shown[s]}" for s in offered if shown[s]),
+                    "direct_options_user": do_user, "director_options": o_raw, "director_notes": d_notes,
+                    "director_check_options": o_check, "options_problems": o_problems,
+                    "deliver_user": d_user, "draft": d_draft, "direct_user": dt_user, "delivered": d_text,
+                    "director_check": d_check, "brief": brief, "shape": shape,
                     "retried": retried, "shape_problems": problems, "notes": notes, "habit_note": h_note,
                     "step": step, "required": need, "target": target, "words": words})
     output = "\n\n".join(f"Turn {n}\n" + "\n".join(f"{w}: {m}" for w, m in lines) for n, lines in chat) + "\n"
@@ -884,27 +975,28 @@ def play(variant_dir, knobs, mech, player, datee, caller):
 def dry_caller(names):
     def caller(system, user, label, effort, ctx):
         if label == "plan":
-            return "\n\n".join(f"{n}\nShows: dry\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\n"
+            return "\n\n".join(f"{n}\nShows: dry\nTonight: dry-tonight\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\n"
                                "Origin, in three pieces, from the surface to the part they'd never say:\n"
                                "1. dry-origin-one\n2. dry-origin-two\n3. dry-origin-three\nAccident: dry-accident-line\n"
                                f"Voice: dry\n- dry" for n in (names["player"], names["datee"])) + \
                 "\n\nCollision: dry\nIf they click: dry\nHeat: dry"
-        if "direction before the roll" in label:
-            return ("NOTES:\n" + "\n".join(f"{h}: dry" for h in NOTE_HEADS) + "\nDIRECTION: (dry run)")
-        if "direction" in label:
-            return "DIRECTION: (dry run)"
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
-        if label.endswith("options"):
-            return "\n\n".join(f"OPTION {s}\n{names['player']}: (dry run, {s})" for s in ctx["offered"])
+        if label.endswith(" options") or "director before the roll" in label:
+            opts = "\n\n".join(f"OPTION {s}\n{names['player']}: (dry run, {s})" for s in ctx["offered"])
+            if "director" not in label:
+                return opts
+            return "NOTES:\n" + "\n".join(f"{h}: dry" for h in NOTE_HEADS) + "\nCHECK:\n1. dry\n" + opts
         shape = ctx["shape"]
         lines = [f"{names['player']}: dry"] * len(shape["player"]) + [f"{names['datee']}: dry"] * len(shape["datee"])
+        if "director after the roll" not in label:
+            return "\n".join(lines)
         for n in ctx.get("required", []):
             if n.startswith("TOLD:"):
                 lines.append(f"TOLD: {names['player'] if n == 'TOLD:any' else n[5:]}: dry")
             else:
                 lines.append(n)
-        return "\n".join(lines)
+        return "CHECK:\n1. dry\nFINAL:\n" + "\n".join(lines)
     return caller
 
 
