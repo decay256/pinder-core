@@ -10,7 +10,7 @@ What each move means. It's a strategy, never a word the character uses:
 - Wit: be quick and funny about it.
 - SelfAwareness: name what's actually going on underneath.
 
-Whichever option gets picked, the story has to be able to move. Where it stands is listed below: what the reader knows of each origin, which hooks are hanging, which setups are waiting, and what the story needs next. Whenever the match has a hook hanging, at least one option pulls on it, and whenever the next piece of ${player_name}'s origin is due, at least one option gives it, their own way: a joke, a dodge that gives something away, or just saying it. The story decides what is happening; the player decides how they handle it.
+The director has read the chat and knows where the story stands; the direction is below. Follow it, so that whichever option gets picked, the story can move. The story decides what is happening; the player decides how they handle it.
 
 Each option is one or two short messages in ${player_name}'s voice, each under 12 words. Their habit shows only as much as the habit note allows; their voice is in the words, not the tic. The three are different from each other and from anything already sent. Nothing in them refers to options, drafts or versions.
 

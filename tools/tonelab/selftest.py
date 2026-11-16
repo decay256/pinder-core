@@ -35,14 +35,19 @@ def check_live(name, variant, knobs, tmp):
         path = os.path.join(tmp, f"{name}-{seed}.json")
         m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))
         names = {"player": m["player"]["display_name"], "datee": m["datee"]["display_name"]}
-        prompts = []
+        prompts, writers = [], []
 
         def caller(system, user, label, effort, ctx):
             prompts.append(system + user)
+            if label.endswith(" options") or " delivery" in label:
+                writers.append(user)
             return live.dry_caller(names)(system, user, label, effort, ctx)
         res = live.play(variant, knobs, m, "reuben", "brick", caller)
-        check(len(res["turns"]) == len(m["turns"]) and len(prompts) == 1 + 2 * len(m["turns"]),
-              f"{name} seed {seed}: a plan call and two calls per played turn ({len(m['turns'])} turns)")
+        check(len(res["turns"]) == len(m["turns"]) and len(prompts) == 1 + 4 * len(m["turns"]),
+              f"{name} seed {seed}: a plan call and four calls per played turn, two of them the director's "
+              f"({len(m['turns'])} turns)")
+        check(all("If they click" not in u and "Collision:" not in u and "Origin:" not in u for u in writers),
+              f"{name} seed {seed}: the writers never see the plan's origins, collision or endings")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
         full = live.beat_keys(knobs, m["turns"], m.get("outcome"))
         same = all(live.beat_keys(knobs, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, len(m["turns"]) + 1))

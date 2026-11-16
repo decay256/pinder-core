@@ -1,19 +1,15 @@
-The plan for this match:
+Who they are:
 
-${plan}
+${cast}
 
 The chat so far:
 
 ${history}
 
-Where the story stands. ${story_so_far}
-${step}
-
-${exchange}
 ${habit_note}
 
-Turn ${n}. Interest is ${interest} out of 25 (${state}). The moves on offer this turn: ${options}.
+Turn ${n}. The moves on offer: ${options}.
 
-What the story needs next: ${needs}
+From the director: ${direction}
 
 Write the three options for ${player_name}.

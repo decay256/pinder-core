@@ -1,6 +1,6 @@
 ## Your job now: plan the match
 
-${player_name} (the player) is about to start chatting with ${datee_name} (the match). Plan the match the way a writers' room plans an episode. The writers who write each turn will see your plan and the chat so far, never the character files, so everything they need is in the plan.
+${player_name} (the player) is about to start chatting with ${datee_name} (the match). Plan the match the way a writers' room plans an episode. Each turn a director reads your plan and the chat and steers the writers, who see only who the two characters are (what they show, their fear, habit, lie and voice) and the chat. Nobody sees the character files, so everything the story needs is in the plan.
 
 Nobody knows how long it runs (usually ten to fifteen turns, sometimes only six), what the player picks or how the dice land. It may end in a date, an unmatch or a ghosting. Plan for both.
 

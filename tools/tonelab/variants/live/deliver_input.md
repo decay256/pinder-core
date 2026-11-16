@@ -1,26 +1,23 @@
-The plan for this match:
+Who they are:
 
-${plan}
+${cast}
 
 The chat so far:
 
 ${history}
 
-Where the story stands. ${story_so_far}
-${step}
-
-${exchange}
 ${habit_note}
 
-Turn ${n}. The player picked ${stat}. What ${player_name} meant to send:
+Turn ${n}. What ${player_name} meant to send:
 ${intended}
 
-What the dice did: ${result}
-What that means for the message: ${dice_meaning}
-${checks}
-Interest ${interest_before} → ${interest_after} (${state_after}).
+How the roll went: ${roll_line}
+${mood}
 
-This turn's job in the story: ${beat}
+From the director: ${direction}
+
+What has to happen this turn, with its note:
+${must}
 
 This turn's shape, set by the game: ${shape}
 
