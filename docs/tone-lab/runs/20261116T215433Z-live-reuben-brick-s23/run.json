@@ -1,0 +1,261 @@
+{
+  "run_id": "20261116T215433Z-live-reuben-brick-s23",
+  "created_utc": "20261116T215433Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "f020251da1c88253302fe8538775639b32fc057138c86909cfefa5c69f52a8ae"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "18f8a675acdaef0a6dc4a45d06efefd523b29def24f6a8ca93b34f7c36e112d8",
+  "prompt_chars": 118570,
+  "model_calls": 15,
+  "repo_commit": "94f111e",
+  "repo_dirty": false,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 364.4,
+  "usage": {
+    "cost": 0.22422490000000003,
+    "prompt_tokens": 205934,
+    "completion_tokens": 11341,
+    "reasoning_tokens": 1134
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 643,
+  "planted_turn": 1,
+  "shape_retries": 1,
+  "turns_off_shape": [],
+  "callback_turn": 2,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "freshly retired from late-night hospitality"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "on a strategic career pause entirely on her own terms"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "lost a heel in a hotel revolving door and lectured the interview panel for forty minutes on geometry"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "got fired from working the door at a dive bar for fighting a regular he insisted was an indie frontman"
+    ],
+    [
+      6,
+      "Brick_haus",
+      3,
+      "grew up too big for a cramped house and dropped her monocle into boxed rosé tonight while rehearsing three smiles in the mirror"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "grew up cropped out of family photos and practices his curvature disclosure shrug versus grin in the mirror for twenty minutes"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "retired from late-night hospitality"
+    ],
+    [
+      1,
+      "Brick_haus",
+      "just got in from a thing, still in heels, demands explanation for his tattoo and curve"
+    ],
+    [
+      2,
+      "Reuben_404",
+      "claims he just got back from a trip"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "refuses revolving doors and is on a strategic career pause"
+    ],
+    [
+      3,
+      "Reuben_404",
+      "bought a $189 titanium posture clip and flinched from admitting why he obsesses over room layouts"
+    ],
+    [
+      3,
+      "Brick_haus",
+      "owns a £240 equestrian posture harness and clocked his unfinished sentence"
+    ],
+    [
+      4,
+      "Brick_haus",
+      "got escorted out of her interview after losing a heel in the revolving door"
+    ],
+    [
+      5,
+      "Reuben_404",
+      "pasted his bathroom mirror test note and admitted he got fired as a dive-bar bouncer"
+    ],
+    [
+      5,
+      "Brick_haus",
+      "zeroed in on his pasted note about keeping his shirt on standing up"
+    ],
+    [
+      6,
+      "Reuben_404",
+      "compared his wide hard-left shaft and huge left nut to a lowercase b"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "pasted her calendar draft and confessed she has been in a towel since four drinking boxed rosé and rehearsing smiles"
+    ],
+    [
+      7,
+      "Brick_haus",
+      "called him out for still pretending he just got back from a trip after she confessed the towel"
+    ],
+    [
+      8,
+      "Reuben_404",
+      "admitted he is hiding what is in his kitchen behind his self-auditing"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "slipped that she had cleared her Tuesday slot for him while snapping about three-week buffers"
+    ],
+    [
+      9,
+      "Reuben_404",
+      "confessed his trip was just buying energy shots and eating eleven-day-old lentils from the pot"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "asked for the truth behind his twenty-minute bathroom mirror test"
+    ],
+    [
+      10,
+      "Brick_haus",
+      "admitted everyone steps back so they do not get bruised by her size, and asked why he was practicing a shrug in the mirror"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "full disclosure",
+      "in fairness to you",
+      "you are free to"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1020,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 1,
+      "called": 2,
+      "paid": 9
+    },
+    "2": {
+      "planted": 3,
+      "paid": 4
+    },
+    "3": {
+      "planted": 2,
+      "called": 4,
+      "paid": 6
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 8.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of being rejected or seen flinching when someone sees their short, wide, hard-left shaft and mismatched nuts, or their messy life.\n2. They constantly narrate their own panic and defense mechanisms in real time, offering preemptive \"full disclosures\" and exit clauses so the other person leaves before Reuben_404 gets hurt.\n3. They grew up cropped out of the edge of family photos because of how they were built.\n4. They dropped it at the end, plainly explaining the mirror test without self-auditing and promising, \"I am not going anywhere.\"\n5. Brick_haus is afraid of being seen as \"too much\" and having people step back so they don't get bruised when she leans her towering, heavy weight on them.\n6. She hides behind numbered lists, rigorous standards, scheduling buffers, and talk of doorway geometry to pretend she is detached and in control.\n7. She grew up so oversized in a cramped terrace house that she cracked the doorframe at fourteen.\n8. She dropped it in the final turn, explicitly saying \"no numbers\" and asking Reuben_404 to stay and let her bruise them against the booth.\n9. When Reuben_404 hid behind meta-narration in Turn 7 instead of matching her bath-towel confession, Brick_haus retreated back into her \"high-value\" scheduling buffers and threatened to take Tuesday off the calendar until Reuben_404 finally gave her real honesty.\n10. \"Standing up, a short wide shaft with a hard-left hook and a left nut the size of a plum looks less like a silhouette and more like a lowercase b.\" It is an unforgettable, deadpan visual that captures both the absurdity of the world and Reuben_404's self-consciousness.\n11. I laughed in Turn 4 when both of their intense pieces of body-modification hardware—a $189 titanium posture clip and a 240-pound equestrian harness—turned out to be holding a bag of coffee shut and propping a hallway door open.",
+    "grade": "1. **Partly** — Caught the fear of rejection over his small, lopsided anatomy, but missed the core fear of being *forgettable* unless he performs nonstop.\n2. **Yes** — Directly nailed the pre-emptive narration, \"full disclosures,\" and exit clauses used to beat her to the rejection.\n3. **Yes** — Got the exact origin detail of growing up cropped out of family photos.\n4. **Yes** — Caught him dropping the exit clause, confessing the mirror rehearsal, and using the exact planned line (\"I am not going anywhere\").\n5. **Yes** — Captured her fear of being an oversized freak who breaks/bruises normal bodies.\n6. **Yes** — Nailed her habit and lie: numbered lists, spatial/doorway logistics, rigorous standards, and scheduling buffers.\n7. **Yes** — Identified her origin of growing up too big for a cramped house.\n8. **Yes** — Caught her dropping the numbered lists with the exact planned phrase (\"no numbers\" / \"stay\").\n9. **Partly** — Shows a defensive clash involving his habit and her buffers, though it slightly deviates from the exact planned collision dynamic (his exits making her feel like a terrifying giant, her lists making him feel small).\n\nSCORE: 8 out of 9",
+    "score": 8.0
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 21,
+    "datee_lines": 26,
+    "words": 1089
+  }
+}
