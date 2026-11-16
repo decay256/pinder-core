@@ -75,7 +75,7 @@ STATE_LENGTH = {
 }
 SWINGS = [  # new: what a change in interest does to the match's reply
     {"name": "big loss", "from": -99, "to": -3, "means": "It hurt. The match pulls back hard and doesn't explain why.",
-     "length": "The match: one message, five words at most, or a single word."},
+     "length": "The match: one message, five words at most, or a single word.", "match_max_words": 10},
     {"name": "loss", "from": -2, "to": -1, "means": "A step cooler. The match answers less than it was asked.",
      "length": "The match: shorter than last turn."},
     {"name": "flat", "from": 0, "to": 0, "means": "Nothing moved. The match keeps its distance and waits.",
@@ -85,6 +85,8 @@ SWINGS = [  # new: what a change in interest does to the match's reply
     {"name": "big gain", "from": 3, "to": 99, "means": "It landed. The match drops some guard: either suddenly talkative, or stopped short by it.",
      "length": "The match: either a burst of several messages, or one word."},
 ]
+LIMITS = {"message_words": 45, "long_message_words": 70, "turn_words": 150,
+          "source": "new: the only lengths the game checks; everything else is guidance"}
 BEAT_LENGTH = {
     "opener": "Short: the act is a one-liner.", "setup": "Short.", "early": "Normal.", "warming": "Getting longer.",
     "close": "Short and charged.", "breakthrough": "The naked line is the shortest in the chat.",
@@ -158,7 +160,7 @@ def seed(force):
         "about": ("The tone lab's situation table. Seeded on " + datetime.date.today().isoformat() + " from Pinder Core's "
                   "data (each entry names its source) and edited here from then on; the game's files are not read at "
                   "run time. 'new' marks text the game has no equivalent for."),
-        "moves": moves, "interest": interest, "swings": SWINGS, "shadows": shadows, "traps": trap_out,
+        "limits": LIMITS, "moves": moves, "interest": interest, "swings": SWINGS, "shadows": shadows, "traps": trap_out,
         "thirst": thirst,
         "beats": {k: {"story": v, "length": BEAT_LENGTH.get(k, ""), "source": "variant.json beats; length: new"}
                   for k, v in beats.items()},
@@ -197,6 +199,11 @@ def page():
                                                     for i, c in enumerate(r)) + "</tr>")
         out.append("</table>")
 
+    lim = t["limits"]
+    out.append("<h2 id='limits'>Limits the game checks " + tag(True) + "</h2><p>No message over "
+               f"{lim['message_words']} words; one may run to {lim['long_message_words']} in an accident or reveal; no more "
+               f"than {lim['turn_words']} words in a turn; after a big loss the match writes no more than the swing's "
+               "word limit. Everything else on this page is guidance the writer reads, not a check.</p>")
     out.append("<h2 id='moves'>Moves and how each roll lands</h2><p class='muted'>Per move, per result: what happens "
                "to the message the player meant, how the match receives it, and how long it runs. The game's text is "
                "written as orders to its own one-message rewriter, which is why it says \"You must\" and fixes lengths.</p>")
@@ -210,10 +217,11 @@ def page():
           [[f"{e(s['state'])}<div class='src'>{s['from']}–{s['to']}</div>", e(s["match_feels"]), e(s["chat_needs"]),
             e(s["length"])] for s in t["interest"]])
     out.append("<h2 id='swings'>Interest swings in one turn " + tag(True) + "</h2>")
-    table(["Swing", "What it means", "Length"],
+    table(["Swing", "What it means", "Length", "Match word limit (checked)"],
           [[f"{e(s['name'])}<div class='src'>{s['from'] if s['from'] > -99 else '…'} to {s['to'] if s['to'] < 99 else '…'}</div>",
-            e(s["means"]), e(s["length"])] for s in t["swings"]])
-    out.append("<h2 id='beats'>Story beats</h2><p class='muted'>Chosen by the tone lab's story clock from the game so far.</p>")
+            e(s["means"]), e(s["length"]), str(s.get("match_max_words") or "")] for s in t["swings"]])
+    out.append("<h2 id='beats'>Story beats</h2><p class='muted'>Chosen by the tone lab's story clock from the game so far; "
+               "the story text is what the writer is told a turn like this usually does.</p>")
     table(["Beat", "What the turn does (tone lab)", "Length " + tag(True)],
           [[e(k), e(v["story"]), e(v["length"])] for k, v in t["beats"].items()])
     out.append("<h2 id='shadows'>Shadows taking over " + tag(False) + "</h2>")
@@ -232,7 +240,7 @@ def page():
           [["below the threshold", e(t["thirst"]["received_at_low_interest"])],
            ["high", e(t["thirst"]["received_at_high_interest"])]])
     body = "\n".join(out)
-    nav = "".join(f"<a href='#{a}'>{b}</a>" for a, b in (("moves", "Moves"), ("interest", "Interest"), ("swings", "Swings"),
+    nav = "".join(f"<a href='#{a}'>{b}</a>" for a, b in (("limits", "Limits"), ("moves", "Moves"), ("interest", "Interest"), ("swings", "Swings"),
                                                          ("beats", "Beats"), ("shadows", "Shadows"), ("traps", "Traps"),
                                                          ("thirst", "Thirst")))
     script = ("<script>document.getElementById('q').addEventListener('input',function(){var q=this.value.toLowerCase();"

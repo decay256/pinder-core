@@ -80,6 +80,19 @@ is neither a message nor a note. Each interest level now names what the chat nee
 it, and the turns-left estimate no longer jumps with the meter (v8's went 4, 8, 3, 12 in
 four turns, and the turn it said 3 demanded an origin piece and the collision at once).
 
+v10: one session writes the chat. In v9 the director rewrote most of every draft (less than
+half of a draft survived into what went out), so the two writers cost two calls a turn and
+added little; they had been kept apart from the plan so they would not steer toward its
+props, but the director picks the material anyway. Now the plan is written once and one
+session writes every turn: before the roll the three options, after the roll the turn as
+sent. What the game knows comes from the tone lab's situation table (situations.yaml):
+for the roll, what it does to the meant message and how the match receives it; what the
+interest level and the size of its change mean; any shadow, trap or thirsty slip; the
+template for the beat; and how long each side's messages run. The random message shape is
+gone: the length guidance is the table's, and the game checks only the extremes (no message
+over the limit, one long one for an accident or reveal, a ceiling per turn, a terse match
+after a big loss, a ghost who never replies).
+
 The engine still plays the whole session first (--mechanics-only, normally with
 --agent random so the choices are as unpredictable as a person's), but the writer only
 ever sees the turns up to the current one, so it knows no more than the live game would.
@@ -92,12 +105,12 @@ import os
 import random
 import re
 
+import yaml
+
 import tonelab as tl
 
-FILES = ("bible.md", "plan.md", "plan_input.md", "options.md", "options_input.md",
-         "deliver.md", "deliver_input.md", "character.md", "direct.md", "direct_options_input.md",
-         "direct_turn_input.md")
-LONG_WORDS = 40  # the one message an accident may take
+FILES = ("bible.md", "plan.md", "plan_input.md", "character.md", "direct.md", "before_roll.md", "after_roll.md",
+         "situations.yaml")
 BAD_TIERS = {"catastrophe", "legendary"}  # miss tiers bad enough to shake a secret out
 REAL_STATS = {"Honesty", "SelfAwareness"}  # moves that can carry a breakthrough
 ENDINGS = {"DateSecured": "ending_win", "Unmatched": "ending_loss", "Ghosted": "ending_ghost"}
@@ -130,8 +143,8 @@ class Story:
     already fired, so it decides exactly as it could in a live game. A snap needs a few
     turns of build-up first: nobody snaps at a stranger in their second message."""
 
-    def __init__(self, knobs):
-        self.beats, self.needs_text = knobs["beats"], knobs["needs"]
+    def __init__(self, knobs, beats):
+        self.beats, self.needs_text = beats, knobs["needs"]
         self.fired, self.secret_turn, self.log = set(), None, []
 
     def so_far(self):
@@ -209,20 +222,9 @@ EXCHANGE_BEATS = {"early", "warming", "close", "callback"}  # middle turns that 
 SNAPS = {"player_snap": "player", "match_snap": "datee"}  # the snapper's habit is the weapon, so it isn't rationed
 BIG_BEATS = {"breakthrough", "forced_breakthrough", "catastrophe", "secret_miss", "discovery", "match_reveal",
              "player_snap", "match_snap"}
-STRONG = {"VeryIntoIt", "AlmostThere", "DateSecured"}
 NOTE = re.compile(r"^[\s*_>\-]*(TOLD|HOOK)\s*[:\-]\s*([^:]+?)\s*:\s*(.+?)\s*$", re.I)
 SETUP = re.compile(r"^[\s*_>\-]*(PLANTED|CALLBACK|PAID)\s*(?:[:\-]\s*(.*?))?[\s*_]*$", re.I)
 FLAG = re.compile(r"^[\s*_>\-]*COLLIDED[\s*_.!]*$", re.I)
-STAT_HIT = {
-    "Charm": "warm and easy, and it puts them at ease",
-    "Rizz": "plainly wanting them, and it works",
-    "Honesty": "something real, and it gets through",
-    "Chaos": "a swerve that somehow makes perfect sense",
-    "Wit": "quick and funny, and it gets a real laugh",
-    "SelfAwareness": "naming what's actually going on, and it's right",
-}
-
-
 def estimate_left(past, interest):
     """Turns left, estimated from the meter: the distance to 25 (or to 0) over the pace. The
     game ends at either, and nobody knows which in advance. The meter swings by several
@@ -243,111 +245,158 @@ def estimate_left(past, interest):
     return max(1, min(12, 14 - i, max(lo, round(left))))
 
 
-def interest_goal(knobs, interest):
-    """What the chat needs at this interest level."""
-    for g in knobs["interest_goals"]:
-        if g["from"] <= interest <= g["to"]:
-            return g["goal"]
-    return ""
+def load_table(variant_dir):
+    with open(os.path.join(variant_dir, "situations.yaml"), encoding="utf-8") as f:
+        return yaml.safe_load(f)
 
 
-def interest_goals_text(knobs):
-    return "\n".join(f"- {g['state']} ({g['from']}" + (f" to {g['to']}" if g["to"] != g["from"] else "") + f"): {g['goal']}"
-                     for g in knobs["interest_goals"])
+def beats_of(table):
+    return {k: v["story"] for k, v in table["beats"].items()}
 
 
-def dice_meaning(t):
-    r, stat = t["roll"] or {}, t["chosen_stat"]
-    hit = STAT_HIT.get(stat, "the way they meant it")
-    margin = (r.get("total") or 0) - (r.get("dc") or 0)
+TIER_WORDS = {"clean": "a clean hit", "strong": "a strong hit (beat the DC by 5 or more)",
+              "critical": "a critical hit (beat the DC by 10 or more)", "exceptional": "an exceptional hit (beat the DC by 15 or more)",
+              "nat20": "a natural 20", "fumble": "a fumble (missed by 1 or 2)", "misfire": "a misfire (missed by 3 to 5)",
+              "trope_trap": "a trope trap (missed by 6 to 9)", "catastrophe": "a catastrophe (missed by 10 or more)",
+              "nat1": "a natural 1"}
+MISS_KEY = {"fumble": "fumble", "misfire": "misfire", "tropetrap": "trope_trap", "catastrophe": "catastrophe",
+            "legendary": "catastrophe"}
+LONG_BEATS = {"catastrophe", "secret_miss", "match_reveal", "ending_loss"}  # one message may run long
+
+
+def roll_key(r):
+    """The game's own result tiers (Pinder.Core RollOutcomeIntensity): a hit by its margin over the DC."""
     if r.get("nat20"):
-        return (f"A natural 20. This is the best message in the chat: {hit}. It cashes something in, a setup or "
-                "something the other one told them, used in a way that shows they understood, and the other one's "
-                "guard visibly drops.")
-    if r.get("nat1"):
-        return ("A natural 1. The worst thing they could have sent, and it lands exactly where it hurts the other "
-                "one most: on their fear, or on something they told them.")
+        return "nat20"
+    if r.get("nat1") or (r.get("tier") or "").lower() == "legendary":
+        return "nat1"
     if r.get("success"):
-        if margin >= 6:
-            return f"A big hit: {hit}, better than they meant it."
-        if margin <= 1:
-            return f"It only just lands: {hit}, barely, and it nearly went wrong."
-        return f"A clean hit: {hit}."
-    return "It came out wrong, in exactly the way the miss describes, and that shows in the message itself."
+        m = (r.get("total") or 0) - (r.get("dc") or 0)
+        return "exceptional" if m >= 15 else "critical" if m >= 10 else "strong" if m >= 5 else "clean"
+    return MISS_KEY.get((r.get("final_tier") or r.get("tier") or "").lower(), "misfire")
 
 
-def turn_target(knobs, key, seed, turn, spent, left, past, state, nat20):
-    """This turn's share of the word budget. The budget is an average for the whole chat,
-    not a cap: big moments draw more, routine turns less, and the seed varies it so long and
-    short turns sit next to each other. Once it's spent, a chat that's dying gets terse and
-    one that's working keeps its pace."""
-    budget = knobs.get("word_budget", 1250)
-    rng = random.Random(f"{seed}-{turn}-budget")
-    remaining, ending = budget - spent, key.startswith("ending")
-    if remaining <= 0:
-        last = past[-1]["interest_delta"] if past else 0
-        if last < 0 and not ending:
-            return rng.randint(4, 14)
-        if state in STRONG or ending:
-            return max(30, round(spent / max(1, len(past))))
-        return rng.randint(15, 35)
-    weight = 1.6 if ending else 1.5 if key in BIG_BEATS else 0.7 if key in ("opener", "setup") else 1.0
-    if nat20:
-        weight *= 1.4
-    target = remaining / (max(1, left) + (0 if ending else 2)) * weight * rng.uniform(0.5, 1.5)
-    if not ending:
-        target = min(target, max(10, remaining - budget * 0.12))  # the ending's share stays reserved
-    return int(max(4, min(130, target)))
+def interest_row(table, interest):
+    return next(x for x in table["interest"] if x["from"] <= interest <= x["to"])
 
 
-def draw_shape(knobs, key, seed, turn, target):
-    spec = knobs["shapes"].get(key) or knobs["shapes"]["default"]
-    rng = random.Random(f"{seed}-{turn}-shape")
-    counts = {side: rng.randint(*spec[side]) for side in ("player", "datee")}
-    want = min(6, max(1, round(target / 20)))
-    while counts["player"] + counts["datee"] < want:
-        side = "datee" if counts["datee"] and counts["datee"] <= counts["player"] + 1 else "player"
-        counts[side] += 1
-    weights = {side: [rng.choice((0.3, 0.6, 1, 1, 1.5, 2.5)) for _ in range(counts[side])] for side in counts}
-    total = sum(sum(w) for w in weights.values()) or 1
-    shape = {side: [max(1, min(45, round(target * w / total))) for w in weights[side]] for side in counts}
-    shape["long"], shape["long_words"] = spec.get("long"), spec.get("long_words", LONG_WORDS)
-    shape["target"] = target
-    return shape
+def swing_row(table, delta):
+    return next(x for x in table["swings"] if x["from"] <= delta <= x["to"])
 
 
-def shape_text(shape, names):
-    parts, lw = [], shape["long_words"]
-    for side in ("player", "datee"):
-        caps = shape[side]
-        if not caps:
-            parts.append(f"{names[side]} sends nothing: no reply ever comes.")
+def situation_before(table, t, names):
+    ir = interest_row(table, t["interest_before"])
+    line = (f"Interest is {t['interest_before']} out of 25 ({ir['state']}). How {names['datee']} feels: {ir['match_feels']} "
+            f"What the chat needs: {ir['chat_needs']}")
+    traps = [table["traps"].get(x.lower()) for x in sorted(t.get("active_traps_before") or [])]
+    trap = "\n".join(f"A trap is active: {x['name']}. {x['summary']} {x['effect']} It clears when: {x['clears']}"
+                     for x in traps if x)
+    moves = "\n".join(f"- {m}: {table['moves'][m]['means']} If it misses, it misses through {table['moves'][m]['shadow']}."
+                      for m in t["options"])
+    return line, trap, moves
+
+
+def situation_after(table, t, names, is_last, outcome, key, beat):
+    """What the game knows about this turn, read from the situation table."""
+    r, stat = t["roll"] or {}, t["chosen_stat"]
+    mv = table["moves"][stat]
+    rk = roll_key(r)
+    row = mv["tiers"][rk]
+    out = [f"The roll: {TIER_WORDS[rk]}" + ("" if r.get("success") else f", so it goes wrong through {mv['shadow']}")
+           + f" (rolled {r.get('total')} against {r.get('dc')}).",
+           f"What that does to the message: {row['message']}",
+           f"How {names['datee']} receives it (written to them): {row['received']}"]
+    fired = []
+    sh = t.get("shadow")
+    if sh and sh.get("miss"):
+        tier, entry = MISS_KEY.get((sh.get("tier") or "").lower(), "misfire"), table["shadows"].get(sh["shadow"].capitalize())
+        if entry:
+            fired.append(f"The {sh['shadow']} shadow took over ({tier.replace('_', ' ')}): {entry['about']} {entry.get(tier, '')}")
+    h = t.get("horniness")
+    if h and h.get("miss"):
+        tier, th = MISS_KEY.get((h.get("tier") or "").lower(), "fumble"), table["thirst"]
+        fired.append(f"A thirsty slip ({tier.replace('_', ' ')}): {th['tiers'][tier]['message']} How {names['datee']} takes it: "
+                     f"{th['tiers'][tier]['received']} "
+                     + (th["received_at_high_interest"] if t["interest_after"] >= 16 else th["received_at_low_interest"]))
+    before, after = set(t.get("active_traps_before") or []), set(t.get("active_traps_after") or [])
+    for trap in sorted(after - before):
+        x = table["traps"].get(trap.lower())
+        fired.append(f"Trap armed: {x['name']}. {x['summary']} {x['effect']} It clears when: {x['clears']}" if x
+                     else f"Trap armed: {trap}.")
+    if t.get("trap_cleared"):
+        fired.append(f"Trap cleared: {t['trap_cleared']}.")
+    if t.get("combo"):
+        fired.append(f"Combo: {t['combo']}.")
+    st = t.get("steering")
+    if st and st.get("succeeded"):
+        fired.append("Steering succeeded: the message ends with a question that steers toward meeting up some time.")
+    if is_last and outcome:
+        fired.append({"DateSecured": f"Interest reaches 25: {names['datee']} agrees to meet, and the chat ends there.",
+                      "Unmatched": f"Interest hits 0: {names['datee']} unmatches.",
+                      "Ghosted": f"{names['datee']} ghosts: no reply comes after this message."}.get(outcome, outcome))
+    elif t["interest_after"] >= 21:
+        fired.append(f"Interest is {t['interest_after']}, still below 25: {names['datee']} will not agree to meet yet.")
+    sw, ir = swing_row(table, t["interest_delta"]), interest_row(table, t["interest_after"])
+    out.append("What else fired:\n" + ("\n".join(f"- {x}" for x in fired) if fired else "- nothing"))
+    out.append(f"Interest {t['interest_before']} → {t['interest_after']} ({sw['name']}): {sw['means']}")
+    out.append(f"At {t['interest_after']} ({ir['state']}), how {names['datee']} feels: {ir['match_feels']} "
+               f"What the chat needs: {ir['chat_needs']}")
+    out.append(f"The template for this kind of turn ({key}): {beat}")
+    return "\n".join(out), rk, sw, ir
+
+
+def limits_for(table, key, swing, ghost):
+    lim = table["limits"]
+    calm = key not in SNAPS and not key.startswith("ending")
+    return {"message": lim["message_words"], "long": lim["long_message_words"] if key in LONG_BEATS else None,
+            "turn": lim["turn_words"], "match_total": swing.get("match_max_words") if calm else None, "ghost": ghost}
+
+
+def limits_text(lim, names):
+    parts = [f"no message over {lim['message']} words"
+             + (f" (one may run to {lim['long']}, for the accident or the reveal)" if lim["long"] else ""),
+             f"no more than {lim['turn']} words in the turn"]
+    if lim["match_total"]:
+        parts.append(f"{names['datee']} no more than {lim['match_total']} words in all")
+    parts.append(f"{names['datee']} sends nothing" if lim["ghost"] else "at least one message each")
+    return "Limits, checked: " + "; ".join(parts) + "."
+
+
+def length_text(table, t, rk, swing, irow, key, names, spent, played, budget, left, lim):
+    beat_len = (table["beats"].get(key) or {}).get("length")
+    out = [f"- {names['player']}: {table['moves'][t['chosen_stat']]['tiers'][rk]['length']}",
+           f"- {names['datee']}: {swing['length']} {irow['length']}"]
+    if beat_len:
+        out.append(f"- This kind of turn: {beat_len}")
+    out.append(f"- So far: {spent} words in {played} turn{'s' if played != 1 else ''}. The whole chat runs about {budget} "
+               f"words, an average, not a cap, and probably has about {left} turn{'s' if left != 1 else ''} left.")
+    out.append("- " + limits_text(lim, names))
+    return "\n".join(out)
+
+
+def length_problems(lines, lim, names):
+    out, long_used = [], False
+    words = [len(m.split()) for _, m in lines]
+    for (w, m), n in zip(lines, words):
+        if n <= lim["message"]:
             continue
-        each = "; ".join("one word" if c == 1 else f"up to {c} words" for c in caps)
-        line = f"{names[side]} sends {len(caps)} message{'s' if len(caps) > 1 else ''} ({each})."
-        if shape.get("long") == side:
-            line += f" One of them may be the accident itself and run to {lw} words."
-        parts.append(line)
-    parts.append(f"About {shape['target']} words in all this turn.")
-    return " ".join(parts)
-
-
-def shape_problems(lines, shape, names):
-    problems, long_used = [], False
-    for side in ("player", "datee"):
-        msgs = [m for who, m in lines if who == names[side]]
-        caps = shape[side]
-        if len(msgs) != len(caps):
-            problems.append(f"{names[side]} sent {len(msgs)} messages, the shape says {len(caps)}")
-        for j, (m, cap) in enumerate(zip(msgs, caps)):
-            n = len(m.split())
-            if n <= cap + max(2, cap // 3):
-                continue
-            if shape.get("long") in (side, "either") and not long_used and n <= shape["long_words"]:
-                long_used = True
-                continue
-            problems.append(f"{names[side]}'s message {j + 1} has {n} words, the shape says up to {cap}")
-    return problems
+        if lim["long"] and not long_used and n <= lim["long"]:
+            long_used = True
+            continue
+        out.append(f"{w}'s message \"{' '.join(m.split()[:6])} ...\" has {n} words, more than {lim['message']}")
+    if sum(words) > lim["turn"]:
+        out.append(f"the turn has {sum(words)} words, more than {lim['turn']}")
+    match = sum(n for (w, _), n in zip(lines, words) if w == names["datee"])
+    if lim["match_total"] and match > lim["match_total"]:
+        out.append(f"{names['datee']} wrote {match} words, more than {lim['match_total']} after a loss like this")
+    sides = {w for w, _ in lines}
+    if names["player"] not in sides:
+        out.append(f"{names['player']} sends nothing")
+    if lim["ghost"] and names["datee"] in sides:
+        out.append(f"{names['datee']} replied, but they ghost")
+    elif not lim["ghost"] and names["datee"] not in sides:
+        out.append(f"{names['datee']} sends nothing")
+    return out
 
 
 def strip_notes(text, names):
@@ -484,55 +533,6 @@ def exchange_text(told, hooks):
     return out
 
 
-CAST_KEEP = {"shows", "tonight", "fear", "habit", "habit marker", "lie", "voice"}
-SHARED = {"collision", "setups", "if they click", "if it falls apart", "heat"}
-FIELDS = CAST_KEEP | SHARED | {"origin", "accident", "snap"}
-
-
-def cast_sheet(plan, names):
-    """Who the two characters are, cut from the plan for the writers: what they show, their
-    where they are tonight, fear, habit, lie and voice. Origins, accidents, setups, the collision, the heat (which
-    names what has to happen first) and both endings stay with the director, so the writers react to the chat
-    instead of steering toward lines and props they've already read."""
-    parts = {names["player"]: [], names["datee"]: []}
-    heat, hidden, current, field = [], [], None, None
-    for ln in plan.splitlines():
-        bare = ln.strip().strip("#*_ ").strip()
-        if not bare:
-            continue
-        who = next((names[s] for s in ("player", "datee")
-                    if re.match(re.escape(names[s]) + r"(?![\w:])(?!\s*:)", bare) and len(bare) <= len(names[s]) + 24), None)
-        if who:
-            current, field = who, None
-            continue
-        # a heading may run on before its colon ("Origin, in three pieces, from the surface ...:")
-        m = re.match(r"^([A-Za-z][A-Za-z ]{1,24}?)(?:\s*[,(][^:]{0,200})?[\s*_]*:[\s*_]*(.*)$", bare)
-        if m and m.group(1).strip().lower() in FIELDS:
-            field = m.group(1).strip().lower()
-            if field in SHARED:
-                current = None
-            line, rest = f"{m.group(1).strip()}: {m.group(2).strip()}".rstrip(), m.group(2).strip()
-        else:
-            line = rest = bare
-        if current and field in CAST_KEEP:
-            parts[current].append(line)
-        elif current is None and field == "heat":
-            heat.append(line)
-        elif current and field in ("origin", "accident") and rest:
-            hidden.append(rest)
-    for name, got in parts.items():
-        low = [x.lower() for x in got]
-        if not any(x.startswith("fear:") for x in low) or not any(x.startswith("habit:") for x in low):
-            tl.die(f"the plan has no Fear and Habit for {name}, so the writers' cast sheet can't be cut from it:\n{plan[:2000]}")
-    sheet = "\n\n".join(n + "\n" + "\n".join(g) for n, g in parts.items())
-    low = sheet.lower()
-    leaked = [h for h in hidden if len(h) > 12 and h.lower() in low]
-    if leaked or re.search(r"(?im)^\s*(origin|accident)\b", sheet):
-        tl.die("the writers' cast sheet would carry an origin or accident from the plan:\n" + "\n".join(leaked[:3])
-               + "\n\n" + sheet[:2000])
-    return sheet
-
-
 NOTE_HEADS = ("Where they are", "What each knows", "Not asked yet", "Working", "Stale", "Last turn")
 CHECK = re.compile(r"(?im)^[\s*_#>\-]*CHECK[\s*_]*:")
 FINAL = re.compile(r"(?im)^[\s*_#>\-]*FINAL[\s*_]*:[\s*_]*")
@@ -614,12 +614,10 @@ class Director:
 
 
 CALL_TITLES = {
-    "options": ("Options writer, draft", False),
-    "director before the roll": ("Director, before the roll: notes, checklist and the options the player sees", True),
-    "director before the roll retry": ("Director, before the roll, asked again", True),
-    "delivery": ("Turn writer, draft", False),
-    "director after the roll": ("Director, after the roll: checklist and the turn as sent", True),
-    "director after the roll retry": ("Director, after the roll, asked again", True),
+    "before the roll": ("Before the roll: notes, checklist and the options the player sees", True),
+    "before the roll retry": ("Before the roll, asked again", True),
+    "after the roll": ("After the roll: checklist and the turn as sent", True),
+    "after the roll retry": ("After the roll, asked again", True),
 }
 
 
@@ -632,9 +630,9 @@ def turn_calls(calls, n_turns):
             continue
         title, session = CALL_TITLES[m.group(2)]
         if session:
-            title += f": message {(c.get('session_messages') or 0) // 2 + 1} sent into the director's session"
-            note = ("The director's session keeps the plan, every earlier message and every reply it wrote; this is "
-                    "what was added this time. Its system prompt is under Prompts sent once.")
+            title += f": message {(c.get('session_messages') or 0) // 2 + 1} sent into the session"
+            note = ("The session keeps the plan, every earlier message and every reply it wrote; this is what was "
+                    "added this time. Its system prompt is under Prompts sent once.")
         else:
             title += ": prompt as sent"
             note = "A fresh call: this is everything it got, besides its system prompt under Prompts sent once."
@@ -642,44 +640,15 @@ def turn_calls(calls, n_turns):
     return out
 
 
-def must_text(need, names, director):
-    """What the game requires this turn, in plain words: with the note it needs for the
-    director, who knows the plan; as a moment to leave room for, for the writer, who doesn't."""
-    if director:
-        say = {"TOLD:any": "something new from one of their origins comes out, the next piece of whoever it fits (note: TOLD)",
-               "COLLIDED": "one's habit lands on the other one's fear, the way the plan's Collision says (note: COLLIDED)",
-               "PLANTED": "a setup from the plan is planted as a throwaway (note: PLANTED and its number)",
-               "CALLBACK": "a setup comes back, meaning more by now (note: CALLBACK and its number)",
-               "PAID": "a setup pays off (note: PAID and its number)"}
-        piece = "the next piece of {}'s origin comes out (note: TOLD)"
-    else:
-        say = {"TOLD:any": "something new comes out of one of their pasts: write the moment, the fact in square brackets",
-               "COLLIDED": "one's habit lands on the other one's fear",
-               "PLANTED": "a throwaway line that will matter later; the director picks it, so leave room for one",
-               "CALLBACK": "something from earlier in the chat comes back, meaning more by now",
-               "PAID": "something from earlier in the chat pays off"}
-        piece = "something new comes out of {}'s past: write the moment, the fact in square brackets"
-    out = [say.get(n) or piece.format(n[5:]) for n in need]
+def must_text(need, names):
+    """What the game requires this turn, in plain words, with the note it needs."""
+    say = {"TOLD:any": "something new from one of their origins comes out, the next piece of whoever it fits (note: TOLD)",
+           "COLLIDED": "one's habit lands on the other one's fear, the way the plan's Collision says (note: COLLIDED)",
+           "PLANTED": "a setup from the plan is planted as a throwaway (note: PLANTED and its number)",
+           "CALLBACK": "a setup comes back, meaning more by now (note: CALLBACK and its number)",
+           "PAID": "a setup pays off (note: PAID and its number)"}
+    out = [say.get(n) or f"the next piece of {n[5:]}'s origin comes out (note: TOLD)" for n in need]
     return "\n".join(f"- {x}" for x in out) if out else "- nothing beyond the template"
-
-
-def roll_line(t):
-    r = t["roll"] or {}
-    if r.get("success") or r.get("nat1"):
-        return dice_meaning(t)
-    return "It misses: what they meant comes out wrong, in a way that fits who they are, and it shows in the message itself."
-
-
-def mood_text(t, names, is_last, outcome):
-    d, who = t["interest_delta"], names["datee"]
-    feel = ("warms up a lot" if d >= 3 else "warms up" if d >= 1 else "holds steady" if d == 0
-            else "cools a little" if d >= -2 else "cools sharply")
-    end = {"DateSecured": ", and agrees to meet", "Unmatched": ", and unmatches", "Ghosted": ", and never replies"}
-    if is_last and outcome in end:
-        return f"{who} {feel}{end[outcome]}."
-    if t["interest_after"] >= 21:
-        return f"{who} {feel}, but isn't ready to agree to meet yet."
-    return f"{who} {feel}."
 
 
 def habit_markers(plan, names):
@@ -761,8 +730,8 @@ def reader_check(caller, plan, output, names):
     return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None}
 
 
-def beat_keys(knobs, turns, outcome):
-    story = Story(knobs)
+def beat_keys(knobs, table, turns, outcome):
+    story = Story(knobs, beats_of(table))
     return [story.beat(i, t, i == len(turns) - 1, outcome)[0] for i, t in enumerate(turns)]
 
 
@@ -803,10 +772,11 @@ def tonight(c, values, rng, n_drawer):
 def play(variant_dir, knobs, mech, player, datee, caller):
     """Write the whole chat turn by turn. caller(system, user, label, effort, ctx) -> text."""
     files = read_files(variant_dir)
+    table = yaml.safe_load(files["situations.yaml"])
     names = {"player": mech["player"]["display_name"], "datee": mech["datee"]["display_name"]}
     rng = random.Random(f"{mech.get('seed')}-{player}-{datee}")
     pc, _, pv = tl.character_values(player, mech["player"], knobs)
-    dc, datee_diag, dv = tl.character_values(datee, mech["datee"], knobs)
+    dc, _, dv = tl.character_values(datee, mech["datee"], knobs)
     n_drawer = int(knobs.get("drawer_sample", 0))
     pv, dv = tonight(pc, pv, rng, n_drawer), tonight(dc, dv, rng, n_drawer)
     common = {
@@ -814,82 +784,58 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         "time_of_day": mech.get("time_of_day", ""),
         "player_card": tl.render(files["character.md"], {**pv, "role": "the player"}, "character.md").strip(),
         "datee_card": tl.render(files["character.md"], {**dv, "role": "the match"}, "character.md").strip(),
-        "interest_goals": interest_goals_text(knobs),
         "checklist": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(knobs["checklist"])),
     }
     bible = tl.render(files["bible.md"], common, "bible.md").strip()
-    systems = {k: bible + "\n\n" + tl.render(files[k + ".md"], common, k + ".md").strip()
-               for k in ("plan", "options", "deliver", "direct")}
+    systems = {k: bible + "\n\n" + tl.render(files[k + ".md"], common, k + ".md").strip() for k in ("plan", "direct")}
     plan_user = tl.render(files["plan_input.md"], common, "plan_input.md").strip() + "\n"
     plan = caller(systems["plan"], plan_user, "plan", knobs.get("plan_reasoning"), {})
-    cast = cast_sheet(plan, names)
     director = Director(caller, systems["direct"], knobs.get("turn_reasoning"))
 
-    story, cons, turns, chat, out = Story(knobs), tl.load_consequences(), mech["turns"], [], []
+    story, turns, chat, out = Story(knobs, beats_of(table)), mech["turns"], [], []
     told, hooks, setups = [], [], {}
     pieces = {names["player"]: set(), names["datee"]: set()}
-    collided, spent, seed = None, 0, mech.get("seed")
+    collided, spent, budget = None, 0, knobs.get("word_budget", 1250)
     habits = habit_markers(plan, names)
     for i, t in enumerate(turns):
         is_last = i == len(turns) - 1
-        r = t["roll"] or {}
-        tv = tl.turn_values(t, cons, names, datee_diag, is_last, mech.get("outcome"))
-        if r.get("success"):  # the generic pass text says "sincere" for every move; the meaning comes separately
-            tv["result"] = "SUCCESS" + (" (natural 20)" if r.get("nat20") else "") + f". The {t['chosen_stat']} roll landed."
+        offered = t["options"]
         left = estimate_left(turns[:i], t["interest_before"])
         needs = story.needs(i, t["interest_before"])
         banned = habit_banned(chat, habits)
         h_note = habit_note(habits, banned)
         pre_step, _ = story_step(i, None, False, left, names, pieces, setups, collided, False)
-        offered = t["options"]
-        base = {**common, "plan": plan, "cast": cast, "history": history(chat), "n": t["turn"],
-                "story_so_far": story.so_far(), "habit_note": h_note,
+        base = {**common, "n": t["turn"], "story_so_far": story.so_far(), "habit_note": h_note,
                 "exchange": exchange_text(told, [h for h in hooks if h[0] >= t["turn"] - 2])}
-        goal_before = interest_goal(knobs, t["interest_before"])
-        o_user = tl.render(files["options_input.md"],
-                           {**base, "options": ", ".join(offered), "interest": t["interest_before"],
-                            "interest_goal": goal_before}, "options_input.md").strip() + "\n"
-        o_draft = caller(systems["options"], o_user, f"turn {t['turn']} options", knobs.get("turn_reasoning"),
-                         {"offered": offered})
+        interest_line, trap_line, moves = situation_before(table, t, names)
         since = (f"The plan for this match:\n\n{plan}\n\nThe chat hasn't started yet." if not chat else
                  f"Turn {chat[-1][0]} went out as you wrote it.")
-        do_user = tl.render(files["direct_options_input.md"],
-                            {**base, "since": since, "step": pre_step, "interest": t["interest_before"],
-                             "state": t["state_before"], "interest_goal": goal_before, "options": ", ".join(offered),
-                             "needs": needs, "draft": o_draft.strip()}, "direct_options_input.md").strip() + "\n"
-        o_label = f"turn {t['turn']} director before the roll"
-        o_raw = director.ask(do_user, o_label, {"offered": offered})
+        b_user = tl.render(files["before_roll.md"],
+                           {**base, "since": since, "step": pre_step, "interest_line": interest_line,
+                            "trap_line": trap_line, "moves": moves, "needs": needs}, "before_roll.md").strip() + "\n"
+        o_label = f"turn {t['turn']} before the roll"
+        o_raw = director.ask(b_user, o_label, {"offered": offered})
         o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
         if o_problems:
             o_raw = director.ask(f"Your answer broke the format: {'; '.join(o_problems)}. Write the notes, the checklist "
                                  "and the three options again, in full, in the format asked for.", o_label + " retry",
                                  {"offered": offered})
             o_problems, d_notes, o_check, finals = options_problems(o_raw, offered, names)
-        drafts = parse_options(o_draft, offered)
-        shown = {s: finals.get(s) or drafts.get(s) for s in offered}  # the director's, or the draft where it gave none
-        intended = shown.get(t["chosen_stat"])
+        intended = finals.get(t["chosen_stat"])
         if not intended:
-            tl.die(f"turn {t['turn']}: neither the director nor the draft has an option for the picked move "
-                   f"{t['chosen_stat']}:\n{o_raw[:1500]}")
+            tl.die(f"turn {t['turn']}: no option for the picked move {t['chosen_stat']}:\n{o_raw[:1500]}")
         key, beat = story.beat(i, t, is_last, mech.get("outcome"))
-        ghost, nat20 = key == "ending_ghost", bool(r.get("nat20"))
+        ghost, nat20 = key == "ending_ghost", bool((t["roll"] or {}).get("nat20"))
         now_left = 1 if is_last else left
         step, need = story_step(i, key, is_last, now_left, names, pieces, setups, collided, nat20)
-        target = turn_target(knobs, key, seed, t["turn"], spent, now_left, turns[:i], t["state_after"], nat20)
-        shape = draw_shape(knobs, key, seed, t["turn"], target)
-        mood, goal_after = mood_text(t, names, is_last, mech.get("outcome")), interest_goal(knobs, t["interest_after"])
+        situation, rk, swing, irow = situation_after(table, t, names, is_last, mech.get("outcome"), key, beat)
+        lim = limits_for(table, key, swing, ghost)
+        length = length_text(table, t, rk, swing, irow, key, names, spent, i, budget, now_left, lim)
         allow_meet = is_last and mech.get("outcome") == "DateSecured"
-        ctx = {"ghost": ghost, "shape": shape, "beat": key, "required": need}
-        d_user = tl.render(files["deliver_input.md"],
-                           {**base, **tv, "intended": intended, "roll_line": roll_line(t), "mood": mood,
-                            "interest_goal": goal_after, "beat": beat, "must": must_text(need, names, False),
-                            "shape": shape_text(shape, names)}, "deliver_input.md").strip() + "\n"
-        d_draft = caller(systems["deliver"], d_user, f"turn {t['turn']} delivery", knobs.get("turn_reasoning"), ctx)
-        dt_user = tl.render(files["direct_turn_input.md"],
-                            {**base, **tv, "step": step, "dice_meaning": dice_meaning(t), "intended": intended,
-                             "beat": beat, "beat_key": key, "must": must_text(need, names, True), "mood": mood,
-                             "interest_goal": goal_after, "shape": shape_text(shape, names), "draft": d_draft.strip()},
-                            "direct_turn_input.md").strip() + "\n"
+        a_user = tl.render(files["after_roll.md"],
+                           {**base, "stat": t["chosen_stat"], "intended": intended, "situation": situation,
+                            "must": must_text(need, names), "length": length}, "after_roll.md").strip() + "\n"
+        ctx = {"ghost": ghost, "required": need}
         exempt = names[SNAPS[key]] if key in SNAPS else None
 
         def judge(raw):
@@ -898,7 +844,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             lines, stray = split_stray(parse_lines(text, names))
             problems = ([] if check else ["there is no CHECK: with an answer to each question of the checklist"])
             problems += ([] if final else ["there is no FINAL: with the turn as sent"])
-            problems += (shape_problems(lines, shape, names) + habit_problems(lines, habits, banned, exempt)
+            problems += (length_problems(lines, lim, names) + habit_problems(lines, habits, banned, exempt)
                          + notes_problems(notes, need, names, key.startswith("ending"))
                          + chat_problems([m for _, m in lines], allow_meet))
             if stray:
@@ -906,12 +852,12 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                                 + " / ".join(f'"{x}"' for x in stray[:3]))
             return problems, notes, lines, check
 
-        t_label = f"turn {t['turn']} director after the roll"
-        d_text = director.ask(dt_user, t_label, ctx)
+        t_label = f"turn {t['turn']} after the roll"
+        d_text = director.ask(a_user, t_label, ctx)
         problems, notes, lines, d_check = judge(d_text)
         retried = bool(problems)
         if problems:
-            d_text = director.ask(f"Your version broke this turn's rules: {'; '.join(problems)}. Write the checklist and "
+            d_text = director.ask(f"Your turn broke the game's rules: {'; '.join(problems)}. Write the checklist and "
                                   f"turn {t['turn']} again, in full, so it keeps all of them.", t_label + " retry", ctx)
             problems, notes, lines, d_check = judge(d_text)
         for who_told, what in notes["told"]:
@@ -936,36 +882,33 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         if notes["collided"] and collided is None:
             collided = t["turn"]
         who = {w for w, _ in lines}
-        if names["player"] not in who or (names["datee"] not in who and shape["datee"]):
-            tl.die(f"turn {t['turn']}: the director's turn is missing a speaker:\n{d_text[:1500]}")
+        if names["player"] not in who or (names["datee"] not in who and not ghost):
+            tl.die(f"turn {t['turn']}: the turn is missing a speaker:\n{d_text[:1500]}")
         words = sum(len(m.split()) for _, m in lines)
         spent += words
         chat.append((t["turn"], lines))
         noted = ([f"Told, {w}: {f}" for w, f in notes["told"]] + [f"Hook dropped, {w}: {h}" for w, h in notes["hooks"]]
                  + [f"{k.capitalize()}: {x or '?'}" for k in ("planted", "callback", "paid") for x in notes[k]]
                  + (["Their habits collided."] if notes["collided"] else []))
-        brief = (f"Picked {t['chosen_stat']}. {tv['result']}\n{tv['checks']}\n"
-                 f"Interest {t['interest_before']} → {t['interest_after']} ({t['state_after']}).\n"
-                 f"Beat the game chose: {key}\n"
-                 f"Required notes: {', '.join(need) or 'none'}\n\nShape: {shape_text(shape, names)} "
-                 f"Written: {words} words; {spent} of the {knobs.get('word_budget', 1250)} budget spent."
+        brief = (f"Picked {t['chosen_stat']}: {TIER_WORDS[rk]}. Interest {t['interest_before']} → {t['interest_after']} "
+                 f"({swing['name']}, {irow['state']}).\nBeat the game chose: {key}\n"
+                 f"Required notes: {', '.join(need) or 'none'}\n{limits_text(lim, names)}\n"
+                 f"Written: {words} words; {spent} of the {budget} budget spent."
                  + (f"\n\nHabits: {h_note}" if h_note else "")
-                 + (f"\nThe director's options broke the format after a retry: {'; '.join(o_problems)}" if o_problems else "")
+                 + (f"\nThe options broke the format after a retry: {'; '.join(o_problems)}" if o_problems else "")
                  + (f"\nRules still broken after a retry: {'; '.join(problems)}" if problems else
                     "\n(kept the rules after a retry)" if retried else "")
                  + ("\n\n" + "\n".join(noted) if noted else ""))
-        out.append({"turn": t["turn"], "beat": key, "needs": needs, "options_user": o_user, "options_draft": o_draft,
-                    "options": "\n\n".join(f"OPTION {s}\n{shown[s]}" for s in offered if shown[s]),
-                    "direct_options_user": do_user, "director_options": o_raw, "director_notes": d_notes,
-                    "director_check_options": o_check, "options_problems": o_problems,
-                    "deliver_user": d_user, "draft": d_draft, "direct_user": dt_user, "delivered": d_text,
-                    "director_check": d_check, "brief": brief, "shape": shape,
-                    "retried": retried, "shape_problems": problems, "notes": notes, "habit_note": h_note,
-                    "step": step, "required": need, "target": target, "words": words})
+        out.append({"turn": t["turn"], "beat": key, "roll_key": rk, "needs": needs, "before_user": b_user,
+                    "options": "\n\n".join(f"OPTION {x}\n{finals[x]}" for x in offered if finals.get(x)),
+                    "director_options": o_raw, "director_notes": d_notes, "director_check_options": o_check,
+                    "options_problems": o_problems, "after_user": a_user, "delivered": d_text, "director_check": d_check,
+                    "brief": brief, "limits": lim, "retried": retried, "shape_problems": problems, "notes": notes,
+                    "habit_note": h_note, "step": step, "required": need, "words": words})
     output = "\n\n".join(f"Turn {n}\n" + "\n".join(f"{w}: {m}" for w, m in lines) for n, lines in chat) + "\n"
-    planted_turns = [s["planted"] for s in setups.values() if s.get("planted")]
-    called_turns = [s["called"] for s in setups.values() if s.get("called")]
-    return {"names": names, "common": common, "systems": systems, "plan_user": plan_user, "plan": plan, "cast": cast,
+    planted_turns = [x["planted"] for x in setups.values() if x.get("planted")]
+    called_turns = [x["called"] for x in setups.values() if x.get("called")]
+    return {"names": names, "common": common, "systems": systems, "plan_user": plan_user, "plan": plan,
             "turns": out, "output": output, "planted_turn": min(planted_turns) if planted_turns else None,
             "callback_turn": min(called_turns) if called_turns else None, "told": told, "hooks_open": hooks,
             "habits": habits, "pieces": {k: sorted(v) for k, v in pieces.items()},
@@ -982,15 +925,10 @@ def dry_caller(names):
                 "\n\nCollision: dry\nIf they click: dry\nHeat: dry"
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
-        if label.endswith(" options") or "director before the roll" in label:
-            opts = "\n\n".join(f"OPTION {s}\n{names['player']}: (dry run, {s})" for s in ctx["offered"])
-            if "director" not in label:
-                return opts
-            return "NOTES:\n" + "\n".join(f"{h}: dry" for h in NOTE_HEADS) + "\nCHECK:\n1. dry\n" + opts
-        shape = ctx["shape"]
-        lines = [f"{names['player']}: dry"] * len(shape["player"]) + [f"{names['datee']}: dry"] * len(shape["datee"])
-        if "director after the roll" not in label:
-            return "\n".join(lines)
+        if "before the roll" in label:
+            return ("NOTES:\n" + "\n".join(f"{h}: dry" for h in NOTE_HEADS) + "\nCHECK:\n1. dry\n"
+                    + "\n\n".join(f"OPTION {x}\n{names['player']}: (dry run, {x})" for x in ctx["offered"]))
+        lines = [f"{names['player']}: dry"] + ([] if ctx.get("ghost") else [f"{names['datee']}: dry"])
         for n in ctx.get("required", []):
             if n.startswith("TOLD:"):
                 lines.append(f"TOLD: {names['player'] if n == 'TOLD:any' else n[5:]}: dry")
@@ -1046,8 +984,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
                 "<!-- plan user prompt -->\n" + result["plan_user"] +
                 "\n<!-- every per-turn user prompt is in live_calls.json -->\n")
     parts = {"system": systems["plan"], "user": result["plan_user"], "plan": result["plan"],
-             "options_system": systems["options"], "deliver_system": systems["deliver"],
-             "direct_system": systems["direct"], "cast": result["cast"],
+             "direct_system": systems["direct"],
              "turn_calls": turn_calls(calls, len(result["turns"])),
              "player_card": result["common"]["player_card"], "datee_card": result["common"]["datee_card"],
              "turn_briefs": [t["brief"] for t in result["turns"]], "beats": [t["beat"] for t in result["turns"]]}

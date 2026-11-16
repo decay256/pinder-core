@@ -28,40 +28,51 @@ def check(cond, msg):
 
 
 def check_live(name, variant, knobs, tmp):
-    """A live variant: every prompt renders on every turn of a few real games, and the story
-    beats never look ahead (a game cut short gives the same beats up to the cut)."""
+    """A live variant: every prompt renders on every turn of a few real games, one session writes
+    every turn, and the story beats never look ahead (a game cut short gives the same beats up
+    to the cut)."""
     import live
+    table = live.load_table(variant)
     for seed in (7, 23, 42):
         path = os.path.join(tmp, f"{name}-{seed}.json")
         m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))
         names = {"player": m["player"]["display_name"], "datee": m["datee"]["display_name"]}
-        prompts, writers, director = [], [], []
+        prompts, session = [], []
 
         def caller(system, user, label, effort, ctx):
             prompts.append(system + user)
-            if "director" in label:
-                director.append((len(ctx.get("history") or []), user))
-            if label.endswith(" options") or label.endswith(" delivery"):
-                writers.append(user)
+            if label.startswith("turn "):
+                session.append((len(ctx.get("history") or []), label, user))
             return live.dry_caller(names)(system, user, label, effort, ctx)
         res = live.play(variant, knobs, m, "reuben", "brick", caller)
-        check(len(res["turns"]) == len(m["turns"]) and len(prompts) == 1 + 4 * len(m["turns"]),
-              f"{name} seed {seed}: a plan call and four calls per played turn: two drafts and the director's two final versions "
-              f"({len(m['turns'])} turns)")
-        check(all("If they click" not in u and "Collision:" not in u and "Origin" not in u and "dry-origin" not in u
-                  and "dry-accident" not in u for u in writers),
-              f"{name} seed {seed}: the writers never see the plan's origins, collision or endings")
-        check(all("dry-tonight" in u for u in writers), f"{name} seed {seed}: the writers see where each one is tonight")
-        check(all("drafted this" in u for _, u in director),
-              f"{name} seed {seed}: every director call gets the writer's draft, and its version is what goes out")
-        check([n for n, _ in director] == list(range(0, 2 * len(director), 2)),
-              f"{name} seed {seed}: the director is one session, each call carrying every earlier message")
-        check("If they click" in director[0][1] and not any("If they click" in u for _, u in director[1:]),
-              f"{name} seed {seed}: the plan goes into the director's session once, at the start")
+        n = len(m["turns"])
+        check(len(res["turns"]) == n and len(prompts) == 1 + 2 * n,
+              f"{name} seed {seed}: a plan call and two calls per played turn, both in one session ({n} turns)")
+        check([k for k, _, _ in session] == list(range(0, 2 * len(session), 2)),
+              f"{name} seed {seed}: the session carries every earlier message into each call")
+        check("If they click" in session[0][2] and not any("If they click" in u for _, _, u in session[1:]),
+              f"{name} seed {seed}: the plan goes into the session once, at the start")
+        after = [u for _, label, u in session if label.endswith("after the roll")]
+        check(len(after) == n and all("What that does to the message:" in u and "receives it" in u and
+                                      "Limits, checked:" in u for u in after),
+              f"{name} seed {seed}: every turn reads the roll, its reception and the limits from the situation table")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
-        full = live.beat_keys(knobs, m["turns"], m.get("outcome"))
-        same = all(live.beat_keys(knobs, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, len(m["turns"]) + 1))
+        full = live.beat_keys(knobs, table, m["turns"], m.get("outcome"))
+        same = all(live.beat_keys(knobs, table, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, n + 1))
         check(same, f"{name} seed {seed}: beats never depend on later turns ({' '.join(full)})")
+    names = {"player": "A", "datee": "B"}
+    lim = {"message": 45, "long": None, "turn": 150, "match_total": 10, "ghost": False}
+    bad = live.length_problems([("A", "w " * 50), ("B", "w " * 12)], lim, names)
+    check(len(bad) == 2 and "50 words" in bad[0] and "12 words" in bad[1],
+          "a message over the limit, and a match over its limit after a big loss, are caught")
+    check(not live.length_problems([("A", "w " * 60), ("B", "no")], {**lim, "long": 70, "match_total": None}, names),
+          "one long message is allowed in an accident or reveal")
+    check(live.length_problems([("A", "hi"), ("B", "hi")], {**lim, "ghost": True}, names) == ["B replied, but they ghost"],
+          "a ghost who replies is caught")
+    keys = [live.roll_key(r) for r in ({"success": True, "total": 22, "dc": 15}, {"success": True, "total": 27, "dc": 15},
+                                       {"success": False, "tier": "Legendary", "final_tier": "Catastrophe"},
+                                       {"success": False, "tier": "TropeTrap", "final_tier": "TropeTrap"})]
+    check(keys == ["strong", "critical", "nat1", "trope_trap"], f"roll results map to the game's tiers ({keys})")
 
 
 def check_chat_rules():
@@ -83,7 +94,7 @@ def check_chat_rules():
     full = all(len(m["tiers"]) == 10 and all(x["message"] and x["received"] and x["length"] for x in m["tiers"].values())
                for m in table["moves"].values())
     span = sorted(v for s in table["interest"] for v in range(s["from"], s["to"] + 1)) == list(range(26))
-    check(len(table["moves"]) == 6 and full and span,
+    check(len(table["moves"]) == 6 and full and span and table["limits"]["message_words"] > 0,
           "the situation table covers every move and result, and every interest level from 0 to 25 once")
     lines, stray = live.split_stray(live.parse_lines("A: hi\nSNAP B\nB: no", names))
     check(lines == [("A", "hi"), ("B", "no")] and stray == ["SNAP B"], "a line that is neither a message nor a note is caught")

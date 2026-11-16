@@ -1,6 +1,11 @@
 about: The tone lab's situation table. Seeded on 2026-11-16 from Pinder Core's data (each entry names its source)
   and edited here from then on; the game's files are not read at run time. 'new' marks text the game has no equivalent
   for.
+limits:
+  message_words: 45
+  long_message_words: 70
+  turn_words: 150
+  source: 'new: the only lengths the game checks; everything else is guidance'
 moves:
   Charm:
     means: Make it easy, warm, reassuring.
@@ -855,6 +860,7 @@ swings:
   to: -3
   means: It hurt. The match pulls back hard and doesn't explain why.
   length: 'The match: one message, five words at most, or a single word.'
+  match_max_words: 10
 - name: loss
   from: -2
   to: -1

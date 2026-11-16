@@ -1,0 +1,245 @@
+{
+  "run_id": "20261116T164239Z-live-reuben-brick-s23",
+  "created_utc": "20261116T164239Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "bible.md": "60ee54317ce29e37af222d1f7138eec171be8e5e3be4feea9088ce58ecd25db6",
+    "plan.md": "1f6f51fa552f45d172451623eac26a39b9e351c3f39b40b61226d81f1c79e029",
+    "plan_input.md": "5f714d1c6fbee938430b0b24995c2cc4d479a8860d4642132298c562d30df23d",
+    "character.md": "690b98069f8d23253ee90590b84c327566c1beab3fac8eb5b0e32a4138e16355",
+    "direct.md": "9afd665d55545abc338251ed8570084cd2a3192021740af52ee1ae2d0bccd46d",
+    "before_roll.md": "b7b7fc54eaa142471e6703e48e4ec46a7257e7c077de0c46a698193f1ff6d558",
+    "after_roll.md": "09f270e61285f93b1bf5ba4f4ee47e1a6619bb0fcbc0de823ab71d3f5d2d4a5b",
+    "situations.yaml": "b78d7f40692ad13d7f12a43dffafda682fd5debc47e15169ac8b7560d713e17f"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "needs": {
+      "opener": "This is the very first message: the act at full strength, the opener they've sent forty people, with piece 1 of their origin in it as a hook if it fits.",
+      "early": "It's early and they're still performing, but they're dropping hooks. At least one option drops piece 1 of the player character's origin or pulls on a hook the match dropped.",
+      "middle": "Every turn the two of them learn something about each other. At least one option pulls on a hook that's still hanging, and at least one gives the next piece of the player character's origin when it's due. Nothing already said comes back, except as a callback that means something new.",
+      "breakthrough": "Nothing real has got through yet. At least one option (the honest or the perceptive one, if it's on offer) carries a small, specific crack in the lie, so that if it's picked and lands, this is the moment.",
+      "secret": "Piece 2 of the player character's origin is still in. Options can come near it without giving it away, and none of them uses the accident from the plan: that's saved for its moment.",
+      "reveal": "Piece 2 of the player character's origin is out. The options are how they live with that: own it, joke about it, explain it, which makes it worse.",
+      "close": "Interest is high and the planned ending is getting near. The options give the ending something to pay off."
+    },
+    "drawer_sample": 5,
+    "word_budget": 1250,
+    "checklist": [
+      "Where are they? Each alone in their own place, apart. Does any line put them in one place, or let one see or know where the other is?",
+      "What did the other one just say, give away or dodge, and does this answer it?",
+      "What does this do to the reader: a laugh, a wince, seeing through a lie, an ache?",
+      "What does it cost the one who sends it? Is their fear nearer the surface than last turn?",
+      "What does the chat need at this interest level, and does this do it?",
+      "Is anything stale back: a prop, a joke, a description, a habit, a line?",
+      "Does each line sound like the one who sends it, carry one thing, and read like something a person would type?",
+      "Options only: are the three different decisions about this moment, each clearly its move, each worth clicking?",
+      "Turn only: does the roll show in the message itself, and does the match's answer follow how their interest moved?"
+    ]
+  },
+  "prompt_sha256": "963ad527cf1baf6278672c59fd465cdb8f9935cefa73b73063aa292f91f2038f",
+  "prompt_chars": 126841,
+  "model_calls": 26,
+  "repo_commit": "85308cf",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 549.5,
+  "usage": {
+    "cost": 0.4005054,
+    "prompt_tokens": 463387,
+    "completion_tokens": 17463,
+    "reasoning_tokens": 3031
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 785,
+  "planted_turn": 1,
+  "shape_retries": 1,
+  "turns_off_shape": [],
+  "callback_turn": 2,
+  "told": [
+    [
+      1,
+      "Brick_haus",
+      1,
+      "on a strategic career pause"
+    ],
+    [
+      2,
+      "Reuben_404",
+      1,
+      "left nightlife when the scene got derivative"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "lost a heel to a hotel revolving door and lectured the interview board for forty minutes on door engineering"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "worked the door at a dive bar and got fired for arguing with an indie singer that he was his own brother"
+    ],
+    [
+      10,
+      "Brick_haus",
+      3,
+      "grew up squeezing sideways through a cramped house and was cropped out of family photos because she never fit the frame"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "was cropped out of his family portrait at nine and has talked nonstop at empty rooms ever since"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Brick_haus",
+      "strategic career pause"
+    ],
+    [
+      2,
+      "Reuben_404",
+      "left nightlife"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "disagreement with a hotel lobby entrance"
+    ],
+    [
+      3,
+      "Brick_haus",
+      "two-hundred-pound equine posture harness"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "standing in a bath towel drinking boxed rosé"
+    ],
+    [
+      8,
+      "Reuben_404",
+      "eleven-day lentil pot and fourth energy shot"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "cleared her 9:00 slot at seven for him"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "spent her whole life turning sideways so she doesn't knock furniture over"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "Full disclosure:",
+      "In fairness to you,",
+      "🙂"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1008,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 1,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 2,
+      "called": 3,
+      "paid": 5
+    },
+    "3": {
+      "planted": 1,
+      "called": 2,
+      "paid": 10
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 7.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of real intimacy, being rejected or unmatched, and people finding out he is a fired dive-bar doorman.\n2. He rehearses his lines in a Notes app and compulsively narrates his own panic and self-sabotage like a live documentary.\n3. He was cropped out of the bottom of his family portrait at age nine and has talked nonstop at empty rooms ever since.\n4. He dropped it, sharing his childhood memory straight without narrating his own collapse and stating he isn't looking for the door.\n5. Brick_haus is afraid of taking up too much space, knocking things over, and crushing a smaller partner like a \"wrecking ball.\"\n6. She hides behind strict schedules, spatial audits, numbered lists, and rehearsed notes about \"executive operations\" taped to her kettle.\n7. She grew up squeezing sideways down a narrow hallway and getting cropped out of the top of every family photo because she never fit the frame.\n8. She dropped it, erasing her spine routine and intentionally abandoning her numbered list structure by saying, \"There is no two.\"\n9. They called out each other's defenses and traded their embarrassing rehearsal notes, which allowed them to finally drop their routines and connect.\n10. \"I limped in on one shoe and lectured the board for forty minutes on vestibule engineering so they would not see me shaking.\" It perfectly captures the absurd length she goes to in order to turn physical embarrassment into cold authority.\n11. I laughed in Turn 4 when they revealed their expensive posture gear was just being used as household tools—a $189 clip clamping a bag of decaf shut and a 200-pound equine harness propping a bathroom door open.",
+    "grade": "1. **No** — The plan specifies his fear is being physically inadequate, anticlimactic, and so small he is practically invisible, not general intimacy or his job.\n2. **Partly** — Caught the self-sabotaging disclosures and rehearsal notes, but missed the core habit of preemptively forfeiting and mapping her exit route.\n3. **Yes** — Directly matches the third layer of his origin story.\n4. **Yes** — Correctly identified that he stopped building exits and used the exact planned payoff line (\"not looking for the door\").\n5. **Yes** — Accurately captures her planned fear of taking up too much room and crushing delicate things.\n6. **Yes** — Correctly identified her habit of turning interactions into spatial audits and numbered lists.\n7. **Yes** — Directly matches the third layer of her origin story.\n8. **Yes** — Correctly identified her dropping the numbered list habit via the exact planned line (\"There is no 2\").\n9. **Partly** — Caught the shared rehearsal notes and dropping of defenses, but missed the core collision of his preemptive shrinking triggering her fear of being too massive.\n\nSCORE: 7 out of 9",
+    "score": 7.0
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 20,
+    "datee_lines": 37,
+    "words": 1087
+  }
+}
