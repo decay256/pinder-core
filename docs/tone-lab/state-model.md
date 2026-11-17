@@ -31,10 +31,11 @@ Two rules keep the interpretation usable:
 | Call | When | State it gets |
 |---|---|---|
 | Plan | Once, before the chat | Session, both characters |
-| Director, system prompt | Once; the session keeps it | The feelings and how each shows in a text; the notes and checklist it works through |
+| Director, system prompt | Once; the session keeps it | The feelings and how each usually shows in a text; the notes, the checklist and the review it works through |
 | Director, turn message | Every turn, in one session that keeps every earlier turn and note | Relationship, story position, this turn, what is required, length |
 | Director, retry | When a turn broke a checked rule | The broken rules, in words |
 | Reader and grader | Once, after the chat | The finished chat only; the grader also gets the plan |
+| Attribution test | Once, after the chat | Every message, shuffled, with no names |
 
 The director never sees the character files or the mechanics. It sees only the plan, the turn
 messages, and its own earlier answers.
@@ -64,7 +65,9 @@ The plan writes, for each character: what the profile shows, where they are toni
 **fear**, their **habit** (with its literal marker), the **lie** that justifies it, the
 **origin** in three pieces (the hook, what happened, the part they'd never say), the
 **accident** that spills piece 2, the **snap**, their **Feelings** (what sets off each feeling
-in them), how their strongest **shadow** shows, and their **voice**. It also writes the
+in them, and how it changes the way they type), how their strongest **shadow** shows, their
+**background** (generation, schooling, money, vices: the life that shapes their words), their **voice**
+(what never changes in how they type) and its **break** (how it drops at the biggest moment). It also writes the
 collision between the two, three setups, both endings, and where the heat starts. The plan is
 the story. Everything that follows is measured against it.
 
@@ -157,9 +160,13 @@ Each character has an emotional state that drives how they answer. The director 
 explicitly before it writes, because a reply follows from what someone feels, not from the
 dice. It works in four steps.
 
-**1. What can set each feeling off: the plan.** For each character the plan writes their
+**1. What can set each feeling off, and how it shows: the plan.** For each character the plan writes their
 Feelings: what sets off each feeling in them, from their fear and their habit. For example:
-anger at thirst that treats her as a body; shame at his own failure on the screen.
+anger at thirst that treats her as a body; shame at his own failure on the screen. The plan also says how
+each feeling changes the way that character types, and the two never change the same way: one rants
+when angry, the other goes down to one-word questions. This is the register the director writes to,
+seeded from the character file's "may … when …" texting traits; the file's "tends to" traits seed the
+voice that never changes.
 
 **2. Which way the match's feeling goes: the game.** The interest change sets the direction for
 the match.
@@ -182,9 +189,10 @@ note, the director names for each character:
 The cause can build over several exchanges. A back-and-forth that wears someone's patience thin
 is named as impatience before it turns into anger on the screen.
 
-The feelings:
+The feelings, with how each usually shows in a text. This is the default the director falls back on where
+the plan says nothing for a character:
 
-| Negative | How it shows in a text | Positive | How it shows in a text |
+| Negative | How it usually shows | Positive | How it usually shows |
 |---|---|---|---|
 | anger | shorter and harder; questions turn into statements and the punctuation sharpens | joy | longer, brighter and quicker, their enthusiasm in their own way |
 | fear | hedged and quick to take things back; an exit named before it's needed | relief | the guard drops a notch; a plainer line than usual |
@@ -198,7 +206,8 @@ in the character's own voice, never named in the message.
 
 **4. The feeling drives the reply, and carries over.**
 
-- The checklist's last question asks whether the match's answer shows the feeling named.
+- The checklist's last question asks whether the match's answer shows the feeling named. The review asks
+  again, of the draft, whether each one's feeling shows the way the plan says it shows in them.
 - The next turn's story block shows the director its own reading: "Last turn you read
   Brick_haus as: …". That way the next feeling is read against the last, and the swings
   between turns are visible.
@@ -214,23 +223,42 @@ Strength and cause are not checked.
 
 ## Length
 
-The game's checked limits:
+Nothing about length is checked. Length is guidance, in three parts:
 
-- 45 words a message, with one message allowed up to 70 on a beat where someone finally tells
-  something;
-- 150 words a turn;
-- the match's message count this turn;
-- 10 words in all for the match after a big loss, except in a snap or an ending.
+- **One length line for each character**, from one source:
+  - the player character: the beat's line when the beat is about them (catastrophe, snap,
+    breakthrough, a lost or ghosted ending), otherwise the move and roll's line;
+  - the match: the beat's line when the beat is about the match (opener, reveal, snap, discovery,
+    won ending), otherwise the swing's. The swing's lines say how much of themselves the match gives,
+    not what shape that takes; the shape comes from the match's Feelings in the plan.
+- **Where the chat stands:** the words so far against the rough size of a whole chat (about 1,250
+  words). Running over is fine. It is not an average to hit each turn: the director writes what the
+  turn needs to sound like the character and land what it is for.
+- **How each has written lately:** the message count and words of each character's last three
+  turns, counted by the code and told as information, so a shape that repeats is visible.
 
-A whole chat runs about 1,250 words, which is an average and not a cap.
+The code checks only who writes: each of them sends something, except a match who ghosts, who sends
+nothing.
 
-Within those limits, each character gets **one** length line a turn, from one source:
+Two run measures show whether this gives variety without losing the voices. The run record keeps
+each character's spread of message lengths and their messages per turn. A blind attribution test
+gives a reader every message, shuffled and without names, to sort into two senders: 0.5 is chance,
+and a score near 1 means the voices are distinct.
 
-- **The player character:** the beat's line when the beat is about them (catastrophe, snap,
-  breakthrough, a lost or ghosted ending), otherwise the move and roll's line.
-- **The match:** the beat's line when the beat is about the match (opener, reveal, snap,
-  discovery, won ending), otherwise the swing's line. Each comes with the message count the code
-  checks.
+## How the director writes a turn
+
+Each turn's answer has five parts, in order: the notes (where they are, what each knows, what is
+hanging, what worked, what is stale, last turn's weakest point, each one's Feeling, what the player
+character meant); the checklist, answered before writing; a draft; a review of the draft; and the
+turn as sent, which is the draft with every fix the review found.
+
+The review questions are adapted from the dialogue rubric and the "dialogue as combat" rules of the
+novel engine (swarm-temporal, `projects/novel-engine`): whether each line could be told apart
+without the names; whether each feeling shows the way the plan says it shows in that character;
+what each line does to the other one, and whether the upper hand moves; subtext, with no named
+feelings, explanations or therapy talk; stale material, and the obvious first joke; the turn's
+shape against the last turns; and whether each message carries one thing and ends on its strongest
+word. The code checks that the draft and the review are there, not what they say.
 
 ## Consistency rules
 
@@ -250,6 +278,5 @@ two lines of one message to disagree.
 
 ## Not in this model yet
 
-- A per-character texting baseline (default length and style), with modifiers from the state above.
 - Reply timing from the d100.
 - A check that the strength of a feeling fits the size of the swing.

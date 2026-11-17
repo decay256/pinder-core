@@ -32,7 +32,7 @@ GROUPS = [  # page order: the prompts in the order the models see them; a sectio
     ("How the prompts are built", ["assembly"]),
     ("Prompt templates", ["prompts"]),
     ("The plan", ["session", "character", "stats"]),
-    ("The director's system prompt", ["feelings", "checklist"]),
+    ("The director's system prompt", ["feelings", "checklist", "review"]),
     ("Each turn's message, in the order it is told", ["turn", "interest", "traps", "clock", "needs", "beats", "moves",
                                                       "results", "shadows", "thirst", "swings", "notes", "habits",
                                                       "limits"]),
@@ -42,11 +42,11 @@ GROUPS = [  # page order: the prompts in the order the models see them; a sectio
 TITLES = {
     "assembly": "How the prompts are built", "prompts": "Prompt templates", "session": "Session: time and heat",
     "character": "Character card pieces", "stats": "Character stats", "feelings": "Feelings",
-    "checklist": "Director's checklist", "turn": "The turn message's frame", "interest": "Interest levels",
+    "checklist": "Director's checklist", "review": "Director's review of its draft", "turn": "The turn message's frame", "interest": "Interest levels",
     "traps": "Traps", "clock": "Story clock", "needs": "What each point in the chat needs", "beats": "Story beats",
     "moves": "Moves and how each roll lands", "results": "Roll results", "shadows": "Shadows taking over",
     "thirst": "Thirsty slips", "swings": "Interest swings in one turn", "notes": "Required notes",
-    "habits": "Habit rule", "limits": "Limits the game checks", "checks": "Checks and retries",
+    "habits": "Habit rule", "limits": "The rough size of a chat", "checks": "Checks and retries",
     "reader": "Reader and grader",
 }
 SKIP = {"about", "sections"}

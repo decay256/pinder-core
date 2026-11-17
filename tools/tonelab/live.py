@@ -101,6 +101,20 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v16: length is guidance and the voice comes from the plan. No length is checked any more: the
+per-message, per-turn and message-count caps and the match's word cap after a big loss are gone,
+and so are their retries; the game checks only who writes. The director is told where the chat
+stands (the words so far against the rough size of a whole chat, which it may run over) and,
+counted by the code, how each of them has written over the last three turns, so a repeating shape
+is visible. The plan gives each character a background (generation, schooling, money, vices) that
+shapes their words, a voice that never changes, how each feeling changes the way they type (one
+rants, the other goes down to one-word questions) and a break kept for the biggest moment; the
+shared table of how feelings show becomes the default. Each turn the director drafts, reviews the
+draft against dialogue questions adapted from the novel engine (who sent it without the names, the
+plan's register, what each line does to the other, subtext, stale material, shape, the last word)
+and sends the revised version. After the chat a blind reader sorts the shuffled messages into two
+senders, which measures how distinct the voices are.
+
 v14: a self-consistency pass over v13. Each fix removes two lines of one turn message that
 told the director opposite things. Length is one line for each of them: the player character's
 from the beat when the beat is about them, otherwise from the move; the match's from the beat
@@ -497,62 +511,49 @@ def feeling_problems(feel, names, delta, ghost):
 
 
 def limits_for(table, key, swing, ghost):
-    """The checked limits. The match's message count comes from the beat when the beat is about the
-    match (a snap, a reveal), otherwise from the swing."""
-    lim, b = table["limits"], table["beats"].get(key) or {}
-    calm = key not in SNAPS and not key.startswith("ending")
-    count = None if ghost else (b.get("match_messages") if b.get("about_match") else swing.get("match_messages"))
-    return {"message": lim["message_words"], "long": lim["long_message_words"] if key in beat_set("long_message") else None,
-            "turn": lim["turn_words"], "match_total": swing.get("match_max_words") if calm else None, "ghost": ghost,
-            "match_messages": count}
+    """What the game checks about a turn's messages: only who writes. No length is checked (v16)."""
+    return {"ghost": ghost}
 
 
-def limits_text(lim, names):
-    L = "turn.limits."
-    parts = [say(L + "message", n=lim["message"]) + (say(L + "long", n=lim["long"]) if lim["long"] else ""),
-             say(L + "turn", n=lim["turn"])]
-    if lim["match_total"]:
-        parts.append(say(L + "match", name=names["datee"], n=lim["match_total"]))
-    if lim.get("match_messages"):
-        parts.append(say(L + "match_messages", name=names["datee"], count=plural(lim["match_messages"], "message")))
-    parts.append(say(L + "ghost", name=names["datee"]) if lim["ghost"] else T()["turn"]["limits"]["each"])
-    return say(L + "frame", parts="; ".join(parts))
+def shape_text(chat, names, last=3):
+    """How each of them has written over the last few turns, counted by the code: told as information,
+    so the director can see a shape repeating, never as a target."""
+    out = []
+    for side in ("player", "datee"):
+        turns = []
+        for _, lines in chat[-last:]:
+            mine = [m for w, m in lines if w == names[side]]
+            turns.append(say("turn.length.shape_turn", count=plural(len(mine), "message"),
+                             words=plural(sum(len(m.split()) for m in mine), "word"))
+                         if mine else T()["turn"]["length"]["shape_none"])
+        if turns:
+            out.append(say("turn.length.shape_one", name=names[side], turns=", then ".join(turns)))
+    return "; ".join(out)
 
 
-def length_text(table, t, rk, swing, key, names, spent, played, budget, lim):
+def length_text(table, t, rk, swing, key, names, spent, played, budget, chat):
     """One length statement for each of them, never two that can disagree: the player's from the
     beat when the beat is about them, otherwise from the move and the roll; the match's from the
-    beat when it is about the match, otherwise from the swing."""
+    beat when it is about the match, otherwise from the swing. Then where the chat stands in words,
+    and how each has written lately. None of it is checked."""
     L, b = "turn.length.", table["beats"].get(key) or {}
     match = fill(b["length"] if b.get("about_match") else swing["length"], datee=names["datee"])
     mine = (b["length"] if b.get("length") and not b.get("about_match")
             else table["moves"][t["chosen_stat"]]["tiers"][rk]["length"])
     out = [say(L + "player", name=names["player"], text=mine), say(L + "match", text=match)]
-    out.append(say(L + "so_far", spent=spent, played=plural(played, "turn"), budget=budget))
-    out.append("- " + limits_text(lim, names))
+    out.append(say(L + "so_far", spent=spent, played=plural(played, "turn"), budget=budget) if played
+               else say(L + "so_far_first", budget=budget))
+    shapes = shape_text(chat, names)
+    if shapes:
+        out.append(say(L + "shape", shapes=shapes))
     return "\n".join(out)
 
 
 def length_problems(lines, lim, names):
+    """Who writes is checked: each of them sends something, and a match who ghosts sends nothing.
+    How much anyone writes is not (v16)."""
     L = "checks.length."
-    out, long_used = [], False
-    words = [len(m.split()) for _, m in lines]
-    for (w, m), n in zip(lines, words):
-        if n <= lim["message"]:
-            continue
-        if lim["long"] and not long_used and n <= lim["long"]:
-            long_used = True
-            continue
-        out.append(say(L + "message", who=w, start=" ".join(m.split()[:6]), n=n, max=lim["message"]))
-    if sum(words) > lim["turn"]:
-        out.append(say(L + "turn", n=sum(words), max=lim["turn"]))
-    match = sum(n for (w, _), n in zip(lines, words) if w == names["datee"])
-    if lim["match_total"] and match > lim["match_total"]:
-        out.append(say(L + "match", name=names["datee"], n=match, max=lim["match_total"]))
-    sent = sum(1 for w, _ in lines if w == names["datee"])
-    if lim.get("match_messages") and sent > lim["match_messages"]:
-        out.append(say(L + "match_messages", name=names["datee"], n=sent, max=lim["match_messages"]))
-    sides = {w for w, _ in lines}
+    out, sides = [], {w for w, _ in lines}
     if names["player"] not in sides:
         out.append(say(L + "silent", name=names["player"]))
     if lim["ghost"] and names["datee"] in sides:
@@ -697,6 +698,8 @@ def hooks_text(hooks):
 
 CHECK = re.compile(r"(?im)^[\s*_#>\-]*CHECK[\s*_]*:")
 FINAL = re.compile(r"(?im)^[\s*_#>\-]*FINAL[\s*_]*:[\s*_]*")
+DRAFT = re.compile(r"(?im)^[\s*_#>\-]*DRAFT[\s*_]*:[\s*_]*")
+REVIEW = re.compile(r"(?im)^[\s*_#>\-]*REVIEW[\s*_]*:[\s*_]*")
 LABEL_IN_CHAT = re.compile(r"\b(?:TOLD|HOOK|PLANTED|CALLBACK|PAID|COLLIDED)\b|(?i:\b(?:setup|piece)\s*#?\d)")
 
 
@@ -714,15 +717,22 @@ def quoted(msgs):
 
 
 def sections(text):
-    """A director answer split into its notes, its checklist answers and the version that goes out."""
+    """A director answer split into its notes, its checklist answers, the version that goes out, its
+    draft and its review of the draft."""
     c = CHECK.search(text)
     body = text[c.end():] if c else text
     m = FINAL.search(body)
     head = text[:c.start()] if c else (body[:m.start()] if m else text)
     notes = re.sub(r"(?is)^.*?NOTES[\s*_]*:", "", head, count=1).strip()
-    check = (body[:m.start()] if m else body).strip() if c else ""
+    middle = (body[:m.start()] if m else body) if c else ""
+    d, r = DRAFT.search(middle), REVIEW.search(middle)
+    check = middle[:d.start() if d else (r.start() if r else len(middle))].strip()
+    if r and d and r.start() < d.end():
+        r = None
+    draft = middle[d.end():r.start() if r else len(middle)].strip() if d else ""
+    review = middle[r.end():].strip() if r else ""
     final = FINAL.sub("", body[m.start():], count=1).strip() if m else ""
-    return notes, check, final
+    return notes, check, final, draft, review
 
 
 def chat_problems(msgs, allow_meet):
@@ -768,7 +778,7 @@ class Director:
 
 
 CALL_TITLES = {
-    "": ("The turn: notes, checklist and the turn as sent", True),
+    "": ("The turn: notes, checklist, draft, review and the turn as sent", True),
     "retry": ("The turn, asked again", True),
 }
 
@@ -865,6 +875,48 @@ def reader_check(caller, plan, output, names):
     return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None}
 
 
+def attribution_check(caller, chat, names, seed):
+    """A blind test of distinct voices: every message of the chat, shuffled and without names, sorted
+    into two senders by a reader who knows nothing else. The score is the share sorted right under the
+    better of the two ways to match the letters to the names, so 0.5 is chance; an unanswered message
+    counts as wrong."""
+    R = T()["reader"]
+    msgs = [(w, m) for _, lines in chat for w, m in lines]
+    order = list(range(len(msgs)))
+    random.Random(f"attribution-{seed}").shuffle(order)
+    listing = "\n".join(say("reader.attribution_line", k=k + 1, message=msgs[j][1]) for k, j in enumerate(order))
+    answer = caller(R["attribution_system"], say("reader.attribution_prompt", n=len(msgs), messages=listing),
+                    "attribution check", "low", {})
+    got = {}
+    for line in answer.splitlines():
+        m = re.match(r"^[\s*_]*(\d+)[\s*_]*[:.)\-]\s*\**\s*([AB])\b", line, re.I)
+        if m and 1 <= int(m.group(1)) <= len(msgs):
+            got[int(m.group(1))] = m.group(2).upper()
+    truth = {k + 1: msgs[j][0] for k, j in enumerate(order)}
+    right = sum(1 for k, a in got.items() if (a == "A") == (truth[k] == names["player"]))
+    score = max(right, len(got) - right) / len(msgs) if msgs else None
+    return {"score": round(score, 3) if score is not None else None, "answered": len(got), "messages": len(msgs),
+            "answer": answer}
+
+
+def shape_stats(chat, names):
+    """How varied each one's messages are: words per message (smallest, median, largest), the spread
+    (standard deviation over the mean) and messages per turn."""
+    out = {}
+    for side in ("player", "datee"):
+        n = names[side]
+        words = [len(m.split()) for _, lines in chat for w, m in lines if w == n]
+        if not words:
+            continue
+        mean = sum(words) / len(words)
+        sd = (sum((x - mean) ** 2 for x in words) / len(words)) ** 0.5
+        out[n] = {"messages": len(words), "words": sum(words),
+                  "per_message": {"min": min(words), "median": sorted(words)[len(words) // 2], "max": max(words)},
+                  "spread": round(sd / mean, 2) if mean else None,
+                  "messages_per_turn": [sum(1 for w, _ in lines if w == n) for _, lines in chat]}
+    return out
+
+
 def beat_keys(knobs, table, turns, outcome):
     use_table(table)
     story = Story(knobs, beats_of(table))
@@ -936,6 +988,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         "player_card": tl.render(P["character"], {**pv, "role": "the player"}, "prompts.character").strip(),
         "datee_card": tl.render(P["character"], {**dv, "role": "the match"}, "prompts.character").strip(),
         "checklist": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(table["checklist"])),
+        "review": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(table["review"])),
     }
     bible = tl.render(P["bible"], common, "prompts.bible").strip()
     systems = {k: bible + "\n\n" + tl.render(P[k], common, "prompts." + k).strip() for k in ("plan", "direct")}
@@ -970,7 +1023,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                                "" if key in beat_set("big") or key.startswith("ending") else needs, last_feel, names,
                                [h for h in hooks if h[0] >= t["turn"] - 2])
         lim = limits_for(table, key, swing, ghost)
-        length = length_text(table, t, rk, swing, key, names, spent, i, budget, lim)
+        length = length_text(table, t, rk, swing, key, names, spent, i, budget, chat)
         allow_meet = is_last and mech.get("outcome") == "DateSecured"
         user = tl.render(P["turn"],
                          {**common, "since": since, "relationship": relationship, "story": story_now,
@@ -980,12 +1033,13 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         exempt = names[SNAPS[key]] if key in SNAPS else None
 
         def judge(raw):
-            head, check, final = sections(raw)
+            head, check, final, draft, review = sections(raw)
             text, notes = strip_notes(final, names)
             lines, stray = split_stray(parse_lines(text, names))
             fmt = T()["checks"]["format"]
             problems = [say("checks.format.no_note_head", head=h) for h in note_heads() if h.lower() not in head.lower()]
             problems += ([] if check else [fmt["no_check"]])
+            problems += ([] if draft and review else [fmt["no_review"]])
             problems += ([] if final else [fmt["no_final"]])
             problems += (length_problems(lines, lim, names) + habit_problems(lines, habits, banned, exempt)
                          + notes_problems(notes, need, names, key.startswith("ending"))
@@ -993,16 +1047,16 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             problems += feeling_problems(feelings_of(head, names), names, t["interest_delta"], ghost)
             if stray:
                 problems.append(say("checks.format.stray", lines=quoted(stray)))
-            return problems, notes, lines, check, head
+            return problems, notes, lines, check, head, draft, review
 
         t_label = f"turn {t['turn']}"
         d_text = director.ask(user, t_label, ctx)
-        problems, notes, lines, d_check, d_notes = judge(d_text)
+        problems, notes, lines, d_check, d_notes, d_draft, d_review = judge(d_text)
         retried = bool(problems)
         if problems:
             d_text = director.ask(say("checks.retry.turn", problems="; ".join(problems), n=t["turn"]), t_label + " retry",
                                   ctx)
-            problems, notes, lines, d_check, d_notes = judge(d_text)
+            problems, notes, lines, d_check, d_notes, d_draft, d_review = judge(d_text)
         feel = feelings_of(d_notes, names)
         last_feel = {k: v for k, v in feel.items() if v.get("feeling")}
         for who_told, what in notes["told"]:
@@ -1037,14 +1091,15 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                  + (["Their habits collided."] if notes["collided"] else []))
         brief = (f"Picked {t['chosen_stat']}: {T()['results'][rk]['name']}. Interest {t['interest_before']} → {t['interest_after']} "
                  f"({swing['name']}, {irow['state']}).\nBeat the game chose: {key}\n"
-                 f"Required notes: {', '.join(need) or 'none'}\n{limits_text(lim, names)}\n"
-                 f"Written: {words} words; {spent} of the {budget} budget spent."
+                 f"Required notes: {', '.join(need) or 'none'}\n"
+                 f"Written: {words} words; {spent} so far, against a chat of about {budget}."
                  + (f"\n\nHabits: {h_note}" if h_note else "")
                  + (f"\nRules still broken after a retry: {'; '.join(problems)}" if problems else
                     "\n(kept the rules after a retry)" if retried else "")
                  + ("\n\n" + "\n".join(noted) if noted else ""))
         out.append({"turn": t["turn"], "beat": key, "roll_key": rk, "needs": needs, "user": user,
                     "director_notes": d_notes, "delivered": d_text, "director_check": d_check,
+                    "director_draft": d_draft, "director_review": d_review,
                     "brief": brief, "limits": lim, "retried": retried, "shape_problems": problems, "notes": notes,
                     "habit_note": h_note, "step": step, "required": need, "words": words, "feelings": feel,
                     "relationship": relationship, "story": story_now, "event": event})
@@ -1055,7 +1110,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             "turns": out, "output": output, "planted_turn": min(planted_turns) if planted_turns else None,
             "callback_turn": min(called_turns) if called_turns else None, "told": told, "hooks_open": hooks,
             "habits": habits, "pieces": {k: sorted(v) for k, v in pieces.items()},
-            "setups": {str(k): v for k, v in sorted(setups.items())}, "collided_turn": collided, "words": spent}
+            "setups": {str(k): v for k, v in sorted(setups.items())}, "collided_turn": collided, "words": spent,
+            "chat": chat}
 
 
 def dry_caller(names):
@@ -1064,11 +1120,14 @@ def dry_caller(names):
             return "\n\n".join(f"{n}\nShows: dry\nTonight: dry-tonight\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\n"
                                "Origin, in three pieces, from the surface to the part they'd never say:\n"
                                "1. dry-origin-one\n2. dry-origin-two\n3. dry-origin-three\nAccident: dry-accident-line\n"
-                               f"Voice: dry\n- dry" for n in (names["player"], names["datee"])) + \
+                               f"Background: dry\nVoice: dry\n- dry\nBreak: dry" for n in (names["player"], names["datee"])) + \
                 "\n\nCollision: dry\nIf they click: dry\nHeat: dry"
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
+        if label.startswith("attribution"):
+            return "1: A"
         lines = [f"{names['player']}: dry"] + ([] if ctx.get("ghost") else [f"{names['datee']}: dry"])
+        draft = "\n".join(lines)
         for n in ctx.get("required", []):
             if n.startswith("TOLD:"):
                 lines.append(f"TOLD: {names['player'] if n == 'TOLD:any' else n[5:]}: dry")
@@ -1076,7 +1135,7 @@ def dry_caller(names):
                 lines.append(n)
         feel = f"{names['player']}: fear, mild, dry. {names['datee']}: {'hurt' if (ctx.get('delta') or 0) < 0 else 'joy'}, mild, dry"
         return ("NOTES:\n" + "\n".join(f"{h}: {feel if h == 'Feeling' else 'dry'}" for h in note_heads())
-                + "\nCHECK:\n1. dry\nFINAL:\n" + "\n".join(lines))
+                + "\nCHECK:\n1. dry\nDRAFT:\n" + draft + "\nREVIEW:\n1. holds\nFINAL:\n" + "\n".join(lines))
     return caller
 
 
@@ -1120,6 +1179,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
 
     result = play(variant_dir, knobs, mech, args.player, args.datee, caller)
     reader = reader_check(caller, result["plan"], result["output"], names)
+    attribution = attribution_check(caller, result["chat"], names, args.seed)
     systems = result["systems"]
     with open(os.path.join(run_dir, "prompt.md"), "w", encoding="utf-8") as f:
         f.write("".join(f"<!-- system prompt: {k} -->\n{v}\n\n" for k, v in systems.items()) +
@@ -1170,6 +1230,8 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "words": result["words"], "word_budget": T()["limits"]["chat_words"],
         "pieces": result["pieces"], "setups": result["setups"], "collided_turn": result["collided_turn"],
         "reader_score": reader["score"], "reader": reader,
+        "attribution_score": attribution["score"], "attribution": attribution,
+        "shape": shape_stats(result["chat"], names),
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
     with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:
@@ -1177,11 +1239,11 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
     with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
     tl.write_report(run_dir)
-    add_reader_to_report(run_dir, reader)
+    add_reader_to_report(run_dir, reader, attribution)
     print(os.path.relpath(run_dir, tl.REPO))
 
 
-def add_reader_to_report(run_dir, reader):
+def add_reader_to_report(run_dir, reader, attribution=None):
     import html
     path = os.path.join(run_dir, "report.html")
     if not os.path.exists(path):
@@ -1192,6 +1254,11 @@ def add_reader_to_report(run_dir, reader):
            f"graded the answers against the plan. Score: {reader['score']} of 9.</p>"
            f"<pre>{html.escape(reader['answers'])}</pre>"
            f"<details><summary>Grade against the plan</summary><pre>{html.escape(reader['grade'])}</pre></details></section>")
+    if attribution:
+        sec += ("<section><h2>Blind attribution</h2><p>A reader saw every message shuffled and without names and sorted "
+                f"them into two senders: {attribution['score']} sorted right ({attribution['answered']} of "
+                f"{attribution['messages']} answered; 0.5 is chance).</p>"
+                f"<details><summary>The answer</summary><pre>{html.escape(attribution['answer'])}</pre></details></section>")
     page = page.replace("</body>", sec + "</body>", 1) if "</body>" in page else page + sec
     with open(path, "w", encoding="utf-8") as f:
         f.write(page)

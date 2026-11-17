@@ -1,0 +1,296 @@
+{
+  "run_id": "20261117T121702Z-live-reuben-brick-s23",
+  "created_utc": "20261117T121702Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "89b571bbfc3ec10e2babc3ea0e9c86750da96ca85a9b176644637a7cb10488a1"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "ce2ab0bb5a0fb66c90f18e3cd385777473a422935bcf54ebccbf49bfc624aaaf",
+  "prompt_chars": 138120,
+  "model_calls": 18,
+  "repo_commit": "7753de7",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 876.6,
+  "usage": {
+    "cost": 0.48816339999999997,
+    "prompt_tokens": 315666,
+    "completion_tokens": 26399,
+    "reasoning_tokens": 3351
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 1257,
+  "planted_turn": 1,
+  "shape_retries": 3,
+  "turns_off_shape": [
+    1
+  ],
+  "callback_turn": 3,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "curated underground venue door policy"
+    ],
+    [
+      1,
+      "Brick_haus",
+      1,
+      "on strategic career pause from architecture"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "fired from dive bar for lecturing regular he thought was Interpol bassist"
+    ],
+    [
+      6,
+      "Brick_haus",
+      2,
+      "wedged shaft and heel in hotel revolving door before interview"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "regular looked right over his top hat and walked in while he talked"
+    ],
+    [
+      11,
+      "Brick_haus",
+      3,
+      "panel stared at veins through her vest while she begged them to look at portfolio"
+    ]
+  ],
+  "required_missed": [
+    [
+      1,
+      [
+        "these put them in one place, or one of them on the way to the other, though they are apart and the match hasn't agreed to meet: \"I am on a strategic career pause after outgrowing corporate architecture, so I vet all specs in advance. How much clearance does your front door have?\""
+      ]
+    ]
+  ],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "used to curate underground venue door policy"
+    ],
+    [
+      1,
+      "Brick_haus",
+      "on a strategic career pause from corporate architecture"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "luxury hotel lobbies cannot engineer a revolving door with decent radius clearance"
+    ],
+    [
+      3,
+      "Reuben_404",
+      "people used to look right over his top hat at the damp dive bar door"
+    ],
+    [
+      4,
+      "Brick_haus",
+      "men stare at the veins through her vest and assume she wants to crush them"
+    ],
+    [
+      5,
+      "Reuben_404",
+      "fired from a damp dive bar for lecturing a regular he swore was the bassist from Interpol"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "lectured interview panel for forty minutes with a bruised glans after getting wedged in hotel door"
+    ],
+    [
+      7,
+      "Brick_haus",
+      "the interview panel did not hear a word she said about the doorway"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "argues with her building super that her 28-inch hallway doorframe is a code violation"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "grew up bruising her hips on every doorway in a narrow terraced house"
+    ],
+    [
+      10,
+      "Brick_haus",
+      "the hotel revolving door snapped her favorite heel clean in half"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "If you need to bail",
+      "For the record",
+      "Structurally speaking"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1380,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 6,
+      "paid": 10
+    },
+    "3": {
+      "planted": 2,
+      "called": 6,
+      "paid": 9
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 9.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of looking ridiculous next to Brick_haus, being overlooked because of their shorter size, and getting rejected once the conversation gets close enough to matter.\n2. They script jokes in advance, inflate their job history, and give a non-stop, live play-by-play narration of their own panic so the other person never gets a clear shot at them.\n3. It comes from working the door at a damp dive bar where people looked right over their top hat, including a regular who just walked inside while Reuben_404 was still lecturing him.\n4. Reuben_404 dropped the habit at the end, finally answering a question simply and directly without narrating their own panic or scripting a joke.\n5. Brick_haus is afraid of being too big for the room, breaking furniture or getting humiliated by getting stuck in doorways, and being stared at like a monster who only wants to crush people.\n6. They rigidly schedule forty-minute time windows, speak in numbered corporate lists, and audit the clearance and specs of every doorway in advance.\n7. It comes from growing up bruising their hips on doorways in a narrow terraced house, and later getting their heel and nine-inch shaft wedged in a hotel revolving door right before an interview where the panel just stared at their veins instead of their portfolio.\n8. Brick_haus dropped the habit, throwing out their numbered lists, capital letters, and strict schedule to show up at eight with no plan at all.\n9. At first, Reuben_404'srambling panic buried Brick_haus's honesty and triggered Brick_haus to put up an executive wall, but calling out each other's defenses actually helped them both feel understood and drop the act.\n10. \"You aren't too big for my room, come breka my doorpost.\" It is unforgettable because the typo shows that Reuben_404 finally stopped rehearsing their texts in a notes app, while offering Brick_haus the exact acceptance they needed.\n11. I laughed in Turn 8 when Brick_haus accidentally pasted a numbered draft to their building super claiming a 28-inch doorframe was \"a code violation, not a personal failing,\" and tried to pass it off as a demonstration of executive standards.",
+    "grade": "1. **Yes** — Captures his fear of being too small, overlooked, and rejected/cropped out.\n2. **Yes** — Captures his pre-scripted rehearsal, inflated work history, and preemptive self-narration to beat rejection.\n3. **Yes** — Matches the exact dive-bar origin story, including the regular looking right over his top hat.\n4. **Yes** — Matches his break and relief behavior (dropping the spatial jargon/rehearsal for a quiet, direct line; Q10 also confirms the contraction and typo).\n5. **Yes** — Captures her fear of being an oversized anomaly who takes up too much room, breaks things, and scares people like a monster.\n6. **Yes** — Matches her habit of auditing physical specs, logistics, and doorways using numbered lists.\n7. **Yes** — Matches both her background in the narrow terraced house and the exact hotel revolving-door interview origin.\n8. **Yes** — Matches her exact break (no numbers, lowercase, admitting she has no plan).\n9. **Yes** — Captures the collision of their defenses and how dropping the audit/exit-speech act allowed them to click.\n\nSCORE: 9 out of 9",
+    "score": 9.0
+  },
+  "attribution_score": 0.98,
+  "attribution": {
+    "score": 0.98,
+    "answered": 50,
+    "messages": 50,
+    "answer": "1: A\n2: A\n3: A\n4: A\n5: B\n6: B\n7: A\n8: A\n9: B\n10: A\n11: B\n12: B\n13: B\n14: A\n15: A\n16: A\n17: A\n18: A\n19: A\n20: B\n21: A\n22: A\n23: A\n24: A\n25: B\n26: B\n27: B\n28: A\n29: A\n30: B\n31: B\n32: A\n33: A\n34: B\n35: B\n36: B\n37: A\n38: B\n39: B\n40: B\n41: A\n42: A\n43: A\n44: B\n45: B\n46: A\n47: B\n48: B\n49: B\n50: A"
+  },
+  "shape": {
+    "Reuben_404": {
+      "messages": 22,
+      "words": 733,
+      "per_message": {
+        "min": 4,
+        "median": 33,
+        "max": 95
+      },
+      "spread": 0.68,
+      "messages_per_turn": [
+        2,
+        3,
+        1,
+        2,
+        2,
+        3,
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
+    },
+    "Brick_haus": {
+      "messages": 28,
+      "words": 647,
+      "per_message": {
+        "min": 4,
+        "median": 24,
+        "max": 40
+      },
+      "spread": 0.38,
+      "messages_per_turn": [
+        2,
+        3,
+        2,
+        4,
+        1,
+        3,
+        2,
+        4,
+        2,
+        3,
+        2
+      ]
+    }
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 22,
+    "datee_lines": 28,
+    "words": 1452
+  }
+}

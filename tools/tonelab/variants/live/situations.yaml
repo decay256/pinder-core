@@ -4,21 +4,20 @@ about: 'The tone lab''s situation table: the one source for everything the tone 
   and edited here from then on; the game''s files are not read at run time. ''new'' marks text the game has no equivalent
   for.'
 sections:
-  limits: The only lengths the game checks; a turn that breaks one is sent back once. chat_words is the average
-    length of a whole chat, which the director is told as a budget, not a cap.
+  limits: The rough size of a whole chat, told to the director as where the chat stands, never as a cap. Since v16
+    the game checks no length; it checks only who writes (each of them, or nobody from a match who ghosts).
   moves: What each move makes the message, what each result does to the message the player character meant to send,
     how the match takes it, and how long the player character writes. breakthrough marks the moves that can carry
     the breakthrough beat.
   results: 'How each roll result is described to the director: in words, never as a number.'
   interest: 'What each interest level means about the match: where they stand, not where the story is.'
-  swings: What this turn's change in interest does to the match's reply, how much the match writes, and how many
-    messages it may send (checked). The match word limit after a big loss is checked too.
+  swings: What this turn's change in interest does to the match's reply, and how much of themselves the match gives.
+    The shape that takes comes from the match's Feelings in the plan.
   beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
     length is the length line for whoever the beat is about; spent is how the beat is listed under 'Already happened'.
-    big beats plant no setup, exchange beats must hand over something real, and in a long_message beat one message
-    may run to the long limit. about_match marks the beats whose length line replaces the swing's for the match.
-    A beat's length line without about_match replaces the move's length line for the player character; beats with
-    no length line leave both to the move and the swing.
+    big beats plant no setup, and exchange beats must hand over something real. about_match marks the beats whose
+    length line replaces the swing's for the match. A beat's length line without about_match replaces the move's
+    length line for the player character; beats with no length line leave both to the move and the swing.
   needs: The template for this point in the chat, built from these parts by where the chat is.
   shadows: When a shadow takes over a message; means is the short version on each character card.
   traps: 'While a trap is active: how the player character acts in it. Every trap lasts three turns, counting the
@@ -31,12 +30,16 @@ sections:
   notes: What each required note asks for and what a retry says when it is missing.
   habits: The habit rule shown every turn, and what a retry says when it is broken.
   checklist: The questions the director answers before writing anything that goes out; part of its system prompt.
+  review: The questions the director answers about its own draft each turn, before it writes the version that goes
+    out; part of its system prompt. Adapted from the novel engine's dialogue rubric and its "dialogue as combat"
+    rules.
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
     that put the two of them in one place; note_heads are the notes the director writes every turn before the checklist.
   turn: 'The frame of the director''s message each turn, in the order of the state model: where they stand, where
     the story is, this turn, what the game requires, how long. The game fills in the numbers, names and rows.'
-  reader: The reader who sees only the finished chat, and the grader who scores the reader's answers against the
-    plan.
+  reader: 'After the chat: a reader who sees only the finished chat, a grader who scores the reader''s answers against
+    the plan, and a blind attribution test, in which a reader sorts every message, shuffled and without names, into
+    two senders.'
   character: 'Pieces of each character card drawn fresh for each match. The rest of the card comes from the game''s
     character file: bio, body, texting style, personality, backstory, the drawer and the diagnosis.'
   prompts: The prompt templates. bible opens every system prompt; plan and direct are the planner's and the director's
@@ -47,13 +50,11 @@ sections:
   session: 'Read once, for the plan: how to say the game''s time of day, and what tonight''s session horniness means.'
   feelings: 'The feelings the director names for each character every turn in its Feeling note, and how each shows
     in a text. The match''s feeling has to agree with how their interest moved: negative on a loss, positive on
-    a gain.'
+    a gain. How each shows is the default: the plan''s Feelings say how each one shows in each character.'
 limits:
-  message_words: 45
-  long_message_words: 70
-  turn_words: 150
-  source: 'new: the only lengths the game checks; everything else is guidance'
   chat_words: 1250
+  source: 'new: the rough size of a whole chat, told to the director as where the chat stands; never a cap, and
+    never an average to hit each turn'
 stats:
   about: Each character has a value for each of the six moves, which the game adds to every roll of that move against
     the match's DC, so it decides how often the move comes off for them. Values run from about -3 to 20. The card
@@ -936,40 +937,35 @@ swings:
   from: -99
   to: -3
   means: It hurt. The match pulls back hard and doesn't explain why.
-  length: '${datee}: one message, a few words.'
-  match_max_words: 10
-  match_messages: 1
+  length: '${datee}: much less of themselves than before. A few cold words or a rant that gives nothing away, whichever
+    their feeling makes of them.'
 - name: loss
   from: -2
   to: -1
   means: A step cooler. The match answers less than it was asked.
-  length: '${datee}: one or two messages, shorter than last turn.'
-  match_messages: 2
+  length: '${datee}: a little less of themselves than last turn.'
 - name: flat
   from: 0
   to: 0
   means: Nothing moved. The match keeps its distance and waits.
-  length: '${datee}: about as much as last turn.'
-  match_messages: 3
+  length: '${datee}: about as much of themselves as last turn.'
 - name: gain
   from: 1
   to: 2
   means: It worked a little. The match gives a little more back than it was asked.
-  length: '${datee}: one or two messages, a little more than last turn.'
-  match_messages: 2
+  length: '${datee}: a little more of themselves than last turn.'
 - name: big gain
   from: 3
   to: 99
   means: It landed. The match drops some guard and gives back more than it was asked.
-  length: '${datee}: two or three messages, more than last turn.'
-  match_messages: 3
+  length: '${datee}: more of themselves than before, in their own shape: more messages, a longer one, or one that
+    finally says something.'
 beats:
   opener:
     story: The opener. Two strangers performing. The player character's first message is the act at full strength.
       The match answers with their own act, and may plant a setup lightly enough that it reads as a throwaway.
     length: '${datee}: one or two short messages: their own act, answering the act.'
     source: 'variant.json beats; length: new'
-    match_messages: 2
     about_match: true
   setup:
     story: Still early, still performing. They drop hooks, the half-brag version of their origin, and the other
@@ -1016,7 +1012,6 @@ beats:
     source: 'variant.json beats; length: new'
     spent: the player character's secret fell out (the planned accident is spent)
     big: true
-    long_message: true
   secret_miss:
     story: Piece 2 of the player character's origin should be out by now. The roll missed, so the accident happens,
       smaller than a catastrophe, but it happens to them, and their explanation doesn't help.
@@ -1024,7 +1019,6 @@ beats:
     source: 'variant.json beats; length: new'
     spent: the player character's secret slipped out (the planned accident is spent)
     big: true
-    long_message: true
   discovery:
     story: 'Piece 2 of the player character''s origin should be out by now, and they''ve kept it in. So the match
       finds it: something on the screen that doesn''t add up. They say so, in their own voice, and the player character
@@ -1033,7 +1027,6 @@ beats:
     source: 'variant.json beats; length: new'
     spent: the match found out the player character's secret
     big: true
-    match_messages: 2
     about_match: true
   match_reveal:
     story: 'The player character''s story is out, and the match can''t step over it. The match''s act cracks: a
@@ -1043,8 +1036,6 @@ beats:
     source: 'variant.json beats; length: new'
     spent: the match's reveal (their secret is out)
     big: true
-    long_message: true
-    match_messages: 3
     about_match: true
   player_snap:
     story: The player character snaps. Under stress the habit turns into a weapon, dressed up as their dating-app
@@ -1059,11 +1050,10 @@ beats:
     story: 'The match had let themselves hope, and that hurt. The match snaps: the habit as a weapon, the dating-app
       wisdom as the disguise, claim, slip, denial, the slip checkable on the screen. Then they regret it and back
       out badly.'
-    length: '${datee}: a burst of short messages, four at most.'
+    length: '${datee}: a burst of short messages.'
     source: 'variant.json beats; length: new'
     spent: the match snapped (no second snap)
     big: true
-    match_messages: 4
     about_match: true
   ending_win:
     story: 'The ending: the match agrees to meet. The click. Each of them puts their habit down for the other, and
@@ -1072,7 +1062,6 @@ beats:
       else, and nobody explains them. The match usually has the last line.'
     length: '${datee}: short and plain, like the player, and usually the last line.'
     source: 'variant.json beats; length: new'
-    match_messages: 3
     about_match: true
   ending_loss:
     story: 'The ending: the match unmatches. Each one''s habit confirms exactly what the other was afraid of, and
@@ -1081,7 +1070,6 @@ beats:
       way. The last line should hurt and be funny at the same time.'
     length: Unhinged and long, then one short line.
     source: 'variant.json beats; length: new'
-    long_message: true
   ending_ghost:
     story: 'The ending: the match ghosts. Only the player character''s messages: one, or a few more into the silence,
       each one their habit at full strength, each one telling the reader what the silence means. A setup comes back
@@ -1615,9 +1603,23 @@ checklist:
 - 'What does this do to the reader: a laugh, a wince, seeing through a lie, an ache?'
 - What does it cost the one who sends it? Is their fear nearer the surface than last turn?
 - What does the chat need at this interest level, and does this do it?
-- 'Is anything stale back: a prop, a joke, a description, a habit, a line?'
-- Does each line sound like the one who sends it, carry one thing, and read like something a person would type?
 - Does the roll show in the message itself, and does the match's answer show the feeling you named?
+review:
+- 'Cover the names: could a reader tell who sent each message from the words alone, by the vocabulary, the schooling,
+  the spelling and the rhythm? Name any line either of them could have sent, and rewrite it in its sender''s voice.'
+- Does each one's feeling show the way the plan's Feelings say it shows in them, and not the way it shows in the
+  other one?
+- 'What is each message doing to the other one: pushing, dodging, testing, hiding, flattering, hitting back? Name
+  any line that only passes on information. Does the upper hand move this turn?'
+- Does anyone name their feeling, explain themselves, sum up what just happened or sound like therapy? People in
+  a chat say the thing next to the thing.
+- Is anything back from an earlier turn (a prop, a joke, a pet word, an opener, a description of a body) without
+  meaning something new? Is the joke the first one anyone would think of, and is there a stranger one only this
+  person would make?
+- Is this turn the same shape as their last turns? Is each message as long as the moment and the voice need, nothing
+  padded and nothing cut?
+- Does each message carry one thing, end on its strongest word with nothing after the joke, and read like something
+  a person types into a phone?
 checks:
   apart_words:
   - downstairs
@@ -1656,16 +1658,13 @@ checks:
     no_check: 'there is no CHECK: with an answer to each question of the checklist'
     no_final: 'there is no FINAL: with the turn as sent'
     stray: 'these lines are neither a message nor one of the notes: ${lines}'
+    no_review: 'there is no DRAFT: and REVIEW: before FINAL:, with an answer to each review question'
   length:
-    message: ${who}'s message "${start} ..." has ${n} words, more than ${max}
-    turn: the turn has ${n} words, more than ${max}
-    match: ${name} wrote ${n} words, more than ${max} after a loss like this
     silent: ${name} sends nothing
     ghost_replied: ${name} replied, but they ghost
-    match_messages: ${name} sent ${n} messages, ${max} at most this turn
   retry:
-    turn: 'Your turn broke the game''s rules: ${problems}. Write the notes, the checklist and turn ${n} again, in
-      full, so it keeps all of them.'
+    turn: 'Your turn broke the game''s rules: ${problems}. Write the notes, the checklist, the draft, the review
+      and turn ${n} again, in full, so it keeps all of them.'
   source: 'new: written for the tone lab'
   feeling:
     missing: the Feeling note doesn't give ${name} one of the feelings first (${list})
@@ -1735,17 +1734,17 @@ turn:
   length:
     player: '- ${name}: ${text}'
     match: '- ${text}'
-    so_far: '- So far: ${spent} words in ${played}. The whole chat runs about ${budget} words, an average, not a
-      cap.'
-  limits:
-    frame: 'Limits, checked: ${parts}.'
-    message: no message over ${n} words
-    long: ' (one may run to ${n}, for the accident or the reveal)'
-    turn: no more than ${n} words in the turn
-    match: ${name} no more than ${n} words in all
-    ghost: ${name} sends nothing
-    each: at least one message each
-    match_messages: ${name} ${count} at most
+    so_far: '- Where the chat stands: ${spent} words so far in ${played}. A whole chat usually comes to something
+      like ${budget}, and running over is fine. It is not a share to fill each turn: write what this turn needs
+      to sound like them and land what it is for, one word or a long rant, and nothing to fill space.'
+    so_far_first: '- Where the chat stands: this is the first turn. A whole chat usually comes to something like
+      ${budget} words, and running over is fine. It is not a share to fill each turn: write what this turn needs
+      to sound like them and land what it is for, and nothing to fill space.'
+    shape: '- How each of them has written over the last turns, oldest first, for information (a shape repeated
+      turn after turn reads like a template): ${shapes}.'
+    shape_one: '${name}: ${turns}'
+    shape_turn: ${count} (${words})
+    shape_none: nothing
   source: 'new: written for the tone lab'
 reader:
   system: You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a
@@ -1778,6 +1777,12 @@ reader:
 
     ${answers}
   source: 'new: written for the tone lab'
+  attribution_system: You read text messages. You know nothing about who sent them except the words.
+  attribution_prompt: |-
+    These ${n} text messages come from one chat between two people, shuffled out of order. Sort them by who sent them: give each number the letter A or B, so that all of one person's messages share a letter. Go by the words alone: the vocabulary, the spelling, the punctuation, the rhythm, the way each one types. One line each, like "1: A", and nothing else.
+
+    ${messages}
+  attribution_line: ${k}. ${message}
 character:
   focus: |-
     - says: ${lie}
@@ -1890,7 +1895,7 @@ prompts:
 
     Everything about a character grows out of one fear and the habit they use to cope with it. Find that in the files: the clinician's notes say what hurts them and how they defend against it, and the backstory says where it came from. Build everything else from it, and make it specific: a place, a person, a moment, the embarrassing detail.
 
-    Write exactly this, under 650 words in all:
+    Write exactly this, under 900 words in all:
 
     ${player_name}
     Shows: what the other one can see on the profile, in one line.
@@ -1905,9 +1910,11 @@ prompts:
     3. the part that still hurts, which only comes out at the end
     Accident: how piece 2 falls out on a bad roll instead: exactly what appears on the screen (a message meant for someone else, the wrong paste).
     Snap: what sets it off, and the habit turned into a weapon, dressed as their dating-app wisdom.
-    Feelings: what sets off each feeling in them, from their fear and their habit, a few words each: anger at ..., fear at ..., shame at ..., guilt at ..., hurt at ..., contempt at ..., joy at ..., relief at ..., desire at ...
+    Feelings: for each feeling, what sets it off in them and how it changes the way they type, from their fear, their habit and the card's "may ... when ..." lines. The change in shape counts: one rants when angry, another goes down to one-word questions, one turns formal, another drops the capitals. The two of them never change the same way. A few words each: anger at ... → ..., fear at ... → ..., shame at ... → ..., guilt at ... → ..., hurt at ... → ..., contempt at ... → ..., joy at ... → ..., relief at ... → ..., desire at ... → ...
     Shadow: how their strongest shadow from the card shows in one of their messages when it takes over.
-    Voice: one line on how they type, then three example messages under 10 words they'd send in a chat, each a different shape, the habit in one of them at most.
+    Background: the life that made the way they type, a little over the top and specific: their generation, how far they got in school (a PhD, out at fourteen, never went), money, the job or the lack of one, what they're on or recovering from, where they grew up. Then how it shows in their words: what they know, the words they use and the ones they get wrong, their spelling.
+    Voice: what never changes in how they type, from the card's "tends to" lines and their background: capitals, punctuation, spelling, pet words, emoji, how long a message usually runs. Then three example messages they'd send, each a different shape (a fragment, a run-on, a question), the habit in one at most.
+    Break: how the voice drops at the one or two biggest moments of the chat, and only there: the act gone, a typo left in, the capitals dropped, one plain sentence.
 
     ${datee_name}
     (the same headings)
@@ -1963,7 +1970,7 @@ prompts:
 
     You write a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan, every turn you wrote and every note you made. The game has already played each turn: the player picked one of the moves on offer and the dice landed. You write the turn as it is sent: ${player_name}'s messages, then ${datee_name}'s answer.
 
-    Each message from the game tells you, in this order: where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (where the chat is, how you read each of them last turn, what is out and what is owed); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and what this turn is for); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "keep the same length"). Read them as what happens to the message; the words are yours, and the length follows the length lines, within the limits the game checks.
+    Each message from the game tells you, in this order: where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (where the chat is, how you read each of them last turn, what is out and what is owed); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and what this turn is for); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "keep the same length"). Read them as what happens to the message; the words are yours, and the length follows the length lines.
 
     The chat. Two strangers on a dating app, each in their own place, alone with a phone. Neither knows where the other is, and neither can see more than the other's profile and the chat. Nobody arrives, waits downstairs, opens a door, puts a coat on or takes it off, or crosses a room for the other one. The match agreeing to meet is the end of the chat, not something that happens in it. Every message is something one person types to the other: one thing they mean, said the way they'd say it.
 
@@ -1971,10 +1978,10 @@ prompts:
 
     The plan's material is yours to spend over the whole chat, a piece at a time, when it means something: an origin piece comes out because the other one asked the right thing, because a bad roll made them say too much, or as the answer to a joke, never out of nowhere. A message carries one thing, never a prop, a setup and a piece of origin at once. Pace it by the meter, not by the turn count: the part they'd never say waits for the end.
 
-    Feelings. Each of them feels something every turn, and it drives how they answer. Before you write, name it for each of them from the chat itself: the back-and-forth that wore someone's patience thin, the line that read as a lecture, the dodge that hurt. The plan's Feelings say what sets each one off in each of them. ${datee_name}'s feeling follows how their interest moved: when it fell, the feeling is a negative one; when it rose, a positive one; a big swing makes it strong. A rise after something that would usually set off a bad feeling means it didn't this time, and the surprise shows. The feelings, and how each shows in a text, always in the character's own voice:
+    Feelings. Each of them feels something every turn, and it drives how they answer. Before you write, name it for each of them from the chat itself: the back-and-forth that wore someone's patience thin, the line that read as a lecture, the dodge that hurt. The plan's Feelings say what sets each one off in each of them. ${datee_name}'s feeling follows how their interest moved: when it fell, the feeling is a negative one; when it rose, a positive one; a big swing makes it strong. A rise after something that would usually set off a bad feeling means it didn't this time, and the surprise shows. How a feeling shows is the plan's Feelings for that character: each of them changes shape in their own way, and the two rarely the same. Where the plan says nothing for a feeling, this is how it usually shows, always in the character's own voice:
     ${feelings}
 
-    Length is how invested someone is and how safe they feel. Whoever is chasing writes more; whoever pulls back writes less. Early and late messages are short, and so are the big moments: the most naked line is the shortest one in the chat. Someone who has just connected may suddenly say more than they ever have.
+    Length is how invested someone is and how safe they feel, in their own voice. Whoever is chasing gives more of themselves; whoever pulls back gives less, and how that looks depends on who they are and what they feel: one goes quiet, another rants. The most naked line is usually the shortest in the chat, and someone who has just connected may suddenly say more than they ever have. Nothing is counted per message or per turn. Write the words the moment needs to sound like them and land what the turn is for: a single word or a long message, never a turn padded to look like a turn or cut short to stay small. A chat that runs long is fine.
 
     Your notes keep track of whether this is working. Look back over the whole chat, compare it with your last notes, and be hard on it: praise helps nobody.
     - Where they are: each one's own place tonight, apart, and what is actually going on between them.
@@ -1987,8 +1994,12 @@ prompts:
     - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
     A line or two each.
 
-    The checklist. Every turn, after your notes, answer each question about the turn you are about to send, a few words each, then write it true to your answers.
+    The checklist. Every turn, after your notes, answer each question about the turn you are about to send, a few words each, then draft it true to your answers.
     ${checklist}
+
+    The review. Then read your draft the way an editor reads dialogue and answer each question about it, line by line where it matters: what fails and how you fix it, or that it holds. Be hard on it: a draft that passes everything usually wasn't read.
+    ${review}
+    Then write the turn as it is sent: the draft with every fix made.
 
     The move the player picked is what ${player_name} is trying to do this turn (a strategy, never a word the character uses). The meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A roll that comes off better than they could have hoped is the best line in the chat. The match's answer shows the feeling you named.
 
@@ -2006,10 +2017,16 @@ prompts:
     CHECK:
     1. ...
     (one answer per question)
+    DRAFT:
+    ${player_name}: message
+    ${datee_name}: message
+    REVIEW:
+    1. ...
+    (one answer per review question)
     FINAL:
     ${player_name}: message
     ${datee_name}: message
-    (${player_name}'s messages first, then ${datee_name}'s, as many as the length lines allow)
+    (${player_name}'s messages first, then ${datee_name}'s, as many as the moment needs)
     then the notes for the game, one per line, only for what happened this turn:
     TOLD: name: piece number: what of their origin came out, in a few words. Only something the other didn't know before.
     HOOK: name: a new hook they dropped, in a few words.
@@ -2037,7 +2054,7 @@ prompts:
     How long:
     ${length}
 
-    Write your notes, go through the checklist, then write the turn as it is sent.
+    Write your notes, go through the checklist, draft the turn, review the draft, then write the turn as it is sent.
 session:
   times:
     Morning: morning
@@ -2199,7 +2216,8 @@ assembly:
           what: The match's display name.
           from: []
         feelings:
-          what: The feelings and how each shows in a text.
+          what: 'How each feeling usually shows in a text: the default where the plan''s Feelings say nothing for
+            a character.'
           from:
           - feelings.shows
           - feelings.list_line
@@ -2207,6 +2225,10 @@ assembly:
           what: The questions answered before every turn, numbered.
           from:
           - checklist
+        review:
+          what: The questions the director answers about its own draft before the turn goes out, numbered.
+          from:
+          - review
     - message: Each turn
       template:
       - prompts.turn
@@ -2253,10 +2275,10 @@ assembly:
           from:
           - notes.asks
         length:
-          what: One length line for each of them, the words so far against the chat's budget, and the checked limits.
+          what: One length line for each of them; where the chat stands, the words so far against the rough size
+            of a whole chat; and how each of them has written over the last three turns, counted by the code.
           from:
           - turn.length
-          - turn.limits
           - moves.*.tiers.*.length
           - beats
           - swings
@@ -2274,8 +2296,9 @@ assembly:
         n:
           what: The turn number.
           from: []
-  - name: The reader and the grader
-    when: 'After the chat: two calls that see only the finished chat, and the plan for the grader.'
+  - name: The reader, the grader and the attribution test
+    when: 'After the chat: a reader and an attribution test that see only the finished chat, and a grader that also
+      sees the plan.'
     messages:
     - message: The reader
       template:
@@ -2301,3 +2324,15 @@ assembly:
         answers:
           what: The reader's answers.
           from: []
+    - message: The attribution test
+      template:
+      - reader.attribution_system
+      - reader.attribution_prompt
+      fills:
+        n:
+          what: How many messages the chat has.
+          from: []
+        messages:
+          what: Every message of the chat, shuffled, numbered, with no names.
+          from:
+          - reader.attribution_line

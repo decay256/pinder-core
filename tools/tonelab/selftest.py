@@ -87,10 +87,10 @@ def check_live(name, variant, knobs, tmp):
               f"{name} seed {seed}: the plan goes into the session once, at the start")
         turn_users = [u for _, _, u in session]
         check(len(turn_users) == n and all(f" plays {t['chosen_stat']}, " in u and "What that does to the message:" in u
-                                           and "takes it" in u and "Limits, checked:" in u and "Where they stand:" in u
+                                           and "takes it" in u and "Where the chat stands:" in u and "Where they stand:" in u
                                            and "Where the story is:" in u and "This turn:" in u
                                            for u, t in zip(turn_users, m["turns"])),
-              f"{name} seed {seed}: every turn reads where they stand, the story, the move, the roll, its reception and the limits")
+              f"{name} seed {seed}: every turn reads where they stand, the story, the move, the roll, its reception and where the chat stands")
         check(all("Last turn you read" in u for u in turn_users[1:]),
               f"{name} seed {seed}: from the second turn on, the director sees how it read each of them last turn")
         check(all(not re.search(r"\brolled \d|natural 20|against \d", u) for u in turn_users),
@@ -104,16 +104,23 @@ def check_live(name, variant, knobs, tmp):
         same = all(live.beat_keys(knobs, table, m["turns"][:k], None)[:k - 1] == full[:k - 1] for k in range(2, n + 1))
         check(same, f"{name} seed {seed}: beats never depend on later turns ({' '.join(full)})")
     names = {"player": "A", "datee": "B"}
-    lim = {"message": 45, "long": None, "turn": 150, "match_total": 10, "ghost": False}
-    bad = live.length_problems([("A", "w " * 50), ("B", "w " * 12)], lim, names)
-    check(len(bad) == 2 and "50 words" in bad[0] and "12 words" in bad[1],
-          "a message over the limit, and a match over its limit after a big loss, are caught")
-    check(not live.length_problems([("A", "w " * 60), ("B", "no")], {**lim, "long": 70, "match_total": None}, names),
-          "one long message is allowed in an accident or reveal")
-    check(live.length_problems([("A", "hi"), ("B", "hi")], {**lim, "ghost": True}, names) == ["B replied, but they ghost"],
+    lim = {"ghost": False}
+    check(not live.length_problems([("A", "w " * 400), ("B", "w " * 120), ("B", "a"), ("B", "b"), ("B", "c")], lim, names),
+          "no length is checked: a long message, a long turn and many messages all pass")
+    check(live.length_problems([("A", "hi"), ("B", "hi")], {"ghost": True}, names) == ["B replied, but they ghost"],
           "a ghost who replies is caught")
-    over = live.length_problems([("A", "hi"), ("B", "a"), ("B", "b"), ("B", "c")], {**lim, "match_messages": 2}, names)
-    check(over == ["B sent 3 messages, 2 at most this turn"], f"a match over its message count is caught ({over})")
+    check(live.length_problems([("A", "hi")], lim, names) == ["B sends nothing"], "a match who sends nothing is caught")
+    shape = live.shape_text([(1, [("A", "one two three"), ("B", "x")]), (2, [("A", "a"), ("A", "b c")])], names)
+    check(shape == "A: 1 message (3 words), then 2 messages (3 words); B: 1 message (1 word), then nothing",
+          f"each one's shape over the last turns is counted, a silent turn included ({shape})")
+    chat = [(1, [("A", "aa one"), ("B", "bb one")]), (2, [("A", "aa two"), ("A", "aa three"), ("B", "bb two")])]
+    for flip in (False, True):
+        def sorter(system, user, label, effort, ctx, flip=flip):
+            got = re.findall(r"(?m)^(\d+)\. (\w+)", user)
+            return "\n".join(f"{k}: {'AB'[(w.startswith('aa')) == flip]}" for k, w in got)
+        att = live.attribution_check(sorter, chat, names, 7)
+        check(att["score"] == 1.0 and att["messages"] == 5 and att["answered"] == 5,
+              f"a reader who sorts every message right scores 1, whichever letter they give whom ({att['score']})")
     feel = live.feelings_of("Where they are: x\nFeeling: A: shame, strong, at himself. B: joy, mild, at the joke\nMeant: y", names)
     check(feel["A"]["feeling"] == "shame" and feel["B"]["feeling"] == "joy", f"the Feeling note is read per character ({feel})")
     check(len(live.feeling_problems(feel, names, -3, False)) == 1 and not live.feeling_problems(feel, names, 2, False),
@@ -145,12 +152,16 @@ def check_chat_rules():
     full = all(len(m["tiers"]) == 10 and all(x["message"] and x["received"] and x["length"] for x in m["tiers"].values())
                for m in table["moves"].values())
     span = sorted(v for s in table["interest"] for v in range(s["from"], s["to"] + 1)) == list(range(26))
-    check(len(table["moves"]) == 6 and full and span and table["limits"]["message_words"] > 0,
+    check(len(table["moves"]) == 6 and full and span and table["limits"]["chat_words"] > 0,
           "the situation table covers every move and result, and every interest level from 0 to 25 once")
     lines, stray = live.split_stray(live.parse_lines("A: hi\nSNAP B\nB: no", names))
     check(lines == [("A", "hi"), ("B", "no")] and stray == ["SNAP B"], "a line that is neither a message nor a note is caught")
-    notes, chk, final = live.sections("NOTES:\nWhere they are: x\nCHECK:\n1. y\nFINAL:\nA: hi")
-    check(notes.startswith("Where") and chk == "1. y" and final == "A: hi", "a director answer splits into notes, checklist and final")
+    notes, chk, final, draft, review = live.sections("NOTES:\nWhere they are: x\nCHECK:\n1. y\nFINAL:\nA: hi")
+    check(notes.startswith("Where") and chk == "1. y" and final == "A: hi" and not draft and not review,
+          "a director answer splits into notes, checklist and final")
+    _, chk, final, draft, review = live.sections("NOTES:\nx\nCHECK:\n1. y\nDRAFT:\nA: hey\nREVIEW:\n1. stale: hey\nFINAL:\nA: hi")
+    check(chk == "1. y" and draft == "A: hey" and review == "1. stale: hey" and final == "A: hi",
+          "the draft and its review are read apart from the checklist and the turn as sent")
     path = [(3, 10), (2, 13), (-1, 15), (5, 14), (-3, 19), (2, 16), (-1, 18), (-3, 17), (2, 14), (5, 16), (4, 21)]
     est = [live.estimate_left([{"interest_delta": d} for d, _ in path[:k]], path[k][1]) for k in range(len(path))]
     jump = max(abs(a - b) for a, b in zip(est, est[1:]))
