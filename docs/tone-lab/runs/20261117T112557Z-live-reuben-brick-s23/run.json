@@ -1,0 +1,201 @@
+{
+  "run_id": "20261117T112557Z-live-reuben-brick-s23",
+  "created_utc": "20261117T112557Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "61c21a459ce204d19ac42cc1dedc74d375224dc372fe863461a494443a62c3f8"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "ffbcf9ed70cff8b0a25602e8a68ef25af45625a87bf65567288f08245a202381",
+  "prompt_chars": 115141,
+  "model_calls": 18,
+  "repo_commit": "235cdf3",
+  "repo_dirty": false,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 410.8,
+  "usage": {
+    "cost": 0.30868180000000006,
+    "prompt_tokens": 266366,
+    "completion_tokens": 16100,
+    "reasoning_tokens": 1611
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 924,
+  "planted_turn": 1,
+  "shape_retries": 4,
+  "turns_off_shape": [
+    5
+  ],
+  "callback_turn": 3,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "curated an unnameable underground late-night sound series"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "on a strategic career pause taken entirely on her own terms"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "lost a heel to a luxury hotel's revolving door and lectured them for forty minutes on door mechanics"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "worked the door at a dive bar for eleven months and got fired for lecturing a regular he insisted was a famous singer's brother"
+    ],
+    [
+      6,
+      "Brick_haus",
+      3,
+      "grew up squeezing through a cramped house knocking things over and schedules every inch because she is terrified her size will crush someone she wants"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "got cropped out of his family portrait at nine and spends twenty minutes before dates rehearsing his curvature disclosure in the mirror"
+    ]
+  ],
+  "required_missed": [
+    [
+      5,
+      [
+        "Reuben_404's message \"Option B (grin, casual): Yes it ...\" has 71 words, more than 45"
+      ]
+    ]
+  ],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "why he no longer curates the late-night sound series"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "why she is actually on a \"strategic career pause\""
+    ],
+    [
+      3,
+      "Brick_haus",
+      "her dispute with a luxury hotel earlier this week"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "Before you say it",
+      "I will save you the exit",
+      "For the record"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1151,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "called": 5,
+      "paid": 11
+    },
+    "2": {
+      "planted": 1,
+      "called": 4,
+      "paid": 10
+    },
+    "3": {
+      "planted": 2,
+      "called": 3,
+      "paid": 4
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 9.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of someone's face dropping in disappointment when they see his short, crooked four-inch body. \n2. He rehearses self-deprecating scripts, invents fake pretentious jobs, and compulsively narrates his own panic and failures in real time so he can reject himself before the other person can.\n3. His family cropped him out of their family portrait when he was nine years old.\n4. He dropped it by finally answering why he wrote the script without over-narrating, taking off his top hat, and deleting his exit clause.\n5. Brick_haus is afraid of getting wedged in doorways and accidentally crushing someone small with their massive seven-inch bulk.\n6. They make numbered lists of strict rules, audit doorways, tattoo schedules onto their dorsal vein, and wear a pressed vest and monocle to distract from their size.\n7. They grew up in a house so cramped that their veined bulk knocked lamps off tables every time they turned around.\n8. They dropped it, explicitly saying \"No list,\" admitting they are just sitting in a towel, and leaving the door wide open.\n9. They called out each other's defenses—with Reuben_404 seeing the fear behind Brick_haus's numbered rules and Brick_haus refusing to accept Reuben_404's rehearsed commentary—until both felt safe enough to drop their acts.\n10. \"Option B (grin, casual): Yes it hooks left like a boomerang and no it does not reach the back — I just pasted my notes-app script...\" sticks out because accidentally pasting the stage directions from a notes app is both hilarious and deeply sad.\n11. I laughed when Reuben_404 admitted he was fired from a dive bar for lecturing a regular he insisted was Bono's brother, and when both revealed their expensive posture gear was just being used for household chores like clipping a coffee bag and propping a door.",
+    "grade": "1. **Yes** — Captured his fear of being seen as too short/crooked and their face dropping.\n2. **Yes** — Nailed his habit of rehearsed self-rejection, pre-writing exits, and fake curating job.\n3. **Yes** — Exact match to the third piece of his origin.\n4. **Yes** — Hit both the \"If they click\" beat (deleting the exit clause) and setup payoff (removing props/hat).\n5. **Yes** — Captured her fear of not fitting in doors and crushing someone with her bulk.\n6. **Yes** — Caught the numbered lists, spatial rules, schedule tattoo, and vest/monocle.\n7. **Yes** — Exact match to her youth squeezing through a cramped house and knocking things over.\n8. **Yes** — Exact match to her \"If they click\" beat (\"No list,\" admitting to the towel).\n9. **Yes** — Captured the collision of their defenses and mutual unlocking.\n\nSCORE: 9 out of 9",
+    "score": 9.0
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 21,
+    "datee_lines": 26,
+    "words": 1220
+  }
+}
