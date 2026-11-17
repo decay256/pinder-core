@@ -1,0 +1,262 @@
+{
+  "run_id": "20261117T111147Z-live-reuben-brick-s23",
+  "created_utc": "20261117T111147Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "ef129016ed1d0da48ee694d94ab2d196b03639b1c6e5f07bb2ca071c47f776cd"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "2b1c9d643f4cfd79f8cd33b89f71ea50378aff63275ed98245edc08bcc91df43",
+  "prompt_chars": 120796,
+  "model_calls": 17,
+  "repo_commit": "4ba46a2",
+  "repo_dirty": false,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 427.7,
+  "usage": {
+    "cost": 0.29925179999999996,
+    "prompt_tokens": 260116,
+    "completion_tokens": 16331,
+    "reasoning_tokens": 2020
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 1027,
+  "planted_turn": 1,
+  "shape_retries": 3,
+  "turns_off_shape": [],
+  "callback_turn": 3,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "used to curate late-night underground music doors"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "currently on a strategic career pause on her own terms"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "wedged her heel and trunk in a hotel revolving door before an executive interview and lectured the panel on torque"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "got fired from a dive bar door by Rick over an indie frontman's brother"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "the real singer walked in ten minutes later and looked straight over his top hat like an empty coat rack"
+    ],
+    [
+      11,
+      "Brick_haus",
+      3,
+      "security popped the emergency glass release while three men in suits stared at her pinned against the pane like livestock"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "used to curate late-night underground music doors"
+    ],
+    [
+      1,
+      "Brick_haus",
+      "crossed out her four o'clock slot and hates badly engineered entryways"
+    ],
+    [
+      2,
+      "Reuben_404",
+      "bought a $189 titanium posture clip and has an arm-wrestling policy"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "on a strategic career pause and wants to test his left hook under load"
+    ],
+    [
+      3,
+      "Reuben_404",
+      "his departure from the door industry wasn't strategic and he's on five gas-station energy shots"
+    ],
+    [
+      3,
+      "Brick_haus",
+      "hates narrow glass cylinder doors in front lobbies"
+    ],
+    [
+      4,
+      "Brick_haus",
+      "wedged her trunk in a hotel revolving door and is afraid she breaks rooms before she gets inside"
+    ],
+    [
+      5,
+      "Reuben_404",
+      "rehearsed his curve disclosure in a Notes app and got fired from The Sluice over a brother thing"
+    ],
+    [
+      6,
+      "Reuben_404",
+      "lectured an indie singer's brother and got fired from the dive bar"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "sitting in a damp towel since four o'clock with boxed rosé and a horse-tack harness propping her door open"
+    ],
+    [
+      7,
+      "Reuben_404",
+      "has been eating cold pot-lentils for eleven days since the brother firing"
+    ],
+    [
+      7,
+      "Brick_haus",
+      "men in the hotel lobby stared when she couldn't fit"
+    ],
+    [
+      8,
+      "Reuben_404",
+      "actually pacing his bathroom floor while texting"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "hotel security had to open the freight door to get her heel out and she is arguing with her sister about it"
+    ],
+    [
+      9,
+      "Reuben_404",
+      "his oversized left ball is a counterweight and he wants her freight-door trunk on his dishwasher-safe mouth"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "her sister tells the lobby story like she's rogue machinery and she's afraid of cracking the bedframe or the man underneath her"
+    ],
+    [
+      10,
+      "Brick_haus",
+      "keeps one heel on the floor in bed so she doesn't crush partners and wants to know why Reuben was practicing lines in the bathroom"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "Full disclosure:",
+      "Before you say it:",
+      "For the record,"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1183,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 3,
+      "paid": 11
+    },
+    "3": {
+      "planted": 2,
+      "called": 6,
+      "paid": 10
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 9.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of being overlooked for his four-inch height, his hard-left curve, and getting fired from his dive-bar door job. He is also terrified of messing up his chance with a woman of Brick_haus's scale.\n\n2. He pre-writes scripts in his Notes app, practices speeches in the mirror, and compulsively narrates his own panic in real time. He also hides behind \"radical upfront transparency\" to beat people to the punch about his flaws.\n\n3. It comes from working a dive-bar door where an indie singer looked right over his top hat \"like an empty coat rack,\" right after he lectured the singer's brother and got fired.\n\n4. He dropped it by finally stopped narrating the chat, telling the real story behind his insecurity, and addressing Brick_haus's fears directly.\n\n5. Brick_haus is afraid of being too big and heavy, breaking rooms or bedframes, crushing partners underneath her, and being stared at like \"livestock\" or \"heavy machinery.\"\n\n6. She acts like a cold efficiency inspector, speaking in numbered lists and structural engineering jargon to audit entryways and men's proportions before they can judge hers.\n\n7. It comes from getting her heavy trunk and heel wedged in a hotel revolving door before an executive interview while men in suits stared, and her sister retelling the story at every family dinner.\n\n8. She dropped the numbered lists and engineering audits, admitting the raw humiliation of the lobby incident and agreeing to meet him for a drink.\n\n9. They repeatedly called out each other's defense mechanisms—with Reuben_404 pasting a script Note and Brick_haus accidentally sending an angry text meant for her sister—until they stripped away the posturing and saw that their bodies actually fit each other's needs.\n\n10. \"Ten minutes after I lectured that brother, the actual singer walked in, looked straight over my top hat like an empty coat rack without handing me an identification card...\" It's hilarious and strangely poignant watching a four-inch sentient dick in a top hat experience that level of humiliation.\n\n11. I laughed when Reuben_404 confessed his $189 titanium posture clip is currently holding a bag of coffee shut, and when he accidentally pasted \"Option B (grin, don't shrug)\" straight from his Notes app.",
+    "grade": "1. **Yes** — Captures his core fear of being overlooked/cropped out because of his stubby proportions and curve.\n2. **Yes** — Nails his habit of beating rejection to the punch via pre-emptive disclaimers and his \"radical upfront transparency\" lie.\n3. **Yes** — Exact match on the dive-bar origin, lecturing the brother, getting fired, and the singer looking right over his top hat.\n4. **Yes** — Correctly notes he dropped his pre-emptive disclaimers/narration, shared his real vulnerability, and reassured her scale.\n5. **Yes** — Directly hits her fear of being too huge to fit without breaking furniture or people, and feeling like \"livestock.\"\n6. **Yes** — Captures her habit of auditing like a structural engineer with numbered lists so nobody flinches at her scale first.\n7. **Yes** — Exact match on getting her trunk and heel wedged in the hotel revolving door before an interview while men in suits stared.\n8. **Yes** — Identifies her dropping the numbered lists/audits and admitting the real humiliation behind her defense.\n9. **Yes** — Nails the accidental pastes (Notes app rehearsal and sister text), dropping their defenses, and finding how their mismatched bodies fit.\n\nSCORE: 9 out of 9",
+    "score": 9.0
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 18,
+    "datee_lines": 28,
+    "words": 1251
+  }
+}
