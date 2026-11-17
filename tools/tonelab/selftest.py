@@ -89,7 +89,8 @@ def check_live(name, variant, knobs, tmp):
         d_users, w_users, t_users = ([u for _, u, _ in by[r]] for r in ("director", "writer", "tracker"))
         check("If they click" in d_users[0] and not any("If they click" in u for u in d_users[1:]),
               f"{name} seed {seed}: the plan goes into the director's session once, at the start")
-        hidden = ("If they click", "dry-origin", "dry-accident-line", "Collision:")
+        hidden = ("If they click", "dry-origin", "dry-accident-line", "Collision:", "dry-event", "dry-story",
+                  "Tonight's events")
         seen = [sy + u for r in ("tracker", "writer") for _, u, sy in by[r]]
         check(not any(h in x for x in seen for h in hidden),
               f"{name} seed {seed}: neither the tracker nor the writer sees the plan's origins, accident, collision "
@@ -103,6 +104,17 @@ def check_live(name, variant, knobs, tmp):
               f"{name} seed {seed}: every role is shown the whole chat so far, every turn")
         check(all("Unanswered:" in u for u in d_users[1:]) and "Unanswered:" not in d_users[0],
               f"{name} seed {seed}: from the second turn on the director gets the tracker's report")
+        check("Build it this turn from the plan's Story" in d_users[0]
+              and all("Your arc, as you left it after turn" in u for u in d_users[1:]),
+              f"{name} seed {seed}: the director builds its arc on the first turn and gets it back every turn after")
+        check(not any("What the chat needs" in u or "has to come out this turn" in u or "plant it this turn" in u
+                      or "Still to come:" in u for u in d_users)
+              and all("- nothing beyond the template" in u for u in d_users[:-1])
+              and not any("How the chat ends:" in u for u in d_users[:-1]) and "How the chat ends:" in d_users[-1],
+              f"{name} seed {seed}: the game never says what a turn is for or asks for anything before the last "
+              "turn, where it says how the chat ends")
+        check(len(res["arc_played"]) == n and all(now == "1. dry: dry" for _, now, _ in res["arc_played"]),
+              f"{name} seed {seed}: the beat the director played is recorded every turn")
         check(all("Answer: dry" in u for u in w_users)
               and not any(re.search(r"\bTOLD\b|\bRETIRED\b|\bPLANTED\b|\bPAID\b", u) for u in w_users),
               f"{name} seed {seed}: the writer gets the director's brief, without the notes for the game")
@@ -163,7 +175,8 @@ def check_live(name, variant, knobs, tmp):
           f"what the review changed between the draft and the turn as sent is counted ({ed})")
     plan = ("**A**\n**Fear:** being found out\nHabit marker: hm. | posture\nOrigin, in three pieces:\n1. brag\n"
             "2. truth\nAccident: wrong paste\nVoice: lowercase\n- \"example: one\"\nBreak: caps drop\n\n**B**\n"
-            "Fear: x\n\nCollision: both\nIf they click: y")
+            "Fear: x\n\nCollision: both\nTonight's events:\n1. the ex texts\nStory:\n1. Opener: acts\n"
+            "If they click: y")
     sh = live.sheets_of(plan, names)
     check(all(w in sh["A"] for w in ("being found out", "lowercase", '"example: one"', "caps drop"))
           and not any(w in sh["A"] for w in ("brag", "truth", "wrong paste")) and sh["B"] == "Fear: x",
@@ -171,6 +184,12 @@ def check_live(name, variant, knobs, tmp):
     got = [live.retired_item(x, names) for x in ("A: 3: never close enough", "setup 2: the chat moved on",
                                                  "collision: they click", "the vibe")]
     check(got == [("piece", "A", 3), ("setup", 2), ("collision",), None], f"a RETIRED note is read ({got})")
+    arc = live.arc_of("Chat now: x\nStory: y\nARC:\nNow: 3. The door: she asks\nNext:\n4. The rack: he tells\n"
+                      "Held: the coat rack, until 4")
+    check(live.arc_line(arc, "Now") == "3. The door: she asks" and live.arc_ok(arc) and not live.arc_ok("Now: x")
+          and live.arc_of("Chat now: x\nStory: the arc") == "", f"the director's arc is read from its notes ({arc!r})")
+    _, _, g = live.director_parts("NOTES:\nx\nBRIEF:\nAnswer: a\nSNAP: B\nTOLD: A: 1: brag", names)
+    check(g["snap"] == ["B"] and g["told"] == [("A", "1: brag")], f"a SNAP note names who snaps ({g})")
     rep = "REPORT:\nLast turn: x\nUnanswered:\n- turn 2, A: the job\n- turn 3, B: the ex\nCame out: y"
     check(live.unanswered_count(rep) == 2 and live.unanswered_count(rep.replace("- turn 2, A: the job\n- turn 3, B: "
                                                                                 "the ex", "- nothing")) == 0,

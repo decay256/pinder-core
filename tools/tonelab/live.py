@@ -101,6 +101,18 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v19: the director owns the arc. In v18 the game's story clock chose every turn's beat from the dice
+(two bad rolls in a row gave two catastrophes in a row), demanded origin pieces and setups by
+turn, and the director's own rules made it answer every question by telling. Now the plan is a
+story: tonight's events, taken from the character files, and seven to nine beats that place every
+origin piece, accident, snap, setup and the collision. The director builds its arc from it on the
+first turn, keeps it under ARC every turn (the beat it plays now, the beats to come, what is
+held), and gets it back at the top of the next turn. The game tells it what the dice did and,
+on the last turn, how the chat ends; it no longer says what a turn is for or asks for anything
+before the last turn. The clock still runs, and its choice is recorded next to the beat the
+director played, for comparison. A director who has a character snap says so (SNAP), which lifts
+that character's habit ration for the turn.
+
 v18: three roles. Up to v17 one director session read the game, kept notes, drafted, reviewed and
 wrote every turn, and in v17's seed-23 chat nobody answered anybody: Brick mentioned her career
 pause and Reuben walked past it, the opener quoted a detail from the plan the reader never saw,
@@ -482,7 +494,8 @@ def event_text(table, t, names, is_last, outcome, beat, stats, active, fresh=(),
         out.append(say(E + "endings." + outcome, datee=datee) if outcome in ends else outcome)
     elif t["interest_after"] >= table["turn"]["event"]["not_yet_from"]:
         out.append(say(E + "not_yet", interest=t["interest_after"], datee=datee))
-    out.append(say(E + "job", beat=beat))
+    if beat:
+        out.append(say(E + "job", beat=beat))
     return "\n".join(out), rk, sw
 
 
@@ -641,10 +654,16 @@ def length_problems(lines, lim, names):
 def strip_notes(text, names):
     """Take the writer's notes for the game out of the chat."""
     kept = []
-    notes = {"told": [], "hooks": [], "planted": [], "callback": [], "paid": [], "collided": False, "retired": []}
+    notes = {"told": [], "hooks": [], "planted": [], "callback": [], "paid": [], "collided": False, "retired": [],
+             "snap": []}
     for ln in text.splitlines():
         if FLAG.match(ln):
             notes["collided"] = True
+            continue
+        m = SNAPPER.match(ln)
+        if m:
+            notes["snap"].append(next((names[x] for x in ("player", "datee") if names[x].lower() in m.group(1).lower()),
+                                      m.group(1).strip()))
             continue
         m = RETIRE.match(ln)
         if m:
@@ -749,6 +768,26 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
     return "\n".join(lines), need
 
 
+def story_facts(names, pieces, setups, collided):
+    """Where the story is, as facts only (v19): which origin pieces the reader knows, whether the habits
+    have collided, where each setup stands. Nothing is called due: the arc is the director's."""
+    S, lines = "clock.step.", []
+    for side in ("player", "datee"):
+        name = names[side]
+        got = sorted(pieces[name])
+        known = (say(S + "known", name=name, pieces=("pieces " if len(got) > 1 else "piece ") + ", ".join(map(str, got)))
+                 if got else say(S + "known_nothing", name=name))
+        lines.append(say(S + "known_line", known=known))
+    lines.append(say(S + "collided", turn=collided) if collided else T()["clock"]["step"]["not_collided"])
+    for n in (1, 2, 3):
+        x = setups.get(n, {})
+        lines.append(say(S + "setup_paid", n=n, paid=x["paid"]) if x.get("paid") else
+                     say(S + "setup_called", n=n, planted=x["planted"], called=x["called"]) if x.get("called") else
+                     say(S + "setup_planted", n=n, planted=x["planted"]) if x.get("planted") else
+                     say(S + "setup_unplanted", n=n))
+    return "\n".join(lines)
+
+
 def notes_problems(notes, need, names, is_end):
     m = T()["notes"]["missing"]
     problems, told_by = [], [w for w, _ in notes["told"]]
@@ -780,6 +819,25 @@ FINAL = re.compile(r"(?im)^[\s*_#>\-]*FINAL[\s*_]*:[\s*_]*")
 DRAFT = re.compile(r"(?im)^[\s*_#>\-]*DRAFT[\s*_]*:[\s*_]*")
 REVIEW = re.compile(r"(?im)^[\s*_#>\-]*REVIEW[\s*_]*:[\s*_]*")
 BRIEF = re.compile(r"(?im)^[\s*_#>\-]*BRIEF[\s*_]*:[\s*_]*")
+ARC = re.compile(r"(?m)^[\s*_#>\-]*ARC[\s*_]*:[\s*_]*")
+SNAPPER = re.compile(r"^[\s*_>\-]*SNAP\s*[:\-]\s*(.+?)[\s*_.]*$", re.I)
+
+
+def arc_of(notes):
+    """The arc the director keeps under ARC in its notes (v19): the beat it plays now, the beats to come,
+    what is held."""
+    m = ARC.search(notes or "")
+    return notes[m.end():].strip() if m else ""
+
+
+def arc_line(arc, head):
+    """One line of the arc (Now, Held), or None."""
+    m = re.search(r"(?im)^[\s*_\-]*" + re.escape(head) + r"[\s*_]*:[\s*_]*(.*)$", arc or "")
+    return m.group(1).strip() if m else None
+
+
+def arc_ok(arc):
+    return arc_line(arc, "Now") is not None and arc_line(arc, "Held") is not None
 LABEL_IN_CHAT = re.compile(r"\b(?:TOLD|HOOK|PLANTED|CALLBACK|PAID|COLLIDED)\b|(?i:\b(?:setup|piece)\s*#?\d)")
 
 
@@ -1304,6 +1362,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     spent, budget = 0, table["limits"]["chat_words"]
     habits = habit_markers(plan, names)
     starts, last_feel, stats = {}, {}, mech["player"]["effective_stats"]
+    arc, arc_turn = "", None
     for i, t in enumerate(turns):
         n = t["turn"]
         is_last = i == len(turns) - 1
@@ -1313,10 +1372,12 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         h_note = habit_note(habits, banned)
         so_far = story.so_far()
         since = say("turn.state.since_start", plan=plan) if not chat else say("turn.state.since_turn", n=chat[-1][0])
-        key, beat = story.beat(i, t, is_last, mech.get("outcome"))
+        clock_key, clock_beat = story.beat(i, t, is_last, mech.get("outcome"))
+        # v19: the director's arc decides what a turn is for; the game tells only how the chat ends
+        key, beat = (clock_key, clock_beat) if clock_key.startswith("ending") else ("free", "")
         ghost, nat20 = key == "ending_ghost", bool((t["roll"] or {}).get("nat20"))
         now_left = 1 if is_last else left
-        step, need = story_step(i, key, is_last, now_left, names, st["pieces"], st["setups"], st["collided"], nat20)
+        step, need = story_facts(names, st["pieces"], st["setups"], st["collided"]), []
         account = plan_left(st, names) if is_last else []
         if account:
             need = need + ["ACCOUNT"]
@@ -1324,9 +1385,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         event, rk, swing = event_text(table, t, names, is_last, mech.get("outcome"), beat, stats, active, fresh,
                                       first=i == 0, about_match=bool(table["beats"][key].get("about_match")))
         irow = interest_row(table, t["interest_after"])
-        # on a big beat the beat is the template: the general one for this point would contradict it
-        story_now = story_text(i, is_last, now_left, so_far, step,
-                               "" if key in beat_set("big") or key.startswith("ending") else needs, last_feel, names,
+        # v19: facts only, nothing called due and no general needs: the arc is the director's
+        story_now = story_text(i, is_last, now_left, "", step, "", last_feel, names,
                                [h for h in st["hooks"] if h[0] >= n - 2])
         lim = limits_for(table, key, swing, ghost)
         length = length_text(table, t, rk, swing, key, names, spent, i, budget, chat)
@@ -1339,10 +1399,14 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             report = tracker.ask(tl.render(P["track_turn"], {"where": say("tracker.before", n=n), "chat": the_chat},
                                            "prompts.track_turn").strip() + "\n", f"turn {n} tracker")
 
-        # the director reads the chat, the report and the game, and briefs the writer
+        arc_text = (say("turn.arc.first") if not chat else say("turn.arc.since", n=arc_turn, arc=arc) if arc
+                    else say("turn.arc.lost", n=chat[-1][0]))
+
+        # the director reads the chat, the report, its arc and the game, and briefs the writer
         user = tl.render(P["turn"],
                          {**common, "since": since, "chat": the_chat,
-                          "tracker": report or T()["turn"]["chat"]["tracker_first"], "relationship": relationship,
+                          "tracker": report or T()["turn"]["chat"]["tracker_first"], "arc": arc_text,
+                          "relationship": relationship,
                           "story": story_now, "habit_note": h_note, "event": event,
                           "must": must_text(need, names, account), "length": length, "repeats": repeats},
                          "prompts.turn").strip() + "\n"
@@ -1364,6 +1428,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                     problems.append(say("checks.format.game_terms", words=", ".join(used)))
             problems += [say("checks.format.retired_unknown", note=x) for x in notes["retired"]
                          if retired_item(x, names) is None]
+            if not arc_ok(arc_of(head)):
+                problems.append(fmt["no_arc"])
             problems += notes_problems(notes, need, names, key.startswith("ending"))
             if account:
                 trial = copy.deepcopy(st)
@@ -1386,7 +1452,11 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             brief = strip_notes(re.sub(r"(?is)^.*?NOTES[\s*_]*:", "", d_text, count=1), names)[0]
         feel = feelings_of(d_notes, names)
         last_feel = {k: v for k, v in feel.items() if v.get("feeling")}
+        played = arc_of(d_notes)
+        if played:
+            arc, arc_turn = played, n
         apply_notes(st, notes, n, names)
+        exempt = next((x for x in notes.get("snap", []) if x in names.values()), exempt)
 
         # the writer writes the turn from the brief
         w_user = tl.render(P["write_turn"], {"chat": the_chat, "n": n, "brief": brief, "habit_note": h_note,
@@ -1430,7 +1500,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                  + [f"Retired: {x}" for x in notes["retired"]])
         problems = d_problems + w_problems
         log = (f"Picked {t['chosen_stat']}: {T()['results'][rk]['name']}. Interest {t['interest_before']} → "
-               f"{t['interest_after']} ({swing['name']}, {irow['state']}).\nBeat the game chose: {key}\n"
+               f"{t['interest_after']} ({swing['name']}, {irow['state']}).\nThe beat the director played: {arc_line(played, 'Now') or '?'} (the v18 clock would have chosen {clock_key})\n"
                f"Required notes: {', '.join(need) or 'none'}\n"
                f"Written: {words} words; {spent} so far, against a chat of about {budget}."
                + (f"\nUnanswered before this turn, as the tracker counted: {unanswered_count(report)}" if report else "")
@@ -1438,7 +1508,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                + (f"\nRules still broken after a retry: {'; '.join(problems)}" if problems else
                   "\n(kept the rules after a retry)" if d_retried or w_retried else "")
                + ("\n\n" + "\n".join(noted) if noted else ""))
-        out.append({"turn": n, "beat": key, "roll_key": rk, "needs": needs, "user": user, "writer_user": w_user,
+        out.append({"turn": n, "beat": key, "clock_beat": clock_key, "arc": played, "arc_now": arc_line(played, "Now"),
+                    "roll_key": rk, "needs": needs, "user": user, "writer_user": w_user,
                     "tracker": report, "unanswered": unanswered_count(report) if report else None,
                     "director_notes": d_notes, "director": d_text, "direction": brief, "release": release,
                     "delivered": w_text, "writer_draft": w_draft, "writer_review": w_review,
@@ -1461,7 +1532,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             "words": spent, "chat": chat, "coverage": coverage,
             "plan_gaps": [c["item"] for c in coverage if not c["spent"] and not c["retired"]],
             "releases": [(x["turn"], x["release"]) for x in out if x["release"]],
-            "tracker_end": end_report, "unanswered_end": unanswered_count(end_report)}
+            "tracker_end": end_report, "unanswered_end": unanswered_count(end_report),
+            "arc_played": [[x["turn"], x["arc_now"], x["clock_beat"]] for x in out]}
 
 
 def dry_caller(names):
@@ -1471,7 +1543,8 @@ def dry_caller(names):
                                "Origin, in three pieces, from the surface to the part they'd never say:\n"
                                "1. dry-origin-one\n2. dry-origin-two\n3. dry-origin-three\nAccident: dry-accident-line\n"
                                f"Background: dry\nVoice: dry\n- dry\nBreak: dry" for n in (names["player"], names["datee"])) + \
-                "\n\nCollision: dry\nIf they click: dry\nHeat: dry"
+                "\n\nCollision: dry\nSetups: dry\nTonight's events:\n1. dry-event\nStory:\n1. dry-story: dry\n" \
+                "Midpoint: dry\nIf it runs short: dry\nIf they click: dry\nHeat: dry"
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
         if label.startswith("attribution"):
@@ -1494,6 +1567,7 @@ def dry_caller(names):
             feel = (f"{names['player']}: fear, mild, dry. {names['datee']}: "
                     f"{'hurt' if (ctx.get('delta') or 0) < 0 else 'joy'}, mild, dry")
             return ("NOTES:\n" + "\n".join(f"{h}: {feel if h == 'Feeling' else 'dry'}" for h in note_heads())
+                    + "\nARC:\nNow: 1. dry: dry\nNext:\n2. dry: dry\nHeld: dry"
                     + "\nBRIEF:\n" + "\n".join(f"{h}: dry" for h in heads_of(T()["brief"])) + "\n" + "\n".join(game))
         lines = [f"{names['player']}: dry"] + ([] if ctx.get("ghost") else [f"{names['datee']}: dry"])
         return "DRAFT:\n" + "\n".join(lines) + "\nREVIEW:\n1. holds\nFINAL:\n" + "\n".join(lines)
@@ -1602,6 +1676,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "release_score": release["score"], "release_check": release,
         "unanswered": [[t["turn"], t["unanswered"]] for t in result["turns"] if t["unanswered"] is not None],
         "unanswered_end": result["unanswered_end"], "tracker_end": result["tracker_end"],
+        "arc_played": result["arc_played"],
         "repeats": repeat_counts(result["chat"], names),
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
@@ -1610,11 +1685,13 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
     with open(os.path.join(run_dir, "run.json"), "w", encoding="utf-8") as f:
         json.dump(record, f, indent=2, ensure_ascii=False)
     tl.write_report(run_dir)
-    add_reader_to_report(run_dir, reader, attribution, release, result["tracker_end"], result["coverage"])
+    add_reader_to_report(run_dir, reader, attribution, release, result["tracker_end"], result["coverage"],
+                         result["arc_played"])
     print(os.path.relpath(run_dir, tl.REPO))
 
 
-def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracker_end=None, coverage=None):
+def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracker_end=None, coverage=None,
+                         arc=None):
     import html
     path = os.path.join(run_dir, "report.html")
     if not os.path.exists(path):
@@ -1643,6 +1720,12 @@ def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracke
         sec += ("<section><h2>The plan, used</h2><p>Each piece of the plan: the turn it was spent on the screen, or "
                 "the turn it was retired and why.</p><table><tr><th>Piece</th><th>Spent</th><th>Retired</th>"
                 f"<th>Why</th></tr>{rows}</table></section>")
+    if arc:
+        rows = "".join(f"<tr><td>{n}</td><td>{html.escape(now or '')}</td><td>{html.escape(ck or '')}</td></tr>"
+                       for n, now, ck in arc)
+        sec += ("<section><h2>The arc, as played</h2><p>The beat the director said each turn played, from its "
+                "own arc, next to the beat the v18 story clock would have chosen from the dice.</p><table><tr>"
+                f"<th>Turn</th><th>The director's beat</th><th>The clock's</th></tr>{rows}</table></section>")
     if tracker_end:
         sec += ("<section><h2>The tracker at the end</h2><p>The tracker's last report, on the finished chat; it "
                 f"never saw the plan.</p><pre>{html.escape(tracker_end)}</pre></section>")

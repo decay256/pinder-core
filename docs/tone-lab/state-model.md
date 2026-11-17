@@ -303,6 +303,45 @@ with the reason, or neither); how many offers the tracker saw unanswered before 
 end; a release check, in which a reader who sees only the chat says whether each turn's release
 reached the screen; and, as before, what the writer's review changed between draft and sent.
 
+## The director owns the arc (v19)
+
+Up to v18 the game's story clock chose the beat of every turn from the dice and the interest, and
+the director carried it out: "What this turn is for" and "What the chat needs" came with every
+turn, and the clock required origin pieces, setups and the collision by turn number. Two bad rolls
+in a row gave two catastrophes in a row, every origin piece was out by turn 8 of 11, and nothing in
+the loop could say "too soon". The director's own rules added to it: a turn that walks past what
+the other one said was the worst turn there is, and nothing said a dodge was an answer, so every
+direct question was answered by telling. And with its reasoning at medium it spent no reasoning
+tokens after turn 2.
+
+In v19:
+
+- **The plan is a story.** It adds tonight's events, three or four things that happen to one of
+  them while they type, each taken from the character files (a person from the backstory, the job,
+  the money, the place, what they're on), and a Story of seven to nine beats from the opener to the
+  ending, without turn numbers, that places every origin piece, both accidents, both snaps, the
+  setups, the collision and the events, with room between the big ones. Then a midpoint, a short
+  version for a six-turn chat, and the two endings as what happens, never the words.
+- **The director owns the arc.** On the first turn it builds its arc from the plan's Story; every
+  turn it writes it under ARC (the beat it plays now, the beats still to come, what is held and
+  until when), and the game hands it back at the top of the next turn. Its Story note says which
+  beat the turn plays and why now, not earlier.
+- **The game reports and no longer directs.** It tells the director what the dice did, how the match
+  takes it and how the interest moved. It no longer says what a turn is for, nothing is called due,
+  and nothing is required before the last turn, where it says how the chat ends and lists what of
+  the plan is still unspent. The clock still runs; its choice is recorded next to the beat the
+  director played, in the run record and the report.
+- **Pacing, the dice and answering.** One beat a turn at most, no two big beats back to back, the
+  part each would never say on the last beats. A bad roll is an embarrassment the size of the moment
+  unless the arc is at the accident; a shadow or a trap shows in one message and one line of it, not
+  the whole turn. A question always gets a reaction, but a dodge the reader can see is a good
+  answer, and what the arc holds stays held until its beat.
+- **Snaps are the director's call.** A director who has a character snap says so (SNAP), and that
+  character's habit may show in every message of the turn.
+- **The writer and the tracker see none of the story.** The writer's sheets stop at the collision, as
+  before; the events reach the chat only through the brief's Released.
+- **The director reasons at high effort.**
+
 ## Consistency rules
 
 These came from reading every turn message exactly as sent (v14). Each rule removes a way for

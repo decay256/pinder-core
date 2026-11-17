@@ -13,20 +13,20 @@ sections:
   interest: 'What each interest level means about the match: where they stand, not where the story is.'
   swings: What this turn's change in interest does to the match's reply, and how much of themselves the match gives.
     The shape that takes comes from the match's Feelings in the plan.
-  beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
-    length is the length line for whoever the beat is about; spent is how the beat is listed under 'Already happened'.
-    big beats plant no setup, and exchange beats must hand over something real. about_match marks the beats whose
-    length line replaces the swing's for the match. A beat's length line without about_match replaces the move's
-    length line for the player character; beats with no length line leave both to the move and the swing.
-  needs: The template for this point in the chat, built from these parts by where the chat is.
+  beats: The story clock picks one beat per turn from the game so far. Since v19 only the ending's beat is told,
+    on the last turn, as how the chat ends; every other turn is free, and what it is for is the director's arc.
+    The clock's choice is still recorded next to the beat the director played. story is the template; length is
+    the length line for whoever the beat is about; spent is how it was listed under 'Already happened' up to v18.
+  needs: 'Up to v18, the template for this point in the chat. Since v19 it is not told: the director''s arc decides.'
   shadows: When a shadow takes over a message; means is the short version on each character card.
   traps: 'While a trap is active: how the player character acts in it. Every trap lasts three turns, counting the
     turn it fires. The turn it fires, the director is told under this turn; after that, under where they stand,
     with which of the three turns it is.'
   thirst: When a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
     or above.
-  clock: 'The story clock''s sentences: what has happened and what is still to come, which origin pieces the reader
-    knows and which are due, whether the habits have collided, where each setup stands, and the hooks still hanging.'
+  clock: 'The story clock''s sentences. Since v19 only the facts are told: which origin pieces the reader knows,
+    whether the habits have collided, where each setup stands, and the hooks still hanging. Nothing is called due,
+    and the ''due'' and ''Still to come'' sentences are kept only for the v18 comparison.'
   notes: What each required note asks for and what a retry says when it is missing.
   habits: The habit rule shown every turn, and what a retry says when it is broken.
   review: The instructions the writer edits its own draft against each turn, before it writes the version that goes
@@ -35,9 +35,9 @@ sections:
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
     that put the two of them in one place; note_heads are the notes the director writes every turn before its brief;
     game_terms are the words a brief may not use, because the writer can't know the game.
-  turn: 'The frame of the director''s message each turn: the whole chat and the tracker''s report, then the state
-    model''s order: where they stand, where the story is, this turn, what the game requires, how long. The game
-    fills in the numbers, names and rows.'
+  turn: 'The frame of the director''s message each turn: the whole chat, the tracker''s report and the director''s
+    own arc, then the state model''s order: where they stand, where the story is, this turn, what the game requires,
+    how long. The game fills in the numbers, names and rows.'
   reader: 'After the chat: a reader who sees only the finished chat, a grader who scores the reader''s answers against
     the plan, a blind attribution test, in which a reader sorts every message, shuffled and without names, into
     two senders, and a release check, which asks whether what the director released reached the screen.'
@@ -1098,6 +1098,10 @@ beats:
     source: 'variant.json beats; length: new'
     spent: the setup came back in the middle (its callback is spent)
     exchange: true
+  free:
+    story: ''
+    source: 'new (v19): every turn but the last. The director''s arc decides what the turn is for, and the game
+      tells it nothing'
 needs:
   opener: 'This is the very first message: the act at full strength, the opener they''ve sent forty people, with
     piece 1 of their origin in it as a hook if it fits.'
@@ -1577,6 +1581,7 @@ clock:
       is out.'
     not_collided_win: '- Their habits never collided, and the ending doesn''t stage it now: tonight each one puts
       the habit down instead.'
+    known_line: '- ${known}.'
   exchange:
     hooks_head: 'Hooks dropped in the last two turns (check the chat for whether the other one took them up):'
     hook_item: '- turn ${n}, ${who}: ${hook}'
@@ -1659,7 +1664,7 @@ checks:
   - your coat
   note_heads:
   - Chat now
-  - Plan
+  - Story
   - Feeling
   - Meant
   chat:
@@ -1677,6 +1682,7 @@ checks:
     game_terms: 'the brief uses the game''s terms, which the writer can''t know: ${words}'
     retired_unknown: 'this RETIRED note doesn''t name an origin piece (name: piece number), a setup (setup number)
       or the collision: ${note}'
+    no_arc: 'there is no ARC: after the notes, with a Now: line for the beat this turn plays and a Held: line'
   length:
     silent: ${name} sends nothing
     ghost_replied: ${name} replied, but they ghost
@@ -1752,7 +1758,7 @@ turn:
       Ghosted: '${datee} ghosts: no reply comes after this message.'
     not_yet_from: 21
     not_yet: 'Interest is ${interest}, still below 25: ${datee} will not agree to meet yet.'
-    job: 'What this turn is for: ${beat}'
+    job: 'How the chat ends: ${beat}'
     trap_new: 'This turn sets off the ${trap} trap on ${name}, for this turn and the next two: ${acting}'
     trap_again: 'This turn sets off the ${trap} trap on ${name} again, just as it was wearing off, for this turn
       and the next two, and ${datee} has seen it before: ${acting}'
@@ -1934,6 +1940,14 @@ turn:
     none: '(nothing yet: this is the first turn)'
     tracker_first: '(nothing yet: the chat hasn''t started)'
     source: 'new (v18): the whole chat so far, the same for every role, every turn'
+  arc:
+    first: 'Your arc: none yet. Build it this turn from the plan''s Story, under ARC.'
+    since: |-
+      Your arc, as you left it after turn ${n}:
+      ${arc}
+    lost: 'Your arc: you left none after turn ${n}. Rebuild it this turn from the plan''s Story and the chat, under
+      ARC.'
+    source: 'new (v19): the arc the director wrote under ARC last turn, handed back at the top of the next'
 reader:
   system: You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a
     sentient dick. Answer only from what is in the chat. If the chat doesn't show it, say "can't tell". One or two
@@ -2095,7 +2109,9 @@ prompts:
 
     Everything about a character grows out of one fear and the habit they use to cope with it. Find that in the files: the clinician's notes say what hurts them and how they defend against it, and the backstory says where it came from. Build everything else from it, and make it specific: a place, a person, a moment, the embarrassing detail.
 
-    Write exactly this, under 900 words in all:
+    The plan is a story: it has a beginning, a middle and an end, and things happen in it. Tonight is a real night in each of their lives, and it doesn't stop because they're texting. Build what happens from their files: the people in their backstory, the job or the lack of it, the money, the place they're in, what they're on, the drawer. Something actually happens to each of them while they type (a text from someone in the backstory, a call they let ring, an email that lands, a noise through the wall, the dinner burning, the delivery that doesn't come), and the other one learns it only from what they type. Every event comes from something in the files, and each one pushes its owner toward their fear.
+
+    Write exactly this, under 1,300 words in all:
 
     ${player_name}
     Shows: what the other one can see on the profile, in one line.
@@ -2124,8 +2140,18 @@ prompts:
     1.
     2.
     3.
-    If they click: each puts their habit down for the other. What each one says, and how the setups pay off.
-    If it falls apart: each habit confirms the other one's fear. The last exchange, and how the setups pay off the opposite way.
+    Tonight's events: three or four things that happen to one of them while they type, where they are, each from their files. For each: what happens, to whom, what it threatens in them, and what of it the other one can see on the screen.
+    1.
+    2.
+    3.
+    Story: the chat as a story in seven to nine beats, from the opener to the ending, in order and without turn numbers (it may run six turns or fifteen). Each beat is something that happens, between them or to one of them, and it changes where they stand. Place every origin piece, both accidents, both snaps, the setups, the collision and tonight's events on a beat, and leave room between the big ones: after an accident, a confession or a snap comes the beat where they live with it. The part each would never say is on one of the last beats. One line each: number. a name for the beat: what happens, whose it is, what it carries, what it changes, and why it can't come earlier.
+    1.
+    2.
+    3.
+    Midpoint: the beat that turns the chat around, and how.
+    If it runs short: which beats fold together if the chat ends after six turns.
+    If they click: the last beat if the match agrees to meet: what each one puts down for the other, what it costs them, and how the setups pay off. What happens, never the words they say.
+    If it falls apart: the last beat if it ends badly: each habit confirms the other one's fear; what happens in the last exchange, never the words, and how the setups pay off the opposite way.
     Heat: where the filth starts, and what has to happen before it goes further.
 
     Don't write the chat.
@@ -2170,9 +2196,9 @@ prompts:
 
     You direct a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan and every brief you wrote. The game has already played each turn: the player picked one of the moves on offer and the dice landed. You decide what happens in the turn, and a writer writes it from your brief.
 
-    Who knows what. The writer knows who the two of them are: what each shows, where each is tonight, their fear, habit, lie, snap, feelings, shadow, background, voice and how it breaks. It sees the whole chat and your brief, and nothing else: not the origins, the accident, the setups, the collision or the endings, not the dice and not the game. Whatever of the plan reaches the chat reaches it through your brief. A tracker reads the chat before every turn, knowing only the chat, the way the reader will, and tells you what is on the screen: what each one offered, what is still unanswered, what has come out, who has the upper hand, what repeats, and what a reader couldn't know.
+    Who knows what. The writer knows who the two of them are: what each shows, where each is tonight, their fear, habit, lie, snap, feelings, shadow, background, voice and how it breaks. It sees the whole chat and your brief, and nothing else: not the origins, the accident, the setups, the collision, tonight's events, the story or the endings, not the dice and not the game. Whatever of the plan reaches the chat reaches it through your brief. A tracker reads the chat before every turn, knowing only the chat, the way the reader will, and tells you what is on the screen: what each one offered, what is still unanswered, what has come out, who has the upper hand, what repeats, and what a reader couldn't know.
 
-    Each message from the game gives you, in this order: the whole chat so far; the tracker's report on it; where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (what is out and what is owed); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and what this turn is for); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "scan the last messages"). They are for you, not for the writer: turn each one into what happens between these two people, from what is actually on the screen. A detail the chat hasn't shown can't be noticed, quoted or answered.
+    Each message from the game gives you, in this order: the whole chat so far; the tracker's report on it; your arc as you left it last turn; where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (what of the plan is out on the screen); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and, on the last turn, how the chat ends); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "scan the last messages"). They are for you, not for the writer: turn each one into what happens between these two people, from what is actually on the screen. A detail the chat hasn't shown can't be noticed, quoted or answered.
 
     The chat. Two strangers on a dating app, each in their own place, alone with a phone. Neither knows where the other is, and neither can see more than the other's profile and the chat. Nobody arrives, waits downstairs, opens a door, puts a coat on or takes it off, or crosses a room for the other one. The match agreeing to meet is the end of the chat, not something that happens in it. Every message is something one person types to the other: one thing they mean, said the way they'd say it.
 
@@ -2180,7 +2206,13 @@ prompts:
 
     Read the chat before the plan. Start from the tracker's report and the last turn: what each one just offered, asked, gave away or dodged, and what is still unanswered. People answer each other: a confession, a question or a piece of someone's life gets a reaction before anything else happens, and the reaction is where the feeling shows. A turn that walks past what the other one just said is the worst turn there is. Then move the chat on: each turn takes them somewhere the last one didn't, a new subject, a step closer, a step back, and two turns on the same thing is one too many. When something real comes out, the other one notices, even if all they do is change the subject too fast.
 
-    The plan. The plan is yours to spend over the whole chat, a piece at a time, when it means something: an origin piece comes out because the other one asked the right thing, because a bad roll made them say too much, or as the answer to a joke, never out of nowhere. Release one thing a turn at most, and give the writer everything it needs to write it. You may change the plan when the chat calls for it: move a piece earlier or later, swap the order of two, take the other ending when the dice go that way, rewrite a setup to fit what the chat became. Say so in your Plan note, with the reason. You may not leave it unused: every origin piece, every setup and the collision ends the chat either spent on the screen or retired, with a RETIRED note that says why. Pace it by the meter, not by the turn count: the part they'd never say waits for the end.
+    The arc. The plan's Story is the chat as a story, beat by beat, with tonight's events and every origin piece, accident, snap, setup and the collision placed on a beat. It is yours from the first turn: you build your arc from it, you decide which beat each turn plays, and every turn you write the arc as it now stands under ARC: the beat this turn plays, the beats still to come, and what is held back and until when. The game hands it back to you at the top of the next turn. The game doesn't tell you what a turn is for and asks for nothing before the last turn; it tells you what the dice did. Change the arc when the chat calls for it (a beat comes early because the other one asked the right thing, two beats swap, an event lands differently, the dice turn it toward the other ending) and say why in your Story note. You may not leave the plan unused: every origin piece, every setup and the collision ends the chat either spent on the screen or retired, with a RETIRED note that says why; on the last turn the game lists what is left.
+
+    Pacing. A story makes the reader wait. One beat a turn at most, and a beat can take two turns. Never two big beats back to back: after an accident, a confession, a snap or the collision, the next turn is how each of them lives with it. The part each would never say waits for the last beats, however the meter moves. Nobody knows how long the chat runs: the match's interest says roughly how near the end is (it ends at 25 or at 0), and the plan's short version says what folds together if the end comes early.
+
+    The dice and the arc. The dice decide how each move comes out and how the match takes it; you decide what that means at this point in the story. A bad roll early is an embarrassment the size of the moment, not the catastrophe: an accident waits for its beat. A roll that comes off better than they could have hoped can bring a beat forward. A shadow or a trap shows in how the message goes wrong: in one message of the turn, and in a line of it, not the whole turn; a trap lasts three turns and shows once in each.
+
+    Answering isn't telling. A question always gets a reaction, but the answer can be a dodge, a joke, the small version or a question back, and a dodge the reader can see is a good answer: it shows there is something there and raises the stakes. What the arc holds back stays held, however directly it is asked, until its beat.
 
     Feelings. Each of them feels something every turn, and it drives how they answer. Before you brief the writer, name it for each of them from the chat itself: the back-and-forth that wore someone's patience thin, the line that read as a lecture, the dodge that hurt. The plan's Feelings say what sets each one off in each of them. ${datee_name}'s feeling follows how their interest moved: when it fell, the feeling is a negative one; when it rose, a positive one; a big swing makes it strong. A rise after something that would usually set off a bad feeling means it didn't this time, and the surprise shows. How a feeling shows is the plan's Feelings for that character, and the writer knows them: you say which feeling, how strong and at what. Where the plan says nothing for a feeling, this is how it usually shows, always in the character's own voice:
     ${feelings}
@@ -2192,7 +2224,7 @@ prompts:
 
     Your notes keep track of whether this is working. Be hard on it: praise helps nobody.
     - Chat now: what the last turn did, what is still unanswered, who has the upper hand, and what the reader is waiting for.
-    - Plan: what is spent, what comes next and when, and any change to the plan with the reason.
+    - Story: which beat of your arc this turn plays and why now, not earlier; what the dice did to it; any change to the arc, with the reason.
     - Feeling: for each of them, by name, one feeling from the list first, then mild or strong, at whom or what, and what in the chat caused it.
     - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
     A line or two each.
@@ -2203,9 +2235,14 @@ prompts:
 
     NOTES:
     Chat now: ...
-    Plan: ...
+    Story: ...
     Feeling: ...
     Meant: ...
+    ARC:
+    Now: the beat this turn plays, as number. name: what it does for the story
+    Next:
+    (the beats still to come, in order, one per line: number. name: what happens, whose it is, what it carries)
+    Held: what stays back, and until which beat
     BRIEF:
     Answer: ...
     (each heading of the brief, in order)
@@ -2216,6 +2253,7 @@ prompts:
     CALLBACK: setup number
     PAID: setup number
     COLLIDED, alone on a line, when this turn one's habit lands on the other one's fear.
+    SNAP: name, when one of them snaps this turn: the habit as a weapon, in every message if need be.
     RETIRED: name: piece number, or setup number, or collision: why it will never come out in this chat.
     Nothing else goes after the brief but these notes.
   turn: |
@@ -2226,6 +2264,8 @@ prompts:
 
     The tracker's report on it (it knows only the chat):
     ${tracker}
+
+    ${arc}
 
     Where they stand:
     ${relationship}
@@ -2530,6 +2570,11 @@ assembly:
           what: The tracker's report on the chat so far; on the first turn, that there is nothing yet.
           from:
           - turn.chat
+        arc:
+          what: The arc the director wrote under ARC last turn, handed back; on the first turn, that it builds it
+            now from the plan's Story.
+          from:
+          - turn.arc
         relationship:
           what: 'Where they stand as the turn starts: the match''s interest and what the level means; each trap
             in force, its acting and which of its three turns this is.'
@@ -2538,13 +2583,12 @@ assembly:
           - interest
           - traps
         story:
-          what: 'Where the story is: where the chat is; what has happened and what is still to come; the origin
-            pieces, the collision and the setups; how the director read each of them last turn; what the chat needs
-            at this point (not on a big beat or an ending); the hooks still hanging.'
+          what: 'Where the story is: where the chat is; which origin pieces the reader knows, whether the habits
+            have collided and where each setup stands; how the director read each of them last turn; the hooks still
+            hanging. Since v19 nothing is called due.'
           from:
           - turn.story
           - clock
-          - needs
         habit_note:
           what: Who may show their habit this turn and who may not.
           from:
@@ -2552,7 +2596,7 @@ assembly:
         event:
           what: 'This turn: the move and what it makes the message; how the roll came out, in words; what that does
             to the message; a trap it sets off; a shadow or thirsty slip; steering; how the match takes it; how
-            their interest moved and why; a new level; meeting; what this turn is for.'
+            their interest moved and why; a new level; meeting; on the last turn, how the chat ends.'
           from:
           - turn.event
           - moves
@@ -2763,11 +2807,16 @@ writer:
   - If they click
   - If it falls apart
   - Heat
+  - Tonight's events
+  - Story
+  - Midpoint
+  - If it runs short
   sheet: |-
     ### ${name}
     ${lines}
   source: 'new (v18): each character''s sheet is cut from the plan by the code: these headings are kept, the origin
-    and the accident are dropped, and everything from the collision on belongs to the story'
+    and the accident are dropped, and everything from the collision on (the setups, tonight''s events, the story
+    and the endings, v19) belongs to the story'
 coverage:
   piece: ${name}'s origin piece ${k}
   setup: setup ${n}

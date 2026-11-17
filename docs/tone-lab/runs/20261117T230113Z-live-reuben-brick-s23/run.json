@@ -1,0 +1,573 @@
+{
+  "run_id": "20261117T230113Z-live-reuben-brick-s23",
+  "created_utc": "20261117T230113Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "9b2ed391f57612640c23b89c80095e12bd34c0d54ef7fb7df41c00d62f2b3779"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "high",
+    "track_reasoning": "low",
+    "write_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "dc1f40502500aab0ad67a6e5c370f50cce3558d97e896e1023cd0a02e5ec6d0d",
+  "prompt_chars": 500762,
+  "model_calls": 43,
+  "repo_commit": "6261e84",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 1045.5,
+  "usage": {
+    "cost": 0.8920267999999997,
+    "prompt_tokens": 868631,
+    "completion_tokens": 49086,
+    "reasoning_tokens": 7754
+  },
+  "beats": [
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "free",
+    "ending_win"
+  ],
+  "plan_words": 2256,
+  "planted_turn": 1,
+  "shape_retries": 4,
+  "turns_off_shape": [
+    6
+  ],
+  "callback_turn": 2,
+  "told": [
+    [
+      2,
+      "Reuben_404",
+      1,
+      "started in curatorial crowd control at late-night underground venues"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "on a strategic career pause taken on her own terms"
+    ],
+    [
+      3,
+      "Reuben_404",
+      2,
+      "worked the door at a damp dive bar for eleven months and got fired for lecturing a regular he insisted was the bassist from Pavement"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "snapped her six-inch heel in a luxury hotel revolving door before an executive interview and spent forty minutes arguing with the panel about torque tolerances"
+    ],
+    [
+      6,
+      "Reuben_404",
+      3,
+      "got fired mid-shift and stood unseen outside the bar window in his top hat for an hour watching his friends drink past his empty stool"
+    ],
+    [
+      7,
+      "Brick_haus",
+      3,
+      "the panel stared at her hulking scale limping in one shoe, the receptionist pried the revolving door wings open with a crowbar, and the security guard muttered \"christ, look at the size of that thing\""
+    ]
+  ],
+  "required_missed": [
+    [
+      6,
+      [
+        "these put them in one place, or one of them on the way to the other, though they are apart and the match hasn't agreed to meet: \"When are we getting together so this stubby left hook can give that bloke downstairs a genuine grievance to bang his broom about 🙂\""
+      ]
+    ]
+  ],
+  "hooks_open": [
+    [
+      2,
+      "Reuben_404",
+      "curatorial crowd control in late-night underground venues"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "strategic career pause over a firm's poor structural vision"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "Strictly speaking",
+      "should you wish to vacate"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2."
+    ]
+  },
+  "words": 1883,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 4,
+      "paid": 7
+    },
+    "3": {
+      "planted": 1,
+      "called": 2,
+      "paid": 10
+    }
+  },
+  "collided_turn": 5,
+  "reader_score": 8.5,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid that he is invisible and won't measure up unless he is constantly performing a bit.\n2. He compulsively over-explains, narrates his own self-sabotage, and hides behind live commentary and footnotes.\n3. After he was fired mid-shift from his bouncer job, he stood outside for an hour and watched his own friends drink right past his empty stool without noticing he was gone.\n4. He dropped it after Brick_haus threatened to put her phone down, retiring the commentary to speak plain English and ask for her postcode.\n5. Brick_haus is afraid of her own hulking scale, being gawked at as a freak, and physically breaking or not fitting into normal spaces.\n6. She hides behind rigid corporate administration, numbered lists, and lecturing people on structural standards and torque tolerances.\n7. She grew up in a cramped row house knocking down light fixtures with her crown by age fourteen, and was recently humiliated when a hotel had to pry open a revolving door with a crowbar to get her out while a guard gawked at her size.\n8. She dropped it, shifting from numbered lists and defensive tests to lowercase vulnerability about not fitting through normal doors before giving him her address.\n9. They called out each other's bluffs and defenses until Brick_haus walked away from Reuben's meta-commentary, forcing both of them to drop their acts and be honest.\n10. \"that guard was looking at a monument and i just wanted you to stay in the room\" — because it is the exact moment Reuben stops doing his verbose bit and says something simple and sincere to keep her from leaving.\n11. I laughed in Turn 3 when Reuben's pot of lentils boiled over and he accidentally pasted an unsent rant to his former boss Dave about the bassist from Pavement.",
+    "grade": "1. **Yes** — Directly captures his fear of being too small/inconsequential to register and disappearing if he stops performing.\n2. **Partly** — Catching the compulsive over-explaining and self-sabotage (Shadow: Overthinking), though it misses his specific habit of offering preemptive spatial disclaimers/exit ramps.\n3. **Yes** — Nails all three pieces of his origin story, especially the deepest layer outside the window.\n4. **Yes** — Matches his planned break (dropping the formal scaffolding for plain English) and the \"If they click\" outcome.\n5. **Yes** — Exactly captures her fear of being an oversized freak who won't fit and will break the room.\n6. **Yes** — Nails her numbered structural verdicts, logistics audits, and the torque-tolerances defense.\n7. **Yes** — Captures both her background (knocking down light fixtures at fourteen) and the deepest piece of her origin (the crowbar and the guard gawking).\n8. **Yes** — Directly mirrors her planned break (`i don't fit through normal doors reuben`), dropping the numbered lists, and inviting him over.\n9. **Yes** — Captures the collision of their defensive acts, the snap, and the mutual unvarnished drop into honesty.\n\nSCORE: 8.5 out of 9",
+    "score": 8.5
+  },
+  "attribution_score": 1.0,
+  "attribution": {
+    "score": 1.0,
+    "answered": 47,
+    "messages": 47,
+    "answer": "1: A\n2: A\n3: A\n4: A\n5: A\n6: B\n7: B\n8: B\n9: B\n10: B\n11: B\n12: A\n13: A\n14: A\n15: A\n16: A\n17: B\n18: A\n19: A\n20: A\n21: B\n22: B\n23: A\n24: A\n25: B\n26: B\n27: A\n28: B\n29: A\n30: A\n31: A\n32: A\n33: B\n34: A\n35: A\n36: B\n37: B\n38: B\n39: B\n40: B\n41: A\n42: B\n43: A\n44: A\n45: B\n46: B\n47: A"
+  },
+  "shape": {
+    "Reuben_404": {
+      "messages": 21,
+      "words": 1099,
+      "per_message": {
+        "min": 17,
+        "median": 47,
+        "max": 124
+      },
+      "spread": 0.52,
+      "messages_per_turn": [
+        2,
+        3,
+        3,
+        1,
+        1,
+        3,
+        2,
+        1,
+        2,
+        1,
+        2
+      ]
+    },
+    "Brick_haus": {
+      "messages": 26,
+      "words": 784,
+      "per_message": {
+        "min": 7,
+        "median": 29,
+        "max": 114
+      },
+      "spread": 0.67,
+      "messages_per_turn": [
+        3,
+        3,
+        2,
+        3,
+        2,
+        3,
+        2,
+        1,
+        2,
+        3,
+        2
+      ]
+    }
+  },
+  "review_edits": {
+    "turns": 11,
+    "turns_changed": 3,
+    "words_changed": 28,
+    "replacements_named": 3,
+    "per_turn": [
+      {
+        "turn": 1,
+        "words_changed": 6,
+        "replacements_named": 1
+      },
+      {
+        "turn": 2,
+        "words_changed": 21,
+        "replacements_named": 1
+      },
+      {
+        "turn": 3,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 4,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 5,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 6,
+        "words_changed": 1,
+        "replacements_named": 1
+      },
+      {
+        "turn": 7,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 8,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 9,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 10,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 11,
+        "words_changed": 0,
+        "replacements_named": 0
+      }
+    ]
+  },
+  "director_retries": 1,
+  "writer_retries": 4,
+  "coverage": [
+    {
+      "item": "Reuben_404's origin piece 1",
+      "spent": 2,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 2",
+      "spent": 3,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 3",
+      "spent": 6,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 1",
+      "spent": 2,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 2",
+      "spent": 4,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 3",
+      "spent": 7,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 1",
+      "spent": 4,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 2",
+      "spent": 7,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 3",
+      "spent": 10,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "the collision",
+      "spent": 5,
+      "retired": null,
+      "why": null
+    }
+  ],
+  "plan_gaps": [],
+  "release_score": 0.938,
+  "release_check": {
+    "score": 0.938,
+    "items": 8,
+    "answered": 8,
+    "verdicts": [
+      [
+        1,
+        "- The immediate physical contrast between his stumpy, all-girth left-hooked frame (with his dishwasher-safe tattoo and lopsided hang) and her towering, heavily veined shaft in heels.\n- Brick_haus's remark that most men on this app cannot even manage a basic entrance without making a mess of the threshold, whereas his upfront audit actually saves her time.",
+        "yes"
+      ],
+      [
+        2,
+        "- Reuben_404's lie that he is still jet-lagged from a ten-day trip.\n- Reuben_404's surface credential: that he got his start running \"curatorial crowd control\" in late-night underground venues, which is where he learned to read a room in three seconds.\n- Brick_haus's surface credential: that her late nights are open because she is on a \"strategic career pause\" she took entirely on her own terms after refusing to compromise her standards for a firm with poor structural vision.\n- Filthy back-and-forth on the physics of their proportions: how his stubby, all-girth left hook and heavy left ball would actually brace, pin, or climb her towering, veined length and low hang if she penciled him in.",
+        "yes"
+      ],
+      [
+        3,
+        "- Reuben_404's accidental paste: `Dave I have cross-referenced the jawline and even if that was not Mark Ibold my spatial management of the smoking patio warranted a formal warning before you gave my stool to the trivia guy`\n- Tonight's kitchen chaos: his fifth gas-station energy shot kicking in and his pot of lentils boiling over onto the stove burner mid-text (betraying that he is home cooking lentils, though he does not yet admit he has been inside for eleven days straight).\n- Reuben_404's dive-bar truth: he worked the door at a damp neighborhood dive bar for eleven months and got fired for spending forty minutes lecturing a regular he insisted was Mark Ibold, the bassist from Pavement.",
+        "yes"
+      ],
+      [
+        4,
+        "- Reuben_404's admission in his single sentence that his ten-day trip was actually eleven days straight shut inside his studio apartment eating out of the lentil pot since getting fired.\n- Brick_haus's apartment mishap and accidental paste: Flustered by his bullseye as she reaches for her wine, she knocks her prescription gold monocle into her glass and is fishing it out with a plastic cocktail sword when an automated calendar alert she set for herself fires and pastes into the chat box: `REMINDER 23:30: Stop drinking the box. Email Hotel Facilities re: brass track liability & heel reimbursement (£190). Put clothes on.`\n- Brick_haus's hotel revolving door incident: Trying to flatly deny any embarrassment, she insists the reminder is purely a consumer-rights and engineering dispute—on the way to an executive interview, she got her six-inch stiletto heel trapped in the brass track of a luxury hotel's revolving door (echoing her opening remark about people who cannot manage a basic entrance), snapped the heel clean off, limped into the boardroom ten minutes late, and spent the entire forty-minute interview arguing with the panel about the door's faulty torque tolerances.\n- High-heat physical instructions: Thrilled by his nerve now that both their covers are blown, she tells him bossily what she wants to do with a fast, clever mouth like his and his thick, low-slung frame.",
+        "partly"
+      ],
+      [
+        5,
+        "- The collision of their defenses: Reuben_404's preemptive exit offer lands directly on Brick_haus's shame about her physical scale.\n- Brick_haus's apartment reality: Pacing a single step in her one remaining stiletto heel while reading his message, her downstairs neighbor bangs a broom against the ceiling—audible right through her hallway door propped open by a £240 horse-tack posture harness—spooking her about being too heavy and loud for the building just as Reuben offers her a way out.",
+        "yes"
+      ],
+      [
+        6,
+        "- Reuben_404's matching apartment detail: a $189 plastic posture clip currently pinching his bag of coffee shut on the counter.\n- The deepest part of Reuben_404's firing: Dave actually fired him in the middle of his shift and nobody noticed he had left; he stood outside the window in his top hat for an hour watching his friends drink right past his empty stool, realizing he only exists in a room while he is making noise.",
+        "yes"
+      ],
+      [
+        7,
+        "- The deepest truth of Brick_haus's hotel revolving door disaster (paying off her opening line about people who cannot manage a basic entrance): the interview panel wasn't even looking at her resume—they were staring at the sheer, hulking scale of her limping up and down in one shoe, and when the receptionist had to pry the revolving door's emergency wings open with a crowbar to let her out of the lobby, she heard the security guard mutter, \"christ, look at the size of that thing.\"",
+        "yes"
+      ],
+      [
+        10,
+        "- The payoff of their physical scale mismatch: that his compact, low-center-of-gravity left hook and lopsided counterweight are built specifically to take the full weight of her towering, heavily veined length so neither of them is too small or too huge when locked together.\n- Brick_haus's background truth and voice break: raised in a cramped, low-ceilinged row house where she knocked light fixtures down with her crown by age fourteen, she drops her numbering and heavy periods in one message for an unguarded, lowercase admission: `i don't fit through normal doors reuben`.",
+        "yes"
+      ]
+    ],
+    "answer": "1: yes: \"Having a daily itinerary tattooed down a towering, heavily veined flank while wearing stiletto heels... you are looking at a stumpy, all-girth chode with a hard left hook, one monumental left ball dragging the floor, a dishwasher-safe symbol inked on the shaft\" and \"Most men on here cannot manage a basic entrance without making a mess of the threshold, so I reckon your upfront audit saves us twenty minutes of admin.\"\n2: yes: \"my internal clock is wrecked from a ten-day excursion I just got back from, compounded by years of nocturnal conditioning running curatorial crowd control in late-night underground venues, where you learn to read a room in three seconds flat\", \"an all-girth low center of gravity with a heavy left counterweight is engineered specifically to brace against a towering shaft\", \"I am on a strategic career pause, taken entirely on my own terms after I refused to compromise my standards for a firm with poor structural vision\", and \"if I let you climb this length, you will need every millimeter of that thick left hook and that boulder of a left ball just to anchor my low hang while I ride your foreskin raw.\"\n3: yes: \"just made my fifth gas-station energy shot kick in at the exact moment my pot of lentils boiled over onto the burner... and—Dave I have cross-referenced the jawline and even if that was not Mark Ibold my spatial management of the smoking patio warranted a formal warning before you gave my stool to the trivia guy\" and \"'curatorial crowd control' was eleven months working the door at a damp neighborhood dive bar called The Rusty Gusset until Dave terminated me for spending forty minutes lecturing a regular I was ninety percent certain was the bassist from Pavement.\"\n4: partly: \"my ten-day excursion has been eleven consecutive days shut inside this studio eating lentils straight from the pot since Dave took my stool\", \"REMINDER 23:30: Stop drinking the box. Email Hotel Facilities re: brass track liability & heel reimbursement (£190). Put clothes on. / That was an automated calendar alert that fired while I was fishing my monocle out of a glass of boxed rosé with a plastic cocktail sword\", \"a luxury hotel's revolving door trapped my six-inch stiletto heel in its brass floor track before an executive interview, snapped the heel clean off, and forced me to limp into the boardroom ten minutes late to spend the entire forty-minute slot lecturing the panel on their faulty torque tolerances\", and \"a mouth that sharp belongs pinned under my heavy low-hanging balls until that tongue puts every ounce of its stamina to proper work on my shaft\"; missing whatshe wants to do with his thick, low-slung frame in this turn, and how the monocle got knocked into the glass.\n5: yes: \"so you can cancel before bringing a build that shears through brass lobbies near a stumpy, unemployed bouncer's kitchen\", \"The bloke in the flat below mine just banged a broom handle against his ceiling because I paced a single step in my one remaining stiletto while a £240 horse-tack posture harness props my own hallway door open\", and \"take your own exit ramp if a proper build frightens you.\"\n6: yes: \"the $189 plastic posture clip currently pinching a bag of coffee shut on my counter\" and \"Dave fired me in the middle of my shift and not a single patron noticed I had left, so I stood outside the bar window in my top hat for an hour watching my own friends drink right past my empty stool until it clicked that I disappear the second I stop doing a bit.\"\n7: yes: \"The panel never looked at my CV because they were gawking at the sheer hulking scale of me limping up and down in one shoe, and when reception had to pry the revolving door's emergency wings open with a crowbar to get me out of the lobby, the security guard muttered christ, look at the size of that thing.\"\n8: yes: \"you want a stumpy, all-girth left hook and a low-slung left counterweight built to lock flush under your towering, veined curve so you can finally put every ounce of your weight down on someone without shrinking an inch or breaking the room\", \"I grew up in a cramped row house with ceilings so low I was knocking light fixtures down with my crown by fourteen\", and \"i don't fit through normal doors reuben\"."
+  },
+  "unanswered": [
+    [
+      2,
+      1
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      5,
+      1
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      7,
+      2
+    ],
+    [
+      8,
+      1
+    ],
+    [
+      9,
+      0
+    ],
+    [
+      10,
+      2
+    ],
+    [
+      11,
+      1
+    ]
+  ],
+  "unanswered_end": 0,
+  "tracker_end": "REPORT:\nLast turn: Reuben pointed out that Brick's hallway door is already propped open and her towel is already off, told her he turned his stove burner off and she will never have to duck around him, and asked for her postcode. Brick gave him her address, told him to leave the horse harness propping the door open when he comes through, and invited him to pour a glass of her boxed rosé and bring his top hat to the sofa.\nOffered: Reuben offered that he is leaving his kitchen (\"My burner is off, you are never ducking your crown or bracing your shoulders around me, and I just need the postcode 🙂\"). Brick offered her address and the final invitation (\"14B Albion Mews, top buzzer, and leave the horse harness where it is when you come through. Pour yourself a glass from the box on the counter and bring that top hat to the sofa.\").\nUnanswered:\n- nothing.\nCame out: Brick lives at 14B Albion Mews (top buzzer), confirming London/UK, and both have finally dropped their defences enough to let Reuben cross his kitchen threshold after eleven days and walk through her propped-open door without either of them having to shrink or do a bit.\nWants and hides: Both got what they wanted—Reuben got a place to go where he won't be invisible, Brick got someone who isn't afraid of her scale and doesn't make her brace her shoulders at the door—and neither is hiding anything by the final line.\nUpper hand: Warm, equal, and settled. Reuben took the initiative by turning off the burner and asking for the postcode; Brick met him by handing over the address and inviting him onto the sofa.\nMoving: Reached a clean, earned resolution that paid off the props introduced across the chat (the stove burner, the horse-tack harness doorstop, the boxed wine, the thresholds/doors, and the top hat). Looking at the whole chat, the only place it circled was Turns 5 and 8, where Reuben twice narrated his own self-sabotage in overly explicit meta-commentary (\"watching my own thumbs actively ruin this in real time\" / \"analyzing my own inability to shut up\").\nRepeats:\n- Thresholds and doors (\"making a mess of the threshold\" in turn 1 / revolving door in turns 4, 7 / \"twenty-eight-inch apartment frame\" and horse-tack doorstop in turn 5 / \"i don't fit through normal doors reuben\" and \"kitchen threshold\" in turn 10 / \"cross my own threshold\" and \"leave the horse harness where it is when you come through\" in turn 11).\n- The £240 horse-tack posture harness propping the door open: turns 5, 6, 11 (great payoff in turn 11: the door is literally already open for him).\n- The stove burner / lentils: turns 3, 4, 8, 11 (\"My burner is off\").\n- Boxed rosé: turns 4, 11 (\"Pour yourself a glass from the box on the counter\").\n- The top hat: turns 1, 6, 9, 11.\n- Reuben's \"🙂\": turns 1, 2, 6, 11 (initially a nervous shield for pre-emptive rejection, finally a genuine smile asking for the postcode).\nDoesn't add up: Two minor slips across the whole chat: in Turn 6 Reuben priced his posture clip in dollars (\"$189\") despite living a postcode away from \"14B Albion Mews\" and using \"£240\" elsewhere, and in Turn 10 Reuben called it a \"ten-round inspection\" right on Turn 10. Also, Turn 3 and Turn 4 used back-to-back accidental clipboard/alert paste disasters.\nThe reader now: Satisfied and affectionate toward both of them. The reader can answer all four questions for each character: Reuben is afraid of being invisible once he stops doing a verbal bit (after his friends drank right past his empty stool when Dave fired him), hides behind exhausting formal/meta commentary and pre-emptive exit ramps, and finally turns off his stove and asks for her postcode; Brick is afraid of being gawked at or fled from as a giant freak (\"look at the size of that thing\", knocking down light fixtures since fourteen), hides behind bossy corporate superiority, numbered lists, and a tattooed schedule, and finally leaves her towel on the radiator and her door propped open with the horse harness so he can come in.",
+  "arc_played": [
+    [
+      1,
+      "1. The Sizing-Up: Reuben opens with a warm, precise read of her profile and a preemptive disclaimer of his stubby left-hooked build (Setup 3); Brick answers with a bossy numbered verdict on how their proportions match and remarks that most men cannot even handle a basic entrance (Setup 2).",
+      "opener"
+    ],
+    [
+      2,
+      "2. The Credentials Test: Reuben answers her question by bragging he's jet-lagged from a ten-day excursion (Setup 1) and used to late hours from running curatorial crowd control in underground venues (Reuben Origin 1), steering toward meeting up to test their proportions; Brick counters with her strategic career pause hook (Brick Origin 1) and debates the filthy physics of how his thick hook handles her towering frame (Setup 3 callback).",
+      "setup"
+    ],
+    [
+      3,
+      "3. The Boil-Over & Reuben's Slip: Trying to answer Brick's demand as his lentil pot boils over and his fifth energy shot kicks in (Tonight's event 1, Setup 1 middle), Reuben accidentally pastes his unsent text to Dave (Reuben Accident), has to admit getting fired from the neighborhood dive-bar door over the Pavement bassist (Reuben Origin 2), and flinches right at the end of his confession by swerving into a question about meeting up.",
+      "setup"
+    ],
+    [
+      4,
+      "4. The Devastating Read & The 23:30 Slip: Reuben answers her command in one lethal sentence that owns his eleven-day lentil exile since Dave fired him (Setup 1 payoff) while clocking that she has a daily itinerary tattooed down her flank to hide that her \"strategic career pause\" left her calendar completely empty; feeling deeply seen and flustered, Brick fishes her monocle out of her wine with a plastic sword as her 23:30 reminder pastes into chat (Tonight's event 2, Brick Accident), tries to deny embarrassment while admitting the broken heel in the hotel revolving door and her forty-minute interview rant (Brick Origin 2, Setup 2 middle), and tells him what she wants to do with his fast mouth.",
+      "breakthrough"
+    ],
+    [
+      5,
+      "5. The Ceiling Bang & The Collision: Right as Brick offers to pin his mouth under her balls, Reuben panics and narrates himself ruining the moment in real time by handing her a preemptive exit ramp so she doesn't have to squeeze her towering frame into a dive-bar bouncer's kitchen; in her flat, Brick takes one step in her remaining heel and her downstairs neighbor bangs a broom against the ceiling while her £240 horse-tack harness props her door open (Tonight's event 3), making Reuben's exit offer land directly on her terror of being a loud, oversized freak (Collision, both Snaps).",
+      "catastrophe"
+    ],
+    [
+      6,
+      "6. Living With the Collision & The Window Truth: Reuben disarms her ultimatum with a tight, funny observation matching her £240 horse-tack doorstop against his $189 posture clip on his coffee bag (with one brief aside on how fast they swerved from face-sitting to carpentry), confesses that he didn't flinch at her scale—Dave fired him mid-shift and he stood outside The Rusty Gusset window in his top hat for an hour watching his friends drink past his empty stool without noticing he was gone (Reuben Origin 3)—and asks to come through her harnessed door; relieved it wasn't her bulk that made him flinch, Brick warms back up and edges toward the real story of the hotel door.",
+      "match_reveal"
+    ],
+    [
+      7,
+      "7. The Performed Candor & The Crowbar Truth: Reuben tries to answer her honestly and ask what really happened at the hotel interview, but slips into a safe, self-congratulatory performance of vulnerability—narrating how refreshing their \"radical candor\" is right now—which irritates Brick into dropping her spin in two clipped lines: the interview panel just stared at her hulking scale limping in one shoe, and when the receptionist had to pry the revolving door's emergency wings open with a crowbar to get her out, the security guard muttered \"christ, look at the size of that thing\" (Brick Origin 3, Setup 2 payoff).",
+      "callback"
+    ],
+    [
+      8,
+      "8. The Second Spiral: Right after Brick warns him to stop hiding behind the commentary and gives him the crowbar and security guard truth, Reuben chokes and narrates himself failing that exact test in real time—turning her rawest wound into a live broadcast of him measuring their mismatched proportions from the safety of his stove; deeply hurt, Brick pulls back into a cold, clipped two-point shutdown without explaining how badly he just stung her.",
+      "match_snap"
+    ],
+    [
+      9,
+      "9. Catching Her Before the Dresser: Reuben stops her departure with a tight, punchy callback to her \"towel is coming off\" goodbye (including one tiny aside that he is finally dropping the footnotes), then strips off his capitalization and ceremonial armor (`i just wanted you to stay in the room`) to answer the security guard's insult directly; Brick pauses before setting the phone on the dresser, warming back up and giving him one chance to prove how their proportions fit tonight.",
+      "warming"
+    ],
+    [
+      10,
+      "10. The Lock-Together Geometry & Brick's Break: In a single, effortlessly warm sentence (with one tiny nod to ten turns of auditioning), Reuben names the exact gap between her strict logistics act and what she actually wants—someone whose stubby, all-girth left hook and low-slung counterweight lock right into her towering veined frame so she never has to duck or shrink for a room again (Setup 3 payoff); completely disarmed, Brick drops her periods and numbering for her lowercase break (`i don't fit through normal doors reuben`), admits knocking light fixtures down with her crown by fourteen in her cramped childhood row house, tells him how she wants their bodies locked together, and holds up one final guard before agreeing to meet.",
+      "warming"
+    ],
+    [
+      11,
+      "11. The Final Threshold: Reuben puts his exit-offer habit down completely and warmly points out what Brick revealed without meaning to—that she is still pretending to audit his follow-through when she has already mentioned twice that her hallway door is propped wide open by her £240 horse-tack harness and her wrap is already on the radiator; Brick puts her numbered lists down and agrees short and plain for him to come over right now.",
+      "ending_win"
+    ]
+  ],
+  "repeats": {
+    "openers": [
+      [
+        "Brick_haus",
+        "1.",
+        3
+      ]
+    ],
+    "words": [
+      [
+        "hotel",
+        4
+      ],
+      [
+        "kitchen",
+        4
+      ],
+      [
+        "single",
+        4
+      ],
+      [
+        "stiletto",
+        4
+      ],
+      [
+        "towel",
+        4
+      ],
+      [
+        "towering",
+        4
+      ],
+      [
+        "balls",
+        3
+      ],
+      [
+        "bloke",
+        3
+      ]
+    ]
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 21,
+    "datee_lines": 26,
+    "words": 1952
+  }
+}
