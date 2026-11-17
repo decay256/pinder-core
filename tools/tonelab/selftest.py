@@ -43,6 +43,29 @@ def check_live(name, variant, knobs, tmp):
           f"the situation page shows every text in the table ({len(texts)} texts; missing: {missing[:2]})")
     with open(situations.PAGE, encoding="utf-8") as f:
         check(f.read() == page, "the committed situation page is rendered from the current table")
+
+    def at(path):
+        nodes = [table]
+        for seg in path.replace("[]", ".[]").split("."):
+            nodes = [x for n in nodes for x in (list(n.values()) if seg == "*" and isinstance(n, dict) else
+                                                n if seg == "[]" and isinstance(n, list) else
+                                                [n[seg]] if isinstance(n, dict) and seg in n else [])]
+        return nodes
+    bad = []
+    for call in table["assembly"]["calls"]:
+        for msg in call["messages"]:
+            ph = set()
+            for p in msg["template"]:
+                got = at(p)
+                if not got or not isinstance(got[0], str):
+                    bad.append(p)
+                    continue
+                ph |= set(re.findall(r"\$\{(\w+)\}", got[0]))
+            if ph != set(msg["fills"]):
+                bad.append(f"{msg['message']}: {sorted(ph ^ set(msg['fills']))}")
+            bad += [x for v in msg["fills"].values() for x in v.get("from") or [] if not at(x)]
+    check(not bad, f"the page's map of how each prompt is built covers every placeholder of every template and "
+                   f"names only table sections that exist ({bad[:3]})")
     for seed in (7, 23, 42):
         path = os.path.join(tmp, f"{name}-{seed}.json")
         m = tonelab.play_mechanics("reuben", "brick", seed, 30, tonelab.DEFAULT_CLOCK, path, knobs.get("agent"))

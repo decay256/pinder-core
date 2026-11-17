@@ -1,6 +1,8 @@
-about: 'The tone lab''s situation table: the one source for everything the tone lab tells the models. Seeded on
-  2026-11-16 from Pinder Core''s data (each game-derived entry names its source) and edited here from then on; the
-  game''s files are not read at run time. ''new'' marks text the game has no equivalent for.'
+about: 'The tone lab''s situation table: the one source for everything the tone lab tells the models. The first
+  section shows how its texts are put together into each prompt; the sections after it follow the prompts in the
+  order the models see them. Seeded on 2026-11-16 from Pinder Core''s data (each game-derived entry names its source)
+  and edited here from then on; the game''s files are not read at run time. ''new'' marks text the game has no equivalent
+  for.'
 sections:
   limits: The only lengths the game checks; a turn that breaks one is sent back once. chat_words is the average
     length of a whole chat, which the director is told as a budget, not a cap.
@@ -12,11 +14,11 @@ sections:
   swings: What this turn's change in interest does to the match's reply, how much the match writes, and how many
     messages it may send (checked). The match word limit after a big loss is checked too.
   beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
-    length joins the length guidance; spent is how the beat is listed under 'Already happened'. big beats plant
-    no setup, exchange beats must hand over something real, and in a long_message beat one message may run to the
-    long limit. about_match marks the beats whose length line replaces the swing's for the match. A beat's length
-    line without about_match replaces the move's length line for the player character; beats with no length line
-    leave both to the move and the swing.
+    length is the length line for whoever the beat is about; spent is how the beat is listed under 'Already happened'.
+    big beats plant no setup, exchange beats must hand over something real, and in a long_message beat one message
+    may run to the long limit. about_match marks the beats whose length line replaces the swing's for the match.
+    A beat's length line without about_match replaces the move's length line for the player character; beats with
+    no length line leave both to the move and the swing.
   needs: The template for this point in the chat, built from these parts by where the chat is.
   shadows: When a shadow takes over a message; means is the short version on each character card.
   traps: 'While a trap is active: how the player character acts in it. Every trap lasts three turns, counting the
@@ -24,8 +26,8 @@ sections:
     with which of the three turns it is.'
   thirst: When a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
     or above.
-  clock: 'The story clock''s sentences: what has happened, what is still to come, which origin pieces and setups
-    are due, and what the two have told each other.'
+  clock: 'The story clock''s sentences: what has happened and what is still to come, which origin pieces the reader
+    knows and which are due, whether the habits have collided, where each setup stands, and the hooks still hanging.'
   notes: What each required note asks for and what a retry says when it is missing.
   habits: The habit rule shown every turn, and what a retry says when it is broken.
   checklist: The questions the director answers before writing anything that goes out; part of its system prompt.
@@ -2081,3 +2083,221 @@ feelings:
     desire: warmer, closer and more specific about bodies
   list_line: '- ${feeling}: ${shows}'
   source: 'new: written for the tone lab'
+assembly:
+  intro: How the texts on this page are put together into what each model is sent. Each message is a template; each
+    placeholder in it is filled from the game, from the run so far, or from the sections named, in the order the
+    template places them. docs/tone-lab/state-model.md says what each piece of game state means and why it is told
+    this way; the run report shows every prompt exactly as sent.
+  calls:
+  - name: The plan
+    when: One call, before the chat. Nobody downstream sees the character files.
+    messages:
+    - message: System prompt
+      template:
+      - prompts.bible
+      - prompts.plan
+      fills:
+        player_name:
+          what: The player character's display name, from the game.
+          from: []
+        datee_name:
+          what: The match's display name, from the game.
+          from: []
+    - message: The plan's input
+      template:
+      - prompts.plan_input
+      fills:
+        time_of_day:
+          what: The game's time of day, in words.
+          from:
+          - session.times
+        heat:
+          what: What tonight's session horniness means.
+          from:
+          - session.heat
+        player_card:
+          what: The player character's card, built as below.
+          from:
+          - prompts.character
+        datee_card:
+          what: The match's card, built as below.
+          from:
+          - prompts.character
+    - message: Each character card, inside the plan's input
+      template:
+      - prompts.character
+      fills:
+        name:
+          what: The display name, from the character file.
+          from: []
+        role:
+          what: '"the player" or "the match".'
+          from: []
+        pronouns:
+          what: From the character file.
+          from: []
+        bio:
+          what: The profile bio, from the character file.
+          from: []
+        body:
+          what: 'The body, from the character file: only the extremes of each 0-100 value.'
+          from: []
+        stats:
+          what: What they are strong and weak at, from the game's effective stats.
+          from:
+          - stats
+          - moves.*.strong
+          - moves.*.weak
+        shadows:
+          what: Their shadows from the character file, strongest first, each with the move it belongs to and what
+            it does.
+          from:
+          - character.shadows_head
+          - character.shadow_line
+          - character.no_shadows
+          - shadows.*.means
+        texting_style:
+          what: How they text, from the character file.
+          from: []
+        personality:
+          what: Who they are, from the character file.
+          from: []
+        backstory:
+          what: From the character file.
+          from: []
+        focus:
+          what: Tonight's brag and truth to build the secret on, drawn for this match.
+          from:
+          - character.focus
+          - character.no_focus
+        drawer:
+          what: A few private, filthy specifics, drawn for this match.
+          from:
+          - character.drawer_line
+        wound:
+          what: What hurts them, from the character file's diagnosis.
+          from: []
+        defence:
+          what: How they defend against it, from the diagnosis.
+          from: []
+        safe_connection:
+          what: What makes them feel safe, from the diagnosis.
+          from: []
+  - name: The director
+    when: 'One session for the whole chat: one call per turn, and the session keeps every earlier turn and note.
+      A turn that breaks a checked rule is sent back once.'
+    messages:
+    - message: System prompt
+      template:
+      - prompts.bible
+      - prompts.direct
+      fills:
+        player_name:
+          what: The player character's display name.
+          from: []
+        datee_name:
+          what: The match's display name.
+          from: []
+        feelings:
+          what: The feelings and how each shows in a text.
+          from:
+          - feelings.shows
+          - feelings.list_line
+        checklist:
+          what: The questions answered before every turn, numbered.
+          from:
+          - checklist
+    - message: Each turn
+      template:
+      - prompts.turn
+      fills:
+        since:
+          what: On the first turn, the plan the planner wrote; after that, that the last turn went out.
+          from:
+          - turn.state
+        relationship:
+          what: 'Where they stand as the turn starts: the match''s interest and what the level means; each trap
+            in force, its acting and which of its three turns this is.'
+          from:
+          - turn.relationship
+          - interest
+          - traps
+        story:
+          what: 'Where the story is: where the chat is; what has happened and what is still to come; the origin
+            pieces, the collision and the setups; how the director read each of them last turn; what the chat needs
+            at this point (not on a big beat or an ending); the hooks still hanging.'
+          from:
+          - turn.story
+          - clock
+          - needs
+        habit_note:
+          what: Who may show their habit this turn and who may not.
+          from:
+          - habits
+        event:
+          what: 'This turn: the move and what it makes the message; how the roll came out, in words; what that does
+            to the message; a trap it sets off; a shadow or thirsty slip; steering; how the match takes it; how
+            their interest moved and why; a new level; meeting; what this turn is for.'
+          from:
+          - turn.event
+          - moves
+          - results
+          - shadows
+          - traps
+          - thirst
+          - swings
+          - interest
+          - beats
+        must:
+          what: The notes the game requires this turn, checked afterwards.
+          from:
+          - notes.asks
+        length:
+          what: One length line for each of them, the words so far against the chat's budget, and the checked limits.
+          from:
+          - turn.length
+          - turn.limits
+          - moves.*.tiers.*.length
+          - beats
+          - swings
+          - limits
+    - message: A retry
+      template:
+      - checks.retry.turn
+      fills:
+        problems:
+          what: Every rule the turn broke, in words.
+          from:
+          - checks
+          - notes.missing
+          - habits
+        n:
+          what: The turn number.
+          from: []
+  - name: The reader and the grader
+    when: 'After the chat: two calls that see only the finished chat, and the plan for the grader.'
+    messages:
+    - message: The reader
+      template:
+      - reader.system
+      - reader.prompt
+      fills:
+        chat:
+          what: The finished chat.
+          from: []
+        questions:
+          what: 'The questions, numbered: four for each character, then the shared ones.'
+          from:
+          - reader.per_character
+          - reader.shared
+    - message: The grader
+      template:
+      - reader.grader_system
+      - reader.grader_prompt
+      fills:
+        plan:
+          what: The plan the planner wrote.
+          from: []
+        answers:
+          what: The reader's answers.
+          from: []

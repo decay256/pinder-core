@@ -5,7 +5,9 @@ tells the models: the prompt templates; what each move, roll result, interest le
 beat, shadow, trap and thirsty slip means; the story clock's sentences; what a required note
 asks for; the habit rule; the checks and what a retry says; the reader's questions. live.py
 reads every sentence from it. This script renders the whole file as
-docs/tone-lab/situations.html, and selftest.py checks that every text in the file appears
+docs/tone-lab/situations.html, laid out the way the prompts are built: first a map of each
+call's messages and what fills each placeholder (the table's assembly section), then the
+sections in the order the models see them, and selftest.py checks that every text in the file appears
 on the page and that the committed page is current.
 
 The table was seeded on 2026-11-16 from Pinder Core's data (the seeder is in git history,
@@ -26,14 +28,26 @@ REPO = os.path.dirname(os.path.dirname(HERE))
 TABLE = os.path.join(HERE, "variants", "live", "situations.yaml")
 PAGE = os.path.join(REPO, "docs", "tone-lab", "situations.html")
 
-TITLES = {  # page order and headings; a section the file gains later is shown after these
-    "limits": "Limits the game checks", "stats": "Character stats", "moves": "Moves and how each roll lands",
-    "results": "Roll results", "interest": "Interest levels", "swings": "Interest swings in one turn",
-    "beats": "Story beats", "needs": "What each point in the chat needs", "shadows": "Shadows taking over",
-    "traps": "Traps", "thirst": "Thirsty slips", "clock": "Story clock", "notes": "Required notes",
-    "habits": "Habit rule", "checklist": "Director's checklist", "checks": "Checks and retries",
-    "turn": "The director's two messages each turn", "reader": "Reader and grader",
-    "character": "Character card pieces", "prompts": "Prompt templates",
+GROUPS = [  # page order: the prompts in the order the models see them; a section the file gains later goes last
+    ("How the prompts are built", ["assembly"]),
+    ("Prompt templates", ["prompts"]),
+    ("The plan", ["session", "character", "stats"]),
+    ("The director's system prompt", ["feelings", "checklist"]),
+    ("Each turn's message, in the order it is told", ["turn", "interest", "traps", "clock", "needs", "beats", "moves",
+                                                      "results", "shadows", "thirst", "swings", "notes", "habits",
+                                                      "limits"]),
+    ("Checks and retries", ["checks"]),
+    ("After the chat", ["reader"]),
+]
+TITLES = {
+    "assembly": "How the prompts are built", "prompts": "Prompt templates", "session": "Session: time and heat",
+    "character": "Character card pieces", "stats": "Character stats", "feelings": "Feelings",
+    "checklist": "Director's checklist", "turn": "The turn message's frame", "interest": "Interest levels",
+    "traps": "Traps", "clock": "Story clock", "needs": "What each point in the chat needs", "beats": "Story beats",
+    "moves": "Moves and how each roll lands", "results": "Roll results", "shadows": "Shadows taking over",
+    "thirst": "Thirsty slips", "swings": "Interest swings in one turn", "notes": "Required notes",
+    "habits": "Habit rule", "limits": "Limits the game checks", "checks": "Checks and retries",
+    "reader": "Reader and grader",
 }
 SKIP = {"about", "sections"}
 
@@ -48,7 +62,7 @@ main{max-width:1180px;margin:0 auto;padding:24px 16px 80px}h1{font-size:26px;mar
 h2{font-size:20px;margin:40px 0 6px;padding-top:12px;border-top:1px solid var(--line);scroll-margin-top:110px}h3{font-size:16px;margin:22px 0 6px}
 h4{font-size:14px;margin:16px 0 4px;color:var(--muted)}p.lead,.muted{color:var(--muted)}
 nav{position:sticky;top:0;background:var(--bg);padding:8px 0;border-bottom:1px solid var(--line);z-index:2;
-display:flex;flex-wrap:wrap;gap:4px 14px}nav a{color:inherit;cursor:pointer;font-size:14px}
+display:flex;flex-wrap:wrap;gap:4px 14px}nav a{color:inherit;cursor:pointer;font-size:14px}nav b{font-size:12px;color:var(--muted);font-weight:600;margin-left:6px}.group{margin:48px 0 0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}td.ph{font-family:ui-monospace,monospace;font-size:13px;width:150px}
 input#q{width:100%;max-width:420px;padding:6px 10px;margin:10px 0;border:1px solid var(--line);border-radius:6px;
 background:var(--card);color:var(--fg)}
 .wrap{overflow-x:auto}table{border-collapse:collapse;width:100%;margin:6px 0 12px;background:var(--card)}
@@ -177,17 +191,49 @@ def source_tag(node):
     return f"<span class='tag {'new' if new else 'game'}'>{label}</span>"
 
 
+def anchor(path):
+    return path.split(".")[0].split("[")[0]
+
+
+def assembly(a):
+    """The map of how each prompt is built: per call, each message's template and what fills each placeholder."""
+    out = [f"<p class='muted'>{e(a['intro'])}</p>"]
+    for call in a["calls"]:
+        out.append(f"<h3>{e(call['name'])}</h3><p class='muted'>{e(call['when'])}</p>")
+        for m in call["messages"]:
+            tpl = " + ".join(f"<a href='#{anchor(p)}'><code>{e(p)}</code></a>" for p in m["template"])
+            rows = "".join(
+                f"<tr><td class='ph'>${{{e(ph)}}}</td><td>{e(x['what'])}</td><td>"
+                + ", ".join(f"<a href='#{anchor(p)}'><code>{e(p)}</code></a>" for p in x.get("from") or [])
+                + "</td></tr>" for ph, x in m["fills"].items())
+            out.append(f"<h4>{e(m['message'])}</h4><p>Template: {tpl}</p><div class='wrap'><table><thead><tr>"
+                       "<th>Placeholder</th><th>What fills it</th><th>From the table</th></tr></thead>"
+                       f"<tbody>{rows}</tbody></table></div>")
+    return "".join(out)
+
+
 def page(t):
-    order = [k for k in TITLES if k in t] + [k for k in t if k not in TITLES and k not in SKIP]
+    groups = [(g, [k for k in keys if k in t]) for g, keys in GROUPS]
+    placed = {k for _, keys in groups for k in keys}
+    rest = [k for k in t if k not in placed and k not in SKIP]
+    if rest:
+        groups.append(("Other sections", rest))
+    order = [k for _, keys in groups for k in keys]
+    first = {keys[0]: g for g, keys in groups if keys}
     intro = t.get("sections") or {}
-    nav = "".join(f"<a data-to='{k}'>{e(TITLES.get(k, k))}</a>" for k in order)
+    nav = "".join((f"<b>{e(first[k])}</b>" if k in first and len(dict(groups)[first[k]]) > 1 else "")
+                  + f"<a data-to='{k}'>{e(TITLES.get(k, k))}</a>" for k in order)
     body = []
     for k in order:
         node = t[k]
-        body.append(f"<h2 id='{k}'>{e(TITLES.get(k, k))}{source_tag(node)}</h2>")
+        if k in first and len(dict(groups)[first[k]]) > 1:
+            body.append(f"<p class='group'>{e(first[k])}</p>")
+        body.append(f"<h2 id='{k}'>{e(TITLES.get(k, k))}{source_tag(node) if k != 'assembly' else ''}</h2>")
         if intro.get(k):
             body.append(f"<p class='muted'>{e(intro[k])}</p>")
-        if k == "moves":
+        if k == "assembly":
+            body.append(assembly(node))
+        elif k == "moves":
             for name, mv in node.items():
                 body.append(f"<h3>{e(name)}</h3>" + render(mv, 1, "result"))
         else:
