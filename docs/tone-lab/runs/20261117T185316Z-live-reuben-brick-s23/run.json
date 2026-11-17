@@ -1,0 +1,564 @@
+{
+  "run_id": "20261117T185316Z-live-reuben-brick-s23",
+  "created_utc": "20261117T185316Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "6c821f8357da2c71e92d4792b929f235640a1feb4529d406ba44af67cb8ad896"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "track_reasoning": "low",
+    "write_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "d42a0c9e5d8132a91cc2bd1574f9123697ac3872dbdb714bc859c806c0611482",
+  "prompt_chars": 445848,
+  "model_calls": 41,
+  "repo_commit": "fcce278",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 866.4,
+  "usage": {
+    "cost": 0.7513048000000001,
+    "prompt_tokens": 736915,
+    "completion_tokens": 39146,
+    "reasoning_tokens": 4127
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 1433,
+  "planted_turn": 1,
+  "shape_retries": 3,
+  "turns_off_shape": [],
+  "callback_turn": 3,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "ran unnameable late-night door policy in underground music"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "took a strategic pause from her last role entirely on her own terms"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "got wedged in a hotel revolving door, snapped her heel, argued 40 minutes about the door radius"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "worked a damp dive bar door for 11 months and got fired for lecturing a regular for 20 minutes insisting he was the singer's brother"
+    ],
+    [
+      6,
+      "Brick_haus",
+      3,
+      "security cranked the door backward while six strangers watched and the interviewer said the room wasn't built for someone of her scale"
+    ],
+    [
+      8,
+      "Reuben_404",
+      3,
+      "the guy was the lead singer and told the manager not to fire him because he thought the little guy in the top hat was a coat rack"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "his underground music door policy days"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "her strategic pause from her last role"
+    ],
+    [
+      3,
+      "Brick_haus",
+      "leaving her role over compromised entry clearances"
+    ],
+    [
+      4,
+      "Brick_haus",
+      "what happened with security at the hotel revolving door"
+    ],
+    [
+      5,
+      "Reuben_404",
+      "who the regular at the dive bar actually was"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "her photos of the snapped heel and the 42-inch door partition"
+    ],
+    [
+      7,
+      "Reuben_404",
+      "sitting on his bathroom counter eating eleven-day-old lentils beside empty energy shots"
+    ],
+    [
+      7,
+      "Brick_haus",
+      "standing barefoot in an old towel with a three-liter box of rosé"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "pulling her spare heels out of the closet for tonight"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "skipping Mercer Street to come straight to her flat tonight"
+    ],
+    [
+      10,
+      "Brick_haus",
+      "whether he will stay in the room once he sees her size in person or do his rehearsed shrug and bolt"
+    ],
+    [
+      11,
+      "Brick_haus",
+      "her flat address and buzzer code for tonight"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "I will save you the trouble",
+      "For the record",
+      "Should you wish to vacate"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2.",
+      "3.",
+      "Logistically speaking"
+    ]
+  },
+  "words": 1656,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "called": 3,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 4,
+      "paid": 10
+    },
+    "3": {
+      "planted": 1,
+      "called": 6,
+      "paid": 9
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 9.0,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of being overlooked, ignored, and passed by because of his short, squat stature.\n2. He constantly over-explains, rehearses his posture in the mirror, and narrates his own self-sabotage so he can reject himself before Brick_haus can.\n3. It comes from people in crowded rooms looking right over him, culminating in getting fired from his bouncer job after the lead singer mistook him for a coat rack.\n4. He dropped it at the end, abandoning his formal, self-sabotaging commentary for a simple, honest text about just wanting to be looked at.\n5. Brick_haus is afraid of taking up too much space, not fitting in, and scaring people away with their massive size.\n6. They obsessively audit doorway clearances, make rigid lists, and act haughty about \"high-value standards\" to reject spaces and matches before they can be told they don't fit.\n7. It comes from a humiliating interview at the Rosewood Hotel where they got wedged in a revolving door in front of tourists and were told the room wasn't built for their scale, as well as a cramped office cubicle that scraped their crown.\n8. They dropped it at the end, abandoning their rigid numbering and architecture audits to honestly ask if Reuben_404 would stay and then giving out their apartment buzzer.\n9. At first, their defensive habits clashed and almost made them cancel the date when Reuben's self-absorbed spiraling stepped over Brick_haus's confession, and Brick_haus retaliated with a cold capacity audit. However, recognizing their shared humiliation allowed them to call out each other's bluffs and drop their guards.\n10. \"When the manager came out to fire me, the singer tapped my top hat and told him not to bother because, 'honestly I thought the little guy by the radiator was a coat rack.'\" It is a hilarious visual that manages to be genuinely heartbreaking at the exact same time.\n11. I laughed when Brick_haus described getting their monocle and ridge wedged in the brass revolving door, snapping a stiletto, and spending forty minutes lecturing three silent vice presidents on municipal turnstile codes while leaning at a fifteen-degree angle.",
+    "grade": "1. **Yes** — Directly captures his fear of being too small/squat to register and being looked right past.\n2. **Yes** — Nails his habit of pre-emptively narrating his own rejection, plus his overthinking and mirror-rehearsal note.\n3. **Yes** — Hits the exact origin story: bouncing at a bar, getting fired, and the lead singer calling him a coat rack.\n4. **Yes** — Catches his exact break: dropping the formal style for a plain text about just wanting to be looked at.\n5. **Yes** — Accurately identifies her fear of being too big, not fitting into spaces, and scaring people off.\n6. **Yes** — Captures her numbered structural/clearance audits and her lie about having high standards to frame rejection as logistics.\n7. **Yes** — Hits the exact origin details: wedged in a luxury hotel revolving door before an interview, watched by strangers, and told the room wasn't built for her scale.\n8. **Yes** — Identifies her dropping the numbers and clearance audits at the end to invite him to her flat.\n9. **Yes** — Captures the central collision (his self-exit spiral clashing with her cold capacity audit) and their eventual click when they drop their defenses.\n\nSCORE: 9 out of 9",
+    "score": 9.0
+  },
+  "attribution_score": 0.959,
+  "attribution": {
+    "score": 0.959,
+    "answered": 49,
+    "messages": 49,
+    "answer": "1: A\n2: A\n3: A\n4: A\n5: B\n6: B\n7: A\n8: A\n9: B\n10: A\n11: B\n12: B\n13: B\n14: A\n15: B\n16: A\n17: B\n18: A\n19: A\n20: B\n21: A\n22: A\n23: A\n24: A\n25: B\n26: A\n27: B\n28: A\n29: A\n30: A\n31: B\n32: A\n33: B\n34: B\n35: B\n36: A\n37: B\n38: A\n39: B\n40: B\n41: A\n42: A\n43: B\n44: A\n45: B\n46: B\n47: A\n48: A\n49: A"
+  },
+  "shape": {
+    "Reuben_404": {
+      "messages": 21,
+      "words": 835,
+      "per_message": {
+        "min": 5,
+        "median": 31,
+        "max": 122
+      },
+      "spread": 0.67,
+      "messages_per_turn": [
+        2,
+        3,
+        2,
+        1,
+        2,
+        2,
+        2,
+        2,
+        2,
+        1,
+        2
+      ]
+    },
+    "Brick_haus": {
+      "messages": 28,
+      "words": 821,
+      "per_message": {
+        "min": 6,
+        "median": 27,
+        "max": 95
+      },
+      "spread": 0.63,
+      "messages_per_turn": [
+        2,
+        3,
+        2,
+        4,
+        1,
+        3,
+        2,
+        4,
+        2,
+        3,
+        2
+      ]
+    }
+  },
+  "review_edits": {
+    "turns": 11,
+    "turns_changed": 8,
+    "words_changed": 229,
+    "replacements_named": 14,
+    "per_turn": [
+      {
+        "turn": 1,
+        "words_changed": 28,
+        "replacements_named": 2
+      },
+      {
+        "turn": 2,
+        "words_changed": 50,
+        "replacements_named": 3
+      },
+      {
+        "turn": 3,
+        "words_changed": 18,
+        "replacements_named": 1
+      },
+      {
+        "turn": 4,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 5,
+        "words_changed": 82,
+        "replacements_named": 3
+      },
+      {
+        "turn": 6,
+        "words_changed": 4,
+        "replacements_named": 1
+      },
+      {
+        "turn": 7,
+        "words_changed": 18,
+        "replacements_named": 1
+      },
+      {
+        "turn": 8,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 9,
+        "words_changed": 0,
+        "replacements_named": 0
+      },
+      {
+        "turn": 10,
+        "words_changed": 24,
+        "replacements_named": 1
+      },
+      {
+        "turn": 11,
+        "words_changed": 5,
+        "replacements_named": 2
+      }
+    ]
+  },
+  "director_retries": 1,
+  "writer_retries": 2,
+  "coverage": [
+    {
+      "item": "Reuben_404's origin piece 1",
+      "spent": 1,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 2",
+      "spent": 5,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 3",
+      "spent": 8,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 1",
+      "spent": 2,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 2",
+      "spent": 4,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 3",
+      "spent": 6,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 1",
+      "spent": 4,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 2",
+      "spent": 10,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 3",
+      "spent": 9,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "the collision",
+      "spent": 4,
+      "retired": null,
+      "why": null
+    }
+  ],
+  "plan_gaps": [],
+  "release_score": 1.0,
+  "release_check": {
+    "score": 1.0,
+    "items": 10,
+    "answered": 10,
+    "verdicts": [
+      [
+        1,
+        "Reuben_404's surface origin piece: he claims he got his start running \"unnameable late-night door policy\" in the underground music scene. Also plant two throwaway details: Reuben_404 promising to lose an arm-wrestle to her before appetizers, and Brick_haus stating she refuses sub-standard entryways.",
+        "yes"
+      ],
+      [
+        2,
+        "Reuben_404 plants a throwaway brag about \"investing in ergonomic presence.\" Brick_haus drops her surface origin piece: she mentions she has free evenings because she recently left her last role in what she calls \"a strategic pause I took entirely on my own terms.\"",
+        "yes"
+      ],
+      [
+        3,
+        "Callback to the posture gear: Reuben_404's $189 collarbone clip (currently clamping a coffee bag) meets Brick_haus's £240 posture harness (currently propping her hall door open).",
+        "yes"
+      ],
+      [
+        4,
+        "Payoff of the posture gear setup (whether they keep the door propped to bolt or drop the bracing). The collision of their habits and fears (his pre-emptive exit hitting her fear of scaring him off with her scale; her clearance audits hitting his fear of failing inspection). Brick_haus's Origin 2 (which also brings back the entryway setup): she didn't quit on her own terms—before an interview at a luxury hotel, her towering shaft got wedged in the lobby's revolving door, she snapped her expensive heel off in the rubber seal, limped into the boardroom, and spent forty minutes arguing with the panel about the door's radius.",
+        "yes"
+      ],
+      [
+        5,
+        "Reuben_404's accident (`angle base 15 degrees left so the short trunk looks intentional — if she laughs do the shrug NOT the grin`) and Reuben_404's Origin 2: he worked the door at a damp dive bar for eleven months and got fired for lecturing a regular for twenty minutes on why he wasn't on the list, insisting the guy was the lead singer's brother.",
+        "yes"
+      ],
+      [
+        6,
+        "Bringing back the arm-wrestle promise (comparing his soup-can girth and heavy low-slung left ball against her towering veined shaft). Brick_haus's accidental paste (`the 42-inch revolving partition in the east lobby violates standard clearance and I have the photos of my heel` sent in its own separate message first) and the deepest part of Brick_haus's origin: at the Rosewood, hotel security actually had to crank the brass revolving door backward while six strangers watched through the glass, and the interviewer told her afterward, \"This room just isn't built for someone of your scale\"—which is why she walked out of her cramped cubicle at her old freight job that same afternoon and bought the £240 harness.",
+        "yes"
+      ],
+      [
+        7,
+        "What both are actually doing tonight: Reuben_404 is sitting on his bathroom counter in a T-shirt (hiding uneven nipples), eating eleven-day-old pot lentils cold beside four empty gas-station energy shots; Brick_haus is standing barefoot at her kitchen counter in an old towel with a three-liter box of rosé. Also plant the setup about who actually fits in a cramped room without getting crushed or cropped out.",
+        "yes"
+      ],
+      [
+        8,
+        "Reuben_404's Origin 3: the guy at the rope actually was the lead singer, and told the manager not to fire Reuben because \"honestly I thought the little guy in the top hat was a coat rack.\"",
+        "yes"
+      ],
+      [
+        9,
+        "Payoff of the arm-wrestle setup (what his hands do when he forfeits the match—going straight to her heavy curve) and personal filth over their opposite geometry (his squat wide plug, dishwasher-safe base tattoo, and heavy left nut against her towering, thick-veined shaft and matching leftward curve).",
+        "yes"
+      ],
+      [
+        10,
+        "Payoff of the entryway setup (who actually fits in the room without breaking it or getting cropped out).",
+        "yes"
+      ]
+    ],
+    "answer": "1: yes: Reuben_404 says \"having run unnameable late-night door policy in the underground music scene\" and \"will gladly forfeit our arm-wrestle before the appetizers\", and Brick_haus says \"provided you book a bar without a sub-standard entryway.\"\n2: yes: Reuben_404 mentions \"investing in ergonomic presence\" and Brick_haus says \"my Thursday blocks are wide open because I recently departed my head of regional freight routing role in a strategic pause I took entirely on my own terms.\"\n3: yes: Reuben_404 mentions \"a $189 titanium collarbone clip... clamping a bag of stale French roast\" and Brick_haus mentions \"a £240 leather posture harness currently propping my hall door open for the draft.\"\n4: yes: Reuben_404 says \"Should you wish to vacate before a squat model fails your Thursday inspection... let you kick that £240 harness out of your hall door right now, unless you only audit lobby clearances so nobody catches a towering shaft flinching first\" and Brick_haus replies \"I am leaving the harness where it is, and nobody is vacating\", tells the story of getting \"wedged so tight in their brass revolving door before a final-round interview that I snapped a three-inch stiletto clean off in the rubber weatherstripping\" and spending \"forty minutes lecturing three silent vice presidents on why their turnstile radius violated municipal freight codes\", and says \"Leave your titanium clip on the coffee bag\".\n5: yes: Reuben_404 sends `angle base 15 degrees left so the short trunk looks intentional — if she laughs do the shrug NOT the grin` and admits \"my underground career was eleven months on a damp stool at The Sump. I got fired for lecturing a regular at the rope for twenty minutes on why his name was not on the clipboard while insisting he was merely the lead singer's brother.\"\n6: yes: Reuben_404 mentions \"an arm-wrestle to stage between your towering, heavy-veined shaft and my wide trunk anchored by one giant low-slung left nut\", and Brick_haus sends `the 42-inch revolving partition in the east lobby violates standard clearance and I have the photos of my heel` in a separate message, then explains \"two hotel security guards had to manually crank the brass drum backward with a wrench while six tourists filmed my veins pressed flat against the curved glass\", the hiring partner said, \"This room just isn't built for someone of your scale,\" and she walked out of her \"cramped cubicle, packed my vest, and ordered the £240 harness from the taxi\".\n7: yes: Reuben_404 says he is \"perched on my bathroom sink in a T-shirt to hide my uneven nipples, eating eleven-day-old cold pot lentils beside four empty gas-station energy shots\" and asks \"whether a towering monument and a squat plug can actually fit into one cramped corner at The Anchor without somebody getting crushed or cropped out of the frame\", while Brick_haus says she is \"standing barefoot at my kitchen counter in a frayed towel with a three-liter box of rosé\".\n8: yes: Reuben_404 admits \"the guy at the rope actually was the lead singer. When the manager came out to fire me, the singer tapped my top hat and told him not to bother because, 'honestly I thought the little guy by the radiator was a coat rack.'\"\n9: yes: Reuben_404 says \"Consider the arm-wrestle officially forfeited right now so my grip can skip the table and go straight to wrapping around that towering, heavy-veined leftward curve tonight\", and Brick_haus replies about pressing \"that squat, freckled plug and your giant low-slung left nut flat against my shaft until we see if that dishwasher-safe tattoo at your base holds up to real heat\" and says \"We both curve hard left anyway... every thick vein on my ridge is going to lock straight into your wide girth\".\n10: yes: Reuben_404 says \"you only measure them because you want someone in your kitchen who proves you fit in a room without breaking it\" and Brick_haus asks \"if you are going to stay once you see how much space I actually take up, or if you are just going to do that rehearsed mirror shrug and bolt for the stairs.\""
+  },
+  "unanswered": [
+    [
+      2,
+      2
+    ],
+    [
+      3,
+      2
+    ],
+    [
+      4,
+      3
+    ],
+    [
+      5,
+      2
+    ],
+    [
+      6,
+      2
+    ],
+    [
+      7,
+      2
+    ],
+    [
+      8,
+      3
+    ],
+    [
+      9,
+      3
+    ],
+    [
+      10,
+      1
+    ],
+    [
+      11,
+      2
+    ]
+  ],
+  "unanswered_end": 0,
+  "tracker_end": "REPORT:\nLast turn:\nReuben_404 gently pointed out that Brick_haus already moved his dining table against the radiator to make room, then dropped his formal capitalisation, punctuation, and vocabulary to admit plainly: \"i only wrote those miror notes bc i just wanted you to keep looking at me for a sec\".\nBrick_haus also dropped his formal punctuation and numbering (\"you don't have to clear the room for me i fit fine\") and gave his address and buzzer: \"14B Harrow, buzzer 4, come up.\"\n\nOffered:\nReuben_404: Dropped his act completely (\"i only wrote those miror notes bc i just wanted you to keep looking at me for a sec\").\nBrick_haus: Reassured him (\"you don't have to clear the room for me i fit fine\") and gave the address: \"14B Harrow, buzzer 4, come up.\"\n\nUnanswered:\n- nothing\n\nCame out:\nWhat each is afraid of, what they do to avoid feeling it, where it comes from, and what they did at the end are all on the screen:\n- Reuben_404 is afraid of being overlooked or treated like furniture because of his short, squat build (\"stop looking right over my—\", the lead singer calling him \"a coat rack\" by the radiator at The Sump). To avoid feeling it, he wears a top hat, bought a $189 titanium clip, rehearses angles in bathroom mirror notes, talks like a thesaurus, and pre-rejects himself first (\"Should you wish to vacate\"). At the end, he dropped the formal prose and confessed in lowercase with a typo that he just wanted Brick_haus to keep looking at him.\n- Brick_haus is afraid of taking up too much space and not fitting in rooms after getting wedged in the Rosewood revolving door in front of filming tourists, being told by a hiring partner \"This room just isn't built for someone of your scale,\" and having ceiling tiles scrape his crown in his freight cubicle. To avoid feeling it, he audits entryway clearances, wears a monocle and heels, bought a £240 leather harness, and hides behind numbered lists and \"high-value standards.\" At the end, he admitted he moved his own dining table against the radiator, dropped his punctuation, and buzzed Reuben_404 up.\n\nWants and hides:\nBoth want each other in Brick_haus's flat right now, and neither is hiding anything anymore.\n\nUpper hand:\nCompletely equal and unguarded. Both put down their acts and even their typing styles at the end. Temperature is warm, quiet, and tender.\n\nMoving:\nReached a clean, earned resolution. After ten turns of ornate, forty-word sentences, dropping into short lowercase lines in Turn 11 (\"i only wrote those miror notes bc i just wanted you to keep looking at me for a sec\" / \"14B Harrow, buzzer 4, come up.\") finally delivered the understatement the chat needed.\n\nRepeats:\n- Radiator / table: \"coat rack\" by the radiator (Turn 8) -> \"moved my dining table against the radiator\" (Turn 10) -> \"shoved your dining table against the radiator to make room for me\" (Turn 11).\n- Mirror notes: pasted (Turn 5) -> \"rehearsed mirror shrug\" (Turn 10) -> \"i only wrote those miror notes bc i just wanted you to keep looking at me for a sec\" (Turn 11).\n- Fitting in a room / clearing space: (Turns 1–11, paid off in \"you don't have to clear the room for me i fit fine\").\n\nDoesn't add up:\n1. In Turn 11, Brick_haus says \"you don't have to clear the room for me i fit fine\", which slightly muddles who cleared the room (Brick_haus is the one who moved *his own* dining table in his own flat in Turn 10, not Reuben_404).\n2. In Turn 5, Reuben_404's pasted mirror note read \"if she laughs\", whereas in Turn 11 he says \"i only wrote those miror notes bc i just wanted you to keep looking at me for a sec\" as if he wrote them specifically for Brick_haus.\n3. Earlier minor slips remain in the transcript: human anatomy (\"collarbone\", \"spine\", \"uneven nipples\", \"barefoot\") mixed with dick anatomy, US dollars vs UK pounds ($189 vs £240), and both characters doing an accidental paste in back-to-back turns (Turns 5 and 6) with Reuben_404's paste and explanation inside the same message bubble.\n\nThe reader now:\nThe reader feels the connection was earned: they laughed at the two absurd posture harnesses used as coffee clips and doorstops, winced at the revolving door and the \"coat rack\" line, and felt the drop in Turn 11 when both of them stopped writing essays and typed like real people.",
+  "repeats": {
+    "openers": [],
+    "words": [
+      [
+        "kitchen",
+        4
+      ],
+      [
+        "shaft",
+        4
+      ],
+      [
+        "squat",
+        4
+      ],
+      [
+        "table",
+        4
+      ],
+      [
+        "towering",
+        4
+      ],
+      [
+        "booth",
+        3
+      ],
+      [
+        "clearance",
+        3
+      ],
+      [
+        "curve",
+        3
+      ]
+    ]
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 21,
+    "datee_lines": 28,
+    "words": 1727
+  }
+}

@@ -31,14 +31,21 @@ Two rules keep the interpretation usable:
 | Call | When | State it gets |
 |---|---|---|
 | Plan | Once, before the chat | Session, both characters |
-| Director, system prompt | Once; the session keeps it | The feelings and how each usually shows in a text; the notes, the checklist and the review it works through |
-| Director, turn message | Every turn, in one session that keeps every earlier turn and note | Relationship, story position, what has repeated, this turn, what is required, length |
-| Director, retry | When a turn broke a checked rule | The broken rules, in words |
+| Tracker, system prompt | Once; the session keeps it | What to report about the chat: what each offered, what is still unanswered, what came out, what each wants and hides, the upper hand, whether the chat moves, repeats, what a reader couldn't know, what the reader feels |
+| Tracker, turn message | Before every turn but the first, and once after the last, in one session | The whole chat so far, nothing else |
+| Director, system prompt | Once; the session keeps it | Who knows what; the feelings and how each usually shows in a text; its notes; the headings of its brief |
+| Director, turn message | Every turn, in one session that keeps the plan and every earlier message and brief | The whole chat, the tracker's report, relationship, story position, what has repeated, this turn, what is required, length |
+| Director, retry | When a brief broke a checked rule | The broken rules, in words |
+| Writer, system prompt | Once; the session keeps it | Each character's sheet, cut from the plan without the origins, the accident, the setups, the collision or the endings; the craft; the review it edits its draft against |
+| Writer, turn message | Every turn, in one session that keeps every earlier brief and turn | The whole chat, the director's brief, the habit rule, what has repeated |
+| Writer, retry | When a turn broke a checked rule | The broken rules, in words |
 | Reader and grader | Once, after the chat | The finished chat only; the grader also gets the plan |
 | Attribution test | Once, after the chat | Every message, shuffled, with no names |
+| Release check | Once, after the chat | The finished chat and what the director released each turn |
 
-The director never sees the character files or the mechanics. It sees only the plan, the turn
-messages, and its own earlier answers.
+Nobody after the planner sees the character files or the mechanics. The director sees the plan,
+the turn messages and its own earlier answers; the writer sees the character sheets, the chat and
+the briefs; the tracker sees only the chat.
 
 ## 1. Session: in the plan only
 
@@ -245,39 +252,56 @@ each character's spread of message lengths and their messages per turn. A blind 
 gives a reader every message, shuffled and without names, to sort into two senders: 0.5 is chance,
 and a score near 1 means the voices are distinct.
 
-## How the director writes a turn
+## Three roles: tracker, director, writer (v18)
 
-Each turn's answer has five parts, in order: the notes (where they are, what each knows, what is
-hanging, what worked, what is stale, what in the plan is still unused, last turn's weakest point,
-each one's Feeling, what the player character meant); the checklist, answered before writing; a
-draft; the review, which edits the draft; and the turn as sent, which is the draft with every
-replacement the review named and nothing else changed.
+Up to v17 one director session read the game, kept notes, drafted, reviewed and wrote every turn.
+The chat was under a tenth of its context, scattered between its notes, drafts and reviews, and it
+behaved like it: offers went unanswered (in v17's seed-23 chat Brick's career pause got no reaction
+at all), the chat circled one subject, and the opener quoted a detail from the plan that the reader
+never saw. Each turn now runs three sessions, in this order.
 
-The review is a list of instructions, not questions. Asked questions about its own draft, the
-director described the draft and passed it (in v16 the turn as sent differed from the draft in 4
-of 11 turns). For each instruction it now writes "holds", or quotes the words that break it and
-what replaces them. The instructions are adapted from the dialogue rubric and the "dialogue as
-combat" rules of the novel engine (swarm-temporal, `projects/novel-engine`):
+**The tracker** knows only the chat. Before every turn but the first, and once after the last, it
+gets the whole chat and reports what is on the screen: what each did to the other in the last turn,
+what each offered, everything still unanswered, what each has let out about themselves, what each
+seems to want and to hide, the upper hand and the temperature, whether the chat moved, what
+repeats, anything a reader couldn't know or follow, and what the reader feels. Not knowing the plan
+is the point: it reads the way the reader will.
 
-- every line could only have come from its sender, and the two don't sound alike in the turn;
-- each feeling shows the way the plan says it shows in that character, in the shape of the message;
-- every line does something to the other one, and the upper hand moves;
-- subtext: no named feelings, explanations or therapy talk;
-- nothing repeats a topic, theme, joke, prop, phrase, pet word or opener the chat has had, unless it
-  is a callback the plan set up that means something new; a repeat is replaced with something from
-  the plan nobody has spent yet, from the notes' Unused line;
-- no joke is the first one anyone would think of;
-- the turn's shape differs from the last turns, and each message is as long as the moment needs;
-- each message carries one thing and ends on its strongest word.
+**The director** knows the plan and the game. It gets the whole chat, the tracker's report and the
+game state for the turn (sections 3 to 5 above), and writes notes (the chat now, the plan, each
+one's Feeling, what the player character meant), a brief for the writer, and the notes for the game.
+The brief is intent, never lines, and in plain words, never the game's terms: what this turn answers
+first, what each feels, what the player character is trying and how it comes out, how the match
+takes it, what comes out of the plan this turn (with every fact the writer needs), what stays away
+(named only as a subject), how much each gives, what the reader should get, and what to avoid. The
+rewriter's orders for a roll ("scan the last messages") are for the director, who turns them into
+what happens between these two people from what is on the screen.
 
-The game counts what has repeated and tells the director every turn: each character's message
-openers used three times or more, and the words (not common ones, not names) that came up in three
-turns or more. The plan's Voice treats pet words and openers as seasoning that turns up now and
-then, so a voice trait does not harden into a tic.
+The director may change the plan (move a piece, swap two, take the other ending, rewrite a setup)
+and says so in its Plan note. It may not leave the plan unused: by the end every origin piece, every
+setup and the collision is spent on the screen or retired with a RETIRED note that says why. On the
+last turn the game lists what is still open, and a direction that leaves any of it open is sent
+back.
 
-The code checks that the draft and the review are there, not what they say. The run record keeps
-what the review did: per turn, how many words differ between the draft and the turn as sent, and
-how many replacements the review named.
+**The writer** knows the characters: a sheet for each, cut from the plan by the code (what they
+show, where they are tonight, fear, habit, lie, snap, feelings, shadow, background, voice, break),
+without the origins, the accident, the setups, the collision or the endings. It gets the whole chat
+and the brief, drafts the turn, edits the draft against ten instructions (each line could only be
+its sender's; each feeling shows the way that character's Feelings say; each one first answers what
+the other last sent; every line acts on the other; subtext; no repeats; no first-thought joke; the
+shape changes and each gives what the brief says; one thing per message, ending on its strongest
+word; nothing leans on what the reader hasn't seen), and writes the turn as sent. It never sees the
+dice, the move, the meter or the notes for the game.
+
+Every role's message carries the whole chat, and each session keeps only its own messages, so no
+role reads another's working. The checks: the director's notes, brief headings, required notes,
+feelings and the end-of-chat accounting; no game terms in the brief; for the writer, who writes, the
+habit rule, the chat rules and stray lines. Each role is sent back once when it breaks one.
+
+The run record measures what the roles are for: where each piece of the plan ended (spent, retired
+with the reason, or neither); how many offers the tracker saw unanswered before each turn and at the
+end; a release check, in which a reader who sees only the chat says whether each turn's release
+reached the screen; and, as before, what the writer's review changed between draft and sent.
 
 ## Consistency rules
 

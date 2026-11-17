@@ -7,5 +7,7 @@
   "secrets": 8,
   "plan_reasoning": "high",
   "turn_reasoning": "medium",
+  "track_reasoning": "low",
+  "write_reasoning": "medium",
   "drawer_sample": 5
 }

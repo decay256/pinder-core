@@ -620,7 +620,10 @@ def write_report(run_dir):
         once = [("Plan call: system prompt", parts.get("system", "")),
                 ("Plan call: user prompt as sent, with both character cards", parts.get("user", "")),
                 ("Plan call: reply, the match plan (only the director sees it)", parts.get("plan", "")),
+                ("Tracker session: system prompt", parts.get("tracker_system", "")),
                 ("Director session: system prompt", parts.get("direct_system", "")),
+                ("Writer session: system prompt, with the character sheets cut from the plan",
+                 parts.get("writer_system", "")),
                 ("Options writer: system prompt", parts.get("options_system", "")),
                 ("Turn writer: system prompt", parts.get("deliver_system", "")),
                 ("Cast sheet: cut from the plan by the game, part of every writer prompt", parts.get("cast", ""))]

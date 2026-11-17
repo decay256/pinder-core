@@ -74,23 +74,51 @@ def check_live(name, variant, knobs, tmp):
 
         def caller(system, user, label, effort, ctx):
             prompts.append(system + user)
-            if label.startswith("turn "):
-                session.append((len(ctx.get("history") or []), label, user))
+            if label.startswith("turn ") or label == "tracker end":
+                session.append((len(ctx.get("history") or []), label, user, system))
             return live.dry_caller(names)(system, user, label, effort, ctx)
         res = live.play(variant, knobs, m, "reuben", "brick", caller)
         n = len(m["turns"])
-        check(len(res["turns"]) == n and len(prompts) == 1 + n,
-              f"{name} seed {seed}: a plan call and one call per played turn, in one session ({n} turns)")
-        check([k for k, _, _ in session] == list(range(0, 2 * len(session), 2)),
-              f"{name} seed {seed}: the session carries every earlier message into each call")
-        check("If they click" in session[0][2] and not any("If they click" in u for _, _, u in session[1:]),
-              f"{name} seed {seed}: the plan goes into the session once, at the start")
-        turn_users = [u for _, _, u in session]
+        role = lambda lb: "tracker" if lb.endswith("tracker") or lb == "tracker end" else lb.split()[-1]
+        by = {r: [(k, u, s) for k, lb, u, s in session if role(lb) == r] for r in ("tracker", "director", "writer")}
+        check(len(res["turns"]) == n and len(prompts) == 1 + 3 * n and [len(by[r]) for r in by] == [n, n, n],
+              f"{name} seed {seed}: a plan call, then a tracker call before every turn but the first and once after "
+              f"the last, and a director and a writer call per played turn ({n} turns)")
+        check(all([k for k, _, _ in v] == list(range(0, 2 * len(v), 2)) for v in by.values()),
+              f"{name} seed {seed}: each of the three sessions carries only its own earlier messages into each call")
+        d_users, w_users, t_users = ([u for _, u, _ in by[r]] for r in ("director", "writer", "tracker"))
+        check("If they click" in d_users[0] and not any("If they click" in u for u in d_users[1:]),
+              f"{name} seed {seed}: the plan goes into the director's session once, at the start")
+        hidden = ("If they click", "dry-origin", "dry-accident-line", "Collision:")
+        seen = [sy + u for r in ("tracker", "writer") for _, u, sy in by[r]]
+        check(not any(h in x for x in seen for h in hidden),
+              f"{name} seed {seed}: neither the tracker nor the writer sees the plan's origins, accident, collision "
+              "or endings")
+        check(all("dry-tonight" in sy and "Voice: dry" in sy for _, _, sy in by["writer"])
+              and not any("dry-tonight" in sy + u for _, u, sy in by["tracker"]),
+              f"{name} seed {seed}: the writer's system prompt carries each character's sheet, the tracker's doesn't")
+        check(all(f"Turn {k}\n" in u for j, u in enumerate(d_users) for k in range(1, j + 1))
+              and all(f"Turn {k}\n" in u for j, u in enumerate(w_users) for k in range(1, j + 1))
+              and all(f"Turn {k}\n" in u for j, u in enumerate(t_users) for k in range(1, j + 2)),
+              f"{name} seed {seed}: every role is shown the whole chat so far, every turn")
+        check(all("Unanswered:" in u for u in d_users[1:]) and "Unanswered:" not in d_users[0],
+              f"{name} seed {seed}: from the second turn on the director gets the tracker's report")
+        check(all("Answer: dry" in u for u in w_users)
+              and not any(re.search(r"\bTOLD\b|\bRETIRED\b|\bPLANTED\b|\bPAID\b", u) for u in w_users),
+              f"{name} seed {seed}: the writer gets the director's brief, without the notes for the game")
+        check(not any(" plays " in u or "What that does to the message" in u or re.search(r"(?i)\binterest\b", u)
+                      for u in w_users),
+              f"{name} seed {seed}: the writer is never told the move, the roll or the meter")
+        check(not res["plan_gaps"] and len(res["coverage"]) == 10,
+              f"{name} seed {seed}: by the end every piece of the plan is spent or retired ({res['plan_gaps']})")
+        turn_users = d_users
         check(len(turn_users) == n and all(f" plays {t['chosen_stat']}, " in u and "What that does to the message:" in u
-                                           and "takes it" in u and "Where the chat stands:" in u and "Repeated so far, counted by the game:" in u and "Where they stand:" in u
+                                           and "takes it" in u and "Where the chat stands:" in u
+                                           and "Repeated so far, counted by the game:" in u and "Where they stand:" in u
                                            and "Where the story is:" in u and "This turn:" in u
                                            for u, t in zip(turn_users, m["turns"])),
-              f"{name} seed {seed}: every turn reads where they stand, the story, the move, the roll, its reception and where the chat stands")
+              f"{name} seed {seed}: every director turn reads where they stand, the story, the move, the roll, its "
+              "reception and where the chat stands")
         check(all("Last turn you read" in u for u in turn_users[1:]),
               f"{name} seed {seed}: from the second turn on, the director sees how it read each of them last turn")
         check(all(not re.search(r"\brolled \d|natural 20|against \d", u) for u in turn_users),
@@ -128,11 +156,31 @@ def check_live(name, variant, knobs, tmp):
           f"an opener used three times and a word in three turns are counted ({rep})")
     check('"hm."' in live.repeats_text(chat, names) and live.repeats_text(chat[:1], names) == "- nothing yet.",
           "what has repeated is told, and nothing is told before anything repeats")
-    turns = [{"turn": 1, "director_draft": "A: hello there\nB: no", "director_review": '1. holds\n2. "no" → "never"'},
+    turns = [{"turn": 1, "writer_draft": "A: hello there\nB: no", "writer_review": '1. holds\n2. "no" → "never"'},
              {"turn": 2, "director_draft": "A: same", "director_review": "1. holds"}]
     ed = live.review_edits(turns, [(1, [("A", "hello there"), ("B", "never")]), (2, [("A", "same")])], names)
     check(ed["turns_changed"] == 1 and ed["words_changed"] == 1 and ed["replacements_named"] == 1,
           f"what the review changed between the draft and the turn as sent is counted ({ed})")
+    plan = ("**A**\n**Fear:** being found out\nHabit marker: hm. | posture\nOrigin, in three pieces:\n1. brag\n"
+            "2. truth\nAccident: wrong paste\nVoice: lowercase\n- \"example: one\"\nBreak: caps drop\n\n**B**\n"
+            "Fear: x\n\nCollision: both\nIf they click: y")
+    sh = live.sheets_of(plan, names)
+    check(all(w in sh["A"] for w in ("being found out", "lowercase", '"example: one"', "caps drop"))
+          and not any(w in sh["A"] for w in ("brag", "truth", "wrong paste")) and sh["B"] == "Fear: x",
+          f"the writer's sheets are cut from the plan without the origin, the accident or the story ({sh})")
+    got = [live.retired_item(x, names) for x in ("A: 3: never close enough", "setup 2: the chat moved on",
+                                                 "collision: they click", "the vibe")]
+    check(got == [("piece", "A", 3), ("setup", 2), ("collision",), None], f"a RETIRED note is read ({got})")
+    rep = "REPORT:\nLast turn: x\nUnanswered:\n- turn 2, A: the job\n- turn 3, B: the ex\nCame out: y"
+    check(live.unanswered_count(rep) == 2 and live.unanswered_count(rep.replace("- turn 2, A: the job\n- turn 3, B: "
+                                                                                "the ex", "- nothing")) == 0,
+          "the offers the tracker lists as unanswered are counted, and '- nothing' counts none")
+    rc = live.release_check(lambda *a: "1: yes: the job\n2. **partly** hinted", [(1, [("A", "my dad"), ("B", "oh")])],
+                            [(1, "his dad graded him"), (1, "the ex")])
+    check(rc["score"] == 0.75 and rc["answered"] == 2, f"the release check counts yes as 1 and partly as a half ({rc})")
+    brief = "Answer: the job\nFeeling: A: shame\nReleased: nothing\nHeld back: the father"
+    check(live.part_of(brief, "Released", ["Answer", "Feeling", "Released", "Held back"]) == "nothing"
+          and live.part_of(brief, "Gives", ["Answer", "Gives"]) is None, "a brief is read heading by heading")
     feel = live.feelings_of("Where they are: x\nFeeling: A: shame, strong, at himself. B: joy, mild, at the joke\nMeant: y", names)
     check(feel["A"]["feeling"] == "shame" and feel["B"]["feeling"] == "joy", f"the Feeling note is read per character ({feel})")
     check(len(live.feeling_problems(feel, names, -3, False)) == 1 and not live.feeling_problems(feel, names, 2, False),
