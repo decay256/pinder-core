@@ -87,7 +87,7 @@ def check_live(name, variant, knobs, tmp):
               f"{name} seed {seed}: the plan goes into the session once, at the start")
         turn_users = [u for _, _, u in session]
         check(len(turn_users) == n and all(f" plays {t['chosen_stat']}, " in u and "What that does to the message:" in u
-                                           and "takes it" in u and "Where the chat stands:" in u and "Where they stand:" in u
+                                           and "takes it" in u and "Where the chat stands:" in u and "Repeated so far, counted by the game:" in u and "Where they stand:" in u
                                            and "Where the story is:" in u and "This turn:" in u
                                            for u, t in zip(turn_users, m["turns"])),
               f"{name} seed {seed}: every turn reads where they stand, the story, the move, the roll, its reception and where the chat stands")
@@ -121,6 +121,18 @@ def check_live(name, variant, knobs, tmp):
         att = live.attribution_check(sorter, chat, names, 7)
         check(att["score"] == 1.0 and att["messages"] == 5 and att["answered"] == 5,
               f"a reader who sorts every message right scores 1, whichever letter they give whom ({att['score']})")
+    chat = [(1, [("A", "hm. posture first"), ("B", "lol posture")]), (2, [("A", "hm. posture again")]),
+            (3, [("A", "Hm, posture"), ("B", "the end")])]
+    rep = live.repeat_counts(chat, names)
+    check(rep["openers"] == [("A", "hm.", 3)] and rep["words"] == [("posture", 3)],
+          f"an opener used three times and a word in three turns are counted ({rep})")
+    check('"hm."' in live.repeats_text(chat, names) and live.repeats_text(chat[:1], names) == "- nothing yet.",
+          "what has repeated is told, and nothing is told before anything repeats")
+    turns = [{"turn": 1, "director_draft": "A: hello there\nB: no", "director_review": '1. holds\n2. "no" → "never"'},
+             {"turn": 2, "director_draft": "A: same", "director_review": "1. holds"}]
+    ed = live.review_edits(turns, [(1, [("A", "hello there"), ("B", "never")]), (2, [("A", "same")])], names)
+    check(ed["turns_changed"] == 1 and ed["words_changed"] == 1 and ed["replacements_named"] == 1,
+          f"what the review changed between the draft and the turn as sent is counted ({ed})")
     feel = live.feelings_of("Where they are: x\nFeeling: A: shame, strong, at himself. B: joy, mild, at the joke\nMeant: y", names)
     check(feel["A"]["feeling"] == "shame" and feel["B"]["feeling"] == "joy", f"the Feeling note is read per character ({feel})")
     check(len(live.feeling_problems(feel, names, -3, False)) == 1 and not live.feeling_problems(feel, names, 2, False),

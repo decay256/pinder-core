@@ -101,6 +101,17 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v17: the review edits instead of describing. In v16 the review asked questions about the draft,
+and the director answered them by describing the draft and passing it (the turn as sent differed
+from the draft in 4 of 11 turns). The review is now a list of instructions, each with what to do
+when a line breaks it, and the director names every fix as the old words and the new ones. One
+instruction makes sure each line could only be its sender's and the two don't sound alike; another
+makes sure nothing repeats a topic, theme, joke, prop, pet word or opener, and replaces a repeat
+with something the plan has not spent yet, which the notes now list under Unused. The code counts
+what has repeated (openers used three times or more, words that came up in three turns or more)
+and tells the director every turn. The plan's Voice treats pet words and openers as seasoning, so
+a voice trait does not harden into a tic. The run record keeps how much the review changed.
+
 v16: length is guidance and the voice comes from the plan. No length is checked any more: the
 per-message, per-turn and message-count caps and the match's word cap after a big loss are gone,
 and so are their retries; the game checks only who writes. The director is told where the chat
@@ -155,6 +166,7 @@ Which story beat a turn carries is decided here from the game so far, never from
 turns; selftest.py checks that.
 """
 
+import difflib
 import json
 import os
 import random
@@ -529,6 +541,50 @@ def shape_text(chat, names, last=3):
         if turns:
             out.append(say("turn.length.shape_one", name=names[side], turns=", then ".join(turns)))
     return "; ".join(out)
+
+
+WORD = re.compile(r"[a-z0-9][a-z0-9']*")
+
+
+def repeat_counts(chat, names):
+    """What has already come back in the chat: each one's message openers used at least opener_min
+    times, and the words (not common ones, not their names) that came up in at least word_turns_min
+    turns, most turns first."""
+    R = T()["turn"]["repeats"]
+    norm = lambda x: WORD.findall(x.lower().replace("’", "'"))
+    names_skip = {p for n in names.values() for p in norm(n)}
+    skip, o_skip = set(R["skip"]) | names_skip, set(R["opener_skip"]) | names_skip
+    openers = []
+    for side in ("player", "datee"):
+        firsts = {}
+        for _, lines in chat:
+            for w, m in lines:
+                tok = m.split()
+                if w != names[side] or not tok:
+                    continue
+                key = (norm(tok[0]) or [tok[0]])[0]
+                if key not in o_skip:
+                    firsts.setdefault(key, []).append(tok[0])
+        openers += [(names[side], max(sorted(set(raw)), key=raw.count), len(raw))
+                    for raw in firsts.values() if len(raw) >= R["opener_min"]]
+    turns_of = {}
+    for n, lines in chat:
+        for _, m in lines:
+            for w in set(norm(m)):
+                w = w.strip("'")
+                if len(w) >= R["word_letters"] and w not in skip:
+                    turns_of.setdefault(w, set()).add(n)
+    words = sorted(((w, len(ts)) for w, ts in turns_of.items() if len(ts) >= R["word_turns_min"]),
+                   key=lambda x: (-x[1], x[0]))[:R["most"]]
+    return {"openers": openers, "words": words}
+
+
+def repeats_text(chat, names):
+    """What has repeated so far, told to the director every turn, with what may bring a repeat back."""
+    R, c = T()["turn"]["repeats"], repeat_counts(chat, names)
+    out = [say("turn.repeats.opener", name=n, count=plural(k, "message"), word=w) for n, w, k in c["openers"]]
+    out += [say("turn.repeats.word", word=w, turns=plural(k, "turn")) for w, k in c["words"]]
+    return "\n".join(out + [R["rule"]]) if out else R["none"]
 
 
 def length_text(table, t, rk, swing, key, names, spent, played, budget, chat):
@@ -917,6 +973,22 @@ def shape_stats(chat, names):
     return out
 
 
+def review_edits(turns, chat, names):
+    """What the review did: per turn, how many words differ between the draft and the turn as sent,
+    and how many replacements the review named."""
+    per = []
+    for t, (_, sent) in zip(turns, chat):
+        a = " ".join(m for _, m in parse_lines(t.get("director_draft") or "", names)).split()
+        b = " ".join(m for _, m in sent).split()
+        ops = difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes()
+        changed = sum(max(i2 - i1, j2 - j1) for tag, i1, i2, j1, j2 in ops if tag != "equal")
+        named = sum(1 for line in (t.get("director_review") or "").splitlines() if "→" in line or "->" in line)
+        per.append({"turn": t["turn"], "words_changed": changed, "replacements_named": named})
+    return {"turns": len(per), "turns_changed": sum(1 for x in per if x["words_changed"]),
+            "words_changed": sum(x["words_changed"] for x in per),
+            "replacements_named": sum(x["replacements_named"] for x in per), "per_turn": per}
+
+
 def beat_keys(knobs, table, turns, outcome):
     use_table(table)
     story = Story(knobs, beats_of(table))
@@ -1027,7 +1099,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         allow_meet = is_last and mech.get("outcome") == "DateSecured"
         user = tl.render(P["turn"],
                          {**common, "since": since, "relationship": relationship, "story": story_now,
-                          "habit_note": h_note, "event": event, "must": must_text(need, names), "length": length},
+                          "habit_note": h_note, "event": event, "must": must_text(need, names), "length": length,
+                          "repeats": repeats_text(chat, names)},
                          "prompts.turn").strip() + "\n"
         ctx = {"ghost": ghost, "required": need, "delta": t["interest_delta"]}
         exempt = names[SNAPS[key]] if key in SNAPS else None
@@ -1232,6 +1305,8 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "reader_score": reader["score"], "reader": reader,
         "attribution_score": attribution["score"], "attribution": attribution,
         "shape": shape_stats(result["chat"], names),
+        "review_edits": review_edits(result["turns"], result["chat"], names),
+        "repeats": repeat_counts(result["chat"], names),
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
     with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:

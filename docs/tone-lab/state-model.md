@@ -32,7 +32,7 @@ Two rules keep the interpretation usable:
 |---|---|---|
 | Plan | Once, before the chat | Session, both characters |
 | Director, system prompt | Once; the session keeps it | The feelings and how each usually shows in a text; the notes, the checklist and the review it works through |
-| Director, turn message | Every turn, in one session that keeps every earlier turn and note | Relationship, story position, this turn, what is required, length |
+| Director, turn message | Every turn, in one session that keeps every earlier turn and note | Relationship, story position, what has repeated, this turn, what is required, length |
 | Director, retry | When a turn broke a checked rule | The broken rules, in words |
 | Reader and grader | Once, after the chat | The finished chat only; the grader also gets the plan |
 | Attribution test | Once, after the chat | Every message, shuffled, with no names |
@@ -248,17 +248,36 @@ and a score near 1 means the voices are distinct.
 ## How the director writes a turn
 
 Each turn's answer has five parts, in order: the notes (where they are, what each knows, what is
-hanging, what worked, what is stale, last turn's weakest point, each one's Feeling, what the player
-character meant); the checklist, answered before writing; a draft; a review of the draft; and the
-turn as sent, which is the draft with every fix the review found.
+hanging, what worked, what is stale, what in the plan is still unused, last turn's weakest point,
+each one's Feeling, what the player character meant); the checklist, answered before writing; a
+draft; the review, which edits the draft; and the turn as sent, which is the draft with every
+replacement the review named and nothing else changed.
 
-The review questions are adapted from the dialogue rubric and the "dialogue as combat" rules of the
-novel engine (swarm-temporal, `projects/novel-engine`): whether each line could be told apart
-without the names; whether each feeling shows the way the plan says it shows in that character;
-what each line does to the other one, and whether the upper hand moves; subtext, with no named
-feelings, explanations or therapy talk; stale material, and the obvious first joke; the turn's
-shape against the last turns; and whether each message carries one thing and ends on its strongest
-word. The code checks that the draft and the review are there, not what they say.
+The review is a list of instructions, not questions. Asked questions about its own draft, the
+director described the draft and passed it (in v16 the turn as sent differed from the draft in 4
+of 11 turns). For each instruction it now writes "holds", or quotes the words that break it and
+what replaces them. The instructions are adapted from the dialogue rubric and the "dialogue as
+combat" rules of the novel engine (swarm-temporal, `projects/novel-engine`):
+
+- every line could only have come from its sender, and the two don't sound alike in the turn;
+- each feeling shows the way the plan says it shows in that character, in the shape of the message;
+- every line does something to the other one, and the upper hand moves;
+- subtext: no named feelings, explanations or therapy talk;
+- nothing repeats a topic, theme, joke, prop, phrase, pet word or opener the chat has had, unless it
+  is a callback the plan set up that means something new; a repeat is replaced with something from
+  the plan nobody has spent yet, from the notes' Unused line;
+- no joke is the first one anyone would think of;
+- the turn's shape differs from the last turns, and each message is as long as the moment needs;
+- each message carries one thing and ends on its strongest word.
+
+The game counts what has repeated and tells the director every turn: each character's message
+openers used three times or more, and the words (not common ones, not names) that came up in three
+turns or more. The plan's Voice treats pet words and openers as seasoning that turns up now and
+then, so a voice trait does not harden into a tic.
+
+The code checks that the draft and the review are there, not what they say. The run record keeps
+what the review did: per turn, how many words differ between the draft and the turn as sent, and
+how many replacements the review named.
 
 ## Consistency rules
 

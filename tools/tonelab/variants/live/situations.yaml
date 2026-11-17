@@ -30,9 +30,9 @@ sections:
   notes: What each required note asks for and what a retry says when it is missing.
   habits: The habit rule shown every turn, and what a retry says when it is broken.
   checklist: The questions the director answers before writing anything that goes out; part of its system prompt.
-  review: The questions the director answers about its own draft each turn, before it writes the version that goes
-    out; part of its system prompt. Adapted from the novel engine's dialogue rubric and its "dialogue as combat"
-    rules.
+  review: The instructions the director edits its own draft against each turn, before it writes the version that
+    goes out; part of its system prompt. Each fix is named as the old words and the new ones. Adapted from the novel
+    engine's dialogue rubric and its "dialogue as combat" rules.
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
     that put the two of them in one place; note_heads are the notes the director writes every turn before the checklist.
   turn: 'The frame of the director''s message each turn, in the order of the state model: where they stand, where
@@ -1605,21 +1605,31 @@ checklist:
 - What does the chat need at this interest level, and does this do it?
 - Does the roll show in the message itself, and does the match's answer show the feeling you named?
 review:
-- 'Cover the names: could a reader tell who sent each message from the words alone, by the vocabulary, the schooling,
-  the spelling and the rhythm? Name any line either of them could have sent, and rewrite it in its sender''s voice.'
-- Does each one's feeling show the way the plan's Feelings say it shows in them, and not the way it shows in the
-  other one?
-- 'What is each message doing to the other one: pushing, dodging, testing, hiding, flattering, hitting back? Name
-  any line that only passes on information. Does the upper hand move this turn?'
-- Does anyone name their feeling, explain themselves, sum up what just happened or sound like therapy? People in
-  a chat say the thing next to the thing.
-- Is anything back from an earlier turn (a prop, a joke, a pet word, an opener, a description of a body) without
-  meaning something new? Is the joke the first one anyone would think of, and is there a stranger one only this
-  person would make?
-- Is this turn the same shape as their last turns? Is each message as long as the moment and the voice need, nothing
-  padded and nothing cut?
-- Does each message carry one thing, end on its strongest word with nothing after the joke, and read like something
-  a person types into a phone?
+- 'Make sure every message could only have come from its sender. Cover the names and read each line as if the other
+  one had sent it: if it could pass as theirs, by the words, the schooling, the spelling, the punctuation or the
+  rhythm, rewrite it in its sender''s Voice and Background until it couldn''t. Make sure the two of them don''t
+  sound alike in this turn either: not the same length, the same opener, the same punctuation or the same kind of
+  joke.'
+- 'Make sure each one''s feeling shows the way the plan''s Feelings say it shows in them, and not the way it shows
+  in the other one. Where it doesn''t, change the shape of the message, not just its words: longer or shorter, formal
+  or lowercase, a rant or one word, a question.'
+- 'Make sure every message does something to the other one: pushes, dodges, tests, hides, flatters or hits back.
+  Rewrite a line that only passes on information so it does one of those, and make sure the upper hand moves at
+  least once this turn.'
+- 'Make sure nobody names their own feeling, explains themselves, sums up what just happened or sounds like therapy.
+  Replace any such line with the thing next to the thing: what they''d say instead of saying it.'
+- 'Make sure nothing repeats what the chat has already had: no topic, theme, joke, prop, phrase, pet word, opener
+  or description of a body that is in your Stale note or that the game counted as repeated. The one exception is
+  a callback the plan set up, coming back to mean something new. Replace anything else that repeats with something
+  from your Unused note: a detail of their background, a setup not yet planted, the shadow, a strange specific from
+  the plan that nobody has spent.'
+- Make sure no joke is the first one anyone would think of. Replace it with a stranger one that only this person,
+  with their background, would make.
+- 'Make sure this turn isn''t the same shape as their last turns (the game counted them), and that each message
+  is as long as the moment and the voice need: nothing padded, nothing cut short.'
+- Make sure each message carries one thing, ends on its strongest word with nothing after the joke, and reads like
+  something a person types into a phone. Cut whatever comes after the punchline; split or cut a message that carries
+  two things.
 checks:
   apart_words:
   - downstairs
@@ -1645,6 +1655,7 @@ checks:
   - Not asked yet
   - Working
   - Stale
+  - Unused
   - Last turn
   - Feeling
   - Meant
@@ -1658,7 +1669,7 @@ checks:
     no_check: 'there is no CHECK: with an answer to each question of the checklist'
     no_final: 'there is no FINAL: with the turn as sent'
     stray: 'these lines are neither a message nor one of the notes: ${lines}'
-    no_review: 'there is no DRAFT: and REVIEW: before FINAL:, with an answer to each review question'
+    no_review: 'there is no DRAFT: and REVIEW: before FINAL:, with an answer to each review instruction'
   length:
     silent: ${name} sends nothing
     ghost_replied: ${name} replied, but they ghost
@@ -1746,6 +1757,162 @@ turn:
     shape_turn: ${count} (${words})
     shape_none: nothing
   source: 'new: written for the tone lab'
+  repeats:
+    opener: '- ${name} has opened ${count} with "${word}".'
+    word: '- "${word}" has come up in ${turns}.'
+    rule: A pet word or opener belongs to a voice only now and then, and a topic comes back only as a planned callback
+      that means something new. Anything else here that comes back is replaced with something unused from the plan.
+    none: '- nothing yet.'
+    opener_min: 3
+    word_turns_min: 3
+    word_letters: 5
+    most: 8
+    opener_skip:
+    - i
+    - i'm
+    - im
+    - the
+    - a
+    - an
+    - and
+    - but
+    - so
+    - you
+    - my
+    - it
+    - it's
+    - that
+    - this
+    - what
+    - how
+    - why
+    - is
+    - are
+    - to
+    - of
+    - in
+    skip:
+    - about
+    - above
+    - actually
+    - after
+    - again
+    - against
+    - almost
+    - already
+    - always
+    - another
+    - anyone
+    - anything
+    - around
+    - because
+    - before
+    - being
+    - below
+    - better
+    - between
+    - can't
+    - cannot
+    - could
+    - couldn't
+    - didn't
+    - doesn't
+    - doing
+    - don't
+    - during
+    - either
+    - enough
+    - every
+    - everyone
+    - everything
+    - exactly
+    - first
+    - going
+    - gonna
+    - haven't
+    - having
+    - here's
+    - honestly
+    - isn't
+    - it's
+    - just
+    - kinda
+    - later
+    - least
+    - literally
+    - little
+    - maybe
+    - might
+    - never
+    - nothing
+    - okay
+    - other
+    - people
+    - please
+    - pretty
+    - probably
+    - quite
+    - rather
+    - really
+    - right
+    - said
+    - saying
+    - seems
+    - should
+    - since
+    - someone
+    - something
+    - sorry
+    - still
+    - such
+    - sure
+    - thank
+    - thanks
+    - that's
+    - their
+    - them
+    - then
+    - there
+    - there's
+    - these
+    - they
+    - they're
+    - thing
+    - things
+    - think
+    - those
+    - though
+    - three
+    - through
+    - today
+    - tonight
+    - totally
+    - under
+    - until
+    - using
+    - wanna
+    - wasn't
+    - we're
+    - what's
+    - whatever
+    - when
+    - where
+    - which
+    - while
+    - whole
+    - without
+    - would
+    - wouldn't
+    - yeah
+    - years
+    - you'd
+    - you'll
+    - you're
+    - you've
+    - yours
+    - yourself
+    source: 'new (v17): counted by the code from the chat so far: each one''s message openers used three times or
+      more, and the words, not common ones and not their names, that came up in three turns or more'
 reader:
   system: You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a
     sentient dick. Answer only from what is in the chat. If the chat doesn't show it, say "can't tell". One or two
@@ -1913,7 +2080,7 @@ prompts:
     Feelings: for each feeling, what sets it off in them and how it changes the way they type, from their fear, their habit and the card's "may ... when ..." lines. The change in shape counts: one rants when angry, another goes down to one-word questions, one turns formal, another drops the capitals. The two of them never change the same way. A few words each: anger at ... → ..., fear at ... → ..., shame at ... → ..., guilt at ... → ..., hurt at ... → ..., contempt at ... → ..., joy at ... → ..., relief at ... → ..., desire at ... → ...
     Shadow: how their strongest shadow from the card shows in one of their messages when it takes over.
     Background: the life that made the way they type, a little over the top and specific: their generation, how far they got in school (a PhD, out at fourteen, never went), money, the job or the lack of one, what they're on or recovering from, where they grew up. Then how it shows in their words: what they know, the words they use and the ones they get wrong, their spelling.
-    Voice: what never changes in how they type, from the card's "tends to" lines and their background: capitals, punctuation, spelling, pet words, emoji, how long a message usually runs. Then three example messages they'd send, each a different shape (a fragment, a run-on, a question), the habit in one at most.
+    Voice: what never changes in how they type, from the card's "tends to" lines and their background: capitals, punctuation, spelling, rhythm, emoji, how long a message usually runs. Pet words and openers too, but as seasoning: each turns up now and then, never in every message or at the top of every turn, or it becomes a tic. Then three example messages they'd send, each a different shape (a fragment, a run-on, a question), the habit in one at most.
     Break: how the voice drops at the one or two biggest moments of the chat, and only there: the act gone, a typo left in, the capitals dropped, one plain sentence.
 
     ${datee_name}
@@ -1988,7 +2155,8 @@ prompts:
     - What each knows: what each has learned about the other.
     - Not asked yet: what's hanging that nobody has picked up.
     - Working: what got a real reply, a laugh or a rise in interest, and why.
-    - Stale: lines, props, jokes, habits and descriptions of their bodies already used. They only come back as a payoff that means something new.
+    - Stale: topics, themes, lines, props, jokes, habits, pet words, openers and descriptions of their bodies already used. They only come back as a payoff that means something new.
+    - Unused: what in the plan nobody has spent yet and could come soon: a detail of each one's background, a voice example, a setup not planted, the shadow, a strange specific. A repeat gets replaced from here.
     - Last turn: the thing in it that worked least, and why.
     - Feeling: for each of them, by name, one feeling from the list first, then mild or strong, at whom or what, and what in the chat caused it.
     - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
@@ -1997,9 +2165,9 @@ prompts:
     The checklist. Every turn, after your notes, answer each question about the turn you are about to send, a few words each, then draft it true to your answers.
     ${checklist}
 
-    The review. Then read your draft the way an editor reads dialogue and answer each question about it, line by line where it matters: what fails and how you fix it, or that it holds. Be hard on it: a draft that passes everything usually wasn't read.
+    The review. Then edit your draft the way an editor edits dialogue. Take each instruction below in turn and hold every line of the draft against it. Where a line breaks it, quote the words and write what replaces them: "the old words" → "the new words". Where nothing breaks it, write "holds". A first draft nearly always has a line either of them could have sent, something the chat has already had and an ending that runs past its punchline: find them. A fix can make a line break an instruction you already passed, so read the edited turn once more at the end.
     ${review}
-    Then write the turn as it is sent: the draft with every fix made.
+    Then write the turn as it is sent: the draft with every replacement made, and nothing changed that the review didn't name.
 
     The move the player picked is what ${player_name} is trying to do this turn (a strategy, never a word the character uses). The meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A roll that comes off better than they could have hoped is the best line in the chat. The match's answer shows the feeling you named.
 
@@ -2011,6 +2179,7 @@ prompts:
     Not asked yet: ...
     Working: ...
     Stale: ...
+    Unused: ...
     Last turn: ...
     Feeling: ...
     Meant: ...
@@ -2021,8 +2190,8 @@ prompts:
     ${player_name}: message
     ${datee_name}: message
     REVIEW:
-    1. ...
-    (one answer per review question)
+    1. holds, or "the old words" → "the new words"
+    (one answer per instruction, every replacement named)
     FINAL:
     ${player_name}: message
     ${datee_name}: message
@@ -2045,6 +2214,9 @@ prompts:
     ${story}
     ${habit_note}
 
+    Repeated so far, counted by the game:
+    ${repeats}
+
     This turn:
     ${event}
 
@@ -2054,7 +2226,7 @@ prompts:
     How long:
     ${length}
 
-    Write your notes, go through the checklist, draft the turn, review the draft, then write the turn as it is sent.
+    Write your notes, go through the checklist, draft the turn, edit the draft against each review instruction, then write the turn as it is sent.
 session:
   times:
     Morning: morning
@@ -2226,7 +2398,7 @@ assembly:
           from:
           - checklist
         review:
-          what: The questions the director answers about its own draft before the turn goes out, numbered.
+          what: The instructions the director edits its draft against before the turn goes out, numbered.
           from:
           - review
     - message: Each turn
@@ -2283,6 +2455,11 @@ assembly:
           - beats
           - swings
           - limits
+        repeats:
+          what: The openers and words that have already come back in the chat, counted by the code, and what may
+            bring one back.
+          from:
+          - turn.repeats
     - message: A retry
       template:
       - checks.retry.turn

@@ -1,0 +1,387 @@
+{
+  "run_id": "20261117T145332Z-live-reuben-brick-s23",
+  "created_utc": "20261117T145332Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "7392cc0206d1365abf942296ace7bb0f356da7580f187b900e723f36ac279739"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "medium",
+    "drawer_sample": 5
+  },
+  "prompt_sha256": "cd839550ec070e91ccd025ae359a27a94d12b33b70aa31ab27d1945b8da8e459",
+  "prompt_chars": 149263,
+  "model_calls": 17,
+  "repo_commit": "9a08581",
+  "repo_dirty": true,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 616.1,
+  "usage": {
+    "cost": 0.37759820000000005,
+    "prompt_tokens": 271835,
+    "completion_tokens": 22708,
+    "reasoning_tokens": 1809
+  },
+  "beats": [
+    "opener",
+    "setup",
+    "setup",
+    "breakthrough",
+    "catastrophe",
+    "match_reveal",
+    "callback",
+    "match_snap",
+    "warming",
+    "warming",
+    "ending_win"
+  ],
+  "plan_words": 1447,
+  "planted_turn": 1,
+  "shape_retries": 2,
+  "turns_off_shape": [],
+  "callback_turn": 4,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "curated late-night door policy for an underground venue"
+    ],
+    [
+      2,
+      "Brick_haus",
+      1,
+      "recently took a strategic career pause entirely on her own terms"
+    ],
+    [
+      4,
+      "Brick_haus",
+      2,
+      "snapped her stiletto in a hotel revolving door and lectured an interview panel for forty minutes on torque"
+    ],
+    [
+      5,
+      "Reuben_404",
+      2,
+      "worked a damp dive-bar door for eleven months and got fired for arguing a regular was a post-punk bassist's brother"
+    ],
+    [
+      11,
+      "Reuben_404",
+      3,
+      "the regular told him he stamped his hand forty Tuesdays without looking at him because he was performing for the wall"
+    ],
+    [
+      11,
+      "Brick_haus",
+      3,
+      "heard two panelists in the elevator laughing that she looked like a wrecking ball trying to do ballet"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "his formative years running an underground venue door"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "her strategic career pause and need for reinforced booth seating"
+    ],
+    [
+      3,
+      "Reuben_404",
+      "rehearsing his leverage speech so nobody notices how close to the floorboards he starts out"
+    ],
+    [
+      4,
+      "Brick_haus",
+      "getting wedged in the hotel revolving door before her interview"
+    ],
+    [
+      5,
+      "Reuben_404",
+      "the regular he argued with for half an hour from below five-foot-four before getting fired"
+    ],
+    [
+      6,
+      "Brick_haus",
+      "splitting a client's antique bistro chair in half and growing up crammed into a narrow terrace house"
+    ],
+    [
+      7,
+      "Reuben_404",
+      "sitting on his bathroom floor after eleven days of one lentil pot and four gas-station caffeine shots"
+    ],
+    [
+      8,
+      "Brick_haus",
+      "her pasted Notes reminder to mention her curve and scale early so he doesn't pull a face"
+    ],
+    [
+      9,
+      "Brick_haus",
+      "making him keep both eyes on her when she unlaces the corset and testing how much pressure he can take"
+    ],
+    [
+      10,
+      "Brick_haus",
+      "hovering above partners so she doesn't crack a rib and keeping her hand on the deadbolt before agreeing to Tuesday"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "mathematically speaking",
+      "let us consider the geometry"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2.",
+      "structurally speaking"
+    ]
+  },
+  "words": 1570,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1,
+      2,
+      3
+    ],
+    "Brick_haus": [
+      1,
+      2,
+      3
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 2,
+      "paid": 4
+    },
+    "2": {
+      "planted": 1,
+      "called": 4,
+      "paid": 11
+    },
+    "3": {
+      "planted": 2,
+      "called": 6,
+      "paid": 10
+    }
+  },
+  "collided_turn": 4,
+  "reader_score": 8.5,
+  "reader": {
+    "questions": [
+      "What is Reuben_404 afraid of?",
+      "What does Reuben_404 keep doing so they don't have to feel it?",
+      "Where does that come from, for Reuben_404?",
+      "At the end, did Reuben_404 drop that habit or hold on to it?",
+      "What is Brick_haus afraid of?",
+      "What does Brick_haus keep doing so they don't have to feel it?",
+      "Where does that come from, for Brick_haus?",
+      "At the end, did Brick_haus drop that habit or hold on to it?",
+      "What happened when the two of them ran into each other's habits?",
+      "Which line would you remember tomorrow, and why?",
+      "Where, if anywhere, did you laugh?"
+    ],
+    "answers": "1. Reuben_404 is afraid of people looking down at his short, cinco-foot-four proportions and judging the silence.\n2. He talks fast, rehearses speeches, and narrates his own conversational failures in real time so he can document the crash before anyone else can judge him.\n3. It comes from being below five-foot-four with a short, stubby build, and a history of over-performing at his old dive-bar job to keep people from looking down at him.\n4. He dropped it at the end, shutting up his live commentary to speak plainly and ask Brick_haus to lean on him.\n5. Brick_haus is afraid of her massive size and weight breaking furniture, cracking a partner's ribs, or making a partner wince and pull a face when her corset comes off.\n6. She scouting entrances twenty minutes early, issues strict structural demands like reinforced seating, and mentions her heavy scale early as a defensive \"contractor memo.\"\n7. It comes from growing up crammed sideways in a narrow house with groaning floorboards, splitting a client's antique chair in half at work, and hearing interview panelists compare her to a wrecking ball trying to do ballet.\n8. She dropped it, admitting how exhausted she is of hovering over partners and agreeing to meet on Tuesday without holding an inch of her weight back.\n9. They initially clashed—with Brick_haus calling out his self-pitying narration and Reuben_404 calling out her doorway-measuring defenses—before realizing they were both just terrified of someone pulling a face at their bodies.\n10. \"everyone looks at me like i'm going to break the furniture\" because it strips away all of Brick_haus's bossy, structural jargon and reveals the simple, painful insecurity underneath.\n11. I laughed in Turn 4 when they both confessed what their expensive posture gear was actually doing: Reuben_404's German collarbone clip was holding a coffee bag shut, and Brick_haus's horse-tack harness was propping a hallway door open.",
+    "grade": "1. **Yes** — Captured his fear of being looked down on and judged for his short, stubby proportions.\n2. **Yes** — Identified his habit of talking fast and preemptively auditioning/narrating his flaws before she can judge him.\n3. **Partly** — Caught the dive-bar job and height, but missed the specific firing incident with the regular and the \"performing for the wall\" line.\n4. **Yes** — Recognized that he dropped the act to speak plainly and asked her to lean on him.\n5. **Yes** — Nailed her fear of her massive size breaking furniture, hurting a partner, or making them flinch/pull a face.\n6. **Yes** — Identified her habit of turning attraction and logistics into a strict structural inspection to warn partners of her scale.\n7. **Yes** — Caught the narrow childhood house and the exact \"wrecking ball try to do ballet\" panelist quote (even if the revolving door shifted to an antique chair).\n8. **Yes** — Saw that she dropped her defenses, admitted her exhaustion/fear of breaking furniture, and agreed to meet without holding back.\n9. **Yes** — Understood both the initial clash over their spatial/defensive habits and their eventual click over shared physical insecurity.\n\nSCORE: 8.5 out of 9",
+    "score": 8.5
+  },
+  "attribution_score": 1.0,
+  "attribution": {
+    "score": 1.0,
+    "answered": 49,
+    "messages": 49,
+    "answer": "1: A\n2: B\n3: B\n4: A\n5: A\n6: A\n7: A\n8: B\n9: A\n10: B\n11: A\n12: A\n13: B\n14: B\n15: B\n16: A\n17: B\n18: B\n19: B\n20: A\n21: B\n22: B\n23: B\n24: B\n25: B\n26: B\n27: A\n28: A\n29: A\n30: B\n31: B\n32: A\n33: B\n34: A\n35: B\n36: B\n37: B\n38: A\n39: B\n40: A\n41: B\n42: A\n43: B\n44: B\n45: B\n46: B\n47: B\n48: A\n49: B"
+  },
+  "shape": {
+    "Reuben_404": {
+      "messages": 19,
+      "words": 805,
+      "per_message": {
+        "min": 3,
+        "median": 39,
+        "max": 106
+      },
+      "spread": 0.59,
+      "messages_per_turn": [
+        2,
+        2,
+        1,
+        2,
+        2,
+        1,
+        2,
+        1,
+        2,
+        1,
+        3
+      ]
+    },
+    "Brick_haus": {
+      "messages": 30,
+      "words": 765,
+      "per_message": {
+        "min": 4,
+        "median": 24,
+        "max": 87
+      },
+      "spread": 0.62,
+      "messages_per_turn": [
+        2,
+        3,
+        1,
+        4,
+        1,
+        3,
+        2,
+        4,
+        3,
+        4,
+        3
+      ]
+    }
+  },
+  "review_edits": {
+    "turns": 11,
+    "turns_changed": 11,
+    "words_changed": 295,
+    "replacements_named": 19,
+    "per_turn": [
+      {
+        "turn": 1,
+        "words_changed": 22,
+        "replacements_named": 3
+      },
+      {
+        "turn": 2,
+        "words_changed": 44,
+        "replacements_named": 4
+      },
+      {
+        "turn": 3,
+        "words_changed": 42,
+        "replacements_named": 2
+      },
+      {
+        "turn": 4,
+        "words_changed": 25,
+        "replacements_named": 2
+      },
+      {
+        "turn": 5,
+        "words_changed": 47,
+        "replacements_named": 3
+      },
+      {
+        "turn": 6,
+        "words_changed": 27,
+        "replacements_named": 0
+      },
+      {
+        "turn": 7,
+        "words_changed": 6,
+        "replacements_named": 1
+      },
+      {
+        "turn": 8,
+        "words_changed": 7,
+        "replacements_named": 2
+      },
+      {
+        "turn": 9,
+        "words_changed": 35,
+        "replacements_named": 1
+      },
+      {
+        "turn": 10,
+        "words_changed": 17,
+        "replacements_named": 0
+      },
+      {
+        "turn": 11,
+        "words_changed": 23,
+        "replacements_named": 1
+      }
+    ]
+  },
+  "repeats": {
+    "openers": [
+      [
+        "Brick_haus",
+        "1.",
+        3
+      ]
+    ],
+    "words": [
+      [
+        "tuesday",
+        4
+      ],
+      [
+        "weight",
+        4
+      ],
+      [
+        "barrel",
+        3
+      ],
+      [
+        "booth",
+        3
+      ],
+      [
+        "built",
+        3
+      ],
+      [
+        "curve",
+        3
+      ],
+      [
+        "drink",
+        3
+      ],
+      [
+        "entrance",
+        3
+      ]
+    ]
+  },
+  "format_checks": {
+    "turn_markers": 11,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 19,
+    "datee_lines": 30,
+    "words": 1641
+  }
+}
