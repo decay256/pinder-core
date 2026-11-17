@@ -8,18 +8,20 @@ sections:
     how the match takes it, and how long the player character writes. breakthrough marks the moves that can carry
     the breakthrough beat.
   results: 'How each roll result is described to the director: in words, never as a number.'
-  interest: 'Every turn: what the match''s interest level means between them, and who carries the chat at that level
-    (no message counts).'
+  interest: 'What each interest level means about the match: where they stand, not where the story is.'
   swings: What this turn's change in interest does to the match's reply, how much the match writes, and how many
     messages it may send (checked). The match word limit after a big loss is checked too.
   beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
     length joins the length guidance; spent is how the beat is listed under 'Already happened'. big beats plant
     no setup, exchange beats must hand over something real, and in a long_message beat one message may run to the
-    long limit. about_match marks the beats whose length line replaces the swing's for the match.
+    long limit. about_match marks the beats whose length line replaces the swing's for the match. A beat's length
+    line without about_match replaces the move's length line for the player character; beats with no length line
+    leave both to the move and the swing.
   needs: The template for this point in the chat, built from these parts by where the chat is.
   shadows: When a shadow takes over a message; means is the short version on each character card.
   traps: 'While a trap is active: how the player character acts in it. Every trap lasts three turns, counting the
-    turn it fires, and the director is told which of the three this is.'
+    turn it fires. The turn it fires, the director is told under this turn; after that, under where they stand,
+    with which of the three turns it is.'
   thirst: When a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
     or above.
   clock: 'The story clock''s sentences: what has happened, what is still to come, which origin pieces and setups
@@ -884,22 +886,19 @@ interest:
 - state: Unmatched
   from: 0
   to: 0
-  length: Nothing, or one last line.
   means: ${datee} has closed the door, and nothing is waiting underneath. It's over.
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-unmatched and tone lab
     v9; length: new'
 - state: Bored
   from: 1
   to: 4
-  length: The player carries the chat; the match gives almost nothing back.
   means: ${datee} is guarded and nearly gone, one message from leaving. The act has failed; only something true
-    could keep them, and it may not be enough. If it ends here, it ends unhinged, with the vulnerability showing.
+    could keep them, and it may not be enough.
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-bored and tone lab v9;
     length: new'
 - state: Lukewarm
   from: 5
   to: 9
-  length: The player carries the chat; the match answers less than it's asked.
   means: '${datee} is curious but not convinced, testing every line for what it costs and whether it''s meant. The
     act is in the way: something real has to get through, or they drift.'
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-lukewarm and tone lab
@@ -907,23 +906,19 @@ interest:
 - state: Interested
   from: 10
   to: 15
-  length: 'Even: both of them carry the chat.'
-  means: '${datee} is interested and still checking: closeness feels possible, trust is conditional. They trade
-    hooks, each learns one thing about the other, and the lie shows its first crack.'
+  means: '${datee} is interested and still checking: closeness feels possible, trust is conditional.'
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-interested and tone lab
     v9; length: new'
 - state: Very Into It
   from: 16
   to: 20
-  length: Whoever is opening up writes more.
   means: '${datee} is drawn in and still protecting themselves: one wrong note and they retreat. They want each
-    other; what they''ve told each other matters now, the filth gets personal, and every honest line costs something.'
+    other, and every honest line costs something.'
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-very-into-it and tone
     lab v9; length: new'
 - state: Almost There
   from: 21
   to: 24
-  length: Short and charged on both sides.
   means: '${datee} is nearly ready to choose this, and what still resists is small and specific. Meeting is on the
     table and the last guard is up: only the habit put down, or the part they''d never say, gets them over it.'
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-almost-there and tone
@@ -931,9 +926,7 @@ interest:
 - state: Date Secured
   from: 25
   to: 25
-  length: Short and plain on both sides.
-  means: '${datee} has decided this is real. They agree to meet: a connection the reader feels, each of them putting
-    the habit down for the other.'
+  means: ${datee} has decided this is real, and agrees to meet.
   source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-date-secured and tone
     lab v9; length: new'
 swings:
@@ -972,31 +965,29 @@ beats:
   opener:
     story: The opener. Two strangers performing. The player character's first message is the act at full strength.
       The match answers with their own act, and may plant a setup lightly enough that it reads as a throwaway.
-    length: 'Short: the act is a one-liner.'
+    length: '${datee}: one or two short messages: their own act, answering the act.'
     source: 'variant.json beats; length: new'
+    match_messages: 2
+    about_match: true
   setup:
     story: Still early, still performing. They drop hooks, the half-brag version of their origin, and the other
       one notices. A setup from the plan can go in here, as a throwaway.
-    length: Short.
     source: 'variant.json beats; length: new'
   early:
     story: Getting to know each other. One of them pulls on a hook, specifically, in their own voice. The other
       gives the next piece of their origin and asks something back, or dodges, and the dodge gives something away.
       The reader learns something new about one of them.
-    length: Normal.
     source: 'variant.json beats; length: new'
     exchange: true
   warming:
     story: 'Getting closer. They want each other, and what they''ve told each other starts to matter: one of them
       uses something the other told them, gently or as a joke, and gets more back. The filth gets personal because
       it''s about what they now know.'
-    length: Getting longer.
     source: 'variant.json beats; length: new'
     exchange: true
   close:
     story: Close. It's nearly happening, and they know enough about each other that every message costs something.
       The habits are under strain.
-    length: Short and charged.
     source: 'variant.json beats; length: new'
     exchange: true
   breakthrough:
@@ -1036,10 +1027,12 @@ beats:
     story: 'Piece 2 of the player character''s origin should be out by now, and they''ve kept it in. So the match
       finds it: something on the screen that doesn''t add up. They say so, in their own voice, and the player character
       has to deal with being caught.'
-    length: The match short and pointed.
+    length: '${datee}: short and pointed, one or two messages.'
     source: 'variant.json beats; length: new'
     spent: the match found out the player character's secret
     big: true
+    match_messages: 2
+    about_match: true
   match_reveal:
     story: 'The player character''s story is out, and the match can''t step over it. The match''s act cracks: a
       piece of their own origin comes out, in their own habit''s format, and it changes the meaning of something
@@ -1095,7 +1088,6 @@ beats:
     source: 'variant.json beats; length: new'
   ending_open:
     story: The chat stops here with nothing resolved. End on a line that leaves the reader wanting the next message.
-    length: Short.
     source: 'variant.json beats; length: new'
   reveal_pending:
     story: The match's own reveal hasn't happened yet, so it happens now, as part of the ending.
@@ -1104,7 +1096,6 @@ beats:
   callback:
     story: A setup from the plan comes back, here in the middle. The reader knows more by now, so it means more
       than when it was planted, and at least one of them notices.
-    length: Normal.
     source: 'variant.json beats; length: new'
     spent: the setup came back in the middle (its callback is spent)
     exchange: true
@@ -1122,7 +1113,7 @@ needs:
     and it doesn''t use the accident from the plan: that''s saved for its moment.'
   reveal: 'Piece 2 of the player character''s origin is out. This turn is how they live with that: own it, joke
     about it, explain it, which makes it worse.'
-  close: Interest is high and the planned ending is getting near. The turn gives the ending something to pay off.
+  close: Interest is high. The turn gives the ending something to pay off.
   source: 'new: written for the tone lab'
 shadows:
   Madness:
@@ -1583,6 +1574,10 @@ clock:
     setup_unplanted: '- Setup ${n}: not planted yet.'
     setup_unplanted_due: '- Setup ${n}: not planted yet; plant it this turn, as a throwaway.'
     nat20: '- This turn''s roll came off better than they could have hoped: something gets cashed in.'
+    secret_now: '- ${known}; piece 2 comes out this turn, the way this turn''s job says, whether or not piece 1
+      is out.'
+    not_collided_win: '- Their habits never collided, and the ending doesn''t stage it now: tonight each one puts
+      the habit down instead.'
   exchange:
     hooks_head: 'Hooks dropped in the last two turns (check the chat for whether the other one took them up):'
     hook_item: '- turn ${n}, ${who}: ${hook}'
@@ -1729,11 +1724,15 @@ turn:
     not_yet_from: 21
     not_yet: 'Interest is ${interest}, still below 25: ${datee} will not agree to meet yet.'
     job: 'What this turn is for: ${beat}'
+    trap_new: 'This turn sets off the ${trap} trap on ${name}, for this turn and the next two: ${acting}'
+    trap_again: 'This turn sets off the ${trap} trap on ${name} again, just as it was wearing off, for this turn
+      and the next two, and ${datee} has seen it before: ${acting}'
+    first: 'This is the first message, so there is nothing from ${datee} yet to notice or answer: their profile
+      is all there is.'
+    swing_bare: ${datee}'s interest goes from ${before} to ${after}, a ${swing}.
   length:
     player: '- ${name}: ${text}'
     match: '- ${text}'
-    between: '- Between them: ${text}'
-    beat: '- This kind of turn: ${text}'
     so_far: '- So far: ${spent} words in ${played}. The whole chat runs about ${budget} words, an average, not a
       cap.'
   limits:
@@ -1869,7 +1868,7 @@ prompts:
 
     In three lines every earlier rating changes meaning: she has been rated all along, and the ratings go to someone who never answers.
 
-    A whole chat runs about 1,250 words, five minutes of reading, but that's an average, not a limit. Most messages are a few words; a turn can be one word each way, or one long message when someone finally tells something, and a long message is an event. The characters are inside the app, not inside the game: they never see or mention dice, moves, options, turns or the meter.
+    A whole chat runs about 1,250 words, five minutes of reading, but that's an average, not a limit. Most messages are a line or two, often less; a turn can be one word each way, or one long message when someone finally tells something, and a long message is an event. The characters are inside the app, not inside the game: they never see or mention dice, moves, options, turns or the meter.
 
     ## How they write
 
@@ -2008,7 +2007,7 @@ prompts:
     FINAL:
     ${player_name}: message
     ${datee_name}: message
-    (${player_name}'s messages first, as many as each of them sends)
+    (${player_name}'s messages first, then ${datee_name}'s, as many as the length lines allow)
     then the notes for the game, one per line, only for what happened this turn:
     TOLD: name: piece number: what of their origin came out, in a few words. Only something the other didn't know before.
     HOOK: name: a new hook they dropped, in a few words.

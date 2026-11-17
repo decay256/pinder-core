@@ -101,6 +101,19 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v14: a self-consistency pass over v13. Each fix removes two lines of one turn message that
+told the director opposite things. Length is one line for each of them: the player character's
+from the beat when the beat is about them, otherwise from the move; the match's from the beat
+when it is about the match, otherwise from the swing. The interest level's "who carries the chat"
+and the beat's general length are gone, since they contradicted the swing and the roll. A trap
+the turn sets off is told under this turn, as a consequence, not under where they stand, and it
+is never given as the cause of the match's reaction on that turn; one set off again as it ran out
+is said to be back. The interest levels say what the level means, not what the story should do
+(which went stale: "the lie shows its first crack" after the secret was out). On a secret turn
+the clock says piece 2 comes out now, which it used to contradict. A won ending doesn't demand
+the collision. The first turn says there is nothing from the match yet, which the Charm rewriter
+assumed there was. Under a beat about the match, the swing doesn't also describe the reply.
+
 v13: the director's message follows a state model (docs/tone-lab/state-model.md). Every
 value the game has is either interpreted in words or left out as technical, and the message
 is ordered the way the director needs it: where they stand (the match's interest and what it
@@ -208,7 +221,7 @@ class Story:
             parts.append(n["breakthrough"])
         if i > 0 and "secret" not in self.fired:
             parts.append(n["secret"])
-        if "secret" in self.fired:
+        if "secret" in self.fired and self.secret_turn is not None and i - self.secret_turn <= 3:
             parts.append(n["reveal"])
         if interest >= 18:
             parts.append(n["close"])
@@ -334,24 +347,31 @@ def strength_of(stats, move):
 
 
 def trap_lines(table, t, names, starts):
-    """Each trap active this turn, with its acting and which of its three turns this is. Every
-    trap lasts three turns and the turn it fires counts as the first (Pinder.Core TrapState);
-    picking the move that clears it disarms it before the message goes out."""
+    """The traps in force as the turn starts, with their acting and which of their three turns this
+    is, and the traps this turn sets off. Every trap lasts three turns and the turn it fires counts
+    as the first (Pinder.Core TrapState); picking the move that clears it disarms it before the
+    message goes out. A trap set off again the turn after it ran out is said to be back. Only the
+    traps in force as the turn starts are a cause of the match's reaction."""
     before, after = set(t.get("active_traps_before") or []), set(t.get("active_traps_after") or [])
-    for x in after - before:
-        starts[x] = t["turn"]
     cleared = str(t.get("trap_cleared") or "").lower()
-    lines, active = [], []
-    for trap in sorted(before | (after - before)):
+    stages = table["turn"]["relationship"]["trap_stage"]
+    lines, active, fresh = [], [], []
+    for trap in sorted(before | after):
         row = table["traps"].get(trap.lower())
         if not row or trap.lower() == cleared:
+            continue
+        acting = say("traps." + trap.lower() + ".acting", name=names["player"])
+        if trap not in before:
+            again = starts.get(trap) == t["turn"] - 3
+            starts[trap] = t["turn"]
+            fresh.append(say("turn.event." + ("trap_again" if again else "trap_new"), name=names["player"],
+                             trap=row["name"], datee=names["datee"], acting=acting))
             continue
         k = max(1, min(3, t["turn"] - starts.get(trap, t["turn"]) + 1))
         active.append(row["name"])
         lines.append(say("turn.relationship.trap", name=names["player"], trap=row["name"],
-                         stage=table["turn"]["relationship"]["trap_stage"][("first", "second", "third")[k - 1]],
-                         acting=say("traps." + trap.lower() + ".acting", name=names["player"])))
-    return lines, active
+                         stage=stages[("first", "second", "third")[k - 1]], acting=acting))
+    return lines, active, fresh
 
 
 def relationship_text(table, t, names, starts):
@@ -359,11 +379,11 @@ def relationship_text(table, t, names, starts):
     ir = interest_row(table, t["interest_before"])
     line = say("turn.relationship.interest", datee=names["datee"], interest=t["interest_before"], state=ir["state"],
                means=fill(ir["means"], datee=names["datee"]))
-    traps, active = trap_lines(table, t, names, starts)
-    return "\n".join([line] + traps), active
+    traps, active, fresh = trap_lines(table, t, names, starts)
+    return "\n".join([line] + traps), active, fresh
 
 
-def event_text(table, t, names, is_last, outcome, beat, stats, active):
+def event_text(table, t, names, is_last, outcome, beat, stats, active, fresh=(), first=False, about_match=False):
     """What happened this turn, in words: the move, the roll, what else fired, how the match takes
     it, how their interest moved and why (when the cause shows in the message), and the beat."""
     E, datee, player = "turn.event.", names["datee"], names["player"]
@@ -378,6 +398,9 @@ def event_text(table, t, names, is_last, outcome, beat, stats, active):
                say(E + "roll_miss", result=result, name=player, shadow=mv["shadow"],
                    shadow_means=table["shadows"][mv["shadow"]]["means"]))
     out.append(say(E + "message", text=row["message"]))
+    if first:
+        out.append(say(E + "first", datee=datee))
+    out += list(fresh)
     causes = []
     sh = t.get("shadow")
     if sh and sh.get("miss"):
@@ -399,8 +422,9 @@ def event_text(table, t, names, is_last, outcome, beat, stats, active):
         out.append(table["turn"]["event"]["steering"])
     out.append(say(E + "received", datee=datee, text=row["received"]))
     sw = swing_row(table, t["interest_delta"])
-    out.append(say(E + "swing", datee=datee, before=t["interest_before"], after=t["interest_after"], swing=sw["name"],
-                   means=sw["means"]))
+    sv = dict(datee=datee, before=t["interest_before"], after=t["interest_after"], swing=sw["name"])
+    # under a beat about the match, the beat says how they reply; the swing's meaning would say it twice, differently
+    out.append(say(E + "swing_bare", **sv) if about_match else say(E + "swing", means=sw["means"], **sv))
     if t["interest_delta"] < 0:
         causes += [say(E + "cause.trap", trap=x, datee=datee) for x in active]
     if causes:
@@ -495,16 +519,15 @@ def limits_text(lim, names):
     return say(L + "frame", parts="; ".join(parts))
 
 
-def length_text(table, t, rk, swing, irow, key, names, spent, played, budget, lim):
-    """One length statement for each of them: the player's from the move and the roll, the match's
-    from the beat when it is about the match, otherwise from the swing; who carries the chat at
-    this interest level; the beat's own length when it is about the player or both."""
+def length_text(table, t, rk, swing, key, names, spent, played, budget, lim):
+    """One length statement for each of them, never two that can disagree: the player's from the
+    beat when the beat is about them, otherwise from the move and the roll; the match's from the
+    beat when it is about the match, otherwise from the swing."""
     L, b = "turn.length.", table["beats"].get(key) or {}
     match = fill(b["length"] if b.get("about_match") else swing["length"], datee=names["datee"])
-    out = [say(L + "player", name=names["player"], text=table["moves"][t["chosen_stat"]]["tiers"][rk]["length"]),
-           say(L + "match", text=match), say(L + "between", text=irow["length"])]
-    if b.get("length") and not b.get("about_match"):
-        out.append(say(L + "beat", text=b["length"]))
+    mine = (b["length"] if b.get("length") and not b.get("about_match")
+            else table["moves"][t["chosen_stat"]]["tiers"][rk]["length"])
+    out = [say(L + "player", name=names["player"], text=mine), say(L + "match", text=match)]
     out.append(say(L + "so_far", spent=spent, played=plural(played, "turn"), budget=budget))
     out.append("- " + limits_text(lim, names))
     return "\n".join(out)
@@ -571,6 +594,9 @@ def setup_no(x):
     return int(m.group()) if m else None
 
 
+SECRET_BEATS = ("catastrophe", "secret_miss", "discovery")  # the beats that spend the secret
+
+
 def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
     """Where the story stands and what this turn has to move: the game's story clock, built
     only from what has actually happened so far. Returns the text and the notes it requires.
@@ -584,7 +610,11 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
         nxt = next((k for k in (1, 2, 3) if k not in got), None)
         known = (say(S + "known", name=name, pieces=("pieces " if len(got) > 1 else "piece ") + ", ".join(map(str, got)))
                  if got else say(S + "known_nothing", name=name))
-        if nxt is None:
+        if side == "player" and key in SECRET_BEATS and 2 not in got:
+            # the accident (or the discovery) is piece 2, whether or not the hook came first
+            lines.append(say(S + "secret_now", known=known))
+            need.append(f"TOLD:{name}")
+        elif nxt is None:
             lines.append(say(S + "all_known", known=known))
         elif nxt == 3:
             lines.append(say(S + "last_piece_saved", known=known))
@@ -597,6 +627,8 @@ def story_step(i, key, is_last, left, names, pieces, setups, collided, nat20):
         need.append("TOLD:any")
     if collided:
         lines.append(say(S + "collided", turn=collided))
+    elif key == "ending_win":
+        lines.append(T()["clock"]["step"]["not_collided_win"])
     elif key and key not in ("opener", "setup") and (
             (i >= 3 and all(pieces[names[s]] for s in ("player", "datee"))) or left <= 3 or key.startswith("ending")):
         lines.append(T()["clock"]["step"]["collision_due"])
@@ -929,15 +961,16 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         ghost, nat20 = key == "ending_ghost", bool((t["roll"] or {}).get("nat20"))
         now_left = 1 if is_last else left
         step, need = story_step(i, key, is_last, now_left, names, pieces, setups, collided, nat20)
-        relationship, active = relationship_text(table, t, names, starts)
-        event, rk, swing = event_text(table, t, names, is_last, mech.get("outcome"), beat, stats, active)
+        relationship, active, fresh = relationship_text(table, t, names, starts)
+        event, rk, swing = event_text(table, t, names, is_last, mech.get("outcome"), beat, stats, active, fresh,
+                                      first=i == 0, about_match=bool(table["beats"][key].get("about_match")))
         irow = interest_row(table, t["interest_after"])
         # on a big beat the beat is the template: the general one for this point would contradict it
         story_now = story_text(i, is_last, now_left, so_far, step,
                                "" if key in beat_set("big") or key.startswith("ending") else needs, last_feel, names,
                                [h for h in hooks if h[0] >= t["turn"] - 2])
         lim = limits_for(table, key, swing, ghost)
-        length = length_text(table, t, rk, swing, irow, key, names, spent, i, budget, lim)
+        length = length_text(table, t, rk, swing, key, names, spent, i, budget, lim)
         allow_meet = is_last and mech.get("outcome") == "DateSecured"
         user = tl.render(P["turn"],
                          {**common, "since": since, "relationship": relationship, "story": story_now,

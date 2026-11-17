@@ -108,3 +108,28 @@ one word".
 
 A per-character texting baseline with modifiers on top (discussed alongside this) is the next step
 and is not part of v13.
+
+## Self-consistency rules (v14)
+
+A review of the v13 messages as sent found nine places where two lines of the same message
+told the director opposite things. The rules that came out of it:
+
+- **One length line per character.** The player character's comes from the beat when the beat is
+  about them (the catastrophe, a snap, a breakthrough, a lost ending), otherwise from the move and
+  the roll. The match's comes from the beat when it is about the match (the opener, a reveal, a
+  snap, a discovery, a won ending), otherwise from the swing. A third source, "who carries the chat"
+  at this interest level, and the beat's general length ("getting longer") contradicted these and
+  are gone.
+- **The relationship block is the state at the start of the turn.** A trap this turn sets off is
+  told under this turn, as a consequence of the roll, and is not given as a cause of the match's
+  reaction on that turn. A trap set off again as it ran out is said to be back, and the match has
+  seen it before.
+- **Interest levels say what the level means about the match, not what the story should do.** The
+  story instruction in them went stale as the chat moved ("the lie shows its first crack" after the
+  secret was out); the story block and the beat carry it.
+- **Under a beat about the match, the swing gives only the numbers.** The beat says how they reply.
+- **The clock agrees with the beat.** On the turn the secret comes out it says piece 2 comes out now;
+  the "how they live with it" guidance runs for three turns after the secret, not for the rest of the
+  chat; a won ending doesn't demand the collision.
+- **The first turn says there is nothing from the match yet**, since the game's rewriter texts assume
+  messages to read.
