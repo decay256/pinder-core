@@ -4,20 +4,22 @@ about: 'The tone lab''s situation table: the one source for everything the tone 
 sections:
   limits: The only lengths the game checks; a turn that breaks one is sent back once. chat_words is the average
     length of a whole chat, which the director is told as a budget, not a cap.
-  moves: The director sees what the picked move means, what the roll did to the message the player character meant
-    to send, how the match receives it, and how long the player character writes. breakthrough marks the moves that
-    can carry the breakthrough beat.
-  results: The name of each roll result, as the director reads it.
-  interest: 'Every turn: how the match feels at this level, what the chat needs, and how much the match writes.'
-  swings: What this turn's change in interest does to the match's reply and how long it runs. The match word limit
-    after a big loss is checked.
+  moves: What each move makes the message, what each result does to the message the player character meant to send,
+    how the match takes it, and how long the player character writes. breakthrough marks the moves that can carry
+    the breakthrough beat.
+  results: 'How each roll result is described to the director: in words, never as a number.'
+  interest: 'Every turn: what the match''s interest level means between them, and who carries the chat at that level
+    (no message counts).'
+  swings: What this turn's change in interest does to the match's reply, how much the match writes, and how many
+    messages it may send (checked). The match word limit after a big loss is checked too.
   beats: The story clock picks one beat per turn from the game so far. story is the template shown with the turn;
     length joins the length guidance; spent is how the beat is listed under 'Already happened'. big beats plant
     no setup, exchange beats must hand over something real, and in a long_message beat one message may run to the
-    long limit.
+    long limit. about_match marks the beats whose length line replaces the swing's for the match.
   needs: The template for this point in the chat, built from these parts by where the chat is.
-  shadows: When a shadow takes over the message.
-  traps: While a trap is active, and when one is armed.
+  shadows: When a shadow takes over a message; means is the short version on each character card.
+  traps: 'While a trap is active: how the player character acts in it. Every trap lasts three turns, counting the
+    turn it fires, and the director is told which of the three this is.'
   thirst: When a thirsty slip fires; how the match takes it depends on whether interest is at high_interest_from
     or above.
   clock: 'The story clock''s sentences: what has happened, what is still to come, which origin pieces and setups
@@ -27,8 +29,8 @@ sections:
   checklist: The questions the director answers before writing anything that goes out; part of its system prompt.
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
     that put the two of them in one place; note_heads are the notes the director writes every turn before the checklist.
-  turn: The frame of the director's message each turn; the game fills in the numbers, the names and the rows of
-    the sections above.
+  turn: 'The frame of the director''s message each turn, in the order of the state model: where they stand, where
+    the story is, this turn, what the game requires, how long. The game fills in the numbers, names and rows.'
   reader: The reader who sees only the finished chat, and the grader who scores the reader's answers against the
     plan.
   character: 'Pieces of each character card drawn fresh for each match. The rest of the card comes from the game''s
@@ -38,6 +40,10 @@ sections:
     turn.
   stats: Each character card lists what the character is strong and weak at, read from the game's stats for that
     character; each move's strong and weak lines are under Moves.
+  session: 'Read once, for the plan: how to say the game''s time of day, and what tonight''s session horniness means.'
+  feelings: 'The feelings the director names for each character every turn in its Feeling note, and how each shows
+    in a text. The match''s feeling has to agree with how their interest moved: negative on a loss, positive on
+    a gain.'
 limits:
   message_words: 45
   long_message_words: 70
@@ -59,7 +65,7 @@ stats:
   source: 'new: written for the tone lab'
 moves:
   Charm:
-    means: Make it easy, warm, reassuring.
+    means: the message is warm, easy and reassuring.
     shadow: Fixation
     tiers:
       clean:
@@ -194,7 +200,7 @@ moves:
     strong: easy to like; people relax around them.
     weak: warmth comes out stiff or needy; reassurance sounds like a pitch.
   Rizz:
-    means: Say plainly that they want them.
+    means: the message says plainly that they want them.
     shadow: Despair
     tiers:
       clean:
@@ -320,7 +326,7 @@ moves:
     strong: says what they want without flinching, and it lands.
     weak: wanting someone out loud comes out clumsy, crude or desperate.
   Honesty:
-    means: Show something real, or ask for it.
+    means: the message shows something real, or asks for it.
     shadow: Denial
     tiers:
       clean:
@@ -453,7 +459,7 @@ moves:
     strong: can say the real thing plainly, and be believed.
     weak: the truth comes out as a dodge, a lie, or too much at once.
   Chaos:
-    means: Swerve somewhere unexpected that still makes sense.
+    means: the message swerves somewhere unexpected that still makes sense.
     shadow: Madness
     tiers:
       clean:
@@ -587,7 +593,7 @@ moves:
     strong: their swerves are funny and somehow make sense.
     weak: a swerve just looks unhinged.
   Wit:
-    means: Be quick and funny about it.
+    means: the message is quick and funny.
     shadow: Overthinking
     tiers:
       clean:
@@ -718,7 +724,7 @@ moves:
     strong: quick and funny; the joke is the reflex.
     weak: jokes land late or wrong, or explain themselves.
   SelfAwareness:
-    means: Name what's actually going on underneath.
+    means: the message names what's actually going on underneath.
     shadow: Dread
     tiers:
       clean:
@@ -854,120 +860,114 @@ moves:
     weak: can't see themselves; naming what's underneath comes out as a lecture or a spiral.
 results:
   clean:
-    name: a clean hit
+    name: it works
   strong:
-    name: a strong hit (beat the DC by 5 or more)
+    name: it works well, a little better than meant
   critical:
-    name: a critical hit (beat the DC by 10 or more)
+    name: it works very well, sharper than meant
   exceptional:
-    name: an exceptional hit (beat the DC by 15 or more)
+    name: 'brilliantly: it''s the line they''d hoped to write'
   nat20:
-    name: a natural 20
+    name: 'better than they could have hoped: the best thing they could possibly have sent'
   fumble:
-    name: a fumble (missed by 1 or 2)
+    name: 'nearly: it slips, slightly'
   misfire:
-    name: a misfire (missed by 3 to 5)
+    name: it misfires
   trope_trap:
-    name: a trope trap (missed by 6 to 9)
+    name: it falls into a cliché
   catastrophe:
-    name: a catastrophe (missed by 10 or more)
+    name: as badly as it could go, short of the worst
   nat1:
-    name: a natural 1
+    name: 'the worst way it could: it lands exactly on the sore spot'
   source: 'new: written for the tone lab'
 interest:
 - state: Unmatched
   from: 0
   to: 0
-  match_feels: The recipient has closed the door. Treat any remaining closeness as ended, with no hidden warmth
-    waiting underneath.
-  chat_needs: It's over.
   length: Nothing, or one last line.
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-unmatched; chat_needs: tone lab v9;
-    length: new'
+  means: ${datee} has closed the door, and nothing is waiting underneath. It's over.
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-unmatched and tone lab
+    v9; length: new'
 - state: Bored
   from: 1
   to: 4
-  match_feels: The recipient is guarded and nearly gone. Closeness feels unlikely unless the next emotional signal
-    is unusually precise.
-  chat_needs: The match is one message from leaving. The act has failed; only something true could keep them, and
-    it may not be enough. If it ends here, it ends unhinged, with the vulnerability showing.
-  length: 'The match: one short message, a few words.'
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-bored; chat_needs: tone lab v9; length:
-    new'
+  length: The player carries the chat; the match gives almost nothing back.
+  means: ${datee} is guarded and nearly gone, one message from leaving. The act has failed; only something true
+    could keep them, and it may not be enough. If it ends here, it ends unhinged, with the vulnerability showing.
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-bored and tone lab v9;
+    length: new'
 - state: Lukewarm
   from: 5
   to: 9
-  match_feels: The recipient is curious but skeptical. Closeness is possible, yet every signal is still being tested
-    for cost and sincerity.
-  chat_needs: 'The match isn''t convinced. The act is in the way: something real has to get through, or they drift.'
-  length: 'The match: short, one or two messages; the player writes more than the match.'
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-lukewarm; chat_needs: tone lab v9;
-    length: new'
+  length: The player carries the chat; the match answers less than it's asked.
+  means: '${datee} is curious but not convinced, testing every line for what it costs and whether it''s meant. The
+    act is in the way: something real has to get through, or they drift.'
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-lukewarm and tone lab
+    v9; length: new'
 - state: Interested
   from: 10
   to: 15
-  match_feels: The recipient is engaged and evaluating. Closeness has begun to feel plausible, but trust is still
-    conditional.
-  chat_needs: Curious. They trade hooks and each learns one thing about the other; the lie shows its first crack.
-  length: 'Both normal: a few short messages each.'
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-interested; chat_needs: tone lab v9;
-    length: new'
+  length: 'Even: both of them carry the chat.'
+  means: '${datee} is interested and still checking: closeness feels possible, trust is conditional. They trade
+    hooks, each learns one thing about the other, and the lie shows its first crack.'
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-interested and tone lab
+    v9; length: new'
 - state: Very Into It
   from: 16
   to: 20
-  match_feels: The recipient is drawn in while still protecting themselves. Closeness is active, but one wrong note
-    can make them retreat.
-  chat_needs: They want each other. What they've told each other matters now, the filth gets personal, and every
-    honest line costs something.
-  length: The one opening up writes more and longer; several messages in a row.
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-very-into-it; chat_needs: tone lab
-    v9; length: new'
+  length: Whoever is opening up writes more.
+  means: '${datee} is drawn in and still protecting themselves: one wrong note and they retreat. They want each
+    other; what they''ve told each other matters now, the filth gets personal, and every honest line costs something.'
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-very-into-it and tone
+    lab v9; length: new'
 - state: Almost There
   from: 21
   to: 24
-  match_feels: The recipient is nearly ready to choose closeness. Resistance is small, specific, and shaped by what
-    still feels risky.
-  chat_needs: Meeting is on the table and the last guard is up. Only the habit put down, or the part they'd never
-    say, gets them over it.
-  length: Short and charged; every message costs something.
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-almost-there; chat_needs: tone lab
-    v9; length: new'
+  length: Short and charged on both sides.
+  means: '${datee} is nearly ready to choose this, and what still resists is small and specific. Meeting is on the
+    table and the last guard is up: only the habit put down, or the part they''d never say, gets them over it.'
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-almost-there and tone
+    lab v9; length: new'
 - state: Date Secured
   from: 25
   to: 25
-  match_feels: The recipient has accepted the closeness as real. Their emotional attention can move from testing
-    to actual meeting.
-  chat_needs: 'They agree to meet: a connection the reader feels, each of them putting the habit down for the other.'
   length: Short and plain on both sides.
-  source: 'match_feels: emotional-reactions.yaml emotional-reaction-interest-date-secured; chat_needs: tone lab
-    v9; length: new'
+  means: '${datee} has decided this is real. They agree to meet: a connection the reader feels, each of them putting
+    the habit down for the other.'
+  source: 'means: tone lab v13, from emotional-reactions.yaml emotional-reaction-interest-date-secured and tone
+    lab v9; length: new'
 swings:
 - name: big loss
   from: -99
   to: -3
   means: It hurt. The match pulls back hard and doesn't explain why.
-  length: 'The match: one message, five words at most, or a single word.'
+  length: '${datee}: one message, a few words.'
   match_max_words: 10
+  match_messages: 1
 - name: loss
   from: -2
   to: -1
   means: A step cooler. The match answers less than it was asked.
-  length: 'The match: shorter than last turn.'
+  length: '${datee}: one or two messages, shorter than last turn.'
+  match_messages: 2
 - name: flat
   from: 0
   to: 0
   means: Nothing moved. The match keeps its distance and waits.
-  length: About as long as last turn.
+  length: '${datee}: about as much as last turn.'
+  match_messages: 3
 - name: gain
   from: 1
   to: 2
   means: It worked a little. The match gives a little more back than it was asked.
-  length: 'The match: a little longer than last turn.'
+  length: '${datee}: one or two messages, a little more than last turn.'
+  match_messages: 2
 - name: big gain
   from: 3
   to: 99
-  means: 'It landed. The match drops some guard: either suddenly talkative, or stopped short by it.'
-  length: 'The match: either a burst of several messages, or one word.'
+  means: It landed. The match drops some guard and gives back more than it was asked.
+  length: '${datee}: two or three messages, more than last turn.'
+  match_messages: 3
 beats:
   opener:
     story: The opener. Two strangers performing. The player character's first message is the act at full strength.
@@ -1044,11 +1044,13 @@ beats:
     story: 'The player character''s story is out, and the match can''t step over it. The match''s act cracks: a
       piece of their own origin comes out, in their own habit''s format, and it changes the meaning of something
       they did earlier. The roll decides how the player character''s message lands; it doesn''t stop the match.'
-    length: The match writes more than ever before.
+    length: '${datee} writes more than ever before: one long message, or up to three.'
     source: 'variant.json beats; length: new'
     spent: the match's reveal (their secret is out)
     big: true
     long_message: true
+    match_messages: 3
+    about_match: true
   player_snap:
     story: The player character snaps. Under stress the habit turns into a weapon, dressed up as their dating-app
       wisdom from the plan and said in complete earnest. Claim, slip, denial, as a burst of short, impulsive messages;
@@ -1062,17 +1064,21 @@ beats:
     story: 'The match had let themselves hope, and that hurt. The match snaps: the habit as a weapon, the dating-app
       wisdom as the disguise, claim, slip, denial, the slip checkable on the screen. Then they regret it and back
       out badly.'
-    length: A burst of short messages from the match.
+    length: '${datee}: a burst of short messages, four at most.'
     source: 'variant.json beats; length: new'
     spent: the match snapped (no second snap)
     big: true
+    match_messages: 4
+    about_match: true
   ending_win:
     story: 'The ending: the match agrees to meet. The click. Each of them puts their habit down for the other, and
       the reader knows what that costs because they know where it came from. Piece 3, the part one of them would
       never say, can come out here, short and plain. The setups pay off: early lines come back meaning something
       else, and nobody explains them. The match usually has the last line.'
-    length: Short and plain.
+    length: '${datee}: short and plain, like the player, and usually the last line.'
     source: 'variant.json beats; length: new'
+    match_messages: 3
+    about_match: true
   ending_loss:
     story: 'The ending: the match unmatches. Each one''s habit confirms exactly what the other was afraid of, and
       both get the rejection they predicted. It''s unhinged: the habit at full volume, the dating-app wisdom said
@@ -1199,6 +1205,7 @@ shadows:
       is a texting app; you have never met. Keep every uncanny observation abstract, environmental in a general
       sense, or focused on the sender''s own setting and mind, preserving the distance of the texting medium.'
     source: delivery-instructions.yaml shadow_corruption.madness
+    means: 'something not quite them leaks in: a detail that doesn''t belong, said calmly'
   Despair:
     about: You must apply the DESPAIR effect, treating it not as generic sadness, but as what the app does over
       time — the accumulation of proof of failure. Force the character to perform a confidence they no longer possess,
@@ -1234,6 +1241,7 @@ shadows:
       want something and then actually get it and I have been trying to figure out how to do that for a while now
       and I don''t want to make this weird." — they made it weird. They knew before they sent it. They sent it.'
     source: delivery-instructions.yaml shadow_corruption.despair
+    means: the want gives up halfway and turns into proof it was never going to work
   Denial:
     about: 'You must apply the DENIAL effect, treating it not as active lying, but as something more exhausting:
       the real-time editing of anything that might actually matter. You must substitute the real emotion with merely
@@ -1269,6 +1277,7 @@ shadows:
       relaxed about that kind of thing." — they are not relaxed. The message is a wall. They built it in under thirty
       seconds.'
     source: delivery-instructions.yaml shadow_corruption.denial
+    means: the honest thing comes out as its own opposite, insisted on
   Fixation:
     about: You must apply the FIXATION effect, treating it as the inability to leave a cognitive loop. Force the
       character to obsess over exactly one thing from this conversation — such as an earlier comment, an unanswered
@@ -1303,6 +1312,7 @@ shadows:
       e.g.: "...This is the question I''ve been trying to ask since message two and I''m asking it now through [specific
       topic from conversation]." — they are at the place of fixation in their mind and they cannot leave.'
     source: delivery-instructions.yaml shadow_corruption.fixation
+    means: 'the warmth clings: needing to be seen back, too much and too soon'
   Dread:
     about: You must apply the DREAD effect, treating it as the accumulation of proof that all connections inevitably
       end. Avoid generic depression; instead, make it clear that the character has been on dating apps long enough
@@ -1336,6 +1346,7 @@ shadows:
       about a farmers market, but here we are, I guess." — the "I guess." The floor. The funniest thing they''ve
       said. The saddest.'
     source: delivery-instructions.yaml shadow_corruption.dread
+    means: they see themselves failing with perfect clarity and narrate it while it happens
   Overthinking:
     about: 'You must apply the OVERTHINKING effect, treating it as the collapse of the self into self-observation.
       Force the character to see the dating game — the beats, the moves, and the subtext — in real time. This must
@@ -1371,59 +1382,45 @@ shadows:
       I''ve just described out loud in a text message to you." — they diagnosed themselves in the message. They
       understand everything. They are still doing it.'
     source: delivery-instructions.yaml shadow_corruption.overthinking
+    means: it qualifies and explains itself until the joke or the point is dead
 traps:
   cringe:
     name: Cringe
     stat: charm
-    summary: You're aware of how you're coming across, which is making it worse.
-    effect: You are aware of how you're coming across, which is making it worse. Every message is slightly over-explained
-      or self-undermined. The more you try to be charming, the harder you try.
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json cringe
+    source: 'acting: tone lab v13, from traps.json cringe llm_instruction'
+    acting: '${name} knows how they''re coming across, and it makes it worse: every message is a little over-explained
+      or undercuts itself, and the harder they try to be charming, the harder they try.'
   creep:
     name: Creep
     stat: rizz
-    summary: An accidental 'agenda' quality is leaking into your messages.
-    effect: 'Inject a subtle ''agenda'' quality into ALL generated messages. On success: one line that could be
-      read two ways. On failure: the entire message feels like it''s leading somewhere uncomfortable.'
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json creep
+    source: 'acting: tone lab v13, from traps.json creep llm_instruction'
+    acting: 'An accidental agenda leaks into everything ${name} sends: when the move lands, one line that could
+      be read two ways; when it misses, the whole message seems to be leading somewhere uncomfortable.'
   overshare:
     name: Overshare
     stat: honesty
-    summary: Personal details keep leaking into your replies.
-    effect: 'Inject an accidental personal detail into ALL generated messages regardless of stat. On success: one
-      parenthetical or aside that reveals something private. On failure: multiple personal details intrude and derail
-      the message.'
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json overshare
+    source: 'acting: tone lab v13, from traps.json overshare llm_instruction'
+    acting: 'Personal details keep leaking into ${name}''s messages, whatever the move: when it lands, one aside
+      that gives away something private; when it misses, several, and they derail the message.'
   unhinged:
     name: Unhinged
     stat: chaos
-    summary: Your messages keep accelerating beyond where you meant to land.
-    effect: 'Inject momentum/acceleration into ALL generated messages. On success: one extra clause or tangent at
-      the end that wasn''t planned. On failure: the message progressively derails, starting controlled and ending
-      somewhere completely different.'
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json unhinged
+    source: 'acting: tone lab v13, from traps.json unhinged llm_instruction'
+    acting: '${name}''s messages keep accelerating past where they meant to land: when the move lands, one extra
+      clause or tangent at the end; when it misses, the message starts controlled and ends somewhere else.'
   pretentious:
     name: Pretentious
     stat: wit
-    summary: You can't stop over-explaining things nobody asked you to clarify.
-    effect: 'Inject a condescending or over-explanatory quality into ALL generated messages. On success: one unnecessary
-      clarification or reference. On failure: the message becomes pedagogical — explaining things the datee didn''t
-      ask about.'
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json pretentious
+    source: 'acting: tone lab v13, from traps.json pretentious llm_instruction'
+    acting: '${name} can''t stop explaining things nobody asked about: when the move lands, one unnecessary clarification
+      or reference; when it misses, the message turns into a lesson.'
   spiral:
     name: Spiral
     stat: self_awareness
-    summary: You keep narrating the conversation while you're inside it.
-    effect: 'While this trap is active, inject meta-commentary into ALL generated messages. On success: one aside
-      that acknowledges the conversation dynamic. On failure: the character narrates their own failure, creating
-      a recursive self-awareness loop.'
-    clears: Pick any Self-Awareness option (selection disarms; SA fail triggers Spiral)
-    source: traps.json spiral
+    source: 'acting: tone lab v13, from traps.json spiral llm_instruction'
+    acting: '${name} keeps narrating the conversation while inside it: when the move lands, one aside about how
+      the chat is going; when it misses, they narrate their own failure as it happens, and the narrating is the
+      failure.'
 thirst:
   tiers:
     fumble:
@@ -1566,8 +1563,6 @@ clock:
     match_reveal: the match's reveal, which stays hidden until then, only cracks showing
     nothing: the ending
   step:
-    last_turn: This is the last turn.
-    turns_left: Going by the meter, the chat probably has about ${left} left.
     known: The reader knows ${pieces} of ${name}'s origin
     known_nothing: The reader knows nothing of ${name}'s origin yet
     all_known: '- ${known}: all of it.'
@@ -1587,12 +1582,8 @@ clock:
       more by now.'
     setup_unplanted: '- Setup ${n}: not planted yet.'
     setup_unplanted_due: '- Setup ${n}: not planted yet; plant it this turn, as a throwaway.'
-    nat20: '- A natural 20 this turn: something gets cashed in.'
+    nat20: '- This turn''s roll came off better than they could have hoped: something gets cashed in.'
   exchange:
-    told_head: 'What they''ve told each other so far:'
-    told_item: '- turn ${n}, ${who}${piece}: ${fact}'
-    piece: ' (piece ${k})'
-    nothing_told: Neither of them has told the other anything real yet.
     hooks_head: 'Hooks dropped in the last two turns (check the chat for whether the other one took them up):'
     hook_item: '- turn ${n}, ${who}: ${hook}'
   source: 'new: written for the tone lab'
@@ -1629,7 +1620,7 @@ checklist:
 - What does the chat need at this interest level, and does this do it?
 - 'Is anything stale back: a prop, a joke, a description, a habit, a line?'
 - Does each line sound like the one who sends it, carry one thing, and read like something a person would type?
-- Does the roll show in the message itself, and does the match's answer follow how their interest moved?
+- Does the roll show in the message itself, and does the match's answer show the feeling you named?
 checks:
   apart_words:
   - downstairs
@@ -1656,6 +1647,7 @@ checks:
   - Working
   - Stale
   - Last turn
+  - Feeling
   - Meant
   chat:
     together: 'these put them in one place, or one of them on the way to the other, though they are apart and the
@@ -1673,10 +1665,17 @@ checks:
     match: ${name} wrote ${n} words, more than ${max} after a loss like this
     silent: ${name} sends nothing
     ghost_replied: ${name} replied, but they ghost
+    match_messages: ${name} sent ${n} messages, ${max} at most this turn
   retry:
     turn: 'Your turn broke the game''s rules: ${problems}. Write the notes, the checklist and turn ${n} again, in
       full, so it keeps all of them.'
   source: 'new: written for the tone lab'
+  feeling:
+    missing: the Feeling note doesn't give ${name} one of the feelings first (${list})
+    direction: ${name}'s interest ${moved}, but the Feeling note gives them ${feeling}, a ${kind} feeling
+    moved:
+      fell: fell
+      rose: rose
 turn:
   state:
     since_start: |-
@@ -1686,38 +1685,57 @@ turn:
 
       The chat hasn't started yet.
     since_turn: Turn ${n} went out as you wrote it.
-    interest: 'Interest is ${interest} out of 25 (${state}). How ${datee} feels: ${feels} What the chat needs: ${needs}'
-    trap: 'A trap is active: ${name}. ${summary} ${effect} It clears when: ${clears}'
-    picked: 'The player picked ${move}: ${means}'
-  roll:
-    roll_hit: 'The roll: ${result} (rolled ${total} against ${dc}).'
-    roll_miss: 'The roll: ${result}, so it goes wrong through ${shadow} (rolled ${total} against ${dc}).'
+  relationship:
+    interest: '${datee}''s interest is ${interest} out of 25, ${state}: ${means}'
+    trap: '${name} is caught in the ${trap} trap, ${stage}: ${acting}'
+    trap_stage:
+      first: 'its first turn: it starts, and they don''t notice it yet'
+      second: 'its second turn: it''s the pattern now, and the other one can see it'
+      third: 'its third and last turn: it''s wearing off, and it''s gone after this turn'
+  story:
+    phase: The chat is ${phase}.
+    phases:
+      opener: at its very first message
+      early: early
+      middle: in the middle
+      late: getting near the end
+      last: at its last turn
+    feeling: 'Last turn you read ${name} as: ${feeling}'
+    needs: 'What the chat needs at this point: ${needs}'
+  event:
+    picked: '${name} plays ${move}, ${strength}: ${means}'
+    strength:
+      strong: a move they're strong at
+      weak: a move they're weak at, outside what they can usually do
+      middling: a move they're middling at
+    roll_hit: 'How it comes out: ${result}.'
+    roll_miss: 'How it comes out: ${result}. It goes wrong through ${name}''s ${shadow}: ${shadow_means}.'
     message: 'What that does to the message: ${text}'
-    received: 'How ${datee} receives it (written to them): ${text}'
-    fired_head: 'What else fired:'
-    fired_none: '- nothing'
-    shadow: 'The ${shadow} shadow took over (${tier}): ${about} ${text}'
+    shadow: '${name}''s ${shadow} also leaks into the message (${tier}): ${about} ${text}'
     thirst: 'A thirsty slip (${tier}): ${message} How ${datee} takes it: ${received} ${mood}'
-    trap_armed: 'Trap armed: ${name}. ${summary} ${effect} It clears when: ${clears}'
-    trap_armed_unknown: 'Trap armed: ${trap}.'
-    trap_cleared: 'Trap cleared: ${trap}.'
-    combo: 'Combo: ${combo}.'
     steering: 'Steering succeeded: the message ends with a question that steers toward meeting up some time.'
+    received: 'How ${datee} takes it (written to them): ${text}'
+    swing: '${datee}''s interest goes from ${before} to ${after}, a ${swing}: ${means}'
+    why: 'Why: ${causes}'
+    cause:
+      thirst: the thirsty slip; ${datee} is reacting to the thirst as much as to the move.
+      shadow: the ${shadow} slip; it is part of what ${datee} is reacting to.
+      trap: the ${trap} trap showing through; it is part of what ${datee} is reacting to.
+    band: 'That takes them to ${state}: ${means}'
     endings:
       DateSecured: 'Interest reaches 25: ${datee} agrees to meet, and the chat ends there.'
       Unmatched: 'Interest hits 0: ${datee} unmatches.'
       Ghosted: '${datee} ghosts: no reply comes after this message.'
     not_yet_from: 21
     not_yet: 'Interest is ${interest}, still below 25: ${datee} will not agree to meet yet.'
-    swing: 'Interest ${before} → ${after} (${swing}): ${means}'
-    level: 'At ${after} (${state}), how ${datee} feels: ${feels} What the chat needs: ${needs}'
-    template: 'The template for this kind of turn (${key}): ${beat}'
+    job: 'What this turn is for: ${beat}'
   length:
     player: '- ${name}: ${text}'
-    match: '- ${name}: ${swing} ${level}'
+    match: '- ${text}'
+    between: '- Between them: ${text}'
     beat: '- This kind of turn: ${text}'
     so_far: '- So far: ${spent} words in ${played}. The whole chat runs about ${budget} words, an average, not a
-      cap, and probably has about ${left} left.'
+      cap.'
   limits:
     frame: 'Limits, checked: ${parts}.'
     message: no message over ${n} words
@@ -1726,6 +1744,7 @@ turn:
     match: ${name} no more than ${n} words in all
     ghost: ${name} sends nothing
     each: at least one message each
+    match_messages: ${name} ${count} at most
   source: 'new: written for the tone lab'
 reader:
   system: You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a
@@ -1765,6 +1784,10 @@ character:
   no_focus: '- (no backstory pairs)'
   drawer_line: '- ${line}'
   source: 'new: written for the tone lab'
+  shadows_head: 'How their moves go wrong for them. Each move goes wrong through its own shadow, and the game keeps
+    a value for each: the higher it is, the more it has grown in them. Strongest first:'
+  shadow_line: '- ${shadow} (${value}), when ${move} goes wrong: ${means}'
+  no_shadows: 'How their moves go wrong for them: no shadow has grown in them yet.'
 prompts:
   bible: |
     # Pinder: the brief
@@ -1860,13 +1883,13 @@ prompts:
   plan: |
     ## Your job now: plan the match
 
-    ${player_name} (the player) is about to start chatting with ${datee_name} (the match). Plan the match the way a writers' room plans an episode. Each turn a director reads your plan and the chat and steers the writers, who see only who the two characters are (what they show, where they are tonight, their fear, habit, lie and voice) and the chat. The two are strangers on an app, each in their own place; the chat ends when the match agrees to meet. Nobody sees the character files, so everything the story needs is in the plan.
+    ${player_name} (the player) is about to start chatting with ${datee_name} (the match). Plan the match the way a writers' room plans an episode. Each turn a director reads your plan and the chat and writes the turn. The two are strangers on an app, each in their own place; the chat ends when the match agrees to meet. Nobody sees the character files, so everything the story needs is in the plan.
 
     Nobody knows how long it runs (usually ten to fifteen turns, sometimes only six), what the player picks or how the dice land. It may end in a date, an unmatch or a ghosting. Plan for both.
 
     Everything about a character grows out of one fear and the habit they use to cope with it. Find that in the files: the clinician's notes say what hurts them and how they defend against it, and the backstory says where it came from. Build everything else from it, and make it specific: a place, a person, a moment, the embarrassing detail.
 
-    Write exactly this, under 500 words in all:
+    Write exactly this, under 650 words in all:
 
     ${player_name}
     Shows: what the other one can see on the profile, in one line.
@@ -1881,6 +1904,8 @@ prompts:
     3. the part that still hurts, which only comes out at the end
     Accident: how piece 2 falls out on a bad roll instead: exactly what appears on the screen (a message meant for someone else, the wrong paste).
     Snap: what sets it off, and the habit turned into a weapon, dressed as their dating-app wisdom.
+    Feelings: what sets off each feeling in them, from their fear and their habit, a few words each: anger at ..., fear at ..., shame at ..., guilt at ..., hurt at ..., contempt at ..., joy at ..., relief at ..., desire at ...
+    Shadow: how their strongest shadow from the card shows in one of their messages when it takes over.
     Voice: one line on how they type, then three example messages under 10 words they'd send in a chat, each a different shape, the habit in one of them at most.
 
     ${datee_name}
@@ -1897,7 +1922,7 @@ prompts:
 
     Don't write the chat.
   plan_input: |
-    Tonight's match. It's ${time_of_day}.
+    Tonight's match. It's ${time_of_day}. ${heat}
 
     ${player_card}
 
@@ -1912,6 +1937,8 @@ prompts:
     ${body}
 
     ${stats}
+
+    ${shadows}
 
     How they text:
     ${texting_style}
@@ -1933,15 +1960,18 @@ prompts:
   direct: |
     ## Your job: write this chat, turn by turn
 
-    You write a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan, every turn you wrote and every note you made. The game has already played each turn: the player picked one of the moves on offer and the dice landed. Each message tells you what happened, and you write the turn as it is sent: ${player_name}'s messages, then ${datee_name}'s answer.
+    You write a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan, every turn you wrote and every note you made. The game has already played each turn: the player picked one of the moves on offer and the dice landed. You write the turn as it is sent: ${player_name}'s messages, then ${datee_name}'s answer.
 
-    Each message from the game tells you what it knows: where the story stands, what the roll did to the message, how the match takes it, what the interest level and its change mean, what has to happen and how long it runs. Some of these descriptions are written as orders to the game's own rewriter ("You must…", "keep the same length"). Read them as what the situation looks like; the words and the length are yours, within the limits the game checks.
+    Each message from the game tells you, in this order: where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (where the chat is, how you read each of them last turn, what is out and what is owed); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and what this turn is for); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "keep the same length"). Read them as what happens to the message; the words are yours, and the length follows the length lines, within the limits the game checks.
 
     The chat. Two strangers on a dating app, each in their own place, alone with a phone. Neither knows where the other is, and neither can see more than the other's profile and the chat. Nobody arrives, waits downstairs, opens a door, puts a coat on or takes it off, or crosses a room for the other one. The match agreeing to meet is the end of the chat, not something that happens in it. Every message is something one person types to the other: one thing they mean, said the way they'd say it.
 
     The story. The vulnerability is the story. Each of them has a fear and a habit that keeps them from feeling it, and the chat is the two of them getting to know each other through the habit until something real gets past it, or until each one's habit lands on the other one's fear. Every turn either costs one of them something, brings the fear a little nearer the surface, or gets a laugh that sets up the next cost. A turn where nobody risks anything is wasted.
 
     The plan's material is yours to spend over the whole chat, a piece at a time, when it means something: an origin piece comes out because the other one asked the right thing, because a bad roll made them say too much, or as the answer to a joke, never out of nowhere. A message carries one thing, never a prop, a setup and a piece of origin at once. Pace it by the meter, not by the turn count: the part they'd never say waits for the end.
+
+    Feelings. Each of them feels something every turn, and it drives how they answer. Before you write, name it for each of them from the chat itself: the back-and-forth that wore someone's patience thin, the line that read as a lecture, the dodge that hurt. The plan's Feelings say what sets each one off in each of them. ${datee_name}'s feeling follows how their interest moved: when it fell, the feeling is a negative one; when it rose, a positive one; a big swing makes it strong. A rise after something that would usually set off a bad feeling means it didn't this time, and the surprise shows. The feelings, and how each shows in a text, always in the character's own voice:
+    ${feelings}
 
     Length is how invested someone is and how safe they feel. Whoever is chasing writes more; whoever pulls back writes less. Early and late messages are short, and so are the big moments: the most naked line is the shortest one in the chat. Someone who has just connected may suddenly say more than they ever have.
 
@@ -1952,13 +1982,14 @@ prompts:
     - Working: what got a real reply, a laugh or a rise in interest, and why.
     - Stale: lines, props, jokes, habits and descriptions of their bodies already used. They only come back as a payoff that means something new.
     - Last turn: the thing in it that worked least, and why.
+    - Feeling: for each of them, by name, one feeling from the list first, then mild or strong, at whom or what, and what in the chat caused it.
     - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
     A line or two each.
 
     The checklist. Every turn, after your notes, answer each question about the turn you are about to send, a few words each, then write it true to your answers.
     ${checklist}
 
-    The move the player picked is what ${player_name} is trying to do this turn (a strategy, never a word the character uses). The meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A natural 20 is the best line in the chat. The match's answer follows how their interest moved.
+    The move the player picked is what ${player_name} is trying to do this turn (a strategy, never a word the character uses). The meant message goes out the way the roll says. A miss is still what they were trying to do, gone wrong in a way that fits who they are, and it shows in the message itself. A roll that comes off better than they could have hoped is the best line in the chat. The match's answer shows the feeling you named.
 
     Every turn, write exactly this and nothing else:
 
@@ -1969,6 +2000,7 @@ prompts:
     Working: ...
     Stale: ...
     Last turn: ...
+    Feeling: ...
     Meant: ...
     CHECK:
     1. ...
@@ -1988,18 +2020,15 @@ prompts:
   turn: |
     ${since}
 
-    The game's state now. ${story_so_far}
-    ${step}
+    Where they stand:
+    ${relationship}
 
-    ${exchange}
+    Where the story is:
+    ${story}
     ${habit_note}
 
-    Turn ${n}. ${interest_line}
-    ${trap_line}
-    The template for this point in a chat: ${needs}
-
-    ${picked}
-    ${situation}
+    This turn:
+    ${event}
 
     What the game requires this turn, checked afterwards:
     ${must}
@@ -2007,4 +2036,49 @@ prompts:
     How long:
     ${length}
 
-    Write your notes, go through the checklist, then write turn ${n} as it is sent.
+    Write your notes, go through the checklist, then write the turn as it is sent.
+session:
+  times:
+    Morning: morning
+    Afternoon: the afternoon
+    Evening: the evening
+    LateNight: late at night
+    Overnight: the middle of the night
+  heat:
+  - from: 0
+    to: 3
+    text: 'The heat is low tonight: the filth has to be earned.'
+  - from: 4
+    to: 6
+    text: 'The heat is ordinary tonight: it comes when the chat gets there.'
+  - from: 7
+    to: 8
+    text: 'The heat is high tonight: it sits near the surface from the start.'
+  - from: 9
+    to: 10
+    text: 'The heat is very high tonight: neither of them is far from saying it.'
+  source: 'new: written for the tone lab, read from the game''s time of day and session horniness (1-10)'
+feelings:
+  negative:
+  - anger
+  - fear
+  - shame
+  - guilt
+  - hurt
+  - contempt
+  positive:
+  - joy
+  - relief
+  - desire
+  shows:
+    anger: shorter and harder; questions turn into statements and the punctuation sharpens
+    fear: hedged and quick to take things back; an exit named before it's needed
+    shame: over-explained, or suddenly quiet; a joke arrives to cover it
+    guilt: apologetic; making it up to them, offering more than was asked
+    hurt: short and flat; they stop giving and stop asking
+    contempt: cool, precise and a little superior; the dating-app wisdom comes out
+    joy: longer, brighter and quicker, their enthusiasm in their own way
+    relief: the guard drops a notch; a plainer line than usual
+    desire: warmer, closer and more specific about bodies
+  list_line: '- ${feeling}: ${shows}'
+  source: 'new: written for the tone lab'

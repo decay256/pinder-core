@@ -13,6 +13,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -62,10 +63,15 @@ def check_live(name, variant, knobs, tmp):
         check("If they click" in session[0][2] and not any("If they click" in u for _, _, u in session[1:]),
               f"{name} seed {seed}: the plan goes into the session once, at the start")
         turn_users = [u for _, _, u in session]
-        check(len(turn_users) == n and all("The player picked " + t["chosen_stat"] in u and "What that does to the message:" in u
-                                           and "receives it" in u and "Limits, checked:" in u
+        check(len(turn_users) == n and all(f" plays {t['chosen_stat']}, " in u and "What that does to the message:" in u
+                                           and "takes it" in u and "Limits, checked:" in u and "Where they stand:" in u
+                                           and "Where the story is:" in u and "This turn:" in u
                                            for u, t in zip(turn_users, m["turns"])),
-              f"{name} seed {seed}: every turn reads the picked move, the roll, its reception and the limits from the situation table")
+              f"{name} seed {seed}: every turn reads where they stand, the story, the move, the roll, its reception and the limits")
+        check(all("Last turn you read" in u for u in turn_users[1:]),
+              f"{name} seed {seed}: from the second turn on, the director sees how it read each of them last turn")
+        check(all(not re.search(r"\brolled \d|natural 20|against \d", u) for u in turn_users),
+              f"{name} seed {seed}: no roll is described by its numbers")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
         st = m["player"]["effective_stats"]
         best = max(st, key=st.get)
@@ -83,6 +89,14 @@ def check_live(name, variant, knobs, tmp):
           "one long message is allowed in an accident or reveal")
     check(live.length_problems([("A", "hi"), ("B", "hi")], {**lim, "ghost": True}, names) == ["B replied, but they ghost"],
           "a ghost who replies is caught")
+    over = live.length_problems([("A", "hi"), ("B", "a"), ("B", "b"), ("B", "c")], {**lim, "match_messages": 2}, names)
+    check(over == ["B sent 3 messages, 2 at most this turn"], f"a match over its message count is caught ({over})")
+    feel = live.feelings_of("Where they are: x\nFeeling: A: shame, strong, at himself. B: joy, mild, at the joke\nMeant: y", names)
+    check(feel["A"]["feeling"] == "shame" and feel["B"]["feeling"] == "joy", f"the Feeling note is read per character ({feel})")
+    check(len(live.feeling_problems(feel, names, -3, False)) == 1 and not live.feeling_problems(feel, names, 2, False),
+          "a match feeling joy on a loss is caught, and on a gain it passes")
+    check(len(live.feeling_problems(live.feelings_of("Feeling: A: tired. B: hurt", names), names, -1, False)) == 1,
+          "a feeling that isn't on the list is caught")
     keys = [live.roll_key(r) for r in ({"success": True, "total": 22, "dc": 15}, {"success": True, "total": 27, "dc": 15},
                                        {"success": False, "tier": "Legendary", "final_tier": "Catastrophe"},
                                        {"success": False, "tier": "TropeTrap", "final_tier": "TropeTrap"})]
