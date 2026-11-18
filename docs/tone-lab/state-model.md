@@ -369,6 +369,37 @@ signal in front of it every turn. In v20 the pace is code:
   report's arc table beside the estimated length, the furthest beat allowed and what came out.
 - **The last turn is free.** The chat ends there; whatever is left comes out or is retired.
 
+## Finding out, and the two reasons (v21)
+
+Up to v20 a character was a fear, a habit and a backstory released piece by piece. The chat had
+the facts in it, but they answered nothing: nobody was trying to find anything out, so the banter
+had nothing underneath it, and the reader never got to know either of them. A real dating chat is
+two people evaluating each other. For a night: is this one safe, and will it be fun. For a date:
+do we vibe, what kind of person is this. Nobody asks that straight out; they find out sideways,
+from how the other talks about the ex or the boss, what they joke about, what they skip.
+
+In v21:
+
+- **Each character wants something tonight** (a night, a date, or something worse: to be wanted,
+  to get even), and what they say they want, if it differs; **needs to know** two or three things
+  before saying yes; has **tests**, the sideways ways they find out; and **gives away** three or
+  four things from their life without meaning to, each answering one of the other's questions.
+  The writer's sheet keeps what each wants and needs to know; the tests and the give-aways are the
+  director's, like the origin.
+- **Two reasons.** The plan gives the good reason these two could be good for each other, and the
+  bad one: the collusion (Jürg Willi's *Kollusion*), where each one's damage fits the other's and
+  the yes is real while the reason is rotten. If the match agrees to meet, the last turn plays the
+  ending for the reason the chat has earned.
+- **The story turns on the guard coming down.** First half, each tests the other through the act;
+  the midpoint is the guard dropping, in how they type before in what they tell; the second half
+  is what they do with it.
+- **Every turn is for finding out.** The director's notes say what each is trying to find out and
+  what they learn; the brief tells the writer; the tracker reports what each could fairly know
+  about the other so far.
+- **The reader is asked their questions:** would you go home with each one, safe and fun; would
+  you date them, what kind of person are they; why do these two want each other, for a good reason
+  or a bad one. The score counts every answer but the last two, so it is no longer out of 9.
+
 ## Consistency rules
 
 These came from reading every turn message exactly as sent (v14). Each rule removes a way for

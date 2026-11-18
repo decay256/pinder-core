@@ -101,6 +101,17 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v21: the chat is two people finding out about each other. Up to v20 the plan modelled a person as
+a fear, a habit and a backstory released piece by piece, so the chat was banter with facts in it
+that answered nothing. Now each one wants something tonight (a night, a date, or something worse)
+and needs answers before saying yes (safe and fun, or the vibe); the plan gives each their tests,
+the sideways ways they find out, and what they give away without meaning to. It also gives the two
+reasons they might end up together: the good one, and the collusion, where each one's damage fits
+the other's. The story's midpoint is the guard coming down, and the ending for a yes plays the
+reason the chat has earned. The director notes what each is finding out every turn, the tracker
+what each could know about the other, and the reader is asked the questions they'd ask: would you
+go home with them, would you date them, why do these two want each other.
+
 v20: the game holds the pace. v19 gave the director the arc and told it, in prose, one beat a turn
 at most and never two big beats back to back. It played a beat every turn anyway, merged two on a
 good roll, and ran its big beats from turn 3 to turn 7 without a breath, because nothing checked.
@@ -1328,9 +1339,12 @@ def reader_check(caller, plan, output, names):
     qs += R["shared"]
     user = say("reader.prompt", chat=output, questions="\n".join(f"{k + 1}. {q}" for k, q in enumerate(qs)))
     answers = caller(R["system"], user, "reader check", "low", {})
-    grade = caller(R["grader_system"], say("reader.grader_prompt", plan=plan, answers=answers), "reader grade", "low", {})
+    count = len(qs) - 2  # the last two (the line remembered, the laugh) aren't graded
+    grade = caller(R["grader_system"], say("reader.grader_prompt", plan=plan, answers=answers, count=count),
+                   "reader grade", "low", {})
     m = re.search(r"SCORE:\s*\**\s*([\d.]+)", grade)
-    return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None}
+    return {"questions": qs, "answers": answers, "grade": grade, "score": float(m.group(1)) if m else None,
+            "count": count}
 
 
 def attribution_check(caller, chat, names, seed):
@@ -1683,11 +1697,12 @@ def play(variant_dir, knobs, mech, player, datee, caller):
 def dry_caller(names):
     def caller(system, user, label, effort, ctx):
         if label == "plan":
-            return "\n\n".join(f"{n}\nShows: dry\nTonight: dry-tonight\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\n"
+            return "\n\n".join(f"{n}\nShows: dry\nTonight: dry-tonight\nFear: dry\nHabit: dry\nHabit marker: none\nLie: dry\nWants tonight: dry\nNeeds to know: dry\nTests: dry-tests\n"
+                               "Gives away: dry-gives\n"
                                "Origin, in three pieces, from the surface to the part they'd never say:\n"
                                "1. dry-origin-one\n2. dry-origin-two\n3. dry-origin-three\nAccident: dry-accident-line\n"
                                f"Background: dry\nVoice: dry\n- dry\nBreak: dry" for n in (names["player"], names["datee"])) + \
-                "\n\nCollision: dry\nSetups: dry\nTonight's events:\n1. dry-event\nStory:\n1. dry-story: dry\n" \
+                "\n\nCollision: dry\nGood reason: dry\nBad reason: dry-bad\nSetups: dry\nTonight's events:\n1. dry-event\nStory:\n1. dry-story: dry\n" \
                 "Midpoint: dry\nIf it runs short: dry\nIf they click: dry\nHeat: dry"
         if label.startswith("reader"):
             return "(dry run)\nSCORE: 0"
@@ -1844,7 +1859,7 @@ def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracke
     with open(path, encoding="utf-8") as f:
         page = f.read()
     sec = ("<section><h2>Reader check</h2><p>A reader who saw only the chat answered these questions; a second call "
-           f"graded the answers against the plan. Score: {reader['score']} of 9.</p>"
+           f"graded the answers against the plan. Score: {reader['score']} of {reader.get('count', 9)}.</p>"
            f"<pre>{html.escape(reader['answers'])}</pre>"
            f"<details><summary>Grade against the plan</summary><pre>{html.escape(reader['grade'])}</pre></details></section>")
     if attribution:

@@ -90,7 +90,7 @@ def check_live(name, variant, knobs, tmp):
         check("If they click" in d_users[0] and not any("If they click" in u for u in d_users[1:]),
               f"{name} seed {seed}: the plan goes into the director's session once, at the start")
         hidden = ("If they click", "dry-origin", "dry-accident-line", "Collision:", "dry-event", "dry-story",
-                  "Tonight's events")
+                  "Tonight's events", "dry-tests", "dry-gives", "dry-bad", "Good reason")
         seen = [sy + u for r in ("tracker", "writer") for _, u, sy in by[r]]
         check(not any(h in x for x in seen for h in hidden),
               f"{name} seed {seed}: neither the tracker nor the writer sees the plan's origins, accident, collision "
@@ -98,6 +98,10 @@ def check_live(name, variant, knobs, tmp):
         check(all("dry-tonight" in sy and "Voice: dry" in sy for _, _, sy in by["writer"])
               and not any("dry-tonight" in sy + u for _, u, sy in by["tracker"]),
               f"{name} seed {seed}: the writer's system prompt carries each character's sheet, the tracker's doesn't")
+        check(all("Wants tonight: dry" in sy and "Needs to know: dry" in sy for _, _, sy in by["writer"])
+              and "Bad reason: dry-bad" in d_users[0] and "Gives away: dry-gives" in d_users[0],
+              f"{name} seed {seed}: the writer knows what each wants tonight and needs to find out; the director "
+              "also gets their tests, what they give away and the two reasons")
         check(all(f"Turn {k}\n" in u for j, u in enumerate(d_users) for k in range(1, j + 1))
               and all(f"Turn {k}\n" in u for j, u in enumerate(w_users) for k in range(1, j + 1))
               and all(f"Turn {k}\n" in u for j, u in enumerate(t_users) for k in range(1, j + 2)),
@@ -235,6 +239,11 @@ def check_live(name, variant, knobs, tmp):
     check(back == [], f"a chat that lets each beat take its time and breathes after each big one passes ({back})")
     back = replay([1, 2, 2, 3, 4, 4, 5, 5, 6, 7, 8], {6: ["piece 3 of R"], 8: ["a", "b", "c"]})
     check(back == [6, 8], f"piece 3 before its turn, and three big things in one turn, are sent back ({back})")
+    rd = live.reader_check(lambda system, user, label, *a: "SCORE: 12" if label == "reader grade" else user,
+                           "the plan", "A: hi", names)
+    check(rd["count"] == 14 and len(rd["questions"]) == 16 and "go home with A" in rd["answers"]
+          and rd["score"] == 12.0,
+          f"the reader is asked what the two of them would ask, and all but the last two answers are graded ({rd['count']})")
     rep = "REPORT:\nLast turn: x\nUnanswered:\n- turn 2, A: the job\n- turn 3, B: the ex\nCame out: y"
     check(live.unanswered_count(rep) == 2 and live.unanswered_count(rep.replace("- turn 2, A: the job\n- turn 3, B: "
                                                                                 "the ex", "- nothing")) == 0,

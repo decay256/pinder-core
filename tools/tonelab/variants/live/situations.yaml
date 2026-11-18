@@ -40,7 +40,9 @@ sections:
     story is, this turn, what the game requires, how long. The game fills in the numbers, names and rows.'
   reader: 'After the chat: a reader who sees only the finished chat, a grader who scores the reader''s answers against
     the plan, a blind attribution test, in which a reader sorts every message, shuffled and without names, into
-    two senders, and a release check, which asks whether what the director released reached the screen.'
+    two senders, and a release check, which asks whether what the director released reached the screen. Since v21
+    the reader is also asked what the two of them would ask: would you go home with each one, would you date them,
+    and why these two want each other.'
   character: 'Pieces of each character card drawn fresh for each match. The rest of the card comes from the game''s
     character file: bio, body, texting style, personality, backstory, the drawer and the diagnosis.'
   prompts: The prompt templates. bible opens every system prompt; plan, track, direct and write are the planner's,
@@ -1665,6 +1667,7 @@ checks:
   note_heads:
   - Chat now
   - Story
+  - Finding out
   - Feeling
   - Meant
   chat:
@@ -1992,8 +1995,11 @@ reader:
   - What does ${name} keep doing so they don't have to feel it?
   - Where does that come from, for ${name}?
   - At the end, did ${name} drop that habit or hold on to it?
+  - 'Would you go home with ${name} tonight: is ${name} safe, and would it be fun? Why?'
+  - 'Would you go on a date with ${name}: what kind of person are they?'
   shared:
   - What happened when the two of them ran into each other's habits?
+  - 'Why do these two want each other, if they do: for a good reason or a bad one?'
   - Which line would you remember tomorrow, and why?
   - Where, if anywhere, did you laugh?
   prompt: |-
@@ -2004,7 +2010,7 @@ reader:
     ${questions}
   grader_system: You check whether a finished piece of writing delivered what its plan intended. Be strict and brief.
   grader_prompt: |
-    A writers' room planned a chat, and a reader who saw only the finished chat answered questions about it. For each of the first nine answers, say whether the reader got what the plan intended: yes, partly or no, with a few words why. Then one last line: SCORE: the number of yes answers plus half a point for each partly, out of 9.
+    A writers' room planned a chat, and a reader who saw only the finished chat answered questions about it. For each of the first ${count} answers, say whether the reader got what the plan intended: yes, partly or no, with a few words why. Then one last line: SCORE: the number of yes answers plus half a point for each partly, out of ${count}.
 
     The plan:
 
@@ -2144,9 +2150,11 @@ prompts:
 
     Everything about a character grows out of one fear and the habit they use to cope with it. Find that in the files: the clinician's notes say what hurts them and how they defend against it, and the backstory says where it came from. Build everything else from it, and make it specific: a place, a person, a moment, the embarrassing detail.
 
+    A chat on a dating app is two people finding out about each other. Each one wants something tonight: a night, a date, or something worse (to be wanted, to get even with an ex, not to be alone with the email that just landed). Before they say yes, they need answers. For a night: is this one safe, and will it be fun. For a date: do we vibe, and what kind of person is this. Nobody asks straight out. They find out sideways, through the flower: how the other talks about the ex, the boss, their mother, the job; what they joke about and what they skip; how they react when something small and real comes up. The reader gets to know each of them by watching the other one find out. And people get together for bad reasons as often as for good ones. Two people's damage can fit, each one's habit feeding what the other one's fear needs: the one who needs to be admired and the one who needs someone to adore, the one who chases and the one who never answers, the rescuer and the disaster, the one who rules and the one who wants to be told. The yes is real and the reason is rotten. Find both reasons in these two.
+
     The plan is a story: it has a beginning, a middle and an end, and things happen in it. Tonight is a real night in each of their lives, and it doesn't stop because they're texting. Build what happens from their files: the people in their backstory, the job or the lack of it, the money, the place they're in, what they're on, the drawer. Something actually happens to each of them while they type (a text from someone in the backstory, a call they let ring, an email that lands, a noise through the wall, the dinner burning, the delivery that doesn't come), and the other one learns it only from what they type. Every event comes from something in the files, and each one pushes its owner toward their fear.
 
-    Write exactly this, under 1,300 words in all:
+    Write exactly this, under 1,700 words in all:
 
     ${player_name}
     Shows: what the other one can see on the profile, in one line.
@@ -2155,6 +2163,10 @@ prompts:
     Habit: what they do in a chat so they never have to feel it. Funny, weird, specific.
     Habit marker: the literal text the habit always uses (a word, an opener, a list number), several separated by " | ", or none.
     Lie: the reasonable sentence that justifies the habit, built on a piece of dating-app wisdom they believe in completely (standards, red flags, high value, efficiency, not looking for anything serious, and so on).
+    Wants tonight: a night, a date, or something worse, and why, from their files; and what they'll say they want, if it isn't the same.
+    Needs to know: the two or three things they have to find out about the other one before they say yes, in their own terms (for a night: safe, fun, wanting the same; for a date: the vibe, what kind of person this is).
+    Tests: how they find out, sideways: the bait, the question that isn't the question, the joke thrown out to see how it lands. Two or three, from their habit and their background.
+    Gives away: three or four things from their life that come out without their meaning to, each answering one of the other one's questions sideways: what it is, how it slips into a message, and what it tells the other about them.
     Origin, in three pieces, from the surface to the part they'd never say:
     1. the version they'd drop as a hook, half a brag
     2. what actually happened
@@ -2171,6 +2183,8 @@ prompts:
     (the same headings)
 
     Collision: how each one's habit lands on the other one's fear.
+    Good reason: why these two could be good for each other: what each could see in the other that nobody else sees, and what it would take for them to see it.
+    Bad reason: the collusion: how each one's damage fits the other's, what each one's fear gets from the other's habit, and why that makes the yes easy and everything after it a disaster.
     Setups: three, each a line that reads as a throwaway early and means something else later: one from each character's habit or origin, one between them. For each, the plant, how it comes back in the middle, and what it means at the end.
     1.
     2.
@@ -2179,13 +2193,14 @@ prompts:
     1.
     2.
     3.
-    Story: the chat as a story in seven to nine beats, from the opener to the ending, in order and without turn numbers (it may run six turns or fifteen). Each beat is something that happens, between them or to one of them, and it changes where they stand. Place every origin piece, both accidents, both snaps, the setups, the collision and tonight's events on a beat, and leave room between the big ones: after an accident, a confession or a snap comes the beat where they live with it. The part each would never say is on one of the last beats. One line each: number. a name for the beat: what happens, whose it is, what it carries, what it changes, and why it can't come earlier.
+    Story: the chat as a story in seven to nine beats, from the opener to the ending, in order and without turn numbers (it may run six turns or fifteen). Each beat is something that happens, between them or to one of them, and it changes where they stand and what each one knows about the other. In the first half each tests the other through the act; at the midpoint the guard comes down; the second half is what two people who have seen each other do with it, and which reason wins. Place every origin piece, both accidents, both snaps, the setups, the collision, tonight's events, the tests and what each gives away on a beat, and leave room between the big ones: after an accident, a confession or a snap comes the beat where they live with it. The part each would never say is on one of the last beats. One line each: number. a name for the beat: what happens, whose it is, what it carries, what it changes, and why it can't come earlier.
     1.
     2.
     3.
-    Midpoint: the beat that turns the chat around, and how.
+    Midpoint: the beat where the guard comes down and turns the chat around: who drops it first, what sets it off, and how it shows in how they type before it shows in what they tell.
     If it runs short: which beats fold together if the chat ends after six turns.
-    If they click: the last beat if the match agrees to meet: what each one puts down for the other, what it costs them, and how the setups pay off. What happens, never the words they say.
+    If they click: the last beat if the match agrees to meet for the good reason: a night or a date, who wanted which, what each one puts down for the other, what it costs them, and how the setups pay off. What happens, never the words they say.
+    If they click for the bad reason: the same yes for the collusion: what each one's damage gets from the other, how the reader can see it while they can't, and how the setups pay off the wrong way.
     If it falls apart: the last beat if it ends badly: each habit confirms the other one's fear; what happens in the last exchange, never the words, and how the setups pay off the opposite way.
     Heat: where the filth starts, and what has to happen before it goes further.
 
@@ -2231,13 +2246,15 @@ prompts:
 
     You direct a chat on Pinder between ${player_name} (the player character) and ${datee_name} (the match), one turn at a time, in one session: you keep the plan and every brief you wrote. The game has already played each turn: the player picked one of the moves on offer and the dice landed. You decide what happens in the turn, and a writer writes it from your brief.
 
-    Who knows what. The writer knows who the two of them are: what each shows, where each is tonight, their fear, habit, lie, snap, feelings, shadow, background, voice and how it breaks. It sees the whole chat and your brief, and nothing else: not the origins, the accident, the setups, the collision, tonight's events, the story or the endings, not the dice and not the game. Whatever of the plan reaches the chat reaches it through your brief. A tracker reads the chat before every turn, knowing only the chat, the way the reader will, and tells you what is on the screen: what each one offered, what is still unanswered, what has come out, who has the upper hand, what repeats, and what a reader couldn't know.
+    Who knows what. The writer knows who the two of them are: what each shows, where each is tonight, what each wants tonight and needs to find out about the other, their fear, habit, lie, snap, feelings, shadow, background, voice and how it breaks. It sees the whole chat and your brief, and nothing else: not the origins, the accident, the tests and what each gives away, the setups, the collision, the two reasons, tonight's events, the story or the endings, not the dice and not the game. Whatever of the plan reaches the chat reaches it through your brief. A tracker reads the chat before every turn, knowing only the chat, the way the reader will, and tells you what is on the screen: what each one offered, what is still unanswered, what has come out, who has the upper hand, what repeats, and what a reader couldn't know.
 
     Each message from the game gives you, in this order: the whole chat so far; the tracker's report on it; your arc as you left it last turn; the pace the game holds this turn; where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (what of the plan is out on the screen); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and, on the last turn, how the chat ends); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "scan the last messages"). They are for you, not for the writer: turn each one into what happens between these two people, from what is actually on the screen. A detail the chat hasn't shown can't be noticed, quoted or answered.
 
     The chat. Two strangers on a dating app, each in their own place, alone with a phone. Neither knows where the other is, and neither can see more than the other's profile and the chat. Nobody arrives, waits downstairs, opens a door, puts a coat on or takes it off, or crosses a room for the other one. The match agreeing to meet is the end of the chat, not something that happens in it. Every message is something one person types to the other: one thing they mean, said the way they'd say it.
 
     The story. The vulnerability is the story. Each of them has a fear and a habit that keeps them from feeling it, and the chat is the two of them getting to know each other through the habit until something real gets past it, or until each one's habit lands on the other one's fear. Every turn either costs one of them something, brings the fear a little nearer the surface, or gets a laugh that sets up the next cost. A turn where nobody risks anything is wasted.
+
+    Finding out. Under the banter, every turn each of them is trying to find out something from their Needs to know, with one of their Tests, and the other one answers it, sideways, or gives something away without meaning to (the plan's Gives away). Every turn one of them learns something about the other that changes the yes: safer, more fun, more their kind of person, or a red flag, or they get it wrong. A turn of jokes that tells neither of them anything is wasted, however funny. The reader gets to know them the way they get to know each other. Which reason they end up together for, the good one or the bad one, follows from what they find out and what they do with it, and if the match agrees to meet, the last turn plays the plan's ending for that reason.
 
     Read the chat before the plan. Start from the tracker's report and the last turn: what each one just offered, asked, gave away or dodged, and what is still unanswered. People answer each other: a confession, a question or a piece of someone's life gets a reaction before anything else happens, and the reaction is where the feeling shows. A turn that walks past what the other one just said is the worst turn there is. Then move the chat on: each turn takes them somewhere the last one didn't, a new subject, a step closer, a step back, and two turns on the same thing is one too many. When something real comes out, the other one notices, even if all they do is change the subject too fast.
 
@@ -2260,6 +2277,7 @@ prompts:
     Your notes keep track of whether this is working. Be hard on it: praise helps nobody.
     - Chat now: what the last turn did, what is still unanswered, who has the upper hand, and what the reader is waiting for.
     - Story: which beat of your arc this turn plays and why now, not earlier; what the dice did to it; any change to the arc, with the reason.
+    - Finding out: what each one is trying to find out about the other this turn, the sideways way they try, and what they actually learn or get wrong; and which reason, the good or the bad, it pushes them toward.
     - Feeling: for each of them, by name, one feeling from the list first, then mild or strong, at whom or what, and what in the chat caused it.
     - Meant: what ${player_name} is trying to send this turn with the move the player picked, before the dice decide how it comes out.
     A line or two each.
@@ -2271,6 +2289,7 @@ prompts:
     NOTES:
     Chat now: ...
     Story: ...
+    Finding out: ...
     Feeling: ...
     Meant: ...
     ARC:
@@ -2767,6 +2786,10 @@ assembly:
         answers:
           what: The reader's answers.
           from: []
+        count:
+          what: 'How many answers are graded: all but the last two, which ask what the reader would remember and
+            where they laughed.'
+          from: []
     - message: The attribution test
       template:
       - reader.attribution_system
@@ -2797,6 +2820,8 @@ brief:
 - 'Feeling: each one''s feeling, mild or strong, at whom, and what in the chat caused it.'
 - 'Trying: what the player character is trying to do with their messages, and how it comes out: whether it lands,
   or how it goes wrong in a way that fits them.'
+- 'Finding out: what each one is trying to find out about the other this turn and the sideways way they go about
+  it, and what of themselves the other gives away in answering, with every fact the writer needs.'
 - 'Taken: how the match takes it, and what that does between them: warmer or colder, closer or further, who has
   the upper hand now.'
 - 'Released: what comes out this turn that the chat hasn''t had, with every fact the writer needs to write it; or
@@ -2816,6 +2841,8 @@ tracker:
     can see it''s a dodge.'
   - 'Came out: what each one has let out about themselves so far (their past, their life, what they''re afraid of),
     and what of it is new in the latest turn.'
+  - 'Knows: what each one could fairly conclude about the other from the chat so far (safe or not, fun or not, their
+    kind of person or not, why they might want each other), and what each still can''t know.'
   - 'Wants and hides: what each one seems to want from the other right now, and what they seem to be hiding, as
     a reader would guess it.'
   - 'Upper hand: who is chasing and who is holding back, the temperature, and how both changed in the latest turn.'
@@ -2836,6 +2863,8 @@ writer:
   - Habit
   - Habit marker
   - Lie
+  - Wants tonight
+  - Needs to know
   - Snap
   - Feelings
   - Shadow
@@ -2845,6 +2874,8 @@ writer:
   drop:
   - Origin
   - Accident
+  - Tests
+  - Gives away
   stop:
   - Collision
   - Setups
@@ -2855,12 +2886,16 @@ writer:
   - Story
   - Midpoint
   - If it runs short
+  - Good reason
+  - Bad reason
+  - If they click for the bad reason
   sheet: |-
     ### ${name}
     ${lines}
   source: 'new (v18): each character''s sheet is cut from the plan by the code: these headings are kept, the origin
     and the accident are dropped, and everything from the collision on (the setups, tonight''s events, the story
-    and the endings, v19) belongs to the story'
+    and the endings, v19) belongs to the story; since v21 the sheet also keeps what each wants tonight and needs
+    to know about the other, and drops their tests and what they give away, which are the director''s'
 coverage:
   piece: ${name}'s origin piece ${k}
   setup: setup ${n}
