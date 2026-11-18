@@ -101,6 +101,17 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v20: the game holds the pace. v19 gave the director the arc and told it, in prose, one beat a turn
+at most and never two big beats back to back. It played a beat every turn anyway, merged two on a
+good roll, and ran its big beats from turn 3 to turn 7 without a breath, because nothing checked.
+Now the pace is worked out in code each turn and checked against the director's answer, and a turn
+that breaks it goes back (twice at most): the arc's beats are numbered and played in order, one
+further at most and no further ahead than the chat's estimated length allows (the average of the
+meter's estimates so far); nothing big (piece 2 or 3 of an origin, the collision, a payoff, a snap)
+in the first two turns, two at most in a turn, and never on the turn after one; the part each would
+never say not before the last 30% of the chat. The director is told all of it before it writes.
+The last turn is free.
+
 v19: the director owns the arc. In v18 the game's story clock chose every turn's beat from the dice
 (two bad rolls in a row gave two catastrophes in a row), demanded origin pieces and setups by
 turn, and the director's own rules made it answer every question by telling. Now the plan is a
@@ -329,6 +340,110 @@ class Story:
         if key.startswith("ending") and "secret" in f and "match_reveal" not in f:
             text += " " + self.beats["reveal_pending"]
         return key, text
+
+
+def and_list(xs):
+    xs = list(xs)
+    return ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else "".join(xs)
+
+
+class Pace:
+    """The pace the game holds (v20). The estimated length of the chat comes from the meter
+    (estimate_left), the arc in hand from the director's last turn; the rules come from there:
+    which beat this turn may play at the furthest, whether anything big may come out, and from
+    which turn the part each would never say may. problems() checks the director's answer against
+    them, record() keeps what it actually did."""
+
+    QUIET, MAX_BIG = 2, 2  # nothing big in the first two turns; two big things at most in one
+    DEEP = (7, 10)         # piece 3 from 7/10 of the way through the chat
+
+    def __init__(self):
+        self.beat, self.last_big, self.seen = 0, None, []
+
+    def rules(self, i, is_last, left, beats):
+        # the meter's estimate jumps by up to five turns from one turn to the next (8, 12, 8, 14 on seed 23),
+        # which would open and shut the gates; the pace runs on the average of the estimates so far
+        self.seen.append(i + left)
+        total = max(i + 2, int(sum(self.seen) / len(self.seen) + 0.5))
+        span = max(1, total - 1)
+        if i == 0:
+            furthest = 1
+        else:
+            ahead = self.beat + 1
+            if beats:
+                ahead = min(ahead, 1 + (2 * i * (beats - 1) + span) // (2 * span))
+            furthest = max(1, self.beat, ahead)
+        a, b = self.DEEP
+        after = self.last_big[1] if self.last_big and self.last_big[0] == i - 1 else None
+        return {"last": is_last, "first": i == 0, "n_index": i, "total": total, "beats": beats, "beat": self.beat,
+                "furthest": furthest, "early": i < self.QUIET, "after": after,
+                "deep_ok": b * i >= a * span, "deep_from": -(-a * span // b) + 1}
+
+    def text(self, r, n):
+        P = "turn.pace."
+        if r["last"]:
+            return say(P + "head") + "\n" + say(P + "last")
+        lines = [say(P + "head"), say(P + "length", total=r["total"], n=n)]
+        lines.append(say(P + "first") if r["first"] else
+                     say(P + "furthest", beats=r["beats"], beat=r["beat"], furthest=r["furthest"]) if r["beats"] else
+                     say(P + "furthest_lost", beat=r["beat"], furthest=r["furthest"]))
+        lines.append(say(P + "big_early") if r["early"] else
+                     say(P + "big_after", what=and_list(r["after"])) if r["after"] else say(P + "big_ok"))
+        lines.append(say(P + "deep_ok") if r["deep_ok"] else say(P + "deep_wait", turn=r["deep_from"]))
+        return "\n".join(lines)
+
+    def problems(self, r, now, big, deep):
+        if r["last"]:
+            return []
+        C, out = "checks.pace.", []
+        if now is None:
+            out.append(say(C + "no_number"))
+        elif now > r["furthest"]:
+            out.append(say(C + "too_far", beat=now, furthest=r["furthest"]))
+        if big and r["early"]:
+            out.append(say(C + "early", what=and_list(big)))
+        elif big and r["after"]:
+            out.append(say(C + "after_big", what=and_list(big), last=and_list(r["after"])))
+        if len(big) > self.MAX_BIG:
+            out.append(say(C + "too_much", what=and_list(big)))
+        if deep and not r["deep_ok"]:
+            out.append(say(C + "deep_early", what=and_list(deep), turn=r["deep_from"]))
+        return out
+
+    def record(self, i, now, big):
+        if now is not None:
+            self.beat = now
+        if big:
+            self.last_big = (i, list(big))
+
+
+def big_of(notes, st):
+    """What a turn's notes for the game release that is big (v20): piece 2 or 3 of an origin (piece 2 is
+    the one the accident spends), the collision, a payoff, a snap. Something already out doesn't count
+    again. Returns (big, deep), deep being the piece 3s."""
+    C, big, deep = "checks.pace.", [], []
+    have = {w: set(v) for w, v in st["pieces"].items()}
+    for who, what in notes["told"]:
+        k = piece_of(what)[0]
+        if who in have:
+            if k is None:
+                k = next((x for x in (1, 2, 3) if x not in have[who]), 3)
+            if k in have[who]:
+                continue
+            have[who].add(k)
+        if k in (2, 3):
+            label = say(C + "piece", k=k, name=who)
+            big.append(label)
+            if k == 3:
+                deep.append(label)
+    if notes["collided"] and st["collided"] is None:
+        big.append(say(C + "collision"))
+    for x in notes["paid"]:
+        n = setup_no(x)
+        if n is None or not st["setups"].get(n, {}).get("paid"):
+            big.append(say(C + "paid", n=n or "?"))
+    big += [say(C + "snap", name=x) for x in notes.get("snap", [])]
+    return big, deep
 
 
 SNAPS = {"player_snap": "player", "match_snap": "datee"}  # the snapper's habit is the weapon, so it isn't rationed
@@ -838,6 +953,18 @@ def arc_line(arc, head):
 
 def arc_ok(arc):
     return arc_line(arc, "Now") is not None and arc_line(arc, "Held") is not None
+
+
+def beat_no(line):
+    """The number of the beat a Now line plays (v20), or None."""
+    m = re.match(r"[\s*_#]*(\d+)", line or "")
+    return int(m.group(1)) if m else None
+
+
+def arc_size(arc):
+    """How many beats the arc has: the highest beat number it lists (v20), or None."""
+    got = [int(x) for x in re.findall(r"(?m)^[\s*_\-]*(?:Now[\s*_]*:[\s*_]*)?(\d+)\s*[.):]", arc or "")]
+    return max(got) if got else None
 LABEL_IN_CHAT = re.compile(r"\b(?:TOLD|HOOK|PLANTED|CALLBACK|PAID|COLLIDED)\b|(?i:\b(?:setup|piece)\s*#?\d)")
 
 
@@ -1362,7 +1489,7 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     spent, budget = 0, table["limits"]["chat_words"]
     habits = habit_markers(plan, names)
     starts, last_feel, stats = {}, {}, mech["player"]["effective_stats"]
-    arc, arc_turn = "", None
+    arc, arc_turn, pace = "", None, Pace()
     for i, t in enumerate(turns):
         n = t["turn"]
         is_last = i == len(turns) - 1
@@ -1401,11 +1528,14 @@ def play(variant_dir, knobs, mech, player, datee, caller):
 
         arc_text = (say("turn.arc.first") if not chat else say("turn.arc.since", n=arc_turn, arc=arc) if arc
                     else say("turn.arc.lost", n=chat[-1][0]))
+        # v20: the pace the game holds, from the chat's estimated length, the arc in hand and the last turn
+        pace_now = pace.rules(i, is_last, left, arc_size(arc))
+        pace_text = pace.text(pace_now, n)
 
         # the director reads the chat, the report, its arc and the game, and briefs the writer
         user = tl.render(P["turn"],
                          {**common, "since": since, "chat": the_chat,
-                          "tracker": report or T()["turn"]["chat"]["tracker_first"], "arc": arc_text,
+                          "tracker": report or T()["turn"]["chat"]["tracker_first"], "arc": arc_text, "pace": pace_text,
                           "relationship": relationship,
                           "story": story_now, "habit_note": h_note, "event": event,
                           "must": must_text(need, names, account), "length": length, "repeats": repeats},
@@ -1438,13 +1568,16 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                 if still:
                     problems.append(say("notes.missing.ACCOUNT", items="; ".join(item_name(x) for x in still)))
             problems += feeling_problems(feelings_of(head, names), names, t["interest_delta"], ghost)
+            big, deep = big_of(notes, st)
+            problems += pace.problems(pace_now, beat_no(arc_line(arc_of(head), "Now")), big, deep)
             return problems, head, brief, notes
 
         d_label = f"turn {n} director"
         d_text = director.ask(user, d_label, ctx)
         d_problems, d_notes, brief, notes = judge_director(d_text)
-        d_retried = bool(d_problems)
-        if d_problems:
+        d_retried, d_tries = bool(d_problems), 0
+        while d_problems and d_tries < int(knobs.get("director_retries", 1)):
+            d_tries += 1
             d_text = director.ask(say("checks.retry.director", problems="; ".join(d_problems), n=n), d_label + " retry",
                                   ctx)
             d_problems, d_notes, brief, notes = judge_director(d_text)
@@ -1455,6 +1588,10 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         played = arc_of(d_notes)
         if played:
             arc, arc_turn = played, n
+        now_no = beat_no(arc_line(played, "Now"))
+        big, deep = big_of(notes, st)
+        pace_broken = pace.problems(pace_now, now_no, big, deep)
+        pace.record(i, now_no, big)
         apply_notes(st, notes, n, names)
         exempt = next((x for x in notes.get("snap", []) if x in names.values()), exempt)
 
@@ -1501,6 +1638,9 @@ def play(variant_dir, knobs, mech, player, datee, caller):
         problems = d_problems + w_problems
         log = (f"Picked {t['chosen_stat']}: {T()['results'][rk]['name']}. Interest {t['interest_before']} → "
                f"{t['interest_after']} ({swing['name']}, {irow['state']}).\nThe beat the director played: {arc_line(played, 'Now') or '?'} (the v18 clock would have chosen {clock_key})\n"
+               f"Pace: about {pace_now['total']} turns; beat {now_no or '?'}, the furthest allowed "
+               f"{pace_now['furthest']}; big this turn: {', '.join(big) or 'nothing'}"
+               + (f"; still broken: {'; '.join(pace_broken)}" if pace_broken else "") + "\n"
                f"Required notes: {', '.join(need) or 'none'}\n"
                f"Written: {words} words; {spent} so far, against a chat of about {budget}."
                + (f"\nUnanswered before this turn, as the tracker counted: {unanswered_count(report)}" if report else "")
@@ -1509,6 +1649,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
                   "\n(kept the rules after a retry)" if d_retried or w_retried else "")
                + ("\n\n" + "\n".join(noted) if noted else ""))
         out.append({"turn": n, "beat": key, "clock_beat": clock_key, "arc": played, "arc_now": arc_line(played, "Now"),
+                    "pace": {**pace_now, "played": now_no, "big": big, "broken": pace_broken},
+                    "director_tries": 1 + d_tries,
                     "roll_key": rk, "needs": needs, "user": user, "writer_user": w_user,
                     "tracker": report, "unanswered": unanswered_count(report) if report else None,
                     "director_notes": d_notes, "director": d_text, "direction": brief, "release": release,
@@ -1533,7 +1675,9 @@ def play(variant_dir, knobs, mech, player, datee, caller):
             "plan_gaps": [c["item"] for c in coverage if not c["spent"] and not c["retired"]],
             "releases": [(x["turn"], x["release"]) for x in out if x["release"]],
             "tracker_end": end_report, "unanswered_end": unanswered_count(end_report),
-            "arc_played": [[x["turn"], x["arc_now"], x["clock_beat"]] for x in out]}
+            "arc_played": [[x["turn"], x["arc_now"], x["clock_beat"]] for x in out],
+            "pace": [[x["turn"], x["pace"]["total"], x["pace"]["furthest"], x["pace"]["played"], x["pace"]["big"],
+                      x["pace"]["broken"]] for x in out]}
 
 
 def dry_caller(names):
@@ -1677,6 +1821,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "unanswered": [[t["turn"], t["unanswered"]] for t in result["turns"] if t["unanswered"] is not None],
         "unanswered_end": result["unanswered_end"], "tracker_end": result["tracker_end"],
         "arc_played": result["arc_played"],
+        "pace": result["pace"], "pace_broken": [[p[0], p[5]] for p in result["pace"] if p[5]],
         "repeats": repeat_counts(result["chat"], names),
         "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
     }
@@ -1686,12 +1831,12 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         json.dump(record, f, indent=2, ensure_ascii=False)
     tl.write_report(run_dir)
     add_reader_to_report(run_dir, reader, attribution, release, result["tracker_end"], result["coverage"],
-                         result["arc_played"])
+                         result["arc_played"], result["pace"])
     print(os.path.relpath(run_dir, tl.REPO))
 
 
 def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracker_end=None, coverage=None,
-                         arc=None):
+                         arc=None, pace=None):
     import html
     path = os.path.join(run_dir, "report.html")
     if not os.path.exists(path):
@@ -1721,11 +1866,21 @@ def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracke
                 "the turn it was retired and why.</p><table><tr><th>Piece</th><th>Spent</th><th>Retired</th>"
                 f"<th>Why</th></tr>{rows}</table></section>")
     if arc:
-        rows = "".join(f"<tr><td>{n}</td><td>{html.escape(now or '')}</td><td>{html.escape(ck or '')}</td></tr>"
-                       for n, now, ck in arc)
+        by = {p[0]: p for p in pace or []}
+        blank = ["", "", [], []]
+
+        def pace_cells(n):
+            total, furthest, _, big, broken = (by[n][1:] if n in by else blank[:1] + blank)
+            return (f"<td>{total}</td><td>{furthest}</td><td>{html.escape(', '.join(big))}</td>"
+                    f"<td>{html.escape('; '.join(broken))}</td>")
+        rows = "".join(f"<tr><td>{n}</td><td>{html.escape(now or '')}</td><td>{html.escape(ck or '')}</td>"
+                       f"{pace_cells(n)}</tr>" for n, now, ck in arc)
         sec += ("<section><h2>The arc, as played</h2><p>The beat the director said each turn played, from its "
-                "own arc, next to the beat the v18 story clock would have chosen from the dice.</p><table><tr>"
-                f"<th>Turn</th><th>The director's beat</th><th>The clock's</th></tr>{rows}</table></section>")
+                "own arc, next to the beat the v18 story clock would have chosen from the dice, and the pace the "
+                "game held (v20): the chat's estimated length that turn, the furthest beat allowed, what big came "
+                "out, and whatever of the pace was still broken after the retries.</p><table><tr>"
+                "<th>Turn</th><th>The director's beat</th><th>The clock's</th><th>Turns expected</th>"
+                f"<th>Furthest beat</th><th>Big</th><th>Still broken</th></tr>{rows}</table></section>")
     if tracker_end:
         sec += ("<section><h2>The tracker at the end</h2><p>The tracker's last report, on the finished chat; it "
                 f"never saw the plan.</p><pre>{html.escape(tracker_end)}</pre></section>")

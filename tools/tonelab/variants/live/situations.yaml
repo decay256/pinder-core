@@ -35,9 +35,9 @@ sections:
   checks: What the game checks in everything that goes out, and what a retry says. apart_words are the patterns
     that put the two of them in one place; note_heads are the notes the director writes every turn before its brief;
     game_terms are the words a brief may not use, because the writer can't know the game.
-  turn: 'The frame of the director''s message each turn: the whole chat, the tracker''s report and the director''s
-    own arc, then the state model''s order: where they stand, where the story is, this turn, what the game requires,
-    how long. The game fills in the numbers, names and rows.'
+  turn: 'The frame of the director''s message each turn: the whole chat, the tracker''s report, the director''s
+    own arc and the pace the game holds (since v20), then the state model''s order: where they stand, where the
+    story is, this turn, what the game requires, how long. The game fills in the numbers, names and rows.'
   reader: 'After the chat: a reader who sees only the finished chat, a grader who scores the reader''s answers against
     the plan, a blind attribution test, in which a reader sorts every message, shuffled and without names, into
     two senders, and a release check, which asks whether what the director released reached the screen.'
@@ -1706,6 +1706,20 @@ checks:
   - pieces?\s*#?\s*\d
   - interest
   - the meter
+  pace:
+    no_number: the Now line of your arc doesn't start with the number of the beat it plays
+    too_far: 'this turn plays beat ${beat}, and the pace allows beat ${furthest} at the furthest: stay on the beat
+      you''re on or play the next one, and let it take its time'
+    after_big: '${what} came out on the turn after ${last} came out: this turn is how they live with it, so hold
+      it for a later turn'
+    early: ${what} came out in the first two turns, while they are still strangers
+    too_much: 'too much came out in one turn (${what}): two big things at most'
+    deep_early: ${what}, the part they'd never say, came out before turn ${turn}
+    piece: piece ${k} of ${name}'s origin
+    collision: the collision
+    paid: the payoff of setup ${n}
+    snap: ${name}'s snap
+    source: 'new (v20): what the game sends back when the director''s turn breaks the pace'
 turn:
   state:
     since_start: |-
@@ -1948,6 +1962,27 @@ turn:
     lost: 'Your arc: you left none after turn ${n}. Rebuild it this turn from the plan''s Story and the chat, under
       ARC.'
     source: 'new (v19): the arc the director wrote under ARC last turn, handed back at the top of the next'
+  pace:
+    head: 'The pace, which the game holds and checks afterwards:'
+    length: '- The chat looks like running about ${total} turns, as the meter stands (an estimate, and it moves);
+      this is turn ${n}.'
+    first: '- Size your arc for that: number its beats and spread them, a beat to a turn or two, sometimes three.
+      This turn plays beat 1.'
+    furthest: '- Your arc has ${beats} beats, and last turn played beat ${beat}. This turn plays beat ${furthest}
+      at the furthest.'
+    furthest_lost: '- Last turn played beat ${beat}. This turn plays beat ${furthest} at the furthest.'
+    big_ok: '- Something big may come out this turn (piece 2 or 3 of an origin, the collision, a payoff, a snap),
+      two at most, if the arc is there.'
+    big_after: '- Last turn ${what} came out, so this turn is how they live with it: nothing big comes out (no piece
+      2 or 3 of an origin, no collision, no payoff, no snap).'
+    big_early: '- Nothing big comes out in the first two turns, while they are still strangers (no piece 2 or 3
+      of an origin, no collision, no payoff, no snap).'
+    deep_wait: '- The part each would never say (piece 3) waits until turn ${turn} at the earliest, as the length
+      stands.'
+    deep_ok: '- The part each would never say (piece 3) may come out from now on, when the arc reaches it.'
+    last: '- This is the last turn: the pace no longer holds, and the chat ends.'
+    source: 'new (v20): the pace, worked out in code each turn from the chat''s estimated length, the arc in hand
+      and what came out last turn, and checked against the director''s answer'
 reader:
   system: You have just read a whole chat from Pinder, a game that looks like a dating app, where everyone is a
     sentient dick. Answer only from what is in the chat. If the chat doesn't show it, say "can't tell". One or two
@@ -2198,7 +2233,7 @@ prompts:
 
     Who knows what. The writer knows who the two of them are: what each shows, where each is tonight, their fear, habit, lie, snap, feelings, shadow, background, voice and how it breaks. It sees the whole chat and your brief, and nothing else: not the origins, the accident, the setups, the collision, tonight's events, the story or the endings, not the dice and not the game. Whatever of the plan reaches the chat reaches it through your brief. A tracker reads the chat before every turn, knowing only the chat, the way the reader will, and tells you what is on the screen: what each one offered, what is still unanswered, what has come out, who has the upper hand, what repeats, and what a reader couldn't know.
 
-    Each message from the game gives you, in this order: the whole chat so far; the tracker's report on it; your arc as you left it last turn; where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (what of the plan is out on the screen); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and, on the last turn, how the chat ends); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "scan the last messages"). They are for you, not for the writer: turn each one into what happens between these two people, from what is actually on the screen. A detail the chat hasn't shown can't be noticed, quoted or answered.
+    Each message from the game gives you, in this order: the whole chat so far; the tracker's report on it; your arc as you left it last turn; the pace the game holds this turn; where the two of them stand (the match's interest and what it means, and any trap and which of its three turns this is); where the story is (what of the plan is out on the screen); what happened this turn (the move, how it came out and what that does to the message, anything else that fired, how the match takes it, how their interest moved and why, and, on the last turn, how the chat ends); what the game requires; and how long it runs. The descriptions of what a roll does to a message come from the game's own rewriter and are written as orders to it ("You must…", "scan the last messages"). They are for you, not for the writer: turn each one into what happens between these two people, from what is actually on the screen. A detail the chat hasn't shown can't be noticed, quoted or answered.
 
     The chat. Two strangers on a dating app, each in their own place, alone with a phone. Neither knows where the other is, and neither can see more than the other's profile and the chat. Nobody arrives, waits downstairs, opens a door, puts a coat on or takes it off, or crosses a room for the other one. The match agreeing to meet is the end of the chat, not something that happens in it. Every message is something one person types to the other: one thing they mean, said the way they'd say it.
 
@@ -2208,9 +2243,9 @@ prompts:
 
     The arc. The plan's Story is the chat as a story, beat by beat, with tonight's events and every origin piece, accident, snap, setup and the collision placed on a beat. It is yours from the first turn: you build your arc from it, you decide which beat each turn plays, and every turn you write the arc as it now stands under ARC: the beat this turn plays, the beats still to come, and what is held back and until when. The game hands it back to you at the top of the next turn. The game doesn't tell you what a turn is for and asks for nothing before the last turn; it tells you what the dice did. Change the arc when the chat calls for it (a beat comes early because the other one asked the right thing, two beats swap, an event lands differently, the dice turn it toward the other ending) and say why in your Story note. You may not leave the plan unused: every origin piece, every setup and the collision ends the chat either spent on the screen or retired, with a RETIRED note that says why; on the last turn the game lists what is left.
 
-    Pacing. A story makes the reader wait. One beat a turn at most, and a beat can take two turns. Never two big beats back to back: after an accident, a confession, a snap or the collision, the next turn is how each of them lives with it. The part each would never say waits for the last beats, however the meter moves. Nobody knows how long the chat runs: the match's interest says roughly how near the end is (it ends at 25 or at 0), and the plan's short version says what folds together if the end comes early.
+    Pacing. A story makes the reader wait, and the game holds the pace: under The pace it tells you each turn how long the chat looks like running, the furthest beat of your arc this turn may play, and whether anything big may come out, and it sends the turn back when your arc or the notes for the game break it. Number the beats of your arc and play them in order: you stay on a beat or move to the next one, and a beat takes a turn or two, sometimes three. You may add, split or fold beats when the chat calls for it; the furthest beat follows the arc you left last turn. Something big is piece 2 or 3 of an origin, the collision, a payoff or a snap: nothing big in the first two turns, two big things at most in one turn, and never on the turn after one, which is how they live with it. The part each would never say waits for the last part of the chat, from the turn the game names. Nobody knows how long the chat runs: the game's estimate moves with the meter, and the plan's short version says what folds together if the end comes early. On the last turn the pace no longer holds.
 
-    The dice and the arc. The dice decide how each move comes out and how the match takes it; you decide what that means at this point in the story. A bad roll early is an embarrassment the size of the moment, not the catastrophe: an accident waits for its beat. A roll that comes off better than they could have hoped can bring a beat forward. A shadow or a trap shows in how the message goes wrong: in one message of the turn, and in a line of it, not the whole turn; a trap lasts three turns and shows once in each.
+    The dice and the arc. The dice decide how each move comes out and how the match takes it; you decide what that means at this point in the story. A bad roll early is an embarrassment the size of the moment, not the catastrophe: an accident waits for its beat. A roll that comes off better than they could have hoped makes this beat land harder; it doesn't bring the next one forward. A shadow or a trap shows in how the message goes wrong: in one message of the turn, and in a line of it, not the whole turn; a trap lasts three turns and shows once in each.
 
     Answering isn't telling. A question always gets a reaction, but the answer can be a dodge, a joke, the small version or a question back, and a dodge the reader can see is a good answer: it shows there is something there and raises the stakes. What the arc holds back stays held, however directly it is asked, until its beat.
 
@@ -2266,6 +2301,8 @@ prompts:
     ${tracker}
 
     ${arc}
+
+    ${pace}
 
     Where they stand:
     ${relationship}
@@ -2575,6 +2612,13 @@ assembly:
             now from the plan's Story.
           from:
           - turn.arc
+        pace:
+          what: 'The pace the game holds and checks: how long the chat looks like running, the furthest beat of
+            the arc this turn may play, whether anything big may come out, and from which turn the part each would
+            never say may; on the last turn, that it no longer holds.'
+          from:
+          - turn.pace
+          - checks.pace
         relationship:
           what: 'Where they stand as the turn starts: the match''s interest and what the level means; each trap
             in force, its acting and which of its three turns this is.'

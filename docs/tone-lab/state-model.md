@@ -342,6 +342,33 @@ In v19:
   before; the events reach the chat only through the brief's Released.
 - **The director reasons at high effort.**
 
+## The game holds the pace (v20)
+
+v19 gave the director the arc and told it, in prose, how to pace it: one beat a turn at most, a
+beat can take two turns, never two big beats back to back, the part each would never say on the
+last beats. On seed 23 it played one beat every turn regardless, merged two on a good roll, and
+ran the big beats from turn 3 to turn 7 without a breath: both accidents on turns 3 and 4, the
+collision on 5, both deepest confessions on 6 and 7. A rule in the prompt lost to the concrete
+signal in front of it every turn. In v20 the pace is code:
+
+- **Worked out before the director writes.** Each turn the game takes the chat's estimated length
+  from the meter (the average of the turn-by-turn estimates so far: on seed 23 those jump between
+  eight and fourteen, which would open and shut the gates) and the arc the director left last turn,
+  and tells the director, under The pace:
+  how long the chat looks like running, the furthest beat this turn may play, whether anything big
+  may come out, and from which turn the part each would never say may.
+- **The beats are numbered and played in order.** A turn stays on its beat or moves to the next;
+  and the furthest beat follows the chat's length: beat k of an arc of B beats not before k-1 of
+  B-1 of the way through the estimated chat. A beat added to the arc counts from the next turn.
+- **Big is read from the notes for the game,** not from the director's say-so: piece 2 or 3 of an
+  origin (piece 2 is what the accident spends), the collision, a payoff, a snap. Nothing big in the
+  first two turns; two at most in one turn; never on the turn after one. Piece 3 not before seven
+  tenths of the way through the estimated chat.
+- **Checked and sent back.** A director answer that breaks the pace goes back with what it broke,
+  twice at most; what is still broken after that is recorded in the run, per turn, and shown in the
+  report's arc table beside the estimated length, the furthest beat allowed and what came out.
+- **The last turn is free.** The chat ends there; whatever is left comes out or is retired.
+
 ## Consistency rules
 
 These came from reading every turn message exactly as sent (v14). Each rule removes a way for

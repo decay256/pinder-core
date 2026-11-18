@@ -9,5 +9,6 @@
   "turn_reasoning": "high",
   "track_reasoning": "low",
   "write_reasoning": "medium",
-  "drawer_sample": 5
+  "drawer_sample": 5,
+  "director_retries": 2
 }

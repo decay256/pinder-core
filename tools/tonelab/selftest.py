@@ -115,6 +115,14 @@ def check_live(name, variant, knobs, tmp):
               "turn, where it says how the chat ends")
         check(len(res["arc_played"]) == n and all(now == "1. dry: dry" for _, now, _ in res["arc_played"]),
               f"{name} seed {seed}: the beat the director played is recorded every turn")
+        quiet = d_users[:min(2, n - 1)]
+        check(all("The pace, which the game holds and checks afterwards:" in u for u in d_users)
+              and all("Nothing big comes out in the first two turns" in u for u in quiet)
+              and "This is the last turn: the pace no longer holds" in d_users[-1]
+              and not any("This is the last turn" in u for u in d_users[:-1])
+              and len(res["pace"]) == n and not any(p[5] for p in res["pace"]),
+              f"{name} seed {seed}: the game tells the director the pace every turn, quiet in the first two turns "
+              "and free on the last, and a dry run keeps it")
         check(all("Answer: dry" in u for u in w_users)
               and not any(re.search(r"\bTOLD\b|\bRETIRED\b|\bPLANTED\b|\bPAID\b", u) for u in w_users),
               f"{name} seed {seed}: the writer gets the director's brief, without the notes for the game")
@@ -190,6 +198,43 @@ def check_live(name, variant, knobs, tmp):
           and live.arc_of("Chat now: x\nStory: the arc") == "", f"the director's arc is read from its notes ({arc!r})")
     _, _, g = live.director_parts("NOTES:\nx\nBRIEF:\nAnswer: a\nSNAP: B\nTOLD: A: 1: brag", names)
     check(g["snap"] == ["B"] and g["told"] == [("A", "1: brag")], f"a SNAP note names who snaps ({g})")
+    check(live.beat_no("3. The door: she asks") == 3 and live.beat_no("The door") is None
+          and live.arc_size("Now: 3. x\nNext:\n4. y\n5. z\nHeld: the rack, until 4") == 5 and live.arc_size("") is None,
+          "the beat a turn plays and the size of the arc are read from the arc's numbers")
+    st0 = {"pieces": {"A": {1}, "B": set()}, "setups": {1: {"planted": 2}}, "collided": None}
+    big, deep = live.big_of({"told": [("A", "2: the dad"), ("B", "dry"), ("A", "1: again")], "collided": True,
+                             "paid": ["setup 1"], "snap": ["B"]}, st0)
+    check(big == ["piece 2 of A's origin", "the collision", "the payoff of setup 1", "B's snap"] and deep == [],
+          f"piece 2 or 3, the collision, a payoff and a snap are big; piece 1 and a piece already out are not ({big})")
+    r0 = live.Pace().rules(0, False, 12, None)
+    check(r0["furthest"] == 1 and r0["early"] and r0["total"] == 12 and not r0["deep_ok"] and r0["deep_from"] == 9,
+          f"on the first turn of an expected twelve the pace allows beat 1, nothing big, and piece 3 from turn 9 ({r0})")
+    pace = live.Pace()
+    got = [pace.rules(i, False, x - i, 8)["total"] for i, x in enumerate((12, 9, 8, 12, 8, 12, 11, 14))]
+    check(got == [12, 11, 10, 10, 10, 10, 10, 11],
+          f"the pace runs on the average of the meter's estimates, which jump from 8 to 14 on seed 23 ({got})")
+
+    def replay(plays, bigs, n=11, total=12, beats=8):
+        pace, back = live.Pace(), []
+        for i in range(n):
+            r = pace.rules(i, i == n - 1, total - i, beats if i else None)
+            b = bigs.get(i + 1, [])
+            if pace.problems(r, plays[i], b, [x for x in b if x.startswith("piece 3")]):
+                back.append(i + 1)
+            pace.record(i, plays[i], b)
+        return back
+    v19 = {3: ["piece 2 of R"], 4: ["piece 2 of B", "the payoff of setup 1"], 5: ["the collision"], 6: ["piece 3 of R"],
+           7: ["piece 3 of B", "the payoff of setup 2"], 10: ["the payoff of setup 3"]}
+    back = replay([1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8], v19)
+    check(back == [3, 4, 5, 6, 7, 8],
+          f"v19's seed-23 chat, a beat a turn and the big beats from turn 3 to 7, is sent back on every turn from 3 to 8 "
+          f"({back})")
+    paced = {3: ["piece 2 of R"], 5: ["piece 2 of B"], 7: ["the collision"], 9: ["piece 3 of R"],
+             11: ["piece 3 of B", "the payoff of setup 1", "the payoff of setup 2", "the payoff of setup 3"]}
+    back = replay([1, 2, 2, 3, 4, 4, 5, 5, 6, 7, 8], paced)
+    check(back == [], f"a chat that lets each beat take its time and breathes after each big one passes ({back})")
+    back = replay([1, 2, 2, 3, 4, 4, 5, 5, 6, 7, 8], {6: ["piece 3 of R"], 8: ["a", "b", "c"]})
+    check(back == [6, 8], f"piece 3 before its turn, and three big things in one turn, are sent back ({back})")
     rep = "REPORT:\nLast turn: x\nUnanswered:\n- turn 2, A: the job\n- turn 3, B: the ex\nCame out: y"
     check(live.unanswered_count(rep) == 2 and live.unanswered_count(rep.replace("- turn 2, A: the job\n- turn 3, B: "
                                                                                 "the ex", "- nothing")) == 0,
