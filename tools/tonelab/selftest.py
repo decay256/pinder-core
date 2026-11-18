@@ -148,6 +148,13 @@ def check_live(name, variant, knobs, tmp):
         check(all(not re.search(r"\brolled \d|natural 20|against \d", u) for u in turn_users),
               f"{name} seed {seed}: no roll is described by its numbers")
         check(all("${" not in p for p in prompts), f"{name} seed {seed}: every prompt renders with no unresolved placeholder")
+        if knobs.get("profiles"):
+            pc = res["common"]["player_card"]
+            check("#### The people in their life" in pc and "Body, as the profile shows it" not in pc
+                  and "\n- says:" not in pc.split("Tonight, build")[0] and "says:" in pc.split("Tonight, build")[1],
+                  f"{name} seed {seed}: with profiles the card is the profile, and one of its brags is the focus")
+            check(all(sy.count("texts, by situation") == 2 and sy.count("**Guard down:**") == 2 for _, _, sy in by["writer"]),
+                  f"{name} seed {seed}: the writer is told how each one texts by situation")
         st = m["player"]["effective_stats"]
         best = max(st, key=st.get)
         check(f"strong at {best} ({st[best]})" in res["common"]["player_card"] and "${" not in res["common"]["datee_card"],
@@ -301,8 +308,33 @@ def check_chat_rules():
     check(jump <= 5, f"along v8's meter the turns-left estimate moves at most 5 a turn ({est})")
 
 
+def check_profiles():
+    """v22: the profiles the live cards are built from."""
+    import profiles as pf
+    T = pf.table()
+    chars = {x: pf.character(x) for x in pf.ORDER}
+    got = pf.read_profiles()
+    check(sorted(got) == sorted(pf.ORDER), f"every bundled character has a profile ({sorted(got)})")
+    bad = {k: pf.problems(md, chars[k], T, pf.shared_passages(k, chars)) for k, md in got.items()}
+    check(not any(bad.values()), f"every committed profile passes the generator's own checks "
+                                 f"({ {k: v[:1] for k, v in bad.items() if v} })")
+    check(any("portrait" in x for x in pf.shared_passages("brick", chars))
+          and not any("portrait" in x for x in pf.shared_passages("reuben", chars)),
+          "a passage copied from another character's fragments is marked shared, and its owner keeps it")
+    portrait = lambda x: any(m["name"] == "the cropped family portrait" for m in pf.barred_motifs(chars[x], T))
+    check(portrait("brick") and portrait("gerald") and not portrait("reuben"),
+          "a spread motif is barred from every profile but the one whose game fragments it comes from")
+    broken = got["reuben"].replace("**Guard down:**", "**Guard:**").replace("## Their life now", "## His life now")
+    p = pf.problems(broken, chars["reuben"], T, [])
+    check(len(p) == 2, f"a profile with a renamed heading and a missing situation is caught ({p})")
+    cv = pf.card_values("reuben")
+    check(4 <= len(cv["pairs"]) <= 6 and "**Baseline:**" in cv["texting_by_situation"] and "\n- says:" not in cv["profile"],
+          f"a card takes the profile without its brags, and the brags apart ({len(cv['pairs'])} brags)")
+
+
 def main():
     check_chat_rules()
+    check_profiles()
     with tempfile.TemporaryDirectory(prefix="tonelab-selftest-") as tmp:
         a, b = os.path.join(tmp, "a.json"), os.path.join(tmp, "b.json")
         ma = tonelab.play_mechanics("reuben", "brick", 7, 30, tonelab.DEFAULT_CLOCK, a)

@@ -44,7 +44,9 @@ sections:
     the reader is also asked what the two of them would ask: would you go home with each one, would you date them,
     and why these two want each other.'
   character: 'Pieces of each character card drawn fresh for each match. The rest of the card comes from the game''s
-    character file: bio, body, texting style, personality, backstory, the drawer and the diagnosis.'
+    character file: bio, body, texting style, personality, backstory, the drawer and the diagnosis. Since v22 a
+    variant can read each character''s profile instead: a life with people, a history and wants in it, written once
+    from the character file, with one of its brags as tonight''s focus.'
   prompts: The prompt templates. bible opens every system prompt; plan, track, direct and write are the planner's,
     the tracker's, the director's and the writer's own; plan_input is the planner's message; character is each character
     card; track_turn, turn and write_turn are each role's message every turn.
@@ -60,7 +62,8 @@ sections:
   tracker: 'What the tracker reports on the chat before every turn, knowing only the chat: its headings, in order,
     and how its message opens.'
   writer: 'How the writer''s character sheets are cut from the plan: the plan headings kept, the ones dropped, and
-    the ones where the story part of the plan starts.'
+    the ones where the story part of the plan starts. Since v22, with profiles on, the writer is also told how each
+    one texts in each situation.'
   coverage: How each piece of the plan is named when the chat ends with it neither spent nor retired.
 limits:
   chat_words: 1250
@@ -2367,7 +2370,7 @@ prompts:
 
     Who they are. This is what you know about them. Their past comes to you a piece at a time, in the briefs, when it is allowed out; until then nothing in their messages gives it away. A detail the chat hasn't shown, nobody can notice, quote or answer.
 
-    ${sheets}
+    ${sheets}${texting}
 
     The craft. You write dialogue the way a good novelist does, without the narration to help, so the lines do all the work.
     - Listen first. Each turn starts from what the other one just sent: the first thing anyone does is react to it, and the reaction is where the feeling shows. A confession, a question or a piece of someone's life never goes by without an answer, even if the answer is a dodge the reader can see through.
@@ -2410,6 +2413,24 @@ prompts:
     ${repeats}
 
     Draft turn ${n}, edit the draft against each instruction, then write it as it is sent.
+  character_profile: |
+    ### ${name}, ${role} (${pronouns})
+    ${profile}
+
+    ${stats}
+
+    ${shadows}
+
+    Tonight, build their hook and true story around this one. Other matches with this character get a different one, so the same character tells a different story each time:
+    ${focus}
+
+    What's in the drawer tonight, a few of the private, filthy, embarrassing specifics (a different few each match):
+    ${drawer}
+
+    What hurts them, as a clinician wrote it down. Translate this into a person; never let a character talk like this:
+    - underneath: ${wound}
+    - how they defend against it: ${defence}
+    - what makes them feel safe: ${safe_connection}
 session:
   times:
     Morning: morning
@@ -2488,24 +2509,27 @@ assembly:
           from:
           - session.heat
         player_card:
-          what: The player character's card, built as below.
+          what: The player character's card, built as below. With profiles on (v22), the card is built from the
+            profile instead.
           from:
           - prompts.character
+          - prompts.character_profile
         datee_card:
-          what: The match's card, built as below.
+          what: The match's card, built as below. With profiles on (v22), the card is built from the profile instead.
           from:
           - prompts.character
+          - prompts.character_profile
     - message: Each character card, inside the plan's input
       template:
       - prompts.character
       fills:
-        name:
+        name: &id001
           what: The display name, from the character file.
           from: []
-        role:
+        role: &id002
           what: '"the player" or "the match".'
           from: []
-        pronouns:
+        pronouns: &id003
           what: From the character file.
           from: []
         bio:
@@ -2514,13 +2538,13 @@ assembly:
         body:
           what: 'The body, from the character file: only the extremes of each 0-100 value.'
           from: []
-        stats:
+        stats: &id004
           what: What they are strong and weak at, from the game's effective stats.
           from:
           - stats
           - moves.*.strong
           - moves.*.weak
-        shadows:
+        shadows: &id005
           what: Their shadows from the character file, strongest first, each with the move it belongs to and what
             it does.
           from:
@@ -2537,24 +2561,44 @@ assembly:
         backstory:
           what: From the character file.
           from: []
-        focus:
+        focus: &id006
           what: Tonight's brag and truth to build the secret on, drawn for this match.
           from:
           - character.focus
           - character.no_focus
-        drawer:
+        drawer: &id007
           what: A few private, filthy specifics, drawn for this match.
           from:
           - character.drawer_line
-        wound:
+        wound: &id008
           what: What hurts them, from the character file's diagnosis.
           from: []
-        defence:
+        defence: &id009
           what: How they defend against it, from the diagnosis.
           from: []
-        safe_connection:
+        safe_connection: &id010
           what: What makes them feel safe, from the diagnosis.
           from: []
+    - message: Each character card when the variant reads profiles (v22)
+      template:
+      - prompts.character_profile
+      fills:
+        name: *id001
+        role: *id002
+        pronouns: *id003
+        profile:
+          what: 'The character''s profile (tools/tonelab/profiles), written once by profiles.py from the character
+            file: what the match sees, their life now, the people in it, how they got here, what they love, how
+            they are with people, what they want, and how they text by situation. Its brags and truths are left
+            out; one of them is the focus.'
+          from: []
+        stats: *id004
+        shadows: *id005
+        focus: *id006
+        drawer: *id007
+        wound: *id008
+        defence: *id009
+        safe_connection: *id010
   - name: The tracker
     when: 'One session for the whole chat: one call before every turn but the first, and one after the last. It
       sees only the chat, never the plan or the game.'
@@ -2725,6 +2769,10 @@ assembly:
           what: The instructions the writer edits its draft against before the turn goes out, numbered.
           from:
           - review
+        texting:
+          what: 'With profiles on (v22): how each one texts by situation, from their profile. Empty otherwise.'
+          from:
+          - writer.texting
     - message: Each turn
       template:
       - prompts.write_turn
@@ -2896,6 +2944,9 @@ writer:
     and the accident are dropped, and everything from the collision on (the setups, tonight''s events, the story
     and the endings, v19) belongs to the story; since v21 the sheet also keeps what each wants tonight and needs
     to know about the other, and drops their tests and what they give away, which are the director''s'
+  texting: |-
+    ### How ${name} texts, by situation. The brief's Feeling and what just happened say which one applies; the baseline always does:
+    ${lines}
 coverage:
   piece: ${name}'s origin piece ${k}
   setup: setup ${n}

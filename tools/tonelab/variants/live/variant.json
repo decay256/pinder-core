@@ -10,5 +10,6 @@
   "track_reasoning": "low",
   "write_reasoning": "medium",
   "drawer_sample": 5,
-  "director_retries": 2
+  "director_retries": 2,
+  "profiles": true
 }

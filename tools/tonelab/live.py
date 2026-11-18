@@ -101,6 +101,15 @@ catches) and fills numbers and names into the table's sentences. situations.py r
 whole file as docs/tone-lab/situations.html, and selftest.py checks that nothing in the file
 is missing from the page.
 
+v22: the characters have lives. Up to v21 a card was the character file: a bio, seventeen body
+readings, a list of texting habits and a backstory made of humiliations, with no people, places,
+job, history or wants in it, so the other one had nothing to find out. With "profiles" in
+variant.json the card is the character's profile instead (tools/tonelab/profiles, written once by
+profiles.py from the file): what the match sees, their life now, the people in it, how they got
+here, what they love and are good at, how they are with people, what they want, and how they text
+in each situation the chat can put them in. One of the profile's brags is tonight's focus, and the
+writer is told how each one texts by situation.
+
 v21: the chat is two people finding out about each other. Up to v20 the plan modelled a person as
 a fear, a habit and a backstory released piece by piece, so the chat was banter with facts in it
 that answered nothing. Now each one wants something tonight (a night, a date, or something worse)
@@ -1443,7 +1452,7 @@ def shadows_text(c):
 def tonight(c, values, rng, n_drawer):
     """Each match draws its own material, so one character does not tell the same story in
     every match: one backstory pair to build the secret around, and a few drawer lines."""
-    cats = list((c.get("backstory_categories") or {}).values())
+    cats = values.get("pairs") or list((c.get("backstory_categories") or {}).values())
     pair = rng.choice(cats) if cats else None
     lines = [ln.strip().lstrip("-•*").strip() for ln in (c.get("psychological_stake") or "").splitlines() if ln.strip()]
     if n_drawer and len(lines) > n_drawer:
@@ -1466,6 +1475,10 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     rng = random.Random(f"{mech.get('seed')}-{player}-{datee}")
     pc, _, pv = tl.character_values(player, mech["player"], knobs)
     dc, _, dv = tl.character_values(datee, mech["datee"], knobs)
+    if knobs.get("profiles"):  # v22: the card is the character's profile
+        import profiles
+        pv.update(profiles.card_values(player))
+        dv.update(profiles.card_values(datee))
     n_drawer = int(knobs.get("drawer_sample", 0))
     pv, dv = tonight(pc, pv, rng, n_drawer), tonight(dc, dv, rng, n_drawer)
     pv["stats"], dv["stats"] = stats_text(mech["player"]["effective_stats"]), stats_text(mech["datee"]["effective_stats"])
@@ -1473,13 +1486,16 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     heat = next((x["text"] for x in table["session"]["heat"]
                  if x["from"] <= int(mech.get("session_horniness") or 0) <= x["to"]), "")
     brief_heads, track_heads = heads_of(table["brief"]), heads_of(table["tracker"]["report"])
+    card = "character_profile" if knobs.get("profiles") else "character"
     common = {
         "player_name": names["player"], "datee_name": names["datee"],
         "time_of_day": table["session"]["times"].get(mech.get("time_of_day", ""), mech.get("time_of_day", "")),
         "heat": heat,
         "feelings": "\n".join(say("feelings.list_line", feeling=k, shows=v) for k, v in table["feelings"]["shows"].items()),
-        "player_card": tl.render(P["character"], {**pv, "role": "the player"}, "prompts.character").strip(),
-        "datee_card": tl.render(P["character"], {**dv, "role": "the match"}, "prompts.character").strip(),
+        "player_card": tl.render(P[card], {**pv, "role": "the player"}, "prompts." + card).strip(),
+        "datee_card": tl.render(P[card], {**dv, "role": "the match"}, "prompts." + card).strip(),
+        "texting": "".join("\n\n" + say("writer.texting", name=names[x], lines=v["texting_by_situation"])
+                           for x, v in (("player", pv), ("datee", dv))) if knobs.get("profiles") else "",
         "brief_heads": "\n".join(table["brief"]),
         "heads": "\n".join(table["tracker"]["report"]),
         "review": "\n".join(f"{k + 1}. {q}" for k, q in enumerate(table["review"])),

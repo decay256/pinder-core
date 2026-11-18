@@ -29,12 +29,15 @@ def main():
     ap.add_argument("--datee", default="brick")
     ap.add_argument("--seed", type=int, default=23)
     ap.add_argument("--key-stdin", action="store_true")
+    ap.add_argument("--old-cards", action="store_true", help="build the cards from the character files, as before v22")
     args = ap.parse_args()
     if not args.key_stdin:
         tl.die("preview: the key comes on stdin (--key-stdin)")
     key = sys.stdin.readline().strip().lstrip("﻿")  # a PowerShell pipe puts a byte-order mark first
     variant = os.path.join(tl.VARIANTS, args.variant)
     knobs = json.load(open(os.path.join(variant, "variant.json"), encoding="utf-8"))
+    if args.old_cards:
+        knobs.pop("profiles", None)
     path = os.path.join(tempfile.mkdtemp(prefix="tonelab-preview-"), "mechanics.json")
     mech = tl.play_mechanics(args.player, args.datee, args.seed, int(knobs.get("turns", 30)), tl.DEFAULT_CLOCK, path,
                              knobs.get("agent"))
@@ -61,11 +64,11 @@ def main():
     except Stop:
         pass
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_dir = os.path.join(tl.REPO, "docs/tone-lab/runs", f"{stamp}-preview-{args.player}-{args.datee}-s{args.seed}")
+    run_dir = os.path.join(tl.REPO, "docs/tone-lab/runs", f"{stamp}-preview{'-oldcards' if args.old_cards else ''}-{args.player}-{args.datee}-s{args.seed}")
     os.makedirs(run_dir)
     cost = round(sum((c["usage"] or {}).get("cost") or 0 for c in calls), 4)
     record = {"run_id": os.path.basename(run_dir), "variant": args.variant, "seed": args.seed,
-              "model": knobs["model"], "repo_commit": tl.git("rev-parse", "--short", "HEAD"),
+              "model": knobs["model"], "repo_commit": tl.git("rev-parse", "--short", "HEAD"), "profiles": bool(knobs.get("profiles")),
               "turn_1": {k: mech["turns"][0][k] for k in ("chosen_stat", "interest_before", "interest_after")},
               "cost": cost, "systems": systems, "calls": calls}
     with open(os.path.join(run_dir, "preview.json"), "w", encoding="utf-8") as fh:
