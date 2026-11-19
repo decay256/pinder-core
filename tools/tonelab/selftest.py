@@ -324,7 +324,7 @@ def check_profiles():
     portrait = lambda x: any(m["name"] == "the cropped family portrait" for m in pf.barred_motifs(chars[x], T))
     check(portrait("brick") and portrait("gerald") and not portrait("reuben"),
           "a spread motif is barred from every profile but the one whose game fragments it comes from")
-    broken = got["reuben"].replace("**Guard down:**", "**Guard:**").replace("## Their life now", "## His life now")
+    broken = got["reuben"].replace("**Guard down:**", "**Guard:**").replace("## How they got here", "## How he got here")
     p = pf.problems(broken, chars["reuben"], T, [])
     check(len(p) == 2, f"a profile with a renamed heading and a missing situation is caught ({p})")
     cv = pf.card_values("reuben")

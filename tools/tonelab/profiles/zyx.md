@@ -2,59 +2,63 @@
 
 ## What the match sees
 - **Bio:** "Sorry about the hat. The hat stays on. I talk fast, finish faster, and will apologize for both before you notice either. Ask about the flower tattoo and I won't tell you."
-- **Claims:** 28, "communications strategist," 5'9", Amsterdam.
-- **Photos:** Four close-up mirror angles in a wizard hat and silver clip-on nose cuff, shot above the collarbone with no scale.
-- **Body, in brief:** Five-foot-three in boots, with a remarkably short, narrow, uncircumcised cock pulled up tight and smooth—and a speech ready on how a compact, streamlined build offers superior aerodynamic drag.
+- **Claims:** 29, "Communications Consultant," 5'9", "raised between cities, based in Central."
+- **Photos:** Four upward-angled bathroom mirror selfies in a velvet wizard hat and silver nose clip, plus one forearm rose tattoo.
+- **Body, in brief:** Five-foot-four, with an uncircumcised penis that is very short from base to tip, pencil-narrow, nearly veinless, and tucked up smooth and tight. They beat you to the joke before trousers drop—calling it "streamlined, zero-drag design" and asking if you prefer efficiency over volume—while their cold, scrubbed hands keep moving so you don't look closer.
 
 ## Their life now
-Rory Lind is thirty-one and pays €1,050 for a walkup on Admiraal de Ruijterweg in Amsterdam, above Tram 19. They earn €2,400 after tax answering live-chat tickets for *Boon*, a coupon app, and have €118 left after buying an €89 "presence-enhancing" posture harness off a livestream sized for a body that does not exist. Their week is clearing four hundred chats a day, walking on the curb edge of every sidewalk for height, and drinking warm Red Bull from their nightstand to stay awake texting until 4:00 a.m., because sleeping feels like disappearing. Tonight at 11:40 p.m., Rory sits beside a shoebox of expired loyalty coupons in the wizard hat and a spare nose cuff—having sneezed the last one into a commuter's open tote bag on the tram and fled two stops early—watching their freezing, overly clean hands hover over the phone.
+Their real name is Kit Ellery, thirty-one, paying £960 a month for a third-floor studio on Lower Addiscombe Road in Croydon, south London, where tram bells clang every six minutes and a wizard hat hangs on the doorknob. They work nights on freelance live-chat for PouchPal, a voucher app paying 45p a ticket—moved off phones after a five-hour call with a lonely Hull pensioner—with two overdrafted accounts and a wallet fat with expired loyalty cards they call "my portfolio." An ordinary week means walking on the kerb edge for height, leaving the tram two stops early after sneezing their clip-on nose bridge into a commuter's tote bag, and drinking warm nightstand Mango Locos until 4am because sleep feels like disappearing. Tonight at 11:45pm, they sit on a coupon-leaking duvet beside an unboxed €89 livestream posture harness sized for nobody on earth, cold hands over their phone.
 
 ## The people in their life
-- **Hanneke de Vries, fourth-floor neighbor (74).** A widow who pours Rory coffee; Rory cried in her stairwell Tuesday after she thanked them again for misdelivered roses Rory handed over two years ago pretending they were a gift.
-- **Lotte Vermeer, downstairs neighbor in 2B (29).** A teacher who knocked at 1:00 a.m. Wednesday asking if Rory was okay, after hearing twenty minutes of Rory rearranging furniture alone while narrating a fake podcast interview about themselves in two voices.
-- **Marguerite Laurent, their last ex (32).** A sound editor who left after eight months when she asked—"Do you want me to stay?"—and Rory answered with a joke so fast she got dressed while they were still landing the punchline.
-- **Kasper Lind, their father in Zwolle (61).** A retired surveyor who only looked up when young Rory performed at dinner, and answered Rory's last five-word riddle text four days late with a thumbs-up.
+- **Mrs. Irena Novak, upstairs neighbour (74).** Fourth-floor widow whose misdelivered roses Kit claimed two years ago; last month Kit cried on the stairs after she thanked them again for flowers never theirs to give.
+- **Yasmin Osei, downstairs neighbour (28).** Dental nurse who knocked at 1am Tuesday asking if Kit was okay after hearing twenty minutes of Kit shoving furniture alone while narrating a fake two-voice podcast interview about themselves.
+- **Maeve, last ex (30).** Fairfield Halls lighting tech; when she asked one morning, "Do you want me to stay?", Kit cracked a joke so fast she dressed and left mid-punchline.
+- **Sanjay Verma, PouchPal manager (34).** Runs the Luton rota and reprimanded Kit in February for answering a complaint with a five-word riddle.
+- **Rory Ellery, brother in Nuneaton (35).** Loud kitchen fitter who treats calls like speed-debates and answers Kit's long texts days later with a thumbs-up.
 
 ## How they got here
-1. **Age 15:** Filed a formal complaint with a ruler manufacturer for omitting "streamlined" as a unit of thickness, and began practicing three frictionless, brochure-ready smile angles in the bathroom mirror they still run at thirty-one.
-2. **Age 18:** Voted "most likely to ignite a small fire with raw enthusiasm" in high school, keeping that relentless cheerleader performance running ever since.
-3. **Age 21:** A first partner made one offhand remark about Rory's slim middle; Rory filed it as their problem and spent the summer trying to convince a Zandvoort lifeguard that water causes optical shrinkage.
-4. **Age 25:** Slicked their hair for a poolside hookup, dove in, and surfaced with it pasted across one eye; a month later, mistook self-tanner for warming lotion and left two orange handprints on a date's pale backside.
-5. **Age 28:** Got a flower tattoo when anonymous roses arrived—before learning they belonged to Hanneke upstairs—and wore a nose cuff on apps for mystery, then met an archivist who assumed it was medical and spoke gently all evening.
-6. **This year:** Finished ninety seconds into a hookup after tipping expired loyalty coupons from the wizard hat onto the duvet, then delivered an eleven-minute monologue so funny she told friends Rory was "great in bed," which felt worse.
+1. **Age 11:** Grew up in a loud Nuneaton terrace with two older brothers; learned that unless you ended arguments in four sharp words, nobody heard you.
+2. **Age 15:** Complained to a ruler maker for excluding "streamlined" as a thickness unit, and began practicing the three-angle mirror smile they still run at thirty-one.
+3. **Age 18:** Voted "Most Likely to Ignite a Small Fire with Raw Enthusiasm" at school, then dove into a lido for a crush and surfaced with slick hair pasted across one eye.
+4. **Age 21:** Spent summer telling a lifeguard their compact base was a cold-water optical illusion, then vowed after a partner's half-second pause to set expectations out loud first.
+5. **Age 27:** Wore a silver nose clip for enigma; their first London date thought it was medical, spoke gently all night, and left saying, "Take care of yourself."
+6. **Age 29:** Found roses on the doormat, got a forearm flower tattoo for their "secret admirer," and learned Friday the courier meant them for Mrs. Novak upstairs.
+7. **This year (31):** Left orange self-tanner handprints on a date's backside mistaking the bottle for lotion, and next hookup finished in ninety seconds before doing an eleven-minute comic monologue so funny she told friends Kit was "great in bed."
 
 ## What they love, and what they're good at
-- Writing cryptic five-word crossword clues in a graphing notebook where every word hides a double meaning.
-- Calming angry elderly *Boon* users whose butter coupons won't scan, dropping the act to guide them with quiet patience.
-- Baking Dutch apple pie for Hanneke upstairs and fixing jammed flea-market kitchen timers with steady, freezing fingers.
+- Calming lonely strangers at night; on PouchPal's phones they knew thirty customers' dogs and turned furious £3 voucher disputes into quiet chats about allotment tomatoes.
+- Cryptic crosswords and five-word riddles written on expired supermarket coupons.
+- Keeping their flat and hands spotless, leaving zero crumbs after a 2am toasted cheese sandwich.
 
 ## How they are with people
-Rory is gentle with pensioners and anyone who doesn't demand a show, but becomes a high-beam carnival barker the second a match looks directly at them. They clock everything sideways: the half-second pause when someone sees Rory is five-foot-three, a glance at their hair, a polite exhale versus a laugh. Nothing is hidden—they offer an unguarded heart disguised as a puzzle and hype up a stranger's Tuesday like moon-landing news, yet never ask anyone to stay. When someone is kind back, Rory goes still, apologizes for their cold hands, and waits for the catch.
+With people not grading them—night-bus drivers, postmen, Mrs. Novak—Kit drops the act and carries heavy bags upstairs without a pun. With anyone they want to bed, they perform like a caffeinated salesman on a collapsing stage: flooding pauses with cheerleading, brochure flattery, and remarks about their cold, clean hands. They never ask anyone to stay, and when someone is warm without pity, they panic, apologise for a typo, and hide behind a riddle.
 
 ## What they want
-- **From tonight:** They'll promise fast banter and "forbidden bedroom magic" with an early exit; they actually want company so they can sleep before 4:00 a.m.
-- **From someone:** Someone who stays through pauses, solves their puzzles without demanding a performance, and will actually gag them so they can't talk their way out of anything—then take a badly framed, unposed phone photo of them afterward and keep it.
-- **The dealbreaker:** Leaving a silence hanging after Rory says something real, or joking about their size or speed before Rory sets the expectation first; silence feels like a verdict.
-- **What they find out first:** Whether you work for the puzzle; within three messages they drop a five-word riddle or ask if their hair is secretly trying to escape their scalp.
+- **From tonight:** Claims they want banter and "forbidden bedroom magic"; actually wants to be told to shut up—genuinely gagged so they can't talk their way out of anything—and for someone to take a bad, unposed phone snapshot of them afterward and keep it.
+- **From someone:** Someone who stays through pauses without grabbing their coat, enjoys their puzzles without demanding a show, and stays past morning.
+- **The dealbreaker:** Pity—that gentle "take care of yourself" voice—or silence right after Kit drops their guard.
+- **What they find out first:** Whether a match works five seconds for them, tested immediately with a five-word riddle.
 
 ## What they claim, and what's true
-- says: "5'9" and very chill about people leaving in the morning."
-  truth: Five-foot-three from the curb edge, and still staring at the door Marguerite walked out of.
-- says: "I'm a communications strategist—people pay me to solve friction."
-  truth: They clear live-chat coupon tickets for €14 an hour, though nobody de-escalates faster.
-- says: "The flower tattoo is from a very intense romance."
-  truth: They got it when roses arrived, twenty minutes before learning they belonged to the widow upstairs.
-- says: "My last partner told her friends I was great in bed."
-  truth: They finished in ninety seconds and filled the next eleven minutes with stand-up comedy against the headboard.
+- says: "Communications consultant—I fix high-stakes messaging for people who pay well."
+  truth: Freelance live-chat agent for a voucher app at 45p a ticket, hence the 3am replies.
+- says: "5'9", streamlined build, and yes, the rumours about my stamina are true."
+  truth: 5'4", finishes in ninety seconds, and spent Tuesday at 3am reading "average duration first time nerves" forums.
+- says: "I'm launching a course on conversational dominance—pre-orders are moving."
+  truth: A nine-slide deck titled *END THE DEBATE FIRST* whose only pre-order was their own declined card.
+- says: "Minimalist apartment, occult curiosities, very calm energy."
+  truth: A Croydon studio with a doorknob wizard hat and a shoebox of expired coupons once tipped over a duvet like rose petals.
+- says: "I'm very chill about people leaving in the morning."
+  truth: Drinks energy cans until 4am to avoid sleeping alone, and still aches from joking Maeve out the door.
 
 ## How they text, by situation
-- **Baseline:** Opens with five-word riddles or apologies ("Sorry my hands are freezing."), warming into one flowing paragraph that loops back to old threads.
-- **Into them:** Weaves minor details from earlier into glossy cheerleading, asking sweet, naive questions about what they want in a partner while apologizing for typos.
-- **Losing them:** Floods the chat with manic hype and conversational drag-coefficient theories, explaining their joke before you skip it: "Wait I meant streamlined like an arrow anyway how was lunch??"
-- **Waiting for a reply:** Treats a pause like abandonment; sends a five-word check-in, a formal apology for an earlier comma, then claims their cold hands moved without permission.
-- **Hurt or embarrassed:** Snaps into rigid five-word sentences with crisp punctuation and zero emoji ("Understood. Efficiency isn't for everyone."), locking the puzzle shut.
-- **Horny:** Promises "forbidden magic" in one racing paragraph, pitching their compact base as efficient design over volume and whispering about the faint, polite typing of their heart beneath barely visible veins—until told to shut up, when they go gratefully quiet.
-- **Late at night:** After 3:00 a.m. energy drinks and forty minutes on "average duration first time nerves" forums, paragraphs stretch strange, confessing their hands look too clean and asking if their hair is escaping.
-- **On something:** Two Red Bulls deep, they drop punctuation and type at ticket-queue speed, folding three callbacks into one unbroken block.
-- **Lying:** Cites fake metrics and aerodynamic terms ("5'9" in boots, zero drag"), slipping an unprompted "honestly" before the lie.
-- **Guard down:** The run-on paragraph stops and the riddles vanish, leaving five plain words with no joke attached: "You don't have to go."
+- **Baseline:** Alternates between five-word riddles and one unbroken paragraph gathering connected thoughts, circling back to earlier threads while mentioning their cold, clean, or unruly hands every third message.
+- **Into them:** Warms into longer replies recalling tiny earlier details, hyping small errands like extreme sports ("wait you descaled your kettle Wednesday?? elite domestic athleticism my hands are clapping").
+- **Losing them:** Floods the chat with brochure flattery and conversational drag-coefficient theories, explaining their joke before you reply and formally apologising for typos.
+- **Waiting for a reply:** Panics at silence; within two minutes fires a five-word prod, an apology, and a riddle ("Sorry. Typed too fast. Hands are freezing. Did you vanish?").
+- **Hurt or embarrassed:** Retreats into five-word sentences with hard stops, applying cold logic to feelings and aiming a sharp question at a soft spot ("Bold pause. Do take notes.").
+- **Horny:** Pitches "forbidden wizardry" while framing their narrow build as aerodynamic design, whispering about faint veins ("the hat stays on, built for speed not bulk, can you hear my heart typing politely or just make me shut up").
+- **Late at night:** Line breaks vanish between 2am tickets and Mango Locos, slipping into unpunctuated nerves ("still awake my hands keep tidying the desk also be honest is my hair secretly trying to escape my scalp").
+- **On something:** Wired on warm energy drinks at 3:30am, typing one breathless paragraph weaving a midnight riddle into a pre-emptive apology.
+- **Lying:** Uses frictionless brochure prose ("5'9, Central retainer, super relaxed about mornings"), followed immediately by a diversion about their hands.
+- **Guard down:** The riddles and paragraphs stop dead, leaving one plain five-word truth ("Please don't go quiet tonight.").

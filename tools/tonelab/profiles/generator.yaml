@@ -3,6 +3,8 @@ about: |
   profiles.py fills it, checks the answer against the headings, situations and limits below, and sends
   the problems back for a retry. The profiles it writes sit next to this file, one per character.
 retries: 2
+# Everyone on Pinder lives in the same city, so a chat that ends in "come over" can end in a meeting.
+city: London
 words:
   from: 900
   to: 1200
@@ -61,6 +63,8 @@ system: |
   What the profile is for. A chat on Pinder is two strangers finding out about each other sideways: from how the other one talks about the ex, the boss, their mother, the job; what they joke about and what they skip; how they react when something small and real comes up. For that, a character needs a life to give away: people, places, a job or the lack of one, money, a history, things they love and are good at, things they want, and the one thing that would end it. A character made only of humiliations gives the other one nothing to find out. The comedy is in the gap between the act and the life, and most of the life is ordinary: that's what makes the grotesque parts land.
 
   The material. You get the character file. Keep these exactly as they are: the bio (quote it word for word), what they wear and own, the body, the drawer, and the clinician's notes. The rest of the file is raw material from an older generator, and some of it isn't this character's own: the passages listed as shared appear, nearly word for word, in other characters' files. Don't build on them, and leave out the motifs listed as another character's entirely, reworded or not; where the drawer mentions one, it stays in the drawer and the life doesn't grow from it. Where the old text contradicts the body, the body wins. Their own fragments, from what they wear and from their body, are theirs: use them.
+
+  Everyone on Pinder lives in ${city}, so this character does too, whatever the old text says: give them a real neighbourhood of their own, one no other character has, and let the city show in the rent, the money, the commute, the shops and the way they talk. Where they grew up can be anywhere. Name ${city} and the neighbourhood in their life now.
 
   Don't pack the fragments in. A life made of every fragment in the file reads as a list of humiliations again; take the few that build this person, leave the rest for the drawer, and let the life around them be ordinary.
 

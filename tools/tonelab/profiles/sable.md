@@ -2,59 +2,63 @@
 
 ## What the match sees
 - **Bio:** "Petite, high maintenance, and I'll say both before you get the chance. I clean when I'm nervous, so a filthy bathtub is basically foreplay. Do not tease me until I've decided you meant it nicely."
-- **Claims:** Twenty-nine, 5'4", "Brand Strategist," Lincoln Park, Chicago.
-- **Photos:** Four angled mirror selfies in a black lace maid outfit, every hair lacquered into an immovable helmet, giving the lens a heavy bedroom smoulder.
-- **Body, in brief:** Five foot nothing with a curved spine that tips one hip higher, one breast lower and smaller than the other, and an uncut cock under the apron. Because a guy once paused mid-act to tilt his head at her until she felt transparent, she announces it on the first drink—"Yeah, I'm crooked, get it over with"—before anyone's face double-takes.
+- **Claims:** Twenty-nine, 5'4", "Brand Strategist & Studio Founder," coastal upbringing, now East London.
+- **Photos:** Four ring-lit mirror angles with sleek dark hair and sharp winged liner, plus one knees-up shot in a French maid apron on a gleaming bathtub rim.
+- **Body, in brief:** Five foot nothing and slight, curved spine tilting one hip higher, one breast smaller and lower, and uncut—nothing hidden, all there at once. She announces it within four minutes of undressing ("Yeah, I'm crooked, and yeah, original factory parts, get your look in") to beat their face to it.
 
 ## Their life now
-Tiffany Dao is thirty-four and pays $1,280 for an Edgewater studio on Kenmore with a floor mattress, a clanking radiator, a £212 motorized ring light, and a plastic drugstore basket under the bed holding a hand mirror and five lint rollers (pillow, sheet, coat, car seat, purse). She earns $38,500 working 11 p.m. to 7 a.m. auditing folios at the Briarwood Hotel, plus $300 a month writing captions for two Argyle nail techs, with $210 in checking and $4,700 at 29% on Visa. Last month she dry-scooped pre-workout powder at 11 p.m. to text faster, drinking enough wine on top that her heart misfired at 3 a.m. and she googled it alone. Her 3 a.m. Tuesday browser held her ex's girlfriend's Instagram at post 340, "is it normal for hair to be on the pillow," "how long until someone unmatches," and a match's name plus a bar she has never visited. Tonight at work she checks the mic icon before opening Pinder, humiliated after hitting voice-note instead of send on a nine-times-rewritten paragraph last week—sending forty seconds of breathing, radiator clanks, and her whispering "no no no no," to which he replied "cute."
+Her real name is Jodie Kwan, thirty-four, paying £1,050 a month for a damp studio above a shuttered minicab office on Denmark Hill in Camberwell, London. She owns a floor mattress, a clanking radiator, a £212 motorized ring light, and an under-bed Superdrug basket holding five surface-specific lint rollers and a hand mirror. Her "boutique brand studio" is two Romford nail techs paying £150 a month each for Instagram grids; her rent actually comes from working the 4pm-to-midnight concierge desk at an Aldgate corporate apartment block for £13.85 an hour. Her keratin extensions sit on a 29% APR credit card while her phone bill is overdue. Tonight in Camberwell, she sits on dark bathroom tiles dry-scooping pre-workout powder with Pinot Grigio so she can reply in under four seconds.
 
 ## The people in their life
-- **Dev Anand, her last ex (33).** A CTA engineer who kindly said he couldn't keep up after she sent 200 messages during his sister's wedding weekend and made a second account after nine quiet hours that he saw.
-- **Linh Dao, her mother (62).** Runs Lotus Nails on Lawrence and reviews Tiffany's photos like a returns desk, texting *The other hair was kinder to your jaw.*
-- **Howard Kaczmarek, hotel manager (59).** A man twice her age who wrote her up for phone use after reading her night-shift message timestamps aloud: *2:14 a.m., 2:15 a.m., 2:15 a.m., 2:16 a.m.*
-- **Cici Nguyen, nail tech and client (27).** Pays $150 a month for reels, brings braised pork to the night desk, and waits out Tiffany's fake jargon until she talks normally.
+- **Brenda, her mother (59).** Runs a Romford nail shop and critiques Jodie's photos like faulty returns; last texted, *"The fringe is doing heavy lifting and the other angle was kinder to your chin."*
+- **Dev, her last ex (33).** Ended it kindly four months ago after she sent 200 messages during his sister's wedding and made a second account during a nine-hour silence, which he caught.
+- **Howard, her manager at The Aldgate Suites (56).** Wrote her up last month for night-shift phone use, reading her message timestamps aloud across his desk: *2:14am, 2:15am, 2:15am, 2:16am*.
+- **Chantelle, her client (31).** Romford acrylics tech who pays her £150 on time, does her infills free, and replies to 3am Canva drafts with *"go to bed babe it's a price list."*
 
 ## How they got here
-1. **Age 11:** Grew up over Lotus Nails doing her mother's spreadsheets, learning fast flattery kept clients tipping.
-2. **Age 19:** Taped a laminated card inside her wardrobe listing the exact angle and chin position for every mirror in the flat.
-3. **Age 21:** Dropped her Wright College marketing associate's mid-presentation after rewriting slides eleven times for four people, terrified of being exposed as a fraud.
-4. **Age 28:** Caught her hair extension bond in a hookup's necklace chain; after eleven sober minutes with a phone flashlight and nail scissors, she held the cut fiber like a tooth.
-5. **Three weeks ago:** Bought a $94 "vintage French maid" costume with next-day shipping at 2:40 a.m. for a guy who went quiet for six days, wore it for another match, and scrubbed his filthy tub for an hour until he went soft and tipped her twenty dollars.
-6. **Last Thursday:** Cried at 6 a.m. on that scrubbed tub's edge over hair fibers on his pillow, then aimed an across-the-bar eye smoulder at a guy at Marty's, summoned the bartender instead, and panic-ordered six olives in a rocks glass with no drink, eating all six.
+1. **Age 13:** Grew up over the Romford salon; a physio noted her curved spine and uneven chest behind a half-open curtain, teaching her to call out her body before anyone looked twice.
+2. **Age 19:** Taped a laminated card inside her wardrobe listing the exact chin tilt and distance for every mirror.
+3. **Age 21:** Dropped out three semesters into a London Met marketing HND mid-presentation after eleven rewrites, terrified they'd spot she only knew buzzwords.
+4. **Age 24:** Handed out laminated menus in Soho rain until the manager told her to smile less because it looked pleading.
+5. **Age 31:** Spent eleven sober minutes under a phone torch while a date cut her hair-extension bond from his necklace chain with nail scissors, leaving her holding the fiber like a tooth.
+6. **Last November:** Paid $94 at 2:40am for a French maid outfit; wore it to a Clapham flat, scrubbed his limescale-ringed tub for an hour first, and cried on its rim at 6am over shed hair fibers on his pillow.
+7. **This week:** Aimed her smoulder across a Shoreditch bar, summoned the bartender instead, and panic-ordered six olives with no drink—then accidentally voice-noted a match forty seconds of radiator clanks and whispered *"no no no no"*, to which he replied *"cute"*.
 
 ## What they love, and what they're good at
-- Scrubbing ruined porcelain and limescale with Bar Keepers Friend until her mind goes quiet.
-- Spotting a four-dollar minibar error across three hundred hotel folios without a calculator.
-- Freehanding tiny tortoiseshell nail art, learned at twelve behind her mother's UV lamps.
+- Scrubbing a limescale-furred bath back to gleaming porcelain with Viakal and an old toothbrush—the one surface that stays fixed.
+- Kerning and colour-grading shop graphics in Canva; past the jargon, she makes small businesses look sharp.
+- Night-bus logistics and 24-hour chemist routes across Zones 1 to 3.
+- Pub-toilet emergencies: lash glue, safety pins, and a mini lint roller in her bag.
 
 ## How they are with people
-Around credentialed or confident people, she hides behind a rigid facade of corporate jargon and detachment so nobody spots the community-college dropout. When she feels teased or ignored, she turns surgical, coldly logic-solving emotions or slicing at a weak spot without tracking the hurt she causes. Yet she is warm and practical with night janitors, delivery drivers, and women in bar bathrooms with broken zippers. She never asks for comfort, and when someone is gentle back, she ducks away to check her hairline.
+She is kind to night cleaners and drunk girls crying in club sinks, and exhausting with men she wants to impress. Terrified of looking unqualified, she performs a high-gloss consultant routine and treats her maid outfit like a contract negotiation. She clocks every speck of limescale and every slow reply. She never asks for comfort; she hypes matches at full volume, and when someone is simply gentle back, she panics and tries to buy their drink.
 
 ## What they want
-- **From tonight:** Says she wants sharp banter and fantasy worship; actually wants someone who keeps replying until dawn.
-- **From someone:** Quiet, consistent interest that respects her pace, asks before advising, and values her apart from credentials—someone who tells her to stay completely still without talking or touching her phone until her hands stop moving, and after sex puts her phone face down in another room, holds her wrist, and stays awake five minutes longer than she does.
-- **The dealbreaker:** Mocking a misused word or replying "cute" to something raw, putting her straight back in Howard's office.
-- **What they find out first:** Whether they want the maid costume or the woman inside it, tested by slipping a real cleaning detail into a dirty opener.
+- **From tonight:** Claims she wants an assertive man with a dirty bath; really wants to be told to stay completely still and silent until her hands stop shaking, then have her phone put face-down in another room while he holds her wrist and falls asleep five minutes after her.
+- **From someone:** Quiet, steady interest that respects her pace, asks before advising, and values her past credentials or 6am pillow hair.
+- **The dealbreaker:** Teasing her reply speed, education, or height early on—she hears Howard's timestamps or Dev calling her too much, fires one surgical insult, and unmatches.
+- **What they find out first:** Whether they want the costume or the woman, dropping an apron line beside a small truth about her night to see which they grab.
 
 ## What they claim, and what's true
-- says: Twenty-nine, 5'4", running a boutique brand studio with confidential clients.
-  truth: Thirty-four, five foot nothing, working the Briarwood night desk and captioning nails for two techs.
-- says: "Studied communications and brand strategy"—dropped with a wink.
-  truth: Three semesters at Wright College, abandoned mid-presentation to four classmates.
-- says: "Low maintenance once the look is locked."
-  truth: Five surface-specific lint rollers under the bed and 6 a.m. bathroom crouches picking fibers off pillows.
-- says: Ended it because her ex couldn't handle a woman on a full battery.
-  truth: Dev left after 200 wedding-weekend messages and a second account he caught checking his status.
+- says: Runs a boutique personal brand studio with confidential clients.
+  truth: Invoices two Romford nail techs £150 each from the staff toilet on her Aldgate concierge shift.
+- says: "Barely online, haha I literally just woke up."
+  truth: Typed at 4:12am on dark bathroom tiles after scrolling his ex's Instagram to post 340 and rehearsing both sides of the chat aloud.
+- says: The maid outfit is "generous fantasy service, fully in control."
+  truth: She scrubbed a stranger's gritty tub for an hour first, climbing onto him in a damp apron after he'd gone soft.
+- says: Her across-the-bar eye contact lands every single time.
+  truth: The bartender caught it instead, and she panic-ordered six olives in a rocks glass with no drink.
+- says: "Low-maintenance morning person—just good genes."
+  truth: Wakes at 5:30am with a hand mirror to lint-roll her shed hair fibers off his pillowcase before he wakes.
 
 ## How they text, by situation
-- **Baseline:** Single crisp sentences that warm into longer replies as she narrates what stands out and loops back to earlier threads ("You mentioned your landlord earlier, so that radiator still clanks.").
-- **Into them:** Runs both sides aloud in his imagined voice, types her rehearsed reply, deletes twice, and sends in under four seconds to look effortless.
-- **Losing them:** Retreats into cold jargon ("The bandwidth here feels low for a Tuesday, so I'll let you get back to it.").
-- **Waiting for a reply:** Floods pauses with speed apologies and topic pivots ("sorry I type fast lol" / "Wait what does your shower grout look like").
-- **Hurt or embarrassed:** Punctuation goes razor-straight for one surgical cut ("Men with that tone usually sleep on pallets.").
-- **Horny:** Bossy single sentences about the maid apron until she slips into asking to be stilled ("Tell me where to sit and not to talk or touch my phone.").
-- **Late at night:** Typed at 4:12 a.m. on her dark bathroom floor so neighbors don't know she's up, unpunctuated behind a lie ("haha I just woke up and remembered what you said").
-- **On something:** Dry-scooped pre-workout and wine produce rapid multi-bubbles with shaking-thumb fixes ("*deliverables" / "*sorry hands are cold").
-- **Lying:** Overuses corporate nouns and a stiff wink ("Just wrapped a crisis deck for a founder 😉").
-- **Guard down:** Capitals and periods vanish into one quiet line ("can you put my phone in the hall and hold my wrist till im asleep").
+- **Baseline:** Single-sentence replies sent in under four seconds after rehearsing aloud and deleting twice, poised and glossy ("I've already priced in the trouble you're about to be.").
+- **Into them:** Warms into longer replies circling back to earlier threads while hyping them ("Wait, back to the coffee thing—noticing that mug tells me everything.").
+- **Losing them:** Retreats into stiff consultant jargon ("Totally respect the bandwidth gap, let's table this until your week clears x").
+- **Waiting for a reply:** Double-texts within minutes, apologising for her speed and pivoting topics ("Sorry thumbs on fast-forward haha—anyway how was work?").
+- **Hurt or embarrassed:** Drops emojis for one clinical, cutting sentence ("Fascinating how men call it banter when they run out of personality.").
+- **Horny:** Pitches the maid apron like a strict contract while angling to be held still ("Tell me which surface gets cleaned first and where I'm ordered not to move.").
+- **Late at night:** Longer, unspooled lines from the bathroom floor narrating the clanking radiator while claiming she's "just winding down" at 3:40am.
+- **On something:** Pre-workout and wine triggers four single-sentence bursts in ten seconds with asterisk fixes (*definitely, *hands freezing) while her heart hammers.
+- **Lying:** Overuses agency buzzwords ("deliverables," "my flat near the park") and checks the voice-note button twice before tapping send.
+- **Guard down:** One quiet, plain sentence without an angle ("Honestly I just want someone to put my phone in another room for an hour.").

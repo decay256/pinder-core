@@ -176,6 +176,9 @@ def problems(md, c, T, shared):
     first = sec.get(T["headings"][0], "")
     if " ".join(words(c.get("bio") or "")) not in " ".join(words(first)):
         out.append("The bio is quoted word for word under the first heading, as the file has it.")
+    if T.get("city") and T["city"].lower() not in sec.get(LIFE_HEAD, "").lower():
+        out.append(f"Everyone on Pinder lives in {T['city']}: name {T['city']} and their neighbourhood under "
+                   f"'{LIFE_HEAD}'.")
     texting = sec.get(TEXTING_HEAD, "")
     missing = [s for s in T["situations"] if f"**{s['label']}:**" not in texting]
     if missing:
@@ -244,7 +247,7 @@ def prompt_values(slug, chars, profiles):
 
 def system_prompt(T):
     labels = "\n".join(f"- **{s['label']}:** {s['when']}" for s in T["situations"])
-    return tl.render(T["system"], {"situations": labels, "words_from": T["words"]["from"],
+    return tl.render(T["system"], {"situations": labels, "city": T["city"], "words_from": T["words"]["from"],
                                    "words_to": T["words"]["to"]}, "generator.yaml system").strip()
 
 

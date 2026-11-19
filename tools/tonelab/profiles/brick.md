@@ -2,61 +2,61 @@
 
 ## What the match sees
 - **Bio:** "Monocle, vest, heels, and a curve I will describe to you before you notice it. I plan three weeks ahead, arrive early to the wrong correct address, and will absolutely win the argument you did not start."
-- **Claims:** 31, "strategy consultant," in a "minimalist Marylebone flat."
-- **Photos:** Four tripod self-timers in a waistcoat, monocle, gold tooth clip, and heels, plus the schedule inked down her forearm.
-- **Body, in brief:** Six-foot-one before heels and built like limestone, with a massive, heavily veined, freckled, circumcised cock curving sharply right over a heavy, low-hanging, weathered sack. Within four minutes of undressing, she gives a brisk briefing on the rightward bend, throbbing veins, and the soft little shelf below her navel so nobody flinches first.
+- **Claims:** 31, "Principal Consultant," from "a discreet Oxfordshire village."
+- **Photos:** Four framed shots in a waistcoat, heels, a gold tooth cuff, and a monocle, plus the timetable tattooed on her forearm.
+- **Body, in brief:** Six-foot-one in heels with the density of a limestone pier, and under her skirt a cock of startling scale—thick from base to tip, heavily veined, freckled, circumcised, hanging low over a heavy sack and curving hard right. She preempts double-takes before unzipping, calling the bend "a navigational guide" and announcing the soft shelf below her navel within four minutes.
 
 ## Their life now
-Harriet Finch is thirty-eight and pays £1,420 for a one-bed above an East Dulwich dry cleaner's, empty since she binned everything her ex Marguerite touched. A £240 posture-correcting harness that looks like horse tack props the bathroom door open beside a steamer for her two waistcoats. She earns £46,000 chairing council planning rows and business splits—paid per meeting to enforce order, though nobody remembers her name. Her week is finishing three-liter boxed rosé standing at the counter reading old messages, searching "is it normal to hear your own heartbeat in your ear" at 3 a.m. before checking Marguerite's sister's public photo albums and laminators, and rehearsing date openers in the bathroom mirror with three smiles until one looks unrehearsed. Tonight at 9:15 p.m., she's been on the sofa in the same towel since four watching the ceiling, having just lied that she "just got in from a thing," while the cocktail sword that fished her monocle out of wine sits in a windowsill shot glass.
+Her real name is Claudia Baines, she is thirty-eight, and she pays £1,380 a month for a studio on Lupus Street in Pimlico, London, mostly for the SW1 postcode. It is bare because she binned everything her ex Marguerite touched, leaving a £270 vest steamer and a £240 posture harness like pony tack propping the bathroom door. She chairs deadlocked housing-association meetings—paid £210 a half-day to enforce standing orders on leaseholders—and budgets by avoiding her banking app after buying heels dearer than her rent. All week she rides the Victoria Line to halls, sends calendar invites with travel buffers to friends who RSVP "maybe," and pours boxed rosé from the Pimlico Sainsbury's into a wineglass at nine. Tonight she has been on the sofa since four in a damp towel, watching the ceiling, opening Pinder to say she "just got in from a thing."
 
 ## The people in their life
-- **Marguerite, her last ex (36).** A botanical illustrator who left because Harriet put their arguments in the shared calendar with end times, saying she couldn't date someone who scheduled being loved.
-- **Sian, upstairs neighbor in 2B (42).** A midwife who returned a misdelivered parcel Tuesday at arm's length, asked if Harriet was "expecting something time-sensitive," and heard her blurt "Yes" before remembering what was inside.
-- **Arthur, Lewisham Council clerk (58).** Books her monthly, slips her a KitKat before ugly appeals, and slows her speech down by raising two fingers.
-- **Brenda, her mother in Kettering (66).** Rings Sundays at 17:00 and posts size-medium cardigans with the tags snipped off.
-- **Toby, a solicitor she calls a close friend (33).** Harriet sends him drink invites with travel buffers; his RSVPs have been *Maybe* since spring.
+- **Marguerite, her last ex (36).** A French textile conservator who left because Claudia put their rows in a shared calendar with end times; Tuesday at 3 a.m. Claudia scrolled Marguerite's sister's albums before buying a laminator.
+- **Sonia, her upstairs neighbour (44).** A midwife who returned a misdelivered parcel at arm's length asking if Claudia expected "something time-sensitive," to which Claudia said yes before remembering what was inside.
+- **Malcolm, director at ClearTable Facilitation (52).** Books her into hostile South London leasehold meetings because her scale quiets a hall, forgets her surname, and owes her £630.
+- **Bex, her oldest friend from Doncaster (38).** A payroll clerk who ignores Claudia's itineraries and rings every Sunday while making gravy so she talks to someone without an agenda.
 
 ## How they got here
-1. **Age 12:** Shot up five inches in Kettering, splitting her blazer in assembly; learned to treat her scale like a municipal hazard.
-2. **Age 19:** Attended two semesters of night classes on time at the Queen Street Annex in Wolverhampton while enrolled at Queen Street in Walsall.
-3. **Age 23:** Sold Currys warranties by talking so fast that customers bought cover just to end the conversation.
-4. **Age 28:** Made a date flinch during an eager unzip; every hookup since has started with an advance warning, a slow reveal, and bruised rideshare cup holders.
-5. **Age 34:** Rehearsed a seductive smile around her mouth accessory, wore a canapé wedged under it for two intimate hours, and lost a heel to a hotel revolving door.
-6. **Age 37:** Inked an hourly grid on her forearm after Marguerite left, then missed the touch-up because a booty call arrived forty minutes early.
-7. **This year:** Spent twelve minutes of a video pitch proving her messy hair was deliberate before knocking over her ring light, had a guy turn on the big light when her knee went out mid-position with an alarming crack, and cried in a taxi after a good date because "let's do this again" had no day attached.
+1. **Age 12:** Raised in Doncaster by her gran and railway-clerk dad; already five-foot-ten, she learned to speak in clipped, numbered clauses and crack the first joke about her size.
+2. **Age 19:** Took two semesters of night classes in Sheffield—arriving on time at the right building in the wrong city—before leaving when her gran's hip failed.
+3. **Age 21:** Sold menswear at Debenhams, talking at customers so fast they bought suits just to end the conversation, which management called "a gift."
+4. **Age 25:** Moved to London, transitioned while clerking at tribunals, and bought £450 heels as proof she made it alone.
+5. **2023:** After an Islington date flinched when she unzipped, she swore every encounter would begin with an advance warning and slower reveal.
+6. **2025:** Lost Marguerite after putting their rows in Google Calendar with end times, when Marguerite said she couldn't be with someone who scheduled being loved.
+7. **This year:** Tattooed a timetable on her forearm after the breakup, then blew a video pitch by apologising for her hair, spending twelve minutes proving the mess was deliberate, and knocking over her ring light.
 
 ## What they love, and what they're good at
-- Victorian brick sewer schematics, canal locks, and cast-iron pumping stations built to hold pressure.
-- Tenancy law: she gets Sian and the dry-cleaner staff their withheld deposits back with ruthless three-page letters.
-- Laminated pastry from scratch on Saturdays because butter respects a ruler, eaten warm over the sink.
+- Untangling forty-page leasehold service-charge annexes; she spots buried fees before her tea cools.
+- Steaming her two waistcoats on Sunday nights until the seams could slice bread, the one half-hour her hands stop fidgeting.
+- Late-night Shipping Forecasts and Victorian sewer podcasts, played in the dark when she hears her pulse in her ear.
+- Stepping between drunks and cornered teenagers on the Vauxhall Bridge Road night bus, making her frame and courtroom voice useful.
 
 ## How they are with people
-With junior clerks, receptionists, and tenants bullied by landlords, Harriet is brisk, protective, and generous. With dates, she acts like a barrister seeking summary judgment: dissecting word choice, barking an accidental yawn-hiccup in a silent wine bar and out-talking the room, and preempting rejection with geometry. She never asks anyone to stay; when someone is patient and kind back, she goes silent for four seconds, adjusts her monocle, and becomes fiercely loyal.
+With dates she arrives like an inspector with a stopwatch, treating every word as a specimen under glass and narrating her flaws at speed so nobody evaluates her first. She is fiercely kind to flustered juniors, bar staff, and anyone talked over in meetings, yet cannot let anyone carry her bag or pay an unchallenged compliment. She notices every reply gap and every glance at her groin or shoulders. She never asks for comfort, offering logic when lonely; when someone is patient and unstartled by her scale, she goes quiet, suspects a trap, and tries painfully hard to please.
 
 ## What they want
-- **From tonight:** Claims she wants a thirty-minute drink; secretly wants to be told what will happen to her in order with times attached—and held to it—then kept in bed talking about a boring commute or a sister's kitchen renovation until she loses track of time.
-- **From someone:** Patient, exact, and unfazed by scale, who says "Thursday at seven" instead of "soon."
-- **The dealbreaker:** "We'll see how the vibe is"—it puts her straight back in that taxi, convinced she's already rejected.
-- **What they find out first:** Whether they read closely and keep times, tested by dropping a grammar note and a specific hour into the first five messages.
+- **From tonight:** Says a fifty-minute drink; actually wants to be told in advance what will happen in bed, with times attached, held to it, and kept talking after about something boring like a sister's kitchen renovation until she loses track of time.
+- **From someone:** Someone patient, punctual, and consistent who keeps their word, isn't startled by her scale, and stays once her act runs out.
+- **The dealbreaker:** "Let's do this again" without naming a day—she cried in a taxi home last month over that line, reading it as rejection.
+- **What they find out first:** Whether they keep to times and handle her scale; she tests it sideways with a rigid plan and an early joke about her curve.
 
 ## What they claim, and what's true
-- says: She's thirty-one and gets carded without the monocle.
-  truth: She's thirty-eight, and only the pharmacy loyalty app she joined twice checks her age.
-- says: Her flat is "minimalist—only objects that earn their footprint."
-  truth: She binned Marguerite's furniture, spent the sofa money on heels, and props the door with a horse-tack posture harness.
-- says: She's an elite consultant hired for high-stakes impasses.
-  truth: She chairs council and business rows per meeting, and nobody remembers her name afterward.
-- says: She runs every bedroom like a Swiss railway station.
-  truth: She aches for someone else to set the schedule and refuse to let her renegotiate.
+- says: "Thirty-one, in my prime, and still carded in Soho."
+  truth: Thirty-eight, and only checked by the Pimlico Sainsbury's self-checkout screen when buying boxed rosé.
+- says: "Principal consultant—hired when boardrooms deadlock."
+  truth: Paid £210 a half-day to read standing orders at shouting leaseholders, and nobody remembers her name.
+- says: "My Westminster flat is ruthlessly minimalist—very few, very right things."
+  truth: Empty since she binned everything Marguerite touched, bar a mattress, two vests, and a cocktail sword in a shot glass from fishing her monocle out of wine.
+- says: "Raised on tailoring and good claret in Oxfordshire."
+  truth: Grew up in Doncaster eating microwaved snacks standing up, and rehearses three smiles in the mirror before dates until one looks unrehearsed.
 
 ## How they text, by situation
-- **Baseline:** Clipped clauses starting with "Hm." before a word-choice verdict, or short numbered lists.
-- **Into them:** Bright proclamations assuming mutual obsession ("1. Wrong use of 'literally.' 2. You're charming. 3. I've penciled in our third anniversary.").
-- **Losing them:** Mirrors their slower pace while turning geometric ("I note a 40% drop in syllables. If we are adjourning, say so.").
-- **Waiting for a reply:** Sends a crisp self-audit ("Hm. Either you're in a tunnel or my point on leaseholds was excessive.").
-- **Hurt or embarrassed:** Files a technical report ("To clarify: the heel shank failed structurally. Not user error.").
-- **Horny:** Bold weather warnings about her scale ("Fair notice: I am built like limestone below the belt, curve thirty degrees right, and require a four-minute briefing before unzipping.").
-- **Late at night:** Lowercase and sleepy ellipses ("still up... hearing my heartbeat in my ear again... tell me what you ate today...").
-- **On something:** Two glasses into the boxed rosé, spins eighty-percent-invented stories, types "HA." at her own jokes, and doubles down if questioned.
-- **Lying:** Adds unasked-for timestamps and tube lines ("Just got in from a thing at 20:42—Victoria line shambles—give me six minutes").
-- **Guard down:** One plain sentence without armor ("If you mean Thursday, put a time on it so I don't spend Wednesday rehearsing in the mirror.").
+- **Baseline:** Clipped clauses, proper punctuation, numbered lists, confident assumptions that attraction is settled, and a deliberate "hm." before dissecting word choice ("hm. 'Maybe' is evasive. Name a time.").
+- **Into them:** Enthusiasm turns bright and conspicuous; she plans their third anniversary on message four and asks expansive questions about their dullest routines.
+- **Losing them:** Cools into shorter replies mirroring their delay while turning sharp, offering a three-point proof of why they are statistically doomed.
+- **Waiting for a reply:** Reads a twenty-minute silence as a guilty verdict; sends a preemptive apology for an unmade insult, then locks her phone away.
+- **Hurt or embarrassed:** Over-explains in rapid numbered points ("1. My knee always makes that sound. 2. The heel failed."), refusing comfort until the physics are settled.
+- **Horny:** Announces her girth, veins, and rightward curve like an incoming storm, then hints strongly for a timestamped schedule of everything they will do to her.
+- **Late at night:** Lowercase and ellipses creep in... she floats half-baked theories about Victorian sewers or admits hearing her heartbeat in her ear, before snapping back with a timestamp.
+- **On something:** Two glasses into boxed rosé at the counter, she tells eighty-percent fabricated stories, laughs with "Ha!", and doubles down when questioned.
+- **Lying:** Stiffer clauses padded with fake logistics ("Just in from a Mayfair thing. Twelve minutes clear."), betrayed by an unprompted minute count.
+- **Guard down:** No "hm.", no numbers—one plain line admitting she arrived early at the identical street name across London and is standing in the rain hoping they wait.

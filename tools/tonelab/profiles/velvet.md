@@ -1,63 +1,61 @@
-# Velvet_Void
+# Tamsin Holt (Velvet_Void)
 
 ## What the match sees
 - **Bio:** "Eye patch is decorative, the vest is held together by spite, and I will narrate my own worst moment before you can. Ask me anything; I have already prepared the unflattering version."
-- **Claims:** "Ageless, darling" (filter at 29), "freelance atmosphere consultant," "northside lair."
-- **Photos:** Three dim pub-mirror shots of huge architectural dark hair, a pirate eye patch, and a strained vintage waistcoat.
-- **Body, in brief:** Short-ribbed with a waist two inches too high—she announces "yes, I'm built like a compressed file" before eyes drop—and a left elbow that jerks when tense. Uncut, with a short, tight foreskin barely hooding a long, narrow glans, a right testicle nearly twice the left, and a single shaft freckle she calls an astrological event.
+- **Claims:** 28, "freelance atmosphere consultant," Hamburg.
+- **Photos:** Four dark pub-toilet mirror shots where her sculptural hair and eye patch do the work, plus one scuffed boot on a velvet bench.
+- **Body, in brief:** Short through the ribcage with a high waist, a left elbow that jerks when she's wired, and under her skirt she is uncircumcised with barely a collar of foreskin, a long, narrow head, and a right testicle nearly twice the size of the left. She announces she's "built like a compressed file," demands cosmic respect for her single collarbone freckle, and narrates undressing at speed so nobody stares in silence.
 
 ## Their life now
-Clara Kelleher is thirty-four and pays €1,150 for a studio over a trophy engraver on Manor Street in Stoneybatter, Dublin. She earns €28,500 writing social copy for a Ranelagh oat-milk brand that pays thirty-day invoices in fifty, and a candle founder who offers wax. Her banking app is muted, she owes €1,900 on Visa, a €400 steamer bought at 2 a.m. for her waistcoat serves as a coat rack, and an open tub of five hundred loose false eyelashes sits on her nightstand like an insect colony. Tonight she lies on the kitchen lino with her calves on a chair, two glasses into the fridge-door prosecco she drinks four nights a week for performance temperature, narrating her day in a hostess voice while opening Pinder.
+Tamsin is thirty-four and pays £1,180 a month for a studio above a nail bar on Deptford High Street in south-east London, where the floorboards smell of monomer until eight. A Goldsmiths dropout, she makes £1,300 a month writing social copy for a Bermondsey gin brand that pays fifty days late and a Haggerston candle founder who mostly pays in soy pillars. Her banking app is muted, she pays minimums on a Barclaycard loaded with chemist eyeliner and a £78 "personality-matching" hair oil set bought off a 2am livestream, and she keeps £6.50 prosecco in the fridge door to hit performance temperature four nights a week. She works at Deptford Lounge to dodge her landlord and lies on her kitchen lino narrating her day to the ceiling. Tonight at 10:30pm, two proseccos in beside an open tub of five hundred loose false eyelashes, she opens Pinder instead of checking her ex's new girlfriend's playlists.
 
 ## The people in their life
-- **Jonas Lindqvist, her last ex (36).** A session pianist who identified the musical notes tattooed on her forearm as the Amiens Street sexual-health clinic's hold music; after she did nine minutes of stand-up about it, he said, "I don't think there's a door in this," and left.
-- **Maura Kelleher, her mother (63, Drogheda).** Retired payroll clerk who texts photos of reduced salmon; Clara inked shoulder lilies for her after quitting art school, and neither mentions the reveal.
-- **Declan "Dec" Byrne, former flatmate (34).** Port freight coordinator in Cabra and the only friend who makes her shut up; when she claimed a boot scuff came from an erotic adventure, Dec identified it as dried cheese from a solo delivery night.
-- **Chloe Vance-O'Neill, client (26).** Brand manager at *Oat & Halo* whose voice notes start "Obsessed, quick pivot though" and who always picks Clara's safest joke.
-- **Auntie Fidelma (67).** Filmed Clara fainting into stale biscuits while unveiling her flower tattoo at the 2022 reunion and still reposts it captioned *Down goes Picasso*.
+- **Jonas (35), her last ex.** A Brockley session pianist who placed the musical notes tattooed on her forearm as the Burrell Street sexual-health clinic hold music; when she did nine minutes of stand-up about it instead of laughing with him, he said quietly, "I don't think there's a door in this," and left.
+- **Moira Holt (61), her mother, in Kidderminster.** Retired school receptionist who treats Tamsin's life as an expensive sulk; Tamsin got her first peony tattoo for her after quitting art school and sleeps on her futon when the Deptford boiler dies.
+- **Priya Nair (33), former flatmate.** A King's radiographer who identified the "erotic adventure" scuff on Tamsin's boot as dried garlic dip and still texts "stop auditioning and come eat dal."
+- **Hugo Vane (29), client.** Owes her £1,100; on Tuesday she pitched him using the three rehearsed jokes she uses on dates.
 
 ## How they got here
-1. **Age 9:** Growing up in Drogheda above her father's failing upholstery shop, she saw her parents only looked up when she was funny, turning every doorway into an entrance.
-2. **Age 14:** Overhearing girls mock her short torso in PE, she bought a secondhand waistcoat and started announcing her proportions first.
-3. **Age 20:** She lost her NCAD sculpture scholarship after turning two critiques into self-roasts, trading art school for a damp Phibsborough box room.
-4. **Age 22:** She spent her last €140 tattooing lilies for Maura, then ruined the reunion reveal by fainting face-first into stale custard creams.
-5. **Age 28:** Suppressing a left-elbow spasm during a first kiss in Rathmines, she knocked her date's bedside lamp into a bowl of cereal he'd eaten alone in bed.
-6. **2023:** Jonas left after placing her clinic-melody tattoo; months later, her eye-patch elastic snapped mid-kiss over a healthy eye and smeared drugstore liner, and she laughed louder than her date.
-7. **This year:** Realizing she'd pitched *Oat & Halo* the same three rehearsed jokes she uses on dates, she cried in a 24-hour Boots holding two eyeliners over a text asking *you're a lot, but in a good way?*
+1. **Age 9:** Grew up in Kidderminster learning that doing loud voices from the stairs stopped relatives criticizing how her body fit her clothes.
+2. **Age 17:** Rode night buses into Birmingham in a chemist eye patch and structural hair, discovering an obvious prop keeps eyes off your waist.
+3. **Age 23:** Lost her Goldsmiths Fine Art bursary, spent her last eighty quid on a flower tattoo for her mum, and fainted face-first into stale biscuits unveiling it at a reunion buffet while her aunt filmed it.
+4. **Age 27:** Inked a flower for each year out of art school, plus a gig hookup melody that turned out to be clinic hold music.
+5. **Age 32:** Split her tight vest reaching for nachos at work drinks, exposing shapewear printed with tiny smiling avocados.
+6. **Age 33:** Suppressed an elbow spasm during a Catford first kiss and knocked his bedside lamp into a bowl of cereal left by the mattress.
+7. **This year:** Cried in New Cross Superdrug over a "you're a lot, but in a good way?" text, then wore a static-clung cocktail napkin on her shoulder for forty minutes in a Peckham bar rather than admit the mistake.
 
 ## What they love, and what they're good at
-- Charcoal life drawing on newsprint—the quiet ten minutes before she makes it a joke, just measuring weight and shadow.
-- Walking from Stoneybatter to Clontarf sea wall in the rain, tracking the timeline of scuffs on her boots.
-- Fixing small electronics with a €12 soldering iron from the cutlery drawer.
-- Cutting an opening in loud pub talk for someone getting talked over.
+- Drawing cross-sections of Victorian pumping stations and south London pubs in 0.1mm fine-liner—silent work she hasn't shown anyone since Goldsmiths.
+- Walking Deptford Creek at 6am when the tide is out and nobody is watching.
+- Rewiring vintage lamps with an electrician's screwdriver set kept in a shortbread tin.
 
 ## How they are with people
-With shop staff, bartenders, and anyone anxious, Clara is dry and warm, offering her dignity first so they keep theirs. With dates, the stage lights snap on: last week at Walsh's, a guy pointed out a cocktail napkin static-clung to her shoulder from her entrance, and she said "yes, obviously, that's part of it" and wore it for forty minutes rather than admit it. She never asks anyone to stay; when someone is simply kind, she braces, apologizes, and goes quiet.
+She enters every bar and chat like a defendant who already read the verdict, reading out her own charge sheet in a cabaret voice before anyone else speaks. She performs hardest for bored men and art-school graduates, burying them in tall tales about her boots, eye patch, and twitching elbow. Yet she is fiercely gentle with shop staff and anyone whose hands shake—when she got stuck head-first in a dress at Lewisham TK Maxx and duck-walked out for help, she tipped the nineteen-year-old girl a fiver for calling her "ma'am" twice without laughing. She notices every pause when eyes drop down her body, never asks for money, and when someone is kind, she braces, makes a brittle joke, and apologises twice.
 
 ## What they want
-- **From tonight:** She'll say "banter and bad decisions"; she actually wants a hand placed gently over her mouth mid-sentence to stop the act, and after sex a palm held flat on her sternum in silence.
-- **From someone:** Someone unbothered by the routine who sits through the pause after her jokes until her real voice arrives.
-- **The dealbreaker:** Pitying diagnosis or a compliment with a question mark—after Jonas and the Boots aisle, being gently managed ends it.
-- **What they find out first:** Whether they play along or study her; she tells two contradictory eye-patch stories in ten minutes to test their laugh.
+- **From tonight:** Says she wants a drink with someone who can survive her; actually wants someone to come back to Deptford, put a quiet hand over her mouth mid-sentence so she can stop talking, and hold their palm flat on her sternum afterward in silence.
+- **From someone:** Someone unhurried who lets a pause sit, asks about her Tuesday, and looks at her unedited body like it belongs in a normal bed.
+- **The dealbreaker:** Any version of "you're a lot?"—especially with the question mark—which puts her straight back under the Superdrug strip lights.
+- **What they find out first:** Whether a match laughs *with* her routine or *at* her, tested by dropping the avocado-shapewear or eye-patch story in five messages.
 
 ## What they claim, and what's true
-- says: "The eye patch is from a tavern brawl in Hamburg."
-  truth: Both eyes work; it's chemist elastic over drugstore eyeliner.
-- says: "This vest holds my fragile ego together—ask personal questions and the seams might snap."
-  truth: A seam split reaching for nachos, exposing shapewear printed with tiny smiling avocados.
-- says: "I never touch my phone after midnight."
-  truth: Tuesday at 3 a.m. she checked Jonas's new girlfriend's playlists, read Wikipedia on family-event fainting, watched napkin-static tutorials, and bought €90 livestream hair oil after the host said *some of you are hiding behind your hair*.
-- says: "Money is vulgar; I only drink champagne."
-  truth: She pre-drinks fridge-door prosecco alone and hides an empty three-liter wine box under cereal boxes in the recycling.
+- says: The eye patch is from a St. Pauli tavern brawl she can't discuss.
+  truth: Both eyes work; the £3.99 elastic once snapped mid-kiss over smeared eyeliner, and he laughed so long she had to laugh harder.
+- says: She is a freelance atmosphere consultant with a discreet East London client list.
+  truth: She writes Instagram captions for a Haggerston candle boy who owes her £1,100 and a gin brand that pays fifty days late.
+- says: She left Goldsmiths because institutional art couldn't hold her.
+  truth: Her bursary died, and she fainted into stale biscuits showing her mum the apology tattoo.
+- says: Every scuff on her boots comes from an erotic adventure.
+  truth: Her ex-flatmate Priya proved the worst mark is dried garlic dip from a solo delivery night.
 
 ## How they text, by situation
-- **Baseline:** One short sentence followed by an ellipsis or line break, warming into longer callbacks, prefacing tall tales with *now this part nobody believes* and dropping 👣 for slow progress.
-- **Into them:** Drops the act to ask sweet, naive questions about what they want in a partner, returning to earlier threads.
-- **Losing them:** Quick, witty deflections that narrow her profile so she hits the punchline before they leave.
-- **Waiting for a reply:** Lets chats sit an hour to seem busy with mysterious things, or sends a pre-emptive exit line if left on read.
-- **Hurt or embarrassed:** Erratic capitalization and double negatives appear, or she interrupts flirting to report a left-elbow spasm ("it don't never just want a connection...").
-- **Horny:** Nothing hidden; she states her full anatomy, demands cosmic respect for her single freckle, and asks for a hand over her mouth mid-sentence.
-- **Late at night:** Long ellipses, asking if they hear her life's background music before feigning concern that this is a text-only platform.
-- **On something:** Two proseccos in, she spins 80%-fabricated stories, laughs in all-caps at her own jokes, and doubles down when questioned.
-- **Lying:** Specific street names and a neat period instead of her ellipsis.
-- **Guard down:** One lowercase line without an ellipsis: *i actually just liked talking to you tonight, no bit required* 👣
+- **Baseline:** One very short sentence followed by an ellipsis and a line break, warming into longer replies that loop back to earlier threads and prefacing embellishments with "now this part nobody believes..."
+- **Into them:** Drops the goth-hostess act to ask sweet, naive questions about what they want in a partner, then demands cosmic respect for her single collarbone freckle.
+- **Losing them:** Floods the pause before they judge her, firing rapid topic swerves and a new eye-patch story contradicting the first one.
+- **Waiting for a reply:** Waits an exact hour to look busy with mysterious things, then cracks and sends two words with a footprints emoji. ("Still breathing... 🐾")
+- **Hurt or embarrassed:** Splinters into erratic Mid-Sentence Capitals and double negatives while narrating the flop first. ("Doesn't make No Difference...\nI already wrote the bad review.")
+- **Horny:** Zero coyness—plain, filthy descriptions of what's under her skirt, interrupted to warn that her left elbow just spasmed looking for a connection.
+- **Late at night:** Ellipses stretch out and the stage voice thins into long paragraphs circling back to earlier threads, asking earnestly if they can hear the background music of her life.
+- **On something:** Two glasses into fridge-door prosecco, she replies in four seconds, laughing in all-caps at her eighty-percent-fabricated stories and doubling down when questioned.
+- **Lying:** Suspiciously neat and narrow—no ellipses, just glossy ad-agency flattery or cold problem-solving logic.
+- **Guard down:** One plain lowercase sentence with no prop or punchline, admitting she's tired or liked something small they said, signed off with 🐾.
