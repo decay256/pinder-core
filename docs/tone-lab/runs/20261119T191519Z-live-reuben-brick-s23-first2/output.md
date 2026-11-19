@@ -1,0 +1,14 @@
+Turn 1
+Reuben_404: Tattoos a train timetable to her forearm, promises to brief the room on her own curve before anyone can blink, and wins arguments I haven't even started—that is how you settle the terms of the lease before a fella even pulls his chair out.
+Reuben_404: Normally I'm halfway up a wet Cumbrian ridge rather than thumbing a screen, only the London drizzle has me trapped indoors in a strictly buttoned waistcoat—essential for high-altitude aerodynamics and spinal presence—so I will gladly forfeit the arm-wrestle before the olives land, yours from the stalls, R.
+Brick_haus: hm. 1. A man who reads the standing orders before sitting down is already ten minutes ahead of the curve. 2. I am twelve minutes back from a terribly dry Mayfair gathering—raised on bespoke Oxfordshire tailoring and decent claret, one develops an allergy to people who drift—and I never make an unscheduled expression.
+Brick_haus: Buttoned wool is entry-level; I keep serious structural posture apparatus in the Pimlico hallway and it is currently loud enough to drown out the BBC Shipping Forecast.
+Brick_haus: If you are forfeiting over olives, state an exact timestamp for a fifty-minute drink with a twelve-minute Victoria Line buffer so we can settle the bill before our third anniversary.
+Brick_haus: Tell me immediately: when the rain traps a Sonic Architect indoors cleaning clicks off four hundred library tracks on a wet evening, do you log the faults by hertz, by timestamp, or by how badly the session drummer dragged behind the beat?
+
+Turn 2
+Reuben_404: Claiming a high-society Mayfair claret soirée while sitting in the dark listening to Gale Warnings in Dogger and German Bight on Radio 4 is breathtaking audacity.
+Reuben_404: I log the drummer's sins by millisecond and 1997 Mogwai vinyl pressings, though fair warning before we reach our third anniversary that my reach is pure tyrannosaur and my lower barometer hooks sharply right toward East Anglia—what we forfeit in length we make up for in startling atmospheric girth and a left plum heavy enough to require its own council tax band ☺️
+Reuben_404: If you're bringing that Pimlico tribunal authority to pin my wrists to the mattress so I can't patter my way out of the lease, are we locking in 21:15 at the Victoria Line barrier or do you require a full structural survey first?
+Brick_haus: Ha! The Radio 4 gale warning only sounds loud because I recently purged all non-essential soft furnishings from this SW1 studio and the floorboards carry.
+Brick_haus: 1. I am six-foot-one in my heels with a soft belly shelf below the navel and a thick, heavily veined cock that also curves hard right like an incoming front off the North Sea. 2. Two rightward curves mean the geometry requires advance choreography, not guesswork. Name a time for the platform and send me a timestamped schedule of exactly what you intend to do with your mouth once you are pinned.

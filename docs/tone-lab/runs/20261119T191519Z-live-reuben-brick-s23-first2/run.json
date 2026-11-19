@@ -1,0 +1,326 @@
+{
+  "run_id": "20261119T191519Z-live-reuben-brick-s23-first2",
+  "created_utc": "20261119T191519Z",
+  "variant": "live",
+  "mode": "live",
+  "variant_sha256": {
+    "situations.yaml": "c5fa506c02de4000a4a6da79b440cbc2256ba9960a226e7c722b10f71a84931f"
+  },
+  "knobs": {
+    "mode": "live",
+    "provider": "openrouter",
+    "model": "google/gemini-4-argon",
+    "agent": "random",
+    "turns": 30,
+    "secrets": 8,
+    "plan_reasoning": "high",
+    "turn_reasoning": "high",
+    "track_reasoning": "low",
+    "write_reasoning": "medium",
+    "drawer_sample": 5,
+    "director_retries": 2,
+    "profiles": true,
+    "stop_after": 2
+  },
+  "prompt_sha256": "d34310155d87e5617475a22eaafb8683c5a963f24b8c68886925be3c70d4cbec",
+  "prompt_chars": 156178,
+  "model_calls": 7,
+  "repo_commit": "5dff228",
+  "repo_dirty": false,
+  "player": "reuben",
+  "datee": "brick",
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00Z",
+  "agent": "random",
+  "turn_cap": 30,
+  "turns_played": 11,
+  "stop_after": 2,
+  "turns_written": 2,
+  "final_interest": 25,
+  "outcome": "DateSecured",
+  "provider": "openrouter",
+  "model_requested": "google/gemini-4-argon",
+  "models_reported": [
+    "google/gemini-4-argon"
+  ],
+  "seconds": 518.4,
+  "usage": {
+    "cost": 0.3329139,
+    "prompt_tokens": 62776,
+    "completion_tokens": 24555,
+    "reasoning_tokens": 12503
+  },
+  "beats": [
+    "free",
+    "free"
+  ],
+  "plan_words": 3920,
+  "planted_turn": 1,
+  "shape_retries": 0,
+  "turns_off_shape": [],
+  "callback_turn": null,
+  "told": [
+    [
+      1,
+      "Reuben_404",
+      1,
+      "spontaneous Cumbrian ridge-scrambler trapped indoors by London rain"
+    ],
+    [
+      1,
+      "Brick_haus",
+      1,
+      "raised on bespoke tailoring and claret in an Oxfordshire village"
+    ]
+  ],
+  "required_missed": [],
+  "hooks_open": [
+    [
+      1,
+      "Reuben_404",
+      "keeps waistcoat buttoned for spinal aerodynamics and forfeits pre-starter arm-wrestle"
+    ],
+    [
+      1,
+      "Brick_haus",
+      "claims she is twelve minutes back from Mayfair while Shipping Forecast plays and keeps hallway posture apparatus"
+    ],
+    [
+      2,
+      "Brick_haus",
+      "SW1 studio echoes because she purged all non-essential soft furnishings"
+    ]
+  ],
+  "habits": {
+    "Reuben_404": [
+      "...yours from the stalls, R.",
+      "— R.",
+      "unless I've bored you rigid"
+    ],
+    "Brick_haus": [
+      "hm.",
+      "1.",
+      "2.",
+      "Name a time."
+    ]
+  },
+  "words": 472,
+  "word_budget": 1250,
+  "pieces": {
+    "Reuben_404": [
+      1
+    ],
+    "Brick_haus": [
+      1
+    ]
+  },
+  "setups": {
+    "1": {
+      "planted": 1
+    },
+    "2": {
+      "planted": 1
+    },
+    "3": {
+      "planted": 2
+    }
+  },
+  "collided_turn": null,
+  "reader_score": null,
+  "reader": {
+    "score": null,
+    "questions": [],
+    "answers": "",
+    "grade": "",
+    "count": 0
+  },
+  "attribution_score": null,
+  "attribution": {
+    "score": null,
+    "answered": 0,
+    "messages": 0,
+    "answer": ""
+  },
+  "shape": {
+    "Reuben_404": {
+      "messages": 5,
+      "words": 223,
+      "per_message": {
+        "min": 26,
+        "median": 44,
+        "max": 63
+      },
+      "spread": 0.26,
+      "messages_per_turn": [
+        2,
+        3
+      ]
+    },
+    "Brick_haus": {
+      "messages": 6,
+      "words": 249,
+      "per_message": {
+        "min": 25,
+        "median": 42,
+        "max": 72
+      },
+      "spread": 0.4,
+      "messages_per_turn": [
+        4,
+        2
+      ]
+    }
+  },
+  "review_edits": {
+    "turns": 2,
+    "turns_changed": 2,
+    "words_changed": 40,
+    "replacements_named": 4,
+    "per_turn": [
+      {
+        "turn": 1,
+        "words_changed": 34,
+        "replacements_named": 3
+      },
+      {
+        "turn": 2,
+        "words_changed": 6,
+        "replacements_named": 1
+      }
+    ]
+  },
+  "director_retries": 0,
+  "writer_retries": 0,
+  "coverage": [
+    {
+      "item": "Reuben_404's origin piece 1",
+      "spent": 1,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 2",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Reuben_404's origin piece 3",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 1",
+      "spent": 1,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 2",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "Brick_haus's origin piece 3",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 1",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 2",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "setup 3",
+      "spent": null,
+      "retired": null,
+      "why": null
+    },
+    {
+      "item": "the collision",
+      "spent": null,
+      "retired": null,
+      "why": null
+    }
+  ],
+  "plan_gaps": [
+    "Reuben_404's origin piece 2",
+    "Reuben_404's origin piece 3",
+    "Brick_haus's origin piece 2",
+    "Brick_haus's origin piece 3",
+    "setup 1",
+    "setup 2",
+    "setup 3",
+    "the collision"
+  ],
+  "release_score": null,
+  "release_check": {
+    "score": null,
+    "items": 0,
+    "answered": 0,
+    "verdicts": [],
+    "answer": ""
+  },
+  "unanswered": [
+    [
+      2,
+      2
+    ]
+  ],
+  "unanswered_end": 2,
+  "tracker_end": "REPORT:\nLast turn: Reuben_404 called her out on listening to the Shipping Forecast right after a \"Mayfair soirée\", answered her question while confessing his short, thick, right-curving anatomy and wanting his wrists pinned, and proposed 21:15 at the Victoria Line barrier. Brick_haus blamed the volume on having no soft furnishings in her studio, gave her own stats (heels, belly shelf, thick veined right-curving cock), ignored his 21:15 time to demand he name a time again, and ordered a timestamped schedule for his mouth.\nOffered: Reuben_404 offered his physical measurements (\"my reach is pure tyrannosaur and my lower barometer hooks sharply right toward East Anglia—what we forfeit in length we make up for in startling atmospheric girth and a left plum heavy enough to require its own council tax band ☺️\"), his sexual wish (\"pin my wrists to the mattress so I can't patter my way out of the lease\"), and a specific time/question (\"are we locking in 21:15 at the Victoria Line barrier or do you require a full structural survey first?\"). Brick_haus offered why her flat echoes (\"I recently purged all non-essential soft furnishings from this SW1 studio\"), her own body (\"six-foot-one in my heels with a soft belly shelf below the navel and a thick, heavily veined cock that also curves hard right\"), and a dirty demand (\"Name a time for the platform and send me a timestamped schedule of exactly what you intend to do with your mouth once you are pinned\").\nUnanswered:\n- turn 2, Reuben_404: \"are we locking in 21:15 at the Victoria Line barrier or do you require a full structural survey first?\" (Brick_haus immediately replies \"Name a time for the platform\" as if he hadn't just named 21:15).\n- turn 2, Brick_haus: \"Name a time for the platform and send me a timestamped schedule of exactly what you intend to do with your mouth once you are pinned.\"\nCame out: New in Turn 2: Reuben_404 collects 1997 Mogwai vinyl, is short (\"pure tyrannosaur\", \"what we forfeit in length\"), thick (\"startling atmospheric girth\"), hooks sharply right, has a massive left ball, knows he talks too much to escape (\"patter my way out\"), and wants his wrists pinned. Brick_haus actually lives in a bare SW1 studio with no soft furnishings, is 6'1\" in heels with a \"soft belly shelf below the navel\" and a thick, heavily veined, right-curving cock.\nKnows: Each now knows the other's physical shape (both curve hard right, both thick) and that they share a D/s kink (she pins, he gets pinned). Neither knows why the other hides behind this exhausting wall of bureaucratic/literary prose, or where any of their defences actually come from.\nWants and hides: Both want to hook up under a strict dominant/submissive script where she controls the schedule and pins him down. Both are hiding any vulnerability or real human feeling behind nonstop elaborate metaphors, weather reports, and numbered lists.\nUpper hand: Still entirely Brick_haus's by mutual design: Reuben_404 offers his flaws and asks to be pinned, and Brick_haus issues numbered notes and demands a schedule for his mouth. The temperature got filthier, though still heavily dressed up in Shipping Forecast and geometry metaphors.\nMoving: It moved into explicit physical descriptions and sex talk, though the chat ended after only two turns, before either character's voice or defence could shift at all.\nRepeats: The Shipping Forecast / weather fronts (Turn 1 \"BBC Shipping Forecast\", Turn 2 \"Gale Warnings in Dogger and German Bight\", \"lower barometer\", \"incoming front off the North Sea\"); the lease (Turn 1 \"terms of the lease\", Turn 2 \"patter my way out of the lease\"); third anniversary (Turn 1, Turn 2); Victoria Line (Turn 1, Turn 2); numbered points from Brick_haus (\"1. ... 2. ...\" in Turn 1 and Turn 2).\nDoesn't add up:\n- In Turn 2, Reuben_404 explicitly proposes a time (\"are we locking in 21:15 at the Victoria Line barrier\"), and in the very next message Brick_haus tells him to \"Name a time for the platform\" as though he never said 21:15.\n- Instead of being sentient dicks, they describe themselves as full-bodied humans who *have* dicks and human body parts (\"forearm\", \"wrists\", \"six-foot-one in my heels with a soft belly shelf below the navel and a thick, heavily veined cock\", \"your mouth\").\n- In Turn 1, Brick_haus says the \"structural posture apparatus in the Pimlico hallway... is currently loud enough to drown out the BBC Shipping Forecast\"; in Turn 2, she acts as if Reuben called the radio itself loud (\"The Radio 4 gale warning only sounds loud because...\").\nThe reader now: Barely started. At only two turns (about 380 words), the reader has watched two extremely wordy people trade hyper-stylized banter and genital specs, with zero backstory, no dropped act, no message-break timing (just dense multi-sentence paragraphs), and no emotional turn—a reader asked at the end where their habits come from or what they did at the end wouldn't be able to answer.",
+  "arc_played": [
+    [
+      1,
+      "1. The Waistcoat Tribunal: both establish their surface origins, plant their posture boasts, and run their opening tests on reach and timing.",
+      "opener"
+    ],
+    [
+      2,
+      "2. Eastward Barometers: Brick_haus pre-emptively announces her scale and rightward curve; Reuben_404 matches her with meteorological bragging about his own rightward bend and colossal left ball, planting their parallel bearings.",
+      "setup"
+    ]
+  ],
+  "pace": [
+    [
+      1,
+      12,
+      1,
+      1,
+      [],
+      []
+    ],
+    [
+      2,
+      11,
+      2,
+      2,
+      [],
+      []
+    ]
+  ],
+  "pace_broken": [],
+  "repeats": {
+    "openers": [],
+    "words": []
+  },
+  "format_checks": {
+    "turn_markers": 2,
+    "turn_markers_match": true,
+    "has_table": false,
+    "has_heading": false,
+    "player_lines": 5,
+    "datee_lines": 6,
+    "words": 487
+  }
+}
