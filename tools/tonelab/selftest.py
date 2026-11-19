@@ -308,6 +308,18 @@ def check_chat_rules():
     check(jump <= 5, f"along v8's meter the turns-left estimate moves at most 5 a turn ({est})")
 
 
+def check_first_look(variant, knobs):
+    """run --stop-after: only the first turns of the full game are written, and none of them is the ending."""
+    import live
+    m = tonelab.play_mechanics("reuben", "brick", 23, 30, tonelab.DEFAULT_CLOCK,
+                               os.path.join(tempfile.mkdtemp(prefix="tonelab-first-"), "m.json"), knobs.get("agent"))
+    names = {"player": m["player"]["display_name"], "datee": m["datee"]["display_name"]}
+    res = live.play(variant, {**knobs, "stop_after": 2}, m, "reuben", "brick", live.dry_caller(names))
+    check(len(m["turns"]) > 2 and [t["turn"] for t in res["turns"]] == [1, 2]
+          and not any((t.get("clock_beat") or "").startswith("ending") for t in res["turns"]),
+          f"a first look writes turns 1 and 2 of a {len(m['turns'])}-turn game, and neither is the ending")
+
+
 def check_profiles():
     """v22: the profiles the live cards are built from."""
     import profiles as pf
@@ -335,6 +347,8 @@ def check_profiles():
 def main():
     check_chat_rules()
     check_profiles()
+    check_first_look(os.path.join(tonelab.VARIANTS, "live"),
+                     json.load(open(os.path.join(tonelab.VARIANTS, "live", "variant.json"), encoding="utf-8")))
     with tempfile.TemporaryDirectory(prefix="tonelab-selftest-") as tmp:
         a, b = os.path.join(tmp, "a.json"), os.path.join(tmp, "b.json")
         ma = tonelab.play_mechanics("reuben", "brick", 7, 30, tonelab.DEFAULT_CLOCK, a)

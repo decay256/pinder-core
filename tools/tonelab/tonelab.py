@@ -430,6 +430,8 @@ def cmd_run(args):
     provider = args.provider or knobs.get("provider", "claude")
     model = args.model or knobs.get("model", "sonnet")
     turns = args.turns or int(knobs.get("turns", 30))
+    if getattr(args, "stop_after", None):
+        knobs["stop_after"] = args.stop_after
     key = None
     if provider == "openrouter" and not args.dry_run:
         # The key arrives on stdin or in the environment, is held in memory only, and
@@ -440,7 +442,8 @@ def cmd_run(args):
             die("openrouter needs a key: OPENROUTER_API_KEY, or --key-stdin")
 
     stamp = dt.datetime.now(dt.timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_id = f"{stamp}-{args.variant}-{args.player}-{args.datee}-s{args.seed}"
+    run_id = f"{stamp}-{args.variant}-{args.player}-{args.datee}-s{args.seed}" + \
+        (f"-first{args.stop_after}" if getattr(args, "stop_after", None) else "")
     run_dir = os.path.join(RUNS, run_id)
     os.makedirs(run_dir)
 
@@ -598,7 +601,8 @@ def write_report(run_dir):
     h.append(f"<h1>{e(names['player'])} × {e(names['datee'])}</h1>")
     h.append(f"<p class=meta><b>{e(model)}</b>{' as reported by ' + reported_by if reported_by else ''} · variant "
              f"<code>{e(rec['variant'])}</code> · seed {rec['seed']} · {e(mech.get('time_of_day', ''))} · "
-             f"<b>{e(rec['outcome'])}</b> after {rec['turns_played']} turns</p>")
+             f"<b>{e(rec['outcome'])}</b> after {rec['turns_played']} turns"
+             f"{' · the chat is written for the first ' + str(rec.get('turns_written')) + ' of them only' if rec.get('stop_after') else ''}</p>")
     h.append(f"<p class=meta>Run <code>{e(rec['run_id'])}</code> · commit <code>{e(rec['repo_commit'])}</code>"
              f"{' (uncommitted changes)' if rec.get('repo_dirty') else ''} · prompt {rec['prompt_chars']:,} characters, "
              f"sha256 <code>{e(rec['prompt_sha256'][:12])}</code>"
@@ -637,7 +641,7 @@ def write_report(run_dir):
                  f"<details><summary>Full user prompt as sent</summary><pre>{e(parts['user'])}</pre></details>"
                  "</details>")
     briefs = parts["turn_briefs"]
-    for i, t in enumerate(mech["turns"]):
+    for i, t in enumerate(mech["turns"][:len(briefs)]):  # a first look writes only its first turns
         r = t["roll"] or {}
         ok = r.get("success")
         res = "success" if ok else (r.get("tier") or "miss").lower()
@@ -712,6 +716,9 @@ def main():
     r.add_argument("--datee", default="brick")
     r.add_argument("--seed", type=int, default=42)
     r.add_argument("--turns", type=int, default=None, help="turn cap (default: variant.json, else the game's 30)")
+    r.add_argument("--stop-after", type=int, default=None,
+                   help="live: write only the first N turns of the full game (the dice play on; the reader checks "
+                        "are skipped), a cheap first look at how the chat opens")
     r.add_argument("--clock", default=DEFAULT_CLOCK, help="session clock, ISO-8601 (sets time-of-day horniness)")
     r.add_argument("--variant", default="baseline")
     r.add_argument("--provider", choices=["claude", "openrouter"], default=None,

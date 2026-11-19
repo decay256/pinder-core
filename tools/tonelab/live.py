@@ -1521,6 +1521,8 @@ def play(variant_dir, knobs, mech, player, datee, caller):
     starts, last_feel, stats = {}, {}, mech["player"]["effective_stats"]
     arc, arc_turn, pace = "", None, Pace()
     for i, t in enumerate(turns):
+        if knobs.get("stop_after") and i >= int(knobs["stop_after"]):
+            break  # a first look: the game played on, the chat stops here, and no turn so far is the last
         n = t["turn"]
         is_last = i == len(turns) - 1
         left = estimate_left(turns[:i], t["interest_before"])
@@ -1788,9 +1790,14 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         return text.strip()
 
     result = play(variant_dir, knobs, mech, args.player, args.datee, caller)
-    reader = reader_check(caller, result["plan"], result["output"], names)
-    attribution = attribution_check(caller, result["chat"], names, args.seed)
-    release = release_check(caller, result["chat"], result["releases"])
+    if knobs.get("stop_after"):  # the reader checks judge a whole chat, so a first look skips them
+        reader = {"score": None, "questions": [], "answers": "", "grade": "", "count": 0}
+        attribution = {"score": None, "answered": 0, "messages": 0, "answer": ""}
+        release = {"score": None, "items": 0, "answered": 0, "verdicts": [], "answer": ""}
+    else:
+        reader = reader_check(caller, result["plan"], result["output"], names)
+        attribution = attribution_check(caller, result["chat"], names, args.seed)
+        release = release_check(caller, result["chat"], result["releases"])
     systems = result["systems"]
     with open(os.path.join(run_dir, "prompt.md"), "w", encoding="utf-8") as f:
         f.write("".join(f"<!-- system prompt: {k} -->\n{v}\n\n" for k, v in systems.items()) +
@@ -1823,6 +1830,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "player": args.player, "datee": args.datee, "seed": args.seed, "clock": args.clock,
         "agent": knobs.get("agent") or "score",
         "turn_cap": turn_cap, "turns_played": mech["turns_played"],
+        "stop_after": knobs.get("stop_after"), "turns_written": len(result["turns"]),
         "final_interest": mech["final_interest"], "outcome": mech.get("outcome") or "NoTerminalOutcome",
         "provider": None if args.dry_run else provider,
         "model_requested": None if args.dry_run else model,
@@ -1854,7 +1862,7 @@ def run_live(args, knobs, variant_dir, mech, run_dir, run_id, stamp, provider, m
         "arc_played": result["arc_played"],
         "pace": result["pace"], "pace_broken": [[p[0], p[5]] for p in result["pace"] if p[5]],
         "repeats": repeat_counts(result["chat"], names),
-        "format_checks": tl.format_checks(result["output"], names, mech["turns_played"]),
+        "format_checks": tl.format_checks(result["output"], names, len(result["turns"])),
     }
     with open(os.path.join(run_dir, "output.md"), "w", encoding="utf-8") as f:
         f.write(result["output"])
@@ -1874,11 +1882,11 @@ def add_reader_to_report(run_dir, reader, attribution=None, release=None, tracke
         return
     with open(path, encoding="utf-8") as f:
         page = f.read()
-    sec = ("<section><h2>Reader check</h2><p>A reader who saw only the chat answered these questions; a second call "
+    sec = "" if not reader.get("questions") else ("<section><h2>Reader check</h2><p>A reader who saw only the chat answered these questions; a second call "
            f"graded the answers against the plan. Score: {reader['score']} of {reader.get('count', 9)}.</p>"
            f"<pre>{html.escape(reader['answers'])}</pre>"
            f"<details><summary>Grade against the plan</summary><pre>{html.escape(reader['grade'])}</pre></details></section>")
-    if attribution:
+    if attribution and attribution.get("messages"):
         sec += ("<section><h2>Blind attribution</h2><p>A reader saw every message shuffled and without names and sorted "
                 f"them into two senders: {attribution['score']} sorted right ({attribution['answered']} of "
                 f"{attribution['messages']} answered; 0.5 is chance).</p>"
