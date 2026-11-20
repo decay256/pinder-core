@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tone lab scorecard</title>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --raised: #ffffff;
+  --ink: #0b0b0b; --ink-2: #52514e; --muted: #75736d;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --s1: #b52a2a; --s2: #e34948; --s3: #f4b4ae; --s4: #a9cbf5; --s5: #3987e5; --s6: #1c5cab;
+  --na: #ecebe6;
+  --core: #1c5cab; --useful: #52514e; --diag: #898781;
+  --line-core: #2a78d6; --line-all: #eb6834; --bar: #898781;
+  --accent: #2a78d6;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --raised: #222220;
+    --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a9890;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --na: #2c2c2a; --core: #86b6ef; --useful: #c3c2b7; --diag: #898781;
+    --line-core: #3987e5; --line-all: #d95926; --accent: #6da7ec;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --raised: #222220;
+  --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a9890;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --na: #2c2c2a; --core: #86b6ef; --useful: #c3c2b7; --diag: #898781;
+  --line-core: #3987e5; --line-all: #d95926; --accent: #6da7ec;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { padding: 20px 24px 8px; max-width: 1500px; margin: 0 auto; }
+h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
+.sub { color: var(--ink-2); margin: 0; max-width: 900px; }
+.meta { color: var(--muted); font-size: 12px; margin-top: 6px; }
+nav { display: flex; gap: 4px; padding: 0 24px; max-width: 1500px; margin: 12px auto 0; border-bottom: 1px solid var(--grid); flex-wrap: wrap; }
+nav button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; font: inherit;
+  color: var(--ink-2); cursor: pointer; }
+nav button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+main { max-width: 1500px; margin: 0 auto; padding: 16px 24px 40px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 20px; align-items: start; }
+@media (max-width: 1100px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 14px 16px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.chip { border: 1px solid var(--axis); background: var(--raised); color: var(--ink-2); border-radius: 999px;
+  padding: 3px 10px; font: inherit; font-size: 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--page); border-color: var(--ink); }
+.controls .label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+.legend { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+.legend .sw { display: inline-flex; align-items: center; gap: 4px; }
+.legend .box { width: 22px; height: 16px; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; }
+.scroll { overflow-x: auto; border-radius: 8px; }
+table.m { border-collapse: separate; border-spacing: 2px; font-size: 12px; }
+table.m th, table.m td { padding: 0; }
+table.m th.dim { position: sticky; left: 0; z-index: 2; background: var(--surface); text-align: left; font-weight: 500;
+  padding: 4px 10px 4px 0; min-width: 250px; max-width: 290px; }
+table.m thead th { position: sticky; top: 0; background: var(--surface); z-index: 1; vertical-align: bottom; }
+table.m thead th.col { cursor: pointer; padding: 0 0 4px; min-width: 44px; }
+table.m thead th.col .v { font-weight: 650; font-size: 12px; display: block; }
+table.m thead th.col .w { color: var(--muted); font-weight: 400; font-size: 10.5px; display: block; line-height: 1.2; }
+table.m thead th.col:hover .v, table.m thead th.col.sel .v { color: var(--accent); }
+.pri { display: inline-block; font-size: 10px; text-transform: uppercase; letter-spacing: .04em; margin-right: 6px;
+  width: 48px; color: var(--muted); }
+.pri.core { color: var(--core); font-weight: 650; }
+td.cell { width: 44px; height: 30px; text-align: center; border-radius: 4px; cursor: pointer; font-weight: 650; font-size: 13px;
+  outline-offset: 1px; }
+td.cell:hover, td.cell.sel { outline: 2px solid var(--ink); }
+td.cell.na { background: var(--na); color: var(--muted); font-weight: 400; }
+tr.sum th.dim { color: var(--ink-2); font-weight: 600; }
+tr.sum td { text-align: center; font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; height: 26px; }
+tr.gap td, tr.gap th { height: 8px; }
+.f1 { background: var(--s1); color: #fff; } .f2 { background: var(--s2); color: #fff; } .f3 { background: var(--s3); color: #0b0b0b; }
+.f4 { background: var(--s4); color: #0b0b0b; } .f5 { background: var(--s5); color: #fff; } .f6 { background: var(--s6); color: #fff; }
+#panel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+#panel h2 { font-size: 16px; margin: 0 0 2px; }
+#panel h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 4px; font-weight: 600; }
+#panel p { margin: 4px 0; }
+#panel .big { display: inline-flex; width: 44px; height: 44px; border-radius: 8px; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 700; margin-right: 10px; flex: none; }
+#panel .head { display: flex; align-items: center; margin: 10px 0 4px; }
+#panel .lean { color: var(--ink-2); font-size: 13px; }
+#panel blockquote { margin: 6px 0; padding: 4px 10px; border-left: 3px solid var(--axis); color: var(--ink-2); }
+#panel blockquote .chk { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+#panel .probe { background: var(--page); border-radius: 6px; padding: 8px 10px; white-space: pre-wrap; font-size: 13px; }
+#panel .def { color: var(--ink-2); font-size: 13px; }
+#panel a { color: var(--accent); }
+.rowlist { list-style: none; padding: 0; margin: 0; }
+.rowlist li { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--grid); cursor: pointer; }
+.rowlist li:hover .n { text-decoration: underline; }
+.rowlist .s { flex: none; width: 26px; height: 22px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 650; font-size: 12px; }
+.rowlist .n { font-weight: 600; }
+.rowlist .y { color: var(--ink-2); font-size: 12.5px; }
+.empty { color: var(--muted); }
+.chart { margin-bottom: 16px; }
+.chart h2 { font-size: 15px; margin: 0 0 2px; }
+.chart .cap { color: var(--ink-2); font-size: 12.5px; margin: 0 0 8px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--muted); font-size: 11px; }
+.chart .gl { stroke: var(--grid); stroke-width: 1; }
+.chart .barline { stroke: var(--bar); stroke-width: 1; stroke-dasharray: 4 3; }
+.tip { position: fixed; pointer-events: none; background: var(--raised); color: var(--ink); border: 1px solid var(--ring);
+  border-radius: 6px; padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); z-index: 10; display: none; max-width: 280px; }
+.fam-intro { color: var(--ink-2); margin: 0 0 12px; max-width: 900px; }
+table.cat { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.cat th, table.cat td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--grid); }
+table.cat th { color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+table.cat td.nm { font-weight: 600; min-width: 180px; }
+table.cat td .probe-tag { display: block; font-weight: 400; font-size: 11px; color: var(--accent); }
+.scale { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; max-width: 720px; margin-bottom: 18px; }
+.scale .box { width: 30px; height: 26px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+@media (max-width: 640px) {
+  header, main, nav { padding-left: 16px; padding-right: 16px; }
+  table.m th.dim { min-width: 170px; max-width: 190px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Tone lab scorecard</h1>
+  <p class="sub">Candidate metrics for the profile, the plan and the chat, scored 1 to 6 by a language model. There is no midpoint:
+    3 leans fail and 4 leans pass, against the bar each dimension defines. Click any cell for the reasoning and the quotes it rests on;
+    click a column header for everything about one piece of work.</p>
+  <div class="meta" id="meta"></div>
+</header>
+<nav id="tabs" role="tablist"></nav>
+<main id="main"></main>
+<div class="tip" id="tip"></div>
+<script>
+const DATA = /*DATA*/null;
+const FAM_NOTE = {
+  profile: "Reuben and Brick as the v22 profile generator writes them, against the character cards the v21 planner used before it. The v21 cards were never meant to hold a life, so low scores there show the gap the generator was built to close.",
+  plan: "Every plan the lab has written for Reuben and Brick on seed 23, one per version. The early plans were small by design; dimensions they were never built for score low on purpose, which is what makes the trend readable.",
+  chat: "The three newest full chats, and the v22 first look, which wrote only the first two turns of an eleven-turn game. Where a dimension needs turns that were not written, it is marked n/a."
+};
+const PRI = { core: "Core", useful: "Useful", diagnostic: "Diag." };
+const $ = (t, a = {}, ...kids) => { const e = document.createElement(t);
+  for (const [k, v] of Object.entries(a)) { if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); }
+  for (const k of kids) if (k != null) e.append(k); return e; };
+const lean = s => s == null ? "not scored" : s >= 4 ? "leans pass" : "leans fail";
+const fill = s => s == null ? "na" : "f" + s;
+const state = { tab: "profile", pri: { core: true, useful: true, diagnostic: true }, order: "catalogue", sel: null };
+const dims = DATA.dimensions;
+const byFam = f => dims.filter(d => d.family === f);
+const results = f => DATA.results.filter(r => r.kind === f).sort((a, b) =>
+  f === "profile" ? (a.id.split("-")[1] === b.id.split("-")[1] ? a.order - b.order : a.id < b.id ? 1 : -1)
+                  : (a.order - b.order) || (a.id < b.id ? -1 : 1));
+const srcHref = s => !s ? null : s.startsWith("docs/tone-lab/") ? "../" + s.slice("docs/tone-lab/".length) : "../../../" + s;
+const mean = xs => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+
+function meta() {
+  const n = DATA.results.length, judges = [...new Set(DATA.results.map(r => r.judge).filter(Boolean))];
+  const cost = DATA.results.reduce((a, r) => a + (r.cost || 0), 0);
+  document.getElementById("meta").textContent =
+    `${n} pieces of work scored · judge ${judges.join(", ") || "none yet"} · built ${DATA.built}` +
+    (cost && !judges.every(j => j.startsWith("claude:")) ? ` · judge cost $${cost.toFixed(2)}` : "");
+}
+
+function tabs() {
+  const nav = document.getElementById("tabs"); nav.replaceChildren();
+  for (const [k, label] of [["profile", "Profiles"], ["plan", "Plans"], ["chat", "Chats"], ["catalogue", "The scorecard"]]) {
+    nav.append($("button", { role: "tab", "aria-selected": String(state.tab === k), text: label,
+      onclick: () => { state.tab = k; state.sel = null; render(); } }));
+  }
+}
+
+function legend() {
+  const l = $("div", { class: "legend" }, $("span", { text: "Score:" }));
+  for (let s = 1; s <= 6; s++) l.append($("span", { class: "sw" }, $("span", { class: "box " + fill(s), text: String(s) }),
+    $("span", { text: s === 3 ? "leans fail" : s === 4 ? "leans pass" : "" })));
+  l.append($("span", { class: "sw" }, $("span", { class: "box na", text: "–" }), $("span", { text: "n/a" })));
+  return l;
+}
+
+function controls() {
+  const c = $("div", { class: "controls" }, $("span", { class: "label", text: "Show" }));
+  for (const p of ["core", "useful", "diagnostic"]) c.append($("button", { class: "chip", "aria-pressed": String(state.pri[p]),
+    text: { core: "Core", useful: "Useful", diagnostic: "Diagnostic" }[p], onclick: () => { state.pri[p] = !state.pri[p]; render(); } }));
+  c.append($("span", { class: "label", text: " · Rows" }));
+  for (const [k, t] of [["catalogue", "scorecard order"], ["weak", "weakest first"]]) c.append($("button", { class: "chip",
+    "aria-pressed": String(state.order === k), text: t, onclick: () => { state.order = k; render(); } }));
+  c.append($("span", { style: "flex:1" }), legend());
+  return c;
+}
+
+function matrix(f) {
+  const rs = results(f);
+  let ds = byFam(f).filter(d => d.scope !== "set" && state.pri[d.priority]);
+  if (state.order === "weak") ds = ds.map(d => [d, mean(rs.map(r => r.scores?.[d.id]?.score).filter(x => x != null)) ?? 9])
+    .sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  const t = $("table", { class: "m" });
+  const hr = $("tr", {}, $("th", { class: "dim" }));
+  for (const r of rs) {
+    const [top, bottom] = f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "")]
+                                          : [r.version, (r.when || "") + (r.label.includes("preview") ? " · prev" : r.label.includes("first") ? " · 2 turns" : "")];
+    hr.append($("th", { class: "col" + (state.sel?.r === r.id && !state.sel?.d ? " sel" : ""), title: r.label,
+      onclick: () => { state.sel = { r: r.id }; render(); } }, $("span", { class: "v", text: top }), $("span", { class: "w", text: bottom })));
+  }
+  t.append($("thead", {}, hr));
+  const tb = $("tbody");
+  const sumRow = (label, fn, fmt) => { const tr = $("tr", { class: "sum" }, $("th", { class: "dim", text: label }));
+    for (const r of rs) { const v = fn(r); tr.append($("td", { text: v == null ? "–" : fmt(v) })); } tb.append(tr); };
+  const vis = new Set(ds.map(d => d.id));
+  const sc = (r, pred) => byFam(f).filter(d => vis.has(d.id) && pred(d)).map(d => r.scores?.[d.id]?.score).filter(x => x != null);
+  sumRow("Core mean", r => mean(sc(r, d => d.priority === "core")), v => v.toFixed(1));
+  sumRow("Mean of the rows shown", r => mean(sc(r, () => true)), v => v.toFixed(1));
+  sumRow("Rows below the line (≤3)", r => sc(r, () => true).filter(x => x <= 3).length || 0, v => String(v));
+  tb.append($("tr", { class: "gap" }, $("th", { class: "dim" })));
+  for (const d of ds) {
+    const tr = $("tr", {}, $("th", { class: "dim", title: d.tells }, $("span", { class: "pri " + d.priority, text: PRI[d.priority] }),
+      document.createTextNode(d.name)));
+    for (const r of rs) {
+      const s = r.scores?.[d.id], v = s ? s.score : undefined;
+      const td = $("td", { class: "cell " + (v === undefined ? "na" : fill(v)) + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : ""),
+        text: v === undefined ? "" : v == null ? "–" : String(v), tabindex: "0",
+        "aria-label": `${d.name}, ${r.label}: ${v == null ? "not scored" : v}`,
+        onclick: () => { state.sel = { r: r.id, d: d.id }; render(); },
+        onkeydown: e => { if (e.key === "Enter") { state.sel = { r: r.id, d: d.id }; render(); } } });
+      if (s) { td.addEventListener("mousemove", e => tip(e, `${d.name} · ${r.label}`, `${v ?? "n/a"} · ${lean(v)}`));
+        td.addEventListener("mouseleave", untip); }
+      tr.append(td);
+    }
+    tb.append(tr);
+  }
+  t.append(tb);
+  return $("div", { class: "scroll" }, t);
+}
+
+function tip(e, a, b) { const el = document.getElementById("tip"); el.replaceChildren($("strong", { text: a }), $("div", { text: b }));
+  el.style.display = "block"; const x = Math.min(e.clientX + 14, innerWidth - 300); el.style.left = x + "px"; el.style.top = (e.clientY + 14) + "px"; }
+function untip() { document.getElementById("tip").style.display = "none"; }
+
+function trend(f) {
+  const rs = results(f).filter(r => Object.keys(r.scores || {}).length);
+  if (rs.length < 3) return null;
+  const core = r => mean(byFam(f).filter(d => d.priority === "core").map(d => r.scores?.[d.id]?.score).filter(x => x != null));
+  const all = r => mean(byFam(f).map(d => r.scores?.[d.id]?.score).filter(x => x != null));
+  const W = 900, H = 240, L = 34, R = 96, T = 12, B = 34, pw = W - L - R, ph = H - T - B;
+  const x = i => L + (rs.length === 1 ? pw / 2 : i * pw / (rs.length - 1)), y = v => T + ph - (v - 1) / 5 * ph;
+  const NS = "http://www.w3.org/2000/svg", s = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  const svg = s("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": "Mean score per plan version" });
+  for (let v = 1; v <= 6; v++) { svg.append(s("line", { class: "gl", x1: L, x2: L + pw, y1: y(v), y2: y(v) }));
+    const tx = s("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }); tx.textContent = v; svg.append(tx); }
+  svg.append(s("line", { class: "barline", x1: L, x2: L + pw, y1: y(3.5), y2: y(3.5) }));
+  const bl = s("text", { x: L + pw + 8, y: y(3.5) + 4 }); bl.textContent = "the line"; svg.append(bl);
+  rs.forEach((r, i) => { if (i % Math.ceil(rs.length / 14) === 0 || i === rs.length - 1) {
+    const tx = s("text", { x: x(i), y: H - 12, "text-anchor": "middle" }); tx.textContent = r.version; svg.append(tx); } });
+  const series = [["Core dimensions", core, "var(--line-core)"], ["All dimensions", all, "var(--line-all)"]];
+  const ends = series.map(([, fn]) => fn(rs[rs.length - 1]));
+  const apart = ends.every(v => v != null) && Math.abs(y(ends[0]) - y(ends[1])) < 14;
+  for (const [name, fn, col] of series) {
+    const pts = rs.map((r, i) => [x(i), fn(r)]).filter(p => p[1] != null);
+    svg.append(s("path", { d: pts.map((p, i) => (i ? "L" : "M") + p[0].toFixed(1) + " " + y(p[1]).toFixed(1)).join(" "),
+      fill: "none", stroke: col, "stroke-width": 2, "stroke-linejoin": "round" }));
+    pts.forEach(p => svg.append(s("circle", { cx: p[0], cy: y(p[1]), r: 4, fill: col, stroke: "var(--surface)", "stroke-width": 2 })));
+    const last = pts[pts.length - 1];
+    if (last) { const up = fn === core ? ends[0] >= ends[1] : ends[1] > ends[0];
+      const tx = s("text", { x: last[0] + 10, y: y(last[1]) + 4 + (apart ? (up ? -8 : 8) : 0), style: "fill: var(--ink-2)" });
+      tx.textContent = name.split(" ")[0]; svg.append(tx); }
+  }
+  const cross = s("line", { x1: 0, x2: 0, y1: T, y2: T + ph, stroke: "var(--axis)", "stroke-width": 1, visibility: "hidden" });
+  svg.append(cross);
+  const hit = s("rect", { x: L - 10, y: T, width: pw + 20, height: ph, fill: "transparent", style: "cursor: pointer" });
+  const near = e => { const b = svg.getBoundingClientRect(), px = (e.clientX - b.left) * W / b.width;
+    return Math.max(0, Math.min(rs.length - 1, Math.round((px - L) / (pw / Math.max(1, rs.length - 1))))); };
+  hit.addEventListener("mousemove", e => { const i = near(e), r = rs[i]; cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i));
+    cross.setAttribute("visibility", "visible"); const c = core(r), a = all(r);
+    tip(e, r.label, `Core ${c == null ? "–" : c.toFixed(1)} · All ${a == null ? "–" : a.toFixed(1)}`); });
+  hit.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); untip(); });
+  hit.addEventListener("click", e => { state.sel = { r: rs[near(e)].id }; render(); });
+  svg.append(hit);
+  const lg = $("div", { class: "legend", style: "margin-bottom:6px" });
+  for (const [name, , col] of series) lg.append($("span", { class: "sw" },
+    $("span", { style: `display:inline-block;width:16px;height:2px;background:${col}` }), $("span", { text: name })));
+  lg.append($("span", { class: "sw" }, $("span", { style: "display:inline-block;width:16px;border-top:1px dashed var(--bar)" }),
+    $("span", { text: "the line between 3 and 4" })));
+  return $("div", { class: "card chart" }, $("h2", { text: "Mean score per plan, by version" }),
+    $("p", { class: "cap", text: "Each point is one plan on seed 23. Click a point for that plan's scores." }), lg, svg);
+}
+
+function panel(f) {
+  const p = $("div", { class: "card", id: "panel" });
+  const sel = state.sel, r = sel && DATA.results.find(x => x.id === sel.r);
+  if (!r) { p.append($("p", { class: "empty", text: "Click a cell for the score's reasoning, or a column header for one piece of work." }));
+    return p; }
+  const href = srcHref(r.source);
+  if (!sel.d) {
+    p.append($("h2", { text: r.label }));
+    if (r.note) p.append($("p", { class: "def", text: r.note }));
+    const sm = r.summary || {};
+    p.append($("p", { class: "lean", text: `Core mean ${sm.core ?? "–"} · all ${sm.all ?? "–"} · ${sm.below ?? 0} of ${sm.scored ?? 0} below the line` }));
+    if (href) p.append($("p", {}, $("a", { href, text: "Open the source" })));
+    p.append($("h3", { text: "Weakest first" }));
+    const ul = $("ul", { class: "rowlist" });
+    byFam(r.kind).filter(d => r.scores?.[d.id]).sort((a, b) => (r.scores[a.id].score ?? 9) - (r.scores[b.id].score ?? 9)).forEach(d => {
+      const s = r.scores[d.id];
+      ul.append($("li", { onclick: () => { state.sel = { r: r.id, d: d.id }; render(); } },
+        $("span", { class: "s " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
+        $("span", {}, $("span", { class: "n", text: d.name }), $("div", { class: "y", text: s.why }))));
+    });
+    p.append(ul);
+    return p;
+  }
+  const d = dims.find(x => x.id === sel.d), s = r.scores?.[d.id];
+  p.append($("h2", { text: d.name }), $("div", { class: "lean", text: `${r.label} · ${PRI[d.priority] === "Diag." ? "Diagnostic" : PRI[d.priority]}` }));
+  if (!s) { p.append($("p", { class: "empty", text: "Not scored yet." })); return p; }
+  p.append($("div", { class: "head" }, $("span", { class: "big " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
+    $("span", { class: "lean", text: s.score == null ? "Not applicable to this material" : DATA.scale[s.score] })));
+  p.append($("h3", { text: "Why" }), $("p", { text: s.why }));
+  if (s.evidence?.length) { p.append($("h3", { text: "Rests on" }));
+    s.evidence.forEach((q, i) => p.append($("blockquote", {}, document.createTextNode("“" + q + "”"),
+      $("span", { class: "chk", text: s.found?.[i] ? "found in the material" : "not found word for word in the material" })))); }
+  if (s.raise) p.append($("h3", { text: "What would raise it" }), $("p", { text: s.raise }));
+  const pr = r.probes?.[d.id];
+  if (pr) p.append($("h3", { text: `Reader probe (saw only ${pr.sees.join(", ")})` }), $("p", { class: "def", text: pr.ask }),
+    $("div", { class: "probe", text: pr.answer }));
+  p.append($("h3", { text: "The dimension" }), $("p", { class: "def", text: d.tells }),
+    $("p", { class: "def" }, $("strong", { text: "Line: " }), document.createTextNode(d.line)),
+    $("p", { class: "def" }, $("strong", { text: "Low: " }), document.createTextNode(d.low)),
+    $("p", { class: "def" }, $("strong", { text: "High: " }), document.createTextNode(d.high)));
+  if (href) p.append($("p", {}, $("a", { href, text: "Open the source" })));
+  return p;
+}
+
+function catalogue() {
+  const w = $("div");
+  w.append($("p", { class: "fam-intro", text: "The candidate metrics. Each dimension defines its own bar (the line between 3 and 4). Core dimensions are what we need to know whether the product works, useful ones steer prompt work, diagnostic ones explain a failure. A probe is a separate reader who sees only part of the material, so the judge is not the one who already knows the answer." }));
+  const sc = $("div", { class: "scale card" });
+  for (let s = 1; s <= 6; s++) sc.append($("span", { class: "box " + fill(s), text: String(s) }), $("span", { text: DATA.scale[s] }));
+  w.append(sc);
+  for (const [f, fam] of Object.entries(DATA.families)) {
+    w.append($("h2", { text: fam.title, style: "font-size:17px;margin:22px 0 4px" }), $("p", { class: "fam-intro", text: "Scored: " + fam.artefact + "." }));
+    const t = $("table", { class: "cat" }, $("thead", {}, $("tr", {}, ...["Dimension", "Priority", "What it tells us", "How", "The line (3 or 4)"].map(h => $("th", { text: h })))));
+    const tb = $("tbody");
+    for (const d of byFam(f)) tb.append($("tr", {},
+      $("td", { class: "nm" }, document.createTextNode(d.name), d.probe ? $("span", { class: "probe-tag", text: "probe: sees " + d.probe.sees.join(", ") }) : null,
+        d.scope === "set" ? $("span", { class: "probe-tag", text: "needs a set of runs; not scored yet" }) : null),
+      $("td", { text: d.priority }), $("td", { text: d.tells }), $("td", { text: d.method }), $("td", { text: d.line })));
+    t.append(tb); w.append($("div", { class: "card scroll", style: "padding:4px 14px" }, t));
+  }
+  return w;
+}
+
+function render() {
+  tabs(); meta();
+  const m = document.getElementById("main"); m.replaceChildren();
+  if (state.tab === "catalogue") { m.append(catalogue()); return; }
+  const f = state.tab;
+  const left = $("div", {}, $("p", { class: "fam-intro", text: FAM_NOTE[f] }));
+  if (f === "plan") { const c = trend(f); if (c) left.append(c); }
+  left.append($("div", { class: "card" }, controls(), matrix(f)));
+  const pn = panel(f);
+  m.append($("div", { class: "layout" }, left, pn));
+  if (state.sel && innerWidth <= 1100) pn.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+render();
+</script>
+</body>
+</html>

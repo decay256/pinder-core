@@ -1,0 +1,358 @@
+{
+ "id": "plan-20261117T121702Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v16 · 17 Nov 12:17 · full run",
+ "version": "v16",
+ "order": 16,
+ "run": "20261117T121702Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261117T121702Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "17 Nov 12:17",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 7726,
+   "words": 1257
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 4,
+   "why": "Most of what the plan says about both characters comes from the brief. For Reuben it uses the top hat, the dishwasher-safe tattoo, the eleven-day lentils, the energy shots, the curve rehearsal, the coffee clip, the door job and the band tests. For Brick it uses the monocle, vest and heels, the schedule tattoo, the boxed rosé, the harness, the towel and the revolving door. The inventions mostly extend that material, such as the Interpol bassist and the doorframe memo. But giving both of them architecture careers ('architecture dropout', 'urban planning master's', 'corporate architecture') makes them more alike than the brief does. The plan also leaves unused Reuben's nipple, his 'just got back from a trip' lie and his early finish, plus Brick's wine-bar bark, her 'just got in from a thing' lie and the canapé, so it does not reach 5.",
+   "evidence": [
+    "Millennial architecture dropout scraping by on freelance audio transcription",
+    "First-gen striver with an urban planning master's",
+    "rehearsing his curve reveal in the mirror while shaking from his fourth gas-station energy shot"
+   ],
+   "raise": "Replace the doubled architecture careers with brief material: Reuben's mathematical reflex, and Brick's wine-bar bark as her Denial blurt.",
+   "def": "422981f4d9c7d5f1",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "I found no contradiction that changes who either character is. Brick's 'towering' anatomy follows the body stats, the plan's voices match the texting tics, and Reuben's contraction appears only at his Break. One fact is in tension with the brief: the brief says Reuben was fired for 'arguing with a regular', while the plan says the regular 'never even argued back'. That is a reframe rather than a break. The plan also passes over a trap in the brief without resolving it: Brick's backstory says 'the tip finishes shorter' and 'midsection slight', but her stats are 95-100 and 70-95.",
+   "evidence": [
+    "The regular never even argued back; he just looked right over Reuben's top hat",
+    "A towering, thick, heavily veined circumcised shaft"
+   ],
+   "raise": "Resolve Brick's self-description against her stats on purpose, for example as Denial, where she insists on a 'slight' midsection that her profile disproves.",
+   "def": "fa45960901c28caa",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have explicit fears, and the Collision maps each one's defense onto the other's fear. Brick's 'hm.' reads to Reuben as the tribunal, and his pre-written exits make her feel like a monster. Each side has a test: Brick's door-clearance question probes whether he will flinch at her size, and Reuben's 'second album' quiz probes whether she knows his version. Reuben has an answer to Brick's need ('You aren't too big for mine'). Brick's answer to Reuben's need is never stated: nothing she does shows she sees him without the performance. His band test is never answered, so the matrix has orphans.",
+   "evidence": [
+    "Brick's clipped \"hm.\" and numbered audits look to Reuben like the tribunal about to cut him for being too small",
+    "How much clearance does your front door have?",
+    "Did you actually like their second album, or are you only testing my reflexes?"
+   ],
+   "raise": "Give Brick a planned give-away that answers Reuben's need to be seen without performing, such as her passing his band-era quiz or staying through his silence.",
+   "def": "cdf9049147e4579d",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The reasons and events depend on these two. All three setups need both characters' particulars and would not survive a swap: the paired posture devices ($189 clip and £240 harness), door clearance set against her size and his short curve, and arm wrestling set against his short arms and her veins. Both endings reuse the clip and the door. It falls short of 6 because the brief makes the two near-mirrors, and the plan leans on that symmetry instead of finding a difference that only this pairing produces.",
+   "evidence": [
+    "returns mid-chat when Brick mentions her £240 harness holding her door open",
+    "You aren't too big for mine. Come break my doorpost.",
+    "hm. 1. Efficient. 2. Keep the coffee clip."
+   ],
+   "raise": "Build one beat on an asymmetry between them (her Honesty 14 against his Honesty, or his Dread against her Denial) rather than on matched props.",
+   "def": "f1b9dddac061dbfe",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 3,
+   "why": "Most beats rest on things each character says or that the profile shows: the veins, his own brag, her own door question. The fall-apart ending, though, has Brick say 'Keep the coffee clip'. The setup has Reuben brag only about 'ergonomic presence equipment'. That the clip is holding coffee is private drawer material, and the plan never routes how she learns it. The 'mutual confession' payoff is offered only as one option.",
+   "evidence": [
+    "Reuben brags about owning \"ergonomic presence equipment\" (his $189 collarbone clip currently holding coffee shut)",
+    "Keep the coffee clip."
+   ],
+   "raise": "Say explicitly that Reuben confesses the clip holds his coffee bag shut before the fall-apart beat can use it.",
+   "def": "5ca08850b888867b",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "The plan has no ordered beat sequence. It is a Collision, three free-standing setups each with an 'or' payoff, and two endings. The Collision and the snaps supply some therefore-logic: her 'hm.' sets off his rejection letter, and his exits set off her termination. The setups' 'returns' and 'pays off' are 'and then' placements with alternative outcomes rather than beats caused by the previous one. Nothing says what turn leads into the click.",
+   "evidence": [
+    "pays off as mutual confession of their mirror routines or as ammunition that the other is fake",
+    "pays off in bed logistics (who pins whom) or in him forfeiting before they ever meet"
+   ],
+   "raise": "Order the beats and state what each causes, for example: the door question leads to his geometry over-explaining, which leads to her Denial blurt.",
+   "def": "b7d5785d1f61ce07",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 4,
+   "why": "The guard-down moment exists. It has a trigger: Reuben stays quiet through a 'hm.' instead of offering an exit, which meets his own safety condition. It also shows in the typing before the words: Brick uses lowercase with no numbers or 'hm.', and Reuben drops his formal grammar and uses a contraction. Placement in the night is unspecified, and the trigger is a general behavior rather than tied to a particular event tonight, which keeps it from 5.",
+   "evidence": [
+    "Reuben stays quiet through a \"hm.\" without offering an exit; Brick drops the numbers and admits the revolving door broke her heel",
+    "i got wedged in the lobby door. i am too big for most rooms",
+    "Break: No numbers, no \"hm.\", lowercase start, admitting she has no plan."
+   ],
+   "raise": "Tie the trigger to a specific earlier beat, such as Reuben's pasted rehearsal note, and place it late in the chat.",
+   "def": "e72f84db4817e97c",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "The heat plan says it 'starts fast with blunt anatomical geometry'. Brick's sample line already sets a time and an act ('climb them at eight'), so explicitness and logistics are front-loaded. There is one gate ('Before it goes further, they have to drop the architectural measurements'), but no steps tied to trust. The night is marked very high heat, but that does not excuse logistics in the opening.",
+   "evidence": [
+    "Starts fast with blunt anatomical geometry",
+    "You are welcome to climb them at eight."
+   ],
+   "raise": "Open on innuendo about clearance and posture, and hold the explicit propositions and the 'eight o'clock' logistics until after the first real confession.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "Only the setups are placed, loosely: 'early', 'mid-chat', 'during dirty talk'. The revolving-door truth is reasonably held for the click. The two Accidents (the rehearsal note and the super memo), both Snaps and both Shadows have no position at all, so nothing prevents them from clustering. Two of the setups also open with prop reveals near the start.",
+   "evidence": [
+    "Brick asks early about his apartment's door width and her \"strategic pause\"",
+    "Accident: Pastes his mirror-rehearsal note"
+   ],
+   "raise": "Assign each Accident and Snap to a phase of the night, for example Brick's doorframe memo in the first third and Reuben's rehearsal note just before the click.",
+   "def": "6992bdb3b448c021",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 2,
+   "why": "The plan gives each character a static 'Tonight' tableau built from drawer items: lentil pot, energy shot, rosé, harness. Nothing from their lives happens to them during the chat. No person or place from the brief presses in at a bad moment: not the dive-bar regular, not the bar, not a call or message from anyone. The closest thing is Brick's misdirected note to her building super, but that is an accident she causes, not the outside world arriving.",
+   "evidence": [
+    "Pacing his bathroom in a towel with an eleven-day pot of lentils on the stove",
+    "Standing at her kitchen counter in a towel drinking from a three-liter box of rosé"
+   ],
+   "raise": "Add one timed event per character from the brief, such as the super replying to Brick's draft or Reuben's old bar texting about the 'Interpol' regular, set to land just after a vulnerable beat.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "All three setups have a plant, a return and a branching payoff. The click and fall-apart endings pay two of them differently: the door becomes the doorpost invitation in one, and the coffee clip becomes a dismissal in the other. Arm wrestling has a weak return ('when comparing his short, thick curve to her towering veins') and is not paid in either ending, which keeps this from a 6.",
+   "evidence": [
+    "pays off as mutual confession of their mirror routines or as ammunition that the other is fake",
+    "pays off when she admits getting wedged in the hotel revolving door or when she slams the door on him",
+    "hm. 1. Efficient. 2. Keep the coffee clip."
+   ],
+   "raise": "Give arm wrestling a sharper return and fold it into one of the two endings, for example who pins whom at the doorpost.",
+   "def": "521e2223c917f019",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The two endings are different stories. In the click ending he holds still through a 'hm.', so she drops her numbers and confesses the revolving door, and each breaks voice as specified. In the fall-apart ending both defences win: his pre-drafted exit meets her audit. The fall-apart is the thinner of the two. It is a single sentence plus two lines and has no turn of its own, only both habits firing at once, so it is not the best version of failure for this pair.",
+   "evidence": [
+    "Reuben stays quiet through a \"hm.\" without offering an exit; Brick drops the numbers",
+    "Reuben's pre-written exit collides with Brick's clinical dismissal."
+   ],
+   "raise": "Give the fall-apart its own turning point, such as one of them nearly breaking voice and then retreating behind a list or an exit.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 2,
+   "why": "The plan has no provision for a six-turn game and does not say which beats to keep or cut. The click hinge is a single compact beat (he stays quiet through a 'hm.'), so it might survive compression by luck. Nothing in the plan secures that.",
+   "evidence": [
+    "If they click: Reuben stays quiet through a \"hm.\" without offering an exit"
+   ],
+   "raise": "Add a short-game line naming the surviving beats: one accident, the 'hm.' silence test, and the door confession or exit.",
+   "def": "9c79336a7855f173",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are exact on-screen artefacts that suit a chat: a pasted mirror-rehearsal note and a draft sent to the wrong person. Each lands on its owner's fear, and Brick's ties into the door setup. The shadow misfires are described but not worded ('sends four rapid messages explaining the anatomical leverage'), which keeps this from a 6.",
+   "evidence": [
+    "Option B (grin, do not shrug): Yes it hooks hard left, think of it as ergonomic. [pause two seconds]",
+    "1. The hallway doorframe is 28 inches wide. 2. That is a code violation, not a personal failing."
+   ],
+   "raise": "Write the Overthinking and Denial shadow misfires as exact message text, like the accidents.",
+   "def": "8a43f27b6bad2c45",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through a chat. The plan also uses the medium itself: a misdirected draft, a pasted note, a slow reply as the snap trigger, a shaking-hand typo as Reuben's break, and lowercase as Brick's. It uses no photo or voice note, and the 'You are staring at the veins' line assumes a gaze the chat cannot show, which keeps this from a 6.",
+   "evidence": [
+    "leaves a contraction and a shaking-hand typo in one short sentence",
+    "A slow reply or a clipped verdict",
+    "Sends a draft meant for her building super"
+   ],
+   "raise": "Plan one photo beat, such as the coffee clip or the horse-tack harness holding the door open, as the moment that sets off the mutual confession.",
+   "def": "df6fedc6221ef314",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 4,
+   "why": "The two specs differ on observable features. Reuben writes zero contractions, long sentences with staccato follow-ups, soft emoji and 'If you need to bail'. Brick writes 'hm.', numbered lists and trimmed clauses. However, the plan makes both of them architecture people who reach for structural jargon. Brick's own sample line 'How much clearance does your front door have?' could be Reuben's ('clearance' is on his list), so not every message can be attributed without names.",
+   "evidence": [
+    "Uses structural words (\"ergonomic\", \"trajectory\", \"clearance\") for sex",
+    "\"How much clearance does your front door have?\"",
+    "Writes like a zoning report mixed with dirty talk"
+   ],
+   "raise": "Give Brick a vocabulary field distinct from Reuben's construction terms, such as calendar and logistics language, so their jargon never overlaps.",
+   "def": "e90fb07ec3b78554",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "Most of the plot is the default size-mismatch farce: tight fits, door clearance, 'Come break my doorpost.' The Accident on Brick's side is one turn you would not predict: a note to her super, about her own doorframe, saying it is 'not a personal failing', which shows she audits rooms for her own fear. The hinge on stillness rather than a joke is also against type. The mirrored posture devices come from the brief, not the planner.",
+   "evidence": [
+    "That is a code violation, not a personal failing.",
+    "Reuben stays quiet through a \"hm.\" without offering an exit"
+   ],
+   "raise": "Let the click turn on something beyond fit, such as Reuben being the one who stays quiet and still while she is the one who over-explains, so the size comedy turns into something neither expected.",
+   "def": "eee876c9f2949144",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 3,
+   "why": "Every section is present for both characters, plus the shared Collision, Setups, Endings and Heat. However, both endings are written as finished chat exchanges with usernames, which writes the chat rather than planning it. Voice sample lines may be allowed, but scripting the final exchanges is not.",
+   "evidence": [
+    "Brick_haus: i got wedged in the lobby door. i am too big for most rooms",
+    "Reuben_404: You aren't too big for mine. Come break my doorpost."
+   ],
+   "raise": "Describe each ending's final beat in prose instead of writing it as dialogue.",
+   "def": "bd872356c69500bb",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 56.1,
+   "cost": 0.190328,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 56.6,
+   "cost": 0.18698399999999998,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:23:04Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3773
+}

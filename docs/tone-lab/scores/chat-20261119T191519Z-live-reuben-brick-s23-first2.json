@@ -1,0 +1,528 @@
+{
+ "id": "chat-20261119T191519Z-live-reuben-brick-s23-first2",
+ "kind": "chat",
+ "label": "v22 · 19 Nov 19:15 · first look",
+ "version": "v22",
+ "order": 22,
+ "run": "20261119T191519Z-live-reuben-brick-s23-first2",
+ "source": "docs/tone-lab/runs/20261119T191519Z-live-reuben-brick-s23-first2/report.html",
+ "note": "This chat stops after turn 2 of a 11-turn game: score what the written turns can show.",
+ "when": "19 Nov 19:15",
+ "materials": {
+  "chat": {
+   "chars": 2918,
+   "words": 487
+  },
+  "plan": {
+   "chars": 24427,
+   "words": 3920
+  },
+  "brief": {
+   "chars": 21666,
+   "words": 3641
+  },
+  "dice": {
+   "chars": 1771,
+   "words": 273
+  },
+  "chat_but_last": {
+   "chars": 1537,
+   "words": 251
+  },
+  "chat_masked": {
+   "chars": 2832,
+   "words": 487
+  }
+ },
+ "scores": {
+  "chat.voices": {
+   "score": 4,
+   "why": "The masked reader attributed all 11 messages correctly. Several calls rested on voice: Brick_haus's \"hm.\" and numbered clauses, Reuben's dash-heavy ornate run-ons, his \"yours from the stalls, R.\" sign-off and his ☺️. Other calls rested on content: [4] on the posture apparatus and Shipping Forecast, [6] on the work question, [7] on catching her lie, [9] on stating his want. Those messages carry no distinct typing markers, which keeps this from a 5. It stays above the line because the two rhythms differ clearly: his long subordinate-clause cascades against her clipped declaratives.",
+   "evidence": [
+    "hm. 1. A man who reads the standing orders before sitting down is already ten minutes ahead of the curve.",
+    "what we forfeit in length we make up for in startling atmospheric girth and a left plum heavy enough to require its own council tax band ☺️",
+    "Buttoned wool is entry-level; I keep serious structural posture apparatus in the Pimlico hallway"
+   ],
+   "raise": "Give the content-identified messages ([4], [6], [7], [9]) a voice tell, such as a numbered clause or hard full stop for her and a dash-and-parenthetical cascade for him, so every line is attributable by shape alone.",
+   "def": "b73a0a956852e09a",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Two situation shifts are visible in the typing. Reuben moves from playbill sign-off to warm run-on plus ☺️ and a blunt horny question. Brick_haus's rosé \"Ha!\" opens her turn-2 reply and her horny register arrives as weather-front announcement plus a demand for a timestamped itinerary. Brick_haus's turn 2 keeps the same numbered, clipped shape as turn 1, so her heat shows mostly in content rather than form. Reuben dropping his sign-off is unexplained rather than situational. These two flaws keep it at a 4.",
+   "evidence": [
+    "Ha! The Radio 4 gale warning only sounds loud because I recently purged all non-essential soft furnishings",
+    "are we locking in 21:15 at the Victoria Line barrier or do you require a full structural survey first?",
+    "1. I am six-foot-one in my heels with a soft belly shelf below the navel"
+   ],
+   "raise": "Let the rosé visibly loosen Brick_haus's form in turn 2, for example a dropped number, a run-on, or a Yorkshire slip, so her shift reads in shape as well as in what she says.",
+   "def": "2239f2a85bb877f1",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.guard": {
+   "score": null,
+   "why": "The plan puts the turning point at beat 6. That is the Shipping Forecast admission and the dropped hat-tip, in lowercase without numbers. The chat stops after turn 2 of 11, so that moment cannot appear. The reader's pick, the \"soft belly shelf\" line, is Brick_haus's planned pre-emptive disclosure (Test 2), still numbered and delivered as armour, not her guard coming down.",
+   "evidence": [
+    "1. I am six-foot-one in my heels with a soft belly shelf below the navel",
+    "Two rightward curves mean the geometry requires advance choreography, not guesswork."
+   ],
+   "raise": "Write through to beat 6 so the lowercase, number-free drop can land and be found.",
+   "def": "498ed86940607399",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.pacing": {
+   "score": 2,
+   "why": "Meeting logistics and explicit sexual detail both arrive in the opening two turns, long before the beat-6 midpoint. Brick_haus demands a timestamp with a Victoria Line buffer in turn 1. Reuben names 21:15 at the barrier and asks to have his wrists pinned to the mattress in turn 2. Brick_haus closes with a full genital description and a demand for a schedule of oral acts. The turns also burn give-aways planned for later, the Shipping Forecast and the purged furnishings, and Brick_haus already knows his library-track job, which isn't on his profile. Very high heat is in the brief, but bed-and-platform logistics in turn 2 leave nothing to build toward; it does not reach 3 because both the explicit and logistical flags trip at once.",
+   "evidence": [
+    "state an exact timestamp for a fifty-minute drink with a twelve-minute Victoria Line buffer",
+    "are we locking in 21:15 at the Victoria Line barrier",
+    "send me a timestamped schedule of exactly what you intend to do with your mouth once you are pinned"
+   ],
+   "raise": "Keep turn 2 at bragging-level geometry and save the named time, the barrier and the bed itinerary for after the midpoint.",
+   "def": "dfc96b66f48adde3",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": null,
+   "why": "The written chat stops after turn 2 of an 11-turn game. Its last line is Brick's demand for a timestamped schedule, not an outcome. The DateSecured result is never shown, so there is no ending to compare with the reader's prediction. The reader's forecast of mock-surrender and an exact time fits the trajectory, but it has nothing to be checked against.",
+   "evidence": [
+    "Name a time for the platform and send me a timestamped schedule",
+    "are we locking in 21:15 at the Victoria Line barrier"
+   ],
+   "raise": "Write turns 3 to 11 so the DateSecured outcome appears on the page and can be checked against what came before.",
+   "def": "523ac55df936d179",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.dice": {
+   "score": 4,
+   "why": "Both written turns are successes, and both read as such. In turn 1 (Charm), Reuben's forfeit-the-arm-wrestle offer is taken up: Brick answers point by point and asks for a timestamp. In turn 2 (Wit), Reuben catches the Mayfair lie and Brick concedes with a flustered 'Ha!' and a patch-up excuse, which is a clear on-screen win. It sits only at the line because there are no misses to show, and turn 1's Charm success looks much like baseline banter; you could not tell it from a Safe Wit roll.",
+   "evidence": [
+    "Claiming a high-society Mayfair claret soirée while sitting in the dark listening to Gale Warnings",
+    "Ha! The Radio 4 gale warning only sounds loud because I recently purged"
+   ],
+   "raise": "Make turn 1's Charm success land on something specific, such as Brick visibly warming to the forfeit, so it reads differently from a Wit roll.",
+   "def": "0926102e524a115c",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.comedy": {
+   "score": 4,
+   "why": "Several lines land, and they come from character. Reuben calls out the Mayfair claim against the Dogger and German Bight forecast, Brick schedules settling the bill 'before our third anniversary', and the testicle gets its 'own council tax band'. Some jokes are muddled: Brick's posture apparatus is somehow loud enough to drown out the radio, and the opening fragment is too clotted to land. Reuben also recycles Brick's 'third anniversary' gag a beat later instead of topping it. That keeps the rate below 5.",
+   "evidence": [
+    "a left plum heavy enough to require its own council tax band ☺️",
+    "so we can settle the bill before our third anniversary",
+    "is breathtaking audacity"
+   ],
+   "raise": "Cut or clarify the muddled lines (the loud posture apparatus, the fragment opener) and give Reuben a fresh topper instead of echoing her anniversary joke.",
+   "def": "a2eec05f35d6a732",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "The sexual lines are specific to these two bodies and lives. His bend is a barometer 'toward East Anglia'. Hers is 'an incoming front off the North Sea'. The matching curves become a logistics problem ('advance choreography') that fits her timetable habit. Reuben's 'pin my wrists... so I can't patter my way out' ties his kink to his core want. It falls short of 6 because it arrives a little fast and is half-bolted onto unrelated jokes ('reach is pure tyrannosaur'), so the heat reads as dual disclosure more than build.",
+   "evidence": [
+    "my lower barometer hooks sharply right toward East Anglia",
+    "pin my wrists to the mattress so I can't patter my way out of the lease",
+    "Two rightward curves mean the geometry requires advance choreography, not guesswork"
+   ],
+   "raise": "Let one beat of reaction to the twin-curve discovery land, such as dirty shock or a pause, before Brick moves to scheduling, so the filth escalates rather than arriving as a matched pair of announcements.",
+   "def": "88948fe597e577cc",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.truth": {
+   "score": 3,
+   "why": "The nearest thing to a real moment is Brick being caught out and scrambling with the over-specific soft-furnishings excuse. The reader chose it, but said belief 'didn't hold'. It is a small human slip, not a moment of feeling, and its hint of a gutted flat after a breakup is too buried for a reader to register. Reuben's wish to be pinned so he 'can't patter' gestures at the real want but is played entirely as a bit. Both voices share one arch register, which the reader flagged as 'one sensibility writing both sides'.",
+   "evidence": [
+    "I recently purged all non-essential soft furnishings from this SW1 studio and the floorboards carry",
+    "I never make an unscheduled expression"
+   ],
+   "raise": "Let one line crack the register, such as Brick's rosé-loosened 'nowt' or a beat where Reuben's reply comes in four seconds and he notices, so a reader glimpses the person under the act.",
+   "def": "f649c60679485389",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.know": {
+   "score": 3,
+   "why": "The reader gets three of five at most for each character, and some of what they got is the lie. Reuben: London (no area), a rough audio job, and loves (Cumbrian ridges, 1997 Mogwai). Brick: Pimlico SW1 and a suspected Mayfair dodge, but no job, and the 'love' they named is the Oxfordshire claret cover story. Nobody in either life appears: no Callum, Delphine, Marguerite or Bex. The reader read Reuben's 'trapped indoors' boast as exaggeration rather than concealment, so the eleven-day confinement never registers.",
+   "evidence": [
+    "Normally I'm halfway up a wet Cumbrian ridge rather than thumbing a screen",
+    "I recently purged all non-essential soft furnishings from this SW1 studio and the floorboards carry",
+    "raised on bespoke Oxfordshire tailoring and decent claret"
+   ],
+   "raise": "Let one person from each life leak into the turns (Callum's hill photo, Malcolm's misdelivered notice), so a reader knows something real about each beyond the bodies.",
+   "def": "92bd91413c686746",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.evaluation": {
+   "score": 4,
+   "why": "The reader named Brick's tests almost exactly as planned: punctuality versus drifting, and whether her scale is accepted. These show in the minute-count demand and the pre-emptive curve disclosure. For Reuben, the reader caught 'will she take charge' and 'will my body be accepted', which is close to the plan's 'laugh with or flinch'. The 'stays through a pause' test is absent, and the arm-wrestle bit never gets a response. It stays above the line because both tests are readable; it is not a 5 because nothing tips either character yet.",
+   "evidence": [
+    "one develops an allergy to people who drift",
+    "state an exact timestamp for a fifty-minute drink with a twelve-minute Victoria Line buffer",
+    "are we locking in 21:15 at the Victoria Line barrier or do you require a full structural survey first?"
+   ],
+   "raise": "Have Reuben's laugh-with-or-at test land visibly: Brick either plays along with the arm-wrestle bit or flattens it, and Reuben reacts to which one she chose.",
+   "def": "d76f2cda01fc9975",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "The Mayfair lie is properly caught out: Reuben uses her own Shipping Forecast slip against her. The bare studio slips out through the furnishings excuse, though the reader didn't decode it as a gutted post-breakup flat. Everything else is stated outright: both bodies are delivered as numbered or meteorological declarations, Reuben's indoor confinement is announced and played as a joke, and the Oxfordshire upbringing is simply claimed. Most important facts come out by being said.",
+   "evidence": [
+    "sitting in the dark listening to Gale Warnings in Dogger and German Bight on Radio 4 is breathtaking audacity",
+    "1. I am six-foot-one in my heels with a soft belly shelf below the navel"
+   ],
+   "raise": "Let Reuben's whereabouts slip through a detail he can't help (the reheated lentils, a four-second double-send) instead of announcing he's trapped indoors.",
+   "def": "bd46631f3db1004c",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.leaks": {
+   "score": 2,
+   "why": "Brick knows that Reuben cleans clicks off library tracks and deals with session drummers. His profile says only 'Sonic Architect' and 'ask me about a band', so this is lifted straight from his private job at Kestrel Audio. Reuben opens with 'the terms of the lease' and later calls her 'Pimlico tribunal authority', which points at her leasehold-tribunal work; her profile says only 'Principal Consultant' and she has said nothing about leases. That makes several references beyond what each could know.",
+   "evidence": [
+    "cleaning clicks off four hundred library tracks on a wet evening",
+    "that is how you settle the terms of the lease before a fella even pulls his chair out",
+    "that Pimlico tribunal authority"
+   ],
+   "raise": "Have Brick ask what a Sonic Architect actually does instead of naming library-track cleanup, and drop 'lease' and 'tribunal' until she has mentioned her job.",
+   "def": "f4e81699090d8a16",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 4,
+   "why": "Most messages react to the one before. Brick answers the waistcoat with her own posture apparatus and turns the olive forfeit into a timestamp demand. Reuben answers the drummer question 'by millisecond', calls out the Shipping Forecast, and echoes 'third anniversary'. Brick answers the callout and matches his curve. The clear miss is that Reuben offers 21:15 and Brick replies 'Name a time' as if he hadn't; it reads as a dropped offer rather than a pointed one. The arm-wrestle bit also goes unanswered.",
+   "evidence": [
+    "are we locking in 21:15 at the Victoria Line barrier",
+    "Name a time for the platform",
+    "Two rightward curves mean the geometry requires advance choreography"
+   ],
+   "raise": "Have Brick seize the 21:15 and audit it ('21:15 is a start, not a schedule') instead of asking for a time he was just given.",
+   "def": "8615d499f666f54d",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 4,
+   "why": "Setup 3 is planted and already moves past bragging. Reuben's \"hooks sharply right toward East Anglia\" is met by Brick's \"curves hard right like an incoming front off the North Sea\" and turned into \"advance choreography.\" The Mayfair lie is planted, exposed by Reuben's Shipping Forecast jab and answered with the purged-furnishings excuse, which is a clean in-chat return. The waistcoat (Setup 1) and the posture apparatus (Setup 2) each return only once with no development. Brick's \"Name a time for the platform\" ignores Reuben's \"21:15\", which breaks the timestamp thread rather than paying it off, so this stays a 4 and not a 5.",
+   "evidence": [
+    "Two rightward curves mean the geometry requires advance choreography, not guesswork.",
+    "sitting in the dark listening to Gale Warnings in Dogger and German Bight on Radio 4 is breathtaking audacity",
+    "are we locking in 21:15 at the Victoria Line barrier"
+   ],
+   "raise": "Have Brick answer the 21:15 directly, for example by dissecting it against her buffer, so the timestamp setup lands instead of being dropped.",
+   "def": "1e5fc737942aad02",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "The turns are split into separate messages with plausible app moves: a numbered reply, a direct question, a demanded time. Several messages run long, ornate and essay-like. Reuben's second turn-1 message and his turn-2 anatomy message are each one breathless 50–60 word sentence that reads more like written monologue than thumbs on a screen. \"Sitting in the dark\" is something Reuben could not know from what she said, though it works as an inferred jab. It stays above the line because the rhythm is still message-to-message, with no stage directions or shared space.",
+   "evidence": [
+    "Normally I'm halfway up a wet Cumbrian ridge rather than thumbing a screen, only the London drizzle has me trapped indoors in a strictly buttoned waistcoat",
+    "hm. 1. A man who reads the standing orders before sitting down is already ten minutes ahead of the curve."
+   ],
+   "raise": "Break Reuben's run-on sentences into two or three shorter sends so the patter reads as rapid-fire texting rather than paragraphs.",
+   "def": "ad34942837ff0404",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Across only two turns, Reuben leans on the same \"before X\" construction four times. Both characters use the same weather-front simile for their curves, so Brick mirrors Reuben's joke shape instead of finding her own. \"Settle the terms\" and \"settle the bill\" plus a repeated \"third anniversary\" add to the sense of recycled phrasing. Some of this is deliberate callback, but the \"before\" tic and the doubled weather simile are noticeable within so few lines.",
+   "evidence": [
+    "before anyone can blink",
+    "before a fella even pulls his chair out",
+    "curves hard right like an incoming front off the North Sea"
+   ],
+   "raise": "Give Brick her own register for the curve, such as tailoring measurements or planning-permission legalese, and cut Reuben's \"before\" clauses to one.",
+   "def": "b7b00a6c1a750e87",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plan": {
+   "score": 5,
+   "why": "Beat 1 is almost fully present: the arm-wrestle forfeit, the Cumbrian ridge claim, the buttoned waistcoat \"spinal presence,\" \"hm.\", the twelve-minute Mayfair lie with the Shipping Forecast give-away, the hallway apparatus, and the fifty-minute drink with a Victoria Line buffer. Beat 2 is also delivered: the 1997 Mogwai pressing test, the left-testicle brag, the pin-me question, her scale and veined curve, and the timestamped bed-itinerary demand. Two small flaws remain. Claudia was meant to disclose first but follows Reuben. Reuben's playbill sign-off appears only once and vanishes in turn 2, even though his baseline voice should keep it.",
+   "evidence": [
+    "yours from the stalls, R.",
+    "I am twelve minutes back from a terribly dry Mayfair gathering",
+    "my lower barometer hooks sharply right toward East Anglia"
+   ],
+   "raise": "Let Brick pre-empt with her scale before Reuben's brag, and keep Reuben's hat-tip sign-off in turn 2.",
+   "def": "7c354ba78c9a3a52",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "The satire targets behaviour: his pre-emptive self-parody and her minute-counting tribunal manner. Both stay people somewhere. She is apparently alone in the dark with the Shipping Forecast and a room stripped of soft furnishings, and he asks to be pinned \"so I can't patter my way out,\" which hints at what he actually wants. Mostly, though, both are still pure armour, and the fondness is thin. A reader sees two bits sparring more than two lonely people.",
+   "evidence": [
+    "I recently purged all non-essential soft furnishings from this SW1 studio and the floorboards carry",
+    "pin my wrists to the mattress so I can't patter my way out of the lease"
+   ],
+   "raise": "Let one plain, unarmoured line slip from either character, such as a lowercase aside about the bare room, so the fondness becomes visible alongside the mockery.",
+   "def": "287d1d1e13cabb29",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.momentum": {
+   "score": 4,
+   "why": "The reader answered \"Never\" and named Brick's hertz/timestamp question as a hook to continue. They also said turn 1 \"could find it exhausting\" and gave no sign of eagerness for the next chat. The density holds attention but does not pull the reader forward with any stakes beyond the escalating bit.",
+   "evidence": [
+    "do you log the faults by hertz, by timestamp, or by how badly the session drummer dragged behind the beat?",
+    "Name a time for the platform and send me a timestamped schedule"
+   ],
+   "raise": "End turn 2 on a crack in the act, such as a contradiction or a slip, so the reader wants the next turn for the person and not only for the joke.",
+   "def": "8cc406668f0d33de",
+   "material": "4c8180b91e713d17",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.know": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what they do for a living; where they live; one person in their life and what is going on with that person; one thing they love; one thing they are hiding or lying about. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n- **What he does for a living:** Not stated outright. Brick_haus calls him a \"Sonic Architect\" cleaning clicks off library tracks, and Reuben goes along with it, saying he logs the drummer's faults by the millisecond. This suggests audio or music production work, but the chat never confirms a job title.\n- **Where he lives:** London, implied by \"the London drizzle has me trapped indoors.\" No area is given.\n- **A person in his life:** Not in the chat. The session drummer who \"dragged behind the beat\" comes from Brick's hypothetical question, not a named or real person in Reuben's life.\n- **One thing he loves:** Hill walking in Cumbria (\"halfway up a wet Cumbrian ridge\"). He also mentions 1997 Mogwai vinyl pressings.\n- **Hiding or lying about:** Nothing is clearly established. His claims, such as the waistcoat being for \"high-altitude aerodynamics,\" and his anatomical boasts read as deliberate comic exaggeration, not concealment.\n\n**Brick_haus**\n\n- **What they do for a living:** Not in the chat. Reuben's phrase \"Pimlico tribunal authority\" might hint at something legal or official, but it is too vague to count.\n- **Where they live:** Pimlico, in an SW1 studio, by their own account.\n- **A person in their life:** Not in the chat.\n- **One thing they love:** Bespoke Oxfordshire tailoring and good claret. They also clearly value punctuality and precise scheduling.\n- **Hiding or lying about:** Possibly the \"terribly dry Mayfair gathering.\" Reuben calls this out, suggesting Brick was actually at home listening to the Shipping Forecast. Brick blames bare floorboards for how loud the radio is, but never directly answers the challenge. The chat leaves it unresolved."
+  },
+  "chat.evaluation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone: what is each one trying to find out about the other before saying yes, and did they find it? As each of them, would you go home with or date the other, and why?",
+   "answer": "**What each is trying to find out**\n\nBrick_haus is testing whether Reuben is precise and dependable or someone who \"drifts.\" Nearly everything he sends is a demand for specifics: an exact timestamp, a fifty-minute drink with a twelve-minute Victoria Line buffer, how Reuben logs audio faults (by hertz, timestamp, or drummer lag). Once things turn sexual, he keeps testing the same way. He discloses his own body, notes that two rightward curves need \"advance choreography,\" and asks for a timestamped schedule of what Reuben will do with his mouth. He wants to see whether Reuben will commit to concrete intent rather than charm.\n\nReuben is testing two things. First, whether Brick is real or posturing: he calls out the \"Mayfair claret soirée\" against the sound of the Shipping Forecast in the dark. Second, whether Brick will actually take charge. He asks whether Brick will \"pin my wrists to the mattress so I can't patter my way out.\" He also gets his own body out early (short reach, a right curve, girth) as if checking it will be accepted, and he offers a concrete choice: 21:15 at the barrier, or a \"full structural survey first.\"\n\n**Did they find it?**\n\nBrick mostly got his answer. Reuben answered the logging question playfully but precisely (\"by millisecond\"), and he proposed an actual time, 21:15. Brick still says \"name a time,\" though, so either he missed it or he wants it confirmed in his own format. The mouth schedule hasn't been answered yet, because the chat ends there.\n\nReuben partly got his answer. Brick laughed off the callout with a half-excuse about bare floorboards rather than owning it, so the posturing question is only partly settled. On dominance and acceptance, Brick reciprocated warmly: he matched Reuben's disclosure, made no complaint about Reuben's body, and kept issuing orders. But by asking for choreography and a schedule, he effectively chose the \"structural survey first\" option and didn't lock in 21:15.\n\n**As each of them, would I go?**\n\nAs Reuben, I'd lean yes. He has already \"forfeited the arm-wrestle,\" he asked to be pinned, and Brick is clearly willing to run the show. The only friction is that Brick's demand for a written itinerary could feel like homework, and the Mayfair dodge is a small mark against his honesty. Whether Reuben finds that fun or tiresome isn't shown.\n\nAs Brick, I'd also lean yes, but conditionally. Reuben has shown the precision Brick values and seems game for his style. Brick's own words make sending that schedule the price of the platform meeting, so his yes still waits on Reuben's next message.\n\nOn going home versus dating: the chat is clearly heading toward a hookup. The running \"third anniversary\" joke hints that both are amused by the idea of more, but nothing here tells us whether either actually wants that."
+  },
+  "chat.guard": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did it get real between them? Quote the line, and say how you could tell.",
+   "answer": "The clearest point where it turns real is Brick_haus's line in Turn 2: \"I am six-foot-one in my heels with a soft belly shelf below the navel and a thick, heavily veined cock that also curves hard right like an incoming front off the North Sea.\"\n\nYou can tell because it's the first line that drops the bit. Until then both men speak almost entirely in performance: invented credentials (Mayfair claret, Oxfordshire tailoring, a \"Sonic Architect\"), mock-bureaucratic framing (leases, standing orders, tribunals, timestamps), and weather and radio jokes. Brick_haus keeps one small weather simile, but the rest is plain, specific, and unflattering in a way the earlier boasting never is. \"Soft belly shelf\" is not a pose anyone strikes to impress. Volunteering a mild imperfection reads as honesty rather than patter.\n\nThe word \"also\" matters too. It shows Brick_haus has decoded Reuben's euphemism from earlier in the turn (\"my lower barometer hooks sharply right toward East Anglia… startling atmospheric girth… a left plum heavy enough to require its own council tax band\"). Reuben was testing the water in code; Brick_haus answers him directly. Reuben's message is really the hinge: it's where the subtext becomes sexual. He follows it with \"pin my wrists to the mattress,\" which is the first open statement of what he actually wants, still dressed in the lease joke. But Reuben keeps the costume on, and Brick_haus is the one who takes it off.\n\nThere's an earlier hint of sincerity under the jokes: the repeated, insistent push for an exact time and meeting place (\"state an exact timestamp,\" \"21:15 at the Victoria Line barrier,\" \"Name a time for the platform\"). That suggests both actually want to meet, not just banter. But that's still delivered as a gag about schedules.\n\nWhat I can't tell from the text is whether any of the biographical details are true, or how either man felt beyond what he wrote. The conversation stops right after Brick_haus's line, so there's no reply from Reuben showing how it landed."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "**[1] Reuben_404.** He's riffing on Brick_haus's bio (the timetable tattoo, briefing the room on her curve, winning arguments nobody started). \"Before a fella even pulls his chair out\" puts the speaker in his position.\n\n**[2] Reuben_404.** It has his hook (the hiker trapped indoors by rain), the Cumbrian ridge, the arm-wrestle forfeit, and his signature sign-off, \"yours from the stalls, R.\" The \"spinal presence\" line nods to his posture clip.\n\n**[3] Brick_haus.** It opens with her \"hm.\" and uses numbered clauses. It also has her lie (\"twelve minutes back from a… Mayfair gathering,\" with the giveaway minute count) and her Oxfordshire tailoring-and-claret hook.\n\n**[4] Brick_haus.** The \"structural posture apparatus\" in a Pimlico hallway is her £240 harness propping a door open, and the Shipping Forecast is her late-night habit.\n\n**[5] Brick_haus.** She demands an exact timestamp, a fifty-minute drink, and a Victoria Line buffer, and she plans the third anniversary early. These are her habits when she's into someone.\n\n**[6] Brick_haus.** She asks him an expansive question about his dull work routine (logging faults on library tracks), which matches how her texting behaves when she's into someone.\n\n**[7] Reuben_404.** He calls out her Mayfair claim using the Shipping Forecast detail she gave in [4]. Mischievously catching someone else's lie fits his quick wit.\n\n**[8] Reuben_404.** It has the 1997 Mogwai pressings, the \"tyrannosaur\" reach, the curve hooking east, the outsized left testicle, weather-flavoured bragging, and his ☺️ for when he's into someone.\n\n**[9] Reuben_404.** He asks to be pinned so he \"can't patter\" his way out, which is his real want for tonight, put as a blunt horny question.\n\n**[10] Brick_haus.** It starts with her rosé-style \"Ha!\" and doubles down on a fib. The purged soft furnishings and the SW1 studio are her life after Marguerite.\n\n**[11] Brick_haus.** It uses numbered points and describes her height, her belly shelf, and her veined, right-curving cock like incoming weather. She ends by asking for a timestamped schedule of what he'll do."
+  },
+  "chat.momentum": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read turn by turn. At which turn would you have stopped reading if you were not asked to finish, and why? Say \"never\" if you would read to the end.",
+   "answer": "Never. I would read to the end.\n\nTurn 1 is dense and deliberately overwrought, with mock-pompous flirting, invented credentials like the waistcoat \"for high-altitude aerodynamics\" and the \"structural posture apparatus,\" and rapid-fire demands for timestamps. A reader could find it exhausting, but the running jokes (leases, standing orders, the Shipping Forecast, \"our third anniversary\") are coherent and escalating. Brick_haus's closing question about logging faults by hertz or timestamp is a hook that invites a reply, so there is reason to continue.\n\nTurn 2 is where the content becomes sexually explicit. Reuben_404 uses weather and geography euphemisms (\"lower barometer hooks sharply right toward East Anglia,\" the council-tax joke), and Brick_haus answers plainly with a description of his body and a request for a \"timestamped schedule\" of what Reuben intends. The explicitness doesn't make me want to stop. Within this transcript it reads as mutual and reciprocated between two participants who are both escalating, and the turn keeps the comic structure that makes the exchange work: the shared \"rightward curve\" becomes a geometry problem that \"requires advance choreography,\" and the timetable motif from the opening line pays off. It is consistent with what came before rather than a jarring break.\n\nI can only judge from these two turns. Nothing here tells me who the participants are, how old they are, or the platform and context beyond what they say themselves, and I'm not assuming anything past that."
+  },
+  "chat.truth": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Quote the one moment you believed these were real people, and say why; or say there wasn't one.",
+   "answer": "The closest I came was Brick_haus's reply in Turn 2: \"Ha! The Radio 4 gale warning only sounds loud because I recently purged all non-essential soft furnishings from this SW1 studio and the floorboards carry.\"\n\nIt works because of what comes just before it. Reuben has caught a contradiction: Brick claims to have just come back from a Mayfair claret gathering while also admitting to sitting in with the Shipping Forecast blaring. Brick doesn't ignore it or escalate. He gets caught out, laughs, and patches the story with a slightly flustered, over-specific excuse. Noticing a fib, calling it, and having the other person scramble to save face is a small, untidy human move. It's the only point where the two seem to be reacting to each other rather than performing beside each other.\n\nEven there the belief didn't hold, and I wouldn't call it a confident yes. Both voices are cut from the same cloth: the same arch British pastiche, the same piling-up of place names (Cumbria, Mayfair, Pimlico, SW1, East Anglia, Dogger), and the same metaphors handed back and forth, like the lease, the third anniversary, and the weather-front imagery. Brick uses numbered lists twice, and the two men describe anatomy that conveniently \"curves hard right\" in matching meteorological language. Two strangers rarely converge that neatly in two turns. It reads more like one sensibility writing both sides, or both sides being generated in the same style.\n\nSo that one exchange is the only moment that briefly felt real. Nothing in the text lets me say whether these are actual people. I can only say the rest reads as constructed."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and whether each pays off.",
+   "answer": "**The curve.** Reuben opens with Brick promising to \"brief the room on her own curve.\" Brick answers with \"ten minutes ahead of the curve.\" In turn 2 it turns literal: Reuben's \"hooks sharply right toward East Anglia,\" and Brick's \"curves hard right like an incoming front off the North Sea.\" Brick closes it with \"two rightward curves mean the geometry requires advance choreography.\" This is the chat's strongest payoff because a throwaway phrase becomes the main subject.\n\n**Weather.** The thread starts with Cumbrian rain and London drizzle, moves to the Shipping Forecast, then to gale warnings in Dogger and German Bight, and ends with Reuben's \"lower barometer\" and \"atmospheric girth\" and Brick's \"incoming front off the North Sea.\" It pays off. Each turn escalates it, and both men end up using it to describe their bodies.\n\n**The Shipping Forecast and the Mayfair claim.** Brick says he's just back from a Mayfair gathering, then mentions his hallway apparatus drowning out the Shipping Forecast. Reuben catches the contradiction: claret soirée versus sitting in the dark with Radio 4. Brick answers with a straight-faced excuse about purging soft furnishings so the floorboards carry. It pays off cleanly. Brick plants the slip, Reuben exposes it, and Brick commits to the bit.\n\n**Third anniversary.** Brick says \"settle the bill before our third anniversary,\" and Reuben repeats it almost word for word to introduce his anatomical disclosure. It pays off as a shared running joke.\n\n**The lease.** Reuben's opener, \"settle the terms of the lease,\" comes back in his line \"so I can't patter my way out of the lease.\" Brick's \"settle the bill\" sits alongside it. It pays off modestly.\n\n**Timestamps and precision.** Brick asks for an exact timestamp with a twelve-minute Victoria Line buffer. He also asks whether faults are logged by hertz, by timestamp, or by the drummer. Reuben answers \"by millisecond\" and proposes 21:15 at the Victoria Line barrier. Brick then demands a \"timestamped schedule\" for what Reuben will do with his mouth. The motif pays off, and the train-timetable tattoo in Reuben's first line fits it. However, Brick's \"Name a time for the platform\" ignores the 21:15 Reuben already gave. That one beat doesn't land, and the chat doesn't show whether this is a deliberate demand for more precision or an oversight.\n\n**Structure and posture.** The thread runs from \"spinal presence\" to \"structural posture apparatus,\" then to Reuben's \"full structural survey,\" and finally to Brick's \"geometry.\" It pays off as a steady undercurrent.\n\n**Pinning.** Reuben's \"pin my wrists to the mattress\" returns as Brick's \"once you are pinned.\" It pays off directly.\n\n**Location.** Brick's Pimlico hallway comes back as Reuben's \"Pimlico tribunal authority\" and as Brick's \"SW1 studio.\" Reuben's East Anglia and Brick's North Sea also mirror each other. Both small payoffs work.\n\n**Partial callbacks.** Some items return once and are then dropped:\n* Reuben's forfeited arm-wrestle and the olives get one reply from Brick (\"forfeiting over olives\").\n* The buttoned waistcoat gets one reply (\"buttoned wool is entry-level\").\n* The drummer question is answered, but the Mogwai vinyl Reuben adds goes nowhere.\n\n**Not called back.** Brick's \"never make an unscheduled expression\" doesn't return.\n\n**Left open.** The chat ends before Reuben replies to Brick's final demand. The meeting time and the requested schedule are still unresolved in what's shown."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the last turn, how do you think this ends, and why?",
+   "answer": "I can't know how it ends; I'm only shown the chat up to Brick_haus's last message. But the pattern points one way.\n\nMost likely, Reuben replies in the same mock-grand register. He answers the audio question with a joke that sorts the faults by all three categories, or blames the drummer outright. Then he concedes to Brick_haus's demand for precision and names a specific time, probably with an absurdly exact detail to match her twelve-minute buffer. He might also counter-boast about his own posture apparatus or his waistcoat to keep the escalating one-upmanship going.\n\nHere's why I read it that way:\n\n- **The banter is escalating.** Each message tops the last. Reuben's waistcoat \"for high-altitude aerodynamics\" is met by her \"structural posture apparatus\" loud enough to drown out the Shipping Forecast. The natural next move is another top or a graceful mock-surrender.\n- **She left two open hooks.** She demanded \"an exact timestamp\" and asked a direct question with \"Tell me immediately.\" A reply that ignores both would break the rhythm.\n- **Reuben has already framed himself as the willing loser.** He said he'd \"gladly forfeit,\" so I'd expect him to give her the timestamp rather than resist.\n- **It reads as flirtation building to a date.** The \"third anniversary\" quip and the drink logistics suggest the conversation is heading toward actually meeting.\n\nThe less likely alternative is that Reuben hits a fussy, deadpan exact time that one-ups her own precision and ends the exchange on that punchline."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.7,
+   "cost": 0.04006,
+   "label": "probe chat.know"
+  },
+  {
+   "seconds": 23.3,
+   "cost": 0.049592000000000004,
+   "label": "probe chat.evaluation"
+  },
+  {
+   "seconds": 15.4,
+   "cost": 0.03272,
+   "label": "probe chat.guard"
+  },
+  {
+   "seconds": 18.8,
+   "cost": 0.101136,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 15.8,
+   "cost": 0.028019999999999996,
+   "label": "probe chat.momentum"
+  },
+  {
+   "seconds": 21.1,
+   "cost": 0.039924,
+   "label": "probe chat.truth"
+  },
+  {
+   "seconds": 30.9,
+   "cost": 0.069328,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 12.9,
+   "cost": 0.021588,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 29.3,
+   "cost": 0.224268,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 30.1,
+   "cost": 0.220296,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 43.6,
+   "cost": 0.25283999999999995,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 43.0,
+   "cost": 0.253588,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:19:53Z",
+ "repo_commit": "5e49d8e",
+ "cost": 1.3334
+}

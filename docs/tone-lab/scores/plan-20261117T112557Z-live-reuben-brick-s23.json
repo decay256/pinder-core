@@ -1,0 +1,352 @@
+{
+ "id": "plan-20261117T112557Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v14 · 17 Nov 11:25 · full run",
+ "version": "v14",
+ "order": 14,
+ "run": "20261117T112557Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261117T112557Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "17 Nov 11:25",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 5536,
+   "words": 924
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 2,
+   "why": "The plan gives each character a grounded 'Tonight' situation drawn from the brief: Reuben's energy shots and eleven-day lentils, and Brick's towel, rosé and the harness holding her door. None of these is an event that happens during the night. No named person, place or outside intrusion interrupts the chat at a bad moment. The situations sit in the background and nothing is scheduled to press on either fear.",
+   "evidence": [
+    "Sitting on his shaking hands in his kitchen after four gas-station energy shots, beside an eleven-day pot of lentils.",
+    "On her sofa in the same towel since four, drinking three-liter boxed rosé"
+   ],
+   "raise": "Add at least one timed outside event from each life, such as the misidentified regular or the singer's brother messaging Reuben mid-chat, placed where it hits his fear of being cropped out.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "All three setups have a plant, a middle return and an end beat. Setup 1 pays differently by outcome ('takes off the props vs. proves he's a fraud'). Setup 2 is paid in the click ending's 'do not make me fit through a restaurant door'. Setup 3 pays only in the click ending, and setup 2's end is phrased as a question rather than a resolution. That puts it above the line, since every setup lands, but not every setup pays differently in each ending.",
+   "evidence": [
+    "end: he takes off the props vs. proves he's a fraud",
+    "end: whether two mismatched bodies can fit through the same door without getting crushed",
+    "end: filthy size-difference geometry in bed"
+   ],
+   "raise": "Give setups 2 and 3 an explicit fall-apart payoff, for example her audit grading his 'insufficient leverage' as the arm-wrestling callback.",
+   "def": "521e2223c917f019",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The two endings are different stories. In the click ending, she drops the numbering and admits the towel, and he deletes the exit clause and stays. In the fall-apart ending, she audits him and he exits first, each executing their snap. The fall-apart version is just both defences running to completion, with no twist specific to this pair, which keeps it from a 5. It clears the line because the scenes differ, not only the last lines.",
+   "evidence": [
+    "She drops the numbers and admits she's still in a towel; he deletes the exit clause and stays in the frame.",
+    "She grades him out of existence; he beats her to the exit."
+   ],
+   "raise": "Make the fall-apart ending turn on the shared mirror-rehearsal secret, so the failure is specific to them rather than two snaps firing.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "The plan has no provision for a short game. It never says which setup, accident or turning point survives if the game runs six turns.",
+   "evidence": [
+    "Setups:",
+    "If they click:"
+   ],
+   "raise": "Add a short-game line naming the one accident and the one setup that carry the turn to an ending in six turns.",
+   "def": "9c79336a7855f173",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    false,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written out verbatim as pasted text, a notes-app script and a draft complaint. They are native to a chat, and each exposes that character's hidden rehearsal or fear in their own voice; hers is even numbered. It stops at 5 because each character has only one accident, so a run of misfires on other stats has nothing written for it.",
+   "evidence": [
+    "Option B (grin, casual): Yes it hooks left like a boomerang and no it does not reach the back, should I grab my coat",
+    "2. A standard brass revolving quadrant is not engineered for seven inches of girth plus heels"
+   ],
+   "raise": "Write a second exact artefact per character for their other strong shadows, such as Reuben's Dread or Brick's Overthinking.",
+   "def": "8a43f27b6bad2c45",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 4,
+   "why": "Most beats can travel through text, and the pasted-script accidents use the medium itself. One payoff, 'he takes off the props', implies something physical the other person must see, and the plan doesn't route it through a photo. Timing is only gestured at in 'anger at slow replies'. Nothing requires a shared room, so it clears the line.",
+   "evidence": [
+    "he takes off the props vs. proves he's a fraud",
+    "anger at slow replies"
+   ],
+   "raise": "Specify that the prop removal arrives as a photo and plan where a delayed reply lands as a beat.",
+   "def": "df6fedc6221ef314",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben uses ceremonial full words, no contractions, staccato bursts and a soft emoji in place of a period. Brick uses clipped clauses, a 'hm.' before verdicts and numbered lists. The sample lines could be attributed without names. Both 'state mutual interest as established', which blurs one axis.",
+   "evidence": [
+    "I have already calculated the angle of disappointment here 🙂",
+    "1. Take the hat off. 2. Speak slower.",
+    "You are staring at my veins. Proceed."
+   ],
+   "raise": "Give Brick one forbidden feature, such as never using emoji or never asking a question, so no Reuben line could pass as hers.",
+   "def": "e90fb07ec3b78554",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "One turn would not be predicted: the huge, imposing one fears she will crush or jam the door, so his exit clauses read to her as proof she scared him off. That inverts the expected mismatch farce. The endings and the heat line ('absurd size gap') stay close to the default, which keeps it from a 5.",
+   "evidence": [
+    "she is terrified her size and heat will crush them or jam the door",
+    "his preemptive exit-clauses make her feel like a clumsy monster who already scared him off"
+   ],
+   "raise": "Have each discover the other's mirror rehearsal through the accidents, so the turn is that both have been performing the same script.",
+   "def": "eee876c9f2949144",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every expected section is present for both characters: Shows, Tonight, Fear, Habit, Lie, a three-piece Origin, Accident, Snap, Feelings, Shadow and Voice. Collision, Setups, both endings and Heat are also there. The ending lines and voice samples read as finished chat messages, which brushes against writing the chat itself.",
+   "evidence": [
+    "Brick_haus: No list. Just come over and do not make me fit through a restaurant door.",
+    "Origin, in three pieces, from the surface to the part they'd never say:"
+   ],
+   "raise": "Keep the ending lines as voice targets rather than polished final messages so the plan does not pre-write the chat.",
+   "def": "bd872356c69500bb",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 4,
+   "why": "Nearly every character fact traces to the brief. Reuben's girth and left curve, lentil pot, energy-shot hands, portrait at nine, mirror rehearsal and $189 clip all come from it, as do Brick's towel, boxed rosé, horse-tack harness, revolving-door heel and cramped house. The inventions extend that material: the notes-app script and the hotel complaint. It stays below 5 because it misses the mirror-image material a reader would prize. Both characters rehearse in the bathroom mirror, both lied about just getting in or back, both bought posture devices and both coded replica dating apps, yet the plan uses each only on one side or not at all.",
+   "evidence": [
+    "Sitting on his shaking hands in his kitchen after four gas-station energy shots, beside an eleven-day pot of lentils.",
+    "a £240 horse-tack posture harness holds her door open"
+   ],
+   "raise": "Build one setup on the shared posture-device or 'just got in from a thing / just got back from a trip' lies, so the pair discovers they are running the same con.",
+   "def": "422981f4d9c7d5f1",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 5,
+   "why": "I found no clear contradiction. The plan also quietly avoids the brief's trap: Brick's backstory has her announce that 'the tip finishes shorter' and her midsection is 'slight', against stats of 95-100 tip and 70-95 mid. The plan follows the stats with 'Towering, thick'. It falls short of 6 for two reasons. The correction is silent rather than flagged. And the dive-bar firing drifts from 'misidentified as someone famous' to insisting a regular was 'a famous singer's brother', which muddies who was famous.",
+   "evidence": [
+    "Towering, thick, heavily veined, circumcised, monocle",
+    "got fired for lecturing a regular he insisted was a famous singer's brother"
+   ],
+   "raise": "Note the stats-versus-backstory conflict on Brick's tip and midsection explicitly, and keep the bar firing as mistaking a regular for someone famous.",
+   "def": "fa45960901c28caa",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 3,
+   "why": "Needs exist only implicitly, in the Feelings lists: 'relief at someone staying after a silence' and 'relief at someone not flinching at her size'. The Collision shows each habit hitting the other's fear. The plan never names a test and the give-away that answers it. Reuben's band test ('Tell me which album') has nothing on Brick's side that can answer it. His need for 'clear, kind boundaries' is never matched to her numbered rules, and her need for exactness is never matched to his formality. The matrix has to be inferred and has orphans, so it falls below the line.",
+   "evidence": [
+    "Tell me which album and do not lie to me.",
+    "relief at someone staying after a silence",
+    "relief at someone not flinching at her size"
+   ],
+   "raise": "Name each character's test outright and pair it with a specific answer from the other, for example his exit clause met by her refusing to take it.",
+   "def": "cdf9049147e4579d",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 4,
+   "why": "The Collision depends on these two. Her 'hm.' audits read to him as the tribunal that crops him out, and his exit clauses read to her as proof she scared him off. The revolving-door and size-geometry threads need her bulk against his stub. Setup 1, the collarbone clip, could move to most other self-deprecating characters unchanged. The plan also leaves the duplicated histories unused (mirror smiles, replica apps, the portrait cropping both share), and those would make this night belong to no one else.",
+   "evidence": [
+    "Her `hm.` and numbered audits feel like the exact tribunal he dreads will measure him and crop him out",
+    "whether two mismatched bodies can fit through the same door without getting crushed"
+   ],
+   "raise": "Swap Setup 1 for one that only this pair could have, such as both discovering they have rehearsed the same brochure smile.",
+   "def": "f1b9dddac061dbfe",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 4,
+   "why": "Most private material is routed out through stated mechanisms. The pasted notes-app script and the pasted hotel complaint carry it, the middle beat has him admit the clip is in the kitchen, and the click has her admit the towel. His 'not grabbing my coat' calls back to a script she has seen. One leak remains: Brick's sample line demands 'Take the hat off', but the top hat is in his backstory, not his bio or body listing. The plan does not track who knows what across beats, which keeps it from 5.",
+   "evidence": [
+    "1. Take the hat off. 2. Speak slower.",
+    "middle: admits it's in the kitchen"
+   ],
+   "raise": "Have Reuben mention or photograph the top hat early so Brick's order to remove it rests on something shared.",
+   "def": "5ca08850b888867b",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "There is no ordered beat list, only three parallel setups with plant, middle and end. Within each, the steps are 'and then': bio challenge, then comparing reach, then bed geometry. Causation lives only in the Collision and the snap descriptions, and these never become a sequence in which one beat forces the next. Getting to 4 needs transitions where one character's move provokes the other's.",
+   "evidence": [
+    "plant: his bio challenge; middle: comparing reach and leverage; end: filthy size-difference geometry in bed",
+    "plant: brag about discipline; middle: admits it's in the kitchen"
+   ],
+   "raise": "Order the setups into one beat sequence in which, for example, his exit clause triggers her audit, which triggers his pasted script.",
+   "def": "b7d5785d1f61ce07",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "The moment exists: she drops the numbers and admits the towel, and he deletes the exit clause. It also shows in the typing, with 'No list.' replacing her numbering and a soft 🙂 on his warmth. Nothing in tonight's events is named as the trigger. The only hint is the Heat note's 'once neither apologizes', which is a condition, not an event, so the moment lacks one of its three parts.",
+   "evidence": [
+    "She drops the numbers and admits she's still in a towel; he deletes the exit clause and stays in the frame.",
+    "No list. Just come over and do not make me fit through a restaurant door."
+   ],
+   "raise": "Tie the click to a specific event, such as her staying silent through his first unanswered exit clause and then replying without a list.",
+   "def": "e72f84db4817e97c",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "The heat is declared 'High from the start' and has a single unlock gate. Nothing maps heat to beats or keeps explicit detail and logistics past the midpoint. The 'seven inches of girth' complaint and the 'does not reach the back' script are explicit accidents with no placement. The plan front-loads rather than climbing in steps tied to trust.",
+   "evidence": [
+    "High from the start over their absurd size gap",
+    "unlocking completely once neither apologizes for how they fit together"
+   ],
+   "raise": "Place each explicit accident and the 'come over' line at a named point after the midpoint, each step following an admission.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "The three-piece origins and the plant/middle/end setups suggest some distribution. The accidents and snaps have no position in any sequence, though, and nothing is marked as held back for late. A rhythm cannot be charted from the plan, so it falls short of the line even though nothing is explicitly crowded into the opening.",
+   "evidence": [
+    "Accident: Pasting his notes-app mirror script",
+    "Accident: Pasting a draft complaint to the hotel"
+   ],
+   "raise": "Assign each accident and origin piece to a turn range, holding piece 3 of both origins for the final third.",
+   "def": "6992bdb3b448c021",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 36.5,
+   "cost": 0.14817599999999997,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 70.3,
+   "cost": 0.215956,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:23:25Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3641
+}

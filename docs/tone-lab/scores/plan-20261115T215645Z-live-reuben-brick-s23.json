@@ -1,0 +1,352 @@
+{
+ "id": "plan-20261115T215645Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v3 · 15 Nov 21:56 · full run",
+ "version": "v3",
+ "order": 3,
+ "run": "20261115T215645Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261115T215645Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "15 Nov 21:56",
+ "materials": {
+  "brief": {
+   "chars": 18751,
+   "words": 3221
+  },
+  "plan": {
+   "chars": 2240,
+   "words": 380
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 4,
+   "why": "Most claims trace to the brief. His pre-emptive exit and size-roast come from 'name an exit' and 'claiming the ridiculous thing first'. The dive-bar door secret and heel secret are the assigned ones. Both slips come from drawer items: the mirror rehearsal for him, and the towel, rosé and three smiles for her. Inventions like 'Ray' and 'nine inches' extend that material, but core material is unused: his band name-drop test (\"if they pass, the door actually opens\"), arm wrestling, the dishwasher-safe tattoo and her monocle mishaps never appear.",
+   "evidence": [
+    "admits rehearsing his curve shrug in the mirror for twenty minutes",
+    "snaps she sat in a towel since four drinking boxed rosé and rehearsing three smiles",
+    "Roasts his size first and offers a polite exit before she leaves."
+   ],
+   "raise": "Use Reuben's band-era name-drop as the test Brick passes or fails, since the brief makes it his real door-opener.",
+   "def": "422981f4d9c7d5f1",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 5,
+   "why": "I found no contradiction with the brief. The brief has a trap: Brick's backstory copies Reuben's body ('tip finishes shorter', 'midsection slight'), while her profile reads 95-100 length. The plan follows the profile ('Huge, veiny cut shaft') and avoids the trap. It also avoids reusing their duplicated backstory items, such as the cropped portrait and the replica app. It stops short of 6 because it never flags or explains these corrections.",
+   "evidence": [
+    "Huge, veiny cut shaft, heavy balls, monocle, vest, heels",
+    "I am nine inches of vein. Plan accordingly."
+   ],
+   "raise": "Note explicitly that Brick's backstory anatomy lines are discarded in favour of her profile values, and which shared backstory items belong to whom.",
+   "def": "fa45960901c28caa",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 3,
+   "why": "Both characters have a stated need: his is someone staying past his joke, hers is to 'be huge safely'. His exit-offer works as a test of the first, and her staying ('until both heels are inside') can answer it. Brick has no test that probes her need, though; the hotel-bar ban is labelled 'Setup'. Neither slip is planned to answer the other's need, and the brief's safety conditions (staying through pauses, engaging real interests) go unused.",
+   "evidence": [
+    "Lie: \"If I joke first, nobody can dump me\" — covers needing someone to stay.",
+    "covers needing to be huge safely",
+    "Brick bans hotel bars early on: \"poorly engineered doors.\""
+   ],
+   "raise": "Give Brick an explicit test of whether Reuben handles her size and rules without flinching, and tie his mirror-rehearsal slip to answering it.",
+   "def": "cdf9049147e4579d",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The doors motif belongs to this pair. His habit of holding the exit open, her revolving-door humiliation and her fear of being too big to fit all feed the same image. Both endings turn on it ('Normal hinges here'; 'I hate narrow doors'). The parallel mirror rehearsals also mirror each other. Some generic filth lines ('On your knees') could move to another pair unchanged.",
+   "evidence": [
+    "Doors — Reuben holding the exit open early; Brick terrified she's too huge to fit through.",
+    "hm. Only until both heels are inside."
+   ],
+   "raise": "Replace the generic filth samples with lines that only these bodies and this door motif could produce.",
+   "def": "f1b9dddac061dbfe",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 5,
+   "why": "Each secret has a planned route out: a misfired text ('Wrong chat.' / 'hm. Disregard.'). Reuben's 'Normal hinges' line draws on her public hotel-bar ban, not on private knowledge. The plan uses the gap well, since her door rule 'hid the interview humiliation'. It stops short of 6 because it never tracks beat by beat who knows what, and leaves unstated whether he ever learns the heel story.",
+   "evidence": [
+    "\"Concierge: your door ate my heel and ruined my interview\" / \"hm. Disregard.\"",
+    "(Her door rule hid the interview humiliation; now she walks in.)"
+   ],
+   "raise": "Add a line per accident stating what the other character now knows and which later beat uses it.",
+   "def": "5ca08850b888867b",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 2,
+   "why": "The plan lists components (quirk, lie, secret, accident, snap, slip, setup, endings) with no beat order, so most transitions cannot be causal. Only a few links exist: her snap is 'Triggered by his exits', and the setup pays off in the ending. Nothing connects the accidents to the snaps or the slips to the meeting.",
+   "evidence": [
+    "Snap: Triggered by his exits. Uses efficiency talk.",
+    "Setup: Brick bans hotel bars early on"
+   ],
+   "raise": "Arrange the components into an ordered beat list where each accident or slip is caused by the prior beat.",
+   "def": "b7d5785d1f61ce07",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 2,
+   "why": "The 'If they meet' exchange works as a guard-down moment: she walks through the door. The plan never says what triggers it, though. It also plans no change in typing: she still opens with 'hm.' and he keeps his usual 😌. The slips are framed as snaps ('snaps she sat in a towel'), not as a softening.",
+   "evidence": [
+    "Reuben_404: Normal hinges here. Shall I hold it open 😌",
+    "hm. Only until both heels are inside."
+   ],
+   "raise": "Name the beat that triggers the turn, and show it in typing first: she drops the numbered list or the 'hm.', and he uses a contraction or stops offering the exit.",
+   "def": "e72f84db4817e97c",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 2,
+   "why": "Filthy sample lines exist ('Sit on my mouth until I go quiet', 'On your knees') but nothing places them. There is no escalation tied to trust, and no guard against explicitness or logistics before the midpoint. The meeting appears only as an ending.",
+   "evidence": [
+    "hm. 1. Lock the door. 2. On your knees.",
+    "Sit on my mouth until I go quiet 🌸"
+   ],
+   "raise": "Map heat to beats, holding the explicit numbered lists until after both slips have landed.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 2,
+   "why": "Only the setup is placed ('early on'). The two accidents, two snaps and two slips have no positions, so there is no rhythm to chart and no reveal held for late. The material is sound but undistributed.",
+   "evidence": [
+    "Brick bans hotel bars early on",
+    "Slip: admits rehearsing his curve shrug in the mirror for twenty minutes."
+   ],
+   "raise": "Assign each accident, snap and slip to a turn range, spacing them and holding one slip for the late game.",
+   "def": "6992bdb3b448c021",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 4,
+   "why": "The only outside pressures are the two wrong-chat messages, and both come from the brief. Ray stands for the dive-bar door job and the concierge for the hotel revolving door, and each presses on its owner's cover story. The plan doesn't time either one to a worst moment, and nothing from the richer material is used: the mother using his brother's name, the cropped family portrait. That keeps it at the line rather than above it. It stays above the line because neither event is generic.",
+   "evidence": [
+    "Ray give me Tuesdays back I will just check IDs",
+    "Concierge: your door ate my heel and ruined my interview"
+   ],
+   "raise": "Add a third event from their people (e.g. his mother texting him by his brother's name) and pin each event to the turn where it would hurt most.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "There is one setup: the hotel-bar ban over 'poorly engineered doors'. It is planted early, and both endings echo the door motif. The meet ending pays it well with 'Normal hinges here' and the heels callback. The fall-apart line only gestures at doors and never returns to the hotel ban. There is no mid-game return, and a single thin setup keeps this from a 5.",
+   "evidence": [
+    "Brick bans hotel bars early on: \"poorly engineered doors.\"",
+    "Normal hinges here. Shall I hold it open 😌",
+    "hm. 1. Pass. 2. I hate narrow doors."
+   ],
+   "raise": "Plant a second setup (e.g. his arm-wrestling 'sleeve with no buttons' excuse), give the hotel ban a midpoint return, and have the fall-apart ending call it back explicitly.",
+   "def": "521e2223c917f019",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The two endings turn on different causes. In one, her door rule gives way and she walks in. In the other, her size shame meets his pre-planted exit. So they are different stories, not just different last lines. Both are two-line door exchanges built on the same image, though. And 'I hate narrow doors' muddles whose inadequacy is speaking, so neither ending is clearly the best version for this pair.",
+   "evidence": [
+    "Her door rule hid the interview humiliation; now she walks in.",
+    "Understood. I already had the exit open."
+   ],
+   "raise": "Make the meet ending turn on him staying through a pause instead of performing, so each outcome hinges on a distinct choice.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 2,
+   "why": "The plan makes no provision for a short game. It doesn't say which beat is the turning point, or what to cut if only six turns are played. Its compactness might survive by accident, but nothing is planned. This keeps it at 2 and not 3.",
+   "evidence": [
+    "If they meet:",
+    "If it falls apart:"
+   ],
+   "raise": "Add a short-game line naming the turning point (e.g. the concierge slip) and which beats to drop in six turns.",
+   "def": "9c79336a7855f173",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written as exact on-screen wrong-chat texts with exact follow-ups. They fit the medium, and each one leaks its owner's secret. They fall short of a 6 for two reasons. The 'Concierge:' label is an odd way to address a text. And it isn't explained why she would be messaging a concierge about an old interview tonight.",
+   "evidence": [
+    "Ray give me Tuesdays back I will just check IDs\" / \"Apologies. Wrong chat.",
+    "hm. Disregard."
+   ],
+   "raise": "Make Brick's misfire plausibly current (e.g. a draft complaint email pasted into the chat) so its timing is as tight as its wording.",
+   "def": "8a43f27b6bad2c45",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every planned beat can travel through text: wrong-chat sends, confessions, and lists. The plan also uses the medium itself by building both secrets into misdirected messages. Nothing else in the medium is exploited: no reply delays despite both characters reading silence as a verdict, no photos, no typos. That keeps it from a 6.",
+   "evidence": [
+    "Apologies. Wrong chat.",
+    "Shall I hold it open 😌"
+   ],
+   "raise": "Plan one beat around a delayed reply or a sent photo, since both characters read silence as judgment.",
+   "def": "df6fedc6221ef314",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The two voices differ on things a reader can see. He writes formal full words with a soft emoji ending warm lines. She writes clipped clauses, a 'hm.' before verdicts, and numbered lists. Most sample lines could be attributed without names. Two things hold it back from a 6. 'Stop apologizing for your curve and use your mouth' could belong to either character. And his rapid-burst rhythm never appears in any sample.",
+   "evidence": [
+    "I am built like a comma, for transparency 😌",
+    "hm. 1. Lock the door. 2. On your knees."
+   ],
+   "raise": "Give Reuben a staccato multi-message burst sample and give every Brick line a list or 'hm.' marker.",
+   "def": "e90fb07ec3b78554",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 3,
+   "why": "The plot runs along predictable lines: two people with secrets, a mistaken text that exposes each one, a confession, and then either a hookup or a pass. The doors motif ties things together but surprises no one. The plan also ignores the brief's most unusual feature. The two characters have near-identical histories: both were cropped out of a family portrait, both built a replica dating app, and both rehearse in the mirror. A plot built on that mirroring would have given a turn nobody predicts.",
+   "evidence": [
+    "Doors — Reuben holding the exit open early; Brick terrified she's too huge to fit through.",
+    "Slip: admits rehearsing his curve shrug in the mirror for twenty minutes."
+   ],
+   "raise": "Build a turn where they discover they share the same rehearsal ritual or app replica, and let that recognition decide the night.",
+   "def": "eee876c9f2949144",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "Each character gets consistent sections: profile, quirk, lie, secret with accident, snap/slip, and voice. Between them come the shared motif, setup, and two endings. The ending exchanges are written chat lines, and there is no short-game section, so this is not exactly as asked. It stays above the line because the dialogue is confined to sample and ending slots rather than drafting the chat.",
+   "evidence": [
+    "Texts like: Clipped clauses, \"hm.\", numbered lists, bossy filthy proclamations.",
+    "Reuben_404: Normal hinges here."
+   ],
+   "raise": "Add the missing short-game provision and describe the endings in prose instead of scripting them.",
+   "def": "bd872356c69500bb",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 50.1,
+   "cost": 0.16777199999999998,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 47.3,
+   "cost": 0.158848,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:26:08Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3266
+}

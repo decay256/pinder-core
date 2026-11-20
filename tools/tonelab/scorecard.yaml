@@ -1,0 +1,862 @@
+# The tone lab's scorecard (v23): candidate metrics for the profile, the plan and the chat.
+#
+# Every dimension scores 1 to 6. There is no midpoint: a 3 leans fail and a 4 leans pass, so
+# every score has to come down on one side of the bar. Each dimension writes its own bar as
+# `line` (what puts it at 4 rather than 3); `low` and `high` describe the ends.
+#
+# priority: core = we need it to know whether the product works; useful = it steers prompt
+# work; diagnostic = it explains a failure once we know there is one.
+# batch: dimensions with the same family and batch are judged in one call.
+# probe: a separate reader call that sees only `sees` and answers `ask`; its answer goes to the
+# judge with the rest of the material. Used where the judge must not be the one who knows.
+# scope: set = needs several artefacts (seeds, versions) at once; not scored per artefact.
+
+scale:
+  1: Fails outright. The thing is absent, or works against what we need.
+  2: Fails. Present in name only, or too weak to change what a reader gets.
+  3: Leans fail. There, but below the bar; a reader would notice what is missing.
+  4: Leans pass. Meets the bar, with flaws a careful reader notices.
+  5: Good. Does it well; small flaws only.
+  6: As good as this gets. Nothing worth changing.
+
+families:
+  profile:
+    title: The profile
+    artefact: one character's profile, the document the director and the writer work from
+  plan:
+    title: The plan
+    artefact: the story plan a planner writes for one match at the start of the night
+  chat:
+    title: The chat
+    artefact: the chat as the reader sees it, written turn by turn as the game's dice fall
+
+materials:
+  profile: the profile being scored
+  game: what the game's character file gives this character (the input the profile had to keep)
+  cast: the other profiles of the same generation
+  brief: everything the planner was given about the two characters and tonight
+  plan: the plan
+  chat: the chat
+  chat_but_last: the chat without its final turn
+  chat_masked: the chat with the speakers' names replaced by message numbers
+  dice: what the game rolled each turn, and what it did to interest
+
+sees:
+  profile: [profile, game, cast]
+  plan: [brief, plan]
+  chat: [chat, plan, brief, dice]
+
+dimensions:
+
+# ── the profile ───────────────────────────────────────────────────────────────
+
+- id: profile.life
+  family: profile
+  batch: 1
+  name: A life to find out about
+  priority: core
+  tells: >-
+    How much of a life there is for a chat to find: people, places, job, money, routines,
+    and things going on this week.
+  method: >-
+    List the facts a character could plausibly bring up tonight, by type (work, home, people,
+    money, routines, plans), and judge how many there are and how usable.
+  low: Mostly traits, jokes and body. Few facts a chat could find; no current situation.
+  line: >-
+    A 4 has at least a dozen concrete, usable facts across at least four types, including
+    something happening this week. A 3 has fewer, or they cluster in one type.
+  high: Dense with usable facts of every type, several live this week, each a possible thread.
+
+- id: profile.ordinary
+  family: profile
+  batch: 1
+  name: Ordinary life outweighs humiliation
+  priority: core
+  tells: >-
+    Whether this is a life or a list of humiliations, the original complaint about the
+    backstories.
+  method: >-
+    Label each sentence as ordinary life, humiliation, sincere, sexual or wound, and judge
+    the shares.
+  low: Humiliation, sex and wound set the tone; ordinary life is a garnish.
+  line: >-
+    A 4 has ordinary life as the largest single share, and the humiliations stand out
+    because of it. A 3 still reads as a list of humiliations or sex.
+  high: An ordinary life with sharp moments; the comedy comes from the ordinary detail.
+
+- id: profile.distinct
+  family: profile
+  batch: 1
+  name: Distinct from the rest of the cast
+  priority: core
+  tells: Whether this character is their own person rather than a variation on another.
+  method: >-
+    Compare with the other profiles: shared motifs, situations, jobs, wounds, phrasings.
+  low: Swap the name and it could be someone else in the cast.
+  line: >-
+    A 4 shares no motif or situation with another profile; parallels exist only at the level
+    of type (two people with creative jobs). A 3 recycles at least one motif, or has a wound
+    or situation that closely mirrors another's.
+  high: Nothing in it could belong to anyone else in the cast.
+
+- id: profile.consistent
+  family: profile
+  batch: 1
+  name: Internally consistent
+  priority: core
+  tells: Ages, dates, money, places, body, claims and timeline agree with each other.
+  method: List contradictions with quotes; judge their number and how much they matter.
+  low: Several contradictions, or one that breaks the character.
+  line: >-
+    A 4 has no contradiction a reader would catch, at most a soft tension. A 3 has one clear
+    contradiction.
+  high: Fully coherent, and the details reinforce each other.
+
+- id: profile.fidelity
+  family: profile
+  batch: 1
+  name: Faithful to the game file
+  priority: core
+  tells: The bio, items, body, drawer and clinician's notes the game gives survive and are respected.
+  method: Check each element in the game file against the profile.
+  low: Elements missing or changed.
+  line: >-
+    A 4 has everything the game gives, present and not contradicted, even if lightly used.
+    A 3 drops or alters something.
+  high: Everything present, and the life explains it (the items and the drawer make sense for this person).
+
+- id: profile.voice
+  family: profile
+  batch: 2
+  name: The profile is enough to write them
+  priority: core
+  tells: Whether a writer who has only this profile produces this character and no other.
+  method: >-
+    A fresh reader writes five messages from the profile alone; the judge checks whether
+    each could only have been sent by this character, against the rest of the cast.
+  probe:
+    sees: [profile]
+    ask: >-
+      From this profile alone, write five short dating-app messages this person would send
+      tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other
+      person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m.,
+      (5) the moment they stop performing.
+  low: The messages are generic dating-app voice; nothing ties them to this person.
+  line: >-
+    A 4 has at least three of the five carrying this character's life or texting habits so
+    plainly that nobody else in the cast could have sent them. A 3 has two or fewer.
+  high: All five unmistakable, and the situations come through as different.
+
+- id: profile.situations
+  family: profile
+  batch: 2
+  name: Texting changes with the situation
+  priority: useful
+  tells: The texting situations describe different behaviour, not one voice reworded.
+  method: >-
+    Read the texting lines and judge whether each predicts a different message shape,
+    length, timing or habit.
+  low: The lines restate one voice, or describe a mood instead of how they type.
+  line: >-
+    A 4 has at least seven in ten situations predicting observable differences (length,
+    punctuation, timing, what they reach for). A 3 has fewer, or no situations at all.
+  high: Every situation distinct and observable; you could tell the situation from one message.
+
+- id: profile.texting_vs_cast
+  family: profile
+  batch: 2
+  name: Texting differs from the rest of the cast
+  priority: useful
+  tells: Hurt Reuben does not read like hurt Brick.
+  method: Compare the same situations across the cast's profiles.
+  low: The same habits as others (everyone goes lowercase when hurt).
+  line: >-
+    A 4 differs from every other profile in most situations. A 3 matches another character
+    in several.
+  high: In every situation the habit is this character's own.
+
+- id: profile.wound
+  family: profile
+  batch: 2
+  name: The wound explains the habits
+  priority: core
+  tells: Whether the wound is a cause, not a label.
+  method: >-
+    Check three links: an event in the timeline causes the wound; the wound produces a habit
+    in how they are with people; the habit shows in a texting line.
+  low: The wound is asserted and connects to nothing.
+  line: A 4 has all three links, even if one is thin. A 3 is missing a link.
+  high: Each link is specific, and the chain is shown rather than stated.
+
+- id: profile.likeable
+  family: profile
+  batch: 2
+  name: Something to like
+  priority: core
+  tells: Whether a stranger could come to like them, which a guard-down moment needs.
+  method: A fresh reader names what they would like; the judge checks it is specific and shown.
+  probe:
+    sees: [profile]
+    ask: >-
+      Name the one thing you would genuinely like about this person if you met them, and the
+      one thing you would find hardest to forgive. Be specific, and no jokes.
+  low: Nothing to like beyond being funny, or the reader's answer is generic.
+  line: >-
+    A 4 lets the reader name a specific, non-ironic quality the profile shows in action, not
+    just claims. A 3 offers only a generic or claimed quality.
+  high: Several, shown through what they do for other people.
+
+- id: profile.tests
+  family: profile
+  batch: 3
+  name: Something to test for
+  priority: core
+  tells: >-
+    The dealbreaker and what they find out first can be seen in a chat, so the other person's
+    evaluation has something to work on.
+  method: Check each is observable in text, and that a single message could trip it.
+  low: Abstract ("dishonesty"), missing, or not observable over text.
+  line: >-
+    A 4 has both observable and specific to this person; you could write the message that
+    trips each. A 3 has one vague or missing.
+  high: Both sharp, funny and tied to the life.
+
+- id: profile.people
+  family: profile
+  batch: 3
+  name: The people in their life are live threads
+  priority: useful
+  tells: Whether the people can come up tonight, rather than being a cast list.
+  method: >-
+    Per person: something current, specific and unresolved, and a way it could come up
+    tonight.
+  low: Names with roles, or no people at all.
+  line: >-
+    A 4 gives most people a live, specific thread, and at least one is good for them. A 3
+    has names with roles, or everyone is a source of humiliation.
+  high: Every person is a story in progress, and two or three could interrupt tonight.
+
+- id: profile.timeline
+  family: profile
+  batch: 3
+  name: An ordinary spine
+  priority: useful
+  tells: Whether the history is a life course, mostly ordinary.
+  method: >-
+    Check for where they grew up, school, first job, leaving home, the longest relationship
+    and the recent year; count the humiliation entries.
+  low: No timeline, or a chain of humiliations.
+  line: >-
+    A 4 has at least five of the six, with at most two humiliations. A 3 misses the spine or
+    lets humiliations dominate.
+  high: All six, each specific, and the recent year leads into tonight.
+
+- id: profile.act
+  family: profile
+  batch: 3
+  name: The gap between the act and the life
+  priority: useful
+  tells: The claims against the truths, where the comedy and the reveals come from.
+  method: >-
+    Read each claim and its truth; judge whether the gap is specific, funny, and could leak
+    out in a chat.
+  low: No claims, or generic ones ("says confident, is insecure").
+  line: >-
+    A 4 has most pairs specific, with each truth able to leak in text. A 3 has generic pairs.
+  high: Every pair is a joke waiting to happen and a reveal the chat can find.
+
+- id: profile.specific
+  family: profile
+  batch: 3
+  name: Specific detail that does work
+  priority: useful
+  tells: Concrete names, sums, streets, brands and times, and whether they tell you something.
+  method: Judge the density of concrete detail and what each detail says about class, money and taste.
+  low: Generic throughout.
+  line: >-
+    A 4 has concrete detail in most paragraphs, and the details tell you about the person.
+    A 3 is concrete in places, or uses detail as decoration.
+  high: Every paragraph has detail that characterises.
+
+- id: profile.stock
+  family: profile
+  batch: 4
+  name: Free of stock material
+  priority: useful
+  tells: Dating-app clichés, recycled comedy shapes, motifs repeated across the cast.
+  method: Flag tropes and anything repeated from another profile. Higher means less stock.
+  low: Built from stock.
+  line: A 4 has at most one stock element, and not a central one. A 3 has several, or a central one.
+  high: Nothing you have read before.
+
+- id: profile.plausible
+  family: profile
+  batch: 4
+  name: Plausible
+  priority: diagnostic
+  tells: London rent against job and wage, geography, ages, durations.
+  method: Name anything implausible.
+  low: Several implausibilities that are not jokes.
+  line: >-
+    A 4 has nothing implausible, or a stretch played as a joke. A 3 has an unintended
+    implausibility a London reader would catch.
+  high: Every number and place checks out.
+
+- id: profile.filth
+  family: profile
+  batch: 4
+  name: Filth grounded in the body and the life
+  priority: useful
+  tells: Whether the sexual material is theirs rather than generic.
+  method: Label each sexual detail as coming from their body, drawer or history, or generic.
+  low: Generic, or absent.
+  line: A 4 takes most sexual material from their own body, drawer or history. A 3 is mostly generic.
+  high: All of it could only be them, and it is funny.
+
+- id: profile.humanity
+  family: profile
+  batch: 4
+  name: Satire aimed at behaviour
+  priority: useful
+  tells: The jokes target what they do; the person keeps some dignity.
+  method: Judge where the contempt points.
+  low: The character is the butt of everything, with nothing held back.
+  line: >-
+    A 4 aims the jokes at behaviour and keeps the person's dignity somewhere. A 3 makes the
+    person the joke.
+  high: Merciless about the behaviour and fond of the person.
+
+- id: profile.efficiency
+  family: profile
+  batch: 4
+  name: Earns its length
+  priority: diagnostic
+  tells: Useful facts per word, whether a director can find what they need.
+  method: Judge padding, repetition and summary.
+  low: Mostly padding.
+  line: A 4 has little padding; most sentences give a fact or a behaviour. A 3 has noticeable padding.
+  high: No sentence could go.
+
+# ── the plan ──────────────────────────────────────────────────────────────────
+
+- id: plan.grounded
+  family: plan
+  batch: 1
+  name: Grounded in the characters
+  priority: core
+  tells: Whether the plan uses who they are, or invents a new story over them.
+  method: >-
+    List what the plan says about each character and map each to the brief or mark it
+    invented; judge the share grounded and whether the inventions fit.
+  low: Mostly invented; the characters' material is barely used.
+  line: >-
+    A 4 takes most of what it says about each character from the brief, and its inventions
+    extend that material rather than replace it. A 3 invents a large share, or leaves core
+    material unused.
+  high: Everything traces to the brief, and the plan finds things in it a reader would miss.
+
+- id: plan.contradictions
+  family: plan
+  batch: 1
+  name: Free of contradictions with the characters
+  priority: core
+  tells: Plan facts that break the brief.
+  method: List contradictions with the brief. Higher means fewer.
+  low: Several, or one that changes who someone is.
+  line: A 4 has none. A 3 has one clear contradiction.
+  high: None, and the plan corrects for traps in the brief.
+
+- id: plan.evaluation
+  family: plan
+  batch: 1
+  name: The evaluation fits together
+  priority: core
+  tells: >-
+    Each character has needs, tests and give-aways that mesh: each test probes its owner's
+    need, each give-away answers the other's need.
+  method: Build the matrix of needs, tests and give-aways for both and count the orphans.
+  low: No evaluation logic at all (one-sided seduction, or a sequence of jokes).
+  line: >-
+    A 4 gives both characters explicit needs and at least one test each that probes them,
+    and the other has something that can answer it, with few orphans. A 3 has one side
+    missing or mostly orphans.
+  high: Every test and give-away connects, and the good and bad reasons fall out of the matrix.
+
+- id: plan.pair
+  family: plan
+  batch: 1
+  name: Specific to this pair
+  priority: core
+  tells: Whether this is their night or any two people's.
+  method: Could the reasons, events and endings be moved to another pair unchanged?
+  low: Generic attraction and farce.
+  line: >-
+    A 4 has reasons and most events that depend on these two people's particulars. A 3 has
+    generic attraction logic.
+  high: Nothing in it would survive a change of either character.
+
+- id: plan.knowledge
+  family: plan
+  batch: 1
+  name: Respects what each can know
+  priority: core
+  tells: >-
+    Nobody is planned to know or mention what they can't, like the private job leaking in the
+    v22 first look.
+  method: >-
+    For each beat, ask what each character needs to know, and whether it is on the public
+    profile, said earlier, or private. Higher means fewer problems.
+  low: Several beats depend on private knowledge.
+  line: >-
+    A 4 has no beat needing private knowledge, or routes explicitly how it comes out. A 3 has
+    at least one beat that depends on something unshared.
+  high: The plan tracks who knows what, and uses the gaps.
+
+- id: plan.causal
+  family: plan
+  batch: 1
+  name: The beats follow from each other
+  priority: core
+  tells: A story, not a list.
+  method: Label each transition between beats as "therefore/but" or "and then".
+  low: A list of scenes.
+  line: A 4 has most transitions causal. A 3 is mostly "and then".
+  high: Every beat is caused by the one before.
+
+- id: plan.guard
+  family: plan
+  batch: 1
+  name: A moment where the guard comes down
+  priority: core
+  tells: The turning point the chats are meant to reach.
+  method: Check that it exists, has a trigger, and shows in how they type before they say it.
+  low: No such moment.
+  line: A 4 has all three. A 3 lacks one.
+  high: Exactly placed, triggered by tonight's events, and shown entirely in the typing.
+
+- id: plan.heat
+  family: plan
+  batch: 1
+  name: Heat climbs
+  priority: core
+  tells: >-
+    Explicitness and logistics are earned. Full sexual detail or a meeting plan before the
+    midpoint fails (the v22 turn-2 rush).
+  method: Map heat to beats; flag full disclosure or logistics before the midpoint.
+  low: Starts at full heat.
+  line: >-
+    A 4 escalates in steps tied to trust, with nothing fully explicit or logistical before
+    the midpoint. A 3 front-loads.
+  high: Each step of heat is a consequence of something said.
+
+- id: plan.spread
+  family: plan
+  batch: 1
+  name: Big moments are spread out
+  priority: useful
+  tells: Reveals, accidents and snaps are not front-loaded.
+  method: Read where the reveals and accidents sit in the beat list, and the gaps between them.
+  low: Everything happens early.
+  line: A 4 distributes them across the game, with nothing crowding the opening. A 3 clusters them.
+  high: Rhythm you could chart, with a reveal held back for late.
+
+- id: plan.events
+  family: plan
+  batch: 2
+  name: Tonight's events come from their lives
+  priority: useful
+  tells: Whether the outside world presses in, from their own people and places.
+  method: Per event, check it is grounded in the brief and presses on its owner's fear.
+  low: No events, or generic interruptions.
+  line: >-
+    A 4 has most events coming from named people or places in the brief and pressing on a
+    fear. A 3 has generic events.
+  high: Every event is personal and lands on the worst moment.
+
+- id: plan.setups
+  family: plan
+  batch: 2
+  name: Setups planted and paid
+  priority: useful
+  tells: Things introduced early come back.
+  method: Check each setup for plant, return and payoff, and whether endings pay them differently.
+  low: No setups.
+  line: A 4 gives each setup a plant and a payoff. A 3 has setups without payoffs.
+  high: Every setup pays, and each ending pays them differently.
+
+- id: plan.endings
+  family: plan
+  batch: 2
+  name: Distinct endings
+  priority: useful
+  tells: Whether the possible outcomes are different stories.
+  method: >-
+    Summarise each ending in a line and judge whether they differ in story, not just the last
+    line. If the plan has one ending, judge whether it handles the other outcomes.
+  low: One ending, or interchangeable ones.
+  line: A 4 has endings that are different stories. A 3 has the same scene with different last lines.
+  high: Each ending is the best version of its outcome for this pair.
+
+- id: plan.short_game
+  family: plan
+  batch: 2
+  name: Survives a short game
+  priority: useful
+  tells: Whether a six-turn game still gets the midpoint and an ending.
+  method: Check for a provision for a short game and whether it keeps the turning point.
+  low: No provision.
+  line: A 4 says what survives a short game, and the turning point does. A 3 has no provision.
+  high: The short version is a complete story of its own.
+
+- id: plan.accidents
+  family: plan
+  batch: 2
+  name: Accidents are concrete
+  priority: useful
+  tells: The misfires the dice will cause are specified as exact on-screen artefacts.
+  method: Check each planned accident for exact wording or an exact artefact.
+  low: None, or vague ("something embarrassing").
+  line: A 4 specifies most accidents concretely enough to write. A 3 is vague.
+  high: Every accident is written down and fits the medium.
+
+- id: plan.medium
+  family: plan
+  batch: 2
+  name: Possible over text
+  priority: useful
+  tells: Everything can reach the other person through the chat.
+  method: Flag beats that need shared space, sight or sound, unless sent as a photo or voice note.
+  low: Several beats need a shared room.
+  line: A 4 has every beat possible in a chat. A 3 has beats a chat cannot carry.
+  high: The plan uses the medium itself (timing, typos, photos).
+
+- id: plan.voices
+  family: plan
+  batch: 2
+  name: Two separable voices
+  priority: useful
+  tells: The two voice specs could not be confused.
+  method: Compare the voice specs on observable features.
+  low: No voice specs, or the same voice.
+  line: >-
+    A 4 has voices differing on observable features (length, punctuation, vocabulary, what
+    they reach for). A 3 differs only in adjectives.
+  high: You could attribute a single message with no names.
+
+- id: plan.original
+  family: plan
+  batch: 2
+  name: Not the default plot
+  priority: diagnostic
+  tells: Whether it surprises.
+  method: Judge whether the story goes anywhere "two mismatched people flirt" would not predict.
+  low: The default farce.
+  line: A 4 has at least one turn you would not predict. A 3 is the default.
+  high: Surprising and inevitable at once.
+
+- id: plan.format
+  family: plan
+  batch: 2
+  name: Format
+  priority: diagnostic
+  tells: The plan follows the structure it was asked for.
+  method: Check the sections and limits the brief asks for, and that it writes no chat itself.
+  low: Ignores the structure.
+  line: A 4 follows the structure and writes no chat lines. A 3 misses sections or writes the chat.
+  high: Exactly as asked.
+
+- id: plan.seeds
+  family: plan
+  scope: set
+  name: Variety across seeds
+  priority: useful
+  tells: The same pair on different seeds gets different stories.
+  method: Compare events and beats across three to five seeds of the same version.
+  low: The same story.
+  line: A 4 shares no event across seeds. A 3 repeats events or the turning point.
+  high: Different stories with the same characters recognisable.
+
+# ── the chat ──────────────────────────────────────────────────────────────────
+
+- id: chat.know
+  family: chat
+  batch: 1
+  name: You get to know them
+  priority: core
+  tells: The point of the chat, that by the end you know who each one is.
+  method: >-
+    A reader who sees only the chat answers questions with known answers; the judge compares
+    with the brief.
+  probe:
+    sees: [chat]
+    ask: >-
+      From the chat alone, answer for each of the two: what they do for a living; where they
+      live; one person in their life and what is going on with that person; one thing they
+      love; one thing they are hiding or lying about. Write "not in the chat" where it does
+      not say.
+  low: The reader learns almost nothing beyond the bodies.
+  line: >-
+    A 4 has the reader right on at least three of the five for each character, with answers
+    coming from their lives, not their bodies. A 3 has fewer.
+  high: All five for both, and the reader learns things the characters did not mean to tell.
+
+- id: chat.evaluation
+  family: chat
+  batch: 1
+  name: The evaluation reads
+  priority: core
+  tells: You can see each one deciding whether the other is safe and fun, or the vibe.
+  method: A reader names what each was testing for; the judge compares with the plan's needs.
+  probe:
+    sees: [chat]
+    ask: >-
+      From the chat alone: what is each one trying to find out about the other before saying
+      yes, and did they find it? As each of them, would you go home with or date the other,
+      and why?
+  low: Nobody is evaluating; it is one long seduction.
+  line: >-
+    A 4 lets the reader name the actual tests for both, close to the plan's. A 3 manages one
+    or neither.
+  high: The reader can say exactly what tipped each of them.
+
+- id: chat.sideways
+  family: chat
+  batch: 1
+  name: Found out sideways
+  priority: core
+  tells: Facts come out by slip, inference or being caught, not by statement.
+  method: Label each disclosure as asked, volunteered, slipped, inferred or caught out.
+  low: Everything is stated.
+  line: >-
+    A 4 has most important facts coming out by slip, inference or being caught. A 3 states
+    most of them.
+  high: Nothing important is said outright.
+
+- id: chat.leaks
+  family: chat
+  batch: 1
+  name: No knowledge leaks
+  priority: core
+  tells: Nobody mentions what they cannot know.
+  method: >-
+    Track what each could know (their own life, the other's public profile and photos, what
+    has been said) and flag references beyond it. Higher means fewer leaks.
+  low: Several leaks.
+  line: A 4 has none. A 3 has one a reader would notice.
+  high: None, and the characters use what they don't know.
+
+- id: chat.listening
+  family: chat
+  batch: 1
+  name: They listen
+  priority: core
+  tells: Each message answers the one before.
+  method: Count offers and questions left unanswered or not pointedly ignored.
+  low: Two monologues.
+  line: >-
+    A 4 has nearly every message responding to the last, with offers taken up or pointedly
+    ignored. A 3 leaves several unanswered.
+  high: Every message is a reaction, and ignoring is a choice.
+
+- id: chat.voices
+  family: chat
+  batch: 2
+  name: Two voices you can tell apart
+  priority: core
+  tells: You know who is talking without the names.
+  method: A reader attributes the messages with the names hidden; the judge checks against the real speakers.
+  probe:
+    sees: [brief, chat_masked]
+    ask: >-
+      The speakers' names are hidden. Using the two characters described, say who sent each
+      numbered message, with a few words of reason each.
+  low: The reader guesses.
+  line: >-
+    A 4 has the reader right on at least 85% of messages, for reasons of voice rather than
+    content. A 3 is below that, or right only by content.
+  high: Every message attributed, by voice alone.
+
+- id: chat.situational
+  family: chat
+  batch: 2
+  name: The voice changes with the situation
+  priority: useful
+  tells: Typing changes when they are hurt, horny, late, or have their guard down.
+  method: Find the moments the situation changes and check whether the typing changes with it.
+  low: One register throughout.
+  line: A 4 shows the typing change at most situation changes. A 3 keeps one register.
+  high: You could read the night's feelings from the message shapes alone.
+
+- id: chat.guard
+  family: chat
+  batch: 2
+  name: The guard comes down, and you notice
+  priority: core
+  tells: The turning point exists and reads.
+  method: A reader finds the moment; the judge checks it against the plan's turning point.
+  probe:
+    sees: [chat]
+    ask: >-
+      Where, if anywhere, did it get real between them? Quote the line, and say how you could
+      tell.
+  low: No such moment.
+  line: >-
+    A 4 has the reader find the moment, and it shows in how they type. A 3 has it missed, or
+    only stated.
+  high: Unmistakable, earned, and nobody says it outright.
+
+- id: chat.pacing
+  family: chat
+  batch: 2
+  name: Pacing
+  priority: core
+  tells: Heat and reveals build across the game.
+  method: >-
+    Per turn, judge heat and new facts; flag full sexual detail or meeting logistics before
+    the midpoint.
+  low: Full heat and logistics in the opening.
+  line: >-
+    A 4 builds across the game with nothing fully explicit or logistical before the midpoint.
+    A 3 rushes, or stays flat.
+  high: Every turn raises the stakes a notch.
+
+- id: chat.ending
+  family: chat
+  batch: 3
+  name: The ending is earned
+  priority: useful
+  tells: The outcome follows from the chat.
+  method: A reader predicts the ending before the last turn; the judge compares with the real one.
+  probe:
+    sees: [chat_but_last]
+    ask: Before reading the last turn, how do you think this ends, and why?
+  low: The ending comes from nowhere.
+  line: >-
+    A 4 has the reader's prediction matching the real outcome in kind, and the last turn
+    follows from what came before. A 3 arrives from nowhere.
+  high: Inevitable in hindsight, surprising in the moment.
+
+- id: chat.dice
+  family: chat
+  batch: 3
+  name: The dice show
+  priority: useful
+  tells: Successes land and misses misfire on screen.
+  method: Match each turn's text to its roll.
+  low: The dice are invisible.
+  line: A 4 makes most successes and misses visible in the text. A 3 hides them.
+  high: Every roll visible, and the misses are the funniest turns.
+
+- id: chat.comedy
+  family: chat
+  batch: 3
+  name: Lines land
+  priority: useful
+  tells: Whether it is funny.
+  method: Mark the lines that land and judge the rate and the kind.
+  low: No laughs.
+  line: >-
+    A 4 has several genuine laughs, at least one every two turns, coming from character rather
+    than template. A 3 is amusing but rarely funny.
+  high: Laughs throughout, and the best ones are about who they are.
+
+- id: chat.filth
+  family: chat
+  batch: 3
+  name: Filth quality
+  priority: useful
+  tells: Specific, earned, character-driven.
+  method: Label each sexual line as specific or generic, earned or gratuitous.
+  low: Generic or gratuitous.
+  line: A 4 has sexual lines specific to these bodies and lives, arriving when earned. A 3 is generic.
+  high: Filthy and funny and about them.
+
+- id: chat.truth
+  family: chat
+  batch: 3
+  name: One moment you believe
+  priority: core
+  tells: Emotional truth inside the satire.
+  method: A reader quotes the moment they believed these were people.
+  probe:
+    sees: [chat]
+    ask: >-
+      Quote the one moment you believed these were real people, and say why; or say there
+      wasn't one.
+  low: None.
+  line: A 4 has at least one earned moment of real feeling. A 3 has none, or one that is stated.
+  high: Several, and they change the night.
+
+- id: chat.callbacks
+  family: chat
+  batch: 4
+  name: Things come back
+  priority: useful
+  tells: Setups pay off for a reader.
+  method: A reader lists what came back; the judge compares with the plan's setups.
+  probe:
+    sees: [chat]
+    ask: List the things that come back later in the chat, and whether each pays off.
+  low: Nothing returns.
+  line: A 4 has at least two setups returning and paying off. A 3 has none a reader notices.
+  high: Every return lands, and the last one closes the night.
+
+- id: chat.medium
+  family: chat
+  batch: 4
+  name: Reads like a real chat
+  priority: useful
+  tells: Message length, rhythm and content plausible for a dating app.
+  method: Flag essays, stage directions, shared-space moments, impossible knowledge.
+  low: Prose, not messages.
+  line: A 4 reads like messages with at most occasional overlong ones. A 3 reads like prose.
+  high: You could screenshot it.
+
+- id: chat.fresh
+  family: chat
+  batch: 4
+  name: Fresh
+  priority: diagnostic
+  tells: Tics, openers and joke shapes do not repeat.
+  method: Find repeated tics, openers and joke shapes. Higher means fewer.
+  low: The same joke all night.
+  line: A 4 repeats nothing more than twice. A 3 has noticeable tics.
+  high: Nothing repeats.
+
+- id: chat.plan
+  family: chat
+  batch: 4
+  name: Plays the plan
+  priority: diagnostic
+  tells: The plan's beats, events and setups appear, adapted to the dice.
+  method: Check the plan's beats against the chat.
+  low: The plan is unused.
+  line: A 4 has most beats and events present. A 3 leaves the plan largely unused.
+  high: Every beat present, adapted to the dice rather than forced.
+
+- id: chat.humanity
+  family: chat
+  batch: 4
+  name: Satire with humanity
+  priority: useful
+  tells: The satire hits behaviour, and both stay people.
+  method: Judge where the contempt points.
+  low: Two punchlines.
+  line: A 4 keeps both people human somewhere. A 3 makes them the joke.
+  high: Merciless and fond at once.
+
+- id: chat.momentum
+  family: chat
+  batch: 4
+  name: You'd keep reading
+  priority: useful
+  tells: Whether it holds a reader.
+  method: A reader says where they would stop.
+  probe:
+    sees: [chat]
+    ask: >-
+      Read turn by turn. At which turn would you have stopped reading if you were not asked
+      to finish, and why? Say "never" if you would read to the end.
+  low: Stops in the opening.
+  line: A 4 holds the reader to the end, or nearly. A 3 loses them by the middle.
+  high: The reader wants the next chat.

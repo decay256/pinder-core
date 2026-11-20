@@ -1,0 +1,356 @@
+{
+ "id": "plan-20261115T204302Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v1 · 15 Nov 20:43 · full run",
+ "version": "v1",
+ "order": 1,
+ "run": "20261115T204302Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261115T204302Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "15 Nov 20:43",
+ "materials": {
+  "brief": {
+   "chars": 22786,
+   "words": 4004
+  },
+  "plan": {
+   "chars": 10478,
+   "words": 1856
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 4,
+   "why": "Nearly every specific traces to the brief. Examples: the boxers on the balcony, eleven days of lentils, the ring light against the shadow, 'we can just watch something', the towel since four, the three-liter box, the cocktail sword, Marguerite's calendar and the taxi with no day named. The inventions mostly extend that material; the Notes-app rehearsal paste grows out of his mirror rehearsal. It stays at 4 because Brick's core kink is turned around: she is the one *told* what will happen, with times, and the plan has her issuing the schedule. It also leaves Reuben's band name-drop test, the duck and the cropped family portrait unused.",
+   "evidence": [
+    "Brick wants to give him a numbered, timed order of operations",
+    "he once caught the shadow of his short, hooked silhouette on the wall during sex",
+    "she accidentally pastes a calendar entry from her phone clipboard"
+   ],
+   "raise": "Let Brick's payoff include Reuben handing her a timed order and keeping to it, since that is her stated kink, and route his band-era test into an early beat.",
+   "def": "422981f4d9c7d5f1",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "There is no hard break with the brief. The plan follows the body stats ('massive, towering, and veined') and not the backstory's contradictory 'tip finishes shorter' line, which avoids a trap in the brief. Two soft problems keep it from 5. It merges the unnamed partner of the eleven-second mishap with Delphine, though the brief keeps them separate. It also adds a motive for Marguerite's calendar that the brief does not give: 'so Marguerite couldn't walk out mid-fight'.",
+   "evidence": [
+    "Delphine went quiet for eleven seconds when the curve caught wrong",
+    "so Marguerite couldn't walk out mid-fight"
+   ],
+   "raise": "Keep the mishap partner unnamed in Reuben's snap, so Delphine stays the 'never heard you say a sentence that wasn't performing' ex.",
+   "def": "fa45960901c28caa",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both sides have explicit needs: his is to be stayed with past the bit, hers is to have a confirmed time and someone who stays. Each has a test that probes it. His pre-emptive exit ramps test whether she will stay, and her 'hm.' and minute-counts test whether he will commit. The collision section shows each test landing as the other's wound, and the ending answers both: he names the exact time tomorrow, and she leaves '3.' blank. It stays at 4 because the accidents and found-outs are not tied to any test, and his core probe from the brief, the band name-drop, is missing.",
+   "evidence": [
+    "Every time Brick types a number of minutes or a `hm.`, Reuben hears a stopwatch",
+    "Every time Reuben jokes about wrapping things up early or offering her an out, Brick hears a polite brush-off"
+   ],
+   "raise": "Give each accident and found-out a role in the matrix, as evidence that passes or fails the other's test.",
+   "def": "cdf9049147e4579d",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The engine is built from these two particulars: his early finish and the eleven-second silence against her hard stops and minute-counts. 'A hard stop' carries both wounds, and the bedroom fit, with her holding him and him silenced past the list, works only for this pair. It falls short of 6 because it never uses how closely the brief mirrors them: both rehearse in the bathroom mirror, both lie about having just been out, and both own a ring light. A reader would miss that, and the plan could have found it.",
+   "evidence": [
+    "The phrase/object that carries it**: **\"A hard stop\"",
+    "Brick is massive, towering, and veined; Reuben is short, thick, and curved hard to the left"
+   ],
+   "raise": "Make the shared ring light or the parallel 'just got in' lies a discovered mirror between them that only this pair could have.",
+   "def": "f1b9dddac061dbfe",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 3,
+   "why": "The agree-to-meet ending has Brick saying 'you don't do the voice' and putting her hand over his mouth. Both rest on his private kink, and the plan never routes how he tells her. The 'headboard light' depends on his ring-light confession, which is only conditional, and it is muddled by her sending her own address. Early on, 'I curve left too' assumes the direction of his curve is public, but the profile gives only its degree.",
+   "evidence": [
+    "headboard light goes off, my hand goes over your mouth, and you don't do the voice",
+    "I am larger than you, I curve left too"
+   ],
+   "raise": "Add an explicit beat where Reuben types the wish to have his mouth taken away, before her list can quote 'the voice'.",
+   "def": "5ca08850b888867b",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "There is no beat sequence, only three parallel setups, each with a payoff, and two endings. The setups do not cause each other; they all happen 'early on'. The snaps, accidents and confessions float without placement, so the transitions read as 'and then' or are left unordered. The collision section supplies a mechanism, but not a chain of events.",
+   "evidence": [
+    "Early on, Brick brags that she hasn't even taken off her vest and heels yet",
+    "Early on, Reuben drops a polite out"
+   ],
+   "raise": "Order the beats so each one is caused by the last, for example: her 12:40 hard stop provokes his exit ramp, which triggers her snap.",
+   "def": "b7d5785d1f61ce07",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 4,
+   "why": "The moment exists, and the typing shows it. Reuben 'drops the formal act and the emoji', Brick leaves '3.' untimed, and both have a break line ('Please don't let me make a joke right now.', 'I don't have a time for after.'). A trigger is gestured at, 'if she doesn't laugh him off', but it is not pinned to a specific event tonight. It also has no placement in the night, which keeps it from 5.",
+   "evidence": [
+    "Reuben drops the formal act and the emoji",
+    "and leaves the time on `3.` blank",
+    "I don't have a time for after."
+   ],
+   "raise": "Tie each break line to a named trigger tonight, such as 12:40 passing unremarked, and place it in the sequence.",
+   "def": "e72f84db4817e97c",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "Explicit acts and logistics are held for the ending's numbered list, and the confessions are gated on trust ('once it's earned'). It stays just above the line, because the early setups already bring in body terms, 'Bold claim for those proportions' and 'I leave the light on'. There is also no mapped ladder showing each step of heat being caused by something said.",
+   "evidence": [
+    "hm. Bold claim for those proportions.",
+    "Confessed in pieces once it's earned"
+   ],
+   "raise": "Map the heat steps between the setups and the ending, each triggered by a specific confession.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "All three setups sit in the opening, and two include body disclosures ('first turn or two', 'Early on' twice), so the start is crowded. The accidents and snaps depend on dice and have no position, and only the confessions are implicitly late. There is no rhythm you could chart.",
+   "evidence": [
+    "In the first turn or two, Brick picks up on Reuben's bio",
+    "Early on, Brick brags",
+    "Early on, Reuben drops a polite out"
+   ],
+   "raise": "Move one setup, such as the light-on terms, to the middle, and hold the ring-light confession explicitly for late.",
+   "def": "6992bdb3b448c021",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 3,
+   "why": "The 'Tonight' material comes from the brief and is personal: the neighbour holding Reuben's boxers 'flat with two fingers', and Brick's towel and three-litre box since 4pm. Both press on each character's fear of being seen as they really are. But these are states that existed before the chat starts. Nothing is scheduled to press in during the night: no knock, no text from Delphine or Marguerite, no neighbour returning. The outside world never acts on the game, so this falls just short of the line.",
+   "evidence": [
+    "his downstairs neighbor returned his fallen boxers held flat with two fingers and asked if he was \"the top hat guy on the third floor.\"",
+    "standing at the kitchen counter finishing the bottom of a three-liter box of rosé"
+   ],
+   "raise": "Plant one mid-chat intrusion per character from their own world, timed to land on a vulnerable beat, such as the neighbour knocking again or a Marguerite calendar notification firing.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "Each of the three setups has a plant and a stated payoff. Setup #1 pays differently by ending: 12:40 passes unnoticed in the meet ending, and lands as 'four minutes under' in the fall-apart ending. Setup #3's payoff is vague ('when both their real fears surface') and is not tied to either ending. Setup #2's payoff drifts into the navel-shelf announcement, which the light plant never set up, and the fall-apart ending only gestures at it with 'under his ring light'. It stays above the line because every setup is planted and returned.",
+   "evidence": [
+    "2. You have until my 12:40 hard stop to lose to me here first.",
+    "Pays off when both their real fears surface",
+    "We're four minutes under the 12:40 hard stop."
+   ],
+   "raise": "Give Setup #3 an ending-specific payoff in both outcomes: in the meet ending she names a day, and in the fall-apart ending he takes the 'bad reception' exit verbatim.",
+   "def": "521e2223c917f019",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 5,
+   "why": "The two endings are different stories. In one, she schedules the night but leaves item 3 blank, and he drops the act and asks to be called Reuben. In the other, he pre-empts rejection, she retreats into a numbered list and unmatches on the dot. The meet ending fulfils both cravings precisely: 'you don't do the voice' meets his kink, and the blank time meets her 'no time for after'. The fall-apart ending is apt but predictable, with each character simply defaulting to their quirk, so it stops short of the best version of its outcome.",
+   "evidence": [
+    "and leaves the time on `3.` blank",
+    "asks her to just call him Reuben when she opens the door",
+    "She unmatches on the dot"
+   ],
+   "raise": "Give the fall-apart ending one unexpected beat that hurts more than the default, such as Brick leaving item 3 blank even as she unmatches.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 2,
+   "why": "The plan has no short-game provision. Its only nod is the parenthetical 'maybe early' on the fall-apart ending. It never says which setup, accident or turning point survives six turns, and there is no compressed path to the meet ending.",
+   "evidence": [
+    "If it falls apart (unmatch or ghost, maybe early)"
+   ],
+   "raise": "Add a short-game line stating which beat is the midpoint (for example, the Notes-app paste) and how a six-turn game reaches either ending from it.",
+   "def": "9c79336a7855f173",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both bad-roll accidents are written as exact on-screen artefacts and fit the medium: a mis-pasted Notes rehearsal line with a stage direction, and a mis-pasted calendar block with a hard stop. Each comes with its cover-up messages. The 'found out' versions are concrete timeline slips (bio changed at 6:15pm, idle at 8:40pm). However, Reuben's found-out contradiction ('complaining about the noise outside his window all week') is left loose rather than given exact wording.",
+   "evidence": [
+    "[say before shirt comes off, shrug do NOT grin] Fair warning, it hooks left hard enough to see around corners",
+    "00:15–00:35 Pinder screen (do NOT mention towel / hide 3L box)."
+   ],
+   "raise": "Write the exact earlier message in which Reuben mentions the neighbour's knock, so Brick's 1-2-3 catch has precise lines to quote.",
+   "def": "8a43f27b6bad2c45",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through chat. The plan uses the medium itself: clipboard paste errors, app timestamps ('watched his status go idle at 8:40pm') and the clock as a live hard stop. The physical material (the hand over his mouth, the collarbone) is framed as texted plans or bedroom talk. The closing image of him 'under his ring light and her at the counter' is narration the other person cannot see, which is a small flaw.",
+   "evidence": [
+    "slips that she saw him change his bio wording at 6:15pm and watched his status go idle at 8:40pm",
+    "Trying to paste the name of an obscure band era to show off, he accidentally pastes the rehearsal line"
+   ],
+   "raise": "Turn the closing image into something sent, such as a final photo or a last undelivered message, so the reader sees it in the chat.",
+   "def": "df6fedc6221ef314",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben writes formal, fully spelled-out sentences, uses 🙂 in place of terminal punctuation, and offers exit ramps. Brick writes a lowercase 'hm.', clipped clauses, numbered lists and timestamps. Most single messages could be attributed without names. But both characters' accidents and snaps share the same three-beat cover-up shape ('That was notes for a short story.' / 'That was a client block.'; 'Delphine is a rhetorical device.' / 'That was a hypothetical taxi.'), which blurs them at their most revealing moments.",
+   "evidence": [
+    "the door is right there 🙂",
+    "hm. I don't do vague exits. Name a time or don't offer.",
+    "That was a hypothetical taxi. I walk."
+   ],
+   "raise": "Give each character a structurally different cover-up: for example, Reuben floods with a staccato burst while Brick issues a numbered correction.",
+   "def": "e90fb07ec3b78554",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 5,
+   "why": "The plan does something the default farce would not predict. The 'hard stop' shifts from a clock that ejects him to her hand over his mouth. Her schedule becomes the very thing that frees him from performing. The blank time on item 3 makes structure into intimacy, which is surprising and follows from both wounds. What keeps it from a 6 is that the twin hidden-at-home lies mirror each other predictably, and the fall-apart path is the expected one.",
+   "evidence": [
+    "the \"hard stop\" stops being when she kicks him out and becomes what she does to his mouth when he starts doing a bit",
+    "provided she stays past the last number on the list"
+   ],
+   "raise": "Break the mirror by making one character's secret land differently from the other's, rather than both being 'claimed to be out, actually home'.",
+   "def": "eee876c9f2949144",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 3,
+   "why": "The sections are complete and consistent for both characters (Quirk through 'Where the quirk breaks'), plus the collision, setups and endings. But the plan writes the chat. Each Snap contains a four-message scripted exchange, Setup #1 gives Brick's full opening line, and the endings draft her numbered message. That goes beyond specifying artefacts and into writing the conversation. It also invents facts the brief does not contain, such as naming the eleven-second partner as Delphine.",
+   "evidence": [
+    "Reuben_404: Honestly people on this app claim they want banter and then grade you like a tax audit.",
+    "Brick_haus: It's basic calendar hygiene. Either you book the slot or you don't."
+   ],
+   "raise": "Reduce the Snap slips and setup plants to beat descriptions plus one key phrase, keeping verbatim text only for the accident artefacts.",
+   "def": "bd872356c69500bb",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 61.5,
+   "cost": 0.224644,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 53.4,
+   "cost": 0.207236,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:26:47Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.4319
+}

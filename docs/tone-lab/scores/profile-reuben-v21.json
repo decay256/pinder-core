@@ -1,0 +1,453 @@
+{
+ "id": "profile-reuben-v21",
+ "kind": "profile",
+ "label": "Reuben · v21 card",
+ "version": "v21",
+ "order": 21,
+ "run": null,
+ "source": "docs/tone-lab/runs/20261118T163642Z-preview-reuben-brick-s23/preview.html",
+ "note": "The character card as the v21 planner saw it, before the profile generator. Its cast is only the other card of the same match.",
+ "when": null,
+ "materials": {
+  "profile": {
+   "chars": 9196,
+   "words": 1602
+  },
+  "game": {
+   "chars": 22207,
+   "words": 3817
+  },
+  "cast": {
+   "chars": 8214,
+   "words": 1410
+  }
+ },
+ "scores": {
+  "profile.life": {
+   "score": 3,
+   "why": "The usable facts are thin and cluster in past mishaps and private routines. Work is the eleven months on a dive-bar door, but nothing says what he does now. Home and routine give the lentil pot, the coffee-bag clip, the mirror rehearsals and the energy shots. People amount to unnamed past dates and a family portrait; there are no friends, colleagues or plans. The nearest thing to this week is the eleven days indoors, and it is a lie-anecdote rather than a live situation, so the profile has fewer than a dozen facts and misses the four-type bar.",
+   "evidence": [
+    "Ran the door at a dive bar for eleven months and got let go for arguing with a regular",
+    "I'd been in my apartment for eleven straight days eating the same lentil thing out of the same pot",
+    "currently holding a bag of coffee shut"
+   ],
+   "raise": "Give him a current job, one named person in his week (flatmate, sibling, colleague) and one thing happening this Friday.",
+   "def": "ba20efe15f1f67e9",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.ordinary": {
+   "score": 2,
+   "why": "The backstory is a run of set-piece humiliations: the toilet, the blister, the margarita, the arm wrestling, the dishwasher-safe tattoo. Wound material (the cropped portrait, the vanishing at sixteen) and body talk fill most of the rest. Ordinary life shows up only in drawer fragments like the lentil pot, so it is garnish rather than the largest share.",
+   "evidence": [
+    "ended at midnight holding his top hat over a clogged toilet while his date scrolled a plunger tutorial",
+    "ended in a stranger's margarita, propelled by a sneeze",
+    "got cropped out of a family portrait at nine"
+   ],
+   "raise": "Replace two of the anecdote recaps with plain facts about his flat, job and week, and let the mishaps sit among them.",
+   "def": "b60d3d6129fdd5ef",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.distinct": {
+   "score": 1,
+   "why": "Brick_haus shares his core wound and several specific motifs nearly word for word. Both were cropped out of a family portrait and both coded a dating-app replica to flirt with their own lopsided reflection. Both practised a brochure smile in the bathroom mirror for three years, grew up in a drafty house keeping everything pulled tight, and were voted most likely to ignite a fire with enthusiasm. Even tonight's drawers mirror each other: a posture device turned into a doorstop or clip, a 'just got back from a trip' lie, and mirror rehearsal before dates. Swap the names and much of either profile still fits.",
+   "evidence": [
+    "got cropped out of a family portrait at nine",
+    "built a flawless replica of a dating app and used it only to flirt with his own lopsided reflection",
+    "$189 \"posture and presence\" device"
+   ],
+   "raise": "Rebuild his wound and drawer picks so no portrait, mirror, app replica, drafty house or posture device overlaps with Brick_haus.",
+   "def": "c49f26573e9ce038",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.consistent": {
+   "score": 3,
+   "why": "The body lists trunk girth at 95-100, the maximum, but the backstory says he traded 'physical volume' for verbal edge. A reader checking the body against the prose catches that clear contradiction. The rest mostly holds, such as the nipple policy implying an age of about 28.",
+   "evidence": [
+    "trunk girth: 95-100",
+    "trading physical volume for a verbal edge sharp enough to end a debate",
+    "slight in the middle"
+   ],
+   "raise": "Make the prose acknowledge the extreme girth, with his self-deprecation aimed at length, so body and backstory agree.",
+   "def": "7aeeef752bd3bd86",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.fidelity": {
+   "score": 3,
+   "why": "The bio, items, body numbers and clinician notes are carried over, and the drawer picks are verbatim. But the game gives an 'intense rightward curve' and the profile rewrites it as 'the leftward curve'. The girth item's 'meteorological event' presence is also contradicted by the 'physical volume' line. The tonight hook is listed but never woven into who he is.",
+   "evidence": [
+    "the leftward curve reframed as imagination",
+    "trading physical volume for a verbal edge"
+   ],
+   "raise": "Restore the rightward curve and the girth-as-weather trait, and fold the dive-bar door job into his story.",
+   "def": "c713ddd28c5a9581",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.tests": {
+   "score": 3,
+   "why": "The profile names no dealbreaker and no explicit first test. One usable test is buried in the prose: the band name-drop as a password check, which is observable and specific enough that a single message could trip it. Nothing tells the match what would end the night, and the clinician's 'stays present through pauses' line is a safety condition, not a test a message could fail. That leaves one observable test and one missing, which is a 3; a named, observable dealbreaker would reach the line.",
+   "evidence": [
+    "He tests people by name-dropping the things he loved to see if they know the specific version of him those things belong to",
+    "Ask me about a band and I'll know which era you mean."
+   ],
+   "raise": "Add an explicit dealbreaker a message could trip, for example a match who answers his joke with a joke and never once lets a pause sit, alongside the era-specific band test.",
+   "def": "d69418021ebd052e",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.people": {
+   "score": 2,
+   "why": "No one in his life is named. The only people are anonymous figures in past mishaps: the rooftop date, the hike date, the margarita stranger, the misidentified regular, the singer and his brother. Every one exists to humiliate him, and none is current or could come up tonight. The game file offered live threads (Delphine, the mother who calls him by his brother's name, the group project that quietly dropped him, the downstairs neighbour), and the profile dropped them all.",
+   "evidence": [
+    "the singer he name-dropped showed up at the dive bar to ask him to stop confusing him with his brother",
+    "his date scrolled a plunger tutorial",
+    "got let go for arguing with a regular he'd misidentified as someone famous"
+   ],
+   "raise": "Restore two or three current people from the game file, such as Delphine's 'try one sentence that isn't performing' or the mother using his brother's name, each with an open thread that could surface tonight.",
+   "def": "1484e17d048bba91",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.timeline": {
+   "score": 2,
+   "why": "The spine is thin: a drafty childhood house, a high-school superlative and his sixteenth year, and the eleven-month bar door as a first job. Leaving home and a longest relationship are both absent. The recent past exists only as drawer items (eleven days of lentils, last month's energy shots). The backstory is mostly a chain of humiliations: rooftop, hike, margarita, arm wrestling, tattoo, singer, firing. That puts it in the low band rather than a 3.",
+   "evidence": [
+    "grew up in a drafty house where safety meant keeping everything pulled in tight",
+    "Ran the door at a dive bar for eleven months and got let go"
+   ],
+   "raise": "Add leaving home, the Delphine relationship as the longest one, and an ordinary recent year (current job, the sublet) leading into tonight, and cut the humiliation anecdotes to two.",
+   "def": "f3e8d800a5fd6476",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.act": {
+   "score": 4,
+   "why": "Only one formal claim/truth pair is given, but it is specific and funny, and it can leak in text, since he can misidentify a famous person mid-chat. The prose carries further pairs that are just as sharp: the 'ancient symbol of devotion' tattoo that means dishwasher-safe, and the 'just got back from a trip' lie over eleven days of lentils. It stays above the line because most truths are concrete and could surface in a message. It misses a 5 because the structure is thin and several truths, like the blister or the sneeze, can't leak over text.",
+   "evidence": [
+    "says: Started out doing something unnameable and cool adjacent to nightlife.",
+    "a tattoo he swears is an ancient symbol of devotion",
+    "saying I \"just got back from a trip\" when I'd been in my apartment for eleven straight days"
+   ],
+   "raise": "Carry over three or four more of the game's text-leakable pairs, such as 'barely online' against replying within four seconds and then apologising for it.",
+   "def": "ff77ae34c8ec6b73",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.specific": {
+   "score": 4,
+   "why": "The drawer and backstory are dense with characterising detail: the $189 2am posture clip holding a coffee bag shut, gas-station shots four or five a day, a nine-year shirt policy, twenty minutes of mirror rehearsal. These say something about his money and self-image. It stays above the line because most paragraphs carry detail that does work. It misses a 5 because the 'Who they are' paragraph is almost wholly abstract, there are no places, streets or brands, and the curve is called 'leftward' against the body's rightward curve.",
+   "evidence": [
+    "a $189 \"posture and presence\" device that's a plastic clip you wear on your collarbone, bought at 2am, worn twice",
+    "four or five a day, until my hands were shaking so badly during a video date",
+    "the leftward curve reframed as imagination"
+   ],
+   "raise": "Ground the 'Who they are' paragraph in one concrete place and object (the cold sublet with the coat kept on, the band and its era) and fix the curve's direction.",
+   "def": "db98767fb36eeb56",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.stock": {
+   "score": 2,
+   "why": "Most of the central material also appears in Brick_haus's profile in the same cast. Both profiles have the cropped family portrait, the dating-app replica used to flirt with a 'lopsided reflection', the brochure smile practised in a bathroom mirror, the 'most likely to ignite a small fire' vote, the drafty house, and the periodic-table crush. Tonight's drawers match too: both have a posture device repurposed as a clip or doorstop, and both have a lie about having just been out. The dive-bar door job and the dishwasher-safe tattoo are fresh, but they sit on a frame shared with the other character.",
+   "evidence": [
+    "once built a flawless replica of a dating app and used it only to flirt with his own lopsided reflection",
+    "a $189 \"posture and presence\" device that's a plastic clip you wear on your collarbone",
+    "still practices a frictionless brochure smile in the bathroom mirror before every date"
+   ],
+   "raise": "Cut every motif the profile shares with Brick_haus and replace it with material from Reuben's own unused drawer, such as the neighbour returning his boxers, the subway stair or Delphine.",
+   "def": "81933a72e1cf3605",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.plausible": {
+   "score": 3,
+   "why": "The comic stretches (the dishwasher-safe tattoo, the singer's brother) work as jokes, and the door job lasting eleven months is believable. A London reader would still catch unintended Americanisms: prices in dollars where Brick_haus uses pounds, and 'gas station' energy shots. The profile also calls the curve 'leftward' while the game file says 'rightward', and it gives no age, job or rent to check against London.",
+   "evidence": [
+    "a $189 \"posture and presence\" device",
+    "those little energy shots from the gas station",
+    "the leftward curve reframed as imagination"
+   ],
+   "raise": "Localise the prices and places to London, fix the curve direction, and state his current job and rent.",
+   "def": "a6a960fcea9e361b",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.filth": {
+   "score": 4,
+   "why": "Most of the sexual material comes from his own body and history: the short, narrow trunk and early finish, the curve he rehearses disclosing in the mirror, and the tongue accessory sneezed into a margarita. Nothing in it is generic. It stays tame, though. The profile skips the funniest and most body-specific drawer items (the curve 'catching wrong on the way back in', the kink of having his mouth taken away) and never uses the extreme girth or the lopsided testicles.",
+   "evidence": [
+    "finishes earlier than the eye expects, so he made an early peace with anticlimax",
+    "rehearsing the curvature disclosure out loud in the bathroom mirror",
+    "launched... into a stranger's margarita"
+   ],
+   "raise": "Bring in the eleven-silent-seconds curve mishap or the held-down kink so the filth is as specific as his body and actually lands as a joke.",
+   "def": "6a879b5e8af5b7b3",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.humanity": {
+   "score": 4,
+   "why": "The jokes aim at what he does: every prop 'detonates', and he narrates his rejection before it happens. The profile keeps his dignity through the vest password that 'leads somewhere real', the duck that 'helped', and a clear safety note. The run of humiliations is relentless, and the tender drawer material (the hand on his back and his real name, the stairwell cry) is left out. That leaves it short of fondness.",
+   "evidence": [
+    "every prop detonates in his hands",
+    "if they pass, the door actually opens",
+    "has never once turned the performance down, which is why the flames are always his own"
+   ],
+   "raise": "Add one unguarded, sympathetic specific, such as wanting someone to just say 'Reuben' afterwards, so the profile shows warmth toward him as well as precision about him.",
+   "def": "13434ea727e1f291",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.efficiency": {
+   "score": 3,
+   "why": "'Who they are' and 'Backstory' are copied word for word from the older generator, and the backstory retells fragment anecdotes the game file already lists. The profile was asked to build tonight's hook around the dive-bar door job, but it only pasted that brag in and never used it. Sentences like 'which is the whole strategy in miniature' summarise instead of adding facts.",
+   "evidence": [
+    "which is the whole strategy in miniature",
+    "Ran the door at a dive bar for eleven months",
+    "His rooftop glamour night ended at midnight holding his top hat over a clogged toilet"
+   ],
+   "raise": "Replace the pasted generator prose with a tight paragraph built around the misidentified-regular firing as tonight's hook.",
+   "def": "63ca3549efdaf667",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.voice": {
+   "score": 5,
+   "why": "All five probe messages run on Reuben's own material, and none could have come from Brick: the opener leads with an apology (\"I am not tall, I lose at arm wrestling\") and then a name-drop password test; the quiet reply does arithmetic and names an exit; the lie and the stop-performing beat both land on the dive-bar door. The five situations also come out as different shapes, from a long flurry with an emoji to a clipped final beat. It falls short of a 6 because several of the specifics have twins in Brick's drawer: a posture device (£240 harness against $189 clip), a 'just got in/back from' lie, and mirror rehearsal. The messages also mostly recite drawer facts rather than showing the listed texting habits, such as ceremonial formality.",
+   "evidence": [
+    "I'll narrate the exit for both of us, I'm very good at it.",
+    "I got fired from the door because I argued with a regular. I was certain he was someone famous.",
+    "the $189 posture device I bought at this exact hour some months ago is currently holding my coffee shut"
+   ],
+   "raise": "Rewrite his drawer items so none of them structurally echo Brick's (no shared posture device, 'just got in' lie, or mirror rehearsal), so each message's content is his alone.",
+   "def": "e7f66af37eb2f5e3",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.situations": {
+   "score": 4,
+   "why": "About nine of the twelve lines predict something you could see on the screen. 'spell words in full with a ceremonial formality', 'replace terminal punctuation with a soft emoji', 'name an exit before the other person does', and 'warm into longer replies while returning to earlier conversational threads' each set a length, punctuation, or content move. That clears seven in ten. It stays at 4 because 'clipped bursts' and 'rapid, staccato bursts' describe nearly the same shape. 'answer guardedly while signaling that each detail is being noticed' describes a mood, not typing. No line covers timing, even though the source gives one ('Replies within four seconds at any hour, then sends a second message apologizing').",
+   "evidence": [
+    "may replace terminal punctuation with a soft emoji when warmth comes through",
+    "may answer in clipped bursts when a longer thought feels exposing",
+    "tends toward rapid, staccato bursts when analyzing something intensely"
+   ],
+   "raise": "Merge the two 'bursts' lines and replace the guarded-affect line with the four-second reply followed by apology follow-ups as a timing habit.",
+   "def": "07baafe3b1ed9ce4",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.texting_vs_cast": {
+   "score": 4,
+   "why": "Most of Reuben's habits are his own and set him apart from Brick. His formality, soft emoji, and exit-naming contrast with her 'hm.' verdicts, numbered lists, and proclamations. His 'warm into longer replies' runs directly against her 'cool into shorter replies while mirroring', which helps. It is held at 4 by overlap. One line appears verbatim in both profiles. His clipped bursts sit close to her 'clipped, efficient clauses', so a hurt, terse Reuben could read like Brick.",
+   "evidence": [
+    "tends to speak as though mutual interest is already established",
+    "may answer in clipped bursts when a longer thought feels exposing",
+    "tends to warm into longer replies while returning to earlier conversational threads"
+   ],
+   "raise": "Replace the shared 'mutual interest is already established' line, and make his terse mode visibly unlike Brick's, for example full formal sentences that stop abruptly rather than trimmed clauses.",
+   "def": "f44795214d1361d7",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.wound": {
+   "score": 4,
+   "why": "All three links are present. The event is the cropped family portrait at nine, the drafty house, and the sixteenth year spent 'vanishing from the edges inward'. That produces the habit of filling silences and narrating rejection first. The habit then shows in a texting line ('name an exit before the other person does'). The best link is 'started texting at inhuman speed just to prove he was still solid'. It stays at 4 because much of the chain is told rather than shown ('Underneath the speed is a tribunal'). That speed habit never appears among the texting lines, and Brick's backstory uses the same portrait, drafty house, and replica app, which blurs whose wound this is.",
+   "evidence": [
+    "got cropped out of a family portrait at nine and has been auditioning for a better camera ever since",
+    "started texting at inhuman speed just to prove he was still solid",
+    "may anticipate rejection and name an exit before the other person does"
+   ],
+   "raise": "Add a texting line that turns the 'inhuman speed' habit into observable timing, and give Brick a different origin event so the portrait is Reuben's alone.",
+   "def": "299ebf3464d13800",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.likeable": {
+   "score": 4,
+   "why": "The reader names a specific, non-ironic quality that the profile shows him doing: he tells on himself first. Losing the arm wrestle and narrating it, and admitting the tattoo means dishwasher-safe, are concrete acts that 'make him unusually easy to be around'. That clears the line. It stays at 4 because this quality is mostly a variant of being funny and is framed as defense. The second quality ('wants to be known accurately') is asserted rather than shown. Nothing shows him doing something for another person.",
+   "evidence": [
+    "I will lose to you at arm wrestling before the appetizers arrive and narrate it beautifully.",
+    "if they pass, the door actually opens",
+    "He tells on himself before anyone else can."
+   ],
+   "raise": "Add one concrete instance of Reuben noticing and looking after someone else, such as a date or the regular he wronged, without it being a bit.",
+   "def": "c9fc1f4e3d28bfc5",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "profile.likeable": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "Name the one thing you would genuinely like about this person if you met them, and the one thing you would find hardest to forgive. Be specific, and no jokes.",
+   "answer": "**What I would genuinely like:** He tells on himself before anyone else can. The profile says he owns his absurdities loudly, claims the ridiculous thing first, and that \"nothing is hidden with him.\" He loses the arm wrestle and narrates it. He admits the tattoo means dishwasher-safe. That makes him unusually easy to be around. You never have to wonder what he's concealing, and you never have to be the one to point out the awkward thing. I'd also like what happens when someone passes his test: when you recognize the specific version of a band he loved, \"the door actually opens.\" That suggests that under all the performance there's someone who wants to be known accurately, not just admired.\n\n**What I would find hardest to forgive:** He doesn't check where his words land. The profile says plainly that he \"genuinely doesn't notice the moment his cleverness lands as an insult\" and that every message ends with a flourish \"he has decided not to check the landing of.\" That word \"decided\" is what makes it hard to forgive. It isn't only a blind spot; it's a choice, and it puts protecting his own performance ahead of the person on the other end. Getting fired from the bar door for arguing with a regular he had wrongly identified fits the same pattern: he committed to his version of someone and pushed it at them instead of looking. A single cutting remark would be easy to forgive. What would wear on me is the repeated sense that being hurt by him is something he has arranged never to find out about.\n\nThe profile doesn't say whether he can change this. It only says he is aware he uses distance as a defense \"without having done anything about it.\""
+  },
+  "profile.voice": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "From this profile alone, write five short dating-app messages this person would send tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m., (5) the moment they stop performing.",
+   "answer": "**(1) Opener to someone he fancies**\n\nHello. I should say up front that I am not tall, I lose at arm wrestling, and I once held a top hat over a toilet for professional reasons. Now that we've covered my weaknesses: your third photo, the record shop. Is that the Wharf Street one before it moved, or after? Because if it's before, we already have a shared past, and I would like to discuss our history. I used to work nights, sort of in the scene, sort of adjacent, hard to describe, but I know what an 11pm queue smells like 🙂\n\n**(2) When the other person has gone quiet**\n\nNo pressure whatsoever. I have done the arithmetic: average reply delay on this app, your probable work hours, a 40% chance you're simply eating. That is a perfectly reasonable explanation. I am not refreshing. I am refreshing a normal amount. If I said something wrong, feel free to just leave. I'll narrate the exit for both of us, I'm very good at it.\n\nAnyway. Did you ever find out who sang on that B-side?\n\n**(3) When caught in a lie**\n\nOkay. Yes. \"Just got back from a trip\" was, technically, false. I had been in my apartment for eleven days. Eating one lentil dish. From one pot. I would argue the pot went on a journey, emotionally, but I can hear that argument losing as I make it. Also, while we're auditing: the nightlife thing was me running the door at a dive bar. Eleven months. I would like to stop talking now and also keep explaining for another four paragraphs. Please pick one for me.\n\n**(4) A message at 2 a.m.**\n\nAre you awake. Do not answer that if you're not, obviously, that's how sleep works. I have just realised that the $189 posture device I bought at this exact hour some months ago is currently holding my coffee shut. It's doing excellent work. Better posture than I've ever had. I respect it. I think it respects me less. Goodnight. Or good morning. Whichever lands more gracefully 🌙\n\n**(5) The moment he stops performing**\n\nI got fired from the door because I argued with a regular. I was certain he was someone famous. He wasn't. I kept going anyway.\n\nThat's the real one.\n\nI practise things in the mirror before dates. Not jokes. The other stuff. For a long time.\n\nYou don't have to say anything clever back. I'd actually like it if you didn't.\n\n---\n\nThe profile gives his texting habits, his drawer details and the door-job truth. It does not specify the match's photos or interests, so the record-shop detail in (1) and the B-side callback in (2) are placeholders I invented to show how he tests people with name-drops and steers back to his favourite topics."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 17.6,
+   "cost": 0.044836,
+   "label": "probe profile.likeable"
+  },
+  {
+   "seconds": 23.7,
+   "cost": 0.055768,
+   "label": "probe profile.voice"
+  },
+  {
+   "seconds": 31.5,
+   "cost": 0.17102,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 34.7,
+   "cost": 0.17530800000000002,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 29.2,
+   "cost": 0.165408,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 46.6,
+   "cost": 0.201784,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:16:21Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.8141
+}

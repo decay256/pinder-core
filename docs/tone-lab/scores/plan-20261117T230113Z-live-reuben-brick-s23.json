@@ -1,0 +1,356 @@
+{
+ "id": "plan-20261117T230113Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v19 · 17 Nov 23:01 · full run",
+ "version": "v19",
+ "order": 19,
+ "run": "20261117T230113Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261117T230113Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "17 Nov 23:01",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 13799,
+   "words": 2256
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 4,
+   "why": "All three events are built from the brief's drawer and backstory: the lentil pot and energy shots, the monocle and cocktail sword in the boxed rosé, and the horse-tack harness door. The ceiling bang lands exactly on Brick's fear of being too big and loud for the building. Events 1 and 2 mostly exist to trigger the two accidents rather than pressing on a fear, and the neighbour is an invented person, not one from the brief. The plan also contradicts itself: 'fourth' shot in Tonight against 'fifth' in event 1, and Brick pacing in 'one good heel' while she sits in a towel on the sofa.",
+   "evidence": [
+    "her downstairs neighbor bangs a broom against the ceiling because she paced once in her one good heel",
+    "Reuben's fifth gas-station energy shot kicks in hard while his eleven-day lentil pot boils over"
+   ],
+   "raise": "Make Reuben's event press on his fear of vanishing, for example a slow reply landing just as the pot boils over, and fix the heel and towel inconsistency so every event is personal and timed to the worst moment.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "Each setup has a plant, a middle and a two-way payoff, and the beats carry them: the trip lie is planted in beat 2, exposed by the boil-over in beat 3 and paid with 'the eleven-day lentil truth' in beat 7. The revolving door is planted in beat 1, returns through the calendar paste and pays with the security guard line. The endings pay the curve and lentil setups differently, but the fall-apart ending never touches the revolving-door setup, so it falls short of 6.",
+   "evidence": [
+    "Payoff: admitting he's been hiding in his flat for eleven days vs claiming he's packing for another trip",
+    "Middle: her calendar paste exposes the hotel lobby incident"
+   ],
+   "raise": "Give the fall-apart ending its own payoff of the door setup, for example Brick slamming the metaphorical entrance using his own 'vacate the premises' line.",
+   "def": "521e2223c917f019",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 5,
+   "why": "The two endings are different stories. In one, he stays in the pause and she drops the lists and invites him through the harness-propped door. In the other, her numbered feasibility audit meets his ceremonial self-eviction. Both come from the pair's own snaps and props. The click ending is a little listy and doesn't say how the night actually turns into a meeting, so it is not quite the best version of that outcome.",
+   "evidence": [
+    "invites him over to bring his eleven-day self through her horse-harnessed door",
+    "a ceremonially formal farewell thanking her for the prompt tribunal and preemptively vacating the chat"
+   ],
+   "raise": "Anchor the click ending in one concrete exchange, such as her giving him a specific time to arrive, so it lands as the definitive version for this pair.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 5,
+   "why": "The fold-downs merge beats 2 with 3 and 5 with 6, which cuts eight beats to six and keeps beat 5, the stated midpoint where status flips, intact. The short version still contains both accidents, the collision and the confession or snap. It doesn't say explicitly how the ending beat lands inside the six turns.",
+   "evidence": [
+    "Beats 5 and 6 fold together (Brick's calendar paste and the neighbor's ceiling bang happen in one turn"
+   ],
+   "raise": "State that the merged confession beat also carries the closing decision, so the six-turn version is explicitly complete.",
+   "def": "9c79336a7855f173",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written verbatim and are characterful: Reuben's misidentified-bassist grievance to Dave and Brick's self-scolding reminder. Reuben's notes-app paste is a believable chat misfire. Brick's calendar alert 'pastes into the chat box' on its own, which is not how phones work, and that keeps this from 6.",
+   "evidence": [
+    "even if that was not Mark Ibold my spatial management of the smoking patio warranted a formal warning",
+    "REMINDER 23:30: Stop drinking the box. Email Hotel Facilities re: brass track liability & heel reimbursement (£190). Put clothes on."
+   ],
+   "raise": "Make Brick's misfire a believable chat artefact, such as a screenshot sent by mistake or a reminder she copy-pastes while drafting.",
+   "def": "8a43f27b6bad2c45",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 4,
+   "why": "Every beat can reach the other person if the character reports it: the boil-over, the monocle in the glass and the ceiling bang can all be narrated, and the plan uses typos and pastes. But the plan never says how the off-screen moments get into the chat, with no photo or voice note planned. The auto-pasting calendar alert also strains plausibility, which keeps this from a 5.",
+   "evidence": [
+    "his hands shaking so badly he mistypes and triggers his Accident paste",
+    "an automated calendar alert she set for herself pastes into the chat box"
+   ],
+   "raise": "Route the off-screen events through the medium, for example a blurry photo of the boiled-over pot or a timestamped gap after the ceiling bang.",
+   "def": "df6fedc6221ef314",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben writes long, ceremonial, fully spelled sentences, uses a soft emoji in place of a period and misspells French words. Brick writes clipped periods, opens verdicts with 'hm.', uses numbered lists, British vocabulary and no emoji. The sample lines can be attributed blind. Both break lines are lowercase and unpunctuated, so the two voices converge at the most important moment.",
+   "evidence": [
+    "In the interest of full disclosure, I am built less like a tower and more like a very enthusiastic comma",
+    "1. I do not lose arguments. 2. Your left-hook geometry is already accounted for. 3. Pour a drink."
+   ],
+   "raise": "Keep one surviving tic in each break line, for example Brick keeping a lone period or Reuben a stray 🙂, so even the breaks can't be confused.",
+   "def": "e90fb07ec3b78554",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "Two turns go beyond the default farce: Brick feels safer once his polish cracks, and Reuben's firing ends with nobody noticing he'd left while he watches his empty stool through the window. The rest follows a predictable track of two accidents, a snap and mutual confession. The mirrored structure of matching lies, matching pastes and matching breaks makes it neat rather than surprising.",
+   "evidence": [
+    "he stood outside the window in his top hat for an hour watching his friends drink right past his empty stool",
+    "feeling safer now that his polish cracked, she teases his Pavement obsession"
+   ],
+   "raise": "Break the symmetry with one turn neither of them expects, for example her being the one to spot that the man in his bar story really was Mark Ibold.",
+   "def": "eee876c9f2949144",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every requested section is present for both characters, plus collision, setups, events, story, midpoint, short version, both endings and heat. The plan writes no chat beyond the voice samples and break lines the structure calls for. Internal inconsistencies keep it from exactly as asked: fourth versus fifth shot, and a heel while she sits in a towel on the sofa.",
+   "evidence": [
+    "Tonight: Day eleven in his studio apartment... wired on his fourth gas-station energy shot",
+    "Reuben's fifth gas-station energy shot kicks in hard"
+   ],
+   "raise": "Reconcile the shot count and Brick's physical state so the sections agree with each other.",
+   "def": "bd872356c69500bb",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every concrete fact traces to the brief: the dishwasher-safe tattoo, the top hat, the lentil pot, the posture clip, the fake trip, the energy shots, the rosé box, the cocktail-sword monocle rescue, the towel since four, the harness holding a door, and both hooks with their truths. The inventions extend the brief rather than replace it. The Pavement/Mark Ibold misidentification sharpens 'someone famous', and the empty-stool and security-guard Origin 3s translate the clinician's invisibility and oversized-anomaly notes into scenes. It falls short of a 6 because some drawer items go unused (his high left nipple, her yawn-hiccup bark). Reuben's strongest SelfAwareness shadow after Overthinking, Dread (5), and his band-reference test of people are also barely deployed.",
+   "evidence": [
+    "got fired for spending forty minutes lecturing a regular he insisted was the bassist from Pavement",
+    "a £240 horse-tack posture harness props her hallway door open",
+    "he only exists in a room while he is making noise"
+   ],
+   "raise": "Build one beat on an unused brief specific, such as his never-shirtless-standing-up nipple policy or her wine-bar bark, so the plan surfaces something a reader would miss.",
+   "def": "422981f4d9c7d5f1",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 5,
+   "why": "I found no fact that breaks the brief. The plan also sidesteps a real trap: Brick's backstory says her tip 'finishes shorter' and her midsection is 'slight', which contradicts her listed tip 95-100 and mid 70-95. The plan follows the stats ('Towering, thick, heavily veined') instead. It likewise does not reuse the backstory material the two characters share (portrait cropping, the replica app). It misses a 6 only on small internal slips: the lentils are 'lukewarm' and then 'boils over', and the fourth energy shot becomes a fifth without comment.",
+   "evidence": [
+    "Towering, thick, heavily veined circumcised shaft with a heavy curve",
+    "eating lukewarm lentils straight from the pot",
+    "Reuben's fifth gas-station energy shot kicks in hard"
+   ],
+   "raise": "Name the brief's tip/mid contradiction and the shared-backstory overlap explicitly as traps avoided, and smooth the lentil and shot-count continuity.",
+   "def": "fa45960901c28caa",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Each character has an explicit fear that works as a need: his is vanishing if he stops performing, hers is breaking the room with her size. Each has a test. Brick audits his credentials ('Define adjacent to nightlife'), and Reuben's exit offers test whether she stays. Each side's give-aways answer the other: his cracked polish makes her 'feel safer', and the Collision wires his exits into her size shame. The matrix is not built out, though. Reuben's brief-defined reference test ('joy at a passed reference test') has no beat, and his safety condition, someone staying present through pauses, is answered by him stilling himself ('Reuben stops offering exits and stays still in the pause') rather than by anything Brick does.",
+   "evidence": [
+    "Brick reads every exit offer as him recoiling from her monstrous size",
+    "feeling safer now that his polish cracked",
+    "Reuben stops offering exits and stays still in the pause"
+   ],
+   "raise": "Plan a beat where Reuben runs his band-reference test on Brick and she passes or fails it, and give Brick an action that keeps him present through a pause.",
+   "def": "cdf9049147e4579d",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The engine is the mirrored size shame: he fears being too small to hold her attention, and she fears being too big to be wanted. Each one's defense lands on the other's wound, which only works for this pairing. The setups ride their exact anatomy ('stubby 100-girth left hook against her towering 100-length veined frame'). The accidents are their own specifics (the Ibold note to Dave, the 23:30 box reminder). Some events would transfer with relabeling, such as the boil-over and the neighbor's broom, so not everything dies under a swap.",
+   "evidence": [
+    "Reuben offers preemptive exits because he's terrified he's too small to keep her attention",
+    "using their exact mismatched proportions as the reason they lock together",
+    "Email Hotel Facilities re: brass track liability & heel reimbursement (£190)"
+   ],
+   "raise": "Tie the neighbor's ceiling bang or the boil-over to something only these two would do, for example his narration making her pace.",
+   "def": "f1b9dddac061dbfe",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 4,
+   "why": "Most private material comes out through routed channels. The early sizing-up uses public profiles, and the two pasted accidents expose the dive bar, the boxed wine, the heel and the missing clothes. Beat 4's Pavement tease follows his admission in beat 3. Some routing is only implied. Setup 1 says his 'lentil pot betrays' the fake trip, and the click ending has her invite him through her 'horse-harnessed door', which he was never told about. Neither disclosure gets a beat of its own, and the plan does not track who knows what.",
+   "evidence": [
+    "his stove timer or lentil pot betrays he hasn't left his kitchen",
+    "invites him over to bring his eleven-day self through her horse-harnessed door"
+   ],
+   "raise": "Add an explicit line for how the lentil pot and the harness reach the other person, for example he types about the boil-over and she mentions the door.",
+   "def": "5ca08850b888867b",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 4,
+   "why": "Several transitions are causal. The credentials demand drives his link-paste ('Trying to paste a band link'), his crack makes her safer and bolder in beat 4, and her sharpness triggers his exit offer, which drives the confessions in beats 6 to 8. But beats 4 to 5 and 5 to 6 are 'and then'. The monocle drop and the neighbor's broom arrive from outside rather than from what was just said. That keeps it from a 5, while most transitions still carry 'therefore'.",
+   "evidence": [
+    "Brick doesn't unmatch—instead, feeling safer now that his polish cracked",
+    "humiliated by her weight, she gets sharp and clinical, triggering Reuben's fear of being dismissed"
+   ],
+   "raise": "Make the 23:30 paste or the pacing a consequence of beat 4's escalation, for example she stands up flustered by his reply.",
+   "def": "b7d5785d1f61ce07",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 5,
+   "why": "The guard comes down at beat 7. It has a clear trigger in tonight's events, the ceiling bang feeding the mutual snap. It is shown in the typing: each Break strips the character's scaffolding, with no capitals or flourish for him and no numbering for her ('i don't fit through normal doors reuben'). It misses a 6 because beat 7 leaves open 'one of them drops the act first' without placing which break comes when. It also lists confessions as content rather than holding them entirely in the typing shift.",
+   "evidence": [
+    "i just wanted you to stay in the room.",
+    "i don't fit through normal doors reuben",
+    "one of them drops the act first"
+   ],
+   "raise": "Fix the order of beat 7 (whose break comes first and what typing change precedes it) and let the confessions arrive inside those broken-register lines.",
+   "def": "e72f84db4817e97c",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "The brief asks for very high heat, but the plan puts full explicitness before its own beat 5 midpoint. Beat 2 already debates 'who tops or pins whom'. Beat 4 has Brick 'describing exactly what she'd do', which contradicts the plan's own claim that filthy instructions come 'once both accidents strip away' the lies. There is a nominal step from bravado to instructions, and logistics wait until beat 8, which keeps this from a 2.",
+   "evidence": [
+    "High from Beat 1—they talk openly about his 100-girth hook, one giant left ball",
+    "describing exactly what she'd do with a fast-talking, thick-girthed mouth like his",
+    "debating the physics of who tops or pins whom"
+   ],
+   "raise": "Keep beats 2 and 4 at innuendo and sizing-up, and move Brick's explicit instructions to after the 23:30 paste.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 5,
+   "why": "The big moments are paced across the night. Hooks come in beat 2, his accident and Origin 2 in beat 3, her accident and Origin 2 in beat 5, the snap in beat 6, and both Origin 3s are held for beat 7. The opening only plants setups. It misses a 6 because beats 5 and 6 stack her accident, a third event and the double snap back to back, with the if-short fallback folding them together.",
+   "evidence": [
+    "Midpoint: Beat 5 (The 23:30 Alert)",
+    "Reuben gives up the empty-stool truth of standing outside the bar window (Reuben Origin 3)"
+   ],
+   "raise": "Put a breathing beat between the 23:30 paste and the ceiling bang so the second half has the same rhythm as the first.",
+   "def": "6992bdb3b448c021",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 43.5,
+   "cost": 0.18581199999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 65.3,
+   "cost": 0.22962000000000002,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:22:14Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.4154
+}

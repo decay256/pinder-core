@@ -1,0 +1,360 @@
+{
+ "id": "plan-20261119T191519Z-live-reuben-brick-s23-first2",
+ "kind": "plan",
+ "label": "v22 · 19 Nov 19:15 · first look",
+ "version": "v22",
+ "order": 22,
+ "run": "20261119T191519Z-live-reuben-brick-s23-first2",
+ "source": "docs/tone-lab/runs/20261119T191519Z-live-reuben-brick-s23-first2/report.html",
+ "note": null,
+ "when": "19 Nov 19:15",
+ "materials": {
+  "brief": {
+   "chars": 21666,
+   "words": 3641
+  },
+  "plan": {
+   "chars": 24427,
+   "words": 3920
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every fact traces to the brief: the lentil pot, the $189 clip on the coffee bag, the pony-tack harness on the bathroom door, the mirror rehearsals, Callum's uncaptioned hill photos, Marguerite's calendar, the taxi cry. The plan also finds parallels a reader would miss: twin waistcoats, twin posture purchases, twin mirror rehearsals, twin ring lights, and both curves bending right, which it builds into the \"Parallel Bearings\" setup. It falls short of a 6 because a few inventions feel added on rather than discovered: Sonia's letter being Malcolm's £630 notice, the ring light \"bangs the radiator\" echoing Nadia, and Reuben recast as a \"working-class Cumbrian lad.\"",
+   "evidence": [
+    "Two waistcoat-armoured, hard-right-curving northern misfits hiding in London flats behind posture contraptions and bathroom-mirror rehearsals.",
+    "Claudia drops it first when Reuben's ring-light embarrassment makes her recognize her own knocked-over ring light pitch disaster"
+   ],
+   "raise": "Root the three events more tightly in brief facts, for example Sonia returning a parcel rather than an invented Malcolm notice, so that no invented detail carries a beat.",
+   "def": "422981f4d9c7d5f1",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 3,
+   "why": "The brief has Reuben commuting to Farringdon three days a week and falling on the Archway stairs on Monday. The plan nevertheless states as fact that he \"hasn't left his flat in eleven days.\" It goes further and makes that his Break line, rather than treating the eleven days as the profile lie it is in the drawer. This is a brief trap the plan escalates instead of correcting. There is also an internal slip: Claudia is \"two glasses into a three-liter box\" yet \"tips the three-liter Sainsbury's rosé box dry.\"",
+   "evidence": [
+    "he hasn't left his flat in eleven days",
+    "i haven't left the flat in eleven days and i just wanted you to hold me down",
+    "just as Claudia tips the three-liter Sainsbury's rosé box dry"
+   ],
+   "raise": "Reframe the eleven days as eleven days of the same lentils and no social plans around his Farringdon commutes, so the confession stays true to the Monday stair fall.",
+   "def": "fa45960901c28caa",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have explicit numbered needs. Each side has at least one test that probes them: Reuben's arm-wrestle checks whether she laughs with him, and Claudia's minute-count probes whether he keeps to times. The other character has something that can answer each test: his \"gap-math\" reveals he watches the clock as obsessively as she does, and his body-shame give-away speaks to her flinch fear. There are orphans, though. No test probes Reuben's second need (whether she stays through a pause), and Claudia's give-aways (the Mayfair lie, the stripped studio, the Doncaster slips) say nothing about whether she laughs with him or stays through silence.",
+   "evidence": [
+    "Whether she stays through a pause without demanding he \"say something real\" or vanishing mid-sentence.",
+    "calculates the exact percentage of their reply gap—telling her that he watches the clock as obsessively as she does"
+   ],
+   "raise": "Add a Reuben test that deliberately leaves a pause, and give Claudia a give-away showing she waits through silence, so his second need has both a probe and an answer.",
+   "def": "cdf9049147e4579d",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 6,
+   "why": "The good and bad reasons depend entirely on these two. Her scale and devotion to exact promises meet his wish to be pinned quiet. Her clock-fear meets his silence-fear. Their matching rightward curves decide whether they fit front-to-back or jam face-to-face. The tribunal chair and the court jester could not be moved to another pair, and the endings pay off this pair's specific objects (the clip, the harness, smile #3).",
+   "evidence": [
+    "lining up front-to-back in the same direction—her scale behind him, pinning him down with a flat palm on his back so both curves fit",
+    "Collusion of the Tribunal Chair and the Court Jester."
+   ],
+   "raise": "Already at the ceiling; nothing generic to replace.",
+   "def": "f1b9dddac061dbfe",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 5,
+   "why": "Private material reaches the other character through explicit routes. The accidental pastes, the \"Claudia sees...\" and \"Reuben sees...\" lines in each event, and the tipsy slips all mark how information crosses over, and later beats use only what was said earlier: the curves from Beat 2, the clip from Beat 5. The plan also uses a gap at the midpoint: her private ring-light disaster gives her a reason to recognise his embarrassment. It falls short of a 6 because it never tracks when \"Claudia\" becomes a name Reuben knows, and the Callum photo's contradiction of the Cumbria claim is never routed to her.",
+   "evidence": [
+    "Claudia sees a frantic four-second timestamped double-text and his accidental clipboard paste",
+    "Reuben sees a sudden loud \"Ha!\", a Doncaster \"nowt\" slip, and her accidental Bex paste"
+   ],
+   "raise": "Note the turn where Brick_haus gives her real name, and say whether Reuben's Cumbria lie is caught through the Callum photo or through the paste.",
+   "def": "5ca08850b888867b",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "The back half is causal: the collision drives a near-snap, \"Before the door shuts\" triggers the midpoint, and the dropped acts lead to the confessions and the time-naming. The middle, however, is driven by three external interruptions: Callum's text lands, then Sonia's text, then the ring light crashes. Beats 2–5 are joined by \"and then,\" and the plan even says \"While Reuben scrambles... Sonia's text... hit Claudia\" rather than having his exposure provoke hers.",
+   "evidence": [
+    "Callum's uncaptioned hill photo lands while Reuben's energy-shot hands shake",
+    "While Reuben scrambles to style out the lentils, Sonia's text and the empty rosé box hit Claudia"
+   ],
+   "raise": "Make Claudia's slip in Beat 4 a consequence of Reuben's exposure in Beat 3 (for example, his lentil confession lowering her guard enough to admit the towel), instead of a coincidental text.",
+   "def": "b7d5785d1f61ce07",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 5,
+   "why": "The guard comes down at Beat 6. The trigger is tonight's ring-light crash, which echoes her own ring-light pitch disaster. The plan shows the drop in the typing before anything is said: she goes to \"late-night lowercase and trailing ellipses without a single number or 'hm.'\" before telling him about Marguerite, and he answers by dropping the sign-off. It falls short of a 6 because the Break lines still carry the drop through stated content rather than typing alone, and his answering drop is a reaction to hers rather than triggered on its own.",
+   "evidence": [
+    "her typing shifts into late-night lowercase and trailing ellipses without a single number or \"hm.\"",
+    "allowing Reuben to drop \"...yours from the stalls, R.\" in answer"
+   ],
+   "raise": "Give Reuben's drop its own visible typing change triggered by something she does, so his guard comes down from more than mirroring.",
+   "def": "e72f84db4817e97c",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "The plan does gate hunger behind a confession after Beat 5. Even so, Beat 2 already carries near-full anatomical disclosure on both sides plus explicit pinning and a \"bedroom timetable.\" Beat 1 opens with Victoria Line buffers and an exact minute-count for a drink. Explicit detail and logistics therefore arrive well before the midpoint, which front-loads the heat.",
+   "evidence": [
+    "announcing her six-foot-one scale, belly shelf, and thick veined hard-right curve (Claudia Test 2)",
+    "escalation turning filthy as he tests whether she's big enough to pin him quiet and she demands to know if he follows a bedroom timetable",
+    "demands an exact minute-count for a fifty-minute drink"
+   ],
+   "raise": "Keep Beat 2 to the curve as a joke-warning and hold the girth, the pinning and any bedroom schedule until after the Beat 6 drop.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 4,
+   "why": "Reveals are layered across the night. The Origin 1s come in Beat 1, the accidents and Origin 2s in Beats 3–4, the near-snap in Beat 5, and both Origin 3s are held back for Beat 7. Above the line, nothing deep crowds the opening. It falls short of a 5 because Beat 1 is stuffed with both tests, both surface origins, a give-away and two setups, and Beats 3–5 stack three events, two accidents and the snaps back to back.",
+   "evidence": [
+    "drop his mirror-rehearsal paste (Reuben Accident)",
+    "drops her Bex paste (Claudia Accident)",
+    "Claudia confesses the 2023 Islington flinch... Reuben confesses Tuesday's eleven-second silence"
+   ],
+   "raise": "Move one accident into Beat 2 or Beat 6 to break up the three-beat cluster of interruptions in the middle.",
+   "def": "6992bdb3b448c021",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 5,
+   "why": "All three events come from named people and objects in the brief, and each presses on its owner's fear. Callum's uncaptioned hill photo lands while Reuben is claiming he 'just got back from Cumbria'. Sonia's misdelivered letter is Malcolm's overdue £630 notice, which threatens the Principal Consultant facade. The headboard ring light ties to Nadia and his silhouette shame. It falls short of a 6 because the ring-light crash arrives during chat rather than at a worst moment: it isn't mid-intimacy, so it presses on body shame only once he chooses to explain it. Sonia texting Claudia is also a stretch from a neighbour who returned a parcel at arm's length.",
+   "evidence": [
+    "His brother Callum texts an uncaptioned Peak District ridge photo while Reuben is claiming he \"just got back from Cumbria\"",
+    "Malcolm's overdue £630 consultancy notice",
+    "Reuben's cheap headboard ring light slips off its clamp and bangs the radiator"
+   ],
+   "raise": "Time the ring-light crash to the moment the filthy geometry talk turns to 'front-to-back alignment', so the event forces the disclosure rather than inviting it.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "Each of the three setups has a plant, a middle return and split payoffs, and the three endings pay them differently. In Click the waistcoat is unbuttoned with the ring light off; in Bad she orders it kept buttoned; in Fall Apart the clip and lentils become evidence against him. 'Parallel Bearings' is the strongest: the curves align from behind in one ending, become a 'numbered mechanical drill' in another, and 'collide at a right angle' in the third. It isn't a 6 because Setup 1's good payoff hinges on the high left nipple, which is never planted; only the waistcoat is. The setup list also lumps 'Bad/Fall apart' into one payoff line.",
+   "evidence": [
+    "he admits he hasn't taken his shirt off standing up since nineteen because of his high left nipple",
+    "two hard-right curves meeting face-to-face only collide at a right angle",
+    "treats their twin rightward curves as a numbered mechanical drill"
+   ],
+   "raise": "Plant the nipple, for example in a beat-2 boast about never removing the waistcoat 'vertically', so Setup 1's payoff is a return rather than a new fact.",
+   "def": "521e2223c917f019",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 5,
+   "why": "The three endings are different stories. In Click there is an exact arrival minute, a scheduled pin and ten quiet minutes. In Bad they book a 'fifty-minute domination slot in Pimlico with a hard stop', a transaction that keeps both alone. In Fall Apart a vague 'sometime' meets a three-point ruling and Reuben cries on the landing. The Bad ending is sharp, because the yes is the failure. Click falls short of the best version because it reads as a checklist of every setup rather than one earned moment, and Fall Apart is muddled about who says 'sometime'.",
+   "evidence": [
+    "They agree to a rigid fifty-minute domination slot in Pimlico with a hard stop.",
+    "Reuben gives her an exact arrival minute on the Northern-to-Victoria line and doesn't crack a joke after it",
+    "Claudia hears \"let's do this again sometime,\""
+   ],
+   "raise": "Pare Click down to the arrival minute and the flat palm, and make Reuben clearly the one who types 'sometime' in Fall Apart.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 4,
+   "why": "The plan has an explicit provision, and the midpoint survives it: Beat 5 folds into Beat 6 'so the collision triggers the midpoint drop immediately'. Counting it out gives exactly six beats with an ending intact, which keeps the score above the line. It isn't a 5 because the folded Beat 3+4 now has to carry two events, two accidents and two Origin 2s in one turn. It also never says what gets dropped, so the short version is crammed rather than complete.",
+   "evidence": [
+    "Fold Beats 3 and 4 into one mutual unmasking beat",
+    "fold Beat 5 directly into Beat 6 so the collision triggers the midpoint drop immediately"
+   ],
+   "raise": "Name what is cut in the short game, for example Sonia's text and one Origin 2, so the folded beat carries a single unmasking.",
+   "def": "9c79336a7855f173",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written verbatim as on-screen artefacts and fit a chat app: a mis-paste of Reuben's notes-app mirror script, and Claudia's unsent message to Bex. Each one exposes exactly the hidden rehearsal. It isn't a 6 because both use the identical wrong-clipboard mechanism, which repeats the gag rather than giving each character a misfire of their own.",
+   "evidence": [
+    "mirror test: do the grin not the shrug when saying \"gravity bends east\"",
+    "if this one says \"sometime\" i'm drinking the box"
+   ],
+   "raise": "Give one character a different medium misfire, such as Claudia's calendar invite autosending with 'Reuben – trial, 50 min' in the title.",
+   "def": "8a43f27b6bad2c45",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through the chat: the crash and the knock reach the other person as confessions or texts. The plan also uses the medium itself, with four-second double-texts, gap-percentage maths, clipboard pastes, and lowercase drift as the break signal. It isn't a 6 because photos and voice notes go unused: Callum's photo is never forwarded, and the Shipping Forecast is only 'let slip' when it could be heard.",
+   "evidence": [
+    "Claudia sees a frantic four-second timestamped double-text and his accidental clipboard paste",
+    "her typing shifts into late-night lowercase and trailing ellipses without a single number or \"hm.\""
+   ],
+   "raise": "Have Claudia send a voice note in which the Shipping Forecast and the bare-room echo are audible, turning give-aways 1 and 2 into artefacts.",
+   "def": "df6fedc6221ef314",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The two voices differ on observable features. Reuben writes long ornate run-ons with dashes, weather metaphors and a hat-tip sign-off. Claudia writes clipped clauses, numbered lists, 'hm.', and quotes the other person's adverb back. Most single messages could be attributed without names. It isn't a 6 because her third sample is a long, warm question shaped much like his, and both break lines collapse into the same lowercase plain sentence.",
+   "evidence": [
+    "hm. 'Soonish' is not a calendar unit. Name a time.",
+    "my lower barometer bends sharply toward East Anglia",
+    "do you log them by hertz or by how badly the drummer dragged?"
+   ],
+   "raise": "Keep a fingerprint in Claudia's break line, such as one stray exact time, so even the unguarded lines stay attributable.",
+   "def": "e90fb07ec3b78554",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 5,
+   "why": "The plan goes beyond the default farce. The twin hard-right curves turn from a punchline into the actual solution, aligning from behind under a flat palm. The 'bad reason' yes is a booked transaction rather than a rejection. The heat must stall until both admit their dirty talk was a mirror script. It isn't a 6 because the spine is a predictable parallel strip-down, with each of them doing accident, origin and confession in lockstep.",
+   "evidence": [
+    "lining up front-to-back in the same direction—her scale behind him, pinning him down with a flat palm on his back so both curves fit",
+    "both have to admit that their dirty talk started as a rehearsed mirror script"
+   ],
+   "raise": "Break the symmetry: let one character's unmasking come only because the other refuses to confess in turn.",
+   "def": "eee876c9f2949144",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every requested section is present for both characters, followed by the shared structure. There is no chat transcript; the sample lines appear only where Voice and Break call for them. It isn't a 6 because several fields bloat past a plan's job: Feelings runs nine mappings, and Click lists every prop. Brick's 'Tonight' also contradicts itself ('On the sofa... at the counter').",
+   "evidence": [
+    "On the sofa of her stripped-bare Pimlico studio... two glasses into a three-liter box of Sainsbury's rosé at the counter",
+    "Midpoint: Beat 6. Claudia drops it first"
+   ],
+   "raise": "Trim Feelings to the four states the story uses and fix the sofa/counter contradiction.",
+   "def": "bd872356c69500bb",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 67.5,
+   "cost": 0.27790400000000004,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 63.5,
+   "cost": 0.252424,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:19:09Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.5303
+}

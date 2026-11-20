@@ -1,0 +1,346 @@
+{
+ "id": "plan-20261115T210012Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v2 · 15 Nov 21:00 · full run",
+ "version": "v2",
+ "order": 2,
+ "run": "20261115T210012Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261115T210012Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "15 Nov 21:00",
+ "materials": {
+  "brief": {
+   "chars": 18751,
+   "words": 3221
+  },
+  "plan": {
+   "chars": 11812,
+   "words": 2047
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 4,
+   "why": "The night's pressures come from the brief and each one hits its owner's fear. Reuben is on Day 11 of lentils, his fourth energy shot and the mirror rehearsal. Brick's heel snapped in the revolving door at 3:45 and she has spent the evening in a towel with boxed rosé, which feeds straight into her too-big-for-doors shame. Most of these are states they carry into the chat rather than things that interrupt it: no one from their lives intrudes during the night, and the mother who calls Reuben by his brother's name goes unused. The only live intrusions are self-inflicted clipboard pastes to Kevin and to a lost-and-found desk, which keeps this below a 5.",
+   "evidence": [
+    "It is Day 11 of not leaving his flat and eating the same pot of lentils straight off the stove.",
+    "still burning from a botched afternoon job interview where she lost a heel in the hotel lobby's revolving door"
+   ],
+   "raise": "Give one live mid-chat intrusion from their own people, such as a voice memo from Reuben's mother calling him by his brother's name, timed to land right after he brags about his parents.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "All three setups have a clear plant and payoff. The rule about taking only one heel off pays when the reader learns there is no second heel. The three-minute timer flips into specific hunger about him finishing in two minutes. The posture devices pay as a coffee clip and a door-propping harness. The two endings use the heel and the timer differently ('Glad I kept the second heel on' against 'You have way more than three minutes'). The posture setup gets no payoff at all in the fall-apart ending.",
+   "evidence": [
+    "1. No appetizers. 2. I don't arm-wrestle, I pin. 3. You get three minutes to impress me before I call time.",
+    "2. Glad I kept the second heel on.",
+    "her £240 horse-tack posture harness is currently propping her hallway door open"
+   ],
+   "raise": "Pay the posture setup in the fall-apart ending too, for example Reuben signing off 'standing very straight' while the coffee clip sits on the counter.",
+   "def": "521e2223c917f019",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The endings tell different stories. In one, Reuben stops his exit clause mid-line and Brick's list turns her shame into an invitation. In the other, he retreats into his polite doorman routine and she slams the door while hiding the towel. Reuben's half of the bad ending is described but not shaped, and there is no third outcome where the guard drops but nobody goes home, which keeps this from a 5.",
+   "evidence": [
+    "If you open the door and decide the proportions are absurd—",
+    "signing off like an overly polite doorman Letting Her Go before she can cut him"
+   ],
+   "raise": "Specify Reuben's exact retreat move in the fall-apart ending and add a middle outcome where one confession lands but they stay in their flats.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 2,
+   "why": "The plan makes no provision for a six-turn game. The only nod is 'even early' on the fall-apart ending. Nothing says which setup, confession or snap survives compression, so the turning point is not protected.",
+   "evidence": [
+    "If it falls apart (unmatch or ghost, even early)"
+   ],
+   "raise": "Add a short-game line naming the beats that must survive six turns: the timer plant, the heel confession and Reuben's unpunctuated 'Please do not go anywhere yet.'",
+   "def": "9c79336a7855f173",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both bad-roll accidents are exact on-screen artefacts that fit the medium. Each is a clipboard paste followed by a correction and a confession. The discovery beats are concrete too: the cover charge and the hinge, the south entrance door. One detail contradicts the secret: the pasted text says 'twelve minutes on the pavement' where the secret says 'twenty minutes behind the rope'.",
+   "evidence": [
+    "Kevin I only held him on the pavement for twelve minutes",
+    "Left black stiletto heel, size 11, brass tip, still wedged in the rubber sweep of the south revolving door",
+    "six dollars, four before ten"
+   ],
+   "raise": "Reconcile the pasted message's twelve minutes and pavement with the secret's twenty minutes and rope, so the accident matches the truth it exposes.",
+   "def": "8a43f27b6bad2c45",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can reach the other person through the chat, and the plan uses the app itself. There is the clipboard misfire, Reuben timing the typing bubble and Brick tracking his bio edit to the minute. The bio-edit tell assumes she saw the earlier version, which is plausible but asserted rather than set up.",
+   "evidence": [
+    "Your typing bubble appeared for forty-three seconds and stopped for nineteen and then you sent two letters and a full stop",
+    "When you changed your bio at 6:14 from \"narrate it graciously\" to \"narrate it beautifully\""
+   ],
+   "raise": "Plant Brick viewing his profile early in the chat so the 6:14 bio-edit tell is earned inside the conversation.",
+   "def": "df6fedc6221ef314",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on features a reader can see. Reuben uses ceremonial full spelling, offers exits and ends lines with soft emoji instead of punctuation. Brick opens with a standalone 'hm.', clips her clauses and numbers her lists. The two snap slips share an identical four-line shape (worldview, denial, obsessive count, excuse), so in those moments the voices blur. Brick also slips into contractions that break her clipped register.",
+   "evidence": [
+    "Should that proportion alarm you, the emergency exits are clearly marked 🙂",
+    "Not a date. A trial run.",
+    "The page refreshed while my phone was by the sink. I wasn't checking."
+   ],
+   "raise": "Rewrite Brick's snap slip in her own structure, as a numbered list that tips over, rather than mirroring Reuben's four-line denial pattern.",
+   "def": "e90fb07ec3b78554",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "The doors collision is a turn you would not predict. His reflexive exit-offers land on the one word she cannot bear tonight, and her verdicts sound like his tribunal, so each one's defence wounds the other. The three-minute timer flipping from dismissal to hunger is also unexpected. Around that mechanism the shape is still the familiar arc of secrets exposed and then confessed, and the twin snaps are templated, which keeps this from a 5.",
+   "evidence": [
+    "Every time Reuben politely points her toward \"the door,\" Brick hears another person telling her she's too big and awkward to stay inside"
+   ],
+   "raise": "Let the doors collision produce one beat outside the confession arc, such as Brick choosing to hold the exit open for him instead of being shown it.",
+   "def": "eee876c9f2949144",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "Every expected section is present for both characters: Quirk, Craving, Lie, Tonight, Price, Secret with all three modes, Snap and Quirk-break, plus collision, setups and endings. The scripted lines mostly sit in artefact slots the template invites. The endings go further and script Brick's full three-line closing reply, which sits right at the edge of writing the chat itself.",
+   "evidence": [
+    "3. You have way more than three minutes. Come over."
+   ],
+   "raise": "Describe the endings' final beats instead of scripting Brick's closing messages verbatim.",
+   "def": "bd872356c69500bb",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Almost every character fact traces to the brief. Reuben gets the exit-naming, the ceremonial phrasing and the soft emoji, plus three drawer items: the lentils, the energy shots and the mirror rehearsal. Brick gets the towel, the rosé, the heel in the revolving door and the 'just got in' lie. The plan also spots something a reader would miss: his eleven months on a bar door and her heel stuck in a revolving door both point to a doors motif, and both of them own a posture device. Inventions like 'ten veined inches', size 11, The Sump and the Grand extend the brief rather than replace it. It stops short of a 6 because core material is left unused (his band-era name-drop test, her mirror smiles, the family portrait), and some details are reshaped, such as the bark becoming a laugh.",
+   "evidence": [
+    "his eleven months on a bar door vs. her heel wedged in a revolving door",
+    "his $189 plastic collarbone clip is currently clipping a bag of coffee shut"
+   ],
+   "raise": "Use Reuben's band-era name-drop test as a beat Brick can pass or fail, so his core testing behaviour is actually exercised.",
+   "def": "422981f4d9c7d5f1",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 3,
+   "why": "Brick's timeline breaks the brief. Her drawer item has her 'on the sofa since four, in the same towel', but the plan has her limping into a boardroom 'at four o'clock' and talking for forty minutes. Reuben's secret also flips the brief: he 'misidentified a regular as someone famous', but the plan has him mistake the real singer for his brother. The plan's own accident text adds an internal clash, with 'twelve minutes' against 'twenty minutes'. No single contradiction changes who either person is, which keeps this above a 2.",
+   "evidence": [
+    "I limped into a third-floor boardroom at four o'clock with one shoe",
+    "She has been sitting on her sofa since 4 p.m. in the same bath towel",
+    "lecturing the guy on why he only looked like the singer's brother"
+   ],
+   "raise": "Move the interview to early afternoon, and keep Reuben's firing as mistaking an ordinary regular for someone famous.",
+   "def": "fa45960901c28caa",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have explicit needs, and the collision section ties them together. Reuben's exit clauses test whether Brick will take the exit, and her line 'I do not have time for men who pre-reject themselves' answers his need for someone who stays. Her verdicts and her three-minute timer test whether he will flinch, and his 'Please do not go anywhere yet' answers her need to stay in the room. Some pieces are orphaned: her stated safety needs (patience, exactness, boundaries) get no explicit test, and his exactness (counting her typing bubble) is never framed as something that answers her. That keeps it from a 5.",
+   "evidence": [
+    "Every time Brick types `hm.` or starts a numbered list, Reuben hears a judge measuring his short, lopsided body",
+    "I do not have time for men who pre-reject themselves on my behalf."
+   ],
+   "raise": "Name a moment where Reuben's obsessive exactness answers Brick's need for someone 'exact and consistent', so her test has a matching give-away.",
+   "def": "cdf9049147e4579d",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The reasons and events depend on these two people. Her verdicts and his exits collide over doors, which fits his door job and her revolving door. The three-minute timer only bites because he finishes early. The mirrored posture contraptions and the mirrored 'just got in' lies come from these particular drawers. It stops short of a 6 because a few beats, such as the generic bad-roll paste accidents, would survive a change of partner.",
+   "evidence": [
+    "3. You get three minutes to impress me before I call time.",
+    "The front door is propped open with £240 of horse tack so neither of us has to stand in the doorway."
+   ],
+   "raise": "Tie each paste accident to the other person's last message, so neither accident could happen in a different match.",
+   "def": "f1b9dddac061dbfe",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 3,
+   "why": "Most reveals are routed well. Brick works out from the sticky hinge that he was the door guy, Reuben works out her story from her rant about the Grand's door, and her bio-change slip shows she was watching his profile. The heat payoff fails, though: Brick says he 'finishes in two minutes flat', and that fact appears only in his private backstory. Neither his profile nor anything he says earlier in the plan gives it to her.",
+   "evidence": [
+    "if his short, thick trunk finishes in two minutes flat against her hip"
+   ],
+   "raise": "Plant a beat where Reuben jokes about his own speed first, so Brick's two-minute line has something public to build on.",
+   "def": "5ca08850b888867b",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "The plan is a toolkit of quirks, secrets, snaps, setups and endings, not an ordered sequence. The snaps have causes ('What sets it off'), and the setups link plant to payoff. There is no beat order, however, and the major pieces (paste accident, discovered secret, snap, quirk break) float free of each other, so the reader cannot trace a chain of 'therefore' moves.",
+   "evidence": [
+    "*As a text-app accident on a bad roll*",
+    "Where the quirk breaks"
+   ],
+   "raise": "Lay out an ordered beat list in which each secret reveal provokes the next snap or the next confession.",
+   "def": "b7d5785d1f61ce07",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "The moment exists, and it shows in the typing. Her line 'I don't have a third point' drops her numbered list, his line 'Please do not go anywhere yet.' drops the formality and the emoji, and his last exit clause stops mid-line. What is missing is a trigger: nothing in the plan says which event tonight brings either guard down.",
+   "evidence": [
+    "I don't have a third point. I just wanted you to keep talking to me.",
+    "Please do not go anywhere yet."
+   ],
+   "raise": "Name the trigger, for example Brick's line about men who pre-reject themselves making Reuben drop his exit clause for the first time.",
+   "def": "e72f84db4817e97c",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "Logistics are held back for the meet ending, and the timer is built to escalate. But heat is never mapped to beats, and the quirk examples allow full explicitness at any point. Her 'full three-point operational plan for how he's going to use his mouth on her ten veined inches' is offered as a normal variation of her quirk, and his quirk includes joking early about his trunk and testicle. Nothing ties the steps of heat to trust.",
+   "evidence": [
+    "a full three-point operational plan for how he's going to use his mouth on her ten veined inches",
+    "When the chat turns filthy"
+   ],
+   "raise": "State that the explicit list and the two-minute payoff arrive only after the first secret has been confessed.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "The opening carries only plants, and confessions are marked 'once it's earned', so nothing obviously crowds the start. But the reveals have no placement: the paste accidents fire 'on a bad roll' at any time, the snaps have no timing, and no reveal is explicitly held for late. The rhythm cannot be charted.",
+   "evidence": [
+    "In the first couple of turns, Brick says she \"just got in from a thing\"",
+    "*Confessed in pieces once it's earned*"
+   ],
+   "raise": "Assign each secret's pieces and each snap to a rough position in the game, and hold the posture-device payoff for the final third.",
+   "def": "6992bdb3b448c021",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 46.4,
+   "cost": 0.18664799999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 67.7,
+   "cost": 0.231584,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:26:36Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.4182
+}

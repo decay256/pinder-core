@@ -1,0 +1,356 @@
+{
+ "id": "plan-20261118T151501Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v20 · 18 Nov 15:15 · full run",
+ "version": "v20",
+ "order": 20,
+ "run": "20261118T151501Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261118T151501Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "18 Nov 15:15",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 12194,
+   "words": 2014
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every element traces to the brief. That includes the dishwasher-safe tattoo, the $189 clip holding coffee shut, the £240 harness propping a door, eleven days of lentils, the gas-station shots, the towel since four, both hooks and truths, and the mirror rehearsals. The inventions extend that material rather than replace it: Craig the manager, the singer looking over the hat, and the boardroom panel staring at her size. The best find is the left-nipple policy turned into a shirtless-mirror event. It stops short of a 6 because core material goes unused: the duck, the mountains, the arm-wrestling loss, and Reuben's 'finishes earlier' anticlimax-to-verbal-ending engine.",
+   "evidence": [
+    "While wiping up lentils shirtless, Reuben catches his reflection in the hallway mirror—his higher left nipple",
+    "he just looked straight over Reuben's top hat and walked inside while Reuben was still talking"
+   ],
+   "raise": "Use the arm-wrestling forfeit or his early-finish 'land the ending in conversation' habit as a beat, so the plan draws on his core compensation story.",
+   "def": "422981f4d9c7d5f1",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "I found no clear contradiction with the brief. The bodies follow the profile numbers: his short, extreme-girth, curved trunk with one massive left ball; her towering, veined length. Both lies, hooks and shadows match the brief. It stays at 4 because it does not handle two traps in the brief. Brick's backstory says her tip 'finishes shorter' and her mid is 'slight', which her 95-100 numbers contradict. Reuben is listed as uncircumcised with foreskin 0-5. The plan silently sidesteps both instead of correcting them.",
+   "evidence": [
+    "heavily veined 95th-percentile trunk and low-hanging balls",
+    "freckled stubby trunk with extreme girth and a sharp left curve, one massive left ball"
+   ],
+   "raise": "Explicitly rule that Brick's anatomical self-disclosures follow her profile numbers, not the backstory's 'shorter tip', so the writers don't import the trap.",
+   "def": "fa45960901c28caa",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 3,
+   "why": "Both characters get fears and a collision, but the plan never states what each needs from the other or what each is testing for. Reuben's band-era check survives only as a feelings line, and Brick's 'Do you actually know bands' sits in a voice sample, not as a test with an answer. The brief's safety needs ('stays present through pauses'; 'patient, exact, consistent') are answered only implicitly by 'the other is still typing'. Beat 4's reason for staying is muddled: 'Brick's honesty disarms her enough to laugh' answers nothing of Reuben's.",
+   "evidence": [
+    "Brick's honesty disarms her enough to laugh instead of leaving",
+    "each realizes the other is still typing"
+   ],
+   "raise": "Name each character's need and give each one explicit test, such as Reuben's band-era name-drop and Brick's numbered audit, with the specific give-away from the other that passes or fails it.",
+   "def": "cdf9049147e4579d",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The night depends on these two bodies and histories. Her numbered spatial audits read to him as a tribunal measuring him tiny. His exit ramps confirm her fear that she is a giant who empties rooms. The paired payoffs only work for this pair: the clip against the harness, and the revolving door against whether both fit one doorway. It stops short of 6 because some reasons and beats are mirrored from near-identical brief material (mirror rehearsal, the 'just got in' lie), so they read as parallel rather than interlocking.",
+   "evidence": [
+    "two misfits paying hundreds to force their bodies into the right shape",
+    "whether there is room for both of them in the same doorway without someone getting crushed or cropped out"
+   ],
+   "raise": "Differentiate the mirrored lies so each one's exposure lands on the other's specific fear rather than echoing it.",
+   "def": "f1b9dddac061dbfe",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 3,
+   "why": "Two beats assume private facts become known without saying how. The lentil spill 'exposes' Reuben's trip lie through a delay alone, and in Beat 6 Brick is 'exposed in her towel' after a mug drop Reuben cannot see. The pasted accidents are routed properly, since they put the facts on screen, and the Origin 3 reveals are spoken. These two unrouted exposures keep it below the line.",
+   "evidence": [
+    "forcing a sudden delay that exposes his lie about having \"just got back from a trip.\"",
+    "Exposed in her towel with her ruined interview out on the screen"
+   ],
+   "raise": "Specify how each spill surfaces in chat, such as Reuben sending a photo of the lentil floor and Brick typing the towel admission, before later beats rely on the other knowing.",
+   "def": "5ca08850b888867b",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 4,
+   "why": "Most transitions are causal. In Beat 3, his delay leads to her audit of his silence, then his exit ramp, then the Craig paste. That paste causes Beat 4's spiral, the double exposure causes the double snap, and the post-snap silence causes the Break. It stays at 4 because the turn into the midpoint rests on an external accident (towel catches harness) that Beat 4 doesn't produce. Beat 1 to Beat 2 is also an 'and then' brag sequence.",
+   "evidence": [
+    "Event 2 (the boxed rosé and £240 horse harness) derails her",
+    "the delay panics him into thinking she's judging him, triggering the Collision"
+   ],
+   "raise": "Make Brick's rosé refill a direct reaction to the heat Reuben escalated in Beat 4, so the midpoint accident is caused rather than coincidental.",
+   "def": "b7d5785d1f61ce07",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 5,
+   "why": "The moment exists, sits in Beat 8, and is triggered by tonight's wreckage: the double snap followed by the still-typing indicator. Both breaks are defined in the typing: his drops ceremonial vocabulary and emojis for lowercase with no punctuation; hers drops 'hm.', numbers and capitals. It stops short of 6 because the Break is also carried by spoken confessions (the Origin 3 stories), not entirely by the typing.",
+   "evidence": [
+    "one short, lowercase, unpunctuated truth",
+    "No numbers, no \"hm.\", no capital letters—just a quiet fragment admitting she doesn't fit"
+   ],
+   "raise": "Let the first sign of the Break be a typed change alone, such as Brick sending an unnumbered reply, before either Origin 3 confession is spoken.",
+   "def": "e72f84db4817e97c",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "Heat starts high, with anatomical trash-talk in Beat 1 and 'fast, filthy banter' in Beat 2. Beat 4, before the Beat 5 midpoint, plans 'specific filthy logistics' about what he can do with her size, which is the pre-midpoint explicitness the line forbids. The Heat note contradicts this by saying the breathy filth comes only after surviving the humiliations. The steps are loosely tied to trust but front-loaded.",
+   "evidence": [
+    "shifting the heat from bravado to specific filthy logistics about what his short trunk and fast hands can do with her size",
+    "Starts in Beat 1 as shameless anatomical trash-talk"
+   ],
+   "raise": "Hold Beat 4 at innuendo and hypotheticals, and move the 'specific filthy logistics' to after the Beat 8 Break.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 5,
+   "why": "The big moments are distributed. The hooks come in Beat 2, the accidents and events in Beats 3, 5 and 6, the snaps in Beat 6, and both deepest truths are held back to Beat 8. Nothing crowds the opening, and Beat 7 is a deliberate quiet gap. It stops short of 6 because Beat 6 stacks both snaps and Event 3 into one beat, and Beat 5 to Beat 6 is a tight cluster.",
+   "evidence": [
+    "Brick admits the boardroom staring at her size (Origin 3) and Reuben admits the singer looking right over his hat (Origin 3)",
+    "Event 3 hits a shirtless Reuben in the mirror, and he snaps back"
+   ],
+   "raise": "Separate the two snaps by a beat, letting Brick's Denial list land and sit before Event 3 triggers Reuben's.",
+   "def": "6992bdb3b448c021",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 5,
+   "why": "All three events come straight from the drawer: eleven-day lentils, gas-station shots, the towel since four, the £240 harness, the higher left nipple. Each lands on its owner's fear. The lentil spill causes a delay that exposes the trip lie just as his tribunal panic rises. The towel snag shows her body catching on a room. The mirror catches him standing up and shirtless, which his nine-year policy forbids. It stops short of a 6 because none involve a named person or place, and the shirtless lentil-wiping is contrived to get him to the mirror.",
+   "evidence": [
+    "his shaking hands knock his pot of eleven-day lentils onto the kitchen floor, forcing a sudden delay that exposes his lie",
+    "catches her towel on the £240 posture harness propping the door, and drops the mug",
+    "While wiping up lentils shirtless, Reuben catches his reflection in the hallway mirror—his higher left nipple"
+   ],
+   "raise": "Give the mirror moment a reason drawn from his life, not 'wiping up lentils shirtless', so it falls at the worst beat without being engineered.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "Each of the three setups has a stated plant, return and payoff. Both endings pay the posture clip and the revolving door in opposite directions: contraptions left 'on the coffee bag and the door' against 'proof he was never big enough to be seen.' It falls short of a 6 because the curve/scale setup only pays in the click ending. The fall-apart ending has only a loose 'minimum clearance' echo.",
+   "evidence": [
+    "two misfits paying hundreds to force their bodies into the right shape",
+    "whether there is room for both of them in the same doorway without someone getting crushed or cropped out",
+    "the revolving door becomes proof she crushes normal rooms, and his posture clip becomes proof he was never big enough to be seen"
+   ],
+   "raise": "Give the curve-and-scale setup an explicit, different payoff in the fall-apart ending.",
+   "def": "521e2223c917f019",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "Click: she drops the travel buffer, he refuses his own exit ramp, and he is invited into her bed tonight. Fall-apart: she issues a three-point verdict, and he cosigns it and leaves first. These are different stories, so the plan passes the line. But the fall-apart ending just finalises the Beat 6 double snap, adds nothing new, and gives no branch point. The story beats 7–8 already assume the Break.",
+   "evidence": [
+    "Brick stops numbering rules and asks him over without a travel buffer; Reuben declines his own exit ramp and stays in the frame",
+    "Brick issues a final three-point structural verdict confirming he doesn't meet minimum clearance, and Reuben eagerly cosigns his own dismissal"
+   ],
+   "raise": "Say where the fall-apart branch diverges from the Beat 7 'still typing' moment, and give it a beat of its own beyond repeating the snap.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 4,
+   "why": "There is a concrete provision that folds 8 beats to 6, merging Beats 2–3 and 6–7. It leaves Beat 5, the midpoint paste, untouched, so the turning point survives. It is not a 6 because the plan never says the short version keeps the midpoint or reaches either ending. It is also unclear whether Brick's Origin 3 confession still fits once the quiet beat collapses into 'a single flash of panic.'",
+   "evidence": [
+    "Beats 2 and 3 fold together (the nightlife bragging triggers the Craig paste immediately)",
+    "Beats 6 and 7 merge into a single flash of panic before the Break in Beat 8"
+   ],
+   "raise": "State explicitly that Beat 5 and the Break survive, and sketch the six-beat arc as its own complete shape.",
+   "def": "9c79336a7855f173",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are exact wrong-chat pastes, so they are perfect for the medium and in character. His is a panicked unpunctuated plea to Craig. Hers is a clinical facilities complaint in her engineering diction. The only flaw is a small mismatch: the paste has the singer not looking 'down at the clipboard', while Origin 3 has him looking 'over Reuben's top hat.'",
+   "evidence": [
+    "I know it was actually him Craig I just panicked when he didn't look down at the clipboard please I need the door hours.",
+    "The rotational clearance of your lobby entrance is hostile to anyone above the 90th percentile and you owe me one Italian leather heel."
+   ],
+   "raise": "Make Reuben's pasted text consistent with Origin 3's top-hat image so the paste and the later confession rhyme.",
+   "def": "8a43f27b6bad2c45",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Nothing needs a shared room, and the plan uses the medium itself. The lentil spill works through a reply delay, both accidents are wrong-chat pastes, and Beat 7 turns on the typing indicator. A small flaw keeps it from a 6. 'Exposed in her towel' and 'her towel coming off' read as if he can see her, and the plan never says how the towel or mirror events reach the chat, whether by confession or photo.",
+   "evidence": [
+    "forcing a sudden delay that exposes his lie",
+    "each realizes the other is still typing",
+    "Exposed in her towel with her ruined interview out on the screen"
+   ],
+   "raise": "Route the towel and mirror events into the chat explicitly, as a confessed typo-burst or an accidental photo.",
+   "def": "df6fedc6221ef314",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The two voices differ on observable features. His has ceremonial full words, soft emojis, multi-message bursts and long run-ons. Hers has clipped clauses, zero emojis, a 'hm.' before verdicts and numbered lists. Most sample lines are attributable without names. It is not a 6 because Brick's third sample has none of her markers and sounds generic. It also reaches for bands, which is Reuben's topic.",
+   "evidence": [
+    "Statistically speaking, one of us is already overthinking the opener, and I volunteer as tribute ☺️",
+    "hm. The hat is a choice.",
+    "Do you actually know bands, or do you just corner women near the bar speakers?"
+   ],
+   "raise": "Rewrite Brick's third sample so it carries a 'hm.', a list or an engineering noun, and stays off his topics.",
+   "def": "e90fb07ec3b78554",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 3,
+   "why": "The arc is the template: brag, mishap, paste, double snap, quiet beat, Break, click. The mirrored mishaps (lentils/towel, clip/harness) are the farce the brief predicts. The strongest surprise in the material goes unused. Their briefs are near-twins (identical lies, identical mirror rehearsals, both cropped from portraits), and the plan never lets them discover it. The Origin 3 images are specific but just mirror each other.",
+   "evidence": [
+    "Brick admits the boardroom staring at her size (Origin 3) and Reuben admits the singer looking right over his hat (Origin 3)",
+    "flipping the status so the towering woman running the audit is suddenly as exposed as the fired doorman"
+   ],
+   "raise": "Add one turn the default would not predict, such as one of them realising the other told the exact same 'just got in' lie.",
+   "def": "eee876c9f2949144",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every requested section is present for both characters, along with Collision, Setups, events, Story, Midpoint, short-game and both endings. The shadows match each character's strongest value. It writes no chat beyond the sample lines and accident text the structure calls for. Small slips keep it from a 6: 'five-hour energy shots' contradicts the gas-station detail, and the shot count drifts from 'fourth' to 'fifth'.",
+   "evidence": [
+    "vibrating on five-hour energy shots in a drafty studio",
+    "wired on his fourth gas-station energy shot",
+    "Reuben's fifth gas-station energy shot hits"
+   ],
+   "raise": "Fix the internal inconsistencies so every field agrees with the brief.",
+   "def": "bd872356c69500bb",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 54.7,
+   "cost": 0.207108,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 58.0,
+   "cost": 0.20738,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:22:07Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.4145
+}

@@ -1,0 +1,453 @@
+{
+ "id": "profile-reuben-v22",
+ "kind": "profile",
+ "label": "Reuben · v22 profile",
+ "version": "v22",
+ "order": 22,
+ "run": null,
+ "source": "tools/tonelab/profiles/reuben.md",
+ "note": null,
+ "when": null,
+ "materials": {
+  "profile": {
+   "chars": 7970,
+   "words": 1330
+  },
+  "game": {
+   "chars": 22207,
+   "words": 3817
+  },
+  "cast": {
+   "chars": 40589,
+   "words": 6649
+  }
+ },
+ "scores": {
+  "profile.stock": {
+   "score": 2,
+   "why": "Several of the central planks are shared with the rest of the cast. The want of having the mouth taken away also appears in Gerald, Velvet and Zyx. The ex who leaves over his non-stop performing matches Velvet's Jonas and Zyx's Maeve. Smaller items repeat too: the posture device (Brick, Zyx), the ring light (Brick, Sable), crying on the stairs (Zyx), energy drinks (Zyx) and mirror-rehearsed smiles (everyone). Only specifics like the dishwasher-safe tattoo, the ring light clamped to hide his silhouette, and the duck that stops panic spirals feel like his own; the frame they hang on is stock.",
+   "evidence": [
+    "the $189 collarbone posture clip currently holding a coffee bag shut",
+    "sits on the stairwell landing between floors two and three to cry for twenty minutes alone",
+    "actually wants to be held down hard enough that his mouth is taken away"
+   ],
+   "raise": "Replace the cast-wide gag/hand-over-mouth want and the 'ex left because I only performed' story with something only Reuben's history could produce, such as a want tied to ridge scrambling or audio silence.",
+   "def": "81933a72e1cf3605",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.plausible": {
+   "score": 3,
+   "why": "Most numbers hold: £2,150 net for library tagging is believable, and Archway, Hargrave Park and The Charlotte Despard are real and close together. But the Northern Line does not reach Farringdon, which a London reader catches at once. A Londoner pricing an impulse buy in dollars is leftover from the American source file. £1,150 for a one-bed in Archway is also low for the current market.",
+   "evidence": [
+    "takes the Northern Line to Farringdon",
+    "the $189 collarbone posture clip",
+    "pays £1,150 a month for a third-floor one-bed on Hargrave Park in Archway"
+   ],
+   "raise": "Fix the commute (Northern Line to King's Cross, then Thameslink or Circle), price the clip in pounds, and set the rent near £1,600.",
+   "def": "a6a960fcea9e361b",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.filth": {
+   "score": 5,
+   "why": "Almost every sexual detail comes from his body or his drawer. The rightward curve catching on the way back in, the eleven-second silence, the ring light that kills his silhouette, the lopsided testicles, and the shirt kept on because of a high nipple could only be Reuben. Several lines are funny in their own right. It stops short of 6 because the 'weather anomaly' and storm-front framing is lifted straight from the game fragment rather than reworked.",
+   "evidence": [
+    "He jokes early that his gravity bends east.",
+    "a cheap ring light stays clamped to his headboard so he never sees his own silhouette on the wall during sex",
+    "a left nipple higher than the right, so his shirt stays on standing up"
+   ],
+   "raise": "Rewrite the meteorological brag in Reuben's own register, through sound engineering or the Lakes, instead of the stock 'storm front' wording.",
+   "def": "6a879b5e8af5b7b3",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.humanity": {
+   "score": 5,
+   "why": "The jokes land on what he does: the fake crate-digging trip, the rehearsed curvature grin, the arm-wrestle he stages and loses on purpose, laughing loudest at the 'she said no' heckle. The profile also gives him real competence and decency: he hears a 1996 drum studio in four bars, he is attentive to bar staff, and Tariq lets him be quiet. The run of humiliations (ex, boss, neighbour, stairwell crying) piles up a little too evenly, which keeps it from 6.",
+   "evidence": [
+    "while a commuter shouted \"she said no, man\" and Reuben laughed loudest",
+    "He is attentive to bar staff and anyone talked over, though he never asks for help himself.",
+    "talks B-sides without making him audition"
+   ],
+   "raise": "Cut one of the stacked humiliations and give him one small win he doesn't joke away.",
+   "def": "13434ea727e1f291",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.efficiency": {
+   "score": 4,
+   "why": "Nearly every sentence carries a fact or a behaviour, and the texting section gives a director usable examples. Some facts are told twice, though: the lentils, the energy shots, the mirror rehearsal and the hike blister each appear in both 'life now' and the claims section. 'Their life now' also crams several drawer items into one overloaded paragraph that is hard to scan. It stays above the line because the repetitions are short and there is no summary padding.",
+   "evidence": [
+    "Tonight in his London flat he is on day eleven of eating the same pot of lentils, buzzing on his fourth corner-shop energy shot",
+    "Hasn't left his flat in eleven days, eating the same pot of lentils."
+   ],
+   "raise": "State the lentils, energy shots and mirror rehearsal once only, in the claims section, and use the freed space in 'life now' for the job and the flat.",
+   "def": "63ca3549efdaf667",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.tests": {
+   "score": 5,
+   "why": "The dealbreaker is a line a match could actually type. Demanding 'say something real' ties straight to Delphine, and unmatching mid-sentence ties to the stairwell crying. 'What they find out first' gives two observable probes, the arm-wrestle challenge and the band drop, both judged on whether the match laughs with him or at him. It stops short of a 6 because the band probe is muddled: it names the band by its brother-confusion anecdote instead of the 1997 EP, so the writer can't tell what a passing answer looks like. 'Unmatching' is also an action, not a message.",
+   "evidence": [
+    "Demanding \"say something real\" like Delphine did, or unmatching mid-sentence.",
+    "tested via the arm-wrestle challenge and dropping a band whose singer once asked him"
+   ],
+   "raise": "Name the 1997 EP and the exact reply that passes the password check, so the band test has a visible pass and fail in text.",
+   "def": "d69418021ebd052e",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.people": {
+   "score": 4,
+   "why": "Nadia's boxers from Tuesday are current and could come up tonight. Tariq is genuinely good for him and offers a quiz-night or B-sides thread. Delphine's ending is the engine of his dealbreaker. Callum is a static family wound ('uncaptioned hill photos') with no open event, and Gareth's snub is a finished spring episode, so not enough people are stories in progress for a 5.",
+   "evidence": [
+    "Knocked on Tuesday holding his fallen boxers flat with two fingers",
+    "talks B-sides without making him audition",
+    "Quietly left Reuben off a project's meeting invite for three weeks this spring"
+   ],
+   "raise": "Give Callum or Gareth something unresolved this week, such as an unanswered text or a meeting tomorrow, that could interrupt tonight.",
+   "def": "1484e17d048bba91",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.timeline": {
+   "score": 2,
+   "why": "Almost every entry after age 9 is a humiliation: the periodic table for a departed crush, getting dumped over a mattress corner, the dishwasher tattoo, the top hat over a toilet, the duck in a margarita, the curve mishap. That is a chain of humiliations. The ordinary spine is missing: there is no school, no first job or route into Kestrel Audio, and the 14-month Delphine relationship is absent. The '2025' entry is also dated a year behind 'Tuesday' and tonight.",
+   "evidence": [
+    "Wore his £240 top hat to a rooftop hookup, then spent midnight holding it over a clogged toilet",
+    "sneezed during the reveal, and fired it into a stranger's margarita",
+    "2025: Spent forty minutes Tuesday at 3 a.m. googling"
+   ],
+   "raise": "Replace three humiliation entries with ordinary milestones (school or degree, first audio job, the Delphine years) and redate the recent entry to lead into tonight.",
+   "def": "f3e8d800a5fd6476",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.act": {
+   "score": 4,
+   "why": "The trip claim against eleven days of lentils is specific, funny and easy to leak, for example if he can't name a single shop he visited. The 'two drinks for tempo' claim against shaking hands from energy shots can also surface in his on-something texting. The hiker pair answers the wrong claim: the truth rebuts 'spontaneous' but not 'only checks the app when it rains', which his four-second replies would. The storm-front pair edges toward generic 'says confident, is insecure'. The '5'9\"' and 'Sonic Architect' claims are never paired with truths.",
+   "evidence": [
+    "Just got back from a ten-day crate-digging trip up north.",
+    "Hasn't left his flat in eleven days, eating the same pot of lentils.",
+    "Terrified of the eleven-second silence when the curve catches wrong"
+   ],
+   "raise": "Pair the 'only checks when it rains' claim with the four-second replies and add a 5'9\"-against-5'6\" pair, so every truth can leak in text.",
+   "def": "ff77ae34c8ec6b73",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.specific": {
+   "score": 5,
+   "why": "The detail is dense and characterising: £1,150 on Hargrave Park, £2,150 tagging library tracks at Kestrel Audio, a £240 hat on that salary, Scarpa boots, The Charlotte Despard. The ring light clamped to the headboard to kill his silhouette and the posture clip holding a coffee bag shut each say something about him. Careful-reader errors keep it from a 6. The clip is priced in dollars in London, and Farringdon is not on the Northern Line from Archway. The 'How they are with people' paragraph has little concrete detail.",
+   "evidence": [
+    "a cheap ring light stays clamped to his headboard so he never sees his own silhouette",
+    "the $189 collarbone posture clip currently holding a coffee bag shut",
+    "takes the Northern Line to Farringdon"
+   ],
+   "raise": "Fix the currency and the commute (for example the Northern Line to King's Cross, then Thameslink), and give the behaviour paragraph one named pub, date or sum.",
+   "def": "db98767fb36eeb56",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.voice": {
+   "score": 5,
+   "why": "Four of the five probe messages could only be Reuben's, and each situation reads differently. The opener has the band-era password, the arm-wrestle and the hat-tip sign-off. The quiet reply has the four-second panic and the named exit. The lie reply goes from 'Got it. Understood.' into a fog-over-the-ridge cover and brochure flattery. The 2 a.m. message has the 1996 snare trivia and the energy shot, sliding into a quiet beat. Message (5) keeps this from a 6: 'I really liked talking to you tonight' is a plain line any cast member could send, much like Velvet's lowercase admission that she 'liked something small they said'.",
+   "evidence": [
+    "I challenge you to an arm-wrestle before the starters arrive. I will lose.",
+    "Fog rolled in over the ridge, visibility dropped, the whole expedition went sort of... indoor.",
+    "the snare on half the records from 1996 came out of about three rooms"
+   ],
+   "raise": "Give the guard-down line one detail only Reuben owns, such as a plain mention of the 1997 EP or his name without the R., so even message (5) can't be swapped into another profile.",
+   "def": "e7f66af37eb2f5e3",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.situations": {
+   "score": 5,
+   "why": "All ten lines predict something you can see on the screen:\n- Baseline: full spelling and a hat-tip.\n- Into them: longer replies, returns to earlier threads, a ☺️ in place of punctuation.\n- Losing them: names the exit first.\n- Waiting: replies in four seconds, then two follow-ups.\n- Hurt: a clipped burst, then glossy flattery.\n- Late night: lowercase and ellipses, then one quiet beat.\n- On something: staccato maths.\n- Guard down: the hat-tip disappears.\nThis is short of a 6 for two reasons. 'Horny' and 'Lying' describe what he says (meteorological bragging, mountain metaphors) more than how the message is shaped. 'Losing them' (breathless topic-changes) and 'On something' (staccato bursts) could produce similar-looking messages.",
+   "evidence": [
+    "Replies in four seconds, panics at the pause, and sends two follow-ups joking about his own speed.",
+    "Cuts to a clipped burst (\"Got it. Understood.\") before overcorrecting with glossy brochure flattery.",
+    "Drops the hat-tip and the voice for one plain line"
+   ],
+   "raise": "Give 'Lying' and 'Horny' a shape marker, such as message length, punctuation or whether the hat-tip survives, so each can be identified from form alone.",
+   "def": "07baafe3b1ed9ce4",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.texting_vs_cast": {
+   "score": 3,
+   "why": "Reuben duplicates other cast members in several situations, which puts him below the line:\n- Late night: his 'lowercase and trailing ellipses' is almost the same as Brick's 'lowercase and ellipses creep in'.\n- Horny: his 'meteorological bragging about thickness and rightward gravity' repeats Brick announcing 'girth, veins, and rightward curve like an incoming storm'.\n- Into them: 'longer replies returning to earlier threads' matches Sable word for word in substance.\n- Waiting: the speed-apology double-text overlaps both Sable and Zyx.\nHis own territory is the hat-tip baseline, the mountain-metaphor lie, the unsolicited maths when wired and the clipped-then-brochure hurt. That is not enough situations to reach a 4.",
+   "evidence": [
+    "Ornate meteorological bragging about thickness and rightward gravity",
+    "Lowercase and trailing ellipses... manic trivia dropping suddenly into one quiet, sleepy beat...",
+    "Warms into longer replies returning to earlier threads"
+   ],
+   "raise": "Rewrite the late-night, horny and into-them lines around habits no one else in the cast has, such as the hat-tip going sleepy or his warming signalled through returning to a band thread rather than through length.",
+   "def": "f44795214d1361d7",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.wound": {
+   "score": 5,
+   "why": "All three links are present and specific:\n- Event: at age 9 he is 'cropped out of a family photo... so his brother fits'. His mum calling him 'Callum' and Gareth quietly dropping him from the invite reinforce it.\n- Habit: silence becomes 'a secret tribunal' that he fills with banter.\n- Texting: he replies in four seconds and names the exit before the other person can.\nA second strand also holds: the curvature mishap leads to mirror rehearsal and the ring light. This falls short of a 6 because the first link is told, not shown: 'learned to talk twice as fast as the room' is a stated conclusion attached to the photo rather than a dramatised moment.",
+   "evidence": [
+    "Cropped out of a family photo in Cumbria so his brother fits; learned to talk twice as fast as the room",
+    "Reuben treats every silence as a secret tribunal, filling gaps with manic banter",
+    "names the exit first (\"...unless I've bored you rigid, in which case I'll vanish immediately\")"
+   ],
+   "raise": "Replace 'learned to talk twice as fast' with a concrete early scene where speaking fast actually got him noticed, so the cause is shown rather than summarised.",
+   "def": "299ebf3464d13800",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.likeable": {
+   "score": 3,
+   "why": "The reader gave a specific answer: his attentiveness to bar staff and to people being talked over. But the profile only claims that quality; it never shows him doing it. The supporting example the reader leaned on, Tariq, is someone being good to Reuben, not the other way round. Nowhere in the profile does Reuben do something for another person on the page, so the quality stays a claim.",
+   "evidence": [
+    "He is attentive to bar staff and anyone talked over, though he never asks for help himself.",
+    "lets Reuben nurse one pint through quiz night, tells him to ditch the hat in the rain"
+   ],
+   "raise": "Add one concrete incident of Reuben acting for someone else, such as stepping in when a bartender is being talked over, so the kindness is shown rather than asserted.",
+   "def": "c9fc1f4e3d28bfc5",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.life": {
+   "score": 5,
+   "why": "The profile is dense with usable facts across work, home, money, people and routines. It gives exact rent and street, a commute and employer with take-home pay, a named bar and bartender with a quiz-night routine, and spending habits. Several things are live this week: Monday's knee on the stairs, Tuesday's knock from Nadia, day eleven of lentils, the fourth energy shot. It stops short of 6 because there are no plans or upcoming events, and most of the this-week threads are mishaps rather than ongoing situations.",
+   "evidence": [
+    "pays £1,150 a month for a third-floor one-bed on Hargrave Park in Archway",
+    "to tag library tracks at Kestrel Audio for £2,150 a month after tax",
+    "lets Reuben nurse one pint through quiz night, tells him to ditch the hat in the rain"
+   ],
+   "raise": "Add one forward-looking situation, such as a deadline at Kestrel, a planned Lakes trip or a quiz-night date, so the life has a plan as well as a present.",
+   "def": "ba20efe15f1f67e9",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.ordinary": {
+   "score": 3,
+   "why": "The 'Their life now' paragraph has a real ordinary spine: rent, commute, job, dry-cleaning. Elsewhere humiliation and wound dominate. All seven 'How they got here' entries are mishaps or shames. Four of the five people are wounds or humiliations (Callum, Delphine, Nadia, Gareth); only Tariq is ordinary. Even the commute sentence is hijacked by the proposal-lunge pratfall, so overall it still reads as a list of humiliations with a job attached.",
+   "evidence": [
+    "his knee gave out on the wet Archway stairs on Monday, dropping him into a proposal lunge",
+    "Wore his £240 top hat to a rooftop hookup, then spent midnight holding it over a clogged toilet",
+    "Knocked on Tuesday holding his fallen boxers flat with two fingers"
+   ],
+   "raise": "Replace two or three timeline mishaps with ordinary formative facts, such as how he got into audio work or what Cumbria and the Lakes were like growing up, so the humiliations stand out against them.",
+   "def": "b60d3d6129fdd5ef",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.distinct": {
+   "score": 2,
+   "why": "Reuben recycles many motifs found elsewhere in the cast:\n- a ring light (Sable's motorized one, Brick knocking hers over)\n- a 2am posture device (Brick's harness, Zyx's harness)\n- crying on his building's stairs (Zyx)\n- a neighbour knocking on Tuesday (Zyx's Yasmin)\n- 3am Tuesday googling (Brick, Zyx)\n- mirror-rehearsed smiles (Brick, Sable, Zyx)\n- an ex who left because he joked instead of speaking plainly (Zyx's Maeve, Velvet's Jonas)\n- wanting his mouth taken away (Gerald, Velvet, Zyx)\nThe energy-shot habit is close to Zyx's too. Only the audio-tagging job, the Lakes and the mum-calls-him-Callum detail are his alone.",
+   "evidence": [
+    "a cheap ring light stays clamped to his headboard",
+    "he sits on the stairwell landing between floors two and three to cry for twenty minutes alone",
+    "he made a joke, watched her face close, and made another"
+   ],
+   "raise": "Swap at least the stairwell crying, the posture device and the Tuesday-neighbour beat for situations nobody else in the cast has, for example tying his low moments to the studio or the Lakes.",
+   "def": "c49f26573e9ce038",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.consistent": {
+   "score": 3,
+   "why": "There is one clear contradiction. The truth line says he 'hasn't left his flat in eleven days', yet he commutes to Farringdon three days a week and fell on the Archway stairs 'on Monday', and tonight is day eleven. There is also a soft tension: a London purchase is priced in dollars ('$189'). Elsewhere the claims-versus-body gaps (5'9\" claimed, 5'6\" actual) are deliberate and handled well.",
+   "evidence": [
+    "Hasn't left his flat in eleven days, eating the same pot of lentils.",
+    "Three days a week he takes the Northern Line to Farringdon",
+    "his knee gave out on the wet Archway stairs on Monday"
+   ],
+   "raise": "Make the eleven days a stretch of working from home with the knee fall outside it, and price the posture clip in pounds.",
+   "def": "7aeeef752bd3bd86",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.fidelity": {
+   "score": 4,
+   "why": "The bio is verbatim. All six items survive:\n- top hat\n- waistcoat\n- Scarpa boots\n- yellow duck tongue-bar\n- dishwasher-safe tattoo\n- T-Rex forearms\nEvery drawer entry is present and fitted to the life, including the boxers, the nipple, the eleven seconds, the ring light, Delphine, Gareth and the hand on the back, and the clinician's safety note appears in 'From someone'. It stays at 4 because some game elements are dropped or overridden:\n- the freckle-counting brag is absent\n- the large glans scale is unmentioned beside 'narrow tip'\n- the cheerleading (hang) trait is unmentioned\n- the slow hour-long-reply trait is replaced by 'Replies in four seconds'",
+   "evidence": [
+    "Put a yellow duck tongue-bar in after four drinks, sneezed during the reveal, and fired it into a stranger's margarita",
+    "Someone who stays through pauses, knows the 1997 EP he protects, and sets kind boundaries when he performs",
+    "almost no length, startling thickness, a narrow tip, and a fierce rightward curve"
+   ],
+   "raise": "Work the freckle brag and the large glans into the body and horny texting, and give the hour-long-silence trait a place, for example as a bluff he can never sustain.",
+   "def": "c713ddd28c5a9581",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "profile.likeable": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "Name the one thing you would genuinely like about this person if you met them, and the one thing you would find hardest to forgive. Be specific, and no jokes.",
+   "answer": "What I would genuinely like is his attention to people on the margins of a room. The profile says he is attentive to bar staff and to anyone being talked over, even while he is busy performing. That matters because his own history is about being overlooked: cropped out of a family photo so his brother fits, called by his brother's name by his own mother, quietly left off a meeting invite for three weeks. He hasn't turned that into resentment. He notices other people disappearing and does something about it. It also fits that his one easy friendship is with Tariq, a bartender who lets him nurse one pint and talk B-sides without auditioning. Someone who looks out for the people who serve the drinks is someone I would trust a little.\n\nWhat I would find hardest to forgive is how he handled Delphine. After fourteen months she quietly asked him for one sentence that wasn't a performance. He made a joke, watched her face close, and then made another. The first joke could be reflex. The second came after he had seen it hurt her, so he chose his own cover over her plain and modest request. Worse, he now lists \"say something real\" as his dealbreaker, which turns her reasonable ask into something done to him. The profile suggests he is capable of plain sincerity (\"I really liked talking to you tonight\"), so the difficulty isn't that he can't. It's that, when someone he loved needed it most, he didn't, and nothing here shows he has admitted that.\n\nThe profile gives only his side of that relationship, so I don't know what led up to her question or whether he has tried to repair things since."
+  },
+  "profile.voice": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "From this profile alone, write five short dating-app messages this person would send tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m., (5) the moment they stop performing.",
+   "answer": "**(1) Opener to someone they fancy**\n\"Good evening. I notice you've listed a band I have strong and possibly unwelcome opinions about, so before anything else: which era? Also, I challenge you to an arm-wrestle before the starters arrive. I will lose. I will lose magnificently and narrate every second of it... yours from the stalls, R.\"\n\n**(2) Reply when the other person has gone quiet**\n\"Ah, I've done the thing where I reply in four seconds like a man with no hobbies. Disregard my speed, it's a medical condition.\"\n\"Second message, sent to prove I'm completely relaxed about the first one. Unless I've bored you rigid, in which case I'll vanish immediately, no hard feelings, very quick exit, already halfway out the door... yours from the stalls, R.\"\n\n**(3) Reply when caught in a lie** (the profile names the \"ten-day crate-digging trip up north\" as a lie, so this one is about that)\n\"Got it. Understood.\"\n\"Right, in fairness, 'up north' was weather-dependent. Fog rolled in over the ridge, visibility dropped, the whole expedition went sort of... indoor. Anyway, enough about my ridiculous movements. Your taste is honestly immaculate and your photos look like you're about to be photographed again for something more important... yours from the stalls, R.\"\n\n**(4) A message at 2 a.m.**\n\"did you know the snare on half the records from 1996 came out of about three rooms... you can hear the ceiling height if you listen properly... most people don't... sorry, fourth energy shot, my brain's doing laps... it's very quiet here actually...\"\n\n**(5) The moment they stop performing**\n\"I really liked talking to you tonight.\""
+  }
+ },
+ "calls": [
+  {
+   "seconds": 13.0,
+   "cost": 0.042684,
+   "label": "probe profile.likeable"
+  },
+  {
+   "seconds": 18.1,
+   "cost": 0.04694,
+   "label": "probe profile.voice"
+  },
+  {
+   "seconds": 35.4,
+   "cost": 0.275592,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 38.1,
+   "cost": 0.273672,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 41.9,
+   "cost": 0.300408,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 43.6,
+   "cost": 0.30159199999999997,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:11:53Z",
+ "repo_commit": "5e49d8e",
+ "cost": 1.2409
+}

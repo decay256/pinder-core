@@ -1,0 +1,358 @@
+{
+ "id": "plan-20261119T004209Z-preview-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v22 · 19 Nov 00:42 · preview",
+ "version": "v22",
+ "order": 22,
+ "run": "20261119T004209Z-preview-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261119T004209Z-preview-reuben-brick-s23/preview.html",
+ "note": null,
+ "when": "19 Nov 00:42",
+ "materials": {
+  "brief": {
+   "chars": 21666,
+   "words": 3641
+  },
+  "plan": {
+   "chars": 21346,
+   "words": 3449
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 5,
+   "why": "All three events come from named people in the brief, and each presses on its owner's fear at a pointed moment. Gareth's snub lands mid-tremor and hits invisibility. Marguerite's leftover calendar alert hits Claudia's fear that her rules emptied her life. Nadia's text arrives while Reuben is still in the boots that his Lakes lie depends on. It falls short of a 6 because Claudia gets only one event, and its Sonia half is a generic thud overhead; only the calendar alert carries it.",
+   "evidence": [
+    "`23:30 – Marguerite: De-escalate & Resolve (15m buffer)`",
+    "are you pacing in mountain boots again up there??",
+    "leaving Reuben off next week's mixing call again, right as Reuben's fourth energy-shot tremor"
+   ],
+   "raise": "Give Claudia a second event from her own people, such as Malcolm finally paying the £630 with a 'let's catch up soon', so her dealbreaker line arrives from outside the chat.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "Each of the three setups has a plant, a middle return and an end, and the three endings mostly pay them differently. In the good ending the 'navigational guide' brings her to the right Hargrave address; in the collapse the curves 'only steer them into opposite walls'; the bad ending has the stopwatch eliminate the eleven seconds. It misses a 6 for two reasons. Setup 1's plant awkwardly fuses the '$189 studio gear' boast with the collarbone clip. The bad ending pays the waistcoat/mirror setup only vaguely.",
+   "evidence": [
+    "her \"navigational guide\" brings her to the right Hargrave address",
+    "the posture harnesses stay on in spirit",
+    "two rightward curves only steer them into opposite walls"
+   ],
+   "raise": "Give the bad ending a concrete waistcoat/mirror payoff, such as both keeping the vests buttoned by agenda item, and make setup 1's early plant a clean zero-dead-air boast.",
+   "def": "521e2223c917f019",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 5,
+   "why": "The three endings are three different stories. In the good one she crosses London to his flat with no end-buffer and he lets a pause run past eleven seconds. In the bad one a timestamped five-point agenda lets both keep performing. In the collapse he hears Delphine's tribunal in her clauses and vanishes first. Each ending turns on this pair's specific fears, not on a swapped last line. The good ending is overstuffed with payoffs, and it reads more like a checklist than the strongest single image.",
+   "evidence": [
+    "Claudia issues a timestamped five-point bed agenda with a fifty-minute cap",
+    "fires his manic curtain-call after eleven seconds of her typing pause, and vanishes first",
+    "lets a pause last past eleven seconds without cracking a joke"
+   ],
+   "raise": "Trim the good ending down to its one decisive moment, him not filling her typing pause, and let the other payoffs fall around it.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 5,
+   "why": "The plan gives explicit fold instructions that compress eight beats into five. Beat 5, the midpoint, is left intact, and the collision still runs straight into Origin 3 and the decision, so a six-turn game keeps both the turning point and an ending. It stays short of a 6 because it says only what merges. It never states which turn the midpoint lands on, and the compressed version is not sketched as a story of its own.",
+   "evidence": [
+    "Beats 3 and 4 merge so the flat events directly trigger the mirror rehearsal confession",
+    "Beat 6 folds into Beat 7 so the collision leads straight into Origin 3 and the decision"
+   ],
+   "raise": "State that in six turns the midpoint drop lands on turn 4, and write one line describing the compressed arc.",
+   "def": "9c79336a7855f173",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 6,
+   "why": "Both accidents are exact pasted artefacts with verbatim text. Each has a plausible chat mechanism: a wrong paste in place of a catalogue number, and a wrong paste in place of a postcode. Each exposes that character's tonight-truth in their own register. The shadow misfires also carry example wording (\"1. I am never lonely. 2. The towel is tactical.\"), so a writer has little to invent.",
+   "evidence": [
+    "does rightward curvature actually affect penetration or did she just want to watch telly // test shrug vs grin",
+    "practising Smile 2 in the mirror so I don't look like a bailiff",
+    "\"1. I am never lonely. 2. The towel is tactical.\""
+   ],
+   "raise": "Already at ceiling; at most, give Reuben's Overthinking shadow a written example line to match Claudia's Denial.",
+   "def": "8a43f27b6bad2c45",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through the chat. The arm-wrestle is only a challenge. Events reach the other person because the characters relay them. The plan actively uses the medium: reply speed as a flinch test, four-second double-texts, a three-message curtain-call, wrong pastes, and the eleven seconds staged as 'her typing pause'. It misses a 6 because no beat uses a photo or voice note, and some physical details (the spoon hitting the clip, Sonia's thud) depend on the characters choosing to narrate them.",
+   "evidence": [
+    "watching his reply speed for a flinch",
+    "after eleven seconds of her typing pause",
+    "a manic three-message curtain-call"
+   ],
+   "raise": "Have one beat land as a sent photo, such as the clip on the coffee bag or the harness propping the door, so the medium itself does the exposing.",
+   "def": "df6fedc6221ef314",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben writes ellipses, long full-spelled clauses and 'yours from the stalls, R.' sign-offs. Claudia writes 'hm.', numbered clauses and minute-buffers. Most sample lines are attributable with no names attached. The third samples blur: both are long 'Do you actually / Have you ever actually' questions about being watched or pinned, with neither character's marker.",
+   "evidence": [
+    "...yours from the stalls, R.",
+    "hm. \"Fast hands\" is an unverified claim. State your reach in centimetres",
+    "Have you ever actually looked at a six-foot-one woman with a heavy rightward curve"
+   ],
+   "raise": "Rewrite Claudia's third sample as a numbered demand with a time attached, so it cannot be mistaken for Reuben's question.",
+   "def": "e90fb07ec3b78554",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "It clears the line with one unpredicted turn. Her rigid scheduling, the trait that looks like his Delphine trigger, is exactly what guarantees she will never leave him in dead air. The paired bathroom-mirror rehearsals also mirror the two characters nicely. Otherwise the beat skeleton is the default: hooks, heat, reveals, snap, raw truth, verdict. 'Both were faking, both confess' is predictable.",
+   "evidence": [
+    "she is the one person whose obsessive scheduling means she will never ghost mid-sentence",
+    "both have to admit they spent tonight rehearsing in the bathroom mirror"
+   ],
+   "raise": "Add a beat where her schedule itself becomes the tender act, such as her booking an eleven-second pause for him, so the surprising good reason drives a scene rather than sitting in the summary.",
+   "def": "eee876c9f2949144",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every requested section is present for both characters, followed by collision, reasons, setups, events, story, midpoint, short-game note, the three endings and heat. The only dialogue is the voice samples and accident text the structure calls for; no chat is scripted. It falls short of a 6 because several fields are bloated and repeat the brief. A few muddles slip in, such as the '$189 studio gear' plant and the 'two eastward curves' phrasing.",
+   "evidence": [
+    "Habit marker: hm. | 1. | 2. | 3.",
+    "he boasts his $189 studio gear keeps his posture and timing tighter than a 1996 snare"
+   ],
+   "raise": "Cut the restated brief detail from Background and Feelings, and fix the muddled setup 1 plant.",
+   "def": "bd872356c69500bb",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every claim traces to the brief: the lentils, the $189 clip, the ring light, Delphine's closed face, the Sheffield night school, Marguerite's calendar, the pony-tack harness. The inventions extend existing material rather than replace it: Gareth's calendar snub, Nadia's boots text, Sonia's thud and the Marguerite alert. The plan also finds what a reader would miss: the twin rightward curves, both characters rehearsing in the bathroom mirror, and her tribunal voice echoing Delphine's demand. It falls short of a 6 because some core material goes unused: Tariq is absent, and Reuben's real love of ridge scrambling survives only as a lie.",
+   "evidence": [
+    "To see it, both have to admit they spent tonight rehearsing in the bathroom mirror.",
+    "Her stopwatch tribunal feels to him like Delphine's \"say something real\" tribunal"
+   ],
+   "raise": "Use one unused anchor that shows the real person under the act, such as Tariq's B-side talk or Bex's Sunday gravy call, as the tone she or he reaches for at the verdict.",
+   "def": "422981f4d9c7d5f1",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "I found no clear contradiction with the brief. Ages, claims, flats, prices and exes all match, and the inventions sit within what the brief allows. There is small drift: her Break becomes a general 'gets the address wrong when she wants something too much' rather than the brief's standing-in-the-rain line, and the midpoint has both 'alone in their flat since four', which is only true of Claudia. It does not reach a 5 because it corrects none of the brief's traps, such as three separate events all landing on 'Tuesday' or dollar prices for a London man.",
+   "evidence": [
+    "admit they have been alone in their flat since four practicing how not to startle the other",
+    "one plain sentence admitting she gets the address wrong when she wants something too much"
+   ],
+   "raise": "Fix the midpoint so Reuben's isolation is his eleven days, not 'since four', and keep the brief's exact rain-and-identical-street guard line.",
+   "def": "fa45960901c28caa",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have explicit needs, and at least one test each probes them. Her time-word dissection probes 'exact times', her anatomical briefing probes 'flinches', and his arm-wrestle and filth probe 'laughs with or flinches'. The other side can answer each of these. There are orphans, though. His EP test checks listening, which is not among his stated needs, and her 'Sonic Architect' cross-examination checks discipline, which is not among hers. Neither tests 'leaves once itinerary runs out' or 'vanish mid-sentence' until the ending, and his give-aways (lentils, stairs lunge) do not answer her need for kept times.",
+   "evidence": [
+    "Cross-examines his \"Sonic Architect\" title and waistcoat care routine to see if he has discipline or just bluster.",
+    "whether he leaves once her prepared itinerary runs out"
+   ],
+   "raise": "Retarget the orphan tests at stated needs, for example a mid-chat timed promise from him that she can check, and a planned pause from her that he can sit through.",
+   "def": "cdf9049147e4579d",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The good and bad reasons both depend on these two people. He wants someone her scale to pin him quiet, and her scheduling guarantees she won't ghost mid-sentence. The setups tie their two right curves and two waistcoats together, and the endings pay off Hargrave, Pimlico and the eleven seconds. Most events hook into a particular fear: Gareth's snub hits his invisibility, and the Marguerite calendar alert hits her rules. It misses a 6 because Sonia's box-drop and Nadia's text are generic neighbour noises that would move to another pair with little change.",
+   "evidence": [
+    "she is the one person whose obsessive scheduling means she will never ghost mid-sentence or leave him in an eleven-second silence",
+    "two rightward curves only steer them into opposite walls"
+   ],
+   "raise": "Make Sonia's interruption tie to Claudia's specifics, for instance her returning another 'time-sensitive' parcel, so no event could be lifted out.",
+   "def": "f1b9dddac061dbfe",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 5,
+   "why": "Every reveal is routed through what a character says or a mis-paste. The accidents leak the private scripts, the give-aways come out in chat, and Claudia's elbow and waistcoat jabs use only what his photos show. The plan also uses the gaps: she can't know her timetables sound like Delphine, and that ignorance is what drives the collision. It misses a 6 because it never tracks the knowledge explicitly. The 'If they click' ending assumes she knows his Hargrave address, and the hold-through-eleven-seconds promise depends on beat 7 having happened, without either being stated.",
+   "evidence": [
+    "Trying to paste a Pimlico venue postcode, she pastes an unsent draft to her Doncaster friend",
+    "her \"navigational guide\" brings her to the right Hargrave address"
+   ],
+   "raise": "State in the verdict beat that he gives her the address and that his eleven-second story is already on the table before she promises to hold him through it.",
+   "def": "5ca08850b888867b",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 4,
+   "why": "The second half is causal. Beat 5 is 'instead of bolting' after the mirror exposure, beat 6 is 'Scared by being seen', and beat 7 grows out of that collision. The first half is driven by outside interruptions dropped in on schedule: the step from beat 2 to beat 3 is simply Gareth's and Sonia's events arriving, and beat 4 opens on Nadia's text. That leaves about four of seven transitions causal, which keeps it just above the line but not at a 5.",
+   "evidence": [
+    "Gareth's calendar snub hits Reuben (Event 1) and Sonia's thud plus Marguerite's old calendar alert hit Claudia (Event 2)",
+    "Scared by being seen without the waistcoat, their defences collide"
+   ],
+   "raise": "Make beat 3 follow from beat 2, for example the filth exchange making him check his work calendar to look busy, and finding he's been left off again.",
+   "def": "b7d5785d1f61ce07",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 5,
+   "why": "The moment exists at the beat 5 midpoint. Its trigger is the beat 4 mirror accidents, and it is shown in the typing: she drops 'hm.' and the numbers, he drops the sign-off, and both switch to lowercase ellipses. Both Breaks are also defined in terms of typing. It misses a 6 because the placement is hedged: it is 'Claudia… first (or Reuben…)' and 'one or both', and the drop is split between the midpoint and beat 7.",
+   "evidence": [
+    "Claudia drops her \"hm.\" and numbered list first (or Reuben drops his \"...yours from the stalls, R.\" sign-off)",
+    "Drops the capital letters, the weather metaphors, and the \"yours from the stalls\" sign-off"
+   ],
+   "raise": "Commit to who drops first, and pin the trigger to one specific leaked line.",
+   "def": "e72f84db4817e97c",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "Full anatomical disclosure arrives at beat 2 of 8, well before the midpoint: her veins, girth and curve, and his 'colossal left ball'. The fallback makes it worse by folding beats 1 and 2 into 'a single high-heat anatomical opener'. The plan does reserve a real step for the second half, where they drop the jargon and talk about the nipple, the belly shelf and the flinch. Logistics also wait until the verdict, which keeps it from a 2. The night's high-heat setting and her four-minute habit explain the front-loading, but they don't earn it.",
+   "evidence": [
+    "Heat rises fast as Claudia delivers her four-minute anatomical briefing—6'1\", heavy veins, and her hard-right curve",
+    "Beats 1 and 2 fold into a single high-heat anatomical opener"
+   ],
+   "raise": "Have beat 2 announce only that the curve exists, as a 'navigational guide' joke, and hold the full briefing and his filth until after a give-away has earned some trust.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 4,
+   "why": "The big moments are distributed. The hooks come in beat 1, events and give-aways in beats 3 and 4, the guard drop in beat 5, the snap in 6, and the deepest truths (Origin 3) are held back for beat 7. The opening is not crowded with reveals. It misses a 5 because beats 3 and 4 cluster all three tonight's events, most of the give-aways, both accidents and both Origin 2 spills into two consecutive beats.",
+   "evidence": [
+    "in the scramble to look composed, one or both suffer their Accident or Origin 2 spill",
+    "The parts they never say (Origin 3) come out raw"
+   ],
+   "raise": "Move one event, such as Nadia's boots text, and one accident to beat 6 so the middle doesn't bunch.",
+   "def": "6992bdb3b448c021",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 52.2,
+   "cost": 0.238152,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 78.8,
+   "cost": 0.295152,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:21:09Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.5333
+}

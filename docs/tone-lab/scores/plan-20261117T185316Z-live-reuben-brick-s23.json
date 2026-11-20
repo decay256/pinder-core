@@ -1,0 +1,346 @@
+{
+ "id": "plan-20261117T185316Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v18 · 17 Nov 18:53 · full run",
+ "version": "v18",
+ "order": 18,
+ "run": "20261117T185316Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261117T185316Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "17 Nov 18:53",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 8656,
+   "words": 1433
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 3,
+   "why": "The plan has almost no events tonight. The 'Tonight' lines are static tableaux, and nobody from the brief's world (the bar manager, the singer, the hotel, the interviewer) intrudes during the chat. The only outside pressure is the misdirected facilities-manager draft, which comes from her hotel-lobby story and does hit her fear of being too big for the room. The props are specific to the brief, so this is not generic, but one live event is below the bar.",
+   "evidence": [
+    "Sends a draft meant for the hotel facilities manager",
+    "eating eleven-day-old pot lentils cold beside four empty gas-station energy shots"
+   ],
+   "raise": "Add an event for each of them from the brief's people, such as the facilities manager replying mid-flirt or the singer posting from the dive bar, timed to the moment each feels sized up.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "All three setups have a plant, a mid-chat return and a payoff in the click ending: the clips are ditched, the hotel lobbies are skipped, and the arm-wrestle is forfeited. Only the revolving door pays in the fall-apart ending, with her tender '42 inches' line. The posture gear and the arm-wrestle have no fall-apart payoff, and their end beats are left as open 'whether' questions. Each setup does get a payoff, which keeps this above the line.",
+   "evidence": [
+    "at the end, it's whether they drop the bracing or keep the door propped to run",
+    "forfeit the arm-wrestle so his hands go straight to her heavy curve"
+   ],
+   "raise": "Give the posture gear and the arm-wrestle their own payoff in the fall-apart ending, for example the harness staying in the doorway as he leaves.",
+   "def": "521e2223c917f019",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The two endings are different stories. In one, both breaks land and they go to her flat. In the other, her audit sets off his pre-emptive exit, and her parting line quietly tells him he would have fit. The fall-apart ending is a single summary sentence plus two lines, so it is underdeveloped next to the click ending. Its bittersweet last beat is strong enough to make it more than a changed last line.",
+   "evidence": [
+    "Her dimension audit triggers his pre-emptive exit, confirming both fears.",
+    "You would have cleared it with room to spare."
+   ],
+   "raise": "Develop the fall-apart path into its own beat sequence, saying which setup turns and who misreads whom at the turning point.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "The plan has no provision for a short game. It never says which beats survive six turns or where the midpoint goes. That absence is a 1.",
+   "evidence": [
+    "Collision: Brick_haus runs clinical dimension checks so nobody recoils at her massive scale"
+   ],
+   "raise": "Add a short-game line naming the midpoint (for example the facilities draft triggering his 'save you the trouble' exit) and which ending line still lands in six turns.",
+   "def": "9c79336a7855f173",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written word for word and fit chat well: a paste from the wrong file and a draft sent to the wrong person. Each exposes the character's fear exactly. The breaks are also fully specified, down to the caffeine-shake typo. Only one accident is given per character, and the plan does not say what triggers the paste.",
+   "evidence": [
+    "angle hip 15 degrees left so the short trunk looks intentional — if she laughs do the shrug NOT the grin",
+    "the 42-inch revolving partition in the east lobby violates standard clearance and I have the photos of my heel"
+   ],
+   "raise": "Add a second accident per character tied to a different shadow (for example Reuben's Madness leaking the coffee-bag clip), each with its trigger.",
+   "def": "8a43f27b6bad2c45",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 4,
+   "why": "The plan uses the medium in several places: three-message bursts after a slow reply, a left-in typo, a pasted file, and a misdirected draft. Two beats are less clear. The clip 'meets' the harness and the bodies are 'compared', and neither is said to happen as a photo. The click ending also describes his hands on her, which happens after the chat rather than in it. All of these beats are still possible in a chat, which keeps it above the line.",
+   "evidence": [
+    "his $189 collarbone clip (clamping a coffee bag) meets her £240 harness (propping a door)",
+    "rapid three-message bursts offering an easy out"
+   ],
+   "raise": "Specify the clip and harness beat and the body comparison as photos sent, and end the click path on the in-chat decision rather than the physical act.",
+   "def": "df6fedc6221ef314",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. He has ceremonial run-ons, soft emoji, and staccato bursts. She has 'hm.', numbered lists, zero emojis, and clipped memo clauses. Most messages could be attributed without names. Both voices avoid contractions, though, and both breaks use the same lowercase, no-period device, so her unmarked samples could pass as his.",
+   "evidence": [
+    "You cannot simply announce a monocle and expect me not to inquire whether it is prescription or strictly for intimidating waiters 😊",
+    "hm. 1. The top hat is a liability in a low booth. 2. We are sitting at the bar anyway."
+   ],
+   "raise": "Give Brick a tell of her own outside her markers (such as contractions or fragments) and make the two breaks differ in form.",
+   "def": "e90fb07ec3b78554",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "Two turns go beyond the default 'mismatched sizes flirt' plot. In the fall-apart ending, her audit becomes reassurance. In the origin stories, the 'coat rack' and 'not built for your scale' reveals turn each backstory into a precise wound. Much of the rest follows the brief's mirrored traits: small/big, twin posture devices, twin mirror rehearsals. It does not feel both surprising and inevitable.",
+   "evidence": [
+    "honestly I thought the little guy in the top hat was a coat rack",
+    "This room just isn't built for someone of your scale."
+   ],
+   "raise": "Build the midpoint around a turn the size mismatch would not predict, such as her being the one who pre-emptively exits.",
+   "def": "eee876c9f2949144",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "The plan follows a clear structure: a full block for each character, then collision, setups, two endings and heat. The voice samples and breaks are short spec lines, not scenes. The fall-apart ending does script two exact exchange lines, which edges into writing the chat. The short-game section is also missing.",
+   "evidence": [
+    "Reuben_404: `I will save you the trouble of calculating whether a compact model survives the revolving door.`",
+    "If it falls apart: Her dimension audit triggers his pre-emptive exit"
+   ],
+   "raise": "Replace the scripted fall-apart dialogue with a beat description and add the missing short-game section.",
+   "def": "bd872356c69500bb",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Almost every concrete detail comes from the brief. The $189 clip holding coffee, the £240 harness holding a door, the eleven-day lentils, the energy shots, the shirt kept on over the nipples, the towel and rosé, and both mirror rehearsals are all used. The plan also pairs things a reader would miss: his door job against her revolving door, and both characters' mirror rehearsals turned into the heat gate. It stops short of a 6 because some inventions don't trace to the brief: the polytechnic in logistics, the audio-engineering dropout, and the interviewer's quote. Reuben's band-era test, the duck and the mountains, and Brick's wine-bar bark go unused.",
+   "evidence": [
+    "his $189 collarbone clip (clamping a coffee bag) meets her £240 harness (propping a door)",
+    "one has to admit they've been rehearsing this disclosure in the bathroom mirror tonight"
+   ],
+   "raise": "Turn Reuben's band-name test into a beat Brick can pass or fail, instead of leaving it as a stray voice line.",
+   "def": "422981f4d9c7d5f1",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 3,
+   "why": "Tonight's assigned truth for Reuben says he argued with a regular he had 'misidentified as someone famous.' The plan reverses this: he tells the actual singer that he is only the singer's brother. That flips the joke from mistaking a nobody for a somebody to mistaking a somebody for a nobody. To its credit, the plan quietly sidesteps a trap in the brief: Brick's backstory calls her tip short and her middle slight, but her stats are 95-100 and 70-95, and the plan follows the stats with 'Towering length.' The one clear contradiction holds it below the line.",
+   "evidence": [
+    "insisting he was the lead singer's brother",
+    "The guy actually was the singer",
+    "Towering length, thick girth, heavy curve"
+   ],
+   "raise": "Restore the assigned truth: Reuben treats an ordinary regular as a celebrity and lectures him for not acting like one.",
+   "def": "fa45960901c28caa",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have explicit fears and snap triggers. Brick's numbered dimension audit works as her test, and Reuben's pre-emptive exit speech is what makes him fail it, so the matrix connects. The fall-apart line also shows that her audit was secretly reassurance he didn't wait to hear. Each break answers the other's need: 'i fit fine' meets his fear of being looked past, and 'keep looking at me' meets her need to be noticed. Still, the tests are never labelled as tests, and his stated safety need ('stays present through pauses, engages your real interests') has no matching move from Brick.",
+   "evidence": [
+    "Reuben_404 pre-emptively narrates his own exit, which convinces Brick_haus he's already bolting from the giant",
+    "2. You would have cleared it with room to spare."
+   ],
+   "raise": "Give Brick one concrete move that engages Reuben's real interests without making him perform, and mark it as the answer to his test.",
+   "def": "cdf9049147e4579d",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The collision only works for these two: a squat man terrified of failing inspection meets a towering woman who inspects everyone. The props match pairwise: collarbone clip and horse-tack harness, a door job and a revolving door, and his promise to lose at arm wrestling set against her size. Even the fall-apart exchange turns on the 42-inch door. It stops short of a 6 because the click ending ('forfeit the arm-wrestle so his hands go straight to her heavy curve') is close to stock.",
+   "evidence": [
+    "a compact model survives the revolving door",
+    "it's who actually fits in the room without getting crushed or cropped out"
+   ],
+   "raise": "Make the click's physical payoff turn on a particular only these two share, such as the clip and harness both being taken off.",
+   "def": "f1b9dddac061dbfe",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 4,
+   "why": "Most private material is routed into the chat. The door story is planted as her warning about 'sub-standard entryways' before it comes out mid-chat. The accidents are pasted drafts, and the mirror rehearsal has to be admitted aloud before heat goes further. The body comparison uses only public profile facts. The one leak is Brick's sample line 'Do not blame the sleeve,' which relies on a private excuse his public bio never mentions.",
+   "evidence": [
+    "Do not blame the sleeve.",
+    "Brick_haus warns she refuses \"sub-standard entryways\"; mid-chat, the wedged hotel door and snapped heel come out"
+   ],
+   "raise": "Have Reuben blame the buttonless sleeve in chat before Brick's line uses it.",
+   "def": "5ca08850b888867b",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "The three setups run as parallel tracks with the same template: 'brags…; mid-chat…; at the end, it's whether.' Each transition is 'and then,' not 'therefore' or 'but.' The heat gate and the snap triggers have some causal force, but nothing says that the door reveal causes the posture-gear moment, or that either one causes the arm-wrestle comparison. This is a set of motifs, not a chain of beats.",
+   "evidence": [
+    "Reuben_404 brags about \"investing in ergonomic presence\"; mid-chat, his $189 collarbone clip",
+    "Reuben_404 promises to lose to her before appetizers; mid-chat, they compare"
+   ],
+   "raise": "Link the setups so each one causes the next, for example: his exit speech triggers her door confession, which makes him admit the clip.",
+   "def": "b7d5785d1f61ce07",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "Both breaks exist, and both are shown in the typing: no 'hm.', no numbers, lowercase for her; dropped ceremonial grammar and capitals for him. But no trigger is named. The plan never says what tonight's event makes either of them drop the numbers or stay in the pause. It also promises a caffeine-shake typo that is missing from the scripted line.",
+   "evidence": [
+    "leaves a caffeine-shake typo in, one plain line: `i just wanted you to keep looking at me for a sec`",
+    "If they click: Brick_haus drops the numbers"
+   ],
+   "raise": "Name the specific message or event that triggers each break, for example her 42-inch clearance answer landing as reassurance.",
+   "def": "e72f84db4817e97c",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "The heat is gated: going further requires admitting the mirror rehearsal, and the logistics of her flat and the forfeited arm-wrestle come only at the end. The opening heat is anatomy already on public profiles, not acts. It stays near the line because heat 'starts immediately' with the girth and left-nut comparison, and only one trust step is planned, so it does not climb in stages.",
+   "evidence": [
+    "Heat: Starts immediately over their opposite geometry",
+    "To go further, one has to admit they've been rehearsing this disclosure"
+   ],
+   "raise": "Add a second trust-tied step between the opening geometry and the flat, such as the clip and harness admission unlocking the arm-wrestle comparison.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "The accidents, the three origin layers and the snaps have no positions in any beat order. All three setups pay off at the same 'mid-chat' point, so the reveals cluster there. The mirror-rehearsal admission is held late, but nothing else has a placement you could chart.",
+   "evidence": [
+    "mid-chat, the wedged hotel door and snapped heel come out",
+    "mid-chat, his $189 collarbone clip (clamping a coffee bag) meets her £240 harness"
+   ],
+   "raise": "Assign each accident and origin layer to a specific turn range, staggered so no two land in the same stretch.",
+   "def": "6992bdb3b448c021",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 46.3,
+   "cost": 0.17530799999999996,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 68.0,
+   "cost": 0.21988400000000002,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:22:23Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3952
+}

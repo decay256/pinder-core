@@ -1,0 +1,346 @@
+{
+ "id": "plan-20261116T133331Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v7 · 16 Nov 13:33 · full run",
+ "version": "v7",
+ "order": 7,
+ "run": "20261116T133331Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261116T133331Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "16 Nov 13:33",
+ "materials": {
+  "brief": {
+   "chars": 15073,
+   "words": 2578
+  },
+  "plan": {
+   "chars": 4089,
+   "words": 651
+  }
+ },
+ "scores": {
+  "plan.grounded": {
+   "score": 4,
+   "why": "Most of what the plan says traces to the brief. That includes Reuben's left curve and giant left testicle, the dishwasher-safe tattoo, both hook/truth pairs, the drawer items (collarbone clip, £240 harness, lentils, mirror rehearsals) and both clinician fears. It notices the two characters' mirrored drawers: both have posture gadgets, both rehearse in the mirror, and both use a 'just got in/back' lie. It stays at 4 because core material is left out: Reuben's band name-drop test, which is how 'the door actually opens', plus his arm wrestling and Brick's wrong-correct-address habit and monocle-in-rosé.",
+   "evidence": [
+    "trading their two posture contraptions and skipping the mirror rehearsal",
+    "Brick's revolving-door heel (planted as \"architectural incompetence\""
+   ],
+   "raise": "Build one of Reuben's tests around his band-era name-drop, and give Brick a way to pass or fail it.",
+   "def": "422981f4d9c7d5f1",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 3,
+   "why": "The plan puts Brick 'standing at her counter in a towel since four'. In the brief she was 'on the sofa since four, in the same towel', and the rosé was finished at the counter 'reading old messages', so two drawer facts are fused into one scene that breaks both. Reuben's firing changes 'misidentified as someone famous' into mistaking a regular for 'an indie singer's brother', and the brother isn't the famous one. The plan also writes 'Massive length' without noticing the brief's trap, where Brick's backstory says her tip 'finishes shorter than the eye expects'.",
+   "evidence": [
+    "Drank three-liter boxed rosé standing at her counter in a towel since four",
+    "fired for lecturing a regular he mistook for an indie singer's brother"
+   ],
+   "raise": "Keep the towel on the sofa and the rosé at the counter as separate facts, and reconcile or flag Brick's tip-length conflict.",
+   "def": "fa45960901c28caa",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 3,
+   "why": "The plan has fears and snaps but never states what each character needs. Reuben's need, 'stays present through pauses, engages your real interests', is only implied by his snap at 'a pause'. Brick's need, someone 'patient, exact, consistent', is not addressed. The tests are implicit, and it is never said what Reuben offers that answers Brick's fear of being too big, or what Brick offers that answers his fear of being negligible. The click outcomes show the guard dropping but not why.",
+   "evidence": [
+    "A pause or feeling measured makes him formally declare the match dead on arrival",
+    "Feeling mocked as \"too much\" triggers a cold numbered ruling"
+   ],
+   "raise": "Name each character's need, and give each one a concrete give-away the other can answer, such as Brick holding through his pause or Reuben being exact with her.",
+   "def": "cdf9049147e4579d",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The collision only works between these two: Brick's numbered audits measure Reuben and find him tiny, and his early exits convince her she has crushed him. The setups pair their two posture contraptions and their two mirror rehearsals, and the opening heat is a geometry duel between his short left-hook and her veined length. Some of the click logic, dropping the list and staying past the punchline, is close to a generic armour-drop.",
+   "evidence": [
+    "Brick's numbered audits make Reuben feel measured and found tiny; Reuben's preemptive exits make Brick feel she has already crushed him"
+   ],
+   "raise": "Make the click turn on something only this pair could do, such as Reuben auditing Brick's geometry back at her and coming out kind.",
+   "def": "f1b9dddac061dbfe",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 4,
+   "why": "Private material reaches the chat by explicit routes. The pasted rehearsal note and the pasted checklist carry the lentils and the rosé box, and the setups move from 'planted' to 'admits' before anyone uses them. The opening geometry banter relies only on profile body data. It is not higher because the plan doesn't track who knows what at each stage, for instance when Reuben learns about the interview behind Brick's 'strategic pause'.",
+   "evidence": [
+    "Pasting his mirror-rehearsal note: `Option B (casual grin): Yes it hooks hard left",
+    "middle: admits her £240 posture harness props her door open"
+   ],
+   "raise": "Add a line per beat noting what each character knows, and when the career-pause truth comes out.",
+   "def": "5ca08850b888867b",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "There is no beat list. The setups run as plant, middle, end without saying what causes each step. The only stated causal link is that heat 'gets real only after both admit the mirror rehearsals'. The accidents and snaps float free of any trigger in the sequence.",
+   "evidence": [
+    "planted as \"elite presence\"; middle: admits it's clamping a coffee bag; end: dropping the prop",
+    "gets real only after both admit the mirror rehearsals"
+   ],
+   "raise": "Write an ordered beat list where each beat says which earlier admission or accident causes it.",
+   "def": "b7d5785d1f61ce07",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 4,
+   "why": "The guard-down moment exists. It shows in the typing: Brick abandons her numbering ('No numbers.') and Reuben uses his warm-signal emoji while refusing his exit habit. A trigger is implied by the mutual mirror-rehearsal admission, but it sits in the Heat line and is not tied to the moment itself. Its placement is also unspecified.",
+   "evidence": [
+    "Brick drops the list (`No numbers. Come over.`)",
+    "Reuben stays past the punchline (`I am not leaving early 🙂`)"
+   ],
+   "raise": "Name the exact accident or admission that triggers the drop, and say where in the night it falls.",
+   "def": "e72f84db4817e97c",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "Heat starts with banter about profile-visible geometry rather than full explicitness. It escalates only after the mutual rehearsal confessions, and logistics ('Come over') arrive only at the end. There are only two steps, though, and the explicit content of the later step is undefined.",
+   "evidence": [
+    "Starts with competitive geometry banter comparing his short thick left-hook to her massive veined shaft",
+    "gets real only after both admit the mirror rehearsals and stop apologizing for scale"
+   ],
+   "raise": "Add an intermediate heat step tied to the posture-gadget admissions.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "The plan gives the setups a plant/middle/end shape. The two accidents, the origin reveals and the snaps are never placed, so their spacing cannot be charted. Both accidents read as similar mid-game pastes that could land together.",
+   "evidence": [
+    "Accident: Pasting her prep checklist",
+    "Accident: Pasting his mirror-rehearsal note"
+   ],
+   "raise": "Place each accident and origin layer on specific turns, with Reuben's paste early-middle, Brick's later, and the deepest truth held for late.",
+   "def": "6992bdb3b448c021",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.events": {
+   "score": 1,
+   "why": "The plan schedules no events from the outside world. No dive-bar regular, indie singer, hotel or interviewer presses in during the night. Every complication is self-generated: the two pasted notes and the two snaps. The brief supplies named people and places that could intrude, such as the misidentified regular and the revolving-door hotel, but they stay in the origin backstory and never act tonight.",
+   "evidence": [
+    "Ran the door at a dive bar for eleven months until fired for lecturing a regular he mistook for an indie singer's brother.",
+    "Lost a heel to a hotel revolving door, limped into the interview"
+   ],
+   "raise": "Add at least two in-chat events from their own lives, such as the misidentified regular messaging Reuben mid-chat or a hotel follow-up email reaching Brick, each timed to hit their fear.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "All three setups have a plant, a middle return and an end beat, and the click ending pays them as a trade of contraptions and a skipped rehearsal. The fall-apart ending pays only the posture and door setups ('fake posture and broken doors'), so the mirror-rehearsal setup has no failure payoff. Setup 2's end is an abstract theme ('fear of not fitting') rather than a beat. That keeps it from a 5, while the full plant-to-payoff chains keep it above the line.",
+   "evidence": [
+    "Reuben's $189 collarbone posture clip (planted as \"elite presence\"; middle: admits it's clamping a coffee bag; end: dropping the prop)",
+    "Setups become weapons about fake posture and broken doors.",
+    "end: fear of not fitting"
+   ],
+   "raise": "Give each setup a concrete beat in both endings, including what the mirror rehearsals become when it falls apart.",
+   "def": "521e2223c917f019",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The click ending has Brick abandoning her lists to invite him over and Reuben staying past his exit reflex, which pays the setups as a trade. The fall-apart ending has both snaps firing, with a final audit and a pre-emptive bow-out. These are different directions, not one scene with a swapped last line. Both are sketched mainly as quoted closing lines, and the collapse is simply both defences triggering on schedule, so neither is yet the best version of its outcome.",
+   "evidence": [
+    "Brick drops the list (`No numbers. Come over.`); Reuben stays past the punchline (`I am not leaving early 🙂`)",
+    "Brick issues a final audit (`1. You want an audience. 2. Door's closed.`)"
+   ],
+   "raise": "Describe what happens in each ending beyond the final line, such as who drops their guard first and through which setup.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "There is no provision for a short game. The only hint of a turning point is the Heat line saying it 'gets real only after both admit the mirror rehearsals'. Nothing says whether that admission survives in six turns or what gets cut.",
+   "evidence": [
+    "gets real only after both admit the mirror rehearsals and stop apologizing for scale"
+   ],
+   "raise": "Add a short-game line naming the six-turn spine: plant, one pasted note, the mutual mirror admission, and an ending.",
+   "def": "9c79336a7855f173",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are exact on-screen artefacts with verbatim text, and a mis-pasted note suits a chat. Each one leaks the character's drawer lie in a single message. Both accidents share the same shape, a pasted rehearsal note, so the dice have only one kind of misfire to cause. That keeps it off a 6.",
+   "evidence": [
+    "`Option B (casual grin): Yes it hooks hard left, call it ergonomic. DO NOT MENTION THE ELEVEN-DAY LENTILS.`",
+    "`1. Smile #2 (less teeth). 2. Say \"just got in from a thing.\" 3. Kick the 3L rosé box behind the sofa.`"
+   ],
+   "raise": "Make one accident a different kind of misfire, such as a photo with the rosé box visible or a wrongly sent voice note.",
+   "def": "8a43f27b6bad2c45",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat travels through the chat: pasted notes, confessions about objects, and numbered audits. Reuben's snap is triggered by a pause, which uses reply timing. The contraption trade happens after the chat, so it needs no shared room. No beat uses photos, typos or voice notes, which keeps it from a 6.",
+   "evidence": [
+    "A pause or feeling measured makes him formally declare the match dead on arrival",
+    "Pasting her prep checklist"
+   ],
+   "raise": "Plan one beat around a photo, for example the harness propping the door, sent as proof.",
+   "def": "df6fedc6221ef314",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben uses ceremonial full sentences, 'frankly', formal exits and soft emoji. Brick uses a lowercase 'hm.', numbered lists and two-word verdicts. Most single lines can be attributed without names ('hm. Unlikely.' against 'I have already lost this round, frankly.'). Some overlap remains, since both avoid contractions and both speak as if interest is settled, so a plain declarative from either could blur.",
+   "evidence": [
+    "In full disclosure, I am built like a punctuation mark.",
+    "1. You are deflecting. 2. Do it faster.",
+    "Stay right there 🙂"
+   ],
+   "raise": "Give Brick one more distinctive surface habit, such as contractions or fragments, to separate her plain lines from Reuben's formal prose.",
+   "def": "e90fb07ec3b78554",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 3,
+   "why": "The arc is the default one: defensive banter, an accidental reveal of a rehearsed self, then the guard comes down. The plan mirrors the twinned brief, with both rehearsing in mirrors and both owning posture gadgets, so their mutual admission is predictable from the setup. The contraption trade is a charming button but not an unpredicted turn.",
+   "evidence": [
+    "gets real only after both admit the mirror rehearsals",
+    "Setups pay off as trading their two posture contraptions and skipping the mirror rehearsal."
+   ],
+   "raise": "Add one turn the symmetry would not predict, such as one of them refusing to admit the rehearsal, or the reveal landing as an insult.",
+   "def": "eee876c9f2949144",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "The plan follows a consistent per-character structure (Shows, Fear, Habit, markers, Lie, three-part Origin, Accident, Snap, Voice), then gives the collision, setups, endings and heat. It writes no chat beyond short sample and ending lines. It has no events or short-game section, and some origin pieces fold drawer items into the origin chain in a muddled way ('towel since four'), so it is not exactly as asked.",
+   "evidence": [
+    "Drank three-liter boxed rosé standing at her counter in a towel since four",
+    "Collision: Brick's numbered audits make Reuben feel measured and found tiny"
+   ],
+   "raise": "Add explicit events and short-game sections, and keep origin pieces separate from drawer specifics.",
+   "def": "bd872356c69500bb",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 48.3,
+   "cost": 0.163964,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 44.0,
+   "cost": 0.150804,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:24:55Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3148
+}

@@ -1,0 +1,451 @@
+{
+ "id": "profile-brick-v21",
+ "kind": "profile",
+ "label": "Brick · v21 card",
+ "version": "v21",
+ "order": 21,
+ "run": null,
+ "source": "docs/tone-lab/runs/20261118T163642Z-preview-reuben-brick-s23/preview.html",
+ "note": "The character card as the v21 planner saw it, before the profile generator. Its cast is only the other card of the same match.",
+ "when": null,
+ "materials": {
+  "profile": {
+   "chars": 8214,
+   "words": 1410
+  },
+  "game": {
+   "chars": 19073,
+   "words": 3229
+  },
+  "cast": {
+   "chars": 9196,
+   "words": 1602
+  }
+ },
+ "scores": {
+  "profile.life": {
+   "score": 3,
+   "why": "There are plenty of anecdotes: monocle in rosé, the wrong-address calendar invite, the heel and the revolving door, the schedule tattoo, the replica app, the periodic-table crush. But they cluster in past mishaps and private routines. Work is almost absent: the hook mentions 'the interview', but there is no job, employer or colleague, and the game's 'consultant' who ends debates for a living was not carried over. No person is named, there is nothing happening this week beyond 'last month' rosé, and money amounts to one purchase.",
+   "evidence": [
+    "limped into the interview, and talked for forty minutes about the door",
+    "specifically finished standing at the counter reading old messages",
+    "is currently holding a door open"
+   ],
+   "raise": "Give her a current job and an employer, a named friend or the ex Marguerite, and one concrete thing pending this week, such as the outcome of that interview.",
+   "def": "ba20efe15f1f67e9",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.ordinary": {
+   "score": 2,
+   "why": "Almost every sentence of the Backstory is a pratfall or a wound: rosé, the wrong address, the lost heel, being cropped from the portrait, the canapé. All five drawer items are humiliations. Ordinary life shows up only as the setting of a mishap (a wine bar, a sofa, a counter), never as a routine, a place or a job in its own right. It reads as the list of humiliations the dimension warns against.",
+   "evidence": [
+    "The pretense collapses on contact",
+    "lost a heel and all remaining mystery to a revolving door",
+    "nobody told her, and she talked the entire time"
+   ],
+   "raise": "Add a paragraph of plain life (her studio, her contract work, her weekly schedule, the friends who RSVP 'maybe') so the mishaps stand out against it.",
+   "def": "b60d3d6129fdd5ef",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.distinct": {
+   "score": 1,
+   "why": "Large parts of the Backstory are near-verbatim copies of Reuben_404's. Both were cropped out of a family portrait and spent years hunting for a camera. Both grew up in a drafty house keeping everything pulled in tight. Both coded a replica dating app to flirt with their own lopsided reflection, practise a brochure smile in the bathroom mirror, and were voted most likely to ignite something with enthusiasm. Her drawer also mirrors his: a posture-device purchase holding something shut or open, and a 'just got in' or 'just got back' lie. She even inherits his body line about the tip finishing shorter than expected.",
+   "evidence": [
+    "coded a private replica of a dating app just to flirt with her own lopsided reflection",
+    "a girl cropped out of the family portrait by bad framing",
+    "a £240 posture-correcting harness"
+   ],
+   "raise": "Strip out every motif shared with Reuben_404 (portrait, drafty house, replica app, mirror smile, ignite vote, posture device) and replace them with hers alone.",
+   "def": "c49f26573e9ce038",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.consistent": {
+   "score": 2,
+   "why": "The Backstory has her announce that 'the tip finishes shorter than the eye expects' and call her midsection 'slight'. Her body lists tip length at 95-100 and mid length at 70-95. This is a clear contradiction, and it breaks her central wound of being 'too large'. There is also a softer tension: her one-person 'narrow, fluff-free style learned squeezing through a cramped childhood home' sits beside a sprawling, over-explaining Wit shadow. The body contradiction alone pulls the score below the line.",
+   "evidence": [
+    "announces that the tip finishes shorter than the eye expects",
+    "calls her midsection slight in the same breath",
+    "trunk length tip: 95-100"
+   ],
+   "raise": "Rewrite the body disclosures to match her stats: the tip runs longer than expected and the midsection is generous.",
+   "def": "7aeeef752bd3bd86",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.fidelity": {
+   "score": 3,
+   "why": "The bio, the body list, the texting tics, tonight's hook and the clinician's notes are carried over intact, and the five drawer items are taken from the game file. However, Hair Style 4 (the hair apology and the ring-light proof) is dropped entirely. The body is also contradicted in prose: the game's 'tip finishes shorter' line was about her nose, and the profile moved it onto her trunk. The Tattoo's forty-minutes-early booty call is gone too.",
+   "evidence": [
+    "a daily schedule tattooed on her after a breakup",
+    "names the curve of her own anatomy out loud",
+    "talked for forty minutes about the door"
+   ],
+   "raise": "Restore the Hair Style 4 material and correct the body description so that no game element is dropped or altered.",
+   "def": "c713ddd28c5a9581",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.voice": {
+   "score": 4,
+   "why": "Four of the five probe messages could only come from Brick. The opener uses the 'hm.' tic, the numbered list and 'wrong correct address'. The lie reply is the revolving-door heel. The 2 a.m. message uses her towel lie and the three-litre rosé, where Reuben's lie is 'just got back from a trip'. The quiet reply, a silence-as-verdict spiral, is not hers alone: Reuben's profile has the same tribunal reading of silence, so it fails the 'all five' bar for a 5. It stays above the line because the other four rest on her own drawer, hook and tics, and the five situations do read as different.",
+   "evidence": [
+    "hm. Verdict: you're my favourite profile tonight, so let's skip the part where we pretend otherwise.",
+    "Forty minutes. Not a verdict. I'm aware it isn't a verdict. I've decided it isn't one.",
+    "I limped into the interview and talked about the door for forty minutes."
+   ],
+   "raise": "Give her a texting line for going unanswered that is only hers, such as re-sending a numbered logistics recap with travel buffers, so the quiet-reply message stops reading like Reuben's tribunal panic.",
+   "def": "e7f66af37eb2f5e3",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.situations": {
+   "score": 3,
+   "why": "Only three of the nine texting lines are tied to a situation: 'when feeling seen', curiosity turning expansive, and cooling while mirroring pace. The rest are constant habits, such as 'hm.', clipped clauses and numbered lists. Three lines restate one confident-assumption voice ('confident assumptions', 'playful proclamations', 'mutual interest is already established'). Nothing says how she types when hurt, caught out, ignored, or at 2 a.m., so most situations predict no change in shape or timing.",
+   "evidence": [
+    "tends to state attraction with confident assumptions rather than tentative questions",
+    "tends to speak as though mutual interest is already established",
+    "tends to cool into shorter replies while mirroring the other person's pace"
+   ],
+   "raise": "Replace two of the overlapping directness lines with situation-keyed habits, such as what her messages look like after a slow reply or when teased, so at least seven situations predict a different message.",
+   "def": "07baafe3b1ed9ce4",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.texting_vs_cast": {
+   "score": 4,
+   "why": "Most of her habits are her own: the 'hm.' verdict, numbered lists and playful proclamations. Her rhythm runs opposite to Reuben's, cooling into shorter replies where he warms into longer ones, and he has the soft emoji and ceremonial full spellings. Two points overlap. One line is word-for-word identical in both profiles. Her 'clipped efficient clauses' sits close to his 'clipped bursts'. Those overlaps keep it from a 5.",
+   "evidence": [
+    "tends to speak as though mutual interest is already established",
+    "usually trims sentences into clipped, efficient clauses",
+    "tends to cool into shorter replies while mirroring the other person's pace"
+   ],
+   "raise": "Swap the shared 'mutual interest is already established' line for a habit only Brick has, such as scheduling the next message with a stated time.",
+   "def": "f44795214d1361d7",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.wound": {
+   "score": 4,
+   "why": "All three links are present. First, events: the cramped childhood home and being cropped out of the portrait. Second, a habit: she narrates her own flaws and proof of worth before anyone can judge her. Third, texting lines: clipped clauses, which the profile ties to the cramped home, and numbered structure. The first link is thin for this particular wound ('too large... to fit'). The portrait cropping is really an invisibility wound, the same one Reuben's profile uses, and the profile drops the game's size events, such as the date flinching at the reveal. That keeps it from a 5.",
+   "evidence": [
+    "a narrow, fluff-free style learned squeezing through a cramped childhood home",
+    "she narrates the whole self-made proof of her worth so fast that nobody gets a chance to evaluate her",
+    "may organize complicated thoughts as a short numbered list"
+   ],
+   "raise": "Put the game's size events into the backstory, such as the date who flinched at the reveal and the room she startled by walking in, so the 'too large to fit' wound has its own cause rather than Reuben's invisibility story.",
+   "def": "299ebf3464d13800",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.likeable": {
+   "score": 4,
+   "why": "The reader named a specific, non-ironic quality: she hides nothing about herself. The profile shows it in action, as she names her own anatomy before anyone can double-take and talks forty minutes about the door. The reader also tied the shoes to self-made proof. It is not higher because the quality is only ever turned on herself. Nothing in the profile shows her doing something for another person, and the reader undercut the quality with her Denial shadow.",
+   "evidence": [
+    "she names the curve of her own anatomy out loud before anyone can double-take",
+    "So the honesty I'd like is real but not reliable.",
+    "evidence that she built herself without help"
+   ],
+   "raise": "Add one shown act of care for someone else, such as the rigor she spends on a friend's problem or remembering a match's exact detail, so there is a second likeable quality aimed outward.",
+   "def": "c9fc1f4e3d28bfc5",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.tests": {
+   "score": 1,
+   "why": "The profile has no dealbreaker and no 'what they find out first', so the match's evaluation has nothing named to work on. The nearest material is the clinician's safety note, which is abstract and written in a register the profile itself says no character should use. A writer could infer a trip-wire from 'treating a slow reply as a verdict already rendered against her', but nothing is stated as a test.",
+   "evidence": [
+    "You feel safe with someone patient, exact, and consistent who respects your boundaries and intellect",
+    "treating a slow reply as a verdict already rendered against her"
+   ],
+   "raise": "Add an observable dealbreaker, such as a match who says 'let's do this again' without naming a day, and a first tell, such as whether he notices she has scheduled the date.",
+   "def": "d69418021ebd052e",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.people": {
+   "score": 2,
+   "why": "The only people are past and unnamed: a family that cropped her out of a portrait, a crush who had already moved away, and an ex behind 'a breakup'. None has a current, unresolved thread that could come up tonight. The game file had Marguerite, who 'couldn't be with someone who scheduled being loved', and friends whose RSVPs say 'maybe', but neither made it into the profile.",
+   "evidence": [
+    "a girl cropped out of the family portrait by bad framing",
+    "memorized the periodic table backwards for a crush who had already moved away",
+    "a daily schedule tattooed on her after a breakup"
+   ],
+   "raise": "Bring in Marguerite and the friends whose RSVPs have been 'maybe' since spring, each with something live, such as a calendar invite still pending.",
+   "def": "1484e17d048bba91",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.timeline": {
+   "score": 2,
+   "why": "There are scraps of a spine: a cramped, drafty childhood home and a high-school superlative. There is no first job, no leaving home, no age, and no named longest relationship. The backstory is mostly a chain of humiliations (monocle in rosé, wrong address, lost heel, canapé), which is the low pattern.",
+   "evidence": [
+    "a narrow, fluff-free style learned squeezing through a cramped childhood home",
+    "lost a heel and all remaining mystery to a revolving door in a luxury hotel lobby",
+    "wore a canapé lodged under her mouth accessory through two hours"
+   ],
+   "raise": "Add an ordinary sequence: her age (38), the job talking customers into buying, the night classes, the move into the studio, the Marguerite years, and what this year has been.",
+   "def": "f3e8d800a5fd6476",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.act": {
+   "score": 4,
+   "why": "The one explicit pair is specific, funny and can leak in text: 'strategic pause' against limping into an interview and talking for forty minutes about the door. The backstory also frames a running act, the curated woman whose props collapse, and her smile 'read like a brochure'. It stays just above the line because there are no generic pairs, but nearly all of the game's twenty brag/truth pairs were dropped, so the act has little to catch.",
+   "evidence": [
+    "Refers to 'a strategic pause I took entirely on my own terms.'",
+    "talked for forty minutes about the door",
+    "presents as the most curated woman on the app"
+   ],
+   "raise": "Carry over three or four more pairs, such as 'thirty-one, carded everywhere' against the pharmacy loyalty program, or 'consultant' against ending other people's debates per meeting.",
+   "def": "ff77ae34c8ec6b73",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.specific": {
+   "score": 5,
+   "why": "The concrete detail is dense and does work. The £240 harness holding a door open, the three-liter rosé 'finished standing at the counter', the towel 'since four' and the cocktail sword from a microwaved appetizer all place her: expensive aspiration over cheap comfort, alone. The 'Who they are' paragraph is entirely abstract. Her job, her money (heels that cost more than her rent) and her flat are absent, which keeps this from a 6.",
+   "evidence": [
+    "a £240 posture-correcting harness that arrived looking like tack for a small horse and is currently holding a door open",
+    "specifically finished standing at the counter reading old messages",
+    "on the sofa since four, in the same towel, watching the ceiling"
+   ],
+   "raise": "Give the 'Who they are' paragraph concrete anchors: her contract debate-ending job, the leaking studio, and heels that cost more than the rent.",
+   "def": "db98767fb36eeb56",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.stock": {
+   "score": 1,
+   "why": "The central biography is shared almost word for word with Reuben_404's. Both were cropped from a family portrait, grew up in a drafty house pulled in tight, coded a replica dating app to flirt with a lopsided reflection, were voted most likely to ignite, and practise a brochure smile in the mirror. Even the closing line of 'Who they are' mirrors Reuben's. The drawer repeats the cast too: a posture device holding something shut, a 'just got in/back' lie, and bathroom-mirror rehearsal, all three in both profiles.",
+   "evidence": [
+    "Underneath is a girl cropped out of the family portrait by bad framing",
+    "who coded a private replica of a dating app just to flirt with her own lopsided reflection",
+    "a £240 posture-correcting harness that arrived looking like tack for a small horse and is currently holding a door open"
+   ],
+   "raise": "Cut every motif shared with Reuben_404 and rebuild her childhood and drawer from her own game fragments, such as the limestone base, the rideshare knees and Marguerite's calendar.",
+   "def": "81933a72e1cf3605",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.plausible": {
+   "score": 2,
+   "why": "The prose contradicts her own body data, and not as a joke. It says her tip 'finishes shorter than the eye expects' when tip length is 95-100, and calls her midsection 'slight' when mid is 70-95. Both details belong to Reuben's body. The profile gives no age, job, wage or rent, so the London checks the dimension asks for are not possible.",
+   "evidence": [
+    "announces that the tip finishes shorter than the eye expects",
+    "calls her midsection slight in the same breath she uses to order drinks"
+   ],
+   "raise": "Make the anatomy claims match her stats and add an age, a job and a rent that hold up in London.",
+   "def": "a6a960fcea9e361b",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.filth": {
+   "score": 2,
+   "why": "None of the five drawer items chosen tonight is sexual. The game's knee mishap, her schedule kink and the navel shelf were all left out. The sexual material that remains is the bio's 'curve' line, a passing calendar-invite hookup and two anatomy claims that contradict her body. What little there is comes from her body, but it is thin, and half of it is wrong.",
+   "evidence": [
+    "names the curve of her own anatomy out loud before anyone can double-take",
+    "sent calendar invites with travel buffers only to arrive flawlessly on time"
+   ],
+   "raise": "Pull in the schedule kink ('being told exactly what's going to happen, in order, with times attached') and the knee-out mishap as tonight's drawer.",
+   "def": "6a879b5e8af5b7b3",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.humanity": {
+   "score": 4,
+   "why": "The pratfalls target her behaviour: over-planning, narrating, performed curation. The interior keeps her dignity by treating the shoes as evidence and structure as a superstition she knows is thin. It leans toward making her the joke with 'the pretense collapses on contact' and a run of slapstick, and there is little fondness beyond the canapé line.",
+   "evidence": [
+    "The nice things she owns are exhibits, not decoration",
+    "on bad days she can feel how thin that belief is",
+    "and nobody told her, and she talked the entire time"
+   ],
+   "raise": "Add one moment where her rigour actually works or is loved, so the fondness matches the mercilessness.",
+   "def": "13434ea727e1f291",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.efficiency": {
+   "score": 3,
+   "why": "'Who they are' and 'Backstory' are pasted from the raw material and overlap each other and the drawer. The rehearsed smile and canapé appear twice in the backstory, and the mirror rehearsal and rosé also turn up in the drawer. Tonight's hook, the 'strategic pause' and the revolving door, is listed but never built into a story, so a director must assemble it. The body list and texting habits are compact and useful.",
+   "evidence": [
+    "a smile practiced for three years in a bathroom mirror until it read like a brochure",
+    "She once rehearsed a seductive smile for an hour and then wore a canapé lodged under her mouth accessory"
+   ],
+   "raise": "Merge the two prose blocks, cut the repeats and spend the saved words developing the revolving-door interview hook.",
+   "def": "63ca3549efdaf667",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "profile.voice": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "From this profile alone, write five short dating-app messages this person would send tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m., (5) the moment they stop performing.",
+   "answer": "**(1) Opener to someone they fancy**\nhm. Verdict: you're my favourite profile tonight, so let's skip the part where we pretend otherwise. Three things up front. 1. I plan dates three weeks out. 2. I will arrive early, possibly at the wrong correct address. 3. There's a curve, and it bears left. Now you can't say nobody warned you. Thursday?\n\n**(2) When the other person has gone quiet**\nForty minutes. Not a verdict. I'm aware it isn't a verdict. I've decided it isn't one. You're probably busy, or eating, or did a perfectly normal human thing like put your phone down, which I support. Ignore this. Actually, don't ignore it. Ignore the part where I said ignore it.\n\n**(3) When caught in a lie**\nFine. Correction for the record. The \"strategic pause I took entirely on my own terms\" was a revolving door in a hotel lobby taking my heel. I limped into the interview and talked about the door for forty minutes. Thoroughly. Possibly brilliantly. Didn't get the job. But that door has never been so well understood.\n\n**(4) At 2 a.m.**\nConfession, since we're past pretending. \"Just got in from a thing\" earlier: I'd been on the sofa since four in the same towel, watching the ceiling. The three-litre rosé and I are reading old messages. This counts as a new message, so technically I'm making progress. hm. That sounded better in my head.\n\n**(5) The moment they stop performing**\nI practise my opening lines in the mirror with three different smiles until one of them looks unrehearsed. I didn't do that for you. Didn't have time. So this is just me. Big, a bit lopsided, too much at once, I know. You don't have to be soft about it. Just be exact with me, and stay a while."
+  },
+  "profile.likeable": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "Name the one thing you would genuinely like about this person if you met them, and the one thing you would find hardest to forgive. Be specific, and no jokes.",
+   "answer": "The thing I'd genuinely like is that she hides nothing about herself. The profile says she will tell you the unflattering truth about herself \"in exhaustive detail.\" She names her own body's oddities before anyone can notice them. Her nice possessions aren't for show; they're evidence of a self she built during a stretch when it wasn't clear she would manage it. The shape of that honesty is defensive, since she judges herself first so nobody else gets the chance. But the result is still someone who doesn't make you guess what she is. With a Wit score that high, the most likely way she'd show it is by telling you about the revolving door that took her heel and then talking about it for forty minutes, rather than pretending it didn't happen.\n\nThat leads to a caveat. Tonight's version of her calls that same episode \"a strategic pause I took entirely on my own terms.\" Her strongest shadow is Denial, where the honest thing comes out as its opposite and she insists on it. So the honesty I'd like is real but not reliable. It is clearest when it's about her flaws and least reliable when it's about her pride.\n\nThe thing I'd find hardest to forgive is cutting someone with her cleverness and not noticing. The profile says her quick wit can insult \"your entire family\" while she stays oblivious. It also says she offers logic when comfort was wanted, and that under pressure her wit gets an edge. On their own those would be ordinary faults. What would make them hard to forgive is her very low SelfAwareness combined with Denial. She is unlikely to see the harm, and if someone pointed it out she might argue the reverse. She does apologize preemptively, but the profile doesn't show her apologizing afterward for a specific hurt she caused. So I'd expect to be the one carrying the injury while she moves on, sure the exchange went well.\n\nThe profile doesn't say whether she can change on either count. It only says she feels safest with someone patient, exact, and consistent. That suggests the second problem might soften with time and the right person, but it doesn't promise it."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.5,
+   "cost": 0.042512,
+   "label": "probe profile.voice"
+  },
+  {
+   "seconds": 20.3,
+   "cost": 0.048932,
+   "label": "probe profile.likeable"
+  },
+  {
+   "seconds": 31.7,
+   "cost": 0.162636,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 40.9,
+   "cost": 0.192352,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 34.0,
+   "cost": 0.157812,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 30.9,
+   "cost": 0.1593,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:16:31Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.7635
+}

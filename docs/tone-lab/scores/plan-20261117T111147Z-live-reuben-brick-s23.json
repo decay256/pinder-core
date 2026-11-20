@@ -1,0 +1,350 @@
+{
+ "id": "plan-20261117T111147Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v13 · 17 Nov 11:11 · full run",
+ "version": "v13",
+ "order": 13,
+ "run": "20261117T111147Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261117T111147Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "17 Nov 11:11",
+ "materials": {
+  "brief": {
+   "chars": 17538,
+   "words": 3035
+  },
+  "plan": {
+   "chars": 6273,
+   "words": 1027
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 3,
+   "why": "The 'Tonight' sections draw on the drawer details: the fifth energy shot, the eleven days of lentils, the damp towel since four, the rosé. But they are static conditions rather than things that happen during the night. Nothing from the named world presses in mid-chat. Rick, The Sluice, the sister and the singer's brother all stay in the backstory; only the wrong-paste accidents bring a named person (the sister) into the chat. The material is personal, but no event is scheduled to hit at a worst moment, so it stays below the line.",
+   "evidence": [
+    "Pacing his bathroom on his fifth gas-station energy shot after eleven days eating cold pot-lentils",
+    "On her sofa in the same damp towel since four p.m."
+   ],
+   "raise": "Add at least one outside interruption per character during the night, such as the sister replying to the misdirected paste or a text from Rick or The Sluice arriving just as Reuben claims nightlife cool, timed to land on that character's fear.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "All three setups have a plant, a return and a payoff. The clip's payoff, 'standing tall doesn't make him taller', is specific and lands on his fear. The payoffs are written only for the click path, though. The fall-apart ending gestures at the door with 'freight elevator' but never says how the clip or the arm-wrestling land differently there. That keeps it from a 5, while the complete three-stage arcs keep it above the line.",
+   "evidence": [
+    "pays off when he admits he clips his coffee shut because standing tall doesn't make him taller",
+    "pays off as how two mismatched bodies actually fit together",
+    "a manic pre-emptive exit about her needing a freight elevator"
+   ],
+   "raise": "Give each setup an explicit fall-apart payoff, for example the arm-wrestling turning into 'who pins whom' as a cold measurement of his insufficiency.",
+   "def": "521e2223c917f019",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The click ending has both drop their markers and confess the hidden rehearsal and the towel-and-rosé. The fall-apart ending has her list reduce him to clearance while he exits first. These are different stories with different mechanics, and 'she doesn't look past him' pays off the singer looking over his hat. Neither ending reaches the brief's go-home decision on a very hot night, and the fall-apart's 'Both confirm they are unlovable freaks of scale' is a generic summary rather than a scene, so it stops short of 5.",
+   "evidence": [
+    "Brick stops numbering and admits she's in a towel with boxed rosé afraid of breaking the furniture",
+    "He doesn't want her smaller; she doesn't look past him.",
+    "Both confirm they are unlovable freaks of scale."
+   ],
+   "raise": "End the click branch on a concrete decision about going home together, and give the fall-apart a specific final artefact instead of a thematic summary.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "The plan makes no provision for a short game. There is no compressed path and no statement of which beat survives six turns. The turning point (markers dropping) is never identified as the protected beat.",
+   "evidence": [
+    "If they click: Brick stops numbering",
+    "If it falls apart: Brick's `1. 2. 3.` reduces him"
+   ],
+   "raise": "Add a short-game line naming the six-turn spine: plant the clip and door, fire one accident, then go straight to the marker-drop turn and an ending.",
+   "def": "9c79336a7855f173",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are exact on-screen artefacts and fit the medium. Reuben's is a Notes-app rehearsal pasted in by mistake, naming Rick and 'the brother thing'. Brick's is a misdirected text to her sister that undercuts her heroic origin. Each leaks the true story through a believable wrong-paste. It misses a 6 because there is only one per character and none is tied to their strongest shadows (Overthinking and Denial) as dice outcomes. Her paste also contradicts the 'emergency glass release' detail without marking whether that contradiction is deliberate.",
+   "evidence": [
+    "Option B (grin, don't shrug): Full disclosure, it hooks left like the hallway at The Sluice",
+    "hotel security just opened the freight door so I could get my heel out. drop it"
+   ],
+   "raise": "Add a second written artefact per character tied to their top shadow, such as Reuben's three-message curve explanation spelled out verbatim.",
+   "def": "8a43f27b6bad2c45",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel over chat. The confessions, the measurements and the booth-fit logistics are all talk, and the hat removal could arrive as a photo. The plan uses the medium itself: the accidents are wrong pastes, and Reuben's snap is triggered by 'a slow reply'. It misses a 6 because it leaves photos, typos and timing beyond that one trigger unused, especially his shaking hands.",
+   "evidence": [
+    "A slow reply or feeling measured makes him weaponize his disclaimer",
+    "Wrong paste meant for her sister"
+   ],
+   "raise": "Use his shaking hands as a typo or garbled-message artefact, or have the hat come off in a sent photo.",
+   "def": "df6fedc6221ef314",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. He writes ceremonial full words, uses emoji as terminal punctuation, and opens with 'Full disclosure:'. She writes clipped clauses, a lowercase 'hm.' and numbered lists. Most single messages could be attributed. The sample lines share a geometry and logistics lexicon ('calculate the geometry' and 'a logistical problem'), so a marker-free message could blur, which keeps it from a 6.",
+   "evidence": [
+    "I can wait while you calculate the geometry.",
+    "We are clearly going to be a logistical problem.",
+    "1. I do not skim bios. 2. Remove the hat."
+   ],
+   "raise": "Give Reuben a vocabulary of his own, such as band eras or door-staff slang, so his lines never borrow her measuring language.",
+   "def": "e90fb07ec3b78554",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "The collision is a real unpredicted turn. His self-deprecating clearance jokes are heard by her as another man saying she is too big, and her measuring is felt by him as being cropped out. Those are mirrored wounds misfiring off the same words. The rest follows the default size-mismatch farce, and the endings resolve as predicted (confess, or both decide they are freaks).",
+   "evidence": [
+    "Reuben pre-emptively jokes about clearance and tight angles so she won't mock his lack of length; Brick hears it as another man warning her"
+   ],
+   "raise": "Let one ending turn on something the collision does not predict, for example both discovering they rehearse in the same mirror ritual.",
+   "def": "eee876c9f2949144",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "Each character has a full set of sections (Shows, Tonight, Fear, Habit, Marker, Lie, Origin, Accident, Snap, Feelings, Shadow, Voice), followed by Collision, Setups, both endings and Heat. No chat is written beyond short voice samples. It misses a 5 because there is no short-game section and the origins carry internal inconsistencies, such as glass release versus freight door, with no note on intent.",
+   "evidence": [
+    "Habit marker: Full disclosure: | Before you say it: | For the record,",
+    "Security had to pop the emergency glass release"
+   ],
+   "raise": "Add the missing short-game section and reconcile or explicitly flag the freight-door contradiction as her denial.",
+   "def": "bd872356c69500bb",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 4,
+   "why": "Nearly every tonight-detail comes from the brief: the energy shots, eleven days of lentils, the $189 clip holding coffee, the mirror rehearsal of the curve, and the dive-bar misidentification for him; the towel since four, the three-liter rosé and the harness propping a door for her. Some inventions go beyond extending the brief. The brief has her losing a heel and talking for forty minutes; the plan adds her trunk wedged in the glass and security releasing her 'like livestock'. The plan also misses the brief's most striking feature: the two backstories mirror each other (both cropped out of the family portrait, both built a replica app, both practise a brochure smile, both have drafty houses). It leaves unused Brick's own mirror-rehearsal drawer item, the duck and the band test.",
+   "evidence": [
+    "Security had to pop the emergency glass release while three men in suits stared at her pinned against the pane like livestock",
+    "rehearsing his curve disclosure in the mirror while a $189 posture clip holds his coffee bag shut"
+   ],
+   "raise": "Use the mirrored backstories, both rehearsing in bathroom mirrors tonight, as a recognition beat, and keep the door origin to the brief's heel and forty-minute lecture.",
+   "def": "422981f4d9c7d5f1",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "There is no clear break with the brief. Brick's backstory claims a short tip and a slight midsection, which conflicts with her 95-100 tip and 70-95 mid stats; the plan quietly follows the stats ('Massive length'). It does not flag or exploit this trap, which keeps it off a 5. The plan also contradicts itself on the door: the origin has security popping the 'emergency glass release', while her accident paste says 'hotel security just opened the freight door'. If that discrepancy is meant as her Denial, the plan never says so.",
+   "evidence": [
+    "Security had to pop the emergency glass release",
+    "hotel security just opened the freight door so I could get my heel out"
+   ],
+   "raise": "Label the freight-door paste explicitly as her Denial version of the glass story, and address the brief's tip and midsection trap on the page.",
+   "def": "fa45960901c28caa",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both needs are implicit and answered by the other: he fears being 'cropped out of the frame', and she 'doesn't look past him'; she fears being too big to fit, and he 'doesn't want her smaller'. The collision gives each a test that misfires on the other's wound. Tests are not stated as tests, though. Reuben's brief-given band name-drop test is dropped, leaving his 'obscure callback' joy with nothing to probe. Nothing is set up to answer his need for someone who stays present through pauses, even though she reads slow replies as verdicts too.",
+   "evidence": [
+    "He doesn't want her smaller; she doesn't look past him.",
+    "joy at an obscure callback landing"
+   ],
+   "raise": "Write an explicit test for each character, such as his band name-drop and her joke about squeezing through a door, and say which of the other's traits passes or fails it.",
+   "def": "cdf9049147e4579d",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The collision only works for these two. His clearance jokes, meant to hide his lack of length, land on her fear of being too large. Her numbered measuring, meant to control the room, lands on his fear of being graded and cropped out. The three setups use his clip, her revolving door and his arm-wrestling bio. The fall-apart ending, 'insufficient clearance' versus 'freight elevator', is built from their specific bodies. It is not a 6 because the click ending's shared confessions (mirror, towel) could be swapped onto other rehearsing, self-isolating characters.",
+   "evidence": [
+    "Reuben pre-emptively jokes about clearance and tight angles so she won't mock his lack of length; Brick hears it as another man warning her she's too huge",
+    "Brick's `1. 2. 3.` reduces him to insufficient clearance"
+   ],
+   "raise": "Tie the click moment to something only this pair could find, for example both admitting to the same mirror ritual.",
+   "def": "f1b9dddac061dbfe",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 5,
+   "why": "Private material reaches the other character by explicit routes. The wrong pastes leak The Sluice and the brother firing, and the sister-bound door message. The clip, the shaking hands, the towel and the glass are each set up as admissions. Brick's early lines use only public profile facts such as the hat and proportions. The accidents deliberately use the gap between the cover story and the truth. It is not a 6 because nothing tracks what each character knows after a leak; for example, it is unclear whether Reuben can use 'pinned' before she confesses it.",
+   "evidence": [
+    "Wrong paste meant for her sister: `the glass didn't crack when I wedged it",
+    "Option B (grin, don't shrug): Full disclosure, it hooks left like the hallway at The Sluice before Rick fired me"
+   ],
+   "raise": "Add a line stating what each character now knows after each accident, and what they may say about it.",
+   "def": "5ca08850b888867b",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "There is no beat sequence, only setups with plant, return and payoff, plus two branch endings. Within the setups the transitions are mostly 'and then'. The clip 'returns when he admits his hands are shaking' without anything prompting that admission, and the door 'returns when she measures how they'd fit in a booth' with no cause. The collision supplies some 'but' logic, but nothing connects it to the setups or to which ending occurs.",
+   "evidence": [
+    "returns when he admits his hands are shaking from gas-station energy shots",
+    "returns when she measures how they'd fit in a booth"
+   ],
+   "raise": "Order the beats and give each return and payoff a trigger from the previous beat, for example her measuring the booth provoking his shaking-hands confession.",
+   "def": "b7d5785d1f61ce07",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "The moment exists and shows in the typing: she 'stops numbering' and he 'drops `Full disclosure:`', so the dropped habit markers carry the change before the words do. It has no trigger, though. 'If they click' is a condition, not an event, and nothing ties the turn to a payoff or line from tonight.",
+   "evidence": [
+    "Brick stops numbering and admits she's in a towel with boxed rosé",
+    "Reuben drops `Full disclosure:` and admits he practiced his curve speech"
+   ],
+   "raise": "Name the event that brings the guard down, for example her admitting she was pinned in the glass, which makes him drop the disclaimer.",
+   "def": "e72f84db4817e97c",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "Heat escalates in steps, from profile-stat geometry to 'filthy logistics about who pins whom', and the step up is tied to trust: 'once they stop defending their proportions'. That suits a brief marked very high heat. It stays at a 4 because it 'Starts early with shameless geometry talk' and never places the filthy logistics or the booth fit relative to the midpoint, so they could arrive early.",
+   "evidence": [
+    "Starts early with shameless geometry talk",
+    "turns filthy once they stop defending their proportions and start figuring out the leverage"
+   ],
+   "raise": "State that the who-pins-whom logistics and booth fitting come only after the midpoint and follow a specific confession.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "The three-stage setups spread payoffs across the night, and the big confessions are held for late. However, both accidents and both snaps have no position at all. Brick's wrong paste gives away the door truth that setup 2 saves for its payoff, so if it fires early it front-loads that reveal.",
+   "evidence": [
+    "pays off when she admits getting pinned in the glass",
+    "Wrong paste meant for her sister"
+   ],
+   "raise": "Place each accident and snap in a numbered beat slot, with the door paste set after the booth return so it does not spoil the payoff.",
+   "def": "6992bdb3b448c021",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 44.4,
+   "cost": 0.16283999999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 59.0,
+   "cost": 0.194696,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:23:40Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3575
+}

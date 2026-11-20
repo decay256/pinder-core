@@ -430,3 +430,21 @@ The bundled files on this branch also share whole passages. The reconsolidation 
 v22 writes each character a profile, once, with `tools/tonelab/profiles.py` and the prompt in `tools/tonelab/profiles/generator.yaml`. The profile keeps the bio word for word, what they own, the body, the drawer and the clinician's notes, and invents the rest in a fixed shape: what the match sees (the body in two or three plain lines), their life now, four to six named people, six to eight moments from childhood to this year, what they love and are good at, how they are with people, what they want (from tonight, from someone, the dealbreaker, what they test for first), four to six brags with the truth behind each, and how they text in ten situations: baseline, into them, losing them, waiting for a reply, hurt or embarrassed, horny, late at night, on something, lying, and guard down. Passages a character's file shares with another character's are listed as shared and kept out, unless they come from that character's own fragments; each profile is told the names and lives the earlier ones already use. Everyone lives in London (the generator's `city`), each in a neighbourhood of their own, so a chat that ends in "come over" can end in a meeting. The tool checks every answer (the headings, the bio, every situation, the counts, the length, nothing copied from a shared passage) and sends the problems back, twice at most.
 
 With `"profiles": true` in variant.json, the card is the profile (without its brags), the stats, the shadows, one brag from the profile as tonight's focus, the drawer sample and the clinician's notes. The writer, who never sees the cards, is also given each character's texting by situation; the director's Feeling note and what just happened say which one applies. The game's character files and its generator are unchanged: the profiles are the tone lab's, and they go back into the game only once the chats show they work. `preview.py --old-cards` builds the cards the old way, for a comparison on the same dice.
+
+## The work is scored (v23)
+
+Until v22 the lab judged its chats by reading them, plus a reader check and an attribution check
+at the end of a live run. v23 adds a scorecard: candidate metrics for the three kinds of work the
+lab produces, the character profile, the plan and the chat, in `tools/tonelab/scorecard.yaml`
+and in prose in `docs/tone-lab/scorecard.md`. Every dimension scores 1 to 6 with no midpoint,
+so a score has to lean: each dimension writes its own bar as the line between 3 and 4.
+
+`tools/tonelab/score.py` has a language model score the work against it, a different model
+family from the writer (the subscription Claude CLI by default). Every score comes with the
+reason, the quotes it rests on (checked against the material, so an invented quote shows), and
+the change that would raise it. Where the judge would be the wrong reader because it already
+knows the answer, a probe call sees only what a reader would see (the chat alone, the chat with
+the names hidden, the chat without its last turn, the profile alone) and the judge compares that
+reader's answer with the truth. Scores are kept until the dimension, the material or the judge
+changes. `docs/tone-lab/scores/index.html` is the explorer: a grid per kind of work, the plans'
+trend across versions, and every score's reasoning.

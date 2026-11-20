@@ -1,0 +1,362 @@
+{
+ "id": "plan-20261118T200708Z-preview-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v22 · 18 Nov 20:07 · preview",
+ "version": "v22",
+ "order": 22,
+ "run": "20261118T200708Z-preview-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261118T200708Z-preview-reuben-brick-s23/preview.html",
+ "note": null,
+ "when": "18 Nov 20:07",
+ "materials": {
+  "brief": {
+   "chars": 20892,
+   "words": 3542
+  },
+  "plan": {
+   "chars": 21822,
+   "words": 3535
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 5,
+   "why": "All four events come from named people and places in the brief: Sonance and the dropped group project, Toby's eternal Maybe, the headboard ring light, and the dry cleaner's shutter. Events 1 and 2 hit the core fears exactly: vanishing from the frame, and vague scheduling. Events 3 and 4 press on a lie or on control rather than the deepest fear. Stacking Events 1 and 3 into the same beat uses up a pressure point that could have landed separately at a worse moment.",
+   "evidence": [
+    "the group project he was quietly dropped from three weeks ago just wrapped without anyone noticing he was gone",
+    "changing Thursday drinks from *Maybe* to \"let's play it by ear soon\"",
+    "threatens her \"Marylebone consultant just back from a thing\" lie"
+   ],
+   "raise": "Move the ring-light event to the moment just after his plain-sentence admission, and aim the shutter event at her fear of being too much, not at her travel lie, so every event hits a fear at its worst moment.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 5,
+   "why": "Each setup has a plant, a mid-chat return and an ending payoff, and the three endings pay them differently. In the click ending, the eleven seconds become how long she'll hold him quiet. In the bad-reason ending, they become a rule against quiet moments. In the fall-apart ending, they are the silence before the unmatch. The eleven-second forfeit is clever: an invented courtroom rule that pays off as his real origin wound. Setup 3 is a bundle (curves, posture hardware, mirrors) that diffuses its payoff, and setup 1's mid-chat return ('measures the pause in percentages') is thin.",
+   "evidence": [
+    "the eleven seconds become how long she'll hold him quiet",
+    "the eleven-second forfeit becomes a rule against quiet moments",
+    "the eleven seconds is the silence before the unmatch"
+   ],
+   "raise": "Narrow setup 3 to one object, such as the two posture devices, so it has a single clean return and a payoff that differs in each ending.",
+   "def": "521e2223c917f019",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 4,
+   "why": "The three outcomes are different stories. In one, he takes the clock and she holds him flat. In another, they sign a timed arbitration that keeps both acts running. In the third, a magistrate release meets a syllable-audit adjournment. Each costs something different. However, Reuben lives on 31st Avenue in Astoria and Harriet lives above an East Dulwich dry cleaner's, so the click and bad-reason endings both depend on meeting tonight, which is impossible across the Atlantic, and the plan never notices. That keeps the endings at the line rather than the best version of each outcome.",
+   "evidence": [
+    "They meet tonight at her flat, giving both the night and the morning-after date they secretly wanted.",
+    "They agree to a strictly timed thirty-minute hookup tonight framed as a council arbitration.",
+    "naming the exact minute he's arriving to pin each other down"
+   ],
+   "raise": "Rebuild the click and bad-reason endings around the ocean, for example he books an exact flight and arrival timestamp, or they schedule a video call with orders, so the outcomes are possible for this pair.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 5,
+   "why": "The provision says exactly which beats fold, and it keeps the lowercase-ellipses turning point, placing it on Turn 4. Combining the confession and the scheduling call into one beat leaves a complete arc: clash, accident, turn, ruling. The merged 'single mutual clipboard accident' is a new, unspecified event rather than one of the two written accidents. It also drops the Toby flake that drives Harriet's snap, so her side of the short story is thinner.",
+   "evidence": [
+    "hit the Beat 6 lowercase turn on Turn 4",
+    "merge Beats 3, 4, and 5 into a single mutual clipboard accident over posture hardware and mirror rehearsals",
+    "combine Beats 7 and 8 into the confession and final scheduling call"
+   ],
+   "raise": "State which character's written accident survives the merge and keep Toby's 'play it by ear' as the trigger, so the short version runs on artefacts already specified.",
+   "def": "9c79336a7855f173",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are exact on-screen artefacts with verbatim text and a scripted cover story, and both suit a chat window. His is a search string blamed on a Sonance medical podcast; hers is a Toby draft relabelled as a council docket. They use the same mechanism, though: each pastes the wrong clipboard. The second misfire therefore repeats the first rather than surprising the reader.",
+   "evidence": [
+    "does rightward curvature actually affect angle of entry reddit",
+    "Toby — 19:30 Thursday, 14-min buffer from Chancery Lane, confirm by 17:00 so I don't sit there",
+    "immediately issues a \"To clarify:\" memo claiming it's a council arbitration docket"
+   ],
+   "raise": "Give Harriet a misfire through a different channel, such as a rosé-typed voice note or an autocorrected timestamp, so the two accidents do not mirror each other.",
+   "def": "8a43f27b6bad2c45",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can reach the other person through the chat: the shutter and the heartbeat are things she can report, the ring light shows up as a cut-off message, and both accidents are pastes. The plan uses the medium itself: four-second replies, energy-shot thumb typos, a mid-sentence cut-off, and the slide into lowercase ellipses. It stops short of 6 because nothing uses photos or voice notes, and the four-minute briefing and pinning are left as promises with no chat form specified.",
+   "evidence": [
+    "a cut-off message exposes that he's in bed under a ring light",
+    "fires off a four-second reply riddled with energy-shot thumb typos",
+    "her numbered clauses dissolve into lowercase ellipses"
+   ],
+   "raise": "Plan one beat that depends on a sent photo or voice note, such as the horse-tack harness on the bathroom door, so the medium is used more fully.",
+   "def": "df6fedc6221ef314",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The voices differ on observable features. Reuben writes long ceremonial sentences without contractions, ends with hat-tips, uses courtroom words and the soft 😌, and has shaky typos. Harriet opens with 'Hm.', writes numbered clauses and 24-hour timestamps, and types 'HA.'. Most of the sample lines could be attributed without names. They overlap in two registers: both slide into sleepy lowercase ellipses, and both snap into percentage math. Messages in those modes could be confused.",
+   "evidence": [
+    "I submit my application for your evening and await the magistrate's ruling.",
+    "1. I am six-foot-one before heels and curve thirty degrees right. 2. You have four minutes to file objections.",
+    "audits the exact percentage drop in his syllables"
+   ],
+   "raise": "Give Harriet's snap a non-percentage form, such as numbered indictment clauses only, and give Reuben's fade a distinct tic, such as trailing music trivia, so the overlapping registers separate.",
+   "def": "e90fb07ec3b78554",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "There is at least one unpredicted turn. Harriet answers his humiliating search paste by filing her own stiff heel-shank incident report instead of mocking him. The eleven-second courtroom rule also turns out to be his actual wound. Otherwise the arc is the familiar mirrored-shame convergence: both lie about travel, both rehearse in mirrors, both own posture hardware, both curve right, and they confess in matching order. The plan also ignores its biggest real complication, the ocean between Astoria and East Dulwich.",
+   "evidence": [
+    "Harriet files a stiff technical report on her own heel-shank failure and wine-bar yawn-hiccup bark",
+    "which can't come until both know the other also rehearses in the mirror"
+   ],
+   "raise": "Let the transatlantic gap drive a turn, for example him taking the clock by booking a timed flight instead of naming a minute at her door, so the plot goes where the default flirt would not.",
+   "def": "eee876c9f2949144",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 5,
+   "why": "Every requested section is present for both characters, followed by the collision, reasons, setups, events, an eight-beat story, midpoint, short-game provision, three endings and heat. It writes no chat beyond the requested voice samples and accident artefacts. Two small flaws keep it from 6. Harriet's 'Shows' field leaks the hidden truth '(actually 38)' into what the match sees. The story beats are overstuffed run-on sentences that cram several fields into one.",
+   "evidence": [
+    "Shows: 31 (actually 38), \"strategy consultant\"",
+    "Tonight's Event 1 (the Sonance Slack ping erasing Reuben) and Event 3 (his headboard ring light falling) rattle Reuben into his Accident"
+   ],
+   "raise": "Keep 'Shows' strictly to the visible profile and trim each story beat to one action and one consequence.",
+   "def": "bd872356c69500bb",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every detail traces to the brief: the $189 clip on the coffee bag, the £240 harness propping the door, the eleven seconds before \"We can just watch something,\" Toby's Maybe RSVPs, and the dry cleaner's shutter. The inventions, such as the Slack ping showing the project wrapped, the ring light falling, and Toby's \"play it by ear soon\" text, extend brief material rather than replace it. The plan also finds a pairing a reader could miss: both characters have right curves, mirror-rehearse, and keep posture hardware they now use as household clips. It falls short of a 6 because it adds an ungrounded \"college radio degree\" and leaves Tariq, Nadia, Sonia, Arthur and Brenda unused, even though Tariq is Reuben's only model of silence without performance.",
+   "evidence": [
+    "both leak their 2 a.m. shame purchases ($189 collarbone clip holding coffee shut; £240 horse-tack harness propping the bathroom door)",
+    "Spent forty minutes at 3 a.m. Tuesday googling \"does curvature actually affect anything\" six ways"
+   ],
+   "raise": "Use Tariq's silent falafel lunches as Reuben's proof that quiet company exists, setting up the bar Harriet has to meet.",
+   "def": "422981f4d9c7d5f1",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 3,
+   "why": "The plan has one load-bearing contradiction. Reuben lives in Astoria, New York, and Harriet lives above an East Dulwich dry cleaner's in London, yet the click ending has them meeting tonight at her flat, with him naming the exact minute he arrives. The plan also ignores the five-hour time gap: her 9:15 p.m. is mid-afternoon in Astoria, but Reuben is in bed doing late-night lowercase. It does not correct the brief's trap here; it builds the payoff on top of it.",
+   "evidence": [
+    "They meet tonight at her flat",
+    "naming the exact minute he's arriving to pin each other down",
+    "On her sofa above an East Dulwich dry cleaner's"
+   ],
+   "raise": "Make the payoff a timestamped plan that crosses the ocean, such as a call or a booked flight with \"Thursday at seven\" in her time zone, and fix the clocks so both can be up late.",
+   "def": "fa45960901c28caa",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Both characters have three explicit needs, and their tests map onto them cleanly: the band-era check probes whether she pays attention, the \"I release you\" exit probes whether she stays, and her minute-mark deadline and her demand for an end time probe whether he keeps time and takes the clock. The give-aways are the weak part. Most reveal the owner's own wreckage (lentils, typos, the nipple; the fake 20:42, the heel shank, the empty flat) rather than answering what the other is testing for. Nothing Harriet gives away shows Reuben she will stay through a silence, and nothing Reuben gives away shows he can take command of the clock.",
+   "evidence": [
+    "Offers a ceremonial early exit (\"I release you, fare well\") after a pause to test whether she lets him disappear",
+    "Demands an end-time for meeting tonight to see whether he hides behind her stopwatch"
+   ],
+   "raise": "Rewrite at least one give-away per side so it answers the other's need, for example Harriet letting a pause run unfilled, or Reuben stating an exact time unprompted.",
+   "def": "cdf9049147e4579d",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The collision is built from these two people specifically. His joking exit-clauses hit her terror of vague rejection, and her syllable audits hit his fear of a silent tribunal. The setups only work for this pair: the eleven-second forfeit against her four-minute briefing, and the two thirty-degree right curves. The good and bad reasons both depend on her size and certainty meeting his need to be held quiet. It misses a 6 because the falling ring light and the Slack ping are slapstick and pressure events that could be given to many anxious performers.",
+   "evidence": [
+    "the eleven seconds become how long she'll hold him quiet, the four-minute briefing is replaced by his timetable",
+    "His joking exit-clauses (\"I release you, fare well\"), which lands directly on Harriet's terror of vague, unscheduled rejection"
+   ],
+   "raise": "Tie the Reuben-side event to something only Harriet's material can answer, for example a silence she has to sit through, rather than a generic ring-light pratfall.",
+   "def": "f1b9dddac061dbfe",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    false
+   ]
+  },
+  "plan.knowledge": {
+   "score": 5,
+   "why": "Private facts reach the screen through planned channels. His Reddit search arrives by a paste accident, her Toby draft by a misdirected paste, and the travel lies are undone by on-screen slips such as the radiator, the lentil pot and the shutter clanging. Beat 7 is explicitly gated on what each has already shown: \"can't come until both know the other also rehearses in the mirror.\" The lie gaps (Marylebone versus East Dulwich, upstate versus eleven days indoors) are used as tension. It falls short of a 6 because some routing is assumed rather than tracked, for example how Reuben learns the noise is a dry cleaner's shutter or that her flat is empty of Marguerite's things.",
+   "evidence": [
+    "which can't come until both know the other also rehearses in the mirror",
+    "pastes his 3 a.m. clipboard search: `does rightward curvature actually affect angle of entry reddit`"
+   ],
+   "raise": "For each give-away, add a note on what is typed on screen that lets the other character know it, for example \"she types 'that's the dry cleaner's shutter, I'm above it.'\"",
+   "def": "5ca08850b888867b",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 4,
+   "why": "Four of the seven transitions are causal. Beat 4 happens instead of laughing at his paste, beat 6 leads to beat 7 because both travel lies are dead, beat 7 leads to beat 8, and the joke in beat 5 sets off the double snap. Beats 3, 5 and 6 are each started by one of tonight's random external events (the Slack ping and falling ring light, Toby's text, the shutter), so those transitions read as \"and then.\" The move from beat 1 to beat 2 is only \"pushed by late-night heat.\"",
+   "evidence": [
+    "Tonight's Event 2 (Toby's \"play it by ear soon\" text over boxed rosé) triggers Harriet's Accident",
+    "Instead of laughing him out of the room, Harriet files a stiff technical report"
+   ],
+   "raise": "Make the beat 5 accident follow from beat 4, for example Harriet pasting the Toby draft because Reuben's kindness about the heel-shank report rattles her.",
+   "def": "b7d5785d1f61ce07",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 5,
+   "why": "The guard comes down at the planned midpoint, beat 6. It has a trigger from tonight's events: the shutter clangs and she hears her heartbeat in her ear. It is shown in the typing before anything is said, as her capitals, numbers and \"Hm.\" collapse into lowercase ellipses and he drops the hat-tip for one plain sentence. It is not a 6 because Reuben's drop only mirrors hers rather than coming from his own trigger, and the deeper confession is deferred to beat 7.",
+   "evidence": [
+    "make Harriet drop her capitals, numbers, and \"Hm.\" for sleepy lowercase ellipses",
+    "which makes Reuben drop his hat-tip and tell her about the lentil pot in one plain sentence"
+   ],
+   "raise": "Give Reuben's guard-drop its own trigger in the typing, for example his four-second replies stopping as he lets a silence past eleven seconds stand.",
+   "def": "e72f84db4817e97c",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 3,
+   "why": "Logistics are correctly held until beat 8, and the heat note does describe a step from performative to raw. However, beat 2 already puts the full anatomy on the table: her \"six-foot-one limestone scale and thirty-degree rightward curve\" and his \"soup-can rightward hook.\" Beat 3 adds an \"angle of entry\" search. That is full sexual detail before the midpoint, which is the front-loading the line excludes.",
+   "evidence": [
+    "Harriet issuing her setup of a four-minute briefing on her six-foot-one limestone scale and thirty-degree rightward curve",
+    "Reuben bragging about his T-rex reach and soup-can rightward hook as a storm"
+   ],
+   "raise": "Keep beat 2 to a teaser, such as \"Fair notice: there is a briefing,\" and hold the specific scale and curve details until after the beat 6 turn.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 4,
+   "why": "The opening is uncrowded: beats 1 and 2 carry only tests and lies. The deepest material (Origin 3, the flinch at twenty-eight, the eleven seconds, Delphine) is held back for beat 7. But beats 3 through 7 each stack a major reveal or accident, with his paste and Origin 2, her heel report and harness, then her paste, a double snap and her Origin 2. That leaves no low beat to breathe in and blurs the rhythm.",
+   "evidence": [
+    "Event 1 ... and Event 3 ... rattle Reuben into his Accident",
+    "triggers Harriet's Accident ... double Snap threat ... exposes Harriet's Origin 2"
+   ],
+   "raise": "Thin beat 4 to banter after the paste and move the harness reveal to beat 6, so the accidents in beats 3 and 5 have space between them.",
+   "def": "6992bdb3b448c021",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 59.4,
+   "cost": 0.249936,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 67.2,
+   "cost": 0.270564,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:21:15Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.5205
+}

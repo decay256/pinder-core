@@ -1,0 +1,356 @@
+{
+ "id": "plan-20261115T222741Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v4 · 15 Nov 22:27 · full run",
+ "version": "v4",
+ "order": 4,
+ "run": "20261115T222741Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261115T222741Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "15 Nov 22:27",
+ "materials": {
+  "brief": {
+   "chars": 15073,
+   "words": 2578
+  },
+  "plan": {
+   "chars": 4127,
+   "words": 687
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 3,
+   "why": "The only things that come from outside the chat are the two misdirected texts. Both are grounded in named people and places from the brief: Reuben's ex-manager and the hotel's facilities team. But both are the characters' own misfires. Nothing from that world pushes back during the night: no manager reply, no hotel message, no bar regular. There is no events provision at all, so the plan stays below the line.",
+   "evidence": [
+    "Pastes an unsent text to his ex-manager",
+    "Sends a text meant for hotel facilities"
+   ],
+   "raise": "Add at least one outside intrusion that arrives mid-chat at a bad moment, such as the ex-manager finally replying about the check just as Reuben claims a 'cool nightlife' past.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "The door motif has a clear plant (\"real hinge\"), a return in the callback against Reuben's exit habit, and a payoff in the click ending (\"heel by the hinge\"). The two endings pay the mirror-rehearsal secrets differently: in one they are offered as tenderness, in the other as a weapon. It stays above the line on that chain. It misses 5 because the click line has Brick citing his shrug rehearsal, which is listed as something he never says. That payoff has no plant the chat can actually deliver.",
+   "evidence": [
+    "I don't do revolving doors. Pick somewhere with a real hinge.",
+    "Stop holding the door open for me. I hate doors.",
+    "Don't rehearse the shrug before I knock."
+   ],
+   "raise": "Plant the shrug rehearsal on screen, for example through an accident or slip, so Brick's click line pays something the reader has actually seen.",
+   "def": "521e2223c917f019",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 3,
+   "why": "Each ending is given only as two last lines, with no description of how the night arrives there. The fall-apart ending uses the same mechanism as the click ending: both sides confess the mirror rehearsal. Reuben's \"so we are even\" also reads closer to a truce than a collapse. So the two outcomes look like one confessional scene with different final lines, not two different stories.",
+   "evidence": [
+    "I practiced three smiles in the mirror for a man already pointing at the exit.",
+    "I practiced shrugging about my curve for twenty minutes at the sink so we are even."
+   ],
+   "raise": "Summarise each ending as its own arc and give the fall-apart a different engine, such as her transit-map slip landing as control, so that it ends in an actual walk-away.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "The plan has no provision for a short game. Nothing says which beats survive six turns, or whether the door story and the callback would still land.",
+   "evidence": [
+    "Setup: Brick drops early",
+    "Callback: Mid-chat, when Reuben offers a polite exit"
+   ],
+   "raise": "Add a short-game line that compresses the setup, the door story and the callback into three turns and keeps the turning point.",
+   "def": "9c79336a7855f173",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Both accidents are written verbatim and suit the medium as misdirected texts. Brick's accident even keeps her numbered-list tic with \"3.\" It misses 6 because Reuben's text uses a contraction (\"didn't\") while his voice spec says zero contractions when anxious, which is exactly when he would send it.",
+   "evidence": [
+    "I washed the stamp ink off the stool and didn't know they were brothers, please just mail my check",
+    "3. The east revolving seal remains a hazard and you still have my left heel tip."
+   ],
+   "raise": "Rewrite Reuben's misfire in his ceremonial uncontracted register so the accident also identifies him by voice.",
+   "def": "8a43f27b6bad2c45",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through a chat: told stories, misdirected texts, and future-facing flirting. The plan also uses the medium itself. One accident is a paste error, and one snap slip turns on reply timing. It misses 6 because it does not use photos, typos or timing beyond that single counted-seconds slip.",
+   "evidence": [
+    "slips that he counted the exact seconds she took to reply",
+    "Pastes an unsent text"
+   ],
+   "raise": "Plan one beat around a sent photo or a timestamp gap, such as a photo of the harness holding the door open.",
+   "def": "df6fedc6221ef314",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 4,
+   "why": "The specs differ on observable markers. Reuben gets emoji in place of periods, ceremonial exit offers (\"should you wish to vacate\") and rapid bursts. Brick gets a leading \"hm.\", numbered verdicts and clipped proclamations. That keeps it above the line. It misses 5 because Brick's sample lines borrow Reuben's uncontracted formality, so some of her lines could be attributed to either character.",
+   "evidence": [
+    "I will step aside should you wish to vacate.",
+    "hm. 1. Your curve is an obvious advantage.",
+    "I already know what you are ordering."
+   ],
+   "raise": "Give Brick contractions and terse fragments throughout, so formality belongs only to Reuben.",
+   "def": "e90fb07ec3b78554",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "It goes beyond the default mismatch farce: the former doorman offers exits as a habit, the match announces she hates doors, and both humiliations happened at doorways. That is a turn a reader would not predict, and it keeps the plan above the line. The mirror-rehearsal rhyme is set up neatly but lands predictably in both endings, and the heat section is standard size-contrast escalation.",
+   "evidence": [
+    "Habit: Preemptively offers ceremonial exits when nervous, learned from eleven months watching dates clock each other at the bar door",
+    "Where they rhyme: Both humiliated themselves at a door"
+   ],
+   "raise": "Let the door rhyme produce a turn the endings rely on, such as Brick realising he is the reason she hates doors, instead of resolving through the mirror confessions.",
+   "def": "eee876c9f2949144",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "Each character gets the expected sections: profile, hook, true story, accident, never says, habit, lie, snap and voice. There are also shared rhyme, setup, callback, endings and heat sections, and the chat lines are kept to spec samples and anchor lines. It stays above the line on that. It misses 5 because there is no short-game section, and the click ending breaks the plan's own \"Never says\" constraint.",
+   "evidence": [
+    "Never says: Spends twenty minutes at his bathroom mirror before dates rehearsing his curve disclosure",
+    "Don't rehearse the shrug before I knock."
+   ],
+   "raise": "Add the short-game section and make the endings consistent with the 'Never says' constraints.",
+   "def": "bd872356c69500bb",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every element traces to the brief. Both hooks and truths are used as given. The habit markers come straight from the texting traits ('hm.', numbered lists, naming an exit). Both 'never says' items come from the drawer, and the snaps come from the clinician notes. The inventions extend the brief rather than replace it: the stool that hides his height, the accountant brother built from the backstory's 'confusing him with his brother', the heel brought back on a napkin. The plan also finds the door rhyme, which a reader of the brief would likely miss. It falls short of a 6 because a lot of the drawer is left untouched (energy shots, the nipple, the boxed rosé, the bark-hiccup), and the duck, mountains and tattoo never feed in.",
+   "evidence": [
+    "Worked the door at a damp dive bar for eleven months perched on a high stool so nobody clocked his height.",
+    "Both humiliated themselves at a door because their bodies didn't fit the room"
+   ],
+   "raise": "Fold one more drawer item per character into a planned beat, for example Brick's 'just got in from a thing' lie set against Reuben's 'just got back from a trip' lie, so the shared drawer becomes a second rhyme.",
+   "def": "422981f4d9c7d5f1",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 4,
+   "why": "Nothing breaks the brief. The plan quietly follows Brick's profile ('Massive length and girth') rather than her backstory's contradictory 'tip finishes shorter' and 'slight midsection', which avoids that trap. It does not flag the trap, though. There is also an internal mismatch: security returns her heel, yet her accidental text says facilities still have it. Separately, both 'never says' secrets are spoken outright in the fall-apart ending.",
+   "evidence": [
+    "until security brought her heel on a napkin",
+    "you still have my left heel tip",
+    "I practiced shrugging about my curve for twenty minutes at the sink"
+   ],
+   "raise": "Reconcile the heel (napkin-returned heel, missing heel tip) and note explicitly that Brick's backstory proportions are overridden by her profile.",
+   "def": "fa45960901c28caa",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "Reuben's need (someone who stays after seeing him clearly) has a test: ceremonial exit offers. Brick has a built answer to that test: 'Stop holding the door open for me. I hate doors.' The bad reason also falls out of the matrix, since Brick reads his exits as 'pointing at the exit'. Brick's need (to fit without shrinking) has no equivalent mid-chat test that Reuben answers; his response only arrives in the click ending. Reuben's band-era test is an orphan, because nothing gives Brick band knowledge.",
+   "evidence": [
+    "Stop holding the door open for me. I hate doors.",
+    "I practiced three smiles in the mirror for a man already pointing at the exit.",
+    "Wait. You actually know their second album."
+   ],
+   "raise": "Give Brick a mid-chat test of her own, such as a numbered inspection of his chaos, and give Reuben a planned reply that respects her structure without asking her to soften.",
+   "def": "cdf9049147e4579d",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The reasons, the callback and both endings rest on these two people's particulars. The door job against the revolving door, the stool against the lost heel, and the shrug rehearsal against the three-smile rehearsal could not be moved to another pair. The heat is also built from their actual bodies. It misses a 6 because the size-contest heat line is close to a generic big-versus-small template.",
+   "evidence": [
+    "Leave the other heel by the hinge. You do not need to stand level here 🙂",
+    "I don't do revolving doors. Pick somewhere with a real hinge."
+   ],
+   "raise": "Tie the heat escalation to a specific door detail (the stool, the hinge) rather than generic 'taking all of her'.",
+   "def": "f1b9dddac061dbfe",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 3,
+   "why": "Brick's click line depends on Reuben's mirror rehearsal of the shrug. The plan lists that as something he never says, and gives no route by which it comes out. Her snap slip about mapping transit times 'between their flats' assumes she knows where he lives. The heel is properly routed through her misdirected facilities text, so Reuben's 'other heel' line is earned.",
+   "evidence": [
+    "Don't rehearse the shrug before I knock.",
+    "Never says: Spends twenty minutes at his bathroom mirror before dates rehearsing his curve disclosure",
+    "slips that she already mapped transit times between their flats"
+   ],
+   "raise": "Route the shrug rehearsal into the chat earlier, for example a half-confession after the callback, or rewrite Brick's click line to rest only on what he has said.",
+   "def": "5ca08850b888867b",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "Only two causal links are explicit. The early hinge line sets up the callback, and heat escalates 'once a door story comes out'. Everything else (the accidents, the snaps, the guard moment) is a list of components with no order and no 'therefore' between them. A reader cannot tell what makes either accidental paste happen, or what leads to the snap.",
+   "evidence": [
+    "Setup: Brick drops early",
+    "Callback: Mid-chat, when Reuben offers a polite exit, Brick replies"
+   ],
+   "raise": "Lay the components out as a sequenced beat list in which each accident or snap is triggered by the previous beat.",
+   "def": "b7d5785d1f61ce07",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "There is an implied turning point: Brick's 'I hate doors' answering Reuben's exit offer. It has a clear trigger in his polite exit. A typing tell exists for Brick ('drops lists when genuinely moved'). However, the plan never names the guard-down moment as such, never says how Reuben's typing changes before he lowers his guard, and never places it.",
+   "evidence": [
+    "drops lists when genuinely moved",
+    "Stop holding the door open for me. I hate doors."
+   ],
+   "raise": "Name the guard moment explicitly and specify the typing shift for Reuben, for example contractions returning and the exit markers disappearing before he says anything plain.",
+   "def": "e72f84db4817e97c",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "The heat goes in two steps. It opens on competitive size talk drawn from the public profiles, and the escalation to filth is gated on trust ('once a door story comes out'). Logistics appear only in the endings ('before I knock'). The steps are coarse, with no midpoint marked and no middle rung, which keeps it at 4.",
+   "evidence": [
+    "Starts as competitive size talk",
+    "Escalates to real filth... once a door story comes out."
+   ],
+   "raise": "Add an intermediate step tied to a specific reveal, such as the accidental paste, and state that full explicitness waits until after the midpoint.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "Only the setup ('early') and the callback ('mid-chat') are placed. Neither accidental paste is placed, and neither snap is. Nothing crowds the opening, but nothing is held back for late either, so the rhythm cannot be charted.",
+   "evidence": [
+    "Setup: Brick drops early",
+    "Callback: Mid-chat"
+   ],
+   "raise": "Assign each accident and snap a position in the game, holding one reveal, such as Reuben's stool-and-stamp-ink text, for the late stretch.",
+   "def": "6992bdb3b448c021",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 41.8,
+   "cost": 0.14429599999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 58.8,
+   "cost": 0.180356,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:25:54Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3247
+}

@@ -1,0 +1,356 @@
+{
+ "id": "plan-20261115T232822Z-live-reuben-brick-s23",
+ "kind": "plan",
+ "label": "v5 · 15 Nov 23:28 · full run",
+ "version": "v5",
+ "order": 5,
+ "run": "20261115T232822Z-live-reuben-brick-s23",
+ "source": "docs/tone-lab/runs/20261115T232822Z-live-reuben-brick-s23/report.html",
+ "note": null,
+ "when": "15 Nov 23:28",
+ "materials": {
+  "brief": {
+   "chars": 15073,
+   "words": 2578
+  },
+  "plan": {
+   "chars": 3673,
+   "words": 610
+  }
+ },
+ "scores": {
+  "plan.events": {
+   "score": 2,
+   "why": "The plan schedules nothing from outside the chat for tonight: no regular from the dive bar, no interviewer, no flatmate or venue that intrudes. The closest things to events are props from the drawer (the posture clip, the horse-tack harness) and backstory scenes like the revolving door. These are grounded, but they are things the characters bring up, not pressures that arrive. The snaps are triggered only by each other's messages.",
+   "evidence": [
+    "Snap: A slow reply or joke about his stature",
+    "Middle: admits a $189 posture clip is holding his coffee shut."
+   ],
+   "raise": "Schedule one outside intrusion per character for tonight, for example the dive-bar regular texting Reuben mid-flirt or a follow-up email from the hotel interviewers, timed to land on each one's fear.",
+   "def": "2f9c9659d5d25e5d",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.setups": {
+   "score": 4,
+   "why": "All three setups have a plant and a middle return, and they are built from the brief: bouncer posture, the revolving-door boycott, the arm-wrestling bio. The door setup pays differently in each ending ('Door's propped open' against 'I would only jam the hinges'), and the arm-wrestling setup pays in the click ending. Each 'End' is written as an abstract tension rather than a concrete payoff, though. Setup 1, the posture clip, never returns in either ending, which keeps this off a 5.",
+   "evidence": [
+    "End: trying to stand taller vs. being seen as he is.",
+    "They plan the arm-wrestling match she'll win in one heel.",
+    "For the record, I would only jam the hinges."
+   ],
+   "raise": "Give the posture clip a concrete payoff in both endings, for example he admits he is not wearing it, or uses it as a chosen prop, so each setup ends in an artefact instead of a 'vs.'",
+   "def": "521e2223c917f019",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.endings": {
+   "score": 3,
+   "why": "Both endings are a single exchange on the same door metaphor, with different last lines. The click ending adds a planned date, but the fall-apart ending is a numbered line, a hinge quip and a shared rationalisation. It does not show a different night, such as who leaves first or what each one does with the rejection. 'Both claim they saved three weeks' is a good touch, but it is still a closing line, not a separate story.",
+   "evidence": [
+    "Good. Door's propped open.",
+    "1. You are already halfway out the door.",
+    "Both claim they saved three weeks."
+   ],
+   "raise": "Write each ending as a short sequence of beats, for example who breaks first, which accident caused it and what they do afterward, so the two outcomes play out as different scenes.",
+   "def": "9e6e47fc0ca1b18e",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.short_game": {
+   "score": 1,
+   "why": "The plan makes no provision for a short game. Nothing says which setup or beat survives if the dice end the night at six turns, or where the turning point falls. The only ordering is the three-part setups, which assume a full-length game.",
+   "evidence": [
+    "Heat: Starts when they compare curves and girth; goes further only when neither apologizes"
+   ],
+   "raise": "Add a line naming what a six-turn game keeps, for example one accident paste as the midpoint and the door exchange as the ending.",
+   "def": "9c79336a7855f173",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true
+   ]
+  },
+  "plan.accidents": {
+   "score": 5,
+   "why": "Each character has one accident, written as an exact on-screen string that is pasted by mistake from a notes app or reminders list. This fits the medium and exposes each one's rehearsed defence: the shrug-not-grin disclosure, and disclosing length before 'drink one'. Each character has only one accident and none is tied to a particular roll or failure type, which keeps this off a 6.",
+   "evidence": [
+    "curve disclosure v4: mention left hook + giant left ball with a shrug (NOT the grin), offer exit immediately",
+    "22:00 chat: 1. do not bark-laugh 2. disclose full length/veins before drink one"
+   ],
+   "raise": "Add a second misfire per character, tied to a specific failed roll, for example a sent photo of the harness propping the door open.",
+   "def": "8a43f27b6bad2c45",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.medium": {
+   "score": 5,
+   "why": "Every beat can travel through a chat. The arm-wrestling match is deferred to a planned future date, and the filthy geometry is described rather than enacted. The plan uses the medium directly: the typing indicator, a slow reply as the snap trigger, and pasted notes as the accidents. It stops short of a 6 because photos or voice notes (the clip on the coffee bag, the harness on the door) are left implied rather than planned.",
+   "evidence": [
+    "You are still typing, which I find terrifying 😌",
+    "A slow reply or joke about his stature"
+   ],
+   "raise": "Plan the clip and the harness to arrive as photos, so the props reach the other person as images and not just as descriptions.",
+   "def": "df6fedc6221ef314",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.voices": {
+   "score": 5,
+   "why": "The two specs differ on features a reader can see. Reuben uses ceremonial full words, 'for the record', exit clauses and soft emoji. Brick uses 'hm.', numbered lists and attraction stated as fact. Most single messages could be attributed without names. Both use no contractions, though ('I am already free Thursday'), and Reuben's staccato never shows in his sample lines, so some lines could blur.",
+   "evidence": [
+    "For the record, my left curve is architectural.",
+    "1. Keep the hat. 2. Lose the apology.",
+    "I am already free Thursday."
+   ],
+   "raise": "Give Brick contractions and fragments that set her apart from Reuben's formal full words, and show Reuben's staccato burst in one sample line.",
+   "def": "e90fb07ec3b78554",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.original": {
+   "score": 4,
+   "why": "Two turns go beyond the default mismatched farce. Both characters keep rehearsed disclosure scripts that leak into the chat, and each one misreads the other's defence as judgment (his exits read as flinching at her size; her specs read as a tribunal). The fall-apart ending, where both claim efficiency, is also unexpected. The rest follows the predictable big-and-small arm-wrestling comedy, which keeps this from a 5.",
+   "evidence": [
+    "Reuben's preemptive exits read to Brick as him flinching at her size",
+    "Both claim they saved three weeks."
+   ],
+   "raise": "Let the leaked scripts be what turns the night, for example each reads the other's pasted note and recognises their own ritual, so the surprise becomes the hinge of the story.",
+   "def": "eee876c9f2949144",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.format": {
+   "score": 4,
+   "why": "It includes every expected section: Shows, Fear, Habit, marker, Lie, Origin, Accident, Snap, Voice, Collision, Setups, the two endings and Heat. Origins follow the says-to-truth pattern. The endings, however, are written largely as quoted chat lines rather than beats. A short-game section is missing, if one was expected.",
+   "evidence": [
+    "Reuben drops the exit clause: \"I would prefer not to leave.\"",
+    "Reuben replies, `For the record, I would only jam the hinges.`"
+   ],
+   "raise": "Describe the endings as beats instead of scripted dialogue, and add the missing short-game provision.",
+   "def": "bd872356c69500bb",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.grounded": {
+   "score": 5,
+   "why": "Nearly every claim traces to the brief. Reuben's exit clause comes from 'name an exit before the other person does,' his accident from the mirror-rehearsal drawer item, and his origin from tonight's door-job hook. Brick's numbered lists, 'hm.', heel and rosé are all sourced. The plan also finds a door motif the brief only scatters: his door job, her revolving door, his coffee clip and her harness propping a door open. It falls short of a 6 because Reuben's core test, name-dropping bands to see who knows 'which era you mean', is unused apart from the bassist detail.",
+   "evidence": [
+    "Worked the door at a dive bar for eleven months and got fired for lecturing a regular",
+    "£240 horse-tack posture harness propping her door open",
+    "Good. Door's propped open."
+   ],
+   "raise": "Give Reuben a band-era name-drop test that Brick can pass or fail, since the brief makes it the moment 'the door actually opens'.",
+   "def": "422981f4d9c7d5f1",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.contradictions": {
+   "score": 5,
+   "why": "There are no clear contradictions. The plan also sidesteps a real trap: Brick's backstory says her 'tip finishes shorter' and her midsection is 'slight', which clashes with her tip 95-100 and girth 95-100. The plan follows the body data ('Towering, thick, heavily veined') and drops the duplicated backstory items copied from Reuben, such as the cropped portrait and the replica app. One small drift keeps it from a 6: the brief has the regular misidentified 'as someone famous', while the plan makes him 'a famous bassist's brother', and a famous person's brother is not himself famous.",
+   "evidence": [
+    "lecturing a regular he insisted was a famous bassist's brother",
+    "Towering, thick, heavily veined cut shaft with a strong curve"
+   ],
+   "raise": "Restore the misidentification as the regular himself being famous, so the firing matches tonight's truth exactly.",
+   "def": "fa45960901c28caa",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.evaluation": {
+   "score": 4,
+   "why": "The Collision line gives a two-sided evaluation in which each habit is misread as a test. Reuben's exit clause reads as flinching at her size. Brick's specs read as a tribunal grading him. There are give-aways that answer each fear: her 'Lose the apology' meets his need for someone who stays without making him perform, and his staying answers her fear of being too large to be wanted. It sits above the line because both tests probe real fears and have answers. It is not a 5 because neither character's need is stated outright (the brief's 'stays present through pauses' and 'patient, exact, consistent' never appear), and Reuben's precision as an answer to her need for exactness is left implicit.",
+   "evidence": [
+    "Reuben's preemptive exits read to Brick as him flinching at her size",
+    "1. Keep the hat. 2. Lose the apology."
+   ],
+   "raise": "State each character's safety need explicitly and name the specific line from the other that satisfies it.",
+   "def": "cdf9049147e4579d",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.pair": {
+   "score": 5,
+   "why": "The reasons and events depend on this pair. His exit clauses collide with her size-shame, her numbered audits collide with his fear of the tribunal, and the arm-wrestling match is one she wins 'in one heel'. Both fail endings ('jam the hinges', 'saved three weeks') draw on each character's own motifs. It is not a 6 because the parallel posture-device setups lean on near-identical drawer items, so that thread is less a collision of particulars than a mirror.",
+   "evidence": [
+    "They plan the arm-wrestling match she'll win in one heel.",
+    "For the record, I would only jam the hinges.",
+    "Both claim they saved three weeks."
+   ],
+   "raise": "Make the two posture devices clash rather than mirror, so his clip exposes something her harness cannot.",
+   "def": "f1b9dddac061dbfe",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.knowledge": {
+   "score": 4,
+   "why": "No beat requires private knowledge. Private material comes out through stated routes: pasted notes for both accidents, and Reuben admitting the clip in Setup 1's middle. Brick's later 'Door's propped open' depends on the harness she reveals in Setup 2. It is not a 5 because the plan never tracks who knows what. It also lists the top hat under 'Shows' and has Brick reference it ('Keep the hat'), although the profile bio never mentions a hat.",
+   "evidence": [
+    "Pasted from his notes app: `curve disclosure v4",
+    "Middle: admits a $189 posture clip is holding his coffee shut."
+   ],
+   "raise": "Add a note on what each character learns at each setup's middle, and confirm that the top hat is visible in his photos.",
+   "def": "5ca08850b888867b",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.causal": {
+   "score": 3,
+   "why": "Each setup has a boast, then an admission, then a stake ('but'). The three setups, however, sit side by side with no order, and nothing says that one causes the next. The click ending draws on the door and the arm wrestling, but the route from Setup 1 to Setup 3 reads as 'and then'.",
+   "evidence": [
+    "Setups:",
+    "End: trying to stand taller vs. being seen as he is."
+   ],
+   "raise": "Order the setups so each one's end triggers the next one's opening, for example the posture-clip confession provoking her revolving-door claim.",
+   "def": "b7d5785d1f61ce07",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    false,
+    true
+   ]
+  },
+  "plan.guard": {
+   "score": 3,
+   "why": "The moment exists, and it shows in the typing: each character drops their defined habit marker, the exit clause and the numbered list. The trigger is missing. The plan never says what event makes Reuben stop offering exits or Brick stop numbering. He also announces the change in words ('I would prefer not to leave') instead of first showing it through absent markers.",
+   "evidence": [
+    "Reuben drops the exit clause: \"I would prefer not to leave.\"",
+    "Brick drops the numbers: \"Good. Door's propped open.\""
+   ],
+   "raise": "Name the exact trigger, such as Brick waiting through one of his silent beats without filling it, and have his next messages lose 'for the record' before he says anything outright.",
+   "def": "e72f84db4817e97c",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "plan.heat": {
+   "score": 4,
+   "why": "Heat has two trust-gated steps: it starts at the curve-and-girth comparison and goes further 'only when neither apologizes', which ties explicitness to trust. Logistics come only in the click ending. It stays at 4 because nothing pins these steps to the midpoint. Two lines also invite a rush: Brick's accident plans to 'disclose full length/veins before drink one', and her sample line 'I am already free Thursday' could fire early.",
+   "evidence": [
+    "goes further only when neither apologizes for the space they take up",
+    "disclose full length/veins before drink one",
+    "I am already free Thursday."
+   ],
+   "raise": "Mark heat steps against setup positions and hold the Thursday-style logistics line until after Setup 2's middle.",
+   "def": "5b3fe0f99d550ebc",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "plan.spread": {
+   "score": 3,
+   "why": "Each setup has a middle reveal, which implies some distribution. Neither accident nor either snap is placed, though, and Brick's accident is timed 'before drink one', which pulls a major reveal toward the opening. No reveal is held back for late in the night.",
+   "evidence": [
+    "disclose full length/veins before drink one so he does not flinch",
+    "Middle: the lost heel and £240 horse-tack posture harness"
+   ],
+   "raise": "Assign each accident and snap to a specific setup position, and keep one reveal, such as the dive-bar firing, back for the final third.",
+   "def": "6992bdb3b448c021",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 40.7,
+   "cost": 0.140784,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 64.3,
+   "cost": 0.190956,
+   "label": "batch 1"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-19T23:25:39Z",
+ "repo_commit": "5e49d8e",
+ "cost": 0.3317
+}

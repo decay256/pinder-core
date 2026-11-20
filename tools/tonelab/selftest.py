@@ -344,9 +344,79 @@ def check_profiles():
           f"a card takes the profile without its brags, and the brags apart ({len(cv['pairs'])} brags)")
 
 
+def check_scorecard():
+    """v23: the scorecard, the scoring harness and the explorer, with a fake judge."""
+    import re
+    import tempfile
+    from pathlib import Path
+    import score
+    cat = score.catalogue()
+    check(not score.problems_in(cat), f"the scorecard is well formed ({score.problems_in(cat)[:3]})")
+    fams = {d["family"] for d in cat["dimensions"]}
+    check(fams == {"profile", "plan", "chat"} and len(cat["dimensions"]) >= 55,
+          f"the scorecard covers the profile, the plan and the chat ({len(cat['dimensions'])} dimensions)")
+    ts = {t["id"]: t for t in score.targets()}
+    old = ts.get("profile-brick-v21", {}).get("material", {}).get("profile", "")
+    check("profile-reuben-v22" in ts and old.startswith("### Brick_haus") and "Plan the match" not in old,
+          "the v22 profiles and the v21 cards they replaced are both scored")
+    plans = [t for t in ts.values() if t["kind"] == "plan"]
+    chats = [t for t in ts.values() if t["kind"] == "chat"]
+    check(len(plans) >= 20 and sum(1 for t in chats if not t.get("note")) == score.CHAT_FULL
+          and sum(1 for t in chats if t.get("note")) == 1,
+          f"every seed-23 plan, the newest full chats and the first look are targets ({len(plans)} plans, {len(chats)} chats)")
+    c = next(t for t in chats if not t.get("note"))
+    masked = c["material"]["chat_masked"]
+    numbered = re.findall(r"(?m)^\[\d+\] ", masked)
+    check(len(numbered) == len(c["speakers"]) > 0
+          and not any(re.search(r"(?m)^" + re.escape(n) + ":", masked) for n in set(c["speakers"])),
+          f"the masked chat numbers every message and names no speaker ({len(numbered)} messages)")
+    try:
+        score.parse_scores('{"scores": [{"id": "x.a", "score": 7, "why": "w"}]}', [{"id": "x.a"}])
+        check(False, "a score of 7 is refused")
+    except ValueError:
+        check(True, "a score of 7 is refused")
+    got = score.parse_scores('{"scores": [{"id": "x.a", "score": null, "why": "two turns only"}]}', [{"id": "x.a"}])
+    check(got["x.a"]["score"] is None, "a dimension the material cannot show may be left unscored, with a reason")
+    t = ts["profile-reuben-v22"]
+    real = " ".join(t["material"]["profile"].split()[2:9])
+    calls = []
+
+    def fake(system, user, label):
+        calls.append(label)
+        if "probe" in label:
+            return "a reader's answer", {"seconds": 0, "cost": 0}
+        ids = [ln[1:ln.index("]")] for ln in user.splitlines() if ln.startswith("[profile.")]
+        return json.dumps({"scores": [{"id": i, "score": 4, "why": "fake", "evidence": [real, "words nobody wrote here"],
+                                       "raise": "r"} for i in ids]}), {"seconds": 0, "cost": 0}
+
+    with tempfile.TemporaryDirectory() as tmp:
+        keep = score.OUT
+        score.OUT = Path(tmp)
+        try:
+            rec = score.score_target(t, cat, fake, "fake:judge")
+            n = sum(1 for d in cat["dimensions"] if d["family"] == "profile")
+            check(len(rec["scores"]) == n and len(rec["probes"]) == 2
+                  and sum(1 for x in calls if "batch" in x) == len({d["batch"] for d in cat["dimensions"] if d["family"] == "profile"}),
+                  f"a profile is scored in its batches, after its reader probes ({len(calls)} calls)")
+            check(all(s["found"] == [True, False] for s in rec["scores"].values()),
+                  "a quote is checked against the material, and an invented one is flagged")
+
+            def refuse(*a):
+                raise AssertionError("called")
+            score.score_target(t, cat, refuse, "fake:judge")
+            check(True, "a scored target is not scored again while its dimensions, material and judge are unchanged")
+            score.write_page(cat)
+            html = (Path(tmp) / "index.html").read_text(encoding="utf-8")
+            check("/*DATA*/null" not in html and "profile-reuben-v22" in html and "</script>" in html,
+                  "the explorer embeds the scores")
+        finally:
+            score.OUT = keep
+
+
 def main():
     check_chat_rules()
     check_profiles()
+    check_scorecard()
     check_first_look(os.path.join(tonelab.VARIANTS, "live"),
                      json.load(open(os.path.join(tonelab.VARIANTS, "live", "variant.json"), encoding="utf-8")))
     with tempfile.TemporaryDirectory(prefix="tonelab-selftest-") as tmp:
