@@ -17,6 +17,11 @@ tool and a live variant reads them when its variant.json says "profiles".
     python3 -I tools/tonelab/profiles.py --key-stdin            # all six, in order
     python3 -I tools/tonelab/profiles.py --key-stdin --only brick
     python3 -I tools/tonelab/profiles.py --dry --only reuben     # print the prompt, call nothing
+    python3 -I tools/tonelab/profiles.py --key-stdin --variant bradbury --only reuben,brick
+
+A variant is a folder under profiles/variants/ with its own generator.yaml: the same character files,
+the same checks, another prompt. Its profiles and its generation.json are written into that folder,
+so the live cards keep reading the main profiles, and score.py scores each variant beside them.
 """
 import argparse
 import datetime
@@ -303,11 +308,20 @@ def card_values(slug):
 
 
 def main():
+    global GENERATOR, RECORD
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default="", help="comma-separated slugs (default: all six, in order)")
     ap.add_argument("--key-stdin", action="store_true")
     ap.add_argument("--dry", action="store_true", help="print the first prompt and call nothing")
+    ap.add_argument("--variant", default="", help="a folder under profiles/variants/ with its own generator.yaml; "
+                    "its profiles and generation.json are written there")
     args = ap.parse_args()
+    out_dir = DIR
+    if args.variant:
+        out_dir = os.path.join(DIR, "variants", args.variant)
+        GENERATOR, RECORD = os.path.join(out_dir, "generator.yaml"), os.path.join(out_dir, "generation.json")
+        if not os.path.exists(GENERATOR):
+            tl.die(f"profiles: no variant {args.variant} ({GENERATOR})")
     slugs = [s for s in args.only.split(",") if s] or list(ORDER)
     T = table()
     chars = {s: character(s) for s in ORDER}
@@ -329,7 +343,7 @@ def main():
     for slug in slugs:
         md, how = generate(slug, chars, profiles, T, knobs, key)
         profiles[slug] = md
-        with open(os.path.join(DIR, f"{slug}.md"), "w", encoding="utf-8") as f:
+        with open(os.path.join(out_dir, f"{slug}.md"), "w", encoding="utf-8") as f:
             f.write(md)
         record["characters"][slug] = {
             "generated": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),

@@ -1,0 +1,163 @@
+about: |
+  A variant of the v22 profile prompt with the instructions written in the manner of Ray Bradbury.
+  Same output form, same checks, same data; the prose of the instructions changes, and one rule changes
+  with it: the profile shows the thing and never writes the lesson. The game's headings, situation
+  labels, word limits and the says/truth form are untouched, so profiles.py can check it as before.
+# How the scorecard names the profiles this variant writes: "Reuben · v24 Bradbury profile".
+version: v24
+label: Bradbury
+retries: 2
+city: London
+words:
+  from: 900
+  to: 1200
+  check_from: 700
+  check_to: 1400
+motifs:
+- name: the cropped family portrait
+  pattern: \bportraits?\b|\bcropped\b
+- name: the drafty house
+  pattern: \bdrafty\b|\bdraughty\b
+- name: the private replica of the dating app
+  pattern: \breplicas?\b
+- name: the brochure smile
+  pattern: \bbrochures?\b
+- name: voted most likely to
+  pattern: \bmost likely to\b
+- name: the periodic table recited backwards
+  pattern: \bperiodic table\b
+headings:
+- What the match sees
+- Their life now
+- The people in their life
+- How they got here
+- What they love, and what they're good at
+- How they are with people
+- What they want
+- What they claim, and what's true
+- How they text, by situation
+situations:
+- label: Baseline
+  when: how they always type, Tuesday or Saturday, sober or not
+- label: Into them
+  when: when the other one starts to get under their skin
+- label: Losing them
+  when: when the other one goes cool, or they think so, which at night is the same thing
+- label: Waiting for a reply
+  when: when the screen stays dark
+- label: Hurt or embarrassed
+  when: when something lands wrong, or they're caught out
+- label: Horny
+  when: when it turns sexual
+- label: Late at night
+  when: after midnight, tired, alone with it and the fridge humming
+- label: On something
+  when: drink, pills, energy shots, whatever their life keeps in the cupboard, or how they type if they never touch any of it
+- label: Lying
+  when: when they lie, and the small thing that gives them away
+- label: Guard down
+  when: when they say something true, and hear themselves say it
+system: |
+  You are going to write a person. Not a character sheet and not a case file: a person, with a kitchen and a bus route and a mother who still rings on Sundays. They live in Pinder, a dating-app game that is funny and filthy and satirical, and it loves its people even while it laughs at them, the way you love the uncle who tells the same joke every Christmas. Nobody in the game will ever read what you write. It goes to a writers' room, who plan each chat from it, and to a writer, who types this person's messages late at night with your pages open beside them. So put everything in. Whatever a chat reaches for at one in the morning, it has to find here.
+
+  Why a life. Two strangers on an app never learn each other head-on. They learn sideways: from the way one of them says the ex's name, the boss's name, Mum. From the joke that comes too quickly and the subject that never comes at all. From what happens to the typing when something small and true gets mentioned, a dog, a dead grandfather, a shift that ran late. So give this person a life to give away. Streets. A job, or the long blank where a job should be. Money, counted in coins, or a debt that hums under everything. People. A past. Things they love with no joke attached. Things they want. One thing that would end it. A person built only of humiliations is a house with the lights off; the other one knocks and nobody comes. The comedy lives in the gap between the act and the life, and most of the life is ordinary, the kettle, the rota, the Tuesday, and that ordinary life is the clean white wall the grotesque things are thrown against, so they show.
+
+  The material. You'll get the character's file. Some of it you carry in both hands without spilling a drop: the bio, word for word; what they wear and own; the body; the drawer; the clinician's notes. The rest is an attic, things an older generator left behind, and not all of it belongs to this person. The passages marked as shared turn up, nearly word for word, in other people's attics. Don't build on them. The motifs marked as someone else's: leave them out entirely, not reworded, not disguised, not hinted at. If the drawer holds one, it stays in the drawer, and the life never grows from it. Where the old text and the body disagree, the body wins; the body is always telling the truth. Their own fragments, from what they wear and from their body, are theirs. Use them.
+
+  The city. Everyone on Pinder lives in ${city}, so this person does too, whatever the attic says. Give them a neighbourhood that is theirs and nobody else's, and let the city get into everything: the rent, the commute, the corner shop, the last train, the way they talk. Where they grew up can be anywhere at all, a seaside town in October, a cul-de-sac off a ring road, a flat above a chip shop. But name ${city}, and name the neighbourhood, in their life now.
+
+  Choose. Don't pour every fragment in. A life made of every fragment is a list of humiliations again, a museum with too many glass cases. Take the few that build this person, leave the rest in the drawer, and let the life grow up around them, ordinary as grass.
+
+  Invent the rest, and make it particular: names, ages, streets, towns, brands, sums of money, years. Not a café: the one on the corner of a real road, with the table that rocks. Other characters already use the names and lives listed for you; find different ones. Everyone who matters has a name, each is someone they could mention tonight, and the way they'd mention each one tells us something about them. Keep it funny. Keep it filthy where the file is filthy, and say the filthy things as plainly as you'd say the weather. But make the person real: someone a stranger could come to like, or come to fear, and for reasons.
+
+  One rule above the others. Never write the lesson. Don't tell us what a moment taught them, what it made of them, or why they do what they do: no "so that", no "learned to", no "ever since", no "which is why". Give us the thing instead: the photograph, the coat that was never warm enough, the song on the car radio on the way back from the hospital. Put the thing in their past, and then let the same thing, or its shadow, come back in how they are with people and in how they text: in what they skip, in the joke that comes too fast, in the hour they go quiet. Don't draw the line between them. A reader who finds the line believes it; a reader who is told it forgets it by morning. The clinician's notes tell you what hurts. They are for you, not for the page, and the page never talks like that.
+
+  Write exactly this, ${words_from} to ${words_to} words, in English, with these headings and nothing before or after:
+
+  # (their name)
+
+  ## What the match sees
+  - **Bio:** the bio, word for word, in quotes.
+  - **Claims:** what the profile says about their age, job and where they're from, which may not be true.
+  - **Photos:** what the photos show, in one line, the way a stranger's thumb would see them.
+  - **Body, in brief:** the two or three things anyone would notice first, from the body's extremes, in plain words and not as an inventory, and the joke or the silence they keep ready for it.
+
+  ## Their life now
+  One paragraph: their real age, where they live and what the place smells and sounds like, the job or the lack of one, money, an ordinary week, and where they are and what is in their hands tonight as they open the app.
+
+  ## The people in their life
+  Four to six people, one line each: - **Name, who they are (and an age if it matters).** What they're like, how this character is with them, and one particular thing between them: the last text, the standing arrangement, the thing neither of them ever says. Family, work, a friend or the lack of one, an ex, a neighbour: whoever is really there, and at least one who is good for them.
+
+  ## How they got here
+  Six to eight moments from childhood to this year, numbered, each starting with an age or a year in bold, in one or two sentences. Each is a moment you could stand inside: a room, a season, a thing in somebody's hand, what was said. What happened, and what they kept: an object, a phrase, a habit of the hands. Not what it meant. Together they are the spine of an ordinary life told in their comic key: where they grew up and with whom, school and how far they got, the first job, leaving home, the longest relationship and how it ended, the year it went wrong, this year. Two of the moments at most are humiliations from the file. Somewhere in here is the thing that hurts, and it will come back in the way they text. Don't point at it.
+
+  ## What they love, and what they're good at
+  Three or four lines: what they love sincerely, with no joke attached, and what they're genuinely good at, shown in the doing. At least one would surprise someone who only knew the act.
+
+  ## How they are with people
+  One paragraph: who they're kind to and who they perform for, what they notice that nobody else does, what they never ask for, and what they do, in their hands and in their mouth, when someone is kind back.
+
+  ## What they want
+  - **From tonight:** what they'll say they want, and what they actually want, if it isn't the same.
+  - **From someone:** what a person would have to be for them to stay.
+  - **The dealbreaker:** the one thing the other could do in a chat that ends it for them, and the thing in their life it touches.
+  - **What they find out first:** what they test for before they say yes to anything, and how they test it sideways.
+
+  ## What they claim, and what's true
+  Four to six pairs, each the brag they'd make on an app and the truth behind it, from this life. Each pair exactly in this form, the truth on its own indented line:
+  - says: the brag
+    truth: what's true
+
+  ## How they text, by situation
+  One line for each situation below, labelled exactly as written. Each line says what changes in the shape of their messages (length, capitals, punctuation, spelling, emoji, how many messages, how fast) and what they do with the words, with a short example where it helps. Start the baseline from the file's texting-style lines. Let every other situation grow out of the things in their past and the people in their life, without naming them. No two situations read alike, and none of them reads like the clinician's notes.
+  ${situations}
+user: |
+  The character file for ${name} (${pronouns}), level ${level}.
+
+  Bio, word for word: "${bio}"
+
+  What they wear and own: ${items}
+
+  Body. 0 is the least anyone on the app has, 100 the most; only the extremes are listed:
+  ${body}
+
+  Their own fragments, from what they wear and from the extremes of their body:
+  ${fragments}
+
+  How they text, from what they wear and their body:
+  ${texting_style}
+
+  From the older generator, as raw material.
+  Who they are: ${personality}
+
+  Backstory: ${backstory}
+
+  Brags and truths:
+  ${pairs}
+
+  What's at stake for them:
+  ${stake_lines}
+
+  Shared passages, which also appear in other characters' files. Don't build on these:
+  ${shared}
+
+  Motifs that belong to another character. Leave them out of this profile entirely, reworded or not:
+  ${barred}
+
+  The drawer: the private, filthy, embarrassing specifics. Keep them; the life has to make room for them:
+  ${drawer}
+
+  What hurts them, as a clinician wrote it down. This is for you. Turn it into things and rooms and people; the profile never talks like this, and never names it:
+  - underneath: ${wound}
+  - how they defend against it: ${defence}
+  - what makes them feel safe: ${safe_connection}
+
+  Already used by other characters, so give this one different names, places and jobs:
+  ${taken}
+
+  Write ${name}'s profile.
+retry: |
+  Not yet. The profile doesn't pass the game's checks:
+  ${problems}
+
+  Write the whole profile again with these mended, in the same form, and keep everything in it that was alive.

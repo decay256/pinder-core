@@ -1,0 +1,485 @@
+{
+ "id": "profile-reuben-v24",
+ "kind": "profile",
+ "label": "Reuben · v24 Bradbury profile",
+ "version": "v24",
+ "order": 24,
+ "run": null,
+ "source": "tools/tonelab/profiles/variants/bradbury/reuben.md",
+ "note": "Written by the Bradbury variant of the profile prompt, from the same character file and checked the same way; its cast is the v22 profiles.",
+ "when": null,
+ "materials": {
+  "profile": {
+   "chars": 8449,
+   "words": 1359
+  },
+  "game": {
+   "chars": 22207,
+   "words": 3817
+  },
+  "cast": {
+   "chars": 40589,
+   "words": 6649
+  }
+ },
+ "scores": {
+  "profile.life": {
+   "score": 5,
+   "why": "The profile gives a chat a lot to find. Home: Green Lanes, £1,250, a Turkish minimarket below. Work: manuals for a Clerkenwell freight-software firm at £34,000. Money: £62 until Friday. Routines: a Wednesday pub quiz with Tariq, his mum's Sunday call at four, Sunday dhansak, Edale walks. Live threads include the quiet sprint-invite cut, Nadia returning his boxers on Tuesday, and the eleven-day pot of lentils. It falls short of a 6 because a few of these facts undercut each other (see consistency), and there are no plans or forward-looking events for him to mention.",
+   "evidence": [
+    "three weeks ago his lead quietly dropped him from the Thursday sprint invite",
+    "he has £62 until Friday and an eleven-day pot of lentils",
+    "meets Reuben Wednesdays at The Salisbury, letting him sit twenty minutes in silence over whitebait"
+   ],
+   "raise": "Give him one concrete upcoming thing, such as a quiz night, a work deadline or a Sunday dhansak, so the chat has a future to invite someone into.",
+   "def": "ba20efe15f1f67e9",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.ordinary": {
+   "score": 4,
+   "why": "Taken across the whole document, ordinary life is the largest share. That includes the chillers that 'smell of fenugreek', the spreadsheet untangling, the dhansak 'to Radio 6', and being 'endlessly patient with learner baristas'. Against that backdrop the humiliations stand out. It stays at 4 because the whole timeline and the claims/truths section are pure humiliation: seven mishaps in a row, then a girth pump and a margarita. In those sections it still reads like a list.",
+   "evidence": [
+    "above a Turkish minimarket whose chillers hum through the floorboards and smell of fenugreek",
+    "grinding toasted fenugreek in a chipped mortar to Radio 6",
+    "He is endlessly patient with learner baristas, lost couriers, and Tariq's ninety-year-old dad."
+   ],
+   "raise": "Swap two of the seven timeline mishaps for ordinary turning points, such as how he came to write manuals or how he met Tariq.",
+   "def": "b60d3d6129fdd5ef",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.distinct": {
+   "score": 2,
+   "why": "Several situations are lifted almost exactly from cast-mates. Zyx's downstairs neighbour is 'Yasmin Osei... Dental nurse who knocked at 1am Tuesday'; Reuben's Nadia is a 'Night-shift dental nurse who knocked Tuesday'. His mother is a 'Retired... school receptionist', which is also Velvet's mother. The 2 a.m. posture device appears with Brick and Zyx too, and the ring light with Sable and Brick. The mix of energy shots and late-night forum searching echoes Zyx closely. His post-punk password test and Derbyshire walking are his own, which keeps him off a 1.",
+   "evidence": [
+    "Night-shift dental nurse who knocked Tuesday holding his fallen navy boxers",
+    "Retired Stafford school receptionist who rings Sundays at four",
+    "£150 collarbone posture clip bought at 2 a.m."
+   ],
+   "raise": "Change the downstairs neighbour's job and the night of the knock, and give his mother a different job from Velvet's.",
+   "def": "c49f26573e9ce038",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.consistent": {
+   "score": 3,
+   "why": "There is one clear contradiction. He 'hasn't left his flat in eleven days except for petrol-station energy shots'. Yet he does Wednesday quizzes at The Salisbury, gives Callum 'finger-guns by the microwave at noon' in what reads as an office, and is supposedly on a ridge in November mud. There is also an anachronism: at 19 he would be in 2007, long after polytechnics ended, yet he is at a 'Leicester Polytechnic sink'. Money, age arithmetic (the 'nineteen-year rule' from 19 to 38) and the body details otherwise line up.",
+   "evidence": [
+    "hasn't left his flat in eleven days except for petrol-station energy shots",
+    "Reuben still gives him finger-guns by the microwave at noon",
+    "At a Leicester Polytechnic sink"
+   ],
+   "raise": "Make the work remote and the quiz paused, so the eleven-day lie holds, and change 'Polytechnic' to a university.",
+   "def": "7aeeef752bd3bd86",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.fidelity": {
+   "score": 3,
+   "why": "The bio is kept word for word, and every item and nearly every drawer entry appears: the ring light, the stairwell cry, Delphine, the hand on the back, the browser history, and the energy shots with hands tucked under his thighs. The clinician's 'stays present through pauses' is embodied in Tariq. However, the tattoo backstory is altered. The 'rebound weekend' becomes 'his first Birmingham paycheque', and the date's server becomes a Wagamama server clearing bowls. The drawer's 'nine-year policy' becomes nineteen years. The freckle brag and the slow hour-long reply fragment are dropped.",
+   "evidence": [
+    "With his first Birmingham paycheque, he got an inner-forearm kanji for devotion",
+    "starting a nineteen-year rule against taking his shirt off standing up",
+    "Short-armed and heavily freckled"
+   ],
+   "raise": "Restore the tattoo as the souvenir of a rebound weekend, recognised by a server on the next date, and give him the freckle-count brag in the bio or baseline texting.",
+   "def": "c713ddd28c5a9581",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.voice": {
+   "score": 5,
+   "why": "All five probe messages are tied to Reuben by content no one else in the cast owns. The opener uses a band-era password check plus a hat-tip, the silence reply names Factory Records, the pivot lands on Martin Hannett, the 2 a.m. message is about matrix etchings, and the guard-down line says 'not thirty-four'. The five situations also come out in different shapes: ceremonial paragraph, staccato odds, two-word clip, unpunctuated run, uncapitalised single line. It falls short of 6 for two reasons. Much of it is lifted verbatim from the profile's own example lines rather than generated from the life. And the profile gives no 'caught lying' behaviour, so message 3 borrows the hurt pattern, and its 'Understood.' brushes against Gerald's.",
+   "evidence": [
+    "whether you came to the Associates through *Sulk* or through the singles before it",
+    "i'm not thirty-four and i haven't been anywhere northern in a while",
+    "Clearly my Factory Records monologue perished. I release you unscathed."
+   ],
+   "raise": "Add a 'caught out' texting line, and make the example lines illustrative rather than paste-ready so the reader has to generate from his life instead of copying.",
+   "def": "e7f66af37eb2f5e3",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.situations": {
+   "score": 5,
+   "why": "Nine of ten lines predict an observable shape: a 🙂 replacing final periods, a footnote sent four minutes later, two-word bursts followed by a topic change ten seconds later, the tell 'which is standard for me, really', and an uncapitalised line with vanishing typing bubbles. 'On something' blurs into 'Late at night'. Both predict manic analytic sprints, and the on-something line spends most of its words on physical state (hands under thighs, white gums) rather than typing. The waiting line also drifts into mirror rehearsal, which no message would show.",
+   "evidence": [
+    "Sends a footnote four minutes later, then a joke mocking his speed",
+    "Guarded two-word bursts signaling he clocked every syllable—\"Noted. Understood.\"—then a breathless topic change ten seconds later",
+    "firing unpunctuated analytical sprints"
+   ],
+   "raise": "Give 'On something' its own typing signature, distinct from the 3 a.m. trivia sprint.",
+   "def": "07baafe3b1ed9ce4",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.texting_vs_cast": {
+   "score": 3,
+   "why": "The small tells are his own: the hat-tip flourish, the 🙂 for the full stop, 'which is standard for me, really', 'Are you still awake?'. The structural habits, though, match the cast in several situations:\n- Baseline full-spelled formality is Gerald's.\n- Horny 'weather warnings about his girth' duplicates Brick, who 'announces her girth, veins, and rightward curve like an incoming storm'.\n- On-something energy shots and unpunctuated sprints mirror Zyx's energy drinks and breathless paragraph.\n- Lying 'brochure-speak' matches Zyx's 'frictionless brochure prose'.\n- Guard down as one plain lowercase sentence is shared with Velvet, Zyx, Gerald and Sable.\nThe distinctive tells sit on top of shared shapes too often to clear the line.",
+   "evidence": [
+    "Rehearsed weather warnings about his girth and \"rightward gravitational orbit\"",
+    "Glossy brochure-speak about guestlists and weekend trips",
+    "Four energy shots deep with shaking hands tucked under his thighs"
+   ],
+   "raise": "Replace the girth-storm horny line and the brochure lying line with shapes only Reuben would produce, such as a lie told as a too-perfect band citation.",
+   "def": "f44795214d1361d7",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.wound": {
+   "score": 5,
+   "why": "The chain runs on specifics and is shown rather than stated. It starts with the Olan Mills print that kept 'only Reuben's left ear and three fingers'. That is echoed by the dropped sprint invite he leaves unmentioned 'to see when someone notices'. It then produces the habits of watching for eyes flicking past his shoulder and never asking why he was dropped. In the texting, it surfaces as naming the exit before he can be dropped. Delphine and the Manor House fall add a second, linked strand: joking first so no one else can. It misses 6 because the step from the childhood event to the texting is left to inference, and some causes (nipple, shadow, ring light) sit beside the chain without feeding it.",
+   "evidence": [
+    "the framed print over the sideboard kept only Reuben's left ear and three fingers",
+    "He never asks why he was dropped from an invite.",
+    "Rapid staccato bursts calculating the odds of their silence, naming the exit first"
+   ],
+   "raise": "Add one 'how they are with people' line that ties the portrait directly to a visible habit, such as always standing at the centre of group photos or refusing to be in them.",
+   "def": "299ebf3464d13800",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.likeable": {
+   "score": 3,
+   "why": "The reader named a specific quality, patience with people who are no audience, and the named examples (learner baristas, Tariq's ninety-year-old dad) give it texture. But it rests on one summary sentence, 'endlessly patient', with no scene of him doing it. The rest of the warmth in the profile is solitary (dhansak, spreadsheets, the ridge) or is other people's kindness to him (Tariq letting him sit silent). That leaves the quality claimed rather than shown in action, below the line. Other profiles in the cast give a scene, such as Velvet tipping the TK Maxx girl a fiver.",
+   "evidence": [
+    "He is endlessly patient with learner baristas, lost couriers, and Tariq's ninety-year-old dad.",
+    "letting him sit twenty minutes in silence over whitebait"
+   ],
+   "raise": "Replace the patience summary with one concrete scene of him doing something for someone, such as walking Tariq's dad home at his pace without a single joke.",
+   "def": "c9fc1f4e3d28bfc5",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.stock": {
+   "score": 2,
+   "why": "Much of the supporting cast and texture repeats other profiles almost exactly. The downstairs night-shift dental nurse who 'knocked Tuesday' matches Zyx's Yasmin. The retired-school-receptionist mother matches Velvet's Moira. Crying on the stairs, the ex who left because he kept performing, the 2 a.m. posture device, and mirror rehearsal also recur across the cast, and some of these come from the drawer. The specific comedy (Olan Mills cropping, Glass Harbor brother, Manor House 'She said no, man') is fresh, but the scaffolding around it is shared, which keeps this out of 3.",
+   "evidence": [
+    "Nadia, his downstairs neighbour (29). Night-shift dental nurse who knocked Tuesday",
+    "Retired Stafford school receptionist who rings Sundays at four",
+    "a £150 collarbone posture clip bought at 2 a.m."
+   ],
+   "raise": "Recast Nadia and Pauline with jobs and incidents that no other cast profile uses, and give the ex-who-left beat a shape distinct from Maeve's and Jonas's.",
+   "def": "81933a72e1cf3605",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.plausible": {
+   "score": 3,
+   "why": "Most details hold: Harringay above a Turkish minimarket on Green Lanes, The Salisbury, Manor House station, Edale to Mam Tor. However, a man who is 38 in 2026 was 19 around 2007, fifteen years after polytechnics became universities, and a British reader will catch 'Leicester Polytechnic'. The work timeline also contradicts itself: he was dropped from the sprint 'three weeks ago', yet Callum cut him 'in October', and £1,250 is low for a Harringay one-bed in 2026.",
+   "evidence": [
+    "At a Leicester Polytechnic sink, he noticed under the strip-light",
+    "three weeks ago his lead quietly dropped him from the Thursday sprint invite",
+    "Cut Reuben from the portal overhaul in October without an email"
+   ],
+   "raise": "Change 'Leicester Polytechnic' to De Montfort, put both work dates on one timeline, and raise the rent to about £1,550.",
+   "def": "a6a960fcea9e361b",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.filth": {
+   "score": 5,
+   "why": "Nearly all the sexual material comes from his body or his drawer, and it is funny. The 'stubby ginger root' hooking over the mismatched testicles comes from the body scores. The eleven seconds of silence with Delphine, the wrist-pinning kink, and the headboard ring light come from the drawer. The horny register of 'rightward gravitational orbit' collapsing into 'Tell me where to put my hands' is his alone. It misses 6 because the vacuum girth pump is a strange purchase for someone scored 95-100 on girth, so it reads as a generic insecurity gag.",
+   "evidence": [
+    "an uncircumcised cock like a stubby ginger root—barely four inches long, startlingly thick, hooking hard right",
+    "\"We can just watch something,\" in the kindest voice he'd ever heard",
+    "£84.99 to \"Meridian Wellness Solutions LLC\" for a vacuum girth pump"
+   ],
+   "raise": "Make the pump a length extender, or replace it with a curvature-specific purchase, so it follows from his actual body.",
+   "def": "6a879b5e8af5b7b3",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.humanity": {
+   "score": 5,
+   "why": "The jokes target his behaviour: the finger-guns at Callum, the arm-wrestle excuses, the game-show voice at Delphine. The profile also gives him real dignity: patience with learner baristas and Tariq's dad, the dhansak ground to Radio 6, untangling 400-page specs, and Mam Tor in November mud. It misses 6 because the humiliations stack up thickly (landing tears, mum using his brother's name, the boxers, the platform), and a few beats read as pathos piled on rather than fondness.",
+   "evidence": [
+    "He is endlessly patient with learner baristas, lost couriers, and Tariq's ninety-year-old dad.",
+    "Reuben stayed kneeling on the tiles laughing loudest",
+    "grinding toasted fenugreek in a chipped mortar to Radio 6"
+   ],
+   "raise": "Cut one humiliation, such as Nadia's boxers or the mother's Gavin call, and give him one small win he is quietly proud of.",
+   "def": "13434ea727e1f291",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.efficiency": {
+   "score": 5,
+   "why": "Nearly every sentence carries a fact a director can use: the chillers humming through the floor, £62 until Friday, the duck tongue-ring beside the energy shots, and the cuff-button reach with the audible swallow. The texting section gives a concrete line for each state. It misses 6 because the claims section partly restates incidents already told in the history (the hike, the tequila and duck, the eleven days in the flat).",
+   "evidence": [
+    "his hand reaches for a missing cuff button, a joke starts, and he swallows hard enough to click",
+    "the chillers hum through the floorboards and smell of fenugreek",
+    "hasn't left his flat in eleven days except for petrol-station energy shots"
+   ],
+   "raise": "Use the claims section only for lies not already dramatised in the history, and move the duplicated incidents out.",
+   "def": "63ca3549efdaf667",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    false,
+    true
+   ]
+  },
+  "profile.tests": {
+   "score": 4,
+   "why": "The find-out-first test is sharp and writable: he drops an obscure band's second era as a password, and the match either knows the era or doesn't. The dealbreaker is tied to the life (the landing between two and three), and you could write the trigger: he says one true thing and the match goes. It stays above the line because both are observable in text. It isn't a 5 because 'something true' is loose, and unmatching is an exit rather than a message the other character composes, so it gives the match's evaluation little to work on mid-chat.",
+   "evidence": [
+    "Unmatching right after he drops something true",
+    "tested sideways by dropping an obscure band's second era like a password"
+   ],
+   "raise": "Make the dealbreaker a specific message, e.g. the match answering his one unperformed sentence with 'lol' or a joke back, so the chat can trip it without ending.",
+   "def": "d69418021ebd052e",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.people": {
+   "score": 4,
+   "why": "Most people carry a current, unresolved thread. Nadia's boxers knock was on Tuesday, Callum gets finger-guns while he cuts Reuben out, and Pauline's Sunday-at-four Gavin calls are ongoing. Tariq is the one good-for-him person: he lets Reuben sit in silence. It falls short of 5 because Delphine is closed history rather than a story in progress, Tariq has no live development, and only Nadia could plausibly interrupt tonight. Nadia is also a near-copy of Zyx's downstairs dental nurse who knocked on a Tuesday.",
+   "evidence": [
+    "knocked Tuesday holding his fallen navy boxers between two fingers",
+    "still gives him finger-guns by the microwave at noon",
+    "letting him sit twenty minutes in silence over whitebait"
+   ],
+   "raise": "Give Tariq or Delphine something pending tonight, e.g. Tariq texting about tomorrow's quiz, or Delphine returning a box of his records this week.",
+   "def": "1484e17d048bba91",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.timeline": {
+   "score": 2,
+   "why": "All seven entries are humiliations: the cropped portrait, the nipple, the tattoo, the Glass Harbor brother, the toilet, the Delphine curve and the station knee. That is exactly the 'chain of humiliations' the low band names. There is no school, first job, leaving home or longest relationship as ordinary events; Stafford and Birmingham appear only as backdrops to the gags. 'Leicester Polytechnic' is also an anachronism for a nineteen-year-old around 2007, and the recent year (2024) does not lead into tonight.",
+   "evidence": [
+    "At a Leicester Polytechnic sink, he noticed under the strip-light that his left nipple sat higher",
+    "2024: His knee buckled on wet Manor House station steps"
+   ],
+   "raise": "Replace three gag entries with plain spine events (leaving Stafford, the first job writing manuals in Birmingham, moving in with Delphine), and add a 2026 entry that leads into tonight.",
+   "def": "f3e8d800a5fd6476",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.act": {
+   "score": 5,
+   "why": "Most pairs are specific, funny and leakable. The automated-finances claim against a girth-pump charge 'between a doner wrap and his mum's flowers' is a reveal waiting to happen. 'Just back from a northern walking trip' against eleven days indoors on petrol-station energy shots can leak through any detail about the lentils. The hiking pair keeps it from 6: the profile also says he really does walk Edale to Mam Tor alone, so the gap blurs, and the 'Surrey viewpoints' truth is just a bad date rather than a lie.",
+   "evidence": [
+    "£84.99 to \"Meridian Wellness Solutions LLC\" for a vacuum girth pump between a doner wrap and his mum's flowers",
+    "hasn't left his flat in eleven days except for petrol-station energy shots"
+   ],
+   "raise": "Rewrite the hiking pair so the claim (sociable effortless hiker) contradicts the real solo-November-mud walker in a way a chat can catch.",
+   "def": "ff77ae34c8ec6b73",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.logic": {
+   "score": 4,
+   "why": "The rule can be written in a sentence he'd agree with: 'If I narrate the joke and name the exit first, nobody gets to laugh at me or leave me.' The profile predicts the escalation when it fails: Delphine asks for one unperformed sentence and he does a game-show voice, then another; the platform laughs and he laughs loudest. 'Losing them' and 'hurt' texting give the next move. It isn't a 5 because the rule is never put in his own words, and the mathematical-logic and flattery habits sit beside it rather than following from it.",
+   "evidence": [
+    "he did a game-show voice, watched her face close, and did another",
+    "Reuben stayed kneeling on the tiles laughing loudest",
+    "Clearly my Factory Records monologue perished. I release you unscathed."
+   ],
+   "raise": "Give him one stated principle he defends out loud (e.g. 'disclose first, it's only fair') and show each defence quoting it.",
+   "def": "bb0f5bbc8dc07548",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.creed": {
+   "score": 2,
+   "why": "No belief from app or dating culture is named or held in earnest. There is no 'red flags', 'standards', 'set expectations' or 'communication is key'. The rehearsed girth 'weather warnings' and the band password gesture toward disclosure and compatibility-test culture, but the profile never frames them as something the apps taught him or that he would cite. With no belief, there is nothing for the profile to contradict.",
+   "evidence": [
+    "Rehearsed weather warnings about his girth and \"rightward gravitational orbit\"",
+    "tested sideways by dropping an obscure band's second era like a password"
+   ],
+   "raise": "Name one earnest app-culture belief, e.g. 'full disclosure upfront is the respectful thing, it's basically consent', and set it against his twenty-minute mirror rehearsals and his age and height lies.",
+   "def": "a741f63642bb3f6b",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "profile.specific": {
+   "score": 5,
+   "why": "Detail is dense and does class and money work. Green Lanes above a Turkish minimarket at £1,250, £34,000 writing manuals, £62 until Friday against an eleven-day lentil pot, The Salisbury whitebait, and dhansak with fenugreek to Radio 6. The fenugreek ties his kitchen to the minimarket below. It falls short of 6 because 'How they are with people' slips into generic types ('women in vintage coats', 'learner baristas'), and there are slips: the Leicester Polytechnic anachronism and some decorative photo detail.",
+   "evidence": [
+    "above a Turkish minimarket whose chillers hum through the floorboards and smell of fenugreek",
+    "he has £62 until Friday and an eleven-day pot of lentils"
+   ],
+   "raise": "Ground the 'How they are with people' paragraph in one named bar and one named barista or courier exchange, and fix the polytechnic date.",
+   "def": "db98767fb36eeb56",
+   "material": "2e688b45a076c43d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "profile.likeable": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "Name the one thing you would genuinely like about this person if you met them, and the one thing you would find hardest to forgive. Be specific, and no jokes.",
+   "answer": "The thing I would genuinely like is his patience with people who can't do anything for him. The profile says he is \"endlessly patient with learner baristas, lost couriers, and Tariq's ninety-year-old dad.\" This stands out because almost everything else about him is a performance aimed at someone he wants approval from: bartenders, women in vintage coats, matches. With people who aren't an audience, he apparently drops the act and is simply kind. I'd trust that more than anything in his bio, because he has no reason to fake it.\n\nThe thing I would find hardest to forgive is what happened with Delphine. She asked him \"quietly for one unperformed sentence,\" and he answered with a game-show voice. He \"watched her face close, and did another.\" The first joke could be reflex. The second came after he had seen it hurt her. She wasn't asking for much, and she left over it. That moment matters more than his lies about age or height, because those are mostly about his own shame. This one is a person telling him clearly what she needed, and him choosing the armour anyway, knowingly. The profile suggests he wants exactly what she offered: someone to stop his jokes, say his name, and let him be quiet. That makes the refusal harder to excuse.\n\nThe profile doesn't say whether he understands this about himself now, or whether he has ever acknowledged it to her."
+  },
+  "profile.voice": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "From this profile alone, write five short dating-app messages this person would send tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m., (5) the moment they stop performing.",
+   "answer": "**(1) Opener to someone he fancies**\n\"I note the vintage coat in your second photograph and must ask, with the utmost seriousness, whether you came to the Associates through *Sulk* or through the singles before it, because the answer will decide everything that follows. I will lose to you at arm wrestling before the starters arrive and narrate the defeat beautifully. Hat tipped, provisionally.\"\n\n**(2) When they've gone quiet**\n\"Silence logged. Probability the snare-reverb tangent did it: high. Probability it's simply me: the remainder. Clearly my Factory Records monologue perished. I release you unscathed.\"\n*(four minutes later)* \"Footnote: that was fast even by my standards. Applause for the speed, none for the content.\"\n\n**(3) Caught in a lie**\n\"Noted. Understood.\"\n*(ten seconds later)* \"Completely separate and far more urgent matter: are we agreed that Martin Hannett could make a drum kit sound like it was recorded inside a fridge, and is that a compliment\"\n\n**(4) At 2 a.m.**\n\"did you know the matrix etchings on some early pressings carry little messages scratched by the cutting engineer and half the collectors never look at them because you have to tilt the record under a lamp at exactly the right angle and i have been tilting records under a lamp for an hour\"\n\"Are you still awake?\"\n\n**(5) The moment he stops performing**\n\"i'm not thirty-four and i haven't been anywhere northern in a while. i'd just like someone to say my name and not need me to be funny after.\"\n*(typing bubbles appear, then vanish)*\n\nA note on what the profile gives me. It sets out the register for each situation, including the \"Noted. Understood.\" pattern, the release line, the 3 a.m. \"Are you still awake?\" and the uncapitalised guard-down sentence. The specific bands, producers and wording are my own extrapolation from the post-punk interest it describes. The profile also doesn't say which of his lies gets caught tonight, so I left message (3) unspecific about it. Message (5) borrows from his stated wish that someone say \"Reuben\" and let him stay quiet, but the profile doesn't say whether he would ever actually type that."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 14.8,
+   "cost": 0.045968,
+   "label": "probe profile.likeable"
+  },
+  {
+   "seconds": 21.1,
+   "cost": 0.059944000000000004,
+   "label": "probe profile.voice"
+  },
+  {
+   "seconds": 42.4,
+   "cost": 0.291284,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 46.1,
+   "cost": 0.31212399999999996,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 38.4,
+   "cost": 0.279008,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 48.7,
+   "cost": 0.305316,
+   "label": "batch 3"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-21T18:48:56Z",
+ "repo_commit": "e22d550",
+ "cost": 1.2936
+}

@@ -28,7 +28,7 @@ planned:
   - {id: new-ab-plan, kind: plan, label: "A and B · new plan", top: "A×B", sub: "new"}
 
 # Reference columns: the best we have today on the same dimensions.
-reference: [profile-reuben-v22, profile-brick-v22, plan-20261119T004209Z-preview-reuben-brick-s23,
+reference: [profile-reuben-v22, profile-brick-v22, profile-reuben-v24, profile-brick-v24, plan-20261119T004209Z-preview-reuben-brick-s23,
             plan-20261119T191519Z-live-reuben-brick-s23-first2]
 
 tiers:

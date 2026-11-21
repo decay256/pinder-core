@@ -359,6 +359,12 @@ def check_scorecard():
     old = ts.get("profile-brick-v21", {}).get("material", {}).get("profile", "")
     check("profile-reuben-v22" in ts and old.startswith("### Brick_haus") and "Plan the match" not in old,
           "the v22 profiles and the v21 cards they replaced are both scored")
+    main_prompt = (score.how_made(ts["profile-reuben-v22"]) or {"steps": [{}]})["steps"][0].get("text")
+    for t in (t for t in ts.values() if t.get("variant")):
+        made = score.how_made(t)
+        check(bool(made) and made["steps"][0]["label"] == "The generator's system prompt"
+              and t["variant"] in made["tool"] and made["steps"][0]["text"] != main_prompt,
+              f"{t['id']}: scored, and how it was made shows its own variant's prompt, not the main one")
     plans = [t for t in ts.values() if t["kind"] == "plan"]
     chats = [t for t in ts.values() if t["kind"] == "chat"]
     check(len(plans) >= 20 and sum(1 for t in chats if not t.get("note")) == score.CHAT_FULL
