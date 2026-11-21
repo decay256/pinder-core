@@ -409,6 +409,8 @@ def check_scorecard():
             html = (Path(tmp) / "index.html").read_text(encoding="utf-8")
             check("/*DATA*/null" not in html and "profile-reuben-v22" in html and "</script>" in html,
                   "the explorer embeds the scores")
+            check(json.dumps(t["material"]["profile"][:60], ensure_ascii=False)[1:-1] in html,
+                  "the explorer carries the profile text, so the work can be read beside its scores")
         finally:
             score.OUT = keep
 

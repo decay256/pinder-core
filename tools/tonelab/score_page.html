@@ -93,6 +93,23 @@ tr.gap td, tr.gap th { height: 8px; }
 #panel .probe { background: var(--page); border-radius: 6px; padding: 8px 10px; white-space: pre-wrap; font-size: 13px; }
 #panel .def { color: var(--ink-2); font-size: 13px; }
 #panel a { color: var(--accent); }
+.layout.reading { grid-template-columns: minmax(0, 1fr) 600px; }
+@media (max-width: 1100px) { .layout.reading { grid-template-columns: minmax(0, 1fr); } }
+.seg { display: inline-flex; border: 1px solid var(--ring); border-radius: 7px; overflow: hidden; margin-bottom: 10px; }
+.seg button { border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 12.5px; padding: 4px 12px; cursor: pointer; }
+.seg button.on { background: var(--ink); color: var(--surface); }
+#panel .readhead { position: sticky; top: -14px; z-index: 1; background: var(--surface); margin: -14px -16px 0; padding: 14px 16px 8px;
+  border-bottom: 1px solid var(--ring); }
+#panel .reader { font-size: 14px; line-height: 1.55; color: var(--ink); padding-top: 6px; }
+#panel .reader h3 { font-size: 17px; text-transform: none; letter-spacing: 0; color: var(--ink); margin: 12px 0 6px; font-weight: 650; }
+#panel .reader h4, #panel .reader h5 { font-size: 14.5px; text-transform: none; letter-spacing: 0; color: var(--ink); margin: 16px 0 4px; font-weight: 650; }
+#panel .reader p { margin: 0 0 8px; }
+#panel .reader ul, #panel .reader ol { margin: 0 0 8px; padding-left: 20px; }
+#panel .reader li { margin: 2px 0; }
+#panel .reader code { font-size: 12.5px; background: var(--page); padding: 0 3px; border-radius: 3px; }
+#panel .reader mark { background: #fbe08a; color: inherit; border-radius: 2px; padding: 0 1px; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) #panel .reader mark { background: #6e5512; } }
+:root[data-theme="dark"] #panel .reader mark { background: #6e5512; }
 .rowlist { list-style: none; padding: 0; margin: 0; }
 .rowlist li { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--grid); cursor: pointer; }
 .rowlist li:hover .n { text-decoration: underline; }
@@ -157,7 +174,8 @@ th.refcol .w { color: var(--ink-2); }
   <h1>Tone lab scorecard</h1>
   <p class="sub">Candidate metrics for the profile, the plan and the chat, scored 1 to 6 by a language model. There is no midpoint:
     3 leans fail and 4 leans pass, against the bar each dimension defines. Click any cell for the reasoning and the quotes it rests on;
-    click a column header for everything about one piece of work.</p>
+    click a column header for everything about one piece of work. For profiles and plans, the panel's second view shows the
+    work itself, with the quotes behind the selected score marked.</p>
   <div class="meta" id="meta"></div>
 </header>
 <nav id="tabs" role="tablist"></nav>
@@ -188,7 +206,7 @@ const TIER_NOTE = { critical: "drives the generator and the gate", watch: "score
 const tierOf = id => FOC?.tiers?.[id]?.tier || null;
 const isOff = f => !!FOC?.disabled?.includes(f);
 const state = { tab: FOC ? "focus" : "profile", pri: { core: true, useful: true, diagnostic: true },
-  tiers: { critical: true, watch: true, off: false }, all: false, order: "catalogue", sel: null };
+  tiers: { critical: true, watch: true, off: false }, all: false, order: "catalogue", sel: null, view: "scores" };
 const dims = DATA.dimensions;
 const byFam = f => dims.filter(d => d.family === f);
 const results = f => DATA.results.filter(r => r.kind === f).sort((a, b) =>
@@ -418,6 +436,11 @@ function panel(f) {
     else p.append($("p", { class: "def", text: `Written from the brief, not from a game file, and scored on the ${r.kind}'s critical dimensions. ${FOC.gate}` }));
     return p;
   }
+  const txt = DATA.texts?.[r.id];
+  const seg = txt ? $("div", { class: "seg" }, ...[["scores", "Scores"], ["text", r.kind === "plan" ? "The plan" : "The profile"]].map(([k, l]) =>
+    $("button", { class: state.view === k ? "on" : "", text: l, onclick: () => { state.view = k; render(); } }))) : null;
+  if (txt && state.view === "text") return reader(p, r, txt, seg);
+  if (seg) p.append(seg);
   if (!sel.d) {
     p.append($("h2", { text: r.label }));
     if (r.note) p.append($("p", { class: "def", text: r.note }));
@@ -457,6 +480,73 @@ function panel(f) {
   return p;
 }
 
+// The work itself, with the quotes behind the selected score marked.
+function reader(p, r, txt, seg) {
+  const d = state.sel.d && dims.find(x => x.id === state.sel.d), s = d && r.scores?.[d.id];
+  const ranges = marks(txt, s?.evidence || []);
+  const sc = s ? ` (${s.score ?? "n/a"})` : "";
+  p.append($("div", { class: "readhead" }, seg, $("h2", { text: r.label }),
+    $("p", { class: "def", text: !d ? "Click a cell in this column to mark the quotes its score rests on."
+      : !s ? `“${d.name}” is not scored yet.`
+      : ranges.length ? `Marked: the quotes behind “${d.name}”${sc}.`
+      : `None of the quotes behind “${d.name}”${sc} are in this text; they come from the brief or a reader probe.` })));
+  const body = $("div", { class: "reader" }); body.innerHTML = md(txt, ranges); p.append(body);
+  return p;
+}
+
+// Where each quote sits in the raw text, matched loosely: case, curly quotes, dashes, spacing and
+// markdown emphasis are ignored, and an ellipsis splits a quote into pieces.
+function marks(raw, quotes) {
+  const map = { "‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-" };
+  const N = s => { let o = ""; const ix = [];
+    for (let i = 0; i < s.length; i++) { let c = s[i];
+      if (c === "*" || c === "`" || c === "_") continue;
+      c = map[c] || c.toLowerCase();
+      if (/\s/.test(c)) { if (!o || o.endsWith(" ")) continue; c = " "; }
+      if (c.length !== 1) continue;
+      o += c; ix.push(i); }
+    return [o, ix]; };
+  const [h, ix] = N(raw), out = [];
+  for (const q of quotes) for (const piece of q.split(/\.\.\.|…/)) {
+    const t = N(piece)[0].trim(); if (t.length < 8) continue;
+    const at = h.indexOf(t); if (at >= 0) out.push([ix[at], ix[at + t.length - 1] + 1]);
+  }
+  out.sort((a, b) => a[0] - b[0]);
+  const m = []; for (const x of out) { const l = m[m.length - 1];
+    if (l && x[0] <= l[1]) l[1] = Math.max(l[1], x[1]); else m.push([...x]); }
+  return m;
+}
+
+// A small markdown renderer: headings, lists, paragraphs, bold, italic, code, and the marks.
+function md(raw, ranges) {
+  const O = "\u0001", C = "\u0002";
+  let s = raw;
+  for (const [a, b] of [...ranges].reverse()) s = s.slice(0, a) + O + s.slice(a, b) + C + s.slice(b);
+  const esc = t => t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const inline = t => esc(t).replace(/\*\*([^*]+?)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\s][^*]*?)\*/g, "<em>$1</em>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\u0001/g, "<mark>").replace(/\u0002/g, "</mark>");
+  const html = []; let list = null, open = false;
+  const close = () => { if (list) { html.push(`</${list}>`); list = null; } };
+  for (let line of s.split("\n")) {
+    if (open) line = O + line;
+    open = line.lastIndexOf(O) > line.lastIndexOf(C);
+    if (open) line += C;
+    const lead = line.startsWith(O) ? O : ""; const body = line.slice(lead.length);
+    let m;
+    if (!body.replace(/[\u0001\u0002]/g, "").trim()) { close(); continue; }
+    if ((m = body.match(/^(#{1,6})\s+(.*)$/))) { close(); const n = Math.min(m[1].length + 2, 5);
+      html.push(`<h${n}>${inline(lead + m[2])}</h${n}>`); continue; }
+    if ((m = body.match(/^\s*(?:[-*]|(\d+)\.)\s+(.*)$/))) { const kind = m[1] ? "ol" : "ul";
+      if (list !== kind) { close(); html.push(`<${kind}>`); list = kind; }
+      html.push(`<li>${inline(lead + m[2])}</li>`); continue; }
+    close();
+    m = body.match(/^([A-Z][\w'’ -]{0,30}):(\s.*)$/);
+    html.push(m ? `<p><strong>${inline(lead + m[1])}:</strong>${inline(m[2])}</p>` : `<p>${inline(lead + body)}</p>`);
+  }
+  close();
+  return html.join("");
+}
+
 function catalogue() {
   const w = $("div");
   w.append($("p", { class: "fam-intro", text: "The candidate metrics. Each dimension defines its own bar (the line between 3 and 4). Core dimensions are what we need to know whether the product works, useful ones steer prompt work, diagnostic ones explain a failure. A probe is a separate reader who sees only part of the material, so the judge is not the one who already knows the answer." }));
@@ -491,9 +581,11 @@ function render() {
   const left = $("div", {}, $("p", { class: "fam-intro", text: FOC ? FOC_NOTE[f] : FAM_NOTE[f] }));
   if (f === "plan" && (!FOC || state.all)) { const c = trend(f); if (c) left.append(c); }
   left.append($("div", { class: "card" }, controls(), matrix(f)));
-  const pn = panel(f);
-  m.append($("div", { class: "layout" }, left, pn));
+  const pn = panel(f), reading = !!pn.querySelector(".reader");
+  m.append($("div", { class: "layout" + (reading ? " reading" : "") }, left, pn));
   if (state.sel && innerWidth <= 1100) pn.scrollIntoView({ block: "start", behavior: "smooth" });
+  if (reading) { const mk = pn.querySelector("mark"); const hd = pn.querySelector(".readhead");
+    pn.scrollTop = mk ? Math.max(0, mk.offsetTop - hd.offsetHeight - 60) : 0; }
 }
 render();
 </script>

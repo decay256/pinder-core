@@ -564,10 +564,13 @@ def write_page(cat):
         r = json.loads(p.read_text(encoding="utf-8"))
         r["summary"] = summary(r, cat)
         results.append(r)
+    # The work itself, so the page can show a profile or plan beside its scores. Briefs, game files and
+    # chats stay out: the brief alone is larger than every plan together, and the chat tab is off.
+    texts = {t["id"]: t["material"][t["kind"]] for t in targets() if t["kind"] in ("profile", "plan")}
     data = {"scale": cat["scale"], "families": cat["families"], "materials": cat["materials"],
             "dimensions": [{k: d.get(k) for k in ("id", "family", "name", "priority", "tells", "method", "low", "line",
                                                   "high", "probe", "scope", "batch", "proposed")} for d in cat["dimensions"]],
-            "results": results,
+            "results": results, "texts": texts,
             "focus": yaml.safe_load(FOCUS.read_text(encoding="utf-8")) if FOCUS.exists() else None,
             "built": dt.datetime.now(dt.timezone.utc).strftime("%d %b %Y %H:%M UTC")}
     page = (HERE / "score_page.html").read_text(encoding="utf-8")
