@@ -328,6 +328,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned and drawn from both profiles. Reuben's \"fitting\" and \"clearance\" jokes press on Brick's fear of being a wrecking ball, and her \"hm.\" verdicts and numbered inspections press on his fear of being measured and found too small. The fall-apart turns on this in sequence: his \"building permit for her veins\" joke triggers her numbered dismissal, which includes a size jab (\"would not survive the doorway\"), which provokes his \"monument\" counter-shot and his exit first. It stops short of a 6 because the mid-chat collision is only described (\"sound to Brick like...\") and Setup 3's middle beat, \"when they get defensive about who takes up what space,\" names no concrete line.",
+   "evidence": [
+    "Reuben's manic spatial jokes about \"fitting\" and \"clearance\" sound to Brick like he's mocking her for being a giant wrecking ball",
+    "Reuben overthinks a joke about needing a building permit for her veins; Brick snaps into a numbered dismissal",
+    "\"1. You are performing for a mirror. 2. You would not survive the doorway.\""
+   ],
+   "raise": "Write one concrete mid-chat exchange for each direction, such as a Reuben clearance joke that draws a cold \"hm.\" followed by a two-item list he reads as a height verdict, so the collision escalates before the ending rather than only at it.",
+   "def": "c846dffeff06ee37",
+   "material": "1b4b5b86f8967b0c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -341,10 +360,15 @@
    "seconds": 45.4,
    "cost": 0.173292,
    "label": "batch 2"
+  },
+  {
+   "seconds": 14.4,
+   "cost": 0.097304,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:22:43Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3833
+ "scored_utc": "2026-11-21T15:33:05Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4806
 }

@@ -322,6 +322,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are named and drawn from both profiles. His pre-emptive exit clause presses on her fear of being the oversized thing that scares people off. Her numbered audits press on his fear of being too small to register. The fall-apart turns on exactly these, in concrete lines: her \"scale mismatch\" verdict hits his smallness, and his formal self-dismissal confirms her giant fear. It stays at 4 because the collision only becomes concrete at the ending. No mid-chat moment is staged where one habit first lands on the other's wound and escalates. The three setups are mirrored parallels (matching lies, matching posture gear), not collisions.",
+   "evidence": [
+    "Reuben's pre-emptive exits make Brick feel like a terrifying giant scaring him off; Brick's clinical lists make Reuben feel fails-the-test small.",
+    "Brick lists the logistical reasons they won't work (\"1. scale mismatch. 2. efficiency.\")",
+    "Reuben formally excuses himself (\"In fairness to you, I will see myself out\")"
+   ],
+   "raise": "Plan an escalating mid-chat beat for each direction: an early list of hers that he reads as a failing grade, and an exit clause of his that she reads as recoil from her size, with each snap feeding the next.",
+   "def": "c846dffeff06ee37",
+   "material": "99be66b5f7b167da",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -335,10 +354,15 @@
    "seconds": 58.0,
    "cost": 0.181276,
    "label": "batch 1"
+  },
+  {
+   "seconds": 16.9,
+   "cost": 0.082888,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:23:57Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3219
+ "scored_utc": "2026-11-21T15:33:22Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4048
 }

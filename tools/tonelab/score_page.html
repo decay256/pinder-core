@@ -118,6 +118,34 @@ table.cat td.nm { font-weight: 600; min-width: 180px; }
 table.cat td .probe-tag { display: block; font-weight: 400; font-size: 11px; color: var(--accent); }
 .scale { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; max-width: 720px; margin-bottom: 18px; }
 .scale .box { width: 30px; height: 26px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; }
+nav button.off { color: var(--muted); text-decoration: line-through; text-decoration-thickness: 1px; }
+.focus-hero { margin-bottom: 16px; max-width: 980px; }
+.focus-hero h2 { font-size: 18px; margin: 0 0 6px; }
+.focus-hero p { margin: 6px 0; }
+blockquote.mission { margin: 12px 0; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--page);
+  border-radius: 0 6px 6px 0; font-size: 15px; line-height: 1.55; }
+blockquote.mission cite { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); font-style: normal; }
+.focus-fam { margin-bottom: 14px; max-width: 980px; }
+.focus-fam h3 { font-size: 16px; margin: 0 0 2px; }
+h4.tier { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; margin: 16px 0 2px; }
+.tier.critical { color: var(--s6); } .tier.watch { color: var(--ink-2); } .tier.off { color: var(--muted); }
+:root[data-theme="dark"] .tier.critical { color: #86b6ef; }
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) .tier.critical { color: #86b6ef; } }
+.offlist li .n, .offlist li .y { color: var(--muted); }
+.offfam { color: var(--muted); max-width: 980px; }
+.tag { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 600; padding: 0 6px; border-radius: 999px;
+  border: 1px solid var(--accent); color: var(--accent); vertical-align: 1px; }
+tr.tierrow th { padding: 14px 0 4px !important; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 700;
+  border-bottom: 1px solid var(--grid); }
+tr.tierrow .tiernote { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--muted); font-size: 12px; }
+tr.offrow th.dim, tr.offrow td.cell { opacity: .45; }
+td.cell.planned { background: transparent; border: 1.5px dashed var(--axis); }
+td.cell.planned:hover { border-color: var(--accent); }
+th.plannedcol .v { color: var(--accent); }
+th.refcol .w { color: var(--ink-2); }
+.tierbox { margin: 10px 0; padding: 8px 10px; border-radius: 6px; background: var(--page); font-size: 13px; }
+.tierbox p { margin: 2px 0 0; color: var(--ink-2); }
+.tierbox.critical { border-left: 3px solid var(--s6); } .tierbox.watch { border-left: 3px solid var(--axis); } .tierbox.off { border-left: 3px solid var(--grid); }
 @media (max-width: 640px) {
   header, main, nav { padding-left: 16px; padding-right: 16px; }
   table.m th.dim { min-width: 170px; max-width: 190px; }
@@ -142,6 +170,10 @@ const FAM_NOTE = {
   plan: "Every plan the lab has written for Reuben and Brick on seed 23, one per version. The early plans were small by design; dimensions they were never built for score low on purpose, which is what makes the trend readable.",
   chat: "The three newest full chats, and the v22 first look, which wrote only the first two turns of an eleven-turn game. Where a dimension needs turns that were not written, it is marked n/a."
 };
+const FOC_NOTE = {
+  profile: "The two new characters, A and B, will be written from the brief alone. Until then their columns are empty. Beside them is the best we have today, Reuben and Brick as the v22 generator wrote them, scored on the same dimensions. Rows are grouped by how much they count in this experiment.",
+  plan: "One plan for A and B, scored on the plan's critical dimensions. Beside it are the two latest v22 plans for Reuben and Brick. Switch on every version for the whole history and the trend."
+};
 const PRI = { core: "Core", useful: "Useful", diagnostic: "Diag." };
 const $ = (t, a = {}, ...kids) => { const e = document.createElement(t);
   for (const [k, v] of Object.entries(a)) { if (k === "class") e.className = v; else if (k === "text") e.textContent = v;
@@ -149,7 +181,14 @@ const $ = (t, a = {}, ...kids) => { const e = document.createElement(t);
   for (const k of kids) if (k != null) e.append(k); return e; };
 const lean = s => s == null ? "not scored" : s >= 4 ? "leans pass" : "leans fail";
 const fill = s => s == null ? "na" : "f" + s;
-const state = { tab: "profile", pri: { core: true, useful: true, diagnostic: true }, order: "catalogue", sel: null };
+const FOC = DATA.focus;
+const TIERS = ["critical", "watch", "off"];
+const TIER_LABEL = { critical: "Critical", watch: "Watch", off: "Off" };
+const TIER_NOTE = { critical: "drives the generator and the gate", watch: "scored and shown, not targeted", off: "not scored in this experiment" };
+const tierOf = id => FOC?.tiers?.[id]?.tier || null;
+const isOff = f => !!FOC?.disabled?.includes(f);
+const state = { tab: FOC ? "focus" : "profile", pri: { core: true, useful: true, diagnostic: true },
+  tiers: { critical: true, watch: true, off: false }, all: false, order: "catalogue", sel: null };
 const dims = DATA.dimensions;
 const byFam = f => dims.filter(d => d.family === f);
 const results = f => DATA.results.filter(r => r.kind === f).sort((a, b) =>
@@ -168,10 +207,53 @@ function meta() {
 
 function tabs() {
   const nav = document.getElementById("tabs"); nav.replaceChildren();
-  for (const [k, label] of [["profile", "Profiles"], ["plan", "Plans"], ["chat", "Chats"], ["catalogue", "The scorecard"]]) {
-    nav.append($("button", { role: "tab", "aria-selected": String(state.tab === k), text: label,
+  const list = [["profile", "Profiles"], ["plan", "Plans"], ["chat", "Chats"], ["catalogue", "The scorecard"]];
+  if (FOC) list.unshift(["focus", "The focus"]);
+  for (const [k, label] of list) {
+    nav.append($("button", { role: "tab", "aria-selected": String(state.tab === k), class: isOff(k) ? "off" : "",
+      text: isOff(k) ? label + " · off" : label, title: isOff(k) ? FOC.disabled_note || "" : "",
       onclick: () => { state.tab = k; state.sel = null; render(); } }));
   }
+}
+
+// The columns of a family's grid: the planned work first, then what we compare it with.
+function columns(f) {
+  const rs = results(f);
+  if (!FOC) return rs;
+  const planned = (FOC.planned || []).filter(p => p.kind === f).map(p => ({ ...p, planned: true, scores: {} }));
+  const refs = (FOC.reference || []).map(id => rs.find(r => r.id === id)).filter(Boolean).map(r => ({ ...r, reference: true }));
+  const rest = state.all ? rs.filter(r => !(FOC.reference || []).includes(r.id)) : [];
+  return [...planned, ...refs, ...rest];
+}
+const findCol = id => DATA.results.find(x => x.id === id) || (FOC?.planned || []).map(p => ({ ...p, planned: true, scores: {} })).find(p => p.id === id);
+
+function focusPage() {
+  const w = $("div");
+  w.append($("div", { class: "card focus-hero" },
+    $("h2", { text: FOC.title }), $("p", { text: FOC.experiment }),
+    $("blockquote", { class: "mission" }, document.createTextNode(FOC.mission), $("cite", { text: FOC.mission_source })),
+    $("p", {}, $("strong", { text: "The gate: " }), document.createTextNode(FOC.gate)),
+    $("p", { class: "def" }, $("strong", { text: "Chats: " }), document.createTextNode(FOC.disabled_note))));
+  for (const f of ["profile", "plan", "chat"]) {
+    const fam = DATA.families[f];
+    if (isOff(f)) { w.append($("div", { class: "card focus-fam offfam" }, $("h3", { text: fam.title + " · off" }),
+      $("p", { class: "def", text: FOC.disabled_note }))); continue; }
+    const ds = byFam(f).filter(d => tierOf(d.id));
+    const box = $("div", { class: "card focus-fam" }, $("h3", { text: fam.title }),
+      $("p", { class: "def", text: TIERS.map(t => `${ds.filter(d => tierOf(d.id) === t).length} ${TIER_LABEL[t].toLowerCase()}`).join(" · ") }));
+    for (const t of TIERS) {
+      const these = ds.filter(d => tierOf(d.id) === t);
+      if (!these.length) continue;
+      box.append($("h4", { class: "tier " + t, text: `${TIER_LABEL[t]}: ${TIER_NOTE[t]}` }));
+      const ul = $("ul", { class: "rowlist" + (t === "off" ? " offlist" : "") });
+      for (const d of these) ul.append($("li", { onclick: () => { state.tab = f; state.sel = { r: columns(f)[0]?.id, d: d.id }; render(); } },
+        $("span", {}, $("span", { class: "n", text: d.name }), d.proposed ? $("span", { class: "tag", text: "new, from the brief" }) : null,
+          $("div", { class: "y", text: FOC.tiers[d.id].why }))));
+      box.append(ul);
+    }
+    w.append(box);
+  }
+  return w;
 }
 
 function legend() {
@@ -184,8 +266,15 @@ function legend() {
 
 function controls() {
   const c = $("div", { class: "controls" }, $("span", { class: "label", text: "Show" }));
-  for (const p of ["core", "useful", "diagnostic"]) c.append($("button", { class: "chip", "aria-pressed": String(state.pri[p]),
-    text: { core: "Core", useful: "Useful", diagnostic: "Diagnostic" }[p], onclick: () => { state.pri[p] = !state.pri[p]; render(); } }));
+  if (FOC) {
+    for (const t of TIERS) c.append($("button", { class: "chip", "aria-pressed": String(state.tiers[t]), text: TIER_LABEL[t],
+      onclick: () => { state.tiers[t] = !state.tiers[t]; render(); } }));
+    c.append($("span", { class: "label", text: " · Columns" }), $("button", { class: "chip", "aria-pressed": String(state.all),
+      text: "every version", onclick: () => { state.all = !state.all; render(); } }));
+  } else {
+    for (const p of ["core", "useful", "diagnostic"]) c.append($("button", { class: "chip", "aria-pressed": String(state.pri[p]),
+      text: { core: "Core", useful: "Useful", diagnostic: "Diagnostic" }[p], onclick: () => { state.pri[p] = !state.pri[p]; render(); } }));
+  }
   c.append($("span", { class: "label", text: " · Rows" }));
   for (const [k, t] of [["catalogue", "scorecard order"], ["weak", "weakest first"]]) c.append($("button", { class: "chip",
     "aria-pressed": String(state.order === k), text: t, onclick: () => { state.order = k; render(); } }));
@@ -194,33 +283,56 @@ function controls() {
 }
 
 function matrix(f) {
-  const rs = results(f);
-  let ds = byFam(f).filter(d => d.scope !== "set" && state.pri[d.priority]);
+  const rs = columns(f);
+  let ds = byFam(f).filter(d => d.scope !== "set" && (FOC ? tierOf(d.id) && state.tiers[tierOf(d.id)] : state.pri[d.priority]));
   if (state.order === "weak") ds = ds.map(d => [d, mean(rs.map(r => r.scores?.[d.id]?.score).filter(x => x != null)) ?? 9])
     .sort((a, b) => a[1] - b[1]).map(x => x[0]);
+  if (FOC) ds = TIERS.flatMap(t => ds.filter(d => tierOf(d.id) === t));
   const t = $("table", { class: "m" });
   const hr = $("tr", {}, $("th", { class: "dim" }));
   for (const r of rs) {
-    const [top, bottom] = f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "")]
-                                          : [r.version, (r.when || "") + (r.label.includes("preview") ? " · prev" : r.label.includes("first") ? " · 2 turns" : "")];
-    hr.append($("th", { class: "col" + (state.sel?.r === r.id && !state.sel?.d ? " sel" : ""), title: r.label,
-      onclick: () => { state.sel = { r: r.id }; render(); } }, $("span", { class: "v", text: top }), $("span", { class: "w", text: bottom })));
+    const [top, bottom] = r.planned ? [r.top, r.sub]
+      : f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "")]
+      : [r.version, (r.when || "") + (r.label.includes("preview") ? " · prev" : r.label.includes("first") ? " · 2 turns" : "")];
+    hr.append($("th", { class: "col" + (r.planned ? " plannedcol" : r.reference ? " refcol" : "") + (state.sel?.r === r.id && !state.sel?.d ? " sel" : ""),
+      title: r.label + (r.reference ? " (reference)" : ""), onclick: () => { state.sel = { r: r.id }; render(); } },
+      $("span", { class: "v", text: top }), $("span", { class: "w", text: bottom + (r.reference ? " · ref" : "") })));
   }
   t.append($("thead", {}, hr));
   const tb = $("tbody");
   const sumRow = (label, fn, fmt) => { const tr = $("tr", { class: "sum" }, $("th", { class: "dim", text: label }));
-    for (const r of rs) { const v = fn(r); tr.append($("td", { text: v == null ? "–" : fmt(v) })); } tb.append(tr); };
+    for (const r of rs) { const v = r.planned ? null : fn(r); tr.append($("td", { text: v == null ? "–" : fmt(v) })); } tb.append(tr); };
   const vis = new Set(ds.map(d => d.id));
   const sc = (r, pred) => byFam(f).filter(d => vis.has(d.id) && pred(d)).map(d => r.scores?.[d.id]?.score).filter(x => x != null);
-  sumRow("Core mean", r => mean(sc(r, d => d.priority === "core")), v => v.toFixed(1));
-  sumRow("Mean of the rows shown", r => mean(sc(r, () => true)), v => v.toFixed(1));
-  sumRow("Rows below the line (≤3)", r => sc(r, () => true).filter(x => x <= 3).length || 0, v => String(v));
+  if (FOC) {
+    const crit = r => byFam(f).filter(d => tierOf(d.id) === "critical").map(d => r.scores?.[d.id]?.score);
+    sumRow("Critical mean", r => mean(crit(r).filter(x => x != null)), v => v.toFixed(1));
+    sumRow("Critical below the line (≤3)", r => crit(r).filter(x => x != null && x <= 3).length, v => String(v));
+    sumRow("Passes the gate", r => { const c = crit(r); return c.some(x => x == null) ? "not all scored" : c.every(x => x >= 4) ? "yes" : "no"; }, v => v);
+  } else {
+    sumRow("Core mean", r => mean(sc(r, d => d.priority === "core")), v => v.toFixed(1));
+    sumRow("Mean of the rows shown", r => mean(sc(r, () => true)), v => v.toFixed(1));
+    sumRow("Rows below the line (≤3)", r => sc(r, () => true).filter(x => x <= 3).length || 0, v => String(v));
+  }
+  let lastTier = null;
   tb.append($("tr", { class: "gap" }, $("th", { class: "dim" })));
   for (const d of ds) {
-    const tr = $("tr", {}, $("th", { class: "dim", title: d.tells }, $("span", { class: "pri " + d.priority, text: PRI[d.priority] }),
-      document.createTextNode(d.name)));
+    const tier = tierOf(d.id);
+    if (FOC && tier !== lastTier) {
+      tb.append($("tr", { class: "tierrow" }, $("th", { class: "dim tier " + tier, colspan: String(rs.length + 1) },
+        document.createTextNode(TIER_LABEL[tier]), $("span", { class: "tiernote", text: " · " + TIER_NOTE[tier] }))));
+      lastTier = tier;
+    }
+    const tr = $("tr", { class: tier === "off" ? "offrow" : "" }, $("th", { class: "dim", title: d.tells },
+      $("span", { class: "pri " + d.priority, text: PRI[d.priority] }), document.createTextNode(d.name),
+      d.proposed ? $("span", { class: "tag", text: "new" }) : null));
     for (const r of rs) {
       const s = r.scores?.[d.id], v = s ? s.score : undefined;
+      if (r.planned) {
+        tr.append($("td", { class: "cell planned" + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : ""), tabindex: "0",
+          "aria-label": `${d.name}, ${r.label}: not written yet`, onclick: () => { state.sel = { r: r.id, d: d.id }; render(); } }));
+        continue;
+      }
       const td = $("td", { class: "cell " + (v === undefined ? "na" : fill(v)) + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : ""),
         text: v === undefined ? "" : v == null ? "–" : String(v), tabindex: "0",
         "aria-label": `${d.name}, ${r.label}: ${v == null ? "not scored" : v}`,
@@ -243,7 +355,8 @@ function untip() { document.getElementById("tip").style.display = "none"; }
 function trend(f) {
   const rs = results(f).filter(r => Object.keys(r.scores || {}).length);
   if (rs.length < 3) return null;
-  const core = r => mean(byFam(f).filter(d => d.priority === "core").map(d => r.scores?.[d.id]?.score).filter(x => x != null));
+  const core = r => mean(byFam(f).filter(d => FOC ? tierOf(d.id) === "critical" : d.priority === "core")
+    .map(d => r.scores?.[d.id]?.score).filter(x => x != null));
   const all = r => mean(byFam(f).map(d => r.scores?.[d.id]?.score).filter(x => x != null));
   const W = 900, H = 240, L = 34, R = 96, T = 12, B = 34, pw = W - L - R, ph = H - T - B;
   const x = i => L + (rs.length === 1 ? pw / 2 : i * pw / (rs.length - 1)), y = v => T + ph - (v - 1) / 5 * ph;
@@ -255,7 +368,7 @@ function trend(f) {
   const bl = s("text", { x: L + pw + 8, y: y(3.5) + 4 }); bl.textContent = "the line"; svg.append(bl);
   rs.forEach((r, i) => { if (i % Math.ceil(rs.length / 14) === 0 || i === rs.length - 1) {
     const tx = s("text", { x: x(i), y: H - 12, "text-anchor": "middle" }); tx.textContent = r.version; svg.append(tx); } });
-  const series = [["Core dimensions", core, "var(--line-core)"], ["All dimensions", all, "var(--line-all)"]];
+  const series = [[FOC ? "Critical dimensions" : "Core dimensions", core, "var(--line-core)"], ["All dimensions", all, "var(--line-all)"]];
   const ends = series.map(([, fn]) => fn(rs[rs.length - 1]));
   const apart = ends.every(v => v != null) && Math.abs(y(ends[0]) - y(ends[1])) < 14;
   for (const [name, fn, col] of series) {
@@ -290,10 +403,21 @@ function trend(f) {
 
 function panel(f) {
   const p = $("div", { class: "card", id: "panel" });
-  const sel = state.sel, r = sel && DATA.results.find(x => x.id === sel.r);
+  const sel = state.sel, r = sel && findCol(sel.r);
   if (!r) { p.append($("p", { class: "empty", text: "Click a cell for the score's reasoning, or a column header for one piece of work." }));
     return p; }
   const href = srcHref(r.source);
+  const tierBox = d => { const t = FOC?.tiers?.[d.id]; if (!t) return null;
+    return $("div", { class: "tierbox " + t.tier }, $("strong", { text: `${TIER_LABEL[t.tier]} in this experiment` + (d.proposed ? " · new, from the brief" : "") }),
+      $("p", { text: t.why })); };
+  if (r.planned) {
+    p.append($("h2", { text: sel.d ? dims.find(x => x.id === sel.d).name : r.label }), $("div", { class: "lean", text: r.label + " · not written yet" }));
+    if (sel.d) { const d = dims.find(x => x.id === sel.d); p.append(tierBox(d) || "", $("h3", { text: "The bar it has to clear" }),
+      $("p", { class: "def" }, $("strong", { text: "Line: " }), document.createTextNode(d.line)),
+      $("p", { class: "def" }, $("strong", { text: "High: " }), document.createTextNode(d.high)), $("p", { class: "def", text: d.tells })); }
+    else p.append($("p", { class: "def", text: `Written from the brief, not from a game file, and scored on the ${r.kind}'s critical dimensions. ${FOC.gate}` }));
+    return p;
+  }
   if (!sel.d) {
     p.append($("h2", { text: r.label }));
     if (r.note) p.append($("p", { class: "def", text: r.note }));
@@ -313,6 +437,7 @@ function panel(f) {
   }
   const d = dims.find(x => x.id === sel.d), s = r.scores?.[d.id];
   p.append($("h2", { text: d.name }), $("div", { class: "lean", text: `${r.label} · ${PRI[d.priority] === "Diag." ? "Diagnostic" : PRI[d.priority]}` }));
+  const tb = tierBox(d); if (tb) p.append(tb);
   if (!s) { p.append($("p", { class: "empty", text: "Not scored yet." })); return p; }
   p.append($("div", { class: "head" }, $("span", { class: "big " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
     $("span", { class: "lean", text: s.score == null ? "Not applicable to this material" : DATA.scale[s.score] })));
@@ -340,12 +465,16 @@ function catalogue() {
   w.append(sc);
   for (const [f, fam] of Object.entries(DATA.families)) {
     w.append($("h2", { text: fam.title, style: "font-size:17px;margin:22px 0 4px" }), $("p", { class: "fam-intro", text: "Scored: " + fam.artefact + "." }));
-    const t = $("table", { class: "cat" }, $("thead", {}, $("tr", {}, ...["Dimension", "Priority", "What it tells us", "How", "The line (3 or 4)"].map(h => $("th", { text: h })))));
+    const heads = ["Dimension", "Priority", ...(FOC ? ["Now"] : []), "What it tells us", "How", "The line (3 or 4)"];
+    const t = $("table", { class: "cat" }, $("thead", {}, $("tr", {}, ...heads.map(h => $("th", { text: h })))));
     const tb = $("tbody");
     for (const d of byFam(f)) tb.append($("tr", {},
-      $("td", { class: "nm" }, document.createTextNode(d.name), d.probe ? $("span", { class: "probe-tag", text: "probe: sees " + d.probe.sees.join(", ") }) : null,
+      $("td", { class: "nm" }, document.createTextNode(d.name), d.proposed ? $("span", { class: "tag", text: "new" }) : null,
+        d.probe ? $("span", { class: "probe-tag", text: "probe: sees " + d.probe.sees.join(", ") }) : null,
         d.scope === "set" ? $("span", { class: "probe-tag", text: "needs a set of runs; not scored yet" }) : null),
-      $("td", { text: d.priority }), $("td", { text: d.tells }), $("td", { text: d.method }), $("td", { text: d.line })));
+      $("td", { text: d.priority }),
+      FOC ? $("td", { class: "tier " + (tierOf(d.id) || (isOff(f) ? "off" : "")), text: isOff(f) ? "off" : TIER_LABEL[tierOf(d.id)] || "–" }) : null,
+      $("td", { text: d.tells }), $("td", { text: d.method }), $("td", { text: d.line })));
     t.append(tb); w.append($("div", { class: "card scroll", style: "padding:4px 14px" }, t));
   }
   return w;
@@ -355,9 +484,12 @@ function render() {
   tabs(); meta();
   const m = document.getElementById("main"); m.replaceChildren();
   if (state.tab === "catalogue") { m.append(catalogue()); return; }
+  if (state.tab === "focus") { m.append(focusPage()); return; }
   const f = state.tab;
-  const left = $("div", {}, $("p", { class: "fam-intro", text: FAM_NOTE[f] }));
-  if (f === "plan") { const c = trend(f); if (c) left.append(c); }
+  if (isOff(f)) { m.append($("div", { class: "card offfam" }, $("h2", { text: DATA.families[f].title + " · off for now" }),
+    $("p", { text: FOC.disabled_note }), $("p", { class: "def", text: "The chat scores from v18 to v22 stay in the data and come back when this tab is switched on." }))); return; }
+  const left = $("div", {}, $("p", { class: "fam-intro", text: FOC ? FOC_NOTE[f] : FAM_NOTE[f] }));
+  if (f === "plan" && (!FOC || state.all)) { const c = trend(f); if (c) left.append(c); }
   left.append($("div", { class: "card" }, controls(), matrix(f)));
   const pn = panel(f);
   m.append($("div", { class: "layout" }, left, pn));

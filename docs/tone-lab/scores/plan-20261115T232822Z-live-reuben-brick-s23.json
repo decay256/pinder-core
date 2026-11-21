@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are named and built from both profiles. Reuben's pre-written exits read to Brick as a flinch at her size, which hits her 'oversized anomaly' fear. Brick's numbered specs read to Reuben as a tribunal grading him small, which hits his 'too small to register' fear. The Snap lines give each direction a concrete trigger and action, and the fall-apart ending stages them against each other, so it clears the line. It stops short of a 5 because the collision is stated in one summary sentence rather than built as a rising sequence: no setup beat shows one defence provoking the other's snap in turn. Reuben's closing 'jam the hinges' also doesn't clearly come from his fear.",
+   "evidence": [
+    "Reuben's preemptive exits read to Brick as him flinching at her size; Brick's numbered specs read to Reuben as a tribunal grading him inadequate.",
+    "he drafts her polite refusal for her under the guise of \"mutual efficiency.\"",
+    "Brick lists `1. You are already halfway out the door.`"
+   ],
+   "raise": "Tie a setup beat (say the arm-wrestling geometry in Setup 3) to an explicit chain: his exit clause sets off her numbered audit, which sets off his drafted refusal. That makes the collision escalate into the fall-apart instead of being stated once.",
+   "def": "c846dffeff06ee37",
+   "material": "ddb62200d825dd12",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 64.3,
    "cost": 0.190956,
    "label": "batch 1"
+  },
+  {
+   "seconds": 16.8,
+   "cost": 0.078044,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:25:39Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3317
+ "scored_utc": "2026-11-21T15:33:50Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4098
 }

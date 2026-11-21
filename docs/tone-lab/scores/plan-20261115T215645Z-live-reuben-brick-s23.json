@@ -330,6 +330,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions exist. Reuben's habit of naming an exit early is set up as the trigger for Brick's snap (\"Triggered by his exits\"). Brick's \"hm.\" verdicts and numbered lists are exactly the grading that sets Reuben off (\"Triggered when graded\"). The fall-apart turns on both: her \"1. Pass.\" is a verdict, and his \"I already had the exit open\" confirms her fear of rejection. That keeps it above the line. It stays at 4 because the mid-chat collisions are only labels, not scripted beats. The plan never pairs a specific Brick verdict with Reuben's snap. Nothing escalates from a first press to the ending. The link between his exits and her size shame rests on the abstract \"doors\" theme, not on a concrete line.",
+   "evidence": [
+    "Snap: Triggered by his exits. Uses efficiency talk.",
+    "Snap: Triggered when graded. Uses app cynicism",
+    "hm. 1. Pass. 2. I hate narrow doors. / Understood. I already had the exit open."
+   ],
+   "raise": "Plan one concrete mid-chat exchange for each direction, such as Brick's numbered verdict on his curve provoking his \"audition\" snap and his \"You may take the exit\" line drawing her towel-and-rosé slip. Each should push harder than the last so the ending reads as the third and final press.",
+   "def": "c846dffeff06ee37",
+   "material": "71d287aeda878362",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    false
+   ]
   }
  },
  "probes": {},
@@ -343,10 +362,15 @@
    "seconds": 47.3,
    "cost": 0.158848,
    "label": "batch 2"
+  },
+  {
+   "seconds": 16.1,
+   "cost": 0.083564,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:26:08Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3266
+ "scored_utc": "2026-11-21T15:33:53Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4102
 }

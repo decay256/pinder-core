@@ -332,6 +332,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned, built from both profiles, and the fall-apart ending turns on them. Brick's audit hits Reuben's tribunal fear: his snap fires 'when Brick clinically dissects his phrasing,' which confirms his fear of being measured and 'cropped out.' Reuben's exit-joking hits her fear of being a spectacle: her snap fires when he 'threatens to leave first,' and the wreck ending has him joke about 'her revolving-door geometry.' It stays at 4 because the in-story collision (Beat 4) is only a summary ('collides with... triggering a near-snap or paste accident'), with no staged line or escalation from a small graze to the breaking hit, and the Reuben-on-Brick direction is asserted more than shown: his jokes mostly mock himself, so how they read as recoiling from her size is never dramatised.",
+   "evidence": [
+    "When Brick clinically dissects his phrasing or treats his vulnerability like an equation, he beats her to the exit",
+    "When Reuben uses a joke to dodge a direct question or threatens to leave first, she goes ice-cold and bureaucratic",
+    "cracks a fast, mathematical joke about her revolving-door geometry and his exit timing"
+   ],
+   "raise": "Stage Beat 4 as two escalating concrete exchanges: first a small sting each way, such as Reuben's size-gap joke that Brick hears as him backing off from her scale, and then the specific line that pushes each one past the point of no return.",
+   "def": "c846dffeff06ee37",
+   "material": "6c7cb68441c3124c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -345,10 +364,15 @@
    "seconds": 59.1,
    "cost": 0.24370399999999998,
    "label": "batch 1"
+  },
+  {
+   "seconds": 17.7,
+   "cost": 0.13854,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:21:16Z",
- "repo_commit": "5e49d8e",
- "cost": 0.4733
+ "scored_utc": "2026-11-21T15:32:51Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.6118
 }

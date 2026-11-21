@@ -40,6 +40,7 @@ import profiles as pf  # noqa: E402
 
 ROOT = HERE.parents[1]
 CARD = HERE / "scorecard.yaml"
+FOCUS = HERE / "focus.yaml"  # which dimensions decide the current experiment (shown in the explorer)
 RUNS = ROOT / "docs" / "tone-lab" / "runs"
 OUT = ROOT / "docs" / "tone-lab" / "scores"
 DOC = ROOT / "docs" / "tone-lab" / "scorecard.md"
@@ -565,8 +566,9 @@ def write_page(cat):
         results.append(r)
     data = {"scale": cat["scale"], "families": cat["families"], "materials": cat["materials"],
             "dimensions": [{k: d.get(k) for k in ("id", "family", "name", "priority", "tells", "method", "low", "line",
-                                                  "high", "probe", "scope", "batch")} for d in cat["dimensions"]],
+                                                  "high", "probe", "scope", "batch", "proposed")} for d in cat["dimensions"]],
             "results": results,
+            "focus": yaml.safe_load(FOCUS.read_text(encoding="utf-8")) if FOCUS.exists() else None,
             "built": dt.datetime.now(dt.timezone.utc).strftime("%d %b %Y %H:%M UTC")}
     page = (HERE / "score_page.html").read_text(encoding="utf-8")
     blob = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")

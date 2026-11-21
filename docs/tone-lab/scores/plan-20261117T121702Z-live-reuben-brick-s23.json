@@ -336,6 +336,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned and come from both profiles. Brick's \"hm.\" and numbered audits read to Reuben as the tribunal cropping him for being too small. Reuben's pre-drafted exits make Brick feel like the oversized thing scaring him off. The fall-apart turns on both: his clearance-based apology hits her too-big fear, and her clipped numbered verdict confirms his. It stays at 4 because the collision is mostly described in the summary line rather than staged as escalating mid-chat beats, and Brick's Snap trigger (\"unscheduled chaos\") is not tied to his exit speeches. It stays above the line because each direction gets a concrete moment in the endings, and the click hinges on Reuben surviving a \"hm.\" without offering an exit.",
+   "evidence": [
+    "Reuben's manic, pre-written exit speeches make Brick feel like a giant monster who is already scaring him off.",
+    "If you need to bail because the clearance is wrong I have already drafted your apology.",
+    "hm. 1. Efficient. 2. Keep the coffee clip."
+   ],
+   "raise": "Plan two or three escalating mid-chat beats where each defence presses harder on the other's fear, for example the door-clearance setup turning into his exit offer, which triggers her numbered termination, and rewrite Brick's Snap so it fires on his exit speeches.",
+   "def": "c846dffeff06ee37",
+   "material": "841e474d3f11559f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -349,10 +368,15 @@
    "seconds": 56.6,
    "cost": 0.18698399999999998,
    "label": "batch 2"
+  },
+  {
+   "seconds": 17.6,
+   "cost": 0.100512,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:23:04Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3773
+ "scored_utc": "2026-11-21T15:33:20Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4778
 }

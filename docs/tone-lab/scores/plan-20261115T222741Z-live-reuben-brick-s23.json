@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned with concrete moments drawn from both profiles. Reuben's door-bouncer habit of offering ceremonial exits hits Brick's fear of being the unwanted, too-big thing: she answers \"Stop holding the door open for me. I hate doors,\" and in the fall-apart his exit-offering becomes proof she rehearsed for nothing. In the other direction, her numbered verdict dismisses wit, his only stat, which is his stated snap trigger. That second direction exists only in the fall-apart line, with no mid-chat moment where her clinical inspection first lands as his tribunal, so there is no escalation and the clash is not yet the engine of the night.",
+   "evidence": [
+    "Stop holding the door open for me. I hate doors.",
+    "I practiced three smiles in the mirror for a man already pointing at the exit.",
+    "1. You aren't witty, you're stalling."
+   ],
+   "raise": "Add a mid-chat beat where Brick's 'hm.' numbered verdict on one of Reuben's stories reads to him as judgment, so he counts her reply seconds and offers an exit, and have the fall-apart grow out of that sequence.",
+   "def": "c846dffeff06ee37",
+   "material": "cfbb74c4a82cbde6",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 58.8,
    "cost": 0.180356,
    "label": "batch 1"
+  },
+  {
+   "seconds": 17.0,
+   "cost": 0.079444,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:25:54Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3247
+ "scored_utc": "2026-11-21T15:33:54Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4041
 }

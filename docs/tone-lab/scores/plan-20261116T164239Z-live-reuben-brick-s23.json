@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned and come from both profiles. His pre-emptive exits press on her fear of being too big: she 'reads his exits as proof she is too massive and intimidating.' Her numbered audits press on his fear of being measured and found small: 'her dimensional audit triggers his fear of being a joke.' The fall-apart turns on exactly this exchange, with a concrete beat ('the geometry is fatal' answered by 'hm. 1. Efficient. 2. Goodbye.'), which keeps it above the line. It stops short of 5 because nothing escalates: before the ending, the only mid-chat friction is a vague 'mid-chat debate over spatial mechanics', with no staged moment where an audit lands on a disclaimer and he backs further out.",
+   "evidence": [
+    "Brick reads his exits as proof she is too massive and intimidating, so she clamps down with numbered audits that put him on trial",
+    "Full disclosure: the geometry is fatal. I shall spare you the revolving door.",
+    "Her dimensional audit triggers his fear of being a joke; his ceremonial forfeit confirms she scared him off."
+   ],
+   "raise": "Plan two or three escalating mid-chat beats where a specific audit item (for example 'Your posture is suspect') meets a specific forfeit, each one pushing the next harder, so the ending is the last step of a visible spiral.",
+   "def": "c846dffeff06ee37",
+   "material": "a1705a2d79856b69",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 46.4,
    "cost": 0.15234799999999998,
    "label": "batch 2"
+  },
+  {
+   "seconds": 15.5,
+   "cost": 0.080628,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:24:11Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3473
+ "scored_utc": "2026-11-21T15:33:32Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.428
 }

@@ -392,6 +392,44 @@
     true,
     true
    ]
+  },
+  "profile.logic": {
+   "score": 5,
+   "why": "The rule is clear and she would defend it: 'If I announce it and schedule it first, nobody can flinch at me or leave me by surprise.' Its origin is grounded in the 2023 flinch. It escalates step by step: warnings before unzipping, travel buffers on friends' invites, and finally rows booked with end times, which cost her Marguerite. Caught out, she digs deeper as predicted, with numbered proofs and a twelve-minute defence of messy hair. It misses a 6 because some traits sit outside the rule: the sewer podcasts and the 'Oxfordshire claret' lie don't follow from it.",
+   "evidence": [
+    "swore every encounter would begin with an advance warning and slower reveal",
+    "put their rows in a shared calendar with end times",
+    "Over-explains in rapid numbered points... refusing comfort until the physics are settled"
+   ],
+   "raise": "Make the class lies serve the same rule, for example claiming Oxfordshire so her size reads as breeding before anyone can read it as an anomaly, so every behaviour traces back to the one logic.",
+   "def": "bb0f5bbc8dc07548",
+   "material": "bd5a73b8bf2b77b5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.creed": {
+   "score": 3,
+   "why": "A dating-culture belief is implied: vague plans are a red flag, and 'if they wanted to, they'd name a day.' It shows in her 'Maybe is evasive. Name a time' and in her dealbreaker. There is also contradicting evidence: she cried over 'let's do this again' after a date that 'went well.' But the profile never frames this as something the apps or dating discourse taught her, and she never voices it as a creed in that culture's language. It reads as private logistics compulsion rather than satire coming out of her mouth.",
+   "evidence": [
+    "hm. 'Maybe' is evasive. Name a time.",
+    "'Let's do this again' without naming a day—she cried in a taxi home last month over that line, reading it as rejection.",
+    "the back of a taxi on the way home from a date that went well"
+   ],
+   "raise": "Have her quote a recognisable app maxim in earnest, such as 'Consistency is the bare minimum; vague plans are breadcrumbing', and use it to justify the calendar invites and the dealbreaker, so the contradiction lands against a named belief.",
+   "def": "a741f63642bb3f6b",
+   "material": "bd5a73b8bf2b77b5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {
@@ -440,10 +478,15 @@
    "seconds": 31.5,
    "cost": 0.260068,
    "label": "batch 3"
+  },
+  {
+   "seconds": 21.1,
+   "cost": 0.23324,
+   "label": "batch 3"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:16:47Z",
- "repo_commit": "5e49d8e",
- "cost": 1.1991
+ "scored_utc": "2026-11-21T15:32:29Z",
+ "repo_commit": "b928e5d",
+ "cost": 1.4324
 }

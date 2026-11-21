@@ -324,6 +324,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned from both profiles. Her numbered dimension checks trip his fear of being sized up and dismissed, which is his Snap trigger. His pre-emptive exit trips her fear that she scares people off, which is her Snap trigger, 'hesitates at her dimensions'. The fall-apart gives a concrete exchange, and the click lines answer each fear directly. It stays at 4 because the collision is mostly described rather than staged: none of the three Setups is a mid-chat moment where audit meets exit, and nothing escalates. Her fall-apart reply ('You would have cleared it with room to spare') also reads as reassurance, so it does not visibly confirm either fear.",
+   "evidence": [
+    "Brick_haus runs clinical dimension checks so nobody recoils at her massive scale, which hits Reuben_404's terror that he's too small",
+    "I will save you the trouble of calculating whether a compact model survives the revolving door.",
+    "Her dimension audit triggers his pre-emptive exit, confirming both fears."
+   ],
+   "raise": "Plan an escalating mid-chat beat where her numbered clearance audit of his trunk prompts his drafted exit speech, and she then answers with a cold structural-capacity audit, so each defence visibly feeds the other before the ending.",
+   "def": "c846dffeff06ee37",
+   "material": "64267975dece2525",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -337,10 +356,15 @@
    "seconds": 68.0,
    "cost": 0.21988400000000002,
    "label": "batch 1"
+  },
+  {
+   "seconds": 12.6,
+   "cost": 0.094976,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:22:23Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3952
+ "scored_utc": "2026-11-21T15:33:02Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4902
 }

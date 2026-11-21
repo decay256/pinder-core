@@ -145,6 +145,24 @@ The claims against the truths, where the comedy and the reveals come from.
 - **Line:** A 4 has most pairs specific, with each truth able to leak in text. A 3 has generic pairs.
 - **High:** Every pair is a joke waiting to happen and a reveal the chat can find.
 
+### The act holds from the inside (core)
+
+The brief's "play it straight": a reasonable person following their way of coping one step too far, and then one more. Unhinged, but never random.
+
+- **How:** State their coping strategy as a rule they would defend, and check the profile lets you predict what they do when caught out: explain, and dig deeper.
+- **Low:** Quirks without a logic; they do odd things for no reason they could give.
+- **Line:** A 4 lets you write the rule they live by in one sentence they would agree with, and predict their next move when it fails. A 3 has a habit but no inner logic, or a logic that only an outsider would state.
+- **High:** The rule is sympathetic, the escalation is inevitable, and each step makes sense to them.
+
+### A belief from app culture, held in earnest (core)
+
+The brief's "the satire comes out of their mouths": a piece of what the apps and dating culture taught them (standards, red flags, high value, "communication is key") that they use straight to justify being afraid.
+
+- **How:** Name the belief, and check the profile gives evidence that contradicts it.
+- **Low:** No belief, or one held ironically.
+- **Line:** A 4 names one specific dating-culture belief they use in earnest, with evidence in the profile that contradicts it. A 3 has a vague belief, or no contradicting evidence.
+- **High:** The belief is recognisable from real apps, and every defence they have quotes it.
+
 ### Specific detail that does work (useful)
 
 Concrete names, sums, streets, brands and times, and whether they tell you something.
@@ -247,6 +265,15 @@ Nobody is planned to know or mention what they can't, like the private job leaki
 - **Low:** Several beats depend on private knowledge.
 - **Line:** A 4 has no beat needing private knowledge, or routes explicitly how it comes out. A 3 has at least one beat that depends on something unshared.
 - **High:** The plan tracks who knows what, and uses the gaps.
+
+### Each defence lands on the other's sore spot (core)
+
+The brief's two endings both depend on it: each one's habit confirms exactly what the other is afraid of. That is what makes it these two, and the fall-apart inevitable.
+
+- **How:** For each direction, A on B and B on A, find the planned moment where one's defence presses on the other's fear, and check it is concrete and comes from both profiles.
+- **Low:** The two defences never touch.
+- **Line:** A 4 plans both directions with a concrete moment each, built from both profiles. A 3 has one direction, or a collision that is only described.
+- **High:** Both directions, escalating, and the ending turns on them.
 
 ### The beats follow from each other (core)
 

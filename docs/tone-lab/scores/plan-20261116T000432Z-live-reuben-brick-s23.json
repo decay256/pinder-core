@@ -338,6 +338,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are named and drawn from both profiles: her numbered audits feed his fear of failing a physical inspection, and his exit clauses feed her fear of being a monstrous anomaly. The fall-apart ending runs on both habits, with her 1-2-3 audit and him holding the door and walking out. That puts it above the line. It stays at 4 because the collision is stated as a mechanism, not staged as a specific turn, and there is no planned escalation. Brick's Snap is also triggered by feeling \"laughed at\", not by his exit clauses, so the B-side direction never becomes a concrete moment.",
+   "evidence": [
+    "Brick's numbered audits and towering size trigger Reuben's tribunal terror that he is failing a physical inspection",
+    "Reuben's constant exit-clauses convince Brick he finds her monstrous and wants to run.",
+    "When she feels laughed at, she Weaponizes the list—itemizing 1-2-3 why his dimensions fail her baseline standards."
+   ],
+   "raise": "Stage one specific turn in each direction, such as his \"Should you wish to bail,\" landing just as she names her size and setting off her list snap, and make each round hit harder so the fall-apart builds rather than arriving at once.",
+   "def": "c846dffeff06ee37",
+   "material": "f333066fde8b84d5",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -351,10 +370,15 @@
    "seconds": 64.2,
    "cost": 0.19338,
    "label": "batch 1"
+  },
+  {
+   "seconds": 14.7,
+   "cost": 0.077536,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:25:28Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3384
+ "scored_utc": "2026-11-21T15:33:47Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4159
 }

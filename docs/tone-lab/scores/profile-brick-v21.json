@@ -394,6 +394,42 @@
     true,
     true
    ]
+  },
+  "profile.logic": {
+   "score": 5,
+   "why": "Her rule can be written in a sentence she would defend: if I plan it, prove it and narrate myself first, nobody can find me lacking before I've shown them. The profile also predicts her move when caught out, which is to explain at length and dig deeper. Tonight's hook does exactly that: the 'strategic pause' cover story sits over a forty-minute talk about the door, which is the rule escalating inevitably. It falls short of a 6 on two counts: it copies 'the tip finishes shorter than the eye expects' against a tip of 95-100 (probably material borrowed from Reuben's card), and the rule is mostly stated in narrator voice rather than as something she would say.",
+   "evidence": [
+    "she plans and proves and optimizes because it lets her believe the future is manageable",
+    "narrates the whole self-made proof of her worth so fast that nobody gets a chance to evaluate her",
+    "limped into the interview, and talked for forty minutes about the door"
+   ],
+   "raise": "Cut the contradictory tip line, or recast it as deliberate denial, so every step of the escalation reads as hers and not as stray material.",
+   "def": "bb0f5bbc8dc07548",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.creed": {
+   "score": 2,
+   "why": "The profile names no belief taken from dating or app culture that she uses in earnest to justify her fear. The nearest candidates are radical self-disclosure ('Nothing about her is concealed') and career euphemism ('a strategic pause'), but the first is told in narrator voice and the second is CV-speak, not app doctrine. The game's raw material holds a usable creed ('no fluff, ask me anything', radically honest), but the profile dropped it. The contradicting evidence (her honesty curdling into Denial, the 'slight' midsection claim) therefore has no named belief to contradict.",
+   "evidence": [
+    "Refers to 'a strategic pause I took entirely on my own terms.'",
+    "Nothing about her is concealed, which lands as bracing honesty or as too much all at once"
+   ],
+   "raise": "Give her one recognisable app creed in her own mouth, such as 'radical honesty, no fluff, ask me anything', and set it directly against the denial and the held-in midsection.",
+   "def": "a741f63642bb3f6b",
+   "material": "fd83f32b4df93dbd",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
   }
  },
  "probes": {
@@ -442,10 +478,15 @@
    "seconds": 30.9,
    "cost": 0.1593,
    "label": "batch 4"
+  },
+  {
+   "seconds": 21.5,
+   "cost": 0.14046799999999998,
+   "label": "batch 3"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:16:31Z",
- "repo_commit": "5e49d8e",
- "cost": 0.7635
+ "scored_utc": "2026-11-21T15:32:29Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.904
 }

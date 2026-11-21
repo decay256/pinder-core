@@ -324,6 +324,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 3,
+   "why": "Both directions are named and fit both profiles: Brick's numbered audits press on Reuben's fear of being \"physically negligible,\" and his preemptive exits feed her fear of being \"too big and loud to fit anyone's life without breaking something.\" But the collision is only described in one sentence. No turn is planned where a specific audit makes him bolt, or where a specific exit lands on her as proof she broke something. Her snap trigger (\"mocked as 'too much'\") doesn't match the collision's mechanism (his exits), and the fall-apart line \"You want an audience\" doesn't answer his leaving, so the ending doesn't clearly turn on either direction.",
+   "evidence": [
+    "Brick's numbered audits make Reuben feel measured and found tiny; Reuben's preemptive exits make Brick feel she has already crushed him.",
+    "Snap: Feeling mocked as \"too much\" triggers a cold numbered ruling terminating the chat for logistical incompatibility.",
+    "1. You want an audience. 2. Door's closed."
+   ],
+   "raise": "Plan one concrete beat per direction: for example, Brick numbering his proportions back at him (\"1. Short. 2. Thick.\") prompts \"I shall see myself out,\" and that exit makes Brick say she has flattened him. Then tie the fall-apart lines to those beats.",
+   "def": "c846dffeff06ee37",
+   "material": "bf8dc5a382406aaa",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -337,10 +356,15 @@
    "seconds": 44.0,
    "cost": 0.150804,
    "label": "batch 2"
+  },
+  {
+   "seconds": 14.3,
+   "cost": 0.07886,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:24:55Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3148
+ "scored_utc": "2026-11-21T15:33:37Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.3936
 }

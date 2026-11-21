@@ -328,6 +328,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned, and each comes from both profiles. Reuben's pre-emptive clearance jokes, from his disclaimer habit, land on Brick's fear of being 'too huge and unyielding to fit inside normal rooms'. Brick's numbered measuring, her audit habit, lands on Reuben's fear of being 'cropped out the second someone sees what he actually measures'. The snaps escalate each side: her itemised verdict on his 'structural capacity', his announced exit. Both endings turn on that escalation: the fall-apart is the two habits fully fired, and the click ending inverts the two fears. It falls short of a 6 because the collision moments are summarised rather than staged as a sequence of rising turns, and no specific line shows the first clearance joke tipping into her list.",
+   "evidence": [
+    "Reuben pre-emptively jokes about clearance and tight angles so she won't mock his lack of length; Brick hears it as another man warning her she's too huge",
+    "Brick's `1. 2. 3.` reduces him to insufficient clearance; Reuben fires off a manic pre-emptive exit about her needing a freight elevator.",
+    "He doesn't want her smaller; she doesn't look past him."
+   ],
+   "raise": "Stage the collision as three escalating beats with a sample line each: a first clearance quip, her first numbered audit, then the snaps. That would make the rise as concrete as the endpoints.",
+   "def": "c846dffeff06ee37",
+   "material": "cc6463f9429015df",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -341,10 +360,15 @@
    "seconds": 59.0,
    "cost": 0.194696,
    "label": "batch 1"
+  },
+  {
+   "seconds": 16.5,
+   "cost": 0.09124,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:23:40Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3575
+ "scored_utc": "2026-11-21T15:33:21Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4488
 }

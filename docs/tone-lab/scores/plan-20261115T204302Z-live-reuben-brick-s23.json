@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned with concrete trigger moments drawn from both profiles. Brick's standalone `hm.` or minute-count lands on Reuben's stamina shame and the eleven-second silence. Reuben's pre-emptive exit ramps land on Brick's fear of the taxi and the 'let's do this again' with no day named. The collision escalates from Setup #3's early exchange to each character's snap, and the fall-apart ending turns directly on it: he takes his exit first, and she shuts into a numbered schedule 'four minutes under the 12:40 hard stop.' It falls short of a 6 for three reasons: the escalation between setup and snap isn't staged beat by beat; the plan pins 'we can just watch something' on Delphine when the brief gives that line to an unnamed partner; and Brick's core wound of being too large and unwanted touches the collision only through the bedroom plan, not the timed sore spot.",
+   "evidence": [
+    "Every time Brick types a number of minutes or a `hm.`, Reuben hears a stopwatch timing him coming up short",
+    "Every time Reuben jokes about wrapping things up early or offering her an out, Brick hears a polite brush-off",
+    "hm. 1. Understood. 2. We're four minutes under the 12:40 hard stop. 3. No need to reschedule."
+   ],
+   "raise": "Stage a middle beat where her escalating count and his escalating exit ramps each provoke the other a second time, and tie Brick's 'too big, too rigid' wound into the timed collision rather than only the bedroom plan.",
+   "def": "c846dffeff06ee37",
+   "material": "1f59de186fabfcc8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 53.4,
    "cost": 0.207236,
    "label": "batch 2"
+  },
+  {
+   "seconds": 21.4,
+   "cost": 0.115236,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:26:47Z",
- "repo_commit": "5e49d8e",
- "cost": 0.4319
+ "scored_utc": "2026-11-21T15:34:11Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.5471
 }

@@ -330,6 +330,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned and built from both profiles. Her `hm.` and numbered audits press on his fear of being measured and \"cropped out\". His pre-written exit clauses press on her fear that her size scares people off, and both endings turn on these habits: she drops the list or he deletes the exit clause, or she grades him and he beats her to the exit. It stays at 4 because the collision is mostly stated in one summary sentence, not staged as moments in the setups. The arc never escalates from a first `hm.` to a full audit to his exit. The direction where his exit clause wounds her has no planned scene or line, only the gloss \"clumsy monster who already scared him off\".",
+   "evidence": [
+    "Her `hm.` and numbered audits feel like the exact tribunal he dreads will measure him and crop him out",
+    "his preemptive exit-clauses make her feel like a clumsy monster who already scared him off",
+    "hm. 1. Too frantic. 2. Insufficient leverage."
+   ],
+   "raise": "Thread the collision through the setups as escalating beats, for example his early \"I will save you the exit\" making her tighten into a first numbered rule. Then her audit of his arm-wrestling reach pushes him toward the exit, and each defence visibly feeds the next before the ending.",
+   "def": "c846dffeff06ee37",
+   "material": "98276f0d76c53d9b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -343,10 +362,15 @@
    "seconds": 70.3,
    "cost": 0.215956,
    "label": "batch 1"
+  },
+  {
+   "seconds": 14.7,
+   "cost": 0.087308,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:23:25Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3641
+ "scored_utc": "2026-11-21T15:33:17Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4514
 }

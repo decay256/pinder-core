@@ -396,6 +396,42 @@
     true,
     true
    ]
+  },
+  "profile.logic": {
+   "score": 4,
+   "why": "The rule is stated in terms he would sign: name the ridiculous thing before anyone else can, and you can't be hurt by it. When he's caught out you can predict the next step: another joke, then a qualification, then the joke about the joke. The drawer backs this with escalation that makes sense to him, like the twenty-minute mirror rehearsal of the curvature disclosure. It stays at 4 because tonight's hook (the dive-bar door job, fired for arguing with a misidentified 'famous' regular) is copied in rather than tied to the password-check logic, and the 'leftward curve' contradicts the game's 'rightward curve'.",
+   "evidence": [
+    "he learned early that claiming the ridiculous thing first defuses it",
+    "get ahead of the rejection by narrating it first",
+    "rehearsing the curvature disclosure out loud in the bathroom mirror, testing whether it lands better as a shrug or a grin"
+   ],
+   "raise": "Build the misidentified-regular firing into one scene where he defends the argument with the same 'I know which era you mean' logic and digs deeper, and fix the curve direction.",
+   "def": "bb0f5bbc8dc07548",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.creed": {
+   "score": 2,
+   "why": "No dating-culture belief is named or held in earnest. The nearest material is behaviour that implies one: advertising 'emotional intelligence' as a selling point, and lying that he 'just got back from a trip' so he seems to have a life. Neither is stated as a creed he would quote to justify his fear, so the satire has nothing to come out of his mouth.",
+   "evidence": [
+    "pivots hard into advertising his emotional intelligence before the other person can leave",
+    "saying I \"just got back from a trip\" when I'd been in my apartment for eleven straight days"
+   ],
+   "raise": "Give him one app belief he quotes sincerely, such as 'lead with your flaws, it's a green flag', and set it against the Delphine evidence that his self-disclosure is itself the performance.",
+   "def": "a741f63642bb3f6b",
+   "material": "c7d6eeb498a61f6f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
   }
  },
  "probes": {
@@ -444,10 +480,15 @@
    "seconds": 46.6,
    "cost": 0.201784,
    "label": "batch 2"
+  },
+  {
+   "seconds": 22.2,
+   "cost": 0.146932,
+   "label": "batch 3"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:16:21Z",
- "repo_commit": "5e49d8e",
- "cost": 0.8141
+ "scored_utc": "2026-11-21T15:32:30Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.9611
 }

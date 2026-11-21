@@ -336,6 +336,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned concretely and drawn from both profiles. Her numbered, stopwatch demand for plain intent presses on his Delphine wound and triggers his Snap. His joke-deflection of a time demand presses on her fear of the polite bolt and triggers hers. The fall-apart ending turns explicitly on both, and the click ending inverts them: he gives a single promised time, and she holds him through the eleven seconds. It falls short of a 6 because the escalation is thin. The collision appears in Beat 1 (her \"hm.\" dissection) and then goes unplanned through Beats 2-5. Beat 6 also hedges with \"or\", so only one direction is guaranteed to fire before the ending.",
+   "evidence": [
+    "Her stopwatch tribunal feels to him like Delphine's \"say something real\" tribunal; his constant tap-dancing feels to her like a man hedging before a polite bolt.",
+    "treats his nervous joke as statistical proof he will flinch and bail... Reuben hears Delphine's tribunal in her clauses",
+    "she tries to lock the heat into a numbered Google Calendar itinerary... which hits his Delphine trigger, or he deflects her time demand"
+   ],
+   "raise": "Plan a mid-chat rung, for example in Beat 3 or 4, where each defence grazes the other's fear in turn, and make Beat 6 fire both directions in sequence instead of either/or.",
+   "def": "c846dffeff06ee37",
+   "material": "ebcaf6d6ac6987e1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -349,10 +368,15 @@
    "seconds": 78.8,
    "cost": 0.295152,
    "label": "batch 1"
+  },
+  {
+   "seconds": 19.3,
+   "cost": 0.153172,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:21:09Z",
- "repo_commit": "5e49d8e",
- "cost": 0.5333
+ "scored_utc": "2026-11-21T15:32:49Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.6865
 }

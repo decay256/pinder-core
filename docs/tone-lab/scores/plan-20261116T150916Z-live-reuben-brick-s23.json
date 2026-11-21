@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are planned. Brick's numbered audits land on Reuben's fear of being judged and cropped out: \"When Brick grades his pauses\" sets off his weaponized exit. Reuben's pre-emptive forfeit lands on Brick's fear that she is too big to fit, as \"proof she is too intimidating to touch\". Both directions are built from the two profiles, and the fall-apart ending turns on the paired snaps. That keeps it above the line. It falls short of a 5 because nothing escalates from one collision to the next. Also, the A-on-B direction is only asserted: Brick's snap is triggered by being \"mocked about her rules\", not by Reuben's forfeit, so no beat shows his exit actually hitting her fear of taking up too much room.",
+   "evidence": [
+    "Her numbered audits look like the tribunal he has braced for his whole life",
+    "his rush to forfeit before the appetizers looks like proof she is too intimidating to touch",
+    "If mocked about her rules, she issues a numbered termination audit"
+   ],
+   "raise": "Trigger Brick's snap from Reuben's formal thank-you exit itself, which she reads as him recoiling from her size, and stage the two snaps as a rising exchange that the fall-apart ending resolves.",
+   "def": "c846dffeff06ee37",
+   "material": "d8429919e1e4f055",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 42.4,
    "cost": 0.14968399999999998,
    "label": "batch 2"
+  },
+  {
+   "seconds": 15.4,
+   "cost": 0.0812,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:24:40Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3176
+ "scored_utc": "2026-11-21T15:33:37Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.3988
 }

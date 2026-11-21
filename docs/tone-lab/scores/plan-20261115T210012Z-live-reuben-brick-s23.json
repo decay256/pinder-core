@@ -324,6 +324,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned as concrete trigger moments built from both profiles. Brick's standalone `hm.` and numbered correction set off Reuben's tribunal fear, so he counts her typing bubble. Reuben's pre-emptive 'early exit' joke about the size gap hits Brick's fear of being too big to fit, so she slips into the 6:14 bio-edit surveillance. The ending turns on exactly these habits: in the meet ending he stops his exit clause mid-line and her final list repurposes the door and the timer, and in the fall-apart he plays the doorman while she slams it with `Hm. 1. That was three minutes.` It misses a 6 because escalation is asserted ('Every time…') rather than staged as a rising sequence, so the middle of the collision is described more than plotted.",
+   "evidence": [
+    "Every time Reuben politely points her toward \"the door,\" Brick hears another person telling her she's too big and awkward to stay inside",
+    "Your typing bubble appeared for forty-three seconds and stopped for nineteen and then you sent two letters and a full stop",
+    "Hm. I do not have time for men who pre-reject themselves on my behalf."
+   ],
+   "raise": "Plot a mid-chat beat where each partial snap feeds the other's next defence (her list answered by a bigger exit offer, which draws a harder verdict) so the collision visibly escalates before the ending.",
+   "def": "c846dffeff06ee37",
+   "material": "ef061fba36b0ed66",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -337,10 +356,15 @@
    "seconds": 67.7,
    "cost": 0.231584,
    "label": "batch 1"
+  },
+  {
+   "seconds": 12.6,
+   "cost": 0.10626,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:26:36Z",
- "repo_commit": "5e49d8e",
- "cost": 0.4182
+ "scored_utc": "2026-11-21T15:34:00Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.5245
 }

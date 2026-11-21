@@ -396,6 +396,42 @@
     true,
     true
    ]
+  },
+  "profile.logic": {
+   "score": 5,
+   "why": "His rule is one he would defend: 'If I narrate my flaw first and keep talking, nobody gets to judge me in the silence.' It comes from being cropped out at nine, and it predicts his behaviour when caught out. Delphine asks for one unperformed sentence and he digs deeper with joke after joke. The arm-wrestle loss gets blamed on a cuff. The silence after the curve catches wrong sends him to rehearse the disclosure even harder. It falls short of a 6 because a few beats sit beside the rule rather than escalating from it: the crate-digging lie, the lentils and the energy shots are texture more than consequence.",
+   "evidence": [
+    "Reuben treats every silence as a secret tribunal, filling gaps with manic banter, trivia, and pre-emptive self-parody.",
+    "he made a joke, watched her face close, and made another.",
+    "Rehearses his curvature disclosure in the mirror for twenty minutes before dates"
+   ],
+   "raise": "Tie the side lies (the crate-digging trip, the 'only checks the app when it rains' line) to the tribunal rule so that each one is visibly a move to avoid being caught idle or unseen.",
+   "def": "bb0f5bbc8dc07548",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "profile.creed": {
+   "score": 2,
+   "why": "The profile names no belief Reuben has taken from dating or app culture. His 'own the absurd thing first' disclosure habit could be read as the 'lead with your flaws, confidence is attractive' trope, but the profile frames it as a personal wound response and never as something the apps taught him. The closest app-culture material is the Reddit thread he read, and that only feeds his fear; it is not a creed he quotes to justify himself. The contradicting evidence exists (the curve caught wrong despite rehearsal, and kindness undid him), but it has no named belief to contradict.",
+   "evidence": [
+    "read an entire Reddit thread of women naming the worst things men said about their dicks.",
+    "He jokes early that his gravity bends east."
+   ],
+   "raise": "Give him one earnest app-culture maxim, such as 'disclose upfront, transparency is attractive' or 'humour is the number one thing women want', that he cites to justify the rehearsed disclosure and the nonstop bits, so that the eleven-second silence visibly refutes it.",
+   "def": "a741f63642bb3f6b",
+   "material": "5d7d7467d46c27b4",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
   }
  },
  "probes": {
@@ -444,10 +480,15 @@
    "seconds": 43.6,
    "cost": 0.30159199999999997,
    "label": "batch 1"
+  },
+  {
+   "seconds": 24.3,
+   "cost": 0.246444,
+   "label": "batch 3"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:11:53Z",
- "repo_commit": "5e49d8e",
- "cost": 1.2409
+ "scored_utc": "2026-11-21T15:32:33Z",
+ "repo_commit": "b928e5d",
+ "cost": 1.4873
 }

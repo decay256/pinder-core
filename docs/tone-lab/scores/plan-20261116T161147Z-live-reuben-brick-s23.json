@@ -330,6 +330,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are named and come from both profiles. Brick's numbered inspection hits Reuben's fear of being measured and found small. Reuben's pre-emptive exits hit Brick's fear that her size breaks whatever it touches. The fall-apart ending turns on this: she lists three incompatibilities and he formally thanks her for the audit and leaves. That clears the line. It stays at 4 because the Reuben-on-Brick direction is only described: no planned beat shows his 'I will save you the trouble' exit landing as 'too much' on her. There is also no escalation across the night, just one statement and one ending.",
+   "evidence": [
+    "Brick's clinical numbering makes Reuben feel graded and found too small; Reuben's preemptive exits make Brick feel she's already crushed him with her size.",
+    "Brick lists three geometric incompatibilities to feel safe; Reuben formally thanks her for the audit and leaves before she can finish typing.",
+    "Thinking a pause or a list means he's being measured and dismissed; he fires off a courteous goodbye and unmatches himself on her behalf."
+   ],
+   "raise": "Add a concrete mid-night beat where Reuben's self-disqualifying exit line makes Brick read herself as having crushed him. Have that push her into a harder numbered audit, so the two defences escalate into the fall-apart instead of meeting only at the end.",
+   "def": "c846dffeff06ee37",
+   "material": "a3fa3693dfb4a24c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -343,10 +362,15 @@
    "seconds": 62.1,
    "cost": 0.18833599999999998,
    "label": "batch 1"
+  },
+  {
+   "seconds": 13.0,
+   "cost": 0.076564,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:24:30Z",
- "repo_commit": "5e49d8e",
- "cost": 0.3389
+ "scored_utc": "2026-11-21T15:33:33Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.4154
 }

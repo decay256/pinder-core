@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned and built from both profiles. Reuben's itemized exit offers, which come from his fear of being too small to register, land on Brick's fear of being a monstrous size. Her numbered clinical audits, her guard against rejection, land on his tribunal fear of being cut from the frame. The loop runs lightly in Beat 1 (his apology for his proportions, her numbered verdict on his body) and fully in Beat 6, and both endings turn directly on it: either he stops offering exits and she drops the lists, or her 'failed feasibility audit' meets his 'preemptively vacating the chat.' It falls short of a 6 because the full collision is a single summarized beat ('she gets sharp and clinical... he offers a preemptive exit'). The neighbor's broom sets it off rather than one defence provoking the other, and no planned line shows either barb landing.",
+   "evidence": [
+    "Brick reads every exit offer as him recoiling from her monstrous size, so she locks him down with numbered clinical audits",
+    "humiliated by her weight, she gets sharp and clinical, triggering Reuben's fear of being dismissed—he offers a preemptive exit",
+    "declare his stubby dimensions and dive-bar pedigree a failed feasibility audit before he can call her huge"
+   ],
+   "raise": "Write Beat 6 as a defence-triggered exchange with concrete lines: Reuben's 'should you wish to vacate' offer provokes her 'hm. 1.' audit of his structural deficits, which provokes his triple-texted exit, so each turn of the loop is caused by the other's habit and climbs.",
+   "def": "c846dffeff06ee37",
+   "material": "39c9388888e616c1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 65.3,
    "cost": 0.22962000000000002,
    "label": "batch 1"
+  },
+  {
+   "seconds": 16.7,
+   "cost": 0.11808,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:22:14Z",
- "repo_commit": "5e49d8e",
- "cost": 0.4154
+ "scored_utc": "2026-11-21T15:33:04Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.5335
 }

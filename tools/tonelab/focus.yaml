@@ -1,0 +1,78 @@
+# The scorecard's current focus (v24 draft): which dimensions decide the next experiment.
+#
+# The experiment: two new characters, written from Pinder's brief rather than from the game's
+# character files, each with a profile, and one plan for the pair. Profiles and plans first;
+# the chat scorecard is off until both reach the gate.
+#
+# tier: critical = drives the generator and the gate; watch = scored and shown, not targeted;
+# off = not scored in this experiment. Every entry says why.
+
+title: Two characters from the brief
+mission: >-
+  When the chat is over, someone who has read only the chat is asked, for each of the two: what
+  are they afraid of, what do they do so they don't have to feel it, where does that come from,
+  and what did they do at the end? If they can't answer, the chat failed, however good the lines
+  were.
+mission_source: Pinder's brief, the planner's system prompt
+experiment: >-
+  Step back from the game's character files. Write two characters from the brief alone, give
+  each a profile and the pair one plan, and score them only on the dimensions below that are
+  critical. Chats come once profiles and plans pass.
+gate: Every critical dimension scores 4 or more, on both profiles and on the plan.
+disabled: [chat]
+disabled_note: Off until both profiles and the plan pass the gate.
+
+planned:
+  - {id: new-a-profile, kind: profile, label: "Character A · new", top: "A", sub: "new"}
+  - {id: new-b-profile, kind: profile, label: "Character B · new", top: "B", sub: "new"}
+  - {id: new-ab-plan, kind: plan, label: "A and B · new plan", top: "A×B", sub: "new"}
+
+# Reference columns: the best we have today on the same dimensions.
+reference: [profile-reuben-v22, profile-brick-v22, plan-20261119T004209Z-preview-reuben-brick-s23,
+            plan-20261119T191519Z-live-reuben-brick-s23-first2]
+
+tiers:
+  # ── the profile ──
+  profile.life:        {tier: critical, why: "The chat's job is finding someone out. With nothing to find, there is nothing to find out sideways."}
+  profile.ordinary:    {tier: critical, why: "Your original complaint, and still at 3 to 4. The humiliations only land against an ordinary life."}
+  profile.timeline:    {tier: critical, why: "Where the humiliation list hides: 2 to 3 on both v22 profiles, though the generator is told to allow two."}
+  profile.wound:       {tier: critical, why: "The brief's test in a profile: fear, the habit that covers it, and where it comes from, linked."}
+  profile.act:         {tier: critical, why: "Laughter comes from the gap between the claim and the evidence. No gap, no joke and no reveal."}
+  profile.logic:       {tier: critical, why: "New, from the brief: play it straight. The act has to make sense from the inside, or the commitment that makes it unhinged has nothing to follow."}
+  profile.creed:       {tier: critical, why: "New, from the brief: the satire comes out of their mouths. Without a belief from app culture, the farce is about one person, not all of us."}
+  profile.likeable:    {tier: critical, why: "The guard-down moment and the affection the brief wants both need something real to like. Reuben scores 3."}
+  profile.tests:       {tier: critical, why: "Each one is deciding whether the other is safe and fun, or the vibe. They need something to test for."}
+  profile.voice:       {tier: critical, why: "The writer works from the profile alone. If it isn't enough to write them, nothing downstream is."}
+  profile.consistent:  {tier: watch, why: "Matters, but a contradiction is cheap to catch and fix once the rest works."}
+  profile.situations:  {tier: watch, why: "Already 5 on both v22 profiles; keep an eye on it, don't steer by it."}
+  profile.people:      {tier: watch, why: "Feeds the plan's events, which are critical there; scored here so we can see the cause."}
+  profile.specific:    {tier: watch, why: "Already 5; specific detail follows from a real life."}
+  profile.filth:       {tier: watch, why: "Pinder is filthy, but the filth works only once the person does."}
+  profile.humanity:    {tier: watch, why: "Already 5 on both; the brief's rule is never cynical about the people."}
+  profile.stock:       {tier: watch, why: "With two characters, clichés matter more than overlap; watch them."}
+  profile.plausible:   {tier: watch, why: "London facts and money; easy fixes once the rest is right."}
+  profile.distinct:    {tier: off, why: "There is no cast to differ from: we want one pair right first. Two different people is covered by the voice and the plan."}
+  profile.texting_vs_cast: {tier: off, why: "Same reason: with two characters, the voice dimension and the plan's two voices cover it."}
+  profile.fidelity:    {tier: off, why: "The experiment is untied from the game's character files, so there is no file to be faithful to."}
+  profile.efficiency:  {tier: off, why: "Diagnostic; length comes later."}
+  # ── the plan ──
+  plan.grounded:       {tier: critical, why: "The plan has to use who they are. Already 5; it stays critical because the new profiles change what there is to use."}
+  plan.evaluation:     {tier: critical, why: "Safe and fun, or the vibe: needs, tests and give-aways that mesh. Stuck at 3 to 4 in every version."}
+  plan.collision:      {tier: critical, why: "New, from the brief: both endings work because each one's defence lands on the other's sore spot. That is the pair, not two people."}
+  plan.causal:         {tier: critical, why: "A story, not a list: 4 at best, 3 on the v22 first look."}
+  plan.guard:          {tier: critical, why: "The moment the chats are meant to reach; 5 since v19, and it must stay there."}
+  plan.heat:           {tier: critical, why: "3 in every plan since v19. The turn-2 rush starts in the plan."}
+  plan.spread:         {tier: critical, why: "Reveals held back so finding out can happen across the night."}
+  plan.events:         {tier: critical, why: "Tonight comes from their lives; 5 since v20, and it depends on the new profiles having lives."}
+  plan.contradictions: {tier: watch, why: "3 to 4 lately; worth fixing, cheap to catch."}
+  plan.knowledge:      {tier: watch, why: "Plans route knowledge well (5); the leak happens later, in the chat."}
+  plan.setups:         {tier: watch, why: "Already 5."}
+  plan.endings:        {tier: watch, why: "Already 4 to 5."}
+  plan.short_game:     {tier: watch, why: "Solved since v19."}
+  plan.medium:         {tier: watch, why: "Already 5."}
+  plan.pair:           {tier: watch, why: "5 in almost every version, so its bar doesn't tell versions apart; it needs a stricter line before it can steer."}
+  plan.accidents:      {tier: watch, why: "Same: 5 everywhere, bar too easy."}
+  plan.voices:         {tier: watch, why: "Same: 5 everywhere, bar too easy."}
+  plan.original:       {tier: off, why: "Diagnostic; the default plot is a worry for later."}
+  plan.format:         {tier: off, why: "The plan's format changes with the experiment."}
+  plan.seeds:          {tier: off, why: "Needs several seeds of one version."}

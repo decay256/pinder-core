@@ -340,6 +340,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "Both directions are planned from both profiles and each has a concrete moment. Reuben's \"I release you, fare well\" exit hits Harriet's terror of unscheduled rejection, and her syllable audits and adjournments hit his fear of a silent tribunal cropping him out. Beat 5 sets them against each other as a \"double Snap threat\", and the fall-apart ending turns on exactly that exchange: his magistrate release, then her numbered dismissal. It falls short of a 6 for two reasons. Beat 5's clash is only described (\"their habits collide\"), not staged as a turn. And Reuben's exit-clause is crisp, not vague, so it lands on her \"we'll see\" dealbreaker at an angle rather than squarely, and the plan never says how she reads it as vagueness.",
+   "evidence": [
+    "Reuben fills every scary pause with joking exit-clauses (\"I release you, fare well\"), which lands directly on Harriet's terror of vague, unscheduled rejection",
+    "Harriet immediately audits his syllable drop and adjourns the session, confirming Reuben's fear that the tribunal just cropped him out of the frame",
+    "their habits collide in a double Snap threat (her syllable audit against his waking-week math percentage)"
+   ],
+   "raise": "Stage Beat 5 as a specific exchange in which his \"I release you\" reads to Harriet as a no-day-attached \"let's do this again\", and her 40% syllable audit reads to Reuben as the eleven-second tribunal, so the ending's collision has visibly escalated from it.",
+   "def": "c846dffeff06ee37",
+   "material": "87eb1d1ef97143b2",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -353,10 +372,15 @@
    "seconds": 67.2,
    "cost": 0.270564,
    "label": "batch 1"
+  },
+  {
+   "seconds": 17.0,
+   "cost": 0.14918,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:21:15Z",
- "repo_commit": "5e49d8e",
- "cost": 0.5205
+ "scored_utc": "2026-11-21T15:32:47Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.6697
 }

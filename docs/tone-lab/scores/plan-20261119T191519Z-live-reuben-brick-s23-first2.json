@@ -338,6 +338,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 5,
+   "why": "The plan runs the collision in both directions and builds each from both profiles. Her minute-count audits make him feel \"inspected and tiny\" and joke faster. His evasions read to her as a mocking \"maybe\" and make her lock the calendar. The collision escalates from the Beat 1 minute-count test, to the Beat 5 clash, to the fall-apart ending, which turns on it directly: his open-ended joke lands as her \"let's do this again sometime\" dealbreaker. It misses a 6 because the Beat 5 peak is only described (\"slams straight into his manic evasion\") with no specific exchange. Also, Reuben's snap trigger, \"drop the act\" like Delphine, comes from his ex rather than from how Claudia actually audits.",
+   "evidence": [
+    "Her tribunal cross-examination makes him feel inspected and tiny, driving him to joke faster",
+    "his tap-dancing evasions make her feel mocked with a \"maybe,\" driving her to lock down the calendar",
+    "cracks one manic self-parody joke that leaves the timetable open-ended; Claudia hears \"let's do this again sometime,\""
+   ],
+   "raise": "Write the Beat 5 clash as a concrete exchange: her \"hm. Name a time.\" against the ring-light crash, and his answer of gap-math and a hat-tip instead of a time. Tie his snap to her numbered audit rather than a borrowed Delphine line.",
+   "def": "c846dffeff06ee37",
+   "material": "2f93cb53937a6fa7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -351,10 +370,15 @@
    "seconds": 63.5,
    "cost": 0.252424,
    "label": "batch 2"
+  },
+  {
+   "seconds": 16.8,
+   "cost": 0.16420800000000002,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:19:09Z",
- "repo_commit": "5e49d8e",
- "cost": 0.5303
+ "scored_utc": "2026-11-21T15:32:46Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.6945
 }

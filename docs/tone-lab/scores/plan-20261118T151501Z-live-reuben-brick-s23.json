@@ -334,6 +334,25 @@
     true,
     true
    ]
+  },
+  "plan.collision": {
+   "score": 4,
+   "why": "Both directions are written from both profiles. Her numbered audits make him feel 'measured by a tribunal and found tiny', which sets off his exit-ramp habit. His rush to leave makes her feel like 'a terrifying giant who just scared another normal person out of the room'. The Brick-on-Reuben direction has a concrete planned moment: in Beat 3 'her numbered audit of his silence makes him fire off his Habit.' The Reuben-on-Brick direction is never given its own staged beat. In Beat 6 her snap comes from her own exposure ('Exposed in her towel... Brick goes into Denial'), not from his exit, and his exit then follows hers, so the loop never escalates by cause and effect. It clears the line because the fall-apart ending does turn on both habits pressing on both fears, with her verdict on 'minimum clearance' and him who 'eagerly cosigns his own dismissal'.",
+   "evidence": [
+    "her numbered audit of his silence makes him fire off his Habit and accidentally paste the text to Craig",
+    "Exposed in her towel with her ruined interview out on the screen, Brick goes into Denial and snaps",
+    "Reuben eagerly cosigns his own dismissal and shows himself out first"
+   ],
+   "raise": "Rewrite Beat 6 so Reuben's exit ramp ('I will happily show myself out') is what sets off Brick's cold numbered dismissal, which then drives him further out, giving the reverse direction its own escalating cause-and-effect moment.",
+   "def": "c846dffeff06ee37",
+   "material": "44b4e5c212b6b831",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
   }
  },
  "probes": {},
@@ -347,10 +366,15 @@
    "seconds": 58.0,
    "cost": 0.20738,
    "label": "batch 2"
+  },
+  {
+   "seconds": 15.2,
+   "cost": 0.10916400000000001,
+   "label": "batch 1"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:22:07Z",
- "repo_commit": "5e49d8e",
- "cost": 0.4145
+ "scored_utc": "2026-11-21T15:33:02Z",
+ "repo_commit": "b928e5d",
+ "cost": 0.5237
 }
