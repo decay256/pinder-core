@@ -262,6 +262,8 @@ function columns(f) {
   return [...planned, ...refs, ...rest];
 }
 const findCol = id => DATA.results.find(x => x.id === id) || (FOC?.planned || []).map(p => ({ ...p, planned: true, scores: {} })).find(p => p.id === id);
+// A score click always opens the score's reasoning, whichever view the panel showed before.
+const pick = (rid, did) => { state.sel = { r: rid, d: did }; state.view = "scores"; render(); };
 // Open a piece of work as text in the side panel, on its own tab.
 const openText = (id, f) => { if (f) state.tab = f; state.sel = { r: id }; state.view = "text"; render(); };
 const readBtn = (r, label) => $("button", { class: "readbtn", text: label, title: "Read " + r.label, onclick: e => { e.stopPropagation(); openText(r.id, r.kind); } });
@@ -391,8 +393,8 @@ function matrix(f) {
       const td = $("td", { class: "cell " + (v === undefined ? "na" : fill(v)) + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : ""),
         text: v === undefined ? "" : v == null ? "–" : String(v), tabindex: "0",
         "aria-label": `${d.name}, ${r.label}: ${v == null ? "not scored" : v}`,
-        onclick: () => { state.sel = { r: r.id, d: d.id }; render(); },
-        onkeydown: e => { if (e.key === "Enter") { state.sel = { r: r.id, d: d.id }; render(); } } });
+        onclick: () => pick(r.id, d.id),
+        onkeydown: e => { if (e.key === "Enter") pick(r.id, d.id); } });
       if (s) { td.addEventListener("mousemove", e => tip(e, `${d.name} · ${r.label}`, `${v ?? "n/a"} · ${lean(v)}`));
         td.addEventListener("mouseleave", untip); }
       tr.append(td);
@@ -492,7 +494,7 @@ function panel(f) {
     const ul = $("ul", { class: "rowlist" });
     byFam(r.kind).filter(d => r.scores?.[d.id]).sort((a, b) => (r.scores[a.id].score ?? 9) - (r.scores[b.id].score ?? 9)).forEach(d => {
       const s = r.scores[d.id];
-      ul.append($("li", { onclick: () => { state.sel = { r: r.id, d: d.id }; render(); } },
+      ul.append($("li", { onclick: () => pick(r.id, d.id) },
         $("span", { class: "s " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
         $("span", {}, $("span", { class: "n", text: d.name }), $("div", { class: "y", text: s.why || "" }))));
     });
@@ -510,7 +512,9 @@ function panel(f) {
   else p.append($("h3", { text: "Why" }), $("p", { text: s.why }));
   if (s.evidence?.length) { p.append($("h3", { text: "Rests on" }));
     s.evidence.forEach((q, i) => p.append($("blockquote", {}, document.createTextNode("“" + q + "”"),
-      $("span", { class: "chk", text: s.found?.[i] ? "found in the material" : "not found word for word in the material" })))); }
+      $("span", { class: "chk", text: s.found?.[i] ? "found in the material" : "not found word for word in the material" }))));
+    if (DATA.texts?.[r.id]) p.append($("p", {}, $("button", { class: "readbtn", text: `Show these in the ${r.kind}`,
+      onclick: () => { state.view = "text"; render(); } }))); }
   if (s.raise) p.append($("h3", { text: "What would raise it" }), $("p", { text: s.raise }));
   const pr = r.probes?.[d.id];
   if (pr) p.append($("h3", { text: `Reader probe (saw only ${pr.sees.join(", ")})` }), $("p", { class: "def", text: pr.ask }),
