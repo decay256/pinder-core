@@ -87,6 +87,10 @@ tr.gap td, tr.gap th { height: 8px; }
 #panel .big { display: inline-flex; width: 44px; height: 44px; border-radius: 8px; align-items: center; justify-content: center;
   font-size: 22px; font-weight: 700; margin-right: 10px; flex: none; }
 #panel .head { display: flex; align-items: center; margin: 10px 0 4px; }
+#panel ul.readers { list-style: none; padding: 0; margin: 4px 0; }
+#panel ul.readers li { margin: 6px 0; line-height: 1.45; }
+#panel .pill { display: inline-flex; width: 22px; height: 22px; border-radius: 5px; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; vertical-align: 1px; }
 #panel .lean { color: var(--ink-2); font-size: 13px; }
 #panel blockquote { margin: 6px 0; padding: 4px 10px; border-left: 3px solid var(--axis); color: var(--ink-2); }
 #panel blockquote .chk { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
@@ -344,7 +348,7 @@ function matrix(f) {
   const hr = $("tr", {}, $("th", { class: "dim" }));
   for (const r of rs) {
     const [top, bottom] = r.planned ? [r.top, r.sub]
-      : f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "")]
+      : f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "") + (r.panel_of ? " panel" : "")]
       : [r.version, (r.when || "") + (r.label.includes("preview") ? " · prev" : r.label.includes("first") ? " · 2 turns" : "")];
     hr.append($("th", { class: "col" + (r.planned ? " plannedcol" : r.reference ? " refcol" : "") + (state.sel?.r === r.id && !state.sel?.d ? " sel" : ""),
       title: r.label + (r.reference ? " (reference)" : ""), onclick: () => { state.sel = { r: r.id }; render(); } },
@@ -516,6 +520,15 @@ function panel(f) {
     if (DATA.texts?.[r.id]) p.append($("p", {}, $("button", { class: "readbtn", text: `Show these in the ${r.kind}`,
       onclick: () => { state.view = "text"; render(); } }))); }
   if (s.raise) p.append($("h3", { text: "What would raise it" }), $("p", { text: s.raise }));
+  // The author panel: what each reader gave, and who still disagrees with the chair's score.
+  if (s.dissent) p.append($("h3", { text: "Dissent" }), $("p", { text: s.dissent }));
+  if (s.readers?.length) {
+    const ul = $("ul", { class: "readers" });
+    s.readers.forEach(x => ul.append($("li", {}, $("span", { class: "pill " + fill(x.score), text: x.score == null ? "–" : String(x.score) }),
+      $("strong", { text: " " + x.name + ": " }), document.createTextNode(x.why))));
+    p.append($("h3", { text: "The panel, reader by reader" }), ul,
+      $("p", { class: "def", text: "Each reader is the same model reading with one writer's sensibility; none of these writers took part." }));
+  }
   const pr = r.probes?.[d.id];
   if (pr) p.append($("h3", { text: `Reader probe (saw only ${pr.sees.join(", ")})` }), $("p", { class: "def", text: pr.ask }),
     $("div", { class: "probe", text: pr.answer }));

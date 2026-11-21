@@ -649,6 +649,11 @@ def page_data(cat):
     ts = [t for t in targets() if t["kind"] in ("profile", "plan")]
     texts = {t["id"]: t["material"][t["kind"]] for t in ts}
     prompts = {t["id"]: p for t in ts if (p := how_made(t))}
+    for r in results:
+        if r.get("panel_of") in texts:
+            texts[r["id"]] = texts[r["panel_of"]]
+        if r.get("panel_of") in prompts:
+            prompts[r["id"]] = prompts[r["panel_of"]]
     focus = yaml.safe_load(FOCUS.read_text(encoding="utf-8")) if FOCUS.exists() else None
     data = {"scale": cat["scale"], "families": cat["families"], "materials": cat["materials"],
             "dimensions": [{k: d.get(k) for k in ("id", "family", "name", "priority", "tells", "method", "low", "line",

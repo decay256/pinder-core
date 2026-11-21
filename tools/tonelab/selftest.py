@@ -360,6 +360,14 @@ def check_scorecard():
     check("profile-reuben-v22" in ts and old.startswith("### Brick_haus") and "Plan the match" not in old,
           "the v22 profiles and the v21 cards they replaced are both scored")
     main_prompt = (score.how_made(ts["profile-reuben-v22"]) or {"steps": [{}]})["steps"][0].get("text")
+    import panel as pn
+    P, _ = pn.panel()
+    check(not pn.problems_in(P), f"the author panel is well formed ({pn.problems_in(P)[:3]})")
+    for p in sorted(score.OUT.glob("*-panel.json")):
+        rec = json.loads(p.read_text(encoding="utf-8"))
+        ok = rec.get("panel_of") in ts and all(len(s.get("readers") or []) >= pn.MIN_READERS
+                                               for s in rec.get("scores", {}).values())
+        check(ok and rec.get("scores"), f"{rec.get('id')}: every panel score carries its readers' scores")
     for t in (t for t in ts.values() if t.get("variant")):
         made = score.how_made(t)
         check(bool(made) and made["steps"][0]["label"] == "The generator's system prompt"

@@ -1,0 +1,2650 @@
+{
+ "kind": "profile",
+ "version": "v24",
+ "order": 24,
+ "run": null,
+ "source": "tools/tonelab/profiles/variants/bradbury/brick.md",
+ "when": null,
+ "id": "profile-brick-v24-panel",
+ "panel_of": "profile-brick-v24",
+ "label": "Brick · v24 Bradbury profile · author panel",
+ "note": "Scored by the author panel: eight readers, each the same model reading with one writer's sensibility, score on their own, and a chair brings them to one score. None of these writers took part.",
+ "readers": [
+  {
+   "id": "armstrong-bain",
+   "name": "Armstrong & Bain"
+  },
+  {
+   "id": "waller-bridge",
+   "name": "Waller-Bridge"
+  },
+  {
+   "id": "coel",
+   "name": "Coel"
+  },
+  {
+   "id": "saunders",
+   "name": "Saunders"
+  },
+  {
+   "id": "david",
+   "name": "Larry David"
+  },
+  {
+   "id": "leonard",
+   "name": "Leonard"
+  },
+  {
+   "id": "pinter",
+   "name": "Pinter"
+  },
+  {
+   "id": "parker",
+   "name": "Parker"
+  }
+ ],
+ "materials": {
+  "profile": {
+   "chars": 8033,
+   "words": 1326
+  },
+  "game": {
+   "chars": 19073,
+   "words": 3229
+  },
+  "cast": {
+   "chars": 40353,
+   "words": 6649
+  }
+ },
+ "probes": {
+  "profile.likeable": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "Name the one thing you would genuinely like about this person if you met them, and the one thing you would find hardest to forgive. Be specific, and no jokes.",
+   "answer": "The thing I would genuinely like is how she treats people who have the least power in the room. With receptionists, night-bus drivers and the terrified temps in her hearings, she notices trembling hands under the desk and slides water across without looking, so nobody has to feel watched while being helped. It costs her nothing in status and earns her nothing, and she does it anyway. In someone who otherwise performs control so loudly, that quiet attentiveness reads as the real person.\n\nThe thing I would find hardest to forgive is the gap between the precision she demands and the honesty she offers. Her first test of anyone is whether they keep a small promise, a call at 19:45 kept to the minute, and her dealbreaker is a vague \"let's do this again.\" Yet what a match sees is false on its face: she gives her age as thirty-one when she is thirty-eight, and calls herself an independent consultant who ends boardroom deadlocks when she chairs forty-minute HR calls. When she lies by text, she over-specifies times and bus routes, using exactness itself as cover. Holding others to the minute while misrepresenting who they are meeting would be hard for me to get past.\n\nThe profile doesn't say whether she ever corrects these claims once someone is close, so I can't tell whether that gap closes in person."
+  },
+  "profile.voice": {
+   "sees": [
+    "profile"
+   ],
+   "ask": "From this profile alone, write five short dating-app messages this person would send tonight, each labelled: (1) an opener to someone they fancy, (2) a reply when the other person has gone quiet, (3) a reply when caught in a lie, (4) a message at 2 a.m., (5) the moment they stop performing.",
+   "answer": "**(1) Opener to someone they fancy**\n\"hm. Your third photo is the Regent's Canal at Islington, not Camden as captioned. 1. I forgive it. 2. I'll ring you at 19:45 tomorrow. 3. Drink at 20:30 Thursday, somewhere with a hard stop. Bring an argument.\"\n\n**(2) When they've gone quiet**\n\"For precision: the 19:45 call is 19:45 exactly, not 'about quarter to.' I've checked, and the Northern Line is fine Thursday. Proceed.\"\n\nAnd, if the silence holds:\n\"hm. 1. Four words in six hours is a verdict. 2. Thursday is withdrawn. 3. No hard feelings, filed.\"\n\n**(3) Caught in a lie**\n\"Yes, fine. There was no 159 and no Westminster traffic. I've been on the sofa in a towel since four. I over-specify when I'm nervous. Don't take notes.\"\n\n**(4) At 2 a.m.**\n\"still awake... mixers downstairs don't start till four... tell me what time your alarm goes and which end of the platform you stand on... boring is fine... boring is good...\"\n\n**(5) When she stops performing**\n\"I'd really like it if you kept talking about your sister's kitchen until I forget what time it is. Are you near the Overground?\""
+  }
+ },
+ "scores": {
+  "profile.life": {
+   "score": 4,
+   "why": "Every reader agrees the profile clears the line with room to spare. There is far more than a dozen concrete facts across home, work, money, people and routine, for example the £1,380 Kennington studio, the £110 Holborn sessions, muted NatWest alerts and Eileen's twelve-minute Sunday call. Saunders, Leonard, Pinter and Larry David held it at 4, and their argument decided it: tonight's towel and rosé is the only live thread. The Sonia parcel, the knee and the ring light carry no date this week, and there is no hearing or plan pending for a match to ask about. The three readers who scored 5 named the same gap themselves.",
+   "evidence": [
+    "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+    "chairs freelance HR grievance hearings in Holborn for £110 a session",
+    "on the sofa in a towel since four, standing at nine sharp"
+   ],
+   "raise": "Date the Sonia parcel to this week and give her a named hearing or Sunday call coming up in the next few days, so a chat has live threads beyond tonight.",
+   "dissent": "Armstrong & Bain, Coel and Parker would give 5 for density across every type, though each conceded that little is live this week.",
+   "def": "ba20efe15f1f67e9",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "The profile is dense with facts a chat could surface, across every type. Home: the Kennington Road studio above a bakery whose mixers thud at 4 a.m. Work: £110 grievance sessions in Holborn on forty-minute agendas. People: Graham's KitKat, Eileen's 18:00 Sunday call that lasts twelve minutes. Money: muted NatWest alerts. Routine: the A-Z indexes read in bed. It falls short of a 6 because only the Sonia parcel is live this week; there is no hearing coming up, no plan, and nothing Graham or Eileen is doing now that a match could ask about.",
+     "evidence": [
+      "Eileen Baines, her mother in Crewe (68). A retired railway timetabler who rings Sundays at 18:00 for twelve minutes",
+      "leaves a KitKat on her folder when union reps shout",
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "The life is concrete and spread across every type. Home: the Kennington Road studio at £1,380 above a bakery whose mixers thud at 4 a.m. Work and money: £110 HR hearings in Holborn, muted NatWest alerts. People and routines: Graham's KitKat on her folder, Eileen's twelve-minute call at 18:00 on Sundays. Tonight is staged precisely, sofa in a towel since four and rosé at nine sharp. It stops short of a 5 because almost nothing is live this week beyond tonight: the knee is 'this year', the ring-light pitch 'last month', and the neighbour parcel carries no date.",
+     "evidence": [
+      "paying £1,380 a month for a studio on Kennington Road in Lambeth, south London, above a Portuguese bakery",
+      "leaves a KitKat on her folder when union reps shout",
+      "rings Sundays at 18:00 for twelve minutes"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "There is a lot here a chat could find, across every type. Home is the Kennington Road studio at £1,380 above a bakery with 4 a.m. mixers. Work is £110 Holborn grievance sessions on forty-minute agendas. Money is a muted NatWest app. People include Graham's KitKat and her mother's twelve-minute Sunday 18:00 call. Tonight is concrete: the towel, the sofa since four, the boxed rosé poured at nine sharp, and the 19:45 call test. It falls short of a 6 because almost nothing is happening this week beyond tonight; the Sonia parcel is undated, so there are few live threads.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "There is a real flat with rent, a noise schedule and a smell: \"£1,380 a month for a studio on Kennington Road... above a Portuguese bakery whose mixers thud at 4 a.m.\" There is a job with a fee and a venue, a way of budgeting, four named people with routines (Eileen's twelve-minute Sunday call, Graham's KitKat), and hobbies a chat can pick up, like the Bradshaw guides and the A-Z indexes. That is well over a dozen facts across work, home, people, money and routine, so it clears the line. It stops short of 5 because almost nothing is live this week beyond tonight's towel and rosé: no hearing on Monday, no Sunday call due, no plan in motion.",
+     "evidence": [
+      "She chairs freelance HR grievance hearings in Holborn for £110 a session, keeping managers to forty-minute agendas",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets \"for the shoulders\"",
+      "standing at nine sharp to pour three-litre boxed rosé at the counter and open the app"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "There are well over a dozen concrete facts across home, work, money, people and routine. Home is £1,380 on Kennington Road above a Portuguese bakery. Work is £110 HR grievance sessions in Holborn, and she budgets by muting NatWest alerts. Her mother rings Sundays at 18:00 for twelve minutes, and Graham leaves KitKats. What keeps it from a 5 is that almost nothing is live this week beyond tonight on the sofa. The parcel, the knee and the hearings carry no dates, and she has no plan or pending event a chat could ask about.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session, keeping managers to forty-minute agendas",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets \"for the shoulders\"",
+      "leaves a KitKat on her folder when union reps shout"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "There is plenty for a chat to find, across every type. Home: \"£1,380 a month for a studio on Kennington Road\" above a bakery whose mixers \"thud at 4 a.m.\" Work: \"£110 a session\" chairing Holborn hearings, with Graham's KitKat. Money: she \"budgets by muting NatWest alerts.\" Routine: her mother rings \"Sundays at 18:00 for twelve minutes.\" What holds it at 4 is that tonight is the only thing live; nothing is dated this week, and there are no plans or pending events a match could ask about.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 4,
+     "why": "There are many concrete, usable facts across home, work, money, people and routine. Home is a £1,380 Kennington Road studio above a bakery whose mixers thud at 4 a.m. Work is £110 grievance sessions in Holborn. Routines include the Sunday 18:00 twelve-minute call and Graham's KitKat on her folder. That clears the line comfortably. What keeps it from 5 is that almost nothing is live this week beyond tonight's towel and rosé: no pending hearing, no plan, no dated errand, and the Sonia parcel carries no date.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session, keeping managers to forty-minute agendas",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets",
+      "on the sofa in a towel since four, standing at nine sharp"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "The profile gives a chat a great deal to find. Home: a £1,380 Kennington Road studio above a bakery whose mixers thud at 4 a.m. Work: £110 HR hearings in Holborn. People: four named, each with a usable habit, such as the mother's twelve-minute Sunday call and Graham's KitKat. Money: muted NatWest alerts. Routines run down to the minute, and tonight is staged precisely. It stops short of a 6 because only tonight is clearly live; the parcel, the knee and the ring light have no date this week, and no plan for the coming days is named outside the texting examples.",
+     "evidence": [
+      "on the sofa in a towel since four, standing at nine sharp to pour three-litre boxed rosé at the counter",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets \"for the shoulders\"",
+      "leaves a KitKat on her folder when union reps shout"
+     ]
+    }
+   ]
+  },
+  "profile.ordinary": {
+   "score": 4,
+   "why": "The panel is unanimous. Ordinary life is the largest share: the hearings, Graham's KitKat, the gilets donated unopened, and the A-Z indexes read in bed with the monocle in. The best comedy comes from that ordinary detail, such as the railway-timetabler mother and the calendar end times. Coel, Leonard and Pinter named what holds it at 4: 'How they got here' is six pratfalls or wounds in a row, and the claims section is a second humiliation ledger, so the backstory still reads as a list.",
+   "evidence": [
+    "reading the index of cul-de-sacs in bed with her monocle in",
+    "noticing trembling hands under the desk and sliding water across without looking",
+    "lost a stiletto to the revolving door and limped into the lobby carrying one shoe"
+   ],
+   "raise": "Replace two of the timeline pratfalls with ordinary turning points, such as her first grievance hearing or the move to Kennington, so her history is a life with sharp moments rather than a run of indignities.",
+   "dissent": "",
+   "def": "b60d3d6129fdd5ef",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "The life-now, people and loves sections carry the largest share, and the best jokes come from ordinary detail played straight: the gilets posted 'for the shoulders' and donated unopened, the harness propping the bathroom door. That keeps it above the line. It stops at a 4 because every numbered history entry is a pratfall (barge shoes, wrong-city night class, revolving door, knee and big light), and the claims-and-truths section is humiliation again, so the spine still reads as a sequence of indignities.",
+     "evidence": [
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened",
+      "a £240 posture harness propping open the bathroom door",
+      "he switched on the big light to ask about an ambulance while she numbered why the joint failed"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "Ordinary life just wins. The flat, the hearings, Graham, Eileen's gilets and the A-Z indexes read in bed with the monocle in make the largest share, and the best comedy comes from ordinary detail: Sunday arguments put into Google Calendar with end times, a mother who was a railway timetabler. Against that, all six timeline beats are humiliations (shoe shop, duvets, wrong city, stiletto, knee) and the claims section is a second humiliation ledger. The armour is told to us rather than lived, so the humiliations crowd the tone more than they stand out against it.",
+     "evidence": [
+      "Petra put their Sunday arguments into Google Calendar with end times",
+      "reading the index of cul-de-sacs in bed with her monocle in",
+      "spotting the exact paragraph where a manager lied, and closing on the dot"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "Ordinary life is the largest share and does the best comic work. The gilets she donates unopened, the KitKat on her folder, and her quiet kindness to terrified temps all carry weight. That ordinary ground is what makes the humiliations land. It stays at a 4 because 'How they got here' is six injuries in a row, from the shoe shop through the wrong city, the revolving door and the knee. The timeline reads as a list of humiliations rather than a life with sharp moments.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "leaves a KitKat on her folder when union reps shout",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "The present-tense material is mostly ordinary life: the hearings, muting NatWest alerts, steaming a waistcoat in ninety seconds, sliding water to a trembling temp without looking. Because that is there, the boxed rosé and the posture harness read as a person's mess and not a gag reel. It stays at 4 because the whole \"How they got here\" timeline is six humiliations in a row (shoe shop, wrong city, stiletto, knee), so her history is a pratfall list. The tenderness lives in the present, not in the past.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "spotting the exact paragraph where a manager lied, and closing on the dot",
+      "limped into the lobby carrying one shoe with no mystery left"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "The present-tense sections carry ordinary life, and it does comic work on its own: forty-minute agendas, reading the A-Z index of cul-de-sacs in bed, steaming a waistcoat in ninety seconds. That puts ordinary life just ahead as the largest share. The back half pulls the other way. Five of the six 'How they got here' entries are humiliations or wounds, and every 'truth' is a pratfall. That keeps it at the line rather than in the zone where the comedy comes mainly from the ordinary detail.",
+     "evidence": [
+      "reading the index of cul-de-sacs in bed with her monocle in",
+      "spotting the exact paragraph where a manager lied, and closing on the dot",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "The present-day sections carry ordinary life: the lard smell, the steamer, the forty-minute agendas, the gilets she donates unopened. The best comedy comes from that ordinary detail, as in a railway-timetabler mother who rings for exactly twelve minutes. Against that, \"How they got here\" is six pratfalls in a row (shoe shop, wrong city, stiletto, knee), and every truth in the claims section is another embarrassment, so the back half reads as a list.",
+     "evidence": [
+      "keeping managers to forty-minute agendas",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 4,
+     "why": "Ordinary life is the largest share. The life-now paragraph, Graham, Eileen, the Bradshaw guides and the water slid across to trembling hands are all plain living, and the mother being a retired railway timetabler is comedy from ordinary detail. It stays at 4 because 'How they got here' is six humiliations or wounds in a row, from the shoe shop through the Salford class, revolving door and Clapham knee. The claims-and-truths section adds more of the same, so the backstory reads as a list.",
+     "evidence": [
+      "A retired railway timetabler who rings Sundays at 18:00",
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "The life-now, people and loves sections are mostly ordinary life, and they carry the comedy: Bradshaw guides read with the monocle in, a waistcoat steamed in ninety seconds, a stiletto mended with superglue and a paperclip. That makes ordinary life the largest single share, which is why it clears the line. It is held back by the timeline, where five of six entries are pratfalls or wounds (shoe shop, wrong city, tattoo, revolving door, the big light), and by the claims section, which is all humiliation.",
+     "evidence": [
+      "reading the index of cul-de-sacs in bed with her monocle in",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    }
+   ]
+  },
+  "profile.distinct": {
+   "score": 3,
+   "why": "Every reader found recycled motifs. The repurposed posture harness also appears with Reuben and Zyx. 'Within four minutes of undressing' is Sable's phrasing almost word for word. The knee giving out mirrors Reuben's, and the neighbour returning an embarrassing item echoes Reuben's Nadia. The scorecard therefore puts this below the line. Saunders, Coel, Pinter and Parker set the score at 3 rather than 2: her core cannot be swapped with anyone else's. The Crewe timetabler mother, the grievance hearings, the Bradshaws and the A-Z habit are hers alone, so 'swap the name and it could be someone else' does not hold.",
+   "evidence": [
+    "a £240 posture harness propping open the bathroom door",
+    "a soft shelf below her navel she announces within four minutes of undressing",
+    "her knee went out so loudly he switched on the big light"
+   ],
+   "raise": "Rewrite the harness and the body-announcement phrasing into props and words that belong only to her, for example a laminated rota instead of the harness.",
+   "dissent": "Armstrong & Bain, Waller-Bridge, Larry David and Leonard hold at 2 because the pile-up of shared props and situations makes her read as a variation on the cast.",
+   "def": "c49f26573e9ce038",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 2,
+     "why": "Several motifs are recycled across the cast. Posture harnesses also appear for Reuben (a clip holding a coffee bag shut) and Zyx (unboxed). A rightward curve with a directional joke matches Reuben's 'gravity bends east'. Announcing the body 'within four minutes of undressing' is Sable's phrasing almost word for word. Reuben also has a knee giving way this year, Gerald drinks boxed wine and got a tattoo after his breakup, and Velvet mutes her bank app. Her railway-timetable family and Bradshaw collection are her own, but too many situations could be moved to another profile.",
+     "evidence": [
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "a £240 posture harness propping open the bathroom door",
+      "budgets by muting NatWest alerts"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 2,
+     "why": "Her core is her own: the Crewe railway-timetabler mother, Bradshaw guides, and grievance hearings with forty-minute agendas. Around that core, too much is shared with the cast. Reuben and Zyx both have a posture harness or clip propping something. Reuben's knee also gave out this year. Sable also announces her body 'within four minutes of undressing'. Neighbours returning an embarrassing item appear for Reuben and Zyx, and muted banking apps for Velvet. Swap a few of these lines into another profile and nobody would notice.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 3,
+     "why": "Her core is her own: railway timetables, the Crewe timetabler mother, HR hearings and A-Z indexes. But several motifs recur elsewhere in the cast. A posture harness appears three times: her £240 harness, Reuben's posture clip and Zyx's unboxed harness. Her knee giving out mirrors Reuben's knee on the Archway stairs. A neighbour's misdelivered parcel echoes Zyx's misdelivered roses. Sable also announces her body 'within four minutes of undressing', and Gerald drinks boxed wine too.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 3,
+     "why": "Her core is her own and could not be swapped with anyone else in the cast: the railway-timetabler mother, the grievance hearings, the Bradshaws, the scale. But several motifs recur across the cast. A posture harness put to another use also belongs to Reuben (\"posture clip... holding a coffee bag shut\") and Zyx (\"unboxed €89 livestream posture harness\"). The knee giving out also happens to Reuben. Announcing her body \"within four minutes of undressing\" uses Sable's exact phrasing. An upstairs neighbour with misdelivered post echoes Zyx and Mrs Novak, and scrolling an ex's family's Instagram at 3 a.m. echoes Sable and Tamsin.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 2,
+     "why": "Several props and situations recur across the cast. The posture harness turns up three times: hers holds a door open, Reuben's posture clip holds a coffee bag shut, and Zyx has an unboxed posture harness. A neighbour holding something incriminating at arm's length also appears with Reuben's Nadia, and the body-announcing line nearly matches Sable's. Boxed wine, a ring-light mishap, a knee giving out, 3 a.m. scrolling of an ex's circle, waistcoats and the 'strategy consultant' claim all appear elsewhere. Her railway-timetable inheritance and A-Z habit are her own, but swapping props between profiles would go largely unnoticed.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "returned a parcel at arm's length asking if Petra was \"expecting something time-sensitive\""
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 2,
+     "why": "Several of her beats appear elsewhere in the cast. Sable also \"announces it within four minutes of undressing,\" nearly word for word. Reuben has a posture clip doing another job and Zyx has an unboxed posture harness. Reuben's neighbour returns fallen boxers held at arm's length, as Sonia returns Petra's parcel. Reuben's knee also gives out this week. Gerald drinks boxed wine at a folding table. Most of this comes from her own drawer, but the cast reuses it, so she reads as a variation.",
+     "evidence": [
+      "she announces within four minutes of undressing",
+      "a £240 posture harness propping open the bathroom door",
+      "returned a parcel at arm's length asking if Petra was \"expecting something time-sensitive\""
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "Petra's core is her own: HR grievance chair, Bradshaw guides, a timetabler mother and a Kennington bakery. But she recycles several cast motifs. A posture harness repurposed as a household prop also appears with Reuben (a clip holding a coffee bag) and Zyx (an unboxed harness). Sable has the identical phrase 'within four minutes of undressing'. Reuben also has the knee giving out and a neighbour handing back an embarrassing item, and Gerald drinks boxed wine. Several of these come from the shared game file, but the rubric counts them, and the pile-up sits close to 2.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 3,
+     "why": "Her core is her own: railway timetables, a mother who timetabled trains, grievance hearings, the A-Z index. But she shares several motifs with the cast. Reuben has a posture clip and Kit has a posture harness. Reuben's knee also gave out. Gerald also drinks boxed wine. Sable is also checking an ex's circle on Instagram. Sable's body announcement uses the same phrasing, 'within four minutes of undressing.' Several of these come from the drawer, but the scorecard counts recycled motifs regardless of source.",
+     "evidence": [
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "a £240 posture harness propping open the bathroom door",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m."
+     ]
+    }
+   ]
+  },
+  "profile.consistent": {
+   "score": 3,
+   "why": "Scores ran from 3 to 5. Saunders moved the panel with a quoted contradiction a reader will catch. The bare studio is inventoried as 'holding a bed' and a few objects, yet she has been 'on the sofa' since four. Parker and Coel quoted the same pair but called it soft; the panel counts it as one clear contradiction. Waller-Bridge and Armstrong & Bain added a second tension: the dated ages work only if she was born in the last weeks of 1987. Pinter added a third: a 20:30 drink and a 19:45 call test sit before a nine o'clock app opening.",
+   "evidence": [
+    "The room has been bare since she binned everything her ex touched, holding a bed",
+    "Tonight she has been on the sofa in a towel since four",
+    "Her real name is Petra Baines, thirty-eight"
+   ],
+   "raise": "Add the sofa to the flat's inventory, or move her to the bed, and nudge one timeline age so the arithmetic gives thirty-eight without needing a December birthday.",
+   "dissent": "Parker would give 5 and Coel, Larry David and Leonard 4, treating the sofa and the clock times as soft tensions inside a timeline whose details reinforce each other.",
+   "def": "7aeeef752bd3bd86",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 3,
+     "why": "The timeline mostly holds. The history ages (11 in 1998, 35 in 2022) put her birth in 1987, and the mother's timetabling job reinforces the tattoo. Tonight's logistics contradict each other, though. She opens the app at 'nine sharp', but her stated goal for tonight is 'a brisk drink at 20:30' and her test is a call set for 19:45, both before she has matched anyone. There is a softer tension as well: born 1987 makes her 39, not 38, by late 2026, unless her birthday falls in December.",
+     "evidence": [
+      "standing at nine sharp to pour three-litre boxed rosé at the counter and open the app",
+      "She'll say a brisk drink at 20:30 with a sharp debater",
+      "she sets a call for 19:45"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 3,
+     "why": "The ages do not add up. She is eleven in 1998, seventeen in 2004, twenty-two in 2009 and thirty-five in 2022, which all put her birth around 1987 and her age in 2026 at thirty-nine, yet the profile says thirty-eight. Anyone checking the age lie against the timeline will catch it. Otherwise the details reinforce each other well: the timetabler mother leads to the tattooed schedule, and Crewe sits cleanly under the 'Cotswolds village' claim.",
+     "evidence": [
+      "Age eleven, 1998.",
+      "Age thirty-five, 2022.",
+      "Her real name is Petra Baines, thirty-eight"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "Money, places and the claims set against the truths mostly agree. The birth year holds across the timeline at roughly 1987. There are soft tensions a careful reader would notice. Her age is 39 by the timeline unless her birthday falls late in the year. 'After leaving home' at 22 sits oddly with leaving Crewe at 17. The room is said to hold only 'a bed' and a few objects, yet she has sat 'on the sofa' since four. None of these breaks the character.",
+     "evidence": [
+      "The room has been bare since she binned everything her ex touched, holding a bed",
+      "on the sofa in a towel since four",
+      "Age twenty-two, 2009. After leaving home"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 3,
+     "why": "The timeline mostly agrees: every dated age points to a birth in late 1987, which only just allows thirty-eight in November 2026. There is one clear contradiction, though. The flat is inventoried as bare, \"holding a bed, a £270 waistcoat steamer, a £240 posture harness... and a cocktail sword,\" and then she \"has been on the sofa in a towel since four.\" A careful reader will stop on that sofa. There is also a softer tension: she leaves Crewe at seventeen for Chester, then is \"after leaving home\" again at twenty-two.",
+     "evidence": [
+      "The room has been bare since she binned everything her ex touched, holding a bed",
+      "Tonight she has been on the sofa in a towel since four",
+      "After leaving home, she arrived ten minutes early every Tuesday at St John's Building in Salford"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "The timeline arithmetic holds: 11 in 1998, 17 in 2004, 22 in 2009, 35 in 2022 and 38 in 2026. Money is plausible at about thirteen sessions a month. The railway-timetabler mother quietly explains the forearm timetable and the Bradshaws, so the details reinforce each other. There is one soft tension. She opens the app at nine sharp, yet her stated ask is a 20:30 drink and her test is a 19:45 call, both already past for tonight. A woman this precise would not let that slip, which keeps it off a 5.",
+     "evidence": [
+      "standing at nine sharp to pour three-litre boxed rosé at the counter and open the app",
+      "She'll say a brisk drink at 20:30 with a sharp debater",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "The dates add up: eleven in 1998, thirty-five in 2022 and thirty-eight in 2026 all agree. The Crewe upbringing sits cleanly against the claimed \"Cotswolds village.\" There are soft tensions only. Her job is in-person hearings with Graham and union reps, yet the truth calls them \"forty-minute HR calls.\" She \"binned everything,\" yet the flat still has a ring light to knock over. She opens the app at nine but wants a 20:30 drink and a 19:45 test call.",
+     "evidence": [
+      "standing at nine sharp to pour three-litre boxed rosé at the counter and open the app",
+      "she sets a call for 19:45 and sees if they mock the precision",
+      "She chairs forty-minute HR calls, and last month knocked over her ring light"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "Ages and years line up exactly (eleven in 1998, thirty-eight in 2026), and the money is plausible. One timing contradiction, though, matters for a character built on punctuality. She opens the app at nine, yet tonight she 'will say a brisk drink at 20:30', and her first test sets a call for 19:45. Both times have passed before the chat starts. The phrase 'After leaving home' at twenty-two also sits oddly after she already left Crewe at seventeen.",
+     "evidence": [
+      "standing at nine sharp to pour three-litre boxed rosé at the counter and open the app",
+      "She'll say a brisk drink at 20:30 with a sharp debater",
+      "she sets a call for 19:45"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "The dates hold: age 11 in 1998, 22 in 2009 and 35 in 2022 all fit a woman of thirty-eight in 2026. The lies line up with the truths: the Cotswolds against Crewe, thirty-one against thirty-eight, the 21:18 bus against the sofa since four. Details reinforce each other: a timetabler mother, a timetable tattoo, a forty-minute agenda. One soft tension keeps it from a 6: the bare studio is inventoried as a bed, a steamer, a harness and a shot glass, yet she has sat on 'the sofa' since four.",
+     "evidence": [
+      "The room has been bare... holding a bed, a £270 waistcoat steamer, a £240 posture harness",
+      "on the sofa in a towel since four",
+      "A retired railway timetabler who rings Sundays at 18:00"
+     ]
+    }
+   ]
+  },
+  "profile.fidelity": {
+   "score": 3,
+   "why": "The panel is unanimous. The bio is verbatim, every item survives, and most of the drawer and the clinician's notes are woven in well, including the sword, the taxi and the boring talk after sex. Several game elements are dropped, though: the yawn-hiccup bark in the wine bar, the mirror rehearsal with three smiles, the 3 a.m. laminator, the canapé under the mouth accessory, the missed tattoo follow-up, and 'circumcised'. Under the line as written, dropping elements is a 3.",
+   "evidence": [
+    "Monocle, vest, heels, and a curve I will describe to you before you notice it.",
+    "wears a silver clip on her upper canine",
+    "a massive, thick-veined, freckled cock that curves sharply right and hangs low"
+   ],
+   "raise": "Restore the dropped drawer items (the wine-bar bark, the three-smile mirror rehearsal, the laminator) and state that she is circumcised in the body section.",
+   "dissent": "",
+   "def": "c713ddd28c5a9581",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 3,
+     "why": "Most of what the game gives is here. The bio is verbatim, the monocle, waistcoat, heels, timetable tattoo and tooth clip are all present, and most drawer items are used well, including the sword, the taxi line and the boring talk after sex. Some elements are dropped. 'Circumcised' and the scrotum and glans extremes do not appear in the body section. Missing drawer items include the yawn-hiccup bark in the wine bar, rehearsing three smiles in the bathroom mirror, the laminator, and the canapé lodged under the mouth accessory.",
+     "evidence": [
+      "a massive, thick-veined, freckled cock that curves sharply right and hangs low",
+      "wears a silver clip on her upper canine"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 3,
+     "why": "The bio is word for word, the body is respected (right curve, veins, freckles, hang), and most of the drawer survives: the parcel, the shelf, the knee, the timetable kink, the cocktail sword, the taxi cry and Marguerite. Several elements are missing, though. The yawn-hiccup bark in the wine bar is gone. So is rehearsing the opening line in the mirror with three smiles, the laminator, the canapé lodged under the mouth accessory, and the tattoo follow-up missed because a booty call arrived forty minutes early. The vest's opposite-side-of-town address survives only through the bio and the Salford night-class swap.",
+     "evidence": [
+      "Monocle, vest, heels, and a curve I will describe to you before you notice it.",
+      "had a daily schedule tattooed down her forearm on Mare Street",
+      "wears a silver clip on her upper canine"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 3,
+     "why": "The bio is word for word, and every item survives: the silver tooth clip, the forearm timetable and the ring-light hair pitch. Most of the drawer and the clinician's notes are carried and well explained by her life. But several drawer entries are missing: the yawn-hiccup bark in the wine bar, the mirror rehearsal with three smiles, and the laminator. The canapé under the mouth accessory and her circumcision are also absent. That counts as dropping elements.",
+     "evidence": [
+      "wears a silver clip on her upper canine",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "massive, thick-veined, freckled cock that curves sharply right and hangs low"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 3,
+     "why": "The bio is verbatim and every item appears: monocle, waistcoat, heels, timetable tattoo, the messy-hair video call, and a silver canine clip. Most of the drawer appears too, along with the clinician's shame about scale, rendered nicely in the \"barge\" shoe shop. But several game elements are dropped:\n- From the drawer: the yawn-hiccup bark in the silent wine bar, rehearsing three smiles in the bathroom mirror, and the laminator at 3 a.m.\n- From the item backstories: the canapé lodged under the mouth accessory, the booty call that made her miss the tattoo follow-up, and the identical address across town (replaced by a night class in the wrong city).\n- From the body: being circumcised, the scrotum and testicle extremes, and the freckle-counting brag.",
+     "evidence": [
+      "wears a silver clip on her upper canine",
+      "checks Marguerite's sister's public Instagram at 3 a.m.",
+      "a massive, thick-veined, freckled cock that curves sharply right and hangs low"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 3,
+     "why": "Most of the file survives: the bio is verbatim; the monocle, cocktail sword, harness, shelf, knee, taxi, Marguerite, sofa lie, ring light and the timetable kink are all present and well motivated. Several drawer items are dropped, though. The yawn-hiccup bark in the wine bar is gone, as is rehearsing her opening line with three smiles in the mirror. The laminator from the 3 a.m. browser history is missing, and so is the mouth-accessory canapé backstory. The tattoo's missed follow-up is absent, and circumcision is never stated. Under the line, dropping elements is a 3.",
+     "evidence": [
+      "wears a silver clip on her upper canine",
+      "had a daily schedule tattooed down her forearm on Mare Street"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 3,
+     "why": "The bio is word for word, and all six items, the clinician's notes and most of the drawer are present and well used: the harness, the taxi, Marguerite, the kink and the boring after-sex talk. Several drawer items are dropped, though. The bark-like yawn-hiccup in the wine bar is gone, as are the mirror rehearsal with three smiles and the 3 a.m. laminator search. The canapé under the mouth accessory and the booty call that made her miss the tattoo appointment are missing too. On the body, \"circumcised\" and the scrotum and testicle values never appear.",
+     "evidence": [
+      "wears a silver clip on her upper canine",
+      "a massive, thick-veined, freckled cock that curves sharply right and hangs low",
+      "her real name is Petra Baines, thirty-eight"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "The bio is verbatim, and all six items are present: monocle, waistcoat, heels, timetable tattoo, hair or ring-light story, and the silver canine clip. Most of the drawer survives and is woven into the life, and the cocktail sword and the taxi crying are especially well placed. However, some drawer entries are dropped: the yawn-hiccup bark in the wine bar, rehearsing opening lines with three smiles, and the laminator. Circumcision is never stated. The ring-light story is also altered from 'producing' to 'knocked over'.",
+     "evidence": [
+      "knocked over her ring light mid-pitch while spending twelve minutes proving her messy hair was deliberate",
+      "a massive, thick-veined, freckled cock that curves sharply right and hangs low"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 3,
+     "why": "The bio is word for word. All six items are present: the monocle, the waistcoat, the heels, the timetable tattoo, the hair and ring light, and the silver canine clip. Most of the drawer and the clinician's notes are honoured, and the 'barge' shoe shop is a good account of where the shame of scale comes from. Some things are dropped, though. Two drawer entries are missing: the yawn-hiccup bark in the quiet wine bar, and rehearsing an opening line in the mirror with three smiles. The laminator is gone from the browser history. The body omits 'circumcised' and the large, low scrotum, and the canapé and booty-call item backstories are unused.",
+     "evidence": [
+      "a massive, thick-veined, freckled cock that curves sharply right and hangs low",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m."
+     ]
+    }
+   ]
+  },
+  "profile.voice": {
+   "score": 5,
+   "why": "All eight readers agree, and Armstrong & Bain, Saunders and Pinter show it from the probe text. Every one of the five messages carries her own kit: the 'hm.' verdicts, numbered proofs, the 19:45 test, the 159 bus lie, the bakery mixers and the Overground check. The situations also come out as distinct shapes. Larry David and Leonard hold it below a 6 because the reader mostly reassembled the profile's sample lines. Message 5, for instance, is nearly the guard-down example, so the profile is proven to be recallable more than generative.",
+   "evidence": [
+    "hm. 1. Six words in five hours is a verdict. 2. Invite revoked.",
+    "Just got in from Soho, caught the 159 at 21:18, dreadful Westminster traffic.",
+    "still awake... bakery mixers haven't started yet... tell me something boring about your Tuesday..."
+   ],
+   "raise": "Give the texting rules a generative grammar beyond the sample lines, such as what she numbers, what she never numbers and how she corrects herself, so a writer produces new Petra lines instead of reusing these.",
+   "dissent": "",
+   "def": "e7f66af37eb2f5e3",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "All five probe messages could only be Brick's. They use her 'hm.' verdicts, numbered points, exact clock times, the 159 bus, the bakery mixers, and the Overground check, and no one else in the cast has that kit. The five situations also come through as different shapes: a numbered opener, a correction followed by a revocation, a flaw-first confession, lowercase ellipses, and one clean sentence. It misses a 6 because the reader mostly lifted the profile's own example lines, and the 2 a.m. message stands on lowercase-and-ellipses, which Reuben shares; only the mixers detail makes it hers.",
+     "evidence": [
+      "hm. 1. Four words in six hours is a verdict. 2. Thursday is withdrawn.",
+      "There was no 159 and no Westminster traffic. I've been on the sofa in a towel since four.",
+      "mixers downstairs don't start till four... tell me what time your alarm goes"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "All five probe messages are hers and nobody else's. They carry the 'hm.' verdict, numbered points, the 19:45 test, the towel on the sofa since four, the bakery mixers, the sister's kitchen and the Overground check, and no one else in the cast owns those. The situations read differently: a brisk numbered opener, a precision correction, a confession, lowercase drift and one plain sentence. It stops short of a 6 because the reader mostly reassembled the profile's own sample lines ('Don't take notes', 'Proceed', 'Are you near the Overground?'). That proves the voice can be lifted, not that it can generate.",
+     "evidence": [
+      "hm. Your third photo is the Regent's Canal at Islington, not Camden as captioned. 1. I forgive it.",
+      "I've been on the sofa in a towel since four. I over-specify when I'm nervous.",
+      "mixers downstairs don't start till four... tell me what time your alarm goes"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "All five probe messages could only come from Petra. Each uses her own furniture: the 19:45 call, the numbered verdicts, the towel since four, the bakery mixers, the sister's kitchen and the Overground. The situations also land differently, from a clipped numbered opener to lowercase drift at 2 a.m. to one plain sentence when she drops the act. It falls short of a 6 because the reader leaned on the profile's sample lines almost word for word ('is a verdict', 'Proceed', 'Don't take notes'). That shows the voice travels through catchphrases more than through a grammar a writer could extend.",
+     "evidence": [
+      "Four words in six hours is a verdict. 2. Thursday is withdrawn.",
+      "mixers downstairs don't start till four... tell me what time your alarm goes",
+      "I've been on the sofa in a towel since four. I over-specify when I'm nervous."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "All five probe messages belong to Petra and to no one else in the cast. They rest on her own furniture: the 'hm.' verdicts, numbered points, the 19:45 test, the sofa-towel lie, the bakery mixers and the sister's-kitchen wish. The five situations also come out as different shapes: a numbered opener, a correction-then-revocation, a flat confession, a lowercase drift and one clean sentence. It falls short of a 6 because the reader mostly reproduced the profile's own examples rather than inventing from it. Message 3 recycles 'Don't take notes', and message 5 is nearly the guard-down example word for word, so the voice is proven to copy, not yet proven to generate.",
+     "evidence": [
+      "hm. 1. Four words in six hours is a verdict. 2. Thursday is withdrawn. 3. No hard feelings, filed.",
+      "still awake... mixers downstairs don't start till four... tell me what time your alarm goes",
+      "I've been on the sofa in a towel since four. I over-specify when I'm nervous. Don't take notes."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "All five probe messages could only come from Brick. The 'hm.' verdicts, numbered points, the 19:45 call test, the 159 bus lie, the Kennington bakery mixers and the Overground check each tie to her life or texting rules, and nobody else in the cast owns them. It falls short of a 6 because two situations blur. The caught-in-a-lie message reuses the hurt line's 'Don't take notes', and the quiet reply recycles the profile's own example lines almost verbatim, so the reader is copying more than inventing from her logic.",
+     "evidence": [
+      "hm. Your third photo is the Regent's Canal at Islington, not Camden as captioned. 1. I forgive it.",
+      "still awake... mixers downstairs don't start till four... tell me what time your alarm goes",
+      "There was no 159 and no Westminster traffic. I've been on the sofa in a towel since four."
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "All five probe messages could only come from Brick. The 'hm.' verdicts, numbered proofs, 19:45 call, bakery mixers, sofa-and-towel lie and Overground check are tied to her flat, her tests and her habits, and the five situations read as different from each other. It falls short of a 6 because the reader mostly reassembled the profile's own example lines rather than producing new ones. Message (5), the guard-down line, is close to a copy of the 'From tonight' wish, which suggests that voice is thinner on the page than the others.",
+     "evidence": [
+      "hm. Your third photo is the Regent's Canal at Islington, not Camden as captioned. 1. I forgive it.",
+      "There was no 159 and no Westminster traffic. I've been on the sofa in a towel since four.",
+      "mixers downstairs don't start till four... tell me what time your alarm goes and which end of the platform you stand on"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "All five probe messages could only be Brick's. They use the 'hm.' verdict, numbered proofs, 19:45 and 20:30 times, the 159 bus, the bakery mixers, the Overground check and the sister's kitchen, and no one else in the cast has that mix of timetables and postcodes. The situations also come out as different shapes: a numbered summons, a curt correction, a flat confession, lowercase drift, then one plain sentence. It stops short of a 6 because the reader mostly re-assembled the profile's own examples (message 5 is nearly the guard-down example word for word), so it shows the profile can be recalled more than that it generates fresh lines.",
+     "evidence": [
+      "hm. Your third photo is the Regent's Canal at Islington, not Camden as captioned. 1. I forgive it.",
+      "still awake... mixers downstairs don't start till four... tell me what time your alarm goes and which end of the platform you stand on",
+      "There was no 159 and no Westminster traffic. I've been on the sofa in a towel since four."
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "All five probe messages could only come from Petra, and each is tied to her life or habits: the 19:45 call, the numbered verdict, the towel since four, the bakery mixers, the Overground check. The five situations also read differently, from the brisk numbered opener to the lowercase 2 a.m. drift to the bare final line. It stops short of a 6 because the reader mostly copied the profile's own example lines ('Don't take notes', 'Proceed', 'Are you near the Overground?'). That shows the examples are distinctive, not that a writer can make new Petra lines from the rest of the profile.",
+     "evidence": [
+      "hm. 1. Four words in six hours is a verdict. 2. Thursday is withdrawn. 3. No hard feelings, filed.",
+      "still awake... mixers downstairs don't start till four... tell me what time your alarm goes and which end of the platform you stand on",
+      "I've been on the sofa in a towel since four. I over-specify when I'm nervous. Don't take notes."
+     ]
+    }
+   ]
+  },
+  "profile.situations": {
+   "score": 5,
+   "why": "The panel was unanimous on concrete shapes. Waiting produces an unsolicited 'Proceed.' correction, lying piles up bus numbers and timestamps, and guard down is the one message without numbering or 'hm.', followed by a logistics question. Leonard and Pinter, whose lens is shown versus stated, mark the flaws. Baseline, losing and on-something share the same 'hm.'-plus-numbering tool. 'Hurt or embarrassed: Blunt and defensive' names a mood before it names a habit.",
+   "evidence": [
+    "Stands at the dark screen, then sends an unsolicited correction",
+    "One clean, unnumbered sentence without \"hm.\", then a logistical check",
+    "Blunt and defensive, announcing her flaw first"
+   ],
+   "raise": "Give 'losing them' and 'hurt' their own observable mechanics, such as a message length, a timing or a dropped tic, so they cannot be mistaken for the numbered baseline.",
+   "dissent": "",
+   "def": "07baafe3b1ed9ce4",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "All ten situations predict something you could see on the screen. Waiting is an unsolicited correction ending 'Proceed.' Lying over-specifies bus times. Late night drops into lowercase with ellipses. Guard down is the only unnumbered sentence without 'hm.', followed by a logistics question. Horny pairs a scale warning with a timetable demand. It falls short of a 6 because baseline, losing them, and on something all lean on 'hm.' plus numbering, so a single message from one of those could be mistaken for another.",
+     "evidence": [
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check",
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "Nearly every line predicts a different message shape. Waiting produces an unsolicited correction ending in 'Proceed.' Lying over-specifies bus numbers and times. Late night goes lowercase with ellipses. Guard down drops both the numbering and the 'hm.', then adds a logistics check. You could tell most situations from one message. Two overlaps keep it from a 6: losing them reuses the baseline's 'hm.' plus numbered list, and into-them and horny both reach for scheduling.",
+     "evidence": [
+      "Just got in from Soho, caught the 159 at 21:18, dreadful Westminster traffic.",
+      "For precision: I meant the 1998 Bradshaw reprint. Not 1999. Proceed.",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Most of the ten lines predict a different message shape. 'Waiting' produces an unsolicited correction sent into silence, 'lying' over-specifies bus routes and times, 'late at night' goes lowercase with ellipses, and 'guard down' drops the 'hm.' and the numbering for one clean sentence plus a logistics check. Two lines are weaker. 'Hurt' ('announcing her flaw first') reads close to baseline in its clipped shape. 'Losing them' reuses the baseline numbered list, so those two would be hard to tell apart from one message.",
+     "evidence": [
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check",
+      "Yes, four messages in a row. I optimise when bored. Don't take notes."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "Most of the ten lines predict a different observable shape. Waiting produces an unsolicited correction ending 'Proceed.' Lying over-specifies times and bus numbers. Late night goes lowercase with ellipses. Guard down drops both the numbering and the 'hm.' and adds a logistics question. Into-them is marked by future dates and line closures. Baseline, losing and on-something all reuse 'hm.' and numbering, and hurt ('blunt and defensive') reads close to her baseline clipped register. So two or three of these are harder to tell apart from a single message.",
+     "evidence": [
+      "Stands at the dark screen, then sends an unsolicited correction",
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "All ten lines predict observable behaviour. Waiting produces an unsolicited correction ending in 'Proceed.' Lying over-specifies routes and times. Guard down drops the numbering and the 'hm.' and adds a logistical check. Horny pairs a scale warning with a timetable. It misses a 6 because baseline and losing share the same 'hm.' plus numbered-list shape and differ mainly in tone. Late night is mostly 'lowercase and ellipses' with the content doing the distinguishing.",
+     "evidence": [
+      "Stands at the dark screen, then sends an unsolicited correction",
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "Most situations predict a different message shape. Lying over-specifies routes and times, waiting produces an unsolicited 'For precision' correction, late night goes to lowercase ellipses, guard down drops both 'hm.' and the numbering and adds a logistics question, and horny pairs a scale warning with a demanded timetable. Below a 6 because three situations share one tool: baseline, losing and on-something all reach for 'hm.' and the numbered list, so one message from those three would not tell you which. The late-night line also gives a mood ('heartbeat thuds in her ear') where it should give a typing habit.",
+     "evidence": [
+      "hm. 1. Six words in five hours is a verdict. 2. Invite revoked.",
+      "For precision: I meant the 1998 Bradshaw reprint. Not 1999. Proceed.",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "Nearly every line predicts a different observable shape. Waiting produces an unsolicited dated correction ending 'Proceed.' Lying piles on bus numbers and timestamps. Late night drops to lowercase with ellipses. Rosé brings 'Ha.' and theories about postcodes. Guard down is one unnumbered sentence without 'hm.' followed by a logistics question. The weak line is 'Hurt or embarrassed: Blunt and defensive', which names a mood rather than a shape, and its example could pass for baseline. Losing them also reuses baseline's numbering and 'hm.', so those two blur.",
+     "evidence": [
+      "Stands at the dark screen, then sends an unsolicited correction",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check",
+      "Over-specifies times and bus routes when she hasn't left the sofa"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "Nearly every line predicts a different shape. The unsolicited correction while waiting, the over-specified bus route when lying, lowercase ellipses after midnight, half-baked theory with 'Ha.' on rosé, and one unnumbered sentence plus a logistics check when her guard is down. The weak spot is overlap: 'hm.' and numbered lists turn up in baseline, losing and on-something, and both into-them and horny reach for timetables. 'Hurt' leans on mood ('blunt and defensive') before it reaches the habit of naming her flaw first.",
+     "evidence": [
+      "Stands at the dark screen, then sends an unsolicited correction",
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "One clean, unnumbered sentence without \"hm.\", then a logistical check"
+     ]
+    }
+   ]
+  },
+  "profile.texting_vs_cast": {
+   "score": 4,
+   "why": "The quoted overlaps are real. Losing them repeats Gerald almost word for word, late night is Reuben's lowercase and ellipses, lying matches Gerald's hyper-specificity, and guard down follows the cast-wide 'one plain sentence' template. Still, about six of ten situations are hers alone: the Bradshaw correction, the timetabled horniness and the anniversary scheduling. Armstrong & Bain, Saunders, Larry David and Parker carried the panel by showing that each shared skeleton still gets a mechanic only she has, the numbered proof or the logistics check, and that this is enough for 'most situations'. It sits at the bottom of the pass band.",
+   "evidence": [
+    "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+    "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+    "Over-specifies times and bus routes when she hasn't left the sofa"
+   ],
+   "raise": "Rewrite the losing and late-night lines around habits no one else in the cast has, for example losing as replies timed to the exact minute of theirs, rather than Gerald's mirroring or Reuben's lowercase.",
+   "dissent": "Coel, Leonard and Pinter hold at 3. In their reading, the shared mechanics (Gerald's mirroring and lie, Reuben's late night, Velvet's flaw-first, the cast-wide guard-down template) amount to matching 'in several situations'. They see props, not habits, doing the separating.",
+   "def": "f44795214d1361d7",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "Most situations are hers alone. Nobody else waits by sending a pedantic correction, lies through bus times, or adds a logistical question to a guard-down line. Several situations, though, share their skeleton with someone else. Losing them opens with almost the same words as Gerald's ('Cools into shorter replies mirroring their pace'). Late night is lowercase and ellipses, like Reuben's. Guard down is 'one plain sentence', which is true of the whole cast. It stays above the line because her additions (the numbered proof, the mixers, the Overground check) still separate her in each of those situations.",
+     "evidence": [
+      "Cools into short replies mirroring their pace",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+      "Are you near the Overground?"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "Her surface tics separate her from the cast: 'hm.', numbered proofs, timetables, Bradshaw corrections. Several underlying moves are shared, though. Gerald's losing line is word-for-word the same mechanism ('Cools into shorter replies mirroring their pace'). Late-night lowercase and ellipses also belongs to Reuben and Velvet, Gerald's lie is also hyper-specificity, and guard-down as 'one plain sentence' is the template for the whole cast. It stays above the line because her content (times, lines, routes) still marks each message as hers.",
+     "evidence": [
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+      "Hyper-specific about months and West London streets"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 3,
+     "why": "Several mechanics are shared with other profiles. 'Cools into short replies mirroring their pace' is nearly Gerald's 'Cools into shorter replies mirroring their pace'. Her late-night lowercase and ellipses repeats Reuben's and Velvet's. Over-specifying when lying sits close to Gerald's 'Hyper-specific about months and West London streets'. Every profile also has a 'one plain sentence' guard-down. Her 'hm.', numbered proofs, waiting-time corrections and timetabled horny lines are her own, but the line says matching in several situations is a 3, and the content details carry the difference more than the habits do.",
+     "evidence": [
+      "Cools into short replies mirroring their pace",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+      "Over-specifies times and bus routes when she hasn't left the sofa"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "In most situations her habit is her own: the numbered proof of failure, the unsolicited correction while waiting, the timetabled horniness, and the guard-down logistics check. Several lines share skeletons with other profiles. Losing ('cools into short replies mirroring their pace') is nearly word for word Gerald's. Late night's lowercase and ellipses matches Reuben's. Over-specified lying sits close to Gerald's hyper-specific streets. Announcing her flaw first when hurt echoes Velvet's narrating of the flop. It stays above the line because each shared shape carries a detail that is hers, such as bus times or a numbered verdict. It is not higher because the underlying habit, not just the content, overlaps in three or four situations.",
+     "evidence": [
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+      "Over-specifies times and bus routes"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "Most situations belong to her alone. No other cast member sends numbered proofs of failure, corrections about Bradshaw reprint years, or 22:00/22:15 sexual timetables. Two shapes are borrowed, though. 'Cools into short replies mirroring their pace' is nearly word for word Gerald's losing line, and lowercase-with-ellipses at night is Reuben's late-night line. The 'one plain sentence' guard-down template is shared by the whole cast. It stays above the line because her content (the numbered verdict, the bakery mixers, the Overground check) still separates each one.",
+     "evidence": [
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 3,
+     "why": "Several of Brick's situations match another cast member. Her losing line repeats Gerald's nearly word for word ('Cools into shorter replies mirroring their pace'). Her lying habit is Gerald's hyper-specificity about times and London streets. Her late-night lowercase-and-ellipses is Reuben's. Her guard-down 'one plain sentence' follows the template every profile uses. Her waiting, horny and into-them lines are her own, which keeps this off a 2.",
+     "evidence": [
+      "Cools into short replies mirroring their pace",
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "Lowercase and ellipses after midnight"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "Several situations are written with the same shape as other cast members. Losing them is almost the same wording as Gerald's ('cools into shorter replies mirroring their pace'). Lying matches Gerald's hyper-specific geography as a tell. Late-night lowercase with ellipses is shared with Reuben. Announcing the flaw first when hurt echoes Velvet 'narrating the flop first'. Guard down follows the cast-wide template of 'one plain sentence'. Her own props (Bradshaw, the 159, the Overground) separate the examples, but the habits underneath are not hers in about four of ten situations.",
+     "evidence": [
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+      "Over-specifies times and bus routes when she hasn't left the sofa",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "Most of her situations are her own. Nobody else answers silence with a Bradshaw correction, schedules an anniversary when keen, or demands 22:00 and 22:15 in bed. Several lines echo the cast, though. 'Cools into short replies mirroring their pace' is nearly word for word Gerald's losing line. Lowercase-and-ellipses late at night matches Reuben. Over-specified places when lying resembles Gerald's 'hyper-specific about months and West London streets.' It stays above the line because each shared shape carries something only she has: the numbered proof, the mixers, the 159.",
+     "evidence": [
+      "Cools into short replies mirroring their pace, then sends a numbered proof of failure",
+      "Lowercase and ellipses after midnight while her heartbeat thuds in her ear",
+      "Just got in from Soho, caught the 159 at 21:18, dreadful Westminster traffic."
+     ]
+    }
+   ]
+  },
+  "profile.wound": {
+   "score": 5,
+   "why": "The panel was unanimous. Leonard and Pinter credit the profile for showing the chain rather than naming it. The 'barge' shoe shop and the boys' lace-ups seed the size shame. That shame becomes announcing the curve and the shelf before drinks arrive, and it reaches the texting as the horny 'Fair warning' and the hurt flaw-first line. Saunders and Coel keep it from a 6 because the control strand rests on Marguerite at thirty-five. Its childhood root is only implied by the timetabler mother, so the clinician's line does the joining.",
+   "evidence": [
+    "they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+    "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+    "Fair warning: considerable girth, curves right."
+   ],
+   "raise": "Add an early timeline event, perhaps with Eileen's timetables, where structure first made her bigness manageable, so the scheduling has a childhood origin rather than a breakup loop.",
+   "dissent": "",
+   "def": "299ebf3464d13800",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "All three links are there and specific. The shoe-shop 'barge' insult at eleven and the outgrown sixth-form desks cause the shame about her size. That shame becomes the habit of 'announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive.' The habit shows up in texting, where hurt means 'announcing her flaw first' and horny opens with 'Fair warning: considerable girth.' Marguerite's 'scheduled being loved' line feeding the forearm tattoo gives the control side its own cause. It misses a 6 because the step from the scale shame to the scheduling habit is carried by the breakup rather than by an event from her childhood.",
+     "evidence": [
+      "didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Yes, four messages in a row. I optimise when bored. Don't take notes."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "The chain holds and is concrete. The Crewe shoe-shop assistant's 'barge' line sends her to assembly in boys' lace-ups, and that becomes the shame about her size. That shame becomes the habit of announcing 'the curve of her cock, the shelf below her navel, and her departure time before drinks arrive'. The habit lands in the texting, in the horny line's 'Fair warning' and the hurt line's 'announcing her flaw first'. Marguerite leaving and the forearm tattoo add a second, sharper branch, structure as armour. It falls short of a 6 because 'Invite revoked' links back to the wound only through the clinician's summary, not through a scene.",
+     "evidence": [
+      "laughed that they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Fair warning: considerable girth, curves right."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "The chain is specific and mostly shown. The shoe-shop assistant's 'barge' and the walk to assembly in boys' lace-ups seed the shame of being oversized. That becomes her habit of announcing the curve, the shelf and her departure time before drinks arrive. It reaches the texting in 'Fair warning: considerable girth, curves right' and in 'hurt' announcing the flaw first. The control half of the defence is thinner: the rigid scheduling is explained by Marguerite at thirty-five and only implied by the timetabler mother, so its childhood root is never made into an event.",
+     "evidence": [
+      "laughed that they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Fair warning: considerable girth, curves right."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "All three links are present and specific. First, the shoe-shop 'barge' at eleven and the boys' lace-ups give her the shame of being too big, and the mother's XXL gilets 'for the shoulders' keep it going. Second, that shame shows in how she is with people: she announces her curve, her shelf and her departure time before drinks, and never asks anyone to carry a bag. Third, it reaches the texting: hurt opens with her own flaw, and horny opens with a warning about her scale. The cost is shown too, in Marguerite leaving because Petra 'scheduled being loved' and in the crying in the taxi. It misses a 6 because the size wound and the structure habit are joined mostly by the clinician's assertion. The timeline jumps from 2009 to 2022 without showing how one became the other.",
+     "evidence": [
+      "laughed that they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Blunt and defensive, announcing her flaw first"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "The chain is shown, not stated. At eleven she walks to assembly in boys' lace-ups after the 'barge' remark. As an adult she 'announces the curve of her cock, the shelf below her navel, and her departure time before drinks arrive', getting the verdict in before anyone else can. That reaches the texting through 'announcing her flaw first' when hurt and 'Fair warning: considerable girth' when horny. Marguerite's line about scheduling being loved, followed by the Mare Street tattoo, is a rule followed one step too far and then defended in ink, which shows the control half of the defence. It misses a 6 because the shoes-as-evidence strand thins out: the Aldwych heel is slapstick with no link back to proving she made it alone.",
+     "evidence": [
+      "they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "couldn't be with someone who scheduled being loved, Petra had a daily schedule tattooed down her forearm",
+      "Blunt and defensive, announcing her flaw first"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "All three links are present and mostly shown. The age-eleven shoe-shop 'barge' remark and the walk to assembly in boys' lace-ups cause the shame of being oversized. That shame produces her habit of announcing the curve, the shelf and her departure time before drinks arrive. The habit appears in the texting lines as hurt ('announcing her flaw first') and horny ('Fair warning: considerable girth'). Below a 6 because the 'outgrowing sixth-form desks' beat is a label rather than an event, and the clinician's line still states the cause outright when the timeline has already shown it.",
+     "evidence": [
+      "laughed that they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Yes, four messages in a row. I optimise when bored. Don't take notes."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "The chain is shown rather than named. The shoe-shop 'barge' at eleven, then outgrowing the sixth-form desks, lead to her habit of announcing the curve, the shelf and her departure time before drinks arrive. That habit appears in the horny line's 'Fair warning: considerable girth'. The control strand also connects: Marguerite leaves, the next week she gets the timetable tattoo, and the 19:45 call becomes her test of a match. The profile never says 'shame' out loud, which is to its credit. The thin link is between the defence and the breakup: scheduling caused the breakup and the breakup caused more scheduling, so that strand is a loop rather than an origin.",
+     "evidence": [
+      "they didn't stock girls' shoes in \"barge,\" and Petra walked to Monday assembly in boys' lace-ups",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "Fair warning: considerable girth, curves right."
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "All three links hold and are shown. The shop assistant's 'barge' and the walk to assembly in boys' lace-ups plant the shame of size. Marguerite leaving because Petra 'scheduled being loved' and the forearm timetable tattoo plant the defence. In company this becomes announcing her cock, her shelf and her departure time 'before drinks arrive', so nobody discovers her first. In texting it shows as the scale warning when horny and the numbered self-dismissal when losing someone. It misses a 6 because the childhood event gets a single line, and the timetabler mother is left as a joke rather than shown as where the habit came from.",
+     "evidence": [
+      "A Crewe shoe-shop assistant laughed that they didn't stock girls' shoes in \"barge,\"",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "she couldn't be with someone who scheduled being loved"
+     ]
+    }
+   ]
+  },
+  "profile.likeable": {
+   "score": 4,
+   "why": "All eight readers agree, led by Saunders and Armstrong & Bain. The fresh reader named a specific, non-ironic quality shown in action: sliding water to trembling hands without looking, so nobody feels watched while being helped. That clears the line. Pinter and Leonard hold it at 4 because it is a single habitual sentence about a class of people, tagged 'fiercely kind'. The warmest named scene, Graham's KitKat, is kindness done to her rather than by her.",
+   "evidence": [
+    "noticing trembling hands under the desk and sliding water across without looking",
+    "she is fiercely kind",
+    "She never asks anyone to carry a bag or name a next date."
+   ],
+   "raise": "Turn the water habit into one dated scene with a named temp or receptionist, and add a second thing she does for someone, such as Graham or Sonia.",
+   "dissent": "",
+   "def": "c9fc1f4e3d28bfc5",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "The reader named a specific, non-ironic quality the profile shows in action: she notices trembling hands under the desk and slides water across without looking, so the person isn't watched while being helped. That clears the line. It stays a 4 because the kindness is written as a general habit across a list of people ('receptionists, night-bus drivers') rather than as one moment with a named person. The warmest specific scene in the profile is Graham's KitKat, and that is his kindness to her, not hers to anyone.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "She never asks anyone to carry a bag or name a next date."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "The reader named a specific, unironic quality shown in action: noticing trembling hands under the desk and sliding water across without looking. That clears the line. Finishing a term at a night class in the wrong city is also quietly endearing. It stays at 4 because the kindness to others is a single habitual sentence with 'fiercely kind' attached as a label, not a scene. The reader also had to look past a larger dislike (the lies about age and job) to find it, and the High band asks for several acts done for other people.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "discovering in week four her night class was in another city, though she finished the term"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "The reader named a specific, non-ironic quality. She notices trembling hands under the desk and slides water across without looking, which is kindness done with dignity for the person receiving it. That clears the line. It stays at 4 because it appears as one summarised habit sentence rather than a moment with a named person. Her other good qualities (spotting the lying paragraph, mending a stiletto with a paperclip) are skills, not things she does for others.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "She never asks anyone to carry a bag or name a next date."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "The fresh reader named a specific, non-ironic quality and could point to it in action: sliding water to trembling temps 'without looking'. The reader read it, rightly, as the real person under the performance. That clears the line. It stops at 4 because this is one sentence about a class of people, not an incident with a named person. The other warm material is either her own private wish (the boring post-sex talk) or something done for her (Graham's KitKat), so 'several, shown through what they do for others' is not met.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "She never asks anyone to carry a bag or name a next date."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "The reader names a specific, non-ironic quality in action: she notices 'trembling hands under the desk and slides water across without looking'. That clears the line. It stops at 4 because this is essentially the only such quality, and it is delivered as a summary of habit rather than a dated moment in her timeline. Her finishing a term at a class in the wrong city is the most Curb-like admirable commitment in the profile, but it is never framed as something done for anyone.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "She never asks anyone to carry a bag or name a next date."
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "The reader named a specific, non-ironic quality that the profile shows in action: noticing trembling hands and sliding water across without looking. That clears the line. It stops at 4 because it is the only instance of her doing something for another person, it is generalised across 'receptionists, night-bus drivers, and terrified temps' rather than set in one scene, and it comes after the label 'fiercely kind'. Her other endearing traits, such as finishing the term in the wrong city, are about her and not about what she does for others.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "she is fiercely kind"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 4,
+     "why": "The reader named a specific, non-ironic quality and the profile shows it in action: she notices trembling hands in hearings and slides water across without looking. That clears the line. It is a single instance, though, and it comes as a habitual summary with a generic list attached ('receptionists, night-bus drivers'), not as an incident with a named person. The kindness in the cast list runs toward her (Graham's KitKat), not from her, so there is no second quality shown through what she does for someone.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "She never asks anyone to carry a bag or name a next date."
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "The reader named a specific, non-ironic quality shown in action: she notices trembling hands and slides water across without looking, in hearings where she has the power. That clears the line. It is still one kindness, written as a habitual summary rather than a single night with a named temp. The profile's other virtues are skills (reading dispute bundles, mending stilettos) rather than things she does for anyone. The reader also turned straight to her hypocrisy, so the warmth has little to stand on against it.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "With receptionists, night-bus drivers, and terrified temps in her hearings, she is fiercely kind"
+     ]
+    }
+   ]
+  },
+  "profile.tests": {
+   "score": 5,
+   "why": "All eight readers scored 5. The dealbreaker is a literal phrase any match could type, tied to the Kennington taxi, and the 19:45 call is a trap that one mocking reply fails. Armstrong & Bain and Larry David held it below 6 because the precision test runs through a call rather than the chat, and the profile never writes the mocking reply. Saunders added a continuity slip: she opens the app at nine sharp, so tonight's 19:45 has already passed.",
+   "evidence": [
+    "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+    "she sets a call for 19:45 and sees if they mock the precision or meet it."
+   ],
+   "raise": "Move the precision test into the chat itself, with a time-stamped message she sends tonight after nine, and give the exact mocking reply that fails it.",
+   "dissent": "",
+   "def": "d69418021ebd052e",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "Both tests can be tripped by a single message, and both come from her life. The dealbreaker is one exact phrase, and it is tied to the taxi she cried in. The first test is a set time that the other person either mocks or meets, and either reply shows up plainly in text. It stops short of a 6 because the test runs through 'a call', which is off the chat, and the profile never writes the precise message that would mock it.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "Both tests can be seen in text, belong to this person, and could be tripped by a single message. The dealbreaker is one exact phrase, and it is tied to her own taxi-crying history. The 19:45 test turns her precision into the trap: a match who mocks it fails in one reply. It stops short of a 6 because the first test runs through a call rather than the chat itself, and it reads as watchful more than funny.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Both tests are observable in text, and each one comes from her life. The dealbreaker is a phrase a match could type tonight, and it is tied to the Kennington taxi and her collar. The first test is a precise time promise that the match either mocks or keeps, which fits the timetable tattoo and the 40-minute agendas. It falls short of a 6 because the first test runs on a 19:45 call rather than inside the chat, and the reaction it waits for ('mock the precision') is broad rather than a line you could quote.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "Both tests can be seen in chat and belong to her. The dealbreaker is a single phrase a match could type tonight, and it is tied to a real taxi and a real collar. The 19:45 test hands the match a precise appointment to meet or mock, which is a joke about her that is also a trap for them. It falls short of a 6 on a continuity error: she opens the app at nine sharp, so a 19:45 call tonight has already passed, and the test is stated as a call rather than as a message.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "Both tests are observable and one message trips each. The dealbreaker is a literal phrase, \"let's do this again\" with no day named, so any match could type it tonight. The first test is a staged trap: she proposes a 19:45 call and watches whether they mock the precision or meet it. Both tie to her life, through the Kennington taxi and a mother who timetabled railways. It falls short of a 6 because the 19:45 test belongs to the phone more than the chat, and the profile never gives the text of the mocking reply that would fail it.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "Both tests can be tripped by one message. A match who types \"let's do this again\" with no day trips the dealbreaker, and a match who jokes about a 19:45 call fails the precision test. Both tie into the life: the taxi cry, the tattooed timetable and the railway-timetabler mother. It stops short of 6 because the second test partly depends on a call happening off the page, so the chat only shows the reply to the proposal, not whether the call is kept.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "Both tests can be seen in text and a single message trips either one. The dealbreaker is a phrase, \"let's do this again\" without a day, and it is tied to the taxi and her timetabler mother. The first test is a set call at 19:45, where mockery or punctuality shows up in one reply. It stops short of 6 because the first test depends on a call rather than a message, and the profile never says what a pass sounds like in her terms.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "Both tests can be tripped by one message and both come from her life. The dealbreaker is a phrase a match would type without thinking, and it is tied to the taxi and the collar. The first test is a time she sets, so the match's reply is the verdict. It falls short of a 6 because the 19:45 test is a call rather than a text, and the profile never says what she types when someone meets the time exactly.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day, putting her back in a Kennington taxi crying into her collar.",
+      "she sets a call for 19:45 and sees if they mock the precision or meet it."
+     ]
+    }
+   ]
+  },
+  "profile.people": {
+   "score": 4,
+   "why": "All eight readers scored 4. Coel and Pinter showed that Graham is plainly good for her, which clears the line, and that Eileen's gilets and the 3 a.m. Instagram checks are ongoing. Every reader agreed that Sonia's parcel is a finished anecdote and that nobody is placed to interrupt tonight, which holds it short of 5.",
+   "evidence": [
+    "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+    "never steps back when she stands up, and leaves a KitKat on her folder when union reps shout",
+    "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened."
+   ],
+   "raise": "Give two of the four something due tonight, such as Graham sending tomorrow's grievance pack late or Sonia knocking about another misdelivered parcel.",
+   "dissent": "",
+   "def": "1484e17d048bba91",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "Most people have a live, specific detail, and two are good for her. Graham's KitKat is a real favour. Eileen's XXL gilets 'for the shoulders' are love shown sideways through an insult. Marguerite stays active through the 3 a.m. Instagram checks. Sonia is a finished anecdote with nothing unresolved, and nobody is set up to interrupt tonight: Eileen rings Sundays only, and Graham has no reason to text.",
+     "evidence": [
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened.",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her.",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "Most people have a current, specific hook. Marguerite's sister's Instagram at 3 a.m. is live and shameful, Eileen's 18:00 Sunday calls and unopened XXL gilets are ongoing, and Graham is clearly good for her. Sonia's parcel is a finished anecdote with nothing unresolved, and Graham's thread is warm but static. Nobody is set up to interrupt tonight, which keeps this from a 5.",
+     "evidence": [
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "Most people have a current thread, and Graham is clearly good for her: he leaves a KitKat on her folder and doesn't step back when she stands up. Eileen's Sunday 18:00 twelve-minute calls and the XXL gilets are ongoing and specific. Marguerite carries the 3 a.m. Instagram habit. It stays a 4 because Sonia is a single finished joke rather than an unresolved story, and none of the four could plausibly interrupt tonight's chat.",
+     "evidence": [
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her",
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets \"for the shoulders\"",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "Most of the people carry something current. Eileen has a fixed Sunday 18:00 call and keeps sending gilets, Marguerite is alive in the 3 a.m. sister-Instagram habit, and Graham is plainly good for her, with the KitKat on the folder. It clears the line because Graham is not a source of humiliation and Eileen's gilets could easily come up. It stops at 4 because Sonia's parcel is a finished anecdote with no next move, and nobody is set up to interrupt tonight.",
+     "evidence": [
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her.",
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "Most people carry something current. The 3 a.m. Instagram checks on Marguerite's sister are ongoing. Sonia's parcel and the harness lie one floor up. Eileen's 18:00 Sunday calls and the unopened gilets keep recurring. Graham is plainly good for her, with the KitKat on the folder and the way he never steps back when she stands, but nothing with him is unresolved, so he is a warm fixture rather than a story in progress. No one is placed to interrupt tonight specifically.",
+     "evidence": [
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her",
+      "rings Sundays at 18:00 for twelve minutes"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "Most people carry something current that could surface tonight. Marguerite's sister's Instagram at 3 a.m., Sonia and the 'time-sensitive' parcel, and Eileen's XXL gilets are all usable lines in a chat. Graham is good for her, which keeps this above the line. But he is a portrait rather than a thread, the phrase \"genuinely good for her\" tells instead of shows, and none of the four has anything changing or about to happen tonight.",
+     "evidence": [
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her.",
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 4,
+     "why": "Each person has a current, specific detail. The 3 a.m. Instagram checks on Marguerite's sister, the parcel at arm's length, the 18:00 Sunday call and Graham's KitKat are all usable. Graham is good for her, and \"never steps back when she stands up\" is the best unspoken thing in the file. Few of these threads are unresolved enough to interrupt tonight: Eileen is fixed to Sunday, and Sonia's incident is already over.",
+     "evidence": [
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "never steps back when she stands up, and leaves a KitKat on her folder when union reps shout"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "Most people have something current. Eileen's 18:00 Sunday call and the gilets are ongoing, the 3 a.m. Instagram checking of Marguerite's sister is a live habit, and Graham is plainly good for her. Sonia's thread is a finished anecdote with no way back into tonight. None of the four is set up to interrupt this particular night, so it stays above the line but well short of 5.",
+     "evidence": [
+      "rings Sundays at 18:00 for twelve minutes and posts men's XXL gilets \"for the shoulders\"",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her",
+      "Petra still checks Marguerite's sister's public Instagram at 3 a.m."
+     ]
+    }
+   ]
+  },
+  "profile.timeline": {
+   "score": 3,
+   "why": "All eight readers scored 3. Waller-Bridge and Saunders counted four humiliations in six entries (the barge shoes, the wrong city, the revolving door, the knee), double the limit of two. Leonard and Armstrong & Bain added that 2009 to 2022 is missing, that Marguerite appears only as an exit, and that age eleven in 1998 makes her 39 rather than 38.",
+   "evidence": [
+    "they didn't stock girls' shoes in \"barge,\"",
+    "discovering in week four her night class was in another city, though she finished the term.",
+    "her knee went out so loudly he switched on the big light"
+   ],
+   "raise": "Replace two of the pratfalls with ordinary entries, such as moving to London and starting the grievance work, and the years with Marguerite, and fix the age arithmetic.",
+   "dissent": "",
+   "def": "f3e8d800a5fd6476",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 3,
+     "why": "The slots are nominally filled: Crewe, sixth form, the Chester store, leaving home, the Marguerite breakup and this year. But four or five of the six entries are humiliation set-pieces: the barge shoes, the wrong city, the revolving door and the knee. There is nothing between 2009 and 2022 explaining how she reached London and HR chairing. The longest relationship appears only as its ending. The dates also put her at 39, not the stated 38.",
+     "evidence": [
+      "discovering in week four her night class was in another city, though she finished the term.",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 3,
+     "why": "Most of the spine is there: Crewe childhood, sixth form, the Chester store job, leaving home, Marguerite, and this year. But four of the six entries are humiliations (the shoe shop, the wrong city, the revolving door, the knee), double the limit. The longest relationship only appears as its ending, so the spine reads as a run of pratfalls rather than an ordinary life.",
+     "evidence": [
+      "discovering in week four her night class was in another city",
+      "her knee went out so loudly he switched on the big light to ask about an ambulance"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 3,
+     "why": "The spine is mostly there: Crewe childhood, sixth form with two A-levels, a first job at a Chester department store, leaving home for Salford, and 2026. However, four of the six entries are humiliations: the 'barge' shoe shop, the wrong-city night class, the revolving-door stiletto, and the knee. The longest relationship appears only as its ending. The dates also don't add up: age eleven in 1998 makes her 39 in 2026, not 38.",
+     "evidence": [
+      "they didn't stock girls' shoes in \"barge,\"",
+      "discovering in week four her night class was in another city",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 3,
+     "why": "The spine is mostly there: Crewe, sixth form, the Chester store, leaving home for the Salford class, Marguerite, and 2026. But four of the six entries are humiliations (the barge shoes, the wrong city, the revolving door, the knee), which is past the limit of two. The longest relationship appears only as its ending, and the ages drift: eleven in 1998 makes her 39, not 38. The 2026 knee does not lead into tonight.",
+     "evidence": [
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 3,
+     "why": "The spine is mostly there: Crewe, sixth form, the Chester store job, leaving for Salford, Marguerite, and 2026. Humiliations dominate, though. The barge shoes, the night class in the wrong city, the stiletto in the revolving door and the knee under the big light make four set-pieces against a limit of two. Marguerite appears only as an exit, not as a relationship, and the Salford entry contradicts itself by placing her at the right building in a class held in another city.",
+     "evidence": [
+      "A Crewe shoe-shop assistant laughed that they didn't stock girls' shoes in \"barge,\"",
+      "lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 3,
+     "why": "It covers childhood in Crewe, sixth form, the first job in Chester and a clause about leaving home. Four of the six entries are humiliations, though: the shoe shop, the wrong city, the revolving door and the knee. The Marguerite relationship appears only as its ending, and nothing covers 2009 to 2022 or how she came to chair grievance hearings. The arithmetic also breaks: age eleven in 1998 makes her thirty-nine, not thirty-eight.",
+     "evidence": [
+      "discovering in week four her night class was in another city, though she finished the term.",
+      "she lost a stiletto to the revolving door and limped into the lobby carrying one shoe",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "The spine is all there: Crewe, sixth form, the Chester store, leaving home for Salford, Marguerite, and 2026. But at least four of the six entries are humiliations: the \"barge\" shoe shop, the night class in the wrong city, the stiletto in the revolving door, and the knee in Clapham. That breaks the limit of two. The 2026 entry is another pratfall and does not lead into tonight.",
+     "evidence": [
+      "they didn't stock girls' shoes in \"barge,\"",
+      "lost a stiletto to the revolving door and limped into the lobby",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 3,
+     "why": "The spine is mostly there: Crewe, sixth form, the Chester store, leaving home, and 2026. But the longest relationship appears only as its ending. At least four of the six entries are pratfalls: the barge shoes, the wrong city, the revolving door and the knee. That breaks the two-humiliation limit, and the dates do not add up either: thirty-eight in 2026 cannot be eleven in 1998.",
+     "evidence": [
+      "laughed that they didn't stock girls' shoes in \"barge,\"",
+      "discovering in week four her night class was in another city",
+      "lost a stiletto to the revolving door and limped into the lobby"
+     ]
+    }
+   ]
+  },
+  "profile.act": {
+   "score": 5,
+   "why": "All eight readers scored 5. Armstrong & Bain, as the lens on this dimension, showed that each truth can leak in chat: the harness propping the door undoes 'curated', and the cocktail sword undoes 'the art of conversation'. Coel, Parker and Larry David held it from 6 because the consultant pair is muddy, and Leonard and Pinter noted that the Cotswolds claim has no paired truth even though Crewe is right there.",
+   "evidence": [
+    "only checked by the pharmacy loyalty scheme she joined twice.",
+    "with the bathroom door propped open by a £240 posture harness.",
+    "once fished her monocle out of it with a cocktail sword."
+   ],
+   "raise": "Add a Cotswolds-versus-Crewe pair and sharpen the consultant truth into one clean gap with the grievance hearings.",
+   "dissent": "",
+   "def": "ff77ae34c8ec6b73",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "Each pair is concrete and could leak in chat. Describing the 'curated' flat leads to a harness propping the bathroom door. 'Wine and the art of conversation' leads to fishing a monocle out of boxed rosé. The age truth, a pharmacy loyalty scheme joined twice, is a joke played straight. The consultant pair is the weakest: chairing grievance hearings is close enough to 'ending deadlocks' that the gap is small.",
+     "evidence": [
+      "It is bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness.",
+      "only checked by the pharmacy loyalty scheme she joined twice.",
+      "once fished her monocle out of it with a cocktail sword."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "All four pairs are specific and each truth could slip into chat. The pharmacy loyalty scheme joined twice is a perfect deflation, and the harness propping the bathroom door undercuts \"very right things\" in one object. The rosé and cocktail sword could surface the moment she types \"wine\". There are only four pairs, and the age gap is a stock joke, which keeps this from a 6.",
+     "evidence": [
+      "only checked by the pharmacy loyalty scheme she joined twice.",
+      "bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Each pair is specific and could leak in text. 'Minimalist, curated' set against a harness propping open the bathroom door is a ready reveal. 'Boardroom deadlocks' set against forty-minute HR calls and a knocked-over ring light exposes class and money. The wine passion undone by three-litre boxed rosé fished with a cocktail sword works the same way. It falls short of a 6 because the age pair is lifted almost word for word from the source and gives the chat little to discover.",
+     "evidence": [
+      "It is bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness.",
+      "She chairs forty-minute HR calls, and last month knocked over her ring light mid-pitch"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "All four pairs are specific and funny, and each truth can leak in text. The pharmacy loyalty scheme she joined twice, the posture harness standing in for 'curated', and the cocktail sword set against 'the art of conversation' are each one slip away from a reveal. The consultant pair is weaker: its truth is a pile of anecdotes rather than one clean gap, which keeps it from a 6.",
+     "evidence": [
+      "only checked by the pharmacy loyalty scheme she joined twice.",
+      "once fished her monocle out of it with a cocktail sword."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "All four pairs are specific and funny, and each truth can leak over text. The age claim collapses into a pharmacy loyalty scheme she joined twice. \"Curated minimalism\" turns out to be a posture harness propping a door open. The art of conversation is a monocle fished out of boxed rosé with a cocktail sword. Her lying register (\"caught the 159 at 21:18\") gives the chat a mechanism to catch her. The consultant pair is weaker, because the ring light belongs to a separate humiliation rather than exposing the job claim directly.",
+     "evidence": [
+      "only checked by the pharmacy loyalty scheme she joined twice",
+      "with the bathroom door propped open by a £240 posture harness",
+      "once fished her monocle out of it with a cocktail sword"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "Each pair is concrete, and each truth could slip out in a chat: the harness propping the door, the ring light falling, the monocle fished out with a cocktail sword. The flat and wine pairs are jokes ready to be found. The age pair is the weakest, a stock lie with a borrowed punchline, and the unpaired Cotswolds-versus-Crewe gap is left lying in the claims.",
+     "evidence": [
+      "Her flat is \"minimalist, curated, very few but very right things.\"",
+      "the bathroom door propped open by a £240 posture harness.",
+      "once fished her monocle out of it with a cocktail sword."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "Most pairs are specific and can leak in text. A boxed-rosé typo or a monocle fished out with a cocktail sword would expose the wine claim. A harness holding the door open would expose \"very right things.\" The ring light would expose the consultant claim. The age pair is the weakest, and the \"Cotswolds village\" claim has no paired truth even though Crewe sits right there in her life.",
+     "evidence": [
+      "once fished her monocle out of it with a cocktail sword",
+      "with the bathroom door propped open by a £240 posture harness",
+      "only checked by the pharmacy loyalty scheme she joined twice"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "All four pairs are specific and each truth can leak in a chat. The harness holding the door open is a reveal waiting to be found. The pharmacy loyalty scheme she joined twice is a joke at her own expense and sharply observed. The consultant truth is muddy: grievance hearings in Holborn become 'HR calls' with a 'pitch'. The Cotswolds claim has no truth beside it, which keeps this from a 6.",
+     "evidence": [
+      "only checked by the pharmacy loyalty scheme she joined twice",
+      "with the bathroom door propped open by a £240 posture harness",
+      "once fished her monocle out of it with a cocktail sword"
+     ]
+    }
+   ]
+  },
+  "profile.logic": {
+   "score": 5,
+   "why": "All eight readers scored 5. Larry David, as the lens on this dimension, stated the rule as 'if everything has a time and an end, nobody can leave me by surprise'. He traced the escalation from the calendared arguments to the tattoo, and the numbering of her own knee failure shows her digging in when caught. Leonard and Parker held it from 6 because the profile predicts her first move when caught but never shows the second.",
+   "evidence": [
+    "put their Sunday arguments into Google Calendar with end times",
+    "while she numbered why the joint failed.",
+    "hm. 1. Six words in five hours is a verdict. 2. Invite revoked."
+   ],
+   "raise": "Show one failure where her numbered proof meets pushback and she escalates again, for example a match who answers her list and gets a longer list back.",
+   "dissent": "",
+   "def": "bb0f5bbc8dc07548",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "Her rule can be stated as one sentence she would defend: if it has a time and a number, it can't ambush me, and if I name the flaw first, nobody else can. The profile predicts how she digs in when caught out. She numbers the failure of her own knee mid-hookup, spends twelve minutes proving the messy hair was deliberate, and diarised arguments with end times until Marguerite left. A 6 would need the rule turned explicitly on its own failure tonight; Marguerite's line is the closest the profile comes.",
+     "evidence": [
+      "while she numbered why the joint failed.",
+      "Petra put their Sunday arguments into Google Calendar with end times",
+      "spending twelve minutes proving her messy hair was deliberate."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "Her rule is easy to state in words she would accept: \"If I announce it and schedule it first, nobody can surprise me with rejection.\" The profile shows it escalating: the shelf announced within four minutes, the cock warned about before unzipping, arguments given calendar end times, and a timetable tattooed after the breakup. When it fails, you can predict her move, a numbered proof of the failure, and the profile shows it. The kink, a timetable for sex itself, is where the rule turns into need. It falls short of a 6 because the sex is described more than it is shown being used to dodge feeling.",
+     "evidence": [
+      "Petra put their Sunday arguments into Google Calendar with end times",
+      "Yes, four messages in a row. I optimise when bored. Don't take notes."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Her rule can be stated in one sentence she would sign: if I schedule and announce everything first, nobody can surprise me with rejection. The profile shows the escalation step by step. She put arguments in the shared calendar with end times, then had a timetable tattooed after the breakup, and when losing someone she sends a numbered proof of failure. That lets you predict that a caught-out Petra explains with a list and digs in. It falls short of a 6 because the 'lying' mode over-specifies a bus route without showing her doubling down when the lie is caught.",
+     "evidence": [
+      "Petra put their Sunday arguments into Google Calendar with end times",
+      "Petra had a daily schedule tattooed down her forearm on Mare Street",
+      "hm. 1. Six words in five hours is a verdict. 2. Invite revoked."
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "Her rule is easy to state in words she would agree with: if I announce the flaw, the time and the exit first, nobody can surprise me into being rejected. The profile predicts what she does when it fails. She numbers a proof of failure, over-specifies bus routes when lying, and confesses the flaw first when hurt. The want inverts the rule in a sympathetic way, since she wants someone else to hold the schedule. It misses a 6 because the step from the Marguerite breakup to the tattoo is told rather than shown escalating inside a chat.",
+     "evidence": [
+      "Petra put their Sunday arguments into Google Calendar with end times",
+      "hm. 1. Six words in five hours is a verdict. 2. Invite revoked."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "Her rule fits one sentence she would defend in public: \"If everything has a time and an end, nobody can leave me by surprise.\" The profile shows her following it one step too far, then one more. She puts arguments in a shared calendar with end times. When Marguerite leaves over it, she tattoos the schedule onto her arm. When caught out, she reliably numbers the proof: she lists why her knee joint failed while the man asks about an ambulance, and she finishes a term in the wrong city. That is inevitable from the inside. It stops short of a 6 because a few beats, such as the harness and the Cotswolds claim, sit outside the rule.",
+     "evidence": [
+      "put their Sunday arguments into Google Calendar with end times",
+      "had a daily schedule tattooed down her forearm on Mare Street",
+      "while she numbered why the joint failed"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "The rule reads cleanly: name the flaw and fix the time first, and nobody gets to find you wanting. She would defend it, and it predicts what she does when caught. In the Clapham bed with the light on she numbers why the joint failed, and when losing a match she sends a numbered proof. It falls short of 6 because the escalation beyond that one proof isn't laid out, so you can predict her first move but not her second.",
+     "evidence": [
+      "while she numbered why the joint failed.",
+      "hm. 1. Six words in five hours is a verdict. 2. Invite revoked.",
+      "she couldn't be with someone who scheduled being loved"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "The rule can be stated in one sentence she would sign: if I announce it and schedule it first, nobody gets to be startled by me or leave without warning. Her failures are predictable from the rule. Marguerite leaves, so the schedule goes on her arm. A date goes quiet, so she sends a numbered proof. She is embarrassed, so she names the flaw first. It falls short of 6 because some quirks sit outside the rule, such as the Bradshaw reprint correction and the boxed-rosé theories.",
+     "evidence": [
+      "Marguerite left saying she couldn't be with someone who scheduled being loved, Petra had a daily schedule tattooed",
+      "hm. 1. Six words in five hours is a verdict. 2. Invite revoked."
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "Her rule can be written as one sentence she would sign: if I name the flaw and the end time first, nobody can discover it or leave me waiting. The escalation follows from it. She puts arguments in the calendar with end times, Marguerite leaves, and Petra answers by tattooing a schedule on her arm, which is digging deeper exactly as the rule predicts. Caught out, she sends a numbered proof or announces the flaw first. It misses a 6 only because the profile never shows the rule failing in front of her and her logic producing one more step.",
+     "evidence": [
+      "left after Petra put their Sunday arguments into Google Calendar with end times",
+      "had a daily schedule tattooed down her forearm on Mare Street",
+      "Yes, four messages in a row. I optimise when bored. Don't take notes."
+     ]
+    }
+   ]
+  },
+  "profile.creed": {
+   "score": 2,
+   "why": "Saunders, the lens on this dimension, and five others scored 2. No dating-culture belief is named or put in her mouth. 'If they wanted to, they would' or 'vague plans are a red flag' can only be inferred, and her system comes from HR work and her timetabler mother, not from the apps. The contradicting evidence exists in Marguerite's line, but it has no stated creed to push against.",
+   "evidence": [
+    "Whether they keep small time promises",
+    "she couldn't be with someone who scheduled being loved."
+   ],
+   "raise": "Have her quote an app maxim in earnest, such as 'consistency is the green flag' or 'if they wanted to, they'd name a day', in her texts and dealbreaker.",
+   "dissent": "Larry David and Parker scored 3: the inferred 'if they wanted to, they would' standard is clear enough beneath the dealbreaker, and the contradicting evidence is present. The others held that an unstated belief cannot be satire coming out of her mouth.",
+   "def": "a741f63642bb3f6b",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 2,
+     "why": "No belief from dating culture is named. The closest is the implied idea that vague plans are a red flag ('let's do this again' with no day). It sits underneath the dealbreaker but is never voiced as something she learned from the apps and repeats. The contradicting evidence exists, since she cried after a date that went well and was left for scheduling love. With no belief stated, though, nothing she says quotes it.",
+     "evidence": [
+      "putting her back in a Kennington taxi crying into her collar.",
+      "Someone patient, exact, and unstartled by her scale who respects her brain and keeps to the minute promised."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 2,
+     "why": "No dating-culture belief is named or quoted in her voice. You can infer an \"if they wanted to, they would\" or \"consistency is the green flag\" logic behind the 19:45 test and the dealbreaker, but she never states it as app wisdom. Without the stated belief, the contradicting evidence (she schedules love and drove Marguerite off) has nothing to push against, so the satire cannot come out of her mouth.",
+     "evidence": [
+      "Whether they keep small time promises",
+      "she couldn't be with someone who scheduled being loved."
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 2,
+     "why": "No belief from dating culture is named anywhere. Her time-promise test and her horror of 'let's do this again' circle something like 'if they wanted to, they would' or 'vague plans are breadcrumbing', but the profile never puts that creed in her mouth. Her whole system is calendar logic from HR work, not app language. The contradicting evidence half exists, since the taxi date 'went well', but there is no stated belief for it to contradict.",
+     "evidence": [
+      "Whether they keep small time promises",
+      "Saying \"let's do this again\" without naming a day"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 2,
+     "why": "No belief from dating culture is named anywhere. Her fear of vague plans echoes 'if he wanted to, he would' and her reading of reply speed echoes app logic, but the reader has to supply both. Her structure is a personal superstition, not something the apps taught her. Contradicting evidence does exist in Marguerite leaving over scheduled love, but it contradicts a creed the profile never states.",
+     "evidence": [
+      "Six words in five hours is a verdict.",
+      "she couldn't be with someone who scheduled being loved"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 3,
+     "why": "A dating-culture belief can be inferred: \"if they wanted to, they'd name a day,\" or \"vague plans are a red flag.\" Evidence contradicts it: precision is exactly what drove Marguerite out, and what she wants in secret is to lose track of time. The profile never names this as something the apps taught her, though, and never puts it in her mouth as a creed. It reads as a private wound, so the satire does not come from her speech.",
+     "evidence": [
+      "Someone patient, exact, and unstartled by her scale who respects her brain and keeps to the minute promised.",
+      "she couldn't be with someone who scheduled being loved"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 2,
+     "why": "No dating-culture belief is put in her mouth. The dealbreaker gestures at something like \"if they wanted to, they'd name a day,\" but the profile never states it as a creed she quotes. Her structure comes from her own history and her timetabler mother, not from the apps. The taxi date that \"went well\" could have been the contradicting evidence, but it isn't pointed at a stated belief.",
+     "evidence": [
+      "Saying \"let's do this again\" without naming a day",
+      "Someone patient, exact, and unstartled by her scale who respects her brain and keeps to the minute promised."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 2,
+     "why": "No belief from dating culture is named. The closest thing is her small time-promise test, which reads like \"consistency is the green flag\" or \"if he wanted to, he would.\" The profile never puts it in app language or has her quote it. Marguerite's reason for leaving is ready to contradict such a belief, but there is no stated creed for it to contradict.",
+     "evidence": [
+      "Whether they keep small time promises",
+      "keeps to the minute promised"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 3,
+     "why": "There is a dating-culture standard underneath: consistency and kept small promises as the proof of interest, the 'if they wanted to, they would' school. The profile never names it or puts it in her mouth as a belief she holds. The contradicting evidence is there: her own precision is what drove Marguerite out. Without the belief stated, the satire never comes out of her mouth.",
+     "evidence": [
+      "Whether they keep small time promises",
+      "she couldn't be with someone who scheduled being loved"
+     ]
+    }
+   ]
+  },
+  "profile.specific": {
+   "score": 5,
+   "why": "All eight readers scored 5. Coel and Waller-Bridge showed that the rent, the 4 a.m. bakery mixers, the £110 sessions and the muted NatWest alerts place her class and money, and the Bradshaw guides tie her to her mother. Saunders, Leonard and Parker held it from 6 because the 'How they are with people' paragraph drifts into stock images like the block of limestone.",
+   "evidence": [
+    "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+    "budgets by muting NatWest alerts.",
+    "reading the index of cul-de-sacs in bed with her monocle in."
+   ],
+   "raise": "Replace the 'wine bars and boardrooms' and limestone images with a named place and a specific moment.",
+   "dissent": "",
+   "def": "db98767fb36eeb56",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "The detail is dense and nearly all of it says something about her. Rent on Kennington Road above a Portuguese bakery that smells of lard, a £270 waistcoat steamer in an otherwise empty studio, and budgeting by muting NatWest together set the class and the pretence exactly. Pre-2005 Bradshaws tie her to her railway-timetabler mother. A few items are decoration rather than character, such as the St John's Building and the Mare Street tattoo, and the 'how they are with people' paragraph is thinner.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard.",
+      "a £270 waistcoat steamer",
+      "budgets by muting NatWest alerts."
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "Nearly every paragraph carries detail that does work. £1,380 above a Portuguese bakery with 4 a.m. mixers and warm lard pins down her money and her sleep. £110 a session in Holborn and muted NatWest alerts show the gap between the consultant claim and her finances. The 159 at 21:18 shows how she lies. A few items are decoration rather than character (the £270 steamer price, the Victoria Line faults), which keeps this from a 6.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Nearly every paragraph carries detail that does work. The £1,380 studio on Kennington Road sits above a Portuguese bakery whose 4 a.m. mixers smell of lard. She earns £110 a session in Holborn and budgets by muting NatWest alerts. Her mother is a railway timetabler in Crewe. Together these place her class, her money and where the timetable habit came from. It falls short of a 6 because a few details are decoration, like the £650 heels set against her rent, and the claimed 'Cotswolds village' is never reconciled with the Crewe life.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "£110 a session, keeping managers to forty-minute agendas, and budgets by muting NatWest alerts",
+      "A retired railway timetabler who rings Sundays at 18:00 for twelve minutes"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "The concrete detail is dense, and it characterises her rather than decorating the page. The bakery mixers at 4 a.m., the £270 steamer next to the £1,380 rent, the £110 sessions and the muted NatWest alerts all say something about her money and her pride. The Bradshaw guides and the A-Z cul-de-sac index say something about her taste. The 'How they are with people' section slips into generic settings ('wine bars and boardrooms'), which keeps it from a 6.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "reading the index of cul-de-sacs in bed with her monocle in."
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "Almost every paragraph carries detail that characterises her. The £1,380 studio over a Portuguese bakery smells of lard at 4 a.m. She earns £110 a session in Holborn and budgets by muting NatWest alerts. The £270 steamer sits in an otherwise bare room. She reads Bradshaw guides in bed with the monocle in. These place her class, her money and the gap between the two. \"How they are with people\" is thinner and leans on the stock image of a block of limestone, so it is not every paragraph.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "budgets by muting NatWest alerts"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "The detail is dense and does work. The £1,380 studio over a bakery whose mixers thud at 4 a.m., the muted NatWest alerts, £110 a session in Holborn, the 159 at 21:18 and the boxed rosé all place her money and her pretensions exactly. It misses 6 in the 'How they are with people' paragraph, which leans on images like \"a block of limestone\", and in a few explanatory phrases where a detail would do the job.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard.",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "budgets by muting NatWest alerts."
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "The detail is dense and tells you about her: £1,380 on Kennington Road above bakery mixers that smell of lard, the £110 session, muted NatWest alerts, the Bradshaw guides, and the Mare Street tattoo all mark class and money. A few lines go generic. \"Receptionists, night-bus drivers, and terrified temps\" and \"heavily built\" are filler beside the rest.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "budgets by muting NatWest alerts",
+      "reading the index of cul-de-sacs in bed with her monocle in"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "Detail is dense and says something about money and class. A £1,380 studio over a bakery whose mixers thud at 4 a.m. and smell of warm lard. £110 a session. Budgeting by muting NatWest alerts. A £270 steamer in an otherwise empty room. The 'How they are with people' paragraph drifts into general statement, and the 'Victoria Line signalling faults' detail is decorative.",
+     "evidence": [
+      "above a Portuguese bakery whose mixers thud at 4 a.m. and smell of warm lard",
+      "budgets by muting NatWest alerts",
+      "a £270 waistcoat steamer"
+     ]
+    }
+   ]
+  },
+  "profile.stock": {
+   "score": 3,
+   "why": "Seven of eight readers scored 3. Leonard and Saunders made the point that decided it: two load-bearing elements are shared cast furniture, not just peripheral ones. The posture harness doing a menial household job also appears in Reuben and Zyx, and the body announced 'within four minutes of undressing' is almost word for word in Sable. Armstrong & Bain, Waller-Bridge and Pinter add the neighbour holding a parcel at arm's length, boxed wine at the counter and the 3 a.m. ex-adjacent Instagram scroll, so the profile has several stock elements and central ones, which the line puts at 3. Her own inventions are fresh (Bradshaw guides, the A-Z cul-de-sac index, the railway-timetabler mother, Victoria Line signalling faults), but they sit beside the shared furniture rather than replacing it.",
+   "evidence": [
+    "a £240 posture harness propping open the bathroom door",
+    "a soft shelf below her navel she announces within four minutes of undressing",
+    "returned a parcel at arm's length asking if Petra was \"expecting something time-sensitive,\""
+   ],
+   "raise": "Replace the harness doorstop and the four-minute announcement with props and timings only she would have, such as an A-Z wedging the door or the shelf announced as a numbered agenda item.",
+   "dissent": "Parker scored 4, judging the shared items peripheral and owned by her drawer; the panel held that the harness and the announcement are central, which the line excludes from a 4.",
+   "def": "81933a72e1cf3605",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 3,
+     "why": "Brick's own invented spine is fresh and specific: the Crewe railway-timetabler mother, the Bradshaw and A-Z habit, the grievance-hearing job, and the shoe-shop 'barge' line. But several central props recur across the cast. The posture harness holding something open also appears in Reuben (a posture clip on a coffee bag) and Zyx (an unboxed harness). Boxed wine at the counter mirrors Gerald's boxed Pinot Grigio. Neighbours handing back embarrassing deliveries appear in Reuben and Zyx, and Sable 'announces it within four minutes of undressing' in almost the same words.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "returned a parcel at arm's length asking if Petra was \"expecting something time-sensitive,\""
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 3,
+     "why": "Petra's own spine is fresh. The railway-timetabler mother who rings for twelve minutes, the A-Z cul-de-sac index read in bed with the monocle, and reciting Victoria Line signalling faults when someone is gentle are not things I have read before. But a central cluster repeats across the cast: the posture harness used as a household prop (Reuben's clip, Zyx's harness), the body announced 'within four minutes of undressing' (Sable, word for word), the knee giving out (Reuben), the ex's relative's Instagram at 3 a.m. (Sable, Velvet), and the kind man who leaves food (Graham's KitKat against Ken's bacon roll). Several of these come from the game file, but the profile leaves them unaltered, so they read as the cast's shared furniture rather than hers.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "leaves a KitKat on her folder when union reps shout"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 3,
+     "why": "Brick's own spine is fresh: the Bradshaw guides, the A-Z cul-de-sac index, the HR grievance chairing, the railway-timetabler mother and the Victoria Line signalling faults are hers alone. Across the cast, though, several of her motifs come back. The posture harness used as a doorstop reappears as Reuben's posture clip and Zyx's posture harness. A knee giving out shows up in Reuben too. Sable has the same 'announces within four minutes of undressing' shape, and the mirror-rehearsed smile, ring light and 3 a.m. googling recur in others. That makes several repeated elements, which puts it under the line.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "her knee went out so loudly he switched on the big light"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 3,
+     "why": "Some material belongs only to her: the Bradshaw guides, reading the A-Z index of cul-de-sacs in bed, the mother who was a railway timetabler and posts XXL gilets 'for the shoulders', and Graham's KitKat. Against that, several shapes are shared with the rest of the cast. The posture harness reappears in Reuben's posture clip and Zyx's posture harness. 'Announces within four minutes of undressing' is repeated almost word for word in Sable. The neighbour holding something at arm's length matches Reuben's Nadia. Being 'fiercely kind' to staff and trembling hands matches Velvet, and the guard-down 'one clean sentence' is a template every profile uses. The kind-to-small-people shape and the guard-down template are central to who she is, which puts this below the line.",
+     "evidence": [
+      "With receptionists, night-bus drivers, and terrified temps in her hearings, she is fiercely kind, noticing trembling hands",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "a £240 posture harness propping open the bathroom door"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 3,
+     "why": "Her own spine is specific: the calendar arguments with end times, the timetable tattoo, the cocktail sword and the 1998 Bradshaw correction all follow one rule, that structure makes the future safe. But several of her signature beats reappear across the cast. Reuben, Zyx and Brick all own a posture harness or clip propping something up. Sable also 'announces it within four minutes of undressing'. Reuben's knee also gives out. Ring lights, boxed wine at night and 3 a.m. googling recur too, so a reader of the batch has met her shelf and her harness before she arrives.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "put their Sunday arguments into Google Calendar with end times"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 3,
+     "why": "Several elements repeat across the cast, and some of them are central. The posture harness also turns up in Reuben's flat and in Zyx's. The neighbour handling a misdelivered item recurs in Reuben, Zyx and others. Wine as the evening's crutch is in nearly every profile, and the line about announcing her body within four minutes of undressing appears almost word for word in Sable. The specific inventions are hers alone (the bakery mixers, Eileen the railway timetabler, Graham's KitKat), but the harness and the four-minute announcement are load-bearing, which puts this below the line.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "pour three-litre boxed rosé at the counter"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 3,
+     "why": "The profile's own additions are fresh and tied to her. Bradshaw guides, A-Z cul-de-sac indexes, a railway-timetabler mother in Crewe and Victoria Line signalling faults recited to the ceiling are all new. But a central cluster is shared across the cast: the posture harness doing a menial job (Reuben, Zyx), the neighbour holding a parcel at arm's length (Reuben's Nadia), the 3 a.m. ex-adjacent Instagram scroll (Sable, Velvet), boxed wine at the counter (Gerald, Sable), and \"within four minutes of undressing,\" word for word in Sable. Graham's KitKat is also the stock 'one good person in their life' slot that every cast profile fills.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "a soft shelf below her navel she announces within four minutes of undressing",
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "The inventions that belong only to this profile are fresh: a railway-timetabler mother who posts XXL gilets \"for the shoulders\", A-Z indexes of cul-de-sacs read in bed, and Victoria Line signalling faults recited when someone is gentle. The stock is peripheral but present: a muted banking app and 3 a.m. stalking of an ex-adjacent Instagram both recur across the cast (Velvet's muted app, Sable's and Velvet's ex-scrolling). The posture harness and the \"within four minutes of undressing\" announcement also show up in Zyx, Reuben and Sable. They are hers by the drawer, but a reader of the batch has seen them, and that keeps this from a 5.",
+     "evidence": [
+      "budgets by muting NatWest alerts",
+      "still checks Marguerite's sister's public Instagram at 3 a.m.",
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened"
+     ]
+    }
+   ]
+  },
+  "profile.plausible": {
+   "score": 4,
+   "why": "Six readers scored 4 and Leonard and Pinter scored 5. Every reader flagged the same gap: £110 a session is never given a monthly count, so the £1,380 rent, the £650 heels and the £270 steamer are not squared. Saunders and Larry David weighed this most heavily, since a London reader would do that sum. Smaller snags noted by Coel, Waller-Bridge and Parker include leaving with A-levels at seventeen, 'grievance hearings' drifting into 'forty-minute HR calls', and a sofa in a room said to hold only a bed. The places and dates hold, and the wrong-city night class is a stretch played as a joke, so this clears the line but stops short of 5.",
+   "evidence": [
+    "She chairs freelance HR grievance hearings in Holborn for £110 a session",
+    "paying £1,380 a month for a studio on Kennington Road in Lambeth",
+    "budgets by muting NatWest alerts"
+   ],
+   "raise": "State how many hearings she chairs a month, so the income visibly covers the rent and leaves her short for the heels.",
+   "dissent": "Leonard and Pinter scored 5, treating the unstated income as a single small gap; the panel held that it is one a London reader would catch.",
+   "def": "a6a960fcea9e361b",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "Most numbers hold. A £1,380 Kennington Road studio is right for 2026, and £110 a session makes the muted NatWest alerts make sense. The other places are real London addresses. Two small wobbles keep it from a 5. The ages imply a 1987 birth, which makes her 38 or 39 in 2026. And she leaves Crewe at seventeen for Chester, yet the 2009 entry still says 'after leaving home.' The Salford wrong-city night class is a stretch, but it is played as the joke it is meant to be.",
+     "evidence": [
+      "paying £1,380 a month for a studio on Kennington Road in Lambeth",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "After leaving home, she arrived ten minutes early every Tuesday at St John's Building in Salford"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "Kennington Road above a bakery at £1,380 for a studio checks out. The Northern Line and Overground references fit the geography, and the timeline ages line up with a 1987 birth. The stretches are small. Her income is never squared with the rent: £110 a session needs roughly twenty-five sessions a month, and that is left unstated. 'Left with two A-levels' at seventeen is a year early for a London-literate reader. Neither breaks the profile, but they keep it from a 5.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "Age seventeen, 2004... she left with two A-levels",
+      "paying £1,380 a month for a studio on Kennington Road"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "The dates all check: age eleven in 1998 gives thirty-eight in 2026, and the 2004, 2009, 2022 and 2024 markers line up. £1,380 for a Kennington Road studio over a bakery is right, and Mare Street and Aldwych are real places used correctly. The weak points are small. £110 a session for freelance grievance chairing is low, and the profile never says how many sessions cover the rent. 'Pre-2005 Bradshaw guides' is odd when Bradshaw stopped in 1961. Leaving at seventeen 'with two A-levels' is a year early. None of this breaks the profile, but together they keep it from a 5.",
+     "evidence": [
+      "paying £1,380 a month for a studio on Kennington Road in Lambeth",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "She loves pre-2005 Bradshaw railway guides"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "The places and dates hold together. A Kennington Road studio at £1,380 is right. Crewe to Chester, Salford, Mare Street, Aldwych and Holborn are all real and sensible. The 1998 to 2026 timeline works if her birthday falls late in the year. The weak point is money: £110 a session never gets a monthly volume, so a London reader will wonder how she pays £1,380 rent plus £650 heels and a £270 steamer. Muting NatWest alerts gestures at the strain but leaves the figure blank, which is why this sits at 4 rather than 5.",
+     "evidence": [
+      "She chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "paying £1,380 a month for a studio on Kennington Road",
+      "budgets by muting NatWest alerts"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 4,
+     "why": "The places and dates hold together. A Kennington Road studio at £1,380 is plausible, Crewe to a Chester department store is a real commute, a retired railway timetabler mother in Crewe is exactly right, and the 1998 to 2024 ages line up with a late-1987 birth. The one gap a London reader would notice is money. At £110 a session she needs about thirteen hearings a month just for rent, and the profile never says how many she chairs. The £650 heels and the £270 steamer are covered only by 'muting NatWest alerts', which is played as a joke but leaves the sums open.",
+     "evidence": [
+      "paying £1,380 a month for a studio on Kennington Road",
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "budgets by muting NatWest alerts"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "The numbers mostly hold. A £1,380 Kennington Road studio is right for Lambeth. The dates line up with a 1987 birth. Crewe, Chester, Mare Street, Holborn and Clapham are all real and sensible. The one gap is money: £110 a session never gets a count, so nothing covers the rent, the £650 heels and the £270 steamer, and £110 is low for a freelance hearing chair. 'Grievance hearings' and 'forty-minute HR calls' also drift a little. The wrong-city night class is a stretch, but it is played as a joke.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "paying £1,380 a month for a studio on Kennington Road"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "The places and ages hold up. Kennington Road studio at £1,380, a Portuguese bakery in that corner of Lambeth, a Mare Street tattoo, a Crewe railway mother, and a timeline from 1998 to 2026 that lands at thirty-eight. The Salford night-class mistake is a stretch played as a joke. What keeps it off 6: £110 a session never adds up to £1,380 rent plus £650 heels unless she sits about fifteen hearings a month, which is never stated. 'Grievance hearings' also drifts into 'forty-minute HR calls' between sections.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "paying £1,380 a month for a studio on Kennington Road",
+      "She chairs forty-minute HR calls"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "A Kennington Road studio over a bakery at £1,380 is right for Lambeth. The 1998–2024 timeline holds for someone of thirty-eight or thirty-nine. The fake Cotswolds claim against a Crewe upbringing is a deliberate lie, not an error. The income is the soft spot: at £110 a session she needs well over thirty hearings a month to clear rent, and the profile never says how many she chairs. There is also a sofa she sits on all evening in a room described as holding only a bed, a steamer and a harness. Neither is glaring, but a careful reader trips on both, which keeps this from a 5.",
+     "evidence": [
+      "chairs freelance HR grievance hearings in Holborn for £110 a session",
+      "holding a bed, a £270 waistcoat steamer, a £240 posture harness",
+      "on the sofa in a towel since four"
+     ]
+    }
+   ]
+  },
+  "profile.filth": {
+   "score": 5,
+   "why": "The panel was unanimous at 5. Armstrong & Bain and Waller-Bridge showed that every sexual detail traces to her body, drawer or history. The timed-sequence kink grows out of the timetable tattoo and the calendared arguments, and the Clapham knee turns into a numbered fault report. Larry David and Coel singled out the 22:00/22:15 line as funny and true to her from the inside. It misses 6 for the reason Pinter and Parker gave: the cock is inventoried rather than put to use, and the 'navigational joke' is described but never written.",
+   "evidence": [
+    "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+    "while she numbered why the joint failed",
+    "She warns dates before unzipping—usually with a navigational joke"
+   ],
+   "raise": "Write out the actual navigational joke she makes before unzipping, so the curve and veins appear in a line a director can use.",
+   "dissent": "",
+   "def": "6a879b5e8af5b7b3",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "Nearly every sexual detail is hers. The timed-sequence kink grows straight out of a mother who timetabled railways and a forearm tattooed with a schedule. Her horny register turns that kink into a demand with clock times. The Clapham knee, with the big light on and her numbering the reasons the joint failed, is humiliation played completely straight. It falls short of a 6 because the body brief (freckles, veins, the hang) barely reaches the bedroom beyond 'a navigational joke.' The material is also more logistical than filthy.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "he switched on the big light to ask about an ambulance while she numbered why the joint failed",
+      "stay talking about their commute or their sister's kitchen renovation until she loses track of time"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "Every sexual detail is traceable to her body, her drawer or her history. The right curve becomes the navigational warning, and the kink is a timetable kept to the minute. The knee goes in Clapham while she 'numbered why the joint failed'. The aftercare wish is a boring commute talk until she loses track of time. That is sex that tells you exactly who she is: the timetable is the armour, and losing time is the armour slipping. It stops short of a 6 because it is mostly inventory and announcement. We never get a filthy, specific beat of what her scale and her schedule actually do to each other in bed.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "she numbered why the joint failed",
+      "stay talking about their commute or their sister's kitchen renovation until she loses track of time"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "Every sexual detail traces back to her. The right curve, veins and freckles come from the body file. The timetabled kink and the boring post-sex talk come from the drawer. The knee failure comes from her history. The horny text joins scale to schedule in a way only she could: 'Tell me what you're doing to me at 22:00 and 22:15, and keep to it' is funny and also exposes the need underneath. It misses a 6 because the 'navigational joke' is described rather than written, so a director gets no line to use.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "be told what will happen in bed in order with times attached",
+      "while she numbered why the joint failed"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "Almost every sexual detail comes from her body, her drawer or her history. The shelf she announces before anyone can find it, the rightward curve warned about with a navigational joke, and the knee in Clapham all trace back to her. The kink, being told what will happen in order with times attached, turns her timetable into something she desires. The horny line '22:00 and 22:15, and keep to it' could only be hers and is funny. It stops short of 6 because the navigational joke is described rather than quoted, and the veins and scale backstory (cup holders, the startled date) are dropped.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "he switched on the big light to ask about an ambulance while she numbered why the joint failed",
+      "warns dates before unzipping—usually with a navigational joke"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "Every sexual detail is hers:\n- the timetable kink is the tattoo logic carried into bed;\n- the knee failure becomes a numbered fault report under the big light;\n- the horny register demands minute-by-minute promises;\n- the aftercare wish is to be bored past the point of keeping time.\nThe rule is followed one step too far and stays logical from the inside, which is why it is funny. What keeps it from a 6 is that the cock itself, curved, veined and freckled, is catalogued but never put to work in a specific scene beyond 'usually with a navigational joke'.",
+     "evidence": [
+      "she numbered why the joint failed",
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "usually with a navigational joke"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "Nearly every sexual detail comes from her body, her drawer or her history. The right curve warned with a navigational joke, the timed-instructions kink, the knee going out and her numbering why the joint failed are all hers. The horny line turns the kink into talk only she would type. What keeps it from a 6 is the body list itself ('massive, thick-veined, freckled cock') and the freckles left unused, because those are stats read off the sheet rather than played.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "she numbered why the joint failed",
+      "warns dates before unzipping—usually with a navigational joke"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "Every sexual detail is hers. The kink of being told 'in order with times attached' grows straight out of the tattooed timetable and the Calendar arguments. The horny text fuses girth with a 22:00/22:15 demand, and the Clapham knee ends with her 'numbering why the joint failed', which is funny and in character. It stops short of 6 because the body itself is listed rather than put to use: 'thick-veined, freckled… hangs low' is an inventory, and none of it plays in a scene the way the knee does.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "she numbered why the joint failed",
+      "warns dates before unzipping—usually with a navigational joke"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "Every sexual detail traces to her body or her drawer. The right curve is turned into a navigational warning. The shelf announcement is a pre-emptive strike. The kink is a bedroom timetable, the aftercare is someone else's boring commute, and the knee-pop mishap gets a numbered failure analysis. The horny text sample is the best line, demanding that seduction run to schedule. It falls short of a 6 because the 'navigational joke' is only described, never written, and the body paragraph reads like an inventory of veins, freckles and hang rather than material that is funny on its own.",
+     "evidence": [
+      "Tell me what you're doing to me at 22:00 and 22:15, and keep to it.",
+      "she numbered why the joint failed",
+      "usually with a navigational joke"
+     ]
+    }
+   ]
+  },
+  "profile.humanity": {
+   "score": 5,
+   "why": "The panel was unanimous at 5. Saunders and Waller-Bridge showed that the contempt lands on behaviour: calendared arguments, the twelve-minute hair proof, the over-specified bus lies. Her dignity is kept in concrete places, such as the water slid across to temps, the boys' lace-ups, 'though she finished the term', and the signalling faults recited to the ceiling. It misses 6 because, as Leonard and Coel noted, the stacked pratfalls tip toward making her the butt. Pinter added that the narrator tells us her worth ('fiercely kind') where the actions would have done it alone.",
+   "evidence": [
+    "noticing trembling hands under the desk and sliding water across without looking",
+    "Petra walked to Monday assembly in boys' lace-ups",
+    "she recites Victoria Line signalling faults to the ceiling"
+   ],
+   "raise": "Cut one or two of the stacked mishaps and drop 'fiercely kind', letting the water and the KitKat carry it.",
+   "dissent": "",
+   "def": "13434ea727e1f291",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 5,
+     "why": "The contempt lands on the scheduling, the lying about bus routes, and the calendared arguments. The person keeps real dignity. She slides water to terrified temps 'without looking.' Her mother loves her sideways by posting XXL gilets 'for the shoulders.' When someone is gentle she recites signalling faults to the ceiling instead of explaining herself. It stops short of a 6 because a few humiliations are stacked for volume rather than aimed, such as fishing the monocle out of rosé with a cocktail sword.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "posts men's XXL gilets \"for the shoulders\" that Petra donates unopened",
+      "her thumb touches her silver tooth clip and she recites Victoria Line signalling faults to the ceiling"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 5,
+     "why": "The jokes land on behaviour: calendared arguments, a forearm timetable tattooed the week Marguerite left, and twelve minutes proving her hair was deliberate. The person stays whole. She slides water to trembling temps without looking, she is brilliant at finding the lying paragraph in a bundle, and the boys' lace-ups origin explains her without pleading. The taxi-crying dealbreaker announces its sadness a little, which keeps this from a 6.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "Petra walked to Monday assembly in boys' lace-ups",
+      "putting her back in a Kennington taxi crying into her collar"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 5,
+     "why": "The contempt lands on behaviour: putting arguments into Google Calendar with end times, proving a ring-light mess was deliberate, over-specifying the 159 when she never left the sofa. The person is protected. She is fiercely kind to temps, sliding water 'without looking'. Graham's KitKat is a real tenderness. The taxi cry over 'let's do this again' is played straight. The timeline does read close to a list of humiliations (shoe shop, wrong city, stiletto, knee), which keeps it short of fond-and-merciless all through, though 'though she finished the term' gives one of them back its dignity.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "she couldn't be with someone who scheduled being loved",
+      "discovering in week four her night class was in another city, though she finished the term"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 5,
+     "why": "The jokes target what she does, not who she is: the Sunday arguments in Google Calendar with end times, the twelve-minute hair proof, fishing the monocle out with the cocktail sword. Underneath, the profile keeps her dignity and shows what the system costs her. The 'barge' shoe shop leads to her walking into assembly in boys' lace-ups. She finished the term in the wrong city. When someone is gentle she recites Victoria Line faults to the ceiling. It falls short of 6 because the claims-and-truth list stacks small humiliations mechanically, like the pharmacy loyalty scheme 'joined twice', without the cost those lies carry for her.",
+     "evidence": [
+      "Petra walked to Monday assembly in boys' lace-ups",
+      "though she finished the term",
+      "her thumb touches her silver tooth clip and she recites Victoria Line signalling faults to the ceiling"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "The profile is merciless about the behaviour: scheduling arguments, inking a timetable the week she was left, and spending twelve minutes proving messy hair was deliberate. It keeps her dignity in specific places. She is fiercely kind to terrified temps, and Graham's KitKat shows someone is good to her. Her tell, the tooth clip and the Victoria Line faults recited to the ceiling, makes her fragile rather than pathetic. It stops short of a 6 because the 3 a.m. ex's-sister Instagram and the taxi crying are familiar wounds rather than her own.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "her thumb touches her silver tooth clip and she recites Victoria Line signalling faults to the ceiling"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 5,
+     "why": "The jokes hit the behaviour: the scheduling, the over-specified lies, the pre-emptive announcements. She keeps real dignity in the hearings and in what she does when someone is gentle. The mishaps pile up, though (the heel, the knee, the monocle in the rosé, the ring light), and the pratfall count tips toward her as the butt. That pile-up is what holds it from a 6.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "her thumb touches her silver tooth clip and she recites Victoria Line signalling faults to the ceiling"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 5,
+     "why": "The contempt lands on behaviour: putting arguments into Google Calendar with end times, the tattoo, the rosé. The person keeps her dignity in quiet places. She slides water to trembling temps 'without looking', she finished the term in the wrong city, and when met with gentleness she deflects into signalling faults rather than speaking a feeling. That last detail is the profile's best unspoken thing. What keeps it from 6 is the narrator telling us her worth ('fiercely kind', 'genuinely good for her') where the water and the KitKat would have done it alone.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "she recites Victoria Line signalling faults to the ceiling",
+      "though she finished the term"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 5,
+     "why": "The contempt lands on behaviour: scheduling Sunday arguments with end times, tattooing a timetable after being left for scheduling love, and proving deliberate hair for twelve minutes. Her dignity is placed carefully in the quiet water slid to trembling temps and in Graham's KitKat. The taxi crying is set down without the writer weeping along, and the cruelest line, the shoe-shop assistant's 'barge', is given to the world rather than to the narrator. It misses a 6 because the dealbreaker line tips slightly toward an agreed-with self-pity.",
+     "evidence": [
+      "noticing trembling hands under the desk and sliding water across without looking",
+      "couldn't be with someone who scheduled being loved",
+      "putting her back in a Kennington taxi crying into her collar"
+     ]
+    }
+   ]
+  },
+  "profile.efficiency": {
+   "score": 4,
+   "why": "Seven readers scored 4. Parker, Saunders and Pinter counted the repetition: the harness appears three times, the rosé and cocktail sword twice, and the shelf and curve announcements twice. The claims block largely restates 'Their life now'. Most sentences still carry a fact or a behaviour, and the texting section gives a usable sample line for every state, which keeps it above the line. Leonard also flagged summary phrases like 'genuinely good for her'.",
+   "evidence": [
+    "with the bathroom door propped open by a £240 posture harness",
+    "leaves a KitKat on her folder when union reps shout; genuinely good for her"
+   ],
+   "raise": "Make each claim/truth entry add a new fact instead of re-serving the harness, the rosé and the bare flat from earlier sections.",
+   "dissent": "Larry David scored 5, counting the repetition as minor; the panel held that the triple harness and the restated claims block are noticeable padding.",
+   "def": "63ca3549efdaf667",
+   "material": "c0969a19503cecea",
+   "panel": "7ad07c768dbdb4ae",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ],
+   "readers": [
+    {
+     "id": "armstrong-bain",
+     "name": "Armstrong & Bain",
+     "score": 4,
+     "why": "Most sentences carry a fact or a behaviour, and the texting section gives a director usable sample lines for every state. Facts are repeated across sections, though. The harness is described three times and Marguerite's reason for leaving twice. The 'claims vs truth' block largely restates 'Their life now.' It stays above the line because the repetition is short and nothing is pure summary.",
+     "evidence": [
+      "It is bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness.",
+      "drinks three-litre boxed rosé at the counter and once fished her monocle out of it with a cocktail sword"
+     ]
+    },
+    {
+     "id": "waller-bridge",
+     "name": "Waller-Bridge",
+     "score": 4,
+     "why": "Most sentences deliver a fact or a usable behaviour, and the texting section gives a director ready lines. There is noticeable repetition, though. The harness appears three times, the boxed rosé and cocktail sword twice, and the claims/truth block largely re-serves facts already given in 'Their life now'. Nothing is pure padding, which keeps it above the line.",
+     "evidence": [
+      "It is bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness.",
+      "She drinks three-litre boxed rosé at the counter and once fished her monocle out of it"
+     ]
+    },
+    {
+     "id": "coel",
+     "name": "Coel",
+     "score": 4,
+     "why": "Most sentences carry a price, a place or a behaviour a director can use, and the texting section gives a sample line for every state. There is noticeable doubling, though. The harness, the boxed rosé with the monocle and the ring light each appear twice, in the life section and again under claims. The curve and shelf announcements are repeated between 'Body' and 'How they are with people'. The doubling is clearly there, but most of the document still carries a fact per sentence, which keeps it above the line.",
+     "evidence": [
+      "truth: It is bare after she binned everything Marguerite touched, with the bathroom door propped open by a £240 posture harness.",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive"
+     ]
+    },
+    {
+     "id": "saunders",
+     "name": "Saunders",
+     "score": 4,
+     "why": "Most sentences give a fact or a behaviour a director can use, and the texting section is concrete and quotable. There is repetition across sections, though. The harness appears three times, the rosé and cocktail sword twice, the ring light twice, and the sofa-since-four detail returns in the lying text. 'The people in their life' and 'What they claim' partly restate 'Their life now'. Little of it is padding, which keeps it above the line, but the restatement keeps it from a 5.",
+     "evidence": [
+      "the bathroom door propped open by a £240 posture harness",
+      "She drinks three-litre boxed rosé at the counter and once fished her monocle out of it with a cocktail sword",
+      "Tonight she has been on the sofa in a towel since four"
+     ]
+    },
+    {
+     "id": "david",
+     "name": "Larry David",
+     "score": 5,
+     "why": "Almost every sentence gives a fact, a price or a behaviour. The texting section is especially usable, with a concrete sample line for each state. Some material repeats, though. The boxed rosé appears in 'Their life now', in 'What they claim' and in 'On something'. The harness and the 3 a.m. ex-checking each appear twice. Phrases like 'After leaving home' in item 3 carry nothing.",
+     "evidence": [
+      "standing at nine sharp to pour three-litre boxed rosé at the counter",
+      "She drinks three-litre boxed rosé at the counter"
+     ]
+    },
+    {
+     "id": "leonard",
+     "name": "Leonard",
+     "score": 4,
+     "why": "Most sentences carry a fact or a behaviour, so it clears the line, but the profile repeats itself. The harness, the boxed rosé, the cocktail sword and the shelf announcement each appear two or three times across 'Their life now', 'What they claim', 'Body' and the drawer-derived lines. A few phrases summarise instead of showing, such as 'genuinely good for her' about Graham. The texting section earns its space with concrete samples.",
+     "evidence": [
+      "leaves a KitKat on her folder when union reps shout; genuinely good for her",
+      "once fished her monocle out of it with a cocktail sword"
+     ]
+    },
+    {
+     "id": "pinter",
+     "name": "Pinter",
+     "score": 4,
+     "why": "Most sentences carry a fact or a behaviour, and the texting section is concrete enough for a writer to use directly. But the same material comes round three times. The shelf and the curve announcement appear in 'Body', 'How they are' and the drawer. The flat, the ring light and the rosé are restated in the claim/truth list after 'Their life now'. The dealbreaker repeats the taxi already told. It stays above the line because a director can still find everything quickly and little of it is abstract summary.",
+     "evidence": [
+      "announcing the curve of her cock, the shelf below her navel, and her departure time before drinks arrive",
+      "It is bare after she binned everything Marguerite touched",
+      "putting her back in a Kennington taxi crying into her collar"
+     ]
+    },
+    {
+     "id": "parker",
+     "name": "Parker",
+     "score": 4,
+     "why": "Most sentences carry a fact or a behaviour, and the texting section gives a director usable lines for every situation. The repetition is noticeable, though. The posture harness appears three times (life, neighbour, claims). The shelf and the curve are announced in both the body paragraph and the people paragraph. The bare flat is explained twice. The claims section mostly restates earlier facts instead of adding new lies, which keeps this from a 5.",
+     "evidence": [
+      "a £240 posture harness propping open the bathroom door",
+      "with the bathroom door propped open by a £240 posture harness",
+      "announcing the curve of her cock, the shelf below her navel, and her departure time"
+     ]
+    }
+   ]
+  }
+ },
+ "calls": [
+  {
+   "seconds": 41.1,
+   "cost": 0.2758762,
+   "label": "batch 1 waller-bridge"
+  },
+  {
+   "seconds": 43.5,
+   "cost": 0.28474679999999997,
+   "label": "batch 1 armstrong-bain"
+  },
+  {
+   "seconds": 39.8,
+   "cost": 0.277816,
+   "label": "batch 1 coel"
+  },
+  {
+   "seconds": 51.1,
+   "cost": 0.2989546,
+   "label": "batch 1 saunders"
+  },
+  {
+   "seconds": 42.2,
+   "cost": 0.2820126,
+   "label": "batch 1 leonard"
+  },
+  {
+   "seconds": 48.6,
+   "cost": 0.29084459999999995,
+   "label": "batch 1 david"
+  },
+  {
+   "seconds": 43.9,
+   "cost": 0.28416339999999995,
+   "label": "batch 1 parker"
+  },
+  {
+   "seconds": 50.4,
+   "cost": 0.2977918,
+   "label": "batch 1 pinter"
+  },
+  {
+   "seconds": 38.6,
+   "cost": 0.2770508,
+   "label": "batch 2 armstrong-bain"
+  },
+  {
+   "seconds": 39.5,
+   "cost": 0.2802802,
+   "label": "batch 2 waller-bridge"
+  },
+  {
+   "seconds": 37.0,
+   "cost": 0.280084,
+   "label": "batch 2 coel"
+  },
+  {
+   "seconds": 41.8,
+   "cost": 0.2871706,
+   "label": "batch 2 saunders"
+  },
+  {
+   "seconds": 38.5,
+   "cost": 0.2825366,
+   "label": "batch 2 david"
+  },
+  {
+   "seconds": 36.0,
+   "cost": 0.2779486,
+   "label": "batch 2 leonard"
+  },
+  {
+   "seconds": 41.7,
+   "cost": 0.2894078,
+   "label": "batch 2 pinter"
+  },
+  {
+   "seconds": 43.4,
+   "cost": 0.2868194,
+   "label": "batch 2 parker"
+  },
+  {
+   "seconds": 36.5,
+   "cost": 0.2724082,
+   "label": "batch 3 waller-bridge"
+  },
+  {
+   "seconds": 50.8,
+   "cost": 0.29836680000000004,
+   "label": "batch 3 armstrong-bain"
+  },
+  {
+   "seconds": 45.7,
+   "cost": 0.284708,
+   "label": "batch 3 coel"
+  },
+  {
+   "seconds": 43.4,
+   "cost": 0.2801866,
+   "label": "batch 3 saunders"
+  },
+  {
+   "seconds": 42.3,
+   "cost": 0.2802846,
+   "label": "batch 3 david"
+  },
+  {
+   "seconds": 39.9,
+   "cost": 0.28134380000000003,
+   "label": "batch 3 pinter"
+  },
+  {
+   "seconds": 44.0,
+   "cost": 0.2864846,
+   "label": "batch 3 leonard"
+  },
+  {
+   "seconds": 38.9,
+   "cost": 0.2794314,
+   "label": "batch 3 parker"
+  },
+  {
+   "seconds": 38.8,
+   "cost": 0.27472019999999997,
+   "label": "batch 4 waller-bridge"
+  },
+  {
+   "seconds": 40.1,
+   "cost": 0.27749480000000004,
+   "label": "batch 4 armstrong-bain"
+  },
+  {
+   "seconds": 38.3,
+   "cost": 0.27423200000000003,
+   "label": "batch 4 coel"
+  },
+  {
+   "seconds": 34.0,
+   "cost": 0.2630646,
+   "label": "batch 4 leonard"
+  },
+  {
+   "seconds": 38.1,
+   "cost": 0.2690926,
+   "label": "batch 4 david"
+  },
+  {
+   "seconds": 41.7,
+   "cost": 0.2800706,
+   "label": "batch 4 saunders"
+  },
+  {
+   "seconds": 40.6,
+   "cost": 0.2723754,
+   "label": "batch 4 parker"
+  },
+  {
+   "seconds": 46.4,
+   "cost": 0.2870158,
+   "label": "batch 4 pinter"
+  },
+  {
+   "seconds": 33.9,
+   "cost": 0.3517214,
+   "label": "batch 1 chair"
+  },
+  {
+   "seconds": 27.4,
+   "cost": 0.3526494,
+   "label": "batch 2 chair"
+  },
+  {
+   "seconds": 25.0,
+   "cost": 0.3562614,
+   "label": "batch 3 chair"
+  },
+  {
+   "seconds": 28.8,
+   "cost": 0.3415614,
+   "label": "batch 4 chair"
+  }
+ ],
+ "judge": "panel:claude:opus",
+ "scored_utc": "2026-11-21T19:17:49Z",
+ "repo_commit": "e22d550",
+ "cost": 10.417
+}
