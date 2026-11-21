@@ -448,3 +448,26 @@ the names hidden, the chat without its last turn, the profile alone) and the jud
 reader's answer with the truth. Scores are kept until the dimension, the material or the judge
 changes. `docs/tone-lab/scores/index.html` is the explorer: a grid per kind of work, the plans'
 trend across versions, and every score's reasoning.
+
+### The focus, and the dashboard that stays open
+
+Not every dimension matters equally for the next step. `tools/tonelab/focus.yaml` names the
+current experiment (two characters written from Pinder's brief alone, a profile each and one
+plan for the pair, chats off until both pass), puts each profile and plan dimension in a tier
+with its reason (critical drives the generator and the gate, watch is scored and shown, off is
+not scored here), and sets the gate: every critical dimension at 4 or more. Quote `"off"`: bare,
+YAML reads it as false.
+
+`score.py page` writes two pages: `docs/tone-lab/scores/index.html`, the full explorer with every
+score's reasoning and every text (about a megabyte, for a browser), and `focus.html`, the
+experiment's view, with reasoning and text only for its own work and its references and numbers
+for the rest (small enough for the app's file viewer). In both, each column has a read button
+that opens the profile or plan beside the grid, with the quotes behind a selected score marked,
+and a prompt button that shows exactly what was sent to make it: for a v22 profile the
+generator's system prompt, the request and every retry with the problems the check found, as
+`tools/tonelab/profiles/generation.json` recorded them; for a plan the planner's system prompt
+(checked against the hash the run recorded) and the brief.
+
+The focus view is also kept as a private claude.ai page that stays open. `score.py hosted --out
+FILE` writes it without the document shell the host adds; after each scoring run it is rebuilt
+and republished to the same address, and an open copy picks up the new version.

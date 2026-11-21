@@ -94,6 +94,23 @@ tr.gap td, tr.gap th { height: 8px; }
 #panel .def { color: var(--ink-2); font-size: 13px; }
 #panel a { color: var(--accent); }
 .layout.reading { grid-template-columns: minmax(0, 1fr) 600px; }
+.readbtn { border: 1px solid var(--accent); background: none; color: var(--accent); border-radius: 6px; font: inherit; font-size: 11.5px;
+  padding: 1px 7px; cursor: pointer; margin: 2px 4px 2px 0; }
+.readbtn:hover { background: var(--accent); color: var(--surface); }
+.backbtn { display: none; margin-left: 8px; vertical-align: top; }
+@media (max-width: 1100px) { .backbtn { display: inline-block; } }
+.readline { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin: 8px 0 4px; }
+.readline .label { color: var(--muted); font-size: 12.5px; margin-right: 4px; }
+table.m tr.readrow td { text-align: center; padding: 2px 0 6px; color: var(--muted); }
+table.m tr.readrow .readbtn { margin: 1px 0; padding: 1px 5px; display: block; width: 100%; }
+#panel .made details { border-top: 1px solid var(--ring); padding: 8px 0; }
+#panel .made summary { cursor: pointer; font-size: 13.5px; }
+#panel .made summary .wc { color: var(--muted); font-weight: 400; }
+#panel .made .probs { background: var(--page); border-radius: 6px; padding: 6px 10px; margin: 8px 0; font-size: 13px; color: var(--ink-2); }
+#panel .made .probs ul { margin: 4px 0 0; padding-left: 18px; }
+#panel .made pre.prompttext { white-space: pre-wrap; overflow-wrap: anywhere; font: 12.5px/1.5 ui-monospace, "Cascadia Mono", Consolas, monospace;
+  background: var(--page); border-radius: 6px; padding: 10px 12px; margin: 8px 0 0; color: var(--ink); }
+table.m tr.readrow th.dim { color: var(--muted); font-weight: 400; font-size: 12px; }
 @media (max-width: 1100px) { .layout.reading { grid-template-columns: minmax(0, 1fr); } }
 .seg { display: inline-flex; border: 1px solid var(--ring); border-radius: 7px; overflow: hidden; margin-bottom: 10px; }
 .seg button { border: 0; background: none; color: var(--ink-2); font: inherit; font-size: 12.5px; padding: 4px 12px; cursor: pointer; }
@@ -174,8 +191,9 @@ th.refcol .w { color: var(--ink-2); }
   <h1>Tone lab scorecard</h1>
   <p class="sub">Candidate metrics for the profile, the plan and the chat, scored 1 to 6 by a language model. There is no midpoint:
     3 leans fail and 4 leans pass, against the bar each dimension defines. Click any cell for the reasoning and the quotes it rests on;
-    click a column header for everything about one piece of work. For profiles and plans, the panel's second view shows the
-    work itself, with the quotes behind the selected score marked.</p>
+    click a column header for everything about one piece of work. Press <strong>read</strong> under a column to open the
+    profile or plan itself; with a cell selected, the quotes behind its score are marked in the text.
+    Press <strong>prompt</strong> for exactly what was sent to make it.</p>
   <div class="meta" id="meta"></div>
 </header>
 <nav id="tabs" role="tablist"></nav>
@@ -212,7 +230,7 @@ const byFam = f => dims.filter(d => d.family === f);
 const results = f => DATA.results.filter(r => r.kind === f).sort((a, b) =>
   f === "profile" ? (a.id.split("-")[1] === b.id.split("-")[1] ? a.order - b.order : a.id < b.id ? 1 : -1)
                   : (a.order - b.order) || (a.id < b.id ? -1 : 1));
-const srcHref = s => !s ? null : s.startsWith("docs/tone-lab/") ? "../" + s.slice("docs/tone-lab/".length) : "../../../" + s;
+const srcHref = s => !s || DATA.hosted ? null : s.startsWith("docs/tone-lab/") ? "../" + s.slice("docs/tone-lab/".length) : "../../../" + s;
 const mean = xs => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
 
 function meta() {
@@ -244,6 +262,13 @@ function columns(f) {
   return [...planned, ...refs, ...rest];
 }
 const findCol = id => DATA.results.find(x => x.id === id) || (FOC?.planned || []).map(p => ({ ...p, planned: true, scores: {} })).find(p => p.id === id);
+// Open a piece of work as text in the side panel, on its own tab.
+const openText = (id, f) => { if (f) state.tab = f; state.sel = { r: id }; state.view = "text"; render(); };
+const readBtn = (r, label) => $("button", { class: "readbtn", text: label, title: "Read " + r.label, onclick: e => { e.stopPropagation(); openText(r.id, r.kind); } });
+const promptBtn = r => $("button", { class: "readbtn", text: "prompt", title: "How " + r.label + " was made",
+  onclick: e => { e.stopPropagation(); state.tab = r.kind; state.sel = { r: r.id }; state.view = "prompt"; render(); } });
+const SLIM_NOTE = "This page carries the reasoning and the text only for the work in the experiment. The full explorer, "
+  + (DATA.hosted ? "docs/tone-lab/scores/index.html in the repository" : "index.html in the same folder") + ", has them for every version.";
 
 function focusPage() {
   const w = $("div");
@@ -259,6 +284,13 @@ function focusPage() {
     const ds = byFam(f).filter(d => tierOf(d.id));
     const box = $("div", { class: "card focus-fam" }, $("h3", { text: fam.title }),
       $("p", { class: "def", text: TIERS.map(t => `${ds.filter(d => tierOf(d.id) === t).length} ${TIER_LABEL[t].toLowerCase()}`).join(" · ") }));
+    const refs = columns(f).filter(r => DATA.texts?.[r.id]);
+    if (refs.length) box.append($("p", { class: "readline" }, $("span", { class: "label", text: "Read the work: " }),
+      ...refs.map(r => readBtn(r, r.label))));
+    const made = columns(f).filter(r => DATA.prompts?.[r.id]);
+    if (made.length) box.append($("p", { class: "readline" }, $("span", { class: "label", text: "How it was made: " }),
+      ...made.map(r => $("button", { class: "readbtn", text: r.label, onclick: e => { e.stopPropagation();
+        state.tab = r.kind; state.sel = { r: r.id }; state.view = "prompt"; render(); } }))));
     for (const t of TIERS) {
       const these = ds.filter(d => tierOf(d.id) === t);
       if (!these.length) continue;
@@ -318,6 +350,11 @@ function matrix(f) {
   }
   t.append($("thead", {}, hr));
   const tb = $("tbody");
+  if (rs.some(r => DATA.texts?.[r.id] || DATA.prompts?.[r.id])) {
+    const tr = $("tr", { class: "readrow" }, $("th", { class: "dim", text: "The work, and how it was made" }));
+    for (const r of rs) tr.append($("td", {}, DATA.texts?.[r.id] ? readBtn(r, "read") : null,
+      DATA.prompts?.[r.id] ? promptBtn(r) : null, r.planned ? document.createTextNode("–") : null));
+    tb.append(tr); }
   const sumRow = (label, fn, fmt) => { const tr = $("tr", { class: "sum" }, $("th", { class: "dim", text: label }));
     for (const r of rs) { const v = r.planned ? null : fn(r); tr.append($("td", { text: v == null ? "–" : fmt(v) })); } tb.append(tr); };
   const vis = new Set(ds.map(d => d.id));
@@ -423,6 +460,8 @@ function panel(f) {
   const p = $("div", { class: "card", id: "panel" });
   const sel = state.sel, r = sel && findCol(sel.r);
   if (!r) { p.append($("p", { class: "empty", text: "Click a cell for the score's reasoning, or a column header for one piece of work." }));
+    const rs = columns(f).filter(x => DATA.texts?.[x.id]);
+    if (rs.length) p.append($("h3", { text: "Read the work" }), $("div", { class: "readline" }, ...rs.map(x => readBtn(x, x.label))));
     return p; }
   const href = srcHref(r.source);
   const tierBox = d => { const t = FOC?.tiers?.[d.id]; if (!t) return null;
@@ -436,10 +475,12 @@ function panel(f) {
     else p.append($("p", { class: "def", text: `Written from the brief, not from a game file, and scored on the ${r.kind}'s critical dimensions. ${FOC.gate}` }));
     return p;
   }
-  const txt = DATA.texts?.[r.id];
-  const seg = txt ? $("div", { class: "seg" }, ...[["scores", "Scores"], ["text", r.kind === "plan" ? "The plan" : "The profile"]].map(([k, l]) =>
+  const txt = DATA.texts?.[r.id], prm = DATA.prompts?.[r.id];
+  const views = [["scores", "Scores"], txt && ["text", r.kind === "plan" ? "The plan" : "The profile"], prm && ["prompt", "How it was made"]].filter(Boolean);
+  const seg = views.length > 1 ? $("div", { class: "seg" }, ...views.map(([k, l]) =>
     $("button", { class: state.view === k ? "on" : "", text: l, onclick: () => { state.view = k; render(); } }))) : null;
   if (txt && state.view === "text") return reader(p, r, txt, seg);
+  if (prm && state.view === "prompt") return madeView(p, r, prm, seg);
   if (seg) p.append(seg);
   if (!sel.d) {
     p.append($("h2", { text: r.label }));
@@ -453,9 +494,10 @@ function panel(f) {
       const s = r.scores[d.id];
       ul.append($("li", { onclick: () => { state.sel = { r: r.id, d: d.id }; render(); } },
         $("span", { class: "s " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
-        $("span", {}, $("span", { class: "n", text: d.name }), $("div", { class: "y", text: s.why }))));
+        $("span", {}, $("span", { class: "n", text: d.name }), $("div", { class: "y", text: s.why || "" }))));
     });
     p.append(ul);
+    if (r.slim) p.append($("p", { class: "def", text: SLIM_NOTE }));
     return p;
   }
   const d = dims.find(x => x.id === sel.d), s = r.scores?.[d.id];
@@ -464,7 +506,8 @@ function panel(f) {
   if (!s) { p.append($("p", { class: "empty", text: "Not scored yet." })); return p; }
   p.append($("div", { class: "head" }, $("span", { class: "big " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
     $("span", { class: "lean", text: s.score == null ? "Not applicable to this material" : DATA.scale[s.score] })));
-  p.append($("h3", { text: "Why" }), $("p", { text: s.why }));
+  if (r.slim) p.append($("p", { class: "def", text: SLIM_NOTE }));
+  else p.append($("h3", { text: "Why" }), $("p", { text: s.why }));
   if (s.evidence?.length) { p.append($("h3", { text: "Rests on" }));
     s.evidence.forEach((q, i) => p.append($("blockquote", {}, document.createTextNode("“" + q + "”"),
       $("span", { class: "chk", text: s.found?.[i] ? "found in the material" : "not found word for word in the material" })))); }
@@ -485,12 +528,35 @@ function reader(p, r, txt, seg) {
   const d = state.sel.d && dims.find(x => x.id === state.sel.d), s = d && r.scores?.[d.id];
   const ranges = marks(txt, s?.evidence || []);
   const sc = s ? ` (${s.score ?? "n/a"})` : "";
-  p.append($("div", { class: "readhead" }, seg, $("h2", { text: r.label }),
+  const back = $("button", { class: "readbtn backbtn", text: "back to the grid",
+    onclick: () => document.querySelector("table.m")?.scrollIntoView({ block: "start" }) });
+  p.append($("div", { class: "readhead" }, seg, back, $("h2", { text: r.label }),
     $("p", { class: "def", text: !d ? "Click a cell in this column to mark the quotes its score rests on."
       : !s ? `“${d.name}” is not scored yet.`
       : ranges.length ? `Marked: the quotes behind “${d.name}”${sc}.`
       : `None of the quotes behind “${d.name}”${sc} are in this text; they come from the brief or a reader probe.` })));
   const body = $("div", { class: "reader" }); body.innerHTML = md(txt, ranges); p.append(body);
+  return p;
+}
+
+// What was sent to make the work: each prompt in order, as sent, with what the check found wrong.
+function madeView(p, r, m, seg) {
+  const back = $("button", { class: "readbtn backbtn", text: "back to the grid",
+    onclick: () => document.querySelector("table.m")?.scrollIntoView({ block: "start" }) });
+  p.append($("div", { class: "readhead" }, seg, back, $("h2", { text: r.label }),
+    $("p", { class: "def", text: [m.model, m.made, m.commit && "commit " + m.commit].filter(Boolean).join(" · ") })));
+  const body = $("div", { class: "made" });
+  body.append($("p", { class: "def", text: `Made with ${m.tool}.` + (m.note ? " " + m.note : "") }));
+  m.steps.forEach((s, i) => {
+    const words = s.text.trim().split(/\s+/).length;
+    const det = $("details", {},
+      $("summary", {}, $("strong", { text: s.label }), $("span", { class: "wc", text: ` · ${words.toLocaleString()} words` })));
+    if (s.problems?.length) det.append($("div", { class: "probs" }, $("strong", { text: "Its answer failed the check:" }),
+      $("ul", {}, ...s.problems.map(x => $("li", { text: x })))));
+    det.append($("pre", { class: "prompttext", text: s.text }));
+    body.append(det);
+  });
+  p.append(body);
   return p;
 }
 
@@ -581,9 +647,10 @@ function render() {
   const left = $("div", {}, $("p", { class: "fam-intro", text: FOC ? FOC_NOTE[f] : FAM_NOTE[f] }));
   if (f === "plan" && (!FOC || state.all)) { const c = trend(f); if (c) left.append(c); }
   left.append($("div", { class: "card" }, controls(), matrix(f)));
-  const pn = panel(f), reading = !!pn.querySelector(".reader");
+  const pn = panel(f), reading = !!pn.querySelector(".reader, .made");
   m.append($("div", { class: "layout" + (reading ? " reading" : "") }, left, pn));
-  if (state.sel && innerWidth <= 1100) pn.scrollIntoView({ block: "start", behavior: "smooth" });
+  // One column on narrow screens: the panel sits under the grid, so bring it into view.
+  if (state.sel && innerWidth <= 1100) requestAnimationFrame(() => pn.scrollIntoView({ block: "start" }));
   if (reading) { const mk = pn.querySelector("mark"); const hd = pn.querySelector(".readhead");
     pn.scrollTop = mk ? Math.max(0, mk.offsetTop - hd.offsetHeight - 60) : 0; }
 }

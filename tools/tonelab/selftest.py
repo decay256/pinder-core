@@ -411,6 +411,22 @@ def check_scorecard():
                   "the explorer embeds the scores")
             check(json.dumps(t["material"]["profile"][:60], ensure_ascii=False)[1:-1] in html,
                   "the explorer carries the profile text, so the work can be read beside its scores")
+            foc = score.yaml.safe_load(score.FOCUS.read_text(encoding="utf-8"))
+            check(all(isinstance(v, dict) and v.get("tier") in ("critical", "watch", "off") for v in foc["tiers"].values())
+                  and set(foc["tiers"]) <= {d["id"] for d in cat["dimensions"]},
+                  "every focus tier is critical, watch or off (a bare off is YAML for false), on a catalogue dimension")
+            lean = (Path(tmp) / "focus.html").read_text(encoding="utf-8")
+            check("/*DATA*/null" not in lean and len(lean.encode()) < len(html.encode()) // 2,
+                  "the focus page is written, and is less than half the size of the full explorer")
+            score.write_hosted(cat, Path(tmp) / "hosted.html")
+            hosted = (Path(tmp) / "hosted.html").read_text(encoding="utf-8")
+            check(hosted.startswith("<title>") and "<head>" not in hosted and "<body>" not in hosted
+                  and '"hosted": true' in hosted,
+                  "the hosted dashboard is the focus page without the document shell the host supplies")
+            made = score.how_made(t)
+            check(made and made["steps"][0]["label"] == "The generator's system prompt"
+                  and json.dumps(made["steps"][1]["text"][:60], ensure_ascii=False)[1:-1] in lean,
+                  "the page shows the prompts that made a profile, as generation.json recorded them")
         finally:
             score.OUT = keep
 

@@ -5,7 +5,7 @@
 # the chat scorecard is off until both reach the gate.
 #
 # tier: critical = drives the generator and the gate; watch = scored and shown, not targeted;
-# off = not scored in this experiment. Every entry says why.
+# off = not scored in this experiment. Every entry says why. Quote "off": bare, YAML reads it as false.
 
 title: Two characters from the brief
 mission: >-
@@ -51,10 +51,10 @@ tiers:
   profile.humanity:    {tier: watch, why: "Already 5 on both; the brief's rule is never cynical about the people."}
   profile.stock:       {tier: watch, why: "With two characters, clichés matter more than overlap; watch them."}
   profile.plausible:   {tier: watch, why: "London facts and money; easy fixes once the rest is right."}
-  profile.distinct:    {tier: off, why: "There is no cast to differ from: we want one pair right first. Two different people is covered by the voice and the plan."}
-  profile.texting_vs_cast: {tier: off, why: "Same reason: with two characters, the voice dimension and the plan's two voices cover it."}
-  profile.fidelity:    {tier: off, why: "The experiment is untied from the game's character files, so there is no file to be faithful to."}
-  profile.efficiency:  {tier: off, why: "Diagnostic; length comes later."}
+  profile.distinct:    {tier: "off", why: "There is no cast to differ from: we want one pair right first. Two different people is covered by the voice and the plan."}
+  profile.texting_vs_cast: {tier: "off", why: "Same reason: with two characters, the voice dimension and the plan's two voices cover it."}
+  profile.fidelity:    {tier: "off", why: "The experiment is untied from the game's character files, so there is no file to be faithful to."}
+  profile.efficiency:  {tier: "off", why: "Diagnostic; length comes later."}
   # ── the plan ──
   plan.grounded:       {tier: critical, why: "The plan has to use who they are. Already 5; it stays critical because the new profiles change what there is to use."}
   plan.evaluation:     {tier: critical, why: "Safe and fun, or the vibe: needs, tests and give-aways that mesh. Stuck at 3 to 4 in every version."}
@@ -73,6 +73,6 @@ tiers:
   plan.pair:           {tier: watch, why: "5 in almost every version, so its bar doesn't tell versions apart; it needs a stricter line before it can steer."}
   plan.accidents:      {tier: watch, why: "Same: 5 everywhere, bar too easy."}
   plan.voices:         {tier: watch, why: "Same: 5 everywhere, bar too easy."}
-  plan.original:       {tier: off, why: "Diagnostic; the default plot is a worry for later."}
-  plan.format:         {tier: off, why: "The plan's format changes with the experiment."}
-  plan.seeds:          {tier: off, why: "Needs several seeds of one version."}
+  plan.original:       {tier: "off", why: "Diagnostic; the default plot is a worry for later."}
+  plan.format:         {tier: "off", why: "The plan's format changes with the experiment."}
+  plan.seeds:          {tier: "off", why: "Needs several seeds of one version."}
