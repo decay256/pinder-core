@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v9", "Run 9: one punchline, short brief", "writers-v9",
+     "Run 9. Run 7's profiles, unchanged, and a new chat session for the same three comedians. The brief is cut to what Pinder is and what the reader should feel; the how, the medium, how they write and the writer's job are gone. The chat is one joke with one punchline: under \"The joke\" the writer gives the punchline (the chat's last message, word for word), the joke in one sentence, and why it is Pinder; then the chat, at most 500 words, ending on the punchline, using only what the joke needs.", "run 7"),
     ("v8", "Run 8: the joke first", "writers-v8",
      "Run 8. Run 7's profiles, unchanged, and a new chat session for the same three comedians. The chat task asks first for the joke, under its own heading: the setup, where it turns, the punchline, and why it could only land on these two. Then the chat under its own heading, at most 500 words, one message per line as \"Name: message\". The joke is saved apart from the chat; the chat is read and scored without it.", "run 7"),
     ("v7", "Run 7: the writer's own pitch", "writers-v7",
@@ -93,18 +95,18 @@ for rid, label, sub, about, profiles_from in RUNS:
                 d = chars[slug]
                 pron = d.get("gender_identity", "they/them")
                 system = w.PROMPTS["v1"]["system"].format(name=name)
-                user = w.PROMPTS["v1"]["user"].format(brief=w.brief(), char=d["name"], pronouns=pron,
+                user = w.PROMPTS["v1"]["user"].format(brief=w.brief_full(), char=d["name"], pronouns=pron,
                                                       obj=w.OBJ.get(pron, "them"), tidbits=w.tidbits(d, items, texting=True))
                 note = "This session's prompt was not saved: the first script kept none. Shown is run 1's profile template filled with Brick's fragments, rebuilt the same way as Reuben's, which was saved."
                 # the check that makes the rebuild credible: the same rebuild for Reuben gives his saved prompt
                 rd = chars["reuben"]
                 rs, ru = split_prompt(os.path.join(O, "reuben", f"{wid}.prompt.md"))
-                rb = w.PROMPTS["v1"]["user"].format(brief=w.brief(), char=rd["name"], pronouns=rd["gender_identity"],
+                rb = w.PROMPTS["v1"]["user"].format(brief=w.brief_full(), char=rd["name"], pronouns=rd["gender_identity"],
                                                     obj=w.OBJ.get(rd["gender_identity"], "them"), tidbits=w.tidbits(rd, items, texting=True))
                 stats["v1 rebuild matches Reuben's saved prompt"] = stats.get("v1 rebuild matches Reuben's saved prompt", 0) + (rb.rstrip("\n") == ru and rs == system)
             inserts = []
             # the brief: the longest stored brief that occurs in this prompt, else the current one
-            cur = w.brief()
+            cur = next((x for x in (w.brief_full(), w.brief_short()) if x in user), w.brief_full())
             if cur in user:
                 bid = hashlib.sha256(cur.encode()).hexdigest()[:10]
                 briefs[bid] = cur

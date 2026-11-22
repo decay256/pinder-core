@@ -185,7 +185,27 @@ The chat is that joke, and it has to work without the explanation: the reader ne
 assert PROMPTS["v7"]["chat"] != PROMPTS["v6"]["chat"]
 TEXTING["v7"] = False
 GROUPED = {"v6", "v7"}
-JOKE_FIRST = {"v7"}  # versions whose chat answer is "## The joke" then "## The chat", saved apart
+# v8: the brief cut to its what and why (brief_short); the chat is one joke with one punchline. The
+# joke heading holds the punchline word for word, the joke in one sentence, and why it is Pinder.
+PROMPTS["v8"] = dict(PROMPTS["v7"], chat=PROMPTS["v7"]["chat"][:PROMPTS["v7"]["chat"].index("# The chat")] + """# The chat
+
+You'll write their chat on the app as a joke: one joke, with one punchline. Work it out before you write.
+
+First, under the heading "## The joke", write three things:
+
+1. The punchline: the last message of the chat, word for word.
+2. The joke, in one sentence: what the reader believes until that message, and what the message makes them see.
+3. Why it's Pinder: in two or three sentences, what it says about dating apps and the people on them, and why it lands on these two.
+
+Then, under the heading "## The chat", write the chat: no longer than {words} words, {a} first, one message per line, as "{a}: message" or "{b}: message", ending on the punchline, and nothing else under that heading. Use only what the joke needs.
+
+The chat has to work without the explanation: the reader never sees it. It's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.
+""")
+assert PROMPTS["v8"]["chat"].startswith("{brief}")
+TEXTING["v8"] = False
+GROUPED = {"v6", "v7", "v8"}
+SHORT_BRIEF = {"v8"}  # versions that get brief_short()
+JOKE_FIRST = {"v7", "v8"}  # versions whose chat answer is "## The joke" then "## The chat", saved apart
 
 
 def split_joke(text):
@@ -196,7 +216,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The joke(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v7")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v8")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -238,9 +258,28 @@ def tidbits_grouped(d, items):
     return "\n\n".join(out)
 
 
-def brief():
+def brief_full():
     y = yaml.safe_load(open(os.path.join(REPO, "tools/tonelab/variants/live/situations.yaml"), encoding="utf-8"))
     return y["prompts"]["bible"].strip()
+
+
+def brief_short():
+    """The brief's what and why only: the opening, "What Pinder is" and "What the reader should feel".
+    Everything from "How the reader comes to feel it" on (the how, the medium, how they write, your
+    job) is cut, and so are the opening's promise of the how and the reading time."""
+    b = brief_full()
+    b = b[:b.index("\n## How the reader comes to feel it")].rstrip()
+    for a, c in (("This brief tells you what Pinder is, what we want a reader to feel, and how a chat makes them feel it.",
+                  "This brief tells you what Pinder is and what we want a reader to feel."),
+                 ("Someone reads a whole chat on their phone in about five minutes. In that time they get to know two people.",
+                  "Someone reads a whole chat on their phone. In that time they get to know two people.")):
+        assert b.count(a) == 1, a
+        b = b.replace(a, c)
+    return b
+
+
+def brief():
+    return brief_short() if VERSION in SHORT_BRIEF else brief_full()
 
 
 def tidbits(d, items, texting=None):
@@ -300,6 +339,10 @@ def fan_out(jobs, key, out, label):
                 return
             joke, text = parts
             results[wid].update(words=len(text.split()), joke_words=len(joke.split()))
+            lines = [ln.split(":", 1)[1].strip() for ln in text.splitlines() if ":" in ln]
+            if lines:
+                norm = lambda s: re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+                results[wid]["punchline_is_last"] = norm(lines[-1]) in norm(joke)
             with open(os.path.join(out, f"{wid}.joke.md"), "w", encoding="utf-8") as f:
                 f.write(joke + "\n")
         with open(os.path.join(out, f"{wid}.md"), "w", encoding="utf-8") as f:
