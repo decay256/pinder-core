@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v11",
+ "kind": "chat",
+ "label": "Run 11 · all 3 chats",
+ "version": "run 11",
+ "order": 111,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v11/chat-reuben-brick/",
+ "note": "Every chat of run 11 (each comedian's own brief; both characters in one short take; the chat set up and paid off): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 11,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8226,
+   "words": 1422
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats play the same scene in the same order. A lie or a disclosure opens, Brick calls out the act, they swap flaws, Reuben confesses he rehearses, they trade exes, and it ends on a timed sex itinerary sent as a calendar invite. Booster and Carr share the opening move (Reuben tips the top hat, Brick clocks the four-second reply). Many lines recur across all three: the four seconds, the cab-sobbing over \"let's do this again\", the Google Calendar fights, and \"ten seconds\" of silence making Reuben disappear. Small differences keep it off a 1: Ali Wong opens with Brick and has Reuben write the itinerary, and Carr ends on the response-time twist.",
+   "evidence": [
+    "Brick_haus: You replied in four seconds. I timed it.",
+    "Brick_haus: Calendar invite sent. Hang the top hat on the Meridian Wellness pump before I get there",
+    "Brick_haus: 20:00: Drinks. 20:14: You lose at arm-wrestling. 21:00: Sex."
+   ],
+   "raise": "Break the shared spine: give at least one chat a different turning point and an ending that is not a timed itinerary, and cut the stock profile lines (cab sobbing, shared calendar, dishwasher-safe) that each writer copied wholesale.",
+   "def": "03d845827225bb57",
+   "material": "cc673a23057928d4",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 17.6,
+   "cost": 0.06090520000000001,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:08:40Z",
+ "repo_commit": "2b0c5dd",
+ "cost": 0.0609
+}

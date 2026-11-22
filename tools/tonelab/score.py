@@ -330,6 +330,7 @@ WRITER_RUNS = [
     ("writers-v8", 8, "run 7's profiles; the joke worked out first, the chat scored without it"),
     ("writers-v9", 9, "run 7's profiles; the brief cut to its what and why; one joke, one punchline"),
     ("writers-v10", 10, "new profiles and chat from the short brief; notes unsorted; the chat worked out as a bit"),
+    ("writers-v11", 11, "each comedian's own brief; both characters in one short take; the chat set up and paid off"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first
 
@@ -366,7 +367,10 @@ def writer_targets():
         for wid, w in writers.items():
             if w.get("error"):
                 continue
-            paths = [base / "chat-reuben-brick" / f"{wid}.md"] + [base / s / f"{wid}.md" for s in CHAT_PAIR]
+            # run 11 on: both characters were written together, in one text
+            paired = (base / "characters" / f"{wid}.md").exists()
+            paths = [base / "chat-reuben-brick" / f"{wid}.md"] + (
+                [base / "characters" / f"{wid}.md"] if paired else [base / s / f"{wid}.md" for s in CHAT_PAIR])
             if not all(p.exists() for p in paths):
                 continue
             text, *profiles = (p.read_text(encoding="utf-8").strip() for p in paths)
@@ -376,11 +380,12 @@ def writer_targets():
             lines = text.splitlines()
             cut = len(msgs) - max(4, len(msgs) // 5)
             masked_text = "\n".join(f"[{k}] {m}" for k, (_, _, m) in enumerate(msgs, 1))
-            brief = "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles))
+            brief = (f"=== {names[0]} and {names[1]}, as {w['writer']} wrote them ===\n{profiles[0]}" if paired else
+                     "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles)))
             out.append({"id": f"chat-{folder}-{wid}", "kind": "chat", "label": f"Run {n} · {w['writer']}",
                         "version": f"run {n}", "order": 100 + n, "writer": wid, "writers_run": n,
                         "source": f"docs/tone-lab/scratch/{folder}/chat-reuben-brick/{wid}.md",
-                        "note": (f"Written in one go by {w['writer']} from the two profiles they wrote (run {n}: {about}). "
+                        "note": (f"Written in one go by {w['writer']} from {'what they wrote about the two characters' if paired else 'the two profiles they wrote'} (run {n}: {about}). "
                                  "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges."),
                         "speakers": [s for _, s, _ in msgs],
                         "material": {"chat": text, "brief": brief, "chat_masked": masked_text,

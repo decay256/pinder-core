@@ -1,0 +1,522 @@
+{
+ "id": "chat-writers-v11-carr",
+ "kind": "chat",
+ "label": "Run 11 · Jimmy Carr",
+ "version": "run 11",
+ "order": 111,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v11/chat-reuben-brick/carr.md",
+ "note": "Written in one go by Jimmy Carr from what they wrote about the two characters (run 11: each comedian's own brief; both characters in one short take; the chat set up and paid off). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 11,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2668,
+   "words": 433
+  },
+  "brief": {
+   "chars": 2766,
+   "words": 452
+  },
+  "chat_masked": {
+   "chars": 2519,
+   "words": 433
+  },
+  "chat_but_last": {
+   "chars": 2331,
+   "words": 379
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader gets Reuben's fear, habit and ending, and gets his origin by placement: the 'oh—okay' first time sits right before the fear. But the fear is stated outright, not inferred. For Brick the reader infers the fear from the taxi line and links it to the scheduling habit, but correctly finds no origin in the chat, so she gets three of four. Above the line because both fear-habit links land; below 5 because Brick has no origin and Reuben's fear is only known because he says it.",
+   "evidence": [
+    "I’m terrified of a quiet room. If I stop tap-dancing for ten seconds, I disappear.",
+    "leaving me crying in a taxi assuming I’ve already been dumped because Date Two isn't locked into a calendar slot",
+    "Why did you move the ten-minute silence up to 21:00:04?"
+   ],
+   "raise": "Give Brick one slipped or caught-out detail that shows where the need for locked-in slots comes from, from before Marguerite, without her explaining it.",
+   "def": "f019e7f239b9d82d",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "Some surface facts come out by being caught: the four-second reply, 'pasting from Notes', and the rain lie that pays off at the end. But the important disclosures are volunteered as backstory. The lentils, the clone app, Delphine, the first time and the fear arrive across three unprompted Reuben messages, and Marguerite comes when he simply asks. Neither character's origin comes out by slip or inference; Reuben's is offered outright and Brick's is absent.",
+   "evidence": [
+    "You typed that entire curvature disclaimer in three seconds. You’re pasting from Notes.",
+    "Classy. Why’d Marguerite walk?",
+    "My ex Delphine left because I couldn’t say one sentence that wasn't a bit."
+   ],
+   "raise": "Have the first-time story leak out as a flinch Brick catches, for example at her '21:00: Sex' slot, instead of Reuben offering it unprompted.",
+   "def": "76152fd7f08caa41",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "Feelings are named or explained more than once. Reuben says 'I’m terrified', and Brick spells out her taxi crying and its cause. Some places do carry what is being avoided. 'That’s the dirtiest talk I’ve ever heard' shows his relief at being ordered silent, and the 21:00:04 closer jokes about his two-minute fear without saying it. That is enough underneath to keep it above a 2, but the explaining keeps it below the line.",
+   "evidence": [
+    "I’m terrified of a quiet room.",
+    "assuming I’ve already been dumped because Date Two isn't locked into a calendar slot with travel buffers",
+    "That’s the dirtiest talk I’ve ever heard. Check your calendar."
+   ],
+   "raise": "Cut 'I’m terrified of a quiet room…' and let the 21:05 silence clause and his reaction to it carry the fear on their own.",
+   "def": "61d4f86460a218aa",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader finds the drop and Brick's answer changes the night: 'I hate tap-dancing' leads straight into the contract. But the line names the feeling ('terrified') and explains what the act is for. It sits inside a longer message that opens with the spaniel gag, so it is neither the shortest line nor unannounced. Reuben's 'Non-negotiable'-sized plain moment never comes.",
+   "evidence": [
+    "I’m terrified of a quiet room. If I stop tap-dancing for ten seconds, I disappear.",
+    "I hate tap-dancing. Here is Thursday’s contract:"
+   ],
+   "raise": "Replace the stated fear with a short plain line that doesn't name it, sent as its own message, such as 'I'm not doing a bit right now,' and let Brick's contract answer that.",
+   "def": "b5a3a3c2e796783b",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "Nothing settles early. The Thursday contract arrives only after the midpoint, and the ending turns twice: the time shift to 21:00:04 and the rain confession. The status flips constantly, from Brick auditing Reuben to Reuben matching her defects to Brick handing down orders. What holds it below 5 is the middle run of back-to-back confessions, which the reader felt 'risks becoming a contest of who can be more pathetic', and two beats the reader could call: 'Non-negotiable' and his erotic framing of the silence clause. It clears the line because no stretch runs flat for ten messages and the reader would not have stopped.",
+   "evidence": [
+    "Brick_haus: Non-negotiable.",
+    "Why did you move the ten-minute silence up to 21:00:04?",
+    "I haven’t been outdoors in eleven days."
+   ],
+   "raise": "Turn the confession run into a fight: have Brick audit one of Reuben's confessions as rehearsed, so the stakes rise instead of the misery piling up.",
+   "def": "9b663d9dfde4d26f",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Almost every sexual line belongs to these two bodies and lives. His side has 'hard left curve', the 'dishwasher-safe' kanji and the under-two-minutes first time. Hers has the 'dorsal bump' and the schedule tattooed on her shaft. The early defect lists are bravado and pre-emptive strikes. Late on, the filth does a different job: the 21:05 silence clause is what turns him on, and 21:00:04 is a quiet admission that he expects to last four seconds, which brings them closer. It falls short of 6 because the most intimate line is implied by a timestamp rather than said, and the gag-with-vest line is closer to performance.",
+   "evidence": [
+    "my daily schedule tattooed on my shaft so nobody can accuse me of drifting",
+    "21:05: Ten minutes where you are contractually forbidden to speak or be funny.",
+    "That’s the dirtiest talk I’ve ever heard. Check your calendar."
+   ],
+   "raise": "Give Brick a late line that shows she has done the arithmetic on 21:00:04 and accepts it, so her closeness is visible as well as his.",
+   "def": "2d9c58b139c34d6a",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 3,
+   "why": "The pieces of a wince are on screen: his four-second replies, his two-minute first time and her 21:00 sex slot. But the chat uses them as a surprise rather than a danger the reader sees coming. The reader says the ending 'was not predictable'. Brick's habit of putting love into a calendar, the thing that cost her Marguerite, is shown before she does it to Reuben, but it lands well instead of on the wrong spot. Nothing goes off where the reader was dreading it.",
+   "evidence": [
+    "I put our arguments in a shared calendar with hard stop-times.",
+    "My first time ended under two minutes",
+    "21:00: Sex. 21:05: Ten minutes"
+   ],
+   "raise": "Have Reuben slip a bit into the contract negotiation after the reader knows the silence clause matters to him, so the reader dreads him breaching it a message before he does.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Each character carries a piece of dating-app doctrine. His is playing it cool: 'only on here when it rains'. Hers is pre-emptive efficiency and a curated profile: 'State your defects', 'curated minimalist'. The screen contradicts both. But neither is voiced in earnest for long. Reuben confesses the act immediately ('Worse. I rehearse'), and Brick explains her own bio away in the same message. Her core belief, that love must be scheduled, is personal rather than app doctrine. The Pinder clone that 'rejected me at 3am' is the only real swipe at the app itself.",
+   "evidence": [
+    "I’m only on here when it rains.",
+    "My bio says \"curated minimalist\" because I binned everything my ex Marguerite touched.",
+    "my own algorithm rejected me at 3am"
+   ],
+   "raise": "Let one of them defend an app rule straight-faced, for example Brick insisting that disclosing defects up front is 'high-value' efficiency, and keep the defence going while the screen contradicts it.",
+   "def": "cd5acec1a8653b27",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's sharpest jokes all land on himself: 'dishwasher-safe', the clone that rejected him, the 'blind spaniel'. Brick opens by turning on him ('that hat cost more than your rent'), but she quickly turns the knife on herself with the monocle fished out of boxed rosé and the crying in taxis. Her scheduling, which looks contemptuous, turns out to be the gift he wanted, so neither ends as the villain. It stops short of 6 because her opening barrage is pointed at him and only later balanced.",
+   "evidence": [
+    "fishing my monocle out of boxed rosé with a plastic cocktail sword",
+    "with the devastating kindness of a vet putting down a blind spaniel",
+    "I lied about the rain, so I figured I’d be honest about my response time."
+   ],
+   "raise": "Have Brick's first dismantling line include a self-own as well, so the contempt and the fondness arrive together from her opening message.",
+   "def": "51f6e5881b5145be",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 20 messages correctly. Most reasons were content, such as 'are his defects' and 'are hers'. A real voice split does exist: Brick_haus speaks in clipped imperatives and verdicts ('State your defects.', 'Non-negotiable.', 'Good.'), and Reuben_404 in apologetic, self-mocking confession. That split keeps it above the line. It falls short of a 5 because Brick's long Marguerite rant and her catalogue of the rosé and heels are in Reuben's confessional register, so those could only be placed by content.",
+   "evidence": [
+    "Skip the routine.",
+    "State your defects.",
+    "whereas saying \"let’s do this again sometime\" and leaving me crying in a taxi assuming I’ve already been dumped"
+   ],
+   "raise": "Rewrite Brick's Marguerite answer in her clipped, itemised register so it could be attributed without its facts.",
+   "def": "a77bc9ef79556bda",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "There is one real claim-versus-evidence gap at the start: 'only on here when it rains' against a four-second reply. Brick points it out, and Reuben then narrates the rest of his act himself ('I rehearse my \"spontaneous\" banter'). Brick explains her own gap in the same message she raises it: 'curated minimalist' because she binned everything. Both characters then name their fears outright ('I’m terrified of a quiet room'), so the reader is told the gaps instead of watching them widen.",
+   "evidence": [
+    "My bio says \"curated minimalist\" because I binned everything my ex Marguerite touched.",
+    "I’m terrified of a quiet room. If I stop tap-dancing for ten seconds, I disappear.",
+    "Worse. I rehearse my \"spontaneous\" banter in the bathroom mirror"
+   ],
+   "raise": "Let Brick keep insisting on the minimalist bio, and Reuben keep insisting he's spontaneous, while the chat shows the empty flat and the rehearsal without either of them admitting it.",
+   "def": "fa4461088ccd15ee",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Several laughs give the sender away: 'dishwasher-safe', the clone his own algorithm rejected, the monocle fished out of rosé, and 21:00:04. Brick's comedy, though, rests heavily on her day job: 'audit trail', 'Thursday’s contract', 'contractually forbidden' and 'Non-negotiable'. That is more than the two allowed. Many other lines recite profile details rather than make a joke.",
+   "evidence": [
+    "I like misery with an audit trail.",
+    "Ten minutes where you are contractually forbidden to speak or be funny.",
+    "a kanji tattoo near the base that I thought meant \"mysterious\" until a waiter told me it says \"dishwasher-safe.\""
+   ],
+   "raise": "Swap the audit and contract phrasing for scheduling detail that comes from her fear of being left, such as travel buffers or recurring slots, rather than from her job.",
+   "def": "4448c7f54baa167a",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 4,
+   "why": "When he is caught pasting from Notes, Reuben digs deeper with 'Worse.' and a worse truth. When he is caught on the 21:00:04 slot, he answers with a confession that implies he will last four seconds, which is also worse. Nobody states a lesson or changes heart, which keeps it above the line. It misses a 5 because Brick is never caught at all, and Reuben volunteers his fear before anyone presses him.",
+   "evidence": [
+    "Worse. I rehearse my \"spontaneous\" banter in the bathroom mirror",
+    "Look, I lied about the rain, so I figured I’d be honest about my response time."
+   ],
+   "raise": "Have Reuben catch Brick on something, for example her empty flat, and have her explain herself into a worse hole.",
+   "def": "5102b09e503af846",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Brick takes the upper hand in her first reply and keeps it while she audits him, dictates the contract and declares it 'Non-negotiable.' The only flip comes in the last three messages. Reuben's calendar invite and his 21:00:04 edit put her in the position of asking for an explanation, and he gets the last word. That is one flip, and Reuben never spends a stretch on top before the end.",
+   "evidence": [
+    "Non-negotiable.",
+    "Why did you move the ten-minute silence up to 21:00:04?"
+   ],
+   "raise": "Give Reuben a stretch in the middle where he has Brick rattled, for instance over an unscheduled 'sometime', before she takes control again with the contract.",
+   "def": "a327913ca348ff82",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Most punchlines land on the last word of their message: 'dishwasher-safe', 'at 3am', 'plastic cocktail sword', 'so it’s hygienic' and 'response time'. The itemised contract gets its own message, and 'Non-negotiable.' works as a one-word reaction shot. It misses a 5 because 'blind spaniel' is buried mid-message under the quiet-room confession. The run from the lentils through the first-time story also stays at one confessional temperature.",
+   "evidence": [
+    "the devastating kindness of a vet putting down a blind spaniel. I’m terrified of a quiet room.",
+    "Non-negotiable."
+   ],
+   "raise": "End Reuben's message on 'blind spaniel', and break up the run of confessions with a short, hot jab from Brick.",
+   "def": "7e36393433d52f66",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Response time starts as Brick's audit jab and returns mid-chat as 'three seconds… pasting from Notes'. At the close it becomes the 21:00:04 slot and 'honest about my response time', a premature-ejaculation confession tied to the 'under two minutes' story that nobody spells out. The rain lie and the travel buffers also return with reversed meaning. It falls short of 6 because Brick's closing question names the four-second change outright, which sets up the joke a little too visibly.",
+   "evidence": [
+    "your response time was four seconds",
+    "Why did you move the ten-minute silence up to 21:00:04?",
+    "I lied about the rain, so I figured I'd be honest about my response time."
+   ],
+   "raise": "Have Brick react to the 21:00:04 slot obliquely, for example by accepting it without comment, so the reader works out the arithmetic alone.",
+   "def": "9ff48f7918d86364",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted that Reuben would agree and that a buffered calendar slot would answer Marguerite's wound. That is what happens, and the 'recurring slot' answers her fear of 'let's do this again sometime'. The twist surprises but follows from his habit: his first honest line is still a bit, now an admission of his worst defect. It falls short of 6 because Brick's own final move is only another audit, so we don't see what the recurring slot does to her.",
+   "evidence": [
+    "You locked in Thursday at 20:00 with travel buffers and a recurring slot.",
+    "Look, I lied about the rain"
+   ],
+   "raise": "Give Brick one beat that shows the recurring slot landing on her, such as a crack in the auditor's syntax.",
+   "def": "8bd8de581cc31c9e",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message picks up the previous one. Brick skips the kanji joke and goes for his typing speed, a pointed choice. Reuben answers the Marguerite story with Delphine, and Brick answers the tap-dancing fear with a contract. One weak spot is Reuben's 'Classy', which skates past her bare-floorboards misery. Another is that Brick never directly answers the 'oh—okay' vet confession beyond 'I hate tap-dancing'.",
+   "evidence": [
+    "You typed that entire curvature disclaimer in three seconds.",
+    "I hate tap-dancing. Here is Thursday's contract:",
+    "Classy. Why'd Marguerite walk?"
+   ],
+   "raise": "Let Brick's reply to the 'oh—okay' confession show that she heard the wound before she moves on to the contract.",
+   "def": "f426aa8449e0fbc7",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "Some shapes do change: the contract arrives as a timetable and 'Non-negotiable.' snaps short. The emotional turns, though, are typed in the same polished, simile-rich register as the banter. Reuben's guard-down confession still reads like a crafted line, and his arousal at being silenced comes out as a neat quip. So the register mostly holds steady through hurt, horny and honest moments.",
+   "evidence": [
+    "with the devastating kindness of a vet putting down a blind spaniel",
+    "That's the dirtiest talk I've ever heard. Check your calendar.",
+    "Non-negotiable."
+   ],
+   "raise": "Break Reuben's typing at the confession and at the turn-on, with fragments, a typo or a lowercase blurt, so the bit visibly drops.",
+   "def": "6e21e724825d1cc3",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Messages run one to three sentences, but composed, stacked-clause sentences are the norm rather than the exception. The Marguerite message is a single essay sentence of nested clauses. Brick's flat description is narrated scene-setting nobody thumbs out at 1am. The '*tips top hat*' stage direction is passable as an app affectation, but it adds to the written feel.",
+   "evidence": [
+    "whereas saying \"let's do this again sometime\" and leaving me crying in a taxi assuming I've already been dumped",
+    "I'm on bare floorboards in skyscraper heels, fishing my monocle out of boxed rosé with a plastic cocktail sword."
+   ],
+   "raise": "Break the Marguerite and flat messages into short, ragged sends and let the clauses drop.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "The opening runs the same joke shape three times in a row: Brick's three-item callout, her three-item defect list and Reuben's three-item defect list. Price-tag gags also recur ('cost more than your rent', '$340 industrial steamer'). The parallel 'My ex X left because' is deliberate and works, and the later contract varies the rhythm, but the inventory tic is noticeable early on.",
+   "evidence": [
+    "It's bone dry outside, that hat cost more than your rent, and your response time was four seconds.",
+    "a dorsal bump, a shorter-than-expected tip, and my daily schedule tattooed on my shaft",
+    "Four and a half inches, a hard left curve, and a kanji tattoo"
+   ],
+   "raise": "Change the shape of one of the three opening lists, for example by having Reuben disclose a single defect in a single blurt.",
+   "def": "679a7696bf0171cd",
+   "material": "a82868726ccde165",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "**[1] Reuben_404.** The top-hat tip and \"only on here when it rains\" are his effortless-raconteur act.\n\n**[2] Brick_haus.** She clocks his four-second reply time and pulls his act apart, as the brief predicts.\n\n**[3] Brick_haus.** She delivers a pre-emptive audit of her own bump, her shorter tip and her schedule tattoo, and she is a contract dispute-ender.\n\n**[4] Reuben_404.** Four and a half inches, a left curve and the \"dishwasher-safe\" kanji are his defects.\n\n**[5] Brick_haus.** She is still dissecting him, now on how fast he typed.\n\n**[6] Reuben_404.** The mirror rehearsal, the cold lentils and the eleven days indoors are his.\n\n**[7] Reuben_404.** He is the out-of-work coder with the one-user Pinder clone.\n\n**[8] Brick_haus.** The bio, the binned belongings, Marguerite, the heels, the monocle and the boxed rosé are all hers.\n\n**[9] Reuben_404.** Someone asks about Marguerite, who is her ex, so it is the other party.\n\n**[10] Brick_haus.** The calendared arguments and crying in taxis over \"let's do this again sometime\" are her fears.\n\n**[11] Reuben_404.** Delphine is his ex, and the reason she left fits him.\n\n**[12] Reuben_404.** The under-two-minutes first time and the fear of a quiet room are his.\n\n**[13] Brick_haus.** She is the one who hates tap-dancing and writes contracts.\n\n**[14] Brick_haus.** This is the itemised night from the brief.\n\n**[15] Brick_haus.** The two vests and the $340 steamer are hers.\n\n**[16] Reuben_404.** He reacts to having his voice and his jokes taken away.\n\n**[17] Brick_haus.** She holds the terms firm.\n\n**[18] Reuben_404.** \"Dirtiest talk I've ever heard\" is his line in the brief, and he is the one who sends her the calendar invite.\n\n**[19] Brick_haus.** She is reading the invite and auditing its details.\n\n**[20] Reuben_404.** He confesses to lying about the rain. The brief doesn't spell out what this line means, but it fits his character: moving the silence to 21:00:04 seems to joke that he'll last about four seconds, which matches his \"response time.\""
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Reuben's: \"I'm terrified of a quiet room. If I stop tap-dancing for ten seconds, I disappear.\"\n\nSeveral things in the text mark it as a real drop rather than another bit:\n\n- **The jokes stop.** The sentence just before it still has a gag, the vet putting down a blind spaniel. These two sentences have no punchline, no absurd detail, and no comic exaggeration. They are short and literal, which is unlike almost everything else he types.\n- **He names the performance itself.** Earlier he admits to rehearsing his \"spontaneous\" banter, but that confession is still played for laughs (cold lentils, the bathroom mirror). Here he states plainly what the act is for: if he stops, he disappears. It also echoes what he says about Delphine, that he \"couldn't say one sentence that wasn't a bit.\"\n- **Brick treats it as serious.** Her reply is \"I hate tap-dancing,\" and the contract she writes is built around exactly what he just confessed. It contains ten minutes where he is \"contractually forbidden to speak or be funny.\" Reuben then calls that \"the dirtiest talk I've ever heard,\" which suggests being allowed not to perform is what he actually wants.\n\nBrick has a smaller crack of her own inside her Marguerite story: \"leaving me crying in a taxi assuming I've already been dumped.\" It is wrapped in her usual sarcasm about calendars, so it reads as only partly unguarded.\n\nThe chat doesn't settle whether Reuben's sincerity lasts. His final line, \"I lied about the rain, so I figured I'd be honest about my response time,\" is framed as honesty but delivered as a joke. It seems to be about scheduling the silence for four seconds after sex begins. So he seems to slip back into the act right after asking to be let out of it. Whether he will actually manage the quiet on Thursday, the text doesn't say."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I wouldn't have stopped. The first exchange sets the rhythm: Reuben does a bit and Brick dismantles it with evidence (dry weather, the hat, four seconds). That pattern pulls you forward. The closest it comes to losing me is the stretch where Reuben sends two confessions in a row (the lentils and mirror, then the Pinder clone) and Brick answers with her own inventory of misery. For a few lines it risks becoming a contest of who can be more pathetic. The Marguerite calendar story rescues it, because it gives Brick a specific, slightly sympathetic logic rather than just another sad detail. From there the chat gains momentum and builds toward something.\n\nAs for predicting exactly what would happen next, the honest answer is never, at least not word for word. I could foresee the general shape of some beats, though:\n\n- After Reuben asks whether she'd \"legally ban\" him from doing a voice, a flat refusal to negotiate was the obvious reply, and \"Non-negotiable\" is almost exactly what you'd expect.\n- After that, it was clear Reuben would accept, and that he'd frame the silence clause as erotic. The two-minutes story and his fear of quiet rooms had set that up. \"That's the dirtiest talk I've ever heard\" was foreseeable in spirit, though not in its exact wording.\n\nThe ending was not predictable. Moving the silence to 21:00:04 quietly folds together three earlier details: the four-second response time from the opening, the under-two-minutes confession, and the 21:00 sex slot. Together they imply he expects to last four seconds. Then his last line ties the lie about the rain back to \"honesty\" about his timing. I didn't see that coming, and it's the strongest moment in the chat precisely because it reuses things I had stopped thinking about."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks, as far as the chat shows them.\n\n**The rain.** Reuben opens by saying he's \"only on here when it rains,\" and Brick immediately calls it out: \"It's bone dry outside.\" It returns in Reuben's last line: \"I lied about the rain.\" The meaning shifts. At first it's a persona line Brick sees through. At the end Reuben admits the lie himself, and the admission becomes the setup for a moment of honesty.\n\n**Response time / \"four seconds.\"** Brick first uses Reuben's typing speed (\"your response time was four seconds,\" then \"three seconds… you're pasting from Notes\") as proof that his banter is rehearsed. At the end the phrase comes back twice: as a timestamp, with the silence moved to 21:00:04, four seconds after the 21:00 sex slot, and as words, when Reuben says he's being \"honest about my response time.\" The meaning changes from how fast he types to, it seems, how quickly he expects to finish in bed. The chat doesn't say this outright, but it fits his earlier confession that his first time \"ended under two minutes.\"\n\n**The calendar with travel buffers.** This first appears as the reason Marguerite left. She called the shared calendar \"bleak,\" and Brick describes crying in a taxi because Date Two wasn't \"locked into a calendar slot with travel buffers.\" At the end Reuben locks in Thursday \"with travel buffers and a recurring slot.\" The meaning reverses. What drove one partner away becomes something the new one does willingly, and the recurring slot suggests he wants more than one date.\n\n**Brick's schedule.** Brick introduces himself with his \"daily schedule tattooed on my shaft so nobody can accuse me of drifting,\" and then hands over a minute-by-minute contract for Thursday. This is less a change in meaning than the trait put into practice.\n\n**Tap-dancing, bits, and the quiet room.** Reuben says Delphine left because everything he said was \"a bit,\" that he's \"terrified of a quiet room,\" and that if he stops tap-dancing he disappears. Brick answers \"I hate tap-dancing,\" and the contract includes ten minutes where Reuben is \"forbidden to speak or be funny.\" Here the meaning does change. Silence goes from Reuben's fear to something imposed on him, and then to something he wants: he calls it \"the dirtiest talk I've ever heard.\"\n\n**Things that don't come back.** The kanji tattoo, the lentils, the Pinder clone, the monocle and rosé, the heels, and the vests and steamer each appear once. The vest gag ties loosely to the \"curated minimalist\" bio, since owning only two vests fits it, but the chat doesn't make that link explicitly."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n**What he's afraid of.** He says it directly: \"I'm terrified of a quiet room. If I stop tap-dancing for ten seconds, I disappear.\"\n\n**What he does so he doesn't have to feel it.** He keeps performing. He opens with a persona (\"*tips top hat* Pardon the intrusion. I'm only on here when it rains.\"), and he admits it's prepared: \"I rehearse my 'spontaneous' banter in the bathroom mirror.\" His ex confirms the pattern: \"My ex Delphine left because I couldn't say one sentence that wasn't a bit.\"\n\n**Where it comes from.** The chat doesn't state a cause. It only places one memory immediately before the fear: \"My first time ended under two minutes with a girl saying 'oh—okay' with the devastating kindness of a vet putting down a blind spaniel.\" He never says that this is the origin, so the link is only implied by where the line sits. Other context he gives (out of work, \"I haven't been outdoors in eleven days,\" his own app rejecting him) describes his present state, not an origin.\n\n**What he did at the end.** He accepted the contract (\"That's the dirtiest talk I've ever heard. Check your calendar.\") and booked it on Brick's terms: \"You locked in Thursday at 20:00 with travel buffers and a recurring slot.\" He also moved the silence to \"21:00:04,\" four seconds after the 21:00 sex slot. Asked why, he said: \"Look, I lied about the rain, so I figured I'd be honest about my response time.\" That line works two ways. It owns up to the opening lie, and it admits, as a joke, that sex will last about four seconds. So it's a confession delivered as a bit. Whether he went through with the silence itself is not in the chat.\n\n**Brick_haus**\n\n**What they're afraid of.** The fear is being left without knowing it, and the ambiguity of something unscheduled. The clearest line is about being left \"crying in a taxi assuming I've already been dumped because Date Two isn't locked into a calendar slot with travel buffers.\" A second fear is being accused of inconsistency: the schedule is tattooed \"so nobody can accuse me of drifting.\"\n\n**What they do so they don't have to feel it.** They schedule and contract everything. \"I put our arguments in a shared calendar with hard stop-times.\" They write Thursday as a minute-by-minute contract with penalties. They audit others, too: \"your response time was four seconds,\" \"You're pasting from Notes.\" After the breakup, they removed every trace: \"I binned everything my ex Marguerite touched.\"\n\n**Where it comes from.** This is not in the chat. Marguerite leaving is a result of the scheduling (\"Apparently that's 'bleak'\"), not its source. The taxi scene is given as the alternative they reject, and the chat doesn't say whether it actually happened.\n\n**What they did at the end.** Brick noticed that Reuben had changed the schedule and asked about it: \"Why did you move the ten-minute silence up to 21:00:04?\" How they reacted to Reuben's answer is not in the chat.\n\nOne thing the chat does show is that the two fit together. Brick says \"I hate tap-dancing\" and writes a rule that makes Reuben stop (\"contractually forbidden to speak or be funny\"). Reuben calls being ordered to \"just exist\" the dirtiest talk he's heard, and in return he books the date with the buffers and recurring slot that Brick says they need."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Reuben agreeing, and doing it without a joke.\n\nThe last line is the hinge. \"You'd legally ban me from doing a voice and just order me to exist?\" sounds incredulous, but the conversation has set it up as relief. He's already told us his deepest fear is the quiet room: if he stops tap-dancing for ten seconds, he disappears. Delphine left because he couldn't say one sentence that wasn't a bit. Brick's contract, with its ten minutes where he's forbidden to speak or be funny, is exactly the permission he can't give himself. So the payoff I'd expect is Reuben finally saying something plain and sincere, probably very short: a simple yes, or an admission that nobody has ever asked him just to be there. The joke would be the absence of a joke.\n\nThe other half is Brick's wound. Marguerite's \"let's do this again sometime\" left her crying in a taxi because Date Two wasn't locked in. The ending probably answers that too, with Reuben, or Brick herself, putting a second date on the calendar, likely with travel buffers. The thing she was mocked for becomes the romantic gesture.\n\nThe chat also loves callbacks. I'd half expect one of the setups to return as the closing button: the vest gag and the $340 steamer, the arm-wrestling he's scheduled to lose, the rain he claims to need, or his Pinder clone, which rejected him and might finally get a second user.\n\nSo my prediction is two damaged people realizing their defects fit together. His need to perform meets her need for rules, and each gets what the last partner wouldn't give: she gets certainty, and he gets silence that doesn't mean he's been dumped. This is only my inference from the patterns and setups in what you've shown me. I haven't seen the real ending, so I can't say how it actually lands."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 14.3,
+   "cost": 0.045824000000000004,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 18.5,
+   "cost": 0.036640000000000006,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 20.9,
+   "cost": 0.037668,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 25.0,
+   "cost": 0.047212000000000004,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 25.8,
+   "cost": 0.052396000000000005,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 17.8,
+   "cost": 0.030872000000000004,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 26.2,
+   "cost": 0.08768519999999999,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 36.2,
+   "cost": 0.0971572,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 43.4,
+   "cost": 0.1192852,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 38.9,
+   "cost": 0.11115719999999998,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:10:25Z",
+ "repo_commit": "2b0c5dd",
+ "cost": 0.6659
+}

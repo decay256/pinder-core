@@ -1,0 +1,524 @@
+{
+ "id": "chat-writers-v11-wong",
+ "kind": "chat",
+ "label": "Run 11 · Ali Wong",
+ "version": "run 11",
+ "order": 111,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v11/chat-reuben-brick/wong.md",
+ "note": "Written in one go by Ali Wong from what they wrote about the two characters (run 11: each comedian's own brief; both characters in one short take; the chat set up and paid off). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "wong",
+ "writers_run": 11,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2891,
+   "words": 499
+  },
+  "brief": {
+   "chars": 3222,
+   "words": 526
+  },
+  "chat_masked": {
+   "chars": 2742,
+   "words": 499
+  },
+  "chat_but_last": {
+   "chars": 2381,
+   "words": 407
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader got all four answers right for both characters, and both endings follow from the fears. Brick asks for a timestamp and gets one. Reuben asks to be pinned 'hard enough that i physically cannot do a bit' and takes back 'we can just watch something.' It sits only just above the line because both fears reach the reader mainly by being stated: Reuben explains his whole psychology in one message, and Brick says the need outright. Reuben's fear is at least partly enacted first, when the ring light catches out his loft lie, and Brick's when 'sometime' sets her off, so habit and fear are linked rather than merely asserted.",
+   "evidence": [
+    "if i stop tap-dancing for ten seconds you're gonna see there's nothing underneath this stupid voice and walk out just like Delphine did",
+    "I just need to know that if you say Tuesday, I'm not sitting on this floor alone at 8:01.",
+    "8:35 we drink your floor wine and we can just watch something."
+   ],
+   "raise": "Have the reader infer at least one fear from behaviour by cutting Reuben's self-diagnosis to the eleven days and the ring light, so the fear is never named.",
+   "def": "f019e7f239b9d82d",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 2,
+   "why": "Only one important fact is caught out: Brick zooms in on the buckle and spots 'a clip-on ring light and a radiator.' Everything after that is volunteered or asked for. Brick hands over the Marguerite calendar story, the dumpster, the cab, the childhood and the eBay monocle unprompted. Reuben's shrimp origin comes only because Brick asks 'And the shrimp comment?', and he explains the ring light's purpose himself. Every habit origin is stated, which is the low band.",
+   "evidence": [
+    "Why can I zoom in on your top hat buckle and see the reflection of a clip-on ring light and a radiator?",
+    "My ex Marguerite walked out because I put our relationship fights on a shared Google Calendar with hard fifteen-minute end times.",
+    "And the shrimp comment?"
+   ],
+   "raise": "Let one origin slip out instead of being told, for example Brick flinching at a 'sometime' in Reuben's own message before the cab story is ever mentioned.",
+   "def": "76152fd7f08caa41",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "Feelings and their reasons are named or explained again and again. Reuben says 'i wanted to die' and diagnoses his own act. Brick spells out the logic of the disclosure habit and states the need underneath the scheduling. There is real subtext at the end: the reclaimed 'watch something' and the order to hang the hat on the pump are tender lines dressed as orders. That is not enough to offset several outright explanations.",
+   "evidence": [
+    "i wanted to die.",
+    "Pre-emptive flaw disclosure so nobody can flinch first. I respect the audit.",
+    "Hang the top hat on the Meridian Wellness pump before I get there, or I'm docking you five minutes."
+   ],
+   "raise": "Delete Reuben's 'nothing underneath this stupid voice' and Brick's 'so nobody can flinch first', and let the eleven days and the itinerary carry those feelings.",
+   "def": "61d4f86460a218aa",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found the moment immediately: 'okay. i haven't left my apartment in eleven days.' It is short, flat in register, contradicts his cover story, and names no feeling. That puts it over the line. It stops short of a 5 because the very next message turns it into a self-explaining speech. Brick's reply, 'And the shrimp comment?', is an audit question rather than an answer that changes the night; the turn comes several messages later.",
+   "evidence": [
+    "okay. i haven't left my apartment in eleven days.",
+    "the ring light is clamped to my headboard so nobody has to see my crooked silhouette in the dark",
+    "And the shrimp comment?"
+   ],
+   "raise": "Let the eleven-days line stand alone without the explanatory follow-up, and have Brick's immediate reply be the one that changes course.",
+   "def": "b5a3a3c2e796783b",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "The night is not settled until about message 17 of 20, when Reuben says \"Tuesday. 7:45 PM\". Every exchange changes something: the ring-light catch flips who has the upper hand, \"jesus\" turns the chat from bits to confession, Brick's pigs-in-a-blanket answer matches it, and the schedule turns that into a plan. The reader never predicted an exact beat. It falls short of a 6 because Reuben drops his whole act in one message after a single push, with no resistance. The early run of stacked quirks also nearly lost the reader.",
+   "evidence": [
+    "Also, if you are at a noise-funk loft, why can I zoom in on your top hat buckle and see the reflection of a clip-on ring light",
+    "okay. i haven’t left my apartment in eleven days."
+   ],
+   "raise": "Make Reuben fight the exposure for one more exchange, trying another bit that Brick takes apart, before he gives in with \"jesus\".",
+   "def": "9b663d9dfde4d26f",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Every sexual line is about these two bodies: the stubby glans and dorsal bump, the 40-degree sad-shrimp hook, the re-entry failure, the Meridian pump. The filth changes job over the chat. The opening disclosures are a show, and the late lines get close. The throat-hold line ties his kink straight to his fear, and the 8:20 line fits his hook to her bump on a schedule. It misses a 6 because Brick's own sexual lines never move past disclosure and logistics. Reuben does all the close, dirty work.",
+   "evidence": [
+    "you hold me down by my throat hard enough that i physically cannot do a bit.",
+    "8:20 my left hook hits that bump on your ridge right on the dot"
+   ],
+   "raise": "Give Brick one late sexual line of her own that is dirty and shows what she craves, rather than only accepting Reuben's itinerary.",
+   "def": "2d9c58b139c34d6a",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Brick has just explained that \"sometime\" made her sob in a cab. Reuben, deep in his act, immediately answers with \"i don't believe in clocks, let's just vibe\". The reader sees the danger one message early, and it lands exactly on her wound and sets off the Marguerite outburst. That keeps it above the line. It is the only real instance: the \"we can just watch something\" callback looks risky but is reclaimed rather than going off, and Brick's other wound arrives at the same moment it is triggered.",
+   "evidence": [
+    "i sobbed so hard in the cab my monocle popped out.",
+    "i’m from everywhere baby, i don’t believe in clocks, let’s just vibe"
+   ],
+   "raise": "Plant Reuben's fear of being seen earlier, so that Brick's monocle-zoom audit is a second danger the reader can see coming before it hits.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Reuben means his low-commitment pitch: \"we should totally hang sometime\" and \"let's just vibe\". The ring light, the radiator and the eleven days indoors contradict it. Brick means her up-front, disclosure-first approach: \"sign off on the following disclosures\" and \"Give me a timestamp or unmatch\". Her sobbing in the cab and the $18 eBay monocle contradict it. The two creeds collide directly, but they read as personal habits more than dating-app doctrine. The chat never widens the joke to everyone on the app, so it stays below a 5.",
+   "evidence": [
+    "we should totally hang sometime!!",
+    "Do not \"vibe\" with me. Give me a timestamp or unmatch.",
+    "The monocle is eighteen dollars on eBay."
+   ],
+   "raise": "Have one of them state the app wisdom behind their move in earnest, such as never be the first to commit, so the collision mocks the culture as well as the two of them.",
+   "def": "cd5acec1a8653b27",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "The hardest jokes land on the speakers themselves: the monocle popping out in the cab, the furniture in the dumpster, the boxed rosé on the floor, the sad shrimp, the pump billed as \"Meridian Wellness Solutions\". The ending treats both of them fondly, and neither ends up the villain. Brick's opening jab at the top-hatted four-second replier and her ring-light exposure do land on Reuben. Meanwhile Reuben's only jab at her, \"inspector gadget\", is weak. That imbalance keeps it short of a 6.",
+   "evidence": [
+    "I sobbed so hard in the cab my monocle popped out.",
+    "Hang the top hat on the Meridian Wellness pump before I get there, or I’m docking you five minutes."
+   ],
+   "raise": "Give Reuben one sharp jab at Brick's audit routine that lands as hard as her ring-light catch, so the mockery runs both ways.",
+   "def": "51f6e5881b5145be",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 5,
+   "why": "The reader attributed all 20 messages correctly. Several reasons are voice: Reuben's lowercase 'i', double '!!' and stacked rapid texts; Brick's capitalized, clipped, legalistic sentences. But many reasons lean on content lifted from the brief, such as Marguerite, Delphine, the pump and the planner tattoo, so not every attribution is by voice alone. Reuben's message 17 also slides into Brick's capitalized itinerary format, which blurs the line just where it matters.",
+   "evidence": [
+    "ok inspector gadget!!",
+    "\"Sometime\" is not a unit of measurement.",
+    "Tuesday. 7:45 PM: fifteen-minute travel buffer."
+   ],
+   "raise": "Keep Reuben's itinerary in his own lowercase, run-on register, so the late messages can be told apart by voice rather than by what they mention.",
+   "def": "a77bc9ef79556bda",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Reuben has real gaps: he claims a 'noise-funk loft' while a ring light and radiator show in his photo, and says 'i don't believe in clocks' after a four-second reply. But Brick exposes the loft gap, and Reuben confesses everything by message 11. Brick has almost no unseen gap: her old-money act is never claimed on screen before she debunks it herself ('monocle is eighteen dollars'). She also volunteers the sobbing and the boxed rosé herself. Both characters narrate their own contradictions, which is the brief's 'pre-emptive disclosure' bit, and it eats the gap.",
+   "evidence": [
+    "i'm actually backstage at this super underground Lithuanian noise-funk loft right now",
+    "why can I zoom in on your top hat buckle and see the reflection of a clip-on ring light and a radiator?",
+    "The monocle is eighteen dollars on eBay."
+   ],
+   "raise": "Let Brick perform the old-money minimalism on screen for several messages, with the floorboards and rosé leaking out in details she doesn't notice, before anyone names them.",
+   "def": "fa4461088ccd15ee",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laughs give the sender away. 'Sometime is not a unit of measurement' and the monocle popping out in the cab are pure Brick, and 'Meridian Wellness Solutions' and the 'we can just watch something' callback cost Reuben something real. Against that, the corporate register stacks up: 'sign off on the following disclosures', 'I respect the audit' and 'docking you five minutes' sit at or past the two-joke limit. 'inspector gadget!!' is a wisecrack either character could send. It stays above the line because the best lines are character-specific and wounding.",
+   "evidence": [
+    "I sobbed so hard in the cab my monocle popped out.",
+    "Pre-emptive flaw disclosure so nobody can flinch first. I respect the audit.",
+    "at 8:35 we drink your floor wine and we can just watch something."
+   ],
+   "raise": "Swap 'I respect the audit' and 'docking you five minutes' for lines that come out of Brick's calendar wound rather than corporate vocabulary.",
+   "def": "4448c7f54baa167a",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Reuben's first catch, the ring light, gets a proper deflect-and-dig ('i'm from everywhere baby, i don't believe in clocks'). After Brick's outburst, though, he concedes outright with 'jesus / okay' and lays out the whole truth. Brick is never caught at all; she volunteers her wounds and then softens ('I just need to know'). There is no stated lesson. Still, the second half is concession and mutual confession rather than explanations that make things worse.",
+   "evidence": [
+    "i'm from everywhere baby, i don't believe in clocks, let's just vibe",
+    "okay. i haven't left my apartment in eleven days.",
+    "I just need to know that if you say Tuesday"
+   ],
+   "raise": "Have Reuben answer the outburst with a worse excuse, such as a fake tour schedule, so the truth only comes out at the bottom of a deeper hole.",
+   "def": "5102b09e503af846",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Brick holds the top from the opening disclosures through the shrimp interrogation, while Reuben chases and deflects. The flip comes when Brick admits the pigs-in-a-blanket childhood and asks for a promise. Reuben then dictates the itinerary, and Brick is reduced to prompting 'And 8:20?'. She reclaims the top with the final docking threat. That makes two flips with a stretch each way, but Reuben's stretch on top is only three messages, and the flips land as a resolution rather than driving the plot.",
+   "evidence": [
+    "Give me a timestamp or unmatch.",
+    "And 8:20?",
+    "or I'm docking you five minutes."
+   ],
+   "raise": "Give Reuben an earlier, longer stretch on top, for instance by spotting something in Brick's photos, so the power changes hands more than once before the itinerary.",
+   "def": "a327913ca348ff82",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 5,
+   "why": "Punchlines mostly land on the last words of their messages: 'monocle popped out', 'radiator', 'six-point Helvetica', 'Meridian Wellness Solutions', 'docking you five minutes'. Reaction shots are well placed: a one-word 'jesus' after Brick's long rant, and the short 'And the shrimp comment?' and 'And 8:20?' after long messages, so hot and cold alternate. Small flaws remain: 'sad shrimp' is buried mid-message in message 3, and 'i wanted to die' sits mid-message in message 14.",
+   "evidence": [
+    "Reuben_404: jesus",
+    "Brick_haus: And 8:20?",
+    "billed my statement as Meridian Wellness Solutions."
+   ],
+   "raise": "Break 'hook forty degrees left like a sad shrimp' into its own message before the 'we should totally hang' follow-up.",
+   "def": "7e36393433d52f66",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways return with new meaning and nobody explains them. The \"sad shrimp\" hook and her listed \"bump on my dorsal ridge\" start as self-deprecation and end as a fit at 8:20. \"We can just watch something\" turns from a wound into a chosen ending. The last line puts the top hat on the Meridian Wellness pump and closes the night without comment. It falls short of a 6 because Brick explains one payoff aloud (\"Pre-emptive flaw disclosure so nobody can flinch first. I respect the audit.\"), and the final schedule crams in heels, vest, hook, bump, floor wine and the watch line, so it reads a little like a checklist.",
+   "evidence": [
+    "hook forty degrees left like a sad shrimp",
+    "8:20 my left hook hits that bump on your ridge right on the dot",
+    "Hang the top hat on the Meridian Wellness pump before I get there"
+   ],
+   "raise": "Cut \"I respect the audit\" and let two or three callbacks in the schedule carry the night instead of six.",
+   "def": "9ff48f7918d86364",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The ending follows from both habits. The man who \"doesn't believe in clocks\" hands over a timestamped itinerary, which is her kink, and writes himself being held down so he \"physically cannot do a bit,\" which is his. The reader's prediction matched almost exactly, down to \"Tuesday, 7:45,\" so the outcome is inevitable but not surprising. That keeps it at a 4. It stays above the line because the warmth is paid for by both confessions, and the pump-and-hat order adds one beat the reader did not see coming.",
+   "evidence": [
+    "Tuesday. 7:45 PM: fifteen-minute travel buffer.",
+    "you hold me down by my throat hard enough that i physically cannot do a bit",
+    "Calendar invite sent."
+   ],
+   "raise": "Have the itinerary arrive in a form the reader didn't predict, such as Reuben asking her for a hard end time, so it surprises in the moment.",
+   "def": "8bd8de581cc31c9e",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message reacts to the one before. Her \"sometime\" lands, he deflects with \"inspector gadget,\" and she answers \"clocks\" with the planner tattoo. His \"jesus\" absorbs her dump. She pointedly skips his Delphine confession to press \"And the shrimp comment?\", which reads as a choice. It isn't a 6 because his first long message ignores her top-hat and four-second jab and starts a fresh pitch instead of reacting.",
+   "evidence": [
+    "\"Sometime\" is not a unit of measurement.",
+    "And the shrimp comment?",
+    "And 8:20?"
+   ],
+   "raise": "Make Reuben's second message answer the top-hat and four-second jab directly, even as a dodge.",
+   "def": "f426aa8449e0fbc7",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 5,
+   "why": "Reuben's typing tracks the night. It starts as lowercase \"!!\" bluster and a double-text, drops to \"jesus\" and \"okay.\" when caught, runs into an unbroken confession, and ends in her capitalized, colon-separated schedule format. You can see his guard go down from the shapes alone. Brick shifts less: her vulnerable \"pigs-in-a-blanket\" message is as composed as her opener, and only the use of his name marks the change. That keeps it from a 6.",
+   "evidence": [
+    "ok inspector gadget!!",
+    "jesus",
+    "I grew up eating microwaved pigs-in-a-blanket over the sink, Reuben."
+   ],
+   "raise": "Let Brick's confession break her formal register, with a shorter, plainer, or uncapitalized line where her guard drops.",
+   "def": "6e21e724825d1cc3",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    false,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "Most messages read as typed. There are short jabs, double-texts and \"And 8:20?\", with no narration or stage directions. But long, composed messages are frequent, about six of nineteen. The Marguerite message stacks a backstory, a furniture-dumpster clause and a scene-setting \"rent-destroying heels\" description that sounds lifted from a profile rather than thumbed at 1am. It stays above the line because Reuben's long confessions land as events, and Brick's formality is her act.",
+   "evidence": [
+    "I threw every piece of furniture she ever touched into a dumpster, so I am currently drinking three-liter boxed rosé on the bare floorboards in rent-destroying heels.",
+    "i’m actually backstage at this super underground Lithuanian noise-funk loft right now, pure chaos, also full disclosure"
+   ],
+   "raise": "Break the Marguerite message into two or three short sends and drop the self-describing \"rent-destroying heels.\"",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "The disclosure frame is used three times: \"Prior to engaging... disclosures,\" \"full disclosure,\" and \"Pre-emptive flaw disclosure.\" The anecdote shape of a humiliating line followed by a pathetic consequence repeats with the cab and the monocle, then the kind voice and the pump. Nothing repeats more than that, and the joke shapes otherwise vary from forensic zoom to tattoo to itinerary. That keeps it above the line but short of a 5.",
+   "evidence": [
+    "please sign off on the following disclosures",
+    "also full disclosure i’m 4.5 inches",
+    "Pre-emptive flaw disclosure so nobody can flinch first."
+   ],
+   "raise": "Drop the third \"disclosure\" phrasing so the motif appears only twice.",
+   "def": "679a7696bf0171cd",
+   "material": "f245d2989c7e3cac",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest break is Reuben's, right after \"jesus\":\n\n\"okay. i haven't left my apartment in eleven days.\"\n\nYou can tell from the change in register. Until then his lines are all bit: \"haha wait my thumb slipped,\" the invented Lithuanian noise-funk loft, \"i'm from everywhere baby, i don't believe in clocks, let's just vibe,\" lots of exclamation marks. Here the punctuation flattens to a lowercase \"okay\" and a period, and he gives a concrete, unflattering number that contradicts his earlier cover story. He also names the performance as performance in his next line: \"if i stop tap-dancing for ten seconds you're gonna see there's nothing underneath this stupid voice.\" The anecdote that follows (\"we can just watch something,\" the £84.99 pump billed as Meridian Wellness Solutions) is specific and embarrassing in a way the shrimp joke only gestured at.\n\nBrick_haus drops his act a few lines later:\n\n\"I grew up eating microwaved pigs-in-a-blanket over the sink, Reuben. The monocle is eighteen dollars on eBay.\"\n\nHe deflates his own persona prop, the monocle that had been part of his dandy, hyper-exacting self-presentation. He also uses Reuben's name for the first time, and he states the actual need under the scheduling demands: \"I just need to know that if you say Tuesday, I'm not sitting on this floor alone at 8:01.\" His earlier disclosures about Marguerite and the dumpster are also raw, but they're still delivered as an ultimatum (\"Give me a timestamp or unmatch\"). This line is the first one that asks rather than commands.\n\nAfter that, both of them partly resume playing, with the timed itinerary and \"docking you five minutes.\" But now the play is built out of what they've just admitted rather than covering it."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Brick_haus**\n\n*What he's afraid of.* Being left waiting alone after a vague promise. He says it outright: \"I just need to know that if you say Tuesday, I'm not sitting on this floor alone at 8:01.\" He also hates open-ended plans: \"'Sometime' is not a unit of measurement.\"\n\n*What he does so he doesn't have to feel it.* He controls through schedules and scrutiny:\n- He demands precision: \"Give me a timestamp or unmatch.\"\n- He has ritualised time: \"a weekly planner tattooed down my shaft in six-point Helvetica,\" and he put fights \"on a shared Google Calendar with hard fifteen-minute end times.\"\n- He discloses his flaws first: he opens with a \"disclosure\" of his own body, and he praises Reuben's version: \"Pre-emptive flaw disclosure so nobody can flinch first. I respect the audit.\"\n- He investigates. He zooms in on the buckle and finds \"a clip-on ring light and a radiator.\"\n- He wears a persona of monocle and heels, and then undercuts it himself: \"The monocle is eighteen dollars on eBay.\"\n\n*Where it comes from.* The chat points to two recent events. The first is the man who said \"let's do this again sometime\" with no date: \"I sobbed so hard in the cab my monocle popped out.\" The second is Marguerite, who \"walked out because I put our relationship fights on a shared Google Calendar.\" He offers \"I grew up eating microwaved pigs-in-a-blanket over the sink\" right before naming his fear. The placement suggests a link, but he never says that his childhood caused it. Any deeper origin is not in the chat.\n\n*What he did at the end.* He accepted the concrete plan and committed to it: \"Calendar invite sent.\" He kept a teasing rule in place: \"Hang the top hat on the Meridian Wellness pump before I get there, or I'm docking you five minutes.\"\n\n**Reuben_404**\n\n*What he's afraid of.* That there is nothing behind his performance, and that people will leave once they see it: \"if i stop tap-dancing for ten seconds you're gonna see there's nothing underneath this stupid voice and walk out just like Delphine did.\" He is also ashamed of his body and of sexual failure. He hides \"my crooked silhouette in the dark,\" and he says \"i wanted to die\" after a partner's kind response.\n\n*What he does so he doesn't have to feel it.*\n- He performs and deflects with jokes, a fake setting (\"backstage at this super underground Lithuanian noise-funk loft\"), \"ok inspector gadget!!\", and \"i don't believe in clocks, let's just vibe.\"\n- He mocks his own body before anyone else can: \"hook forty degrees left like a sad shrimp.\"\n- He hides and withdraws. The ring light is \"clamped to my headboard so nobody has to see my crooked silhouette,\" and \"i haven't left my apartment in eleven days.\"\n- He tries to fix the problem in private: \"an £84.99 vacuum girth pump that billed my statement as Meridian Wellness Solutions.\"\n\n*Where it comes from.* The chat gives two sources. One is Delphine walking out. The other is the last girl, who \"patted my helmet and said 'we can just watch something' in the kindest voice i've ever heard.\" The chat doesn't say whether these were the same person. Anything earlier than these is not in the chat.\n\n*What he did at the end.* He dropped the vagueness and gave Brick exactly what Brick had asked for, a timed plan: \"Tuesday. 7:45 PM: fifteen-minute travel buffer. 8:00 PM...\" He asked to have his defence taken away: \"hold me down by my throat hard enough that i physically cannot do a bit.\" He took back the line that had hurt him and offered it as something to look forward to: \"at 8:35 we drink your floor wine and we can just watch something.\"\n\nThe chat ends before Tuesday, so whether either of them follows through is not in the chat."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**\"We can just watch something.\"** It first appears as the kind, pitying line a past partner said after his hook \"caught wrong,\" the moment he says made him want to die. It returns as his own plan for 8:35, after sex and the wine. It shifts from consolation for failure to a chosen, cozy ending. The chat doesn't say whether that partner is Delphine, so I can't tell if the two are the same person.\n\n**The left hook / \"sad shrimp.\"** It starts as a self-deprecating joke in his first disclosure, then reappears as the source of real humiliation in the re-entry story. At 8:20 it becomes the thing that \"hits that bump on your ridge right on the dot.\" The flaw is now a fit.\n\n**Her dorsal bump.** She opens by listing it as a disclosed flaw. It comes back as the target of his hook, an asset paired with his.\n\n**\"Sometime\" and vibing versus clocks.** She rejects \"sometime\" as not a unit of measurement. He answers with \"I don't believe in clocks, let's just vibe.\" Later he gives a minute-by-minute Tuesday schedule. His position completely reverses, and he speaks her language.\n\n**Fifteen-minute increments and the calendar.** These first appear as the reason Marguerite left: fights with hard fifteen-minute end times on a shared Google Calendar. Then they return in his \"fifteen-minute travel buffer,\" his schedule running in roughly fifteen-minute blocks, and her \"Calendar invite sent.\" The habit that ended her last relationship is now accepted and shared.\n\n**The heels.** First they are \"rent-destroying heels\" worn while drinking alone on the bare floor after the breakup. Then they are what she walks in wearing at 8:00. They turn from a sign of wreckage into something he wants. (The \"steamed vest\" isn't mentioned earlier, so it isn't a callback.)\n\n**The floor and the boxed rosé.** She is drinking it alone on the floorboards, and she fears \"sitting on this floor alone at 8:01.\" It returns as \"your floor wine\" that they drink together. Solitary grief becomes a shared joke. His schedule, starting with her walking in at 8:00, also answers the 8:01 fear directly.\n\n**Walking out.** Marguerite walked out, and he fears she'll \"walk out just like Delphine did.\" His plan has her walk in. Leaving is inverted into arriving.\n\n**The top hat.** It starts as her insult (\"a dick in a bespoke top hat\"), then becomes the source of evidence (the buckle reflecting the ring light). Finally she tells him to hang it on the pump. The costume is retired, and his persona is set down on the object of his shame.\n\n**The ring light.** First it is a clue exposing his \"loft\" lie. Then he explains it is clamped to his headboard to hide his silhouette. It shifts from proof he's faking to a vulnerable confession.\n\n**Meridian Wellness Solutions.** It starts as the embarrassing billing name on his statement. She reuses it as a playful name for the pump, turning a private shame into an affectionate in-joke.\n\n**Doing a bit / tap-dancing / four-second replies.** She opens by disliking quick, glib replies. He admits his tap-dancing hides that there's \"nothing underneath.\" His request to be held down so he \"physically cannot do a bit\" turns the defense mechanism into something he asks her to take from him.\n\n**The monocle.** First it is a comic detail, popping out while she sobs in a cab. Later she reveals it cost eighteen dollars on eBay. It goes from part of her persona to an admitted prop, matching his own unmasking.\n\n**Disclosures and audits.** Her opening demand to \"sign off on the following disclosures\" comes back as \"Pre-emptive flaw disclosure… I respect the audit.\" It moves from a defensive gatekeeping ritual to mutual recognition.\n\n**Docking minutes.** Her time-penalty threat (\"docking you five minutes\") echoes her rigid scheduling, but now as flirtation rather than control.\n\nNothing in the chat brings back his \"my thumb slipped.\""
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I wouldn't have stopped. The closest I came was early, around \"i'm from everywhere baby, i don't believe in clocks, let's just vibe.\" By then both characters seemed built from stacked quirks (top hat, monocle, Lithuanian noise-funk loft, sad shrimp), and the chat risked becoming two people trading eccentricities with nothing underneath. Brick_haus's Marguerite message deepened that worry: the Google Calendar fights, the dumpstered furniture, the boxed rosé and heels on bare floorboards all land in one breath, which reads more like a writer piling on detail than a person talking.\n\nWhat kept me reading was the ring-light catch. Brick_haus pierces Reuben's cover story with something concrete and observed, which suggested the chat would interrogate the bits rather than just perform them. Then Reuben's \"jesus\" and \"i haven't left my apartment in eleven days\" turned the piece. From there, the quirks get explained instead of merely displayed. The ring light hides his silhouette, the tap-dancing is fear of being left, and the shrimp line hides a specific humiliation.\n\nAs for exact prediction, the answer is never. Some moves were foreseeable in shape but not in substance:\n\n- Once Reuben gave a minute-by-minute schedule, a follow-up like \"And 8:20?\" was likely, since it suits a calendar-obsessed character.\n- Once \"we can just watch something\" had been planted as a wound, a callback was plausible. I didn't expect it to return reclaimed as a tender plan for after sex.\n- The final line's use of the Meridian Wellness pump was a callback I might have half-guessed, but not the specific joke of hanging the top hat on it.\n\nSo I could anticipate the structure, schedule-then-callbacks, but never what would actually be said next."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "**1. Brick_haus.** She opens with formal \"disclosures\" about her stubby glans and ridge bump, plus a jab at his top hat and four-second replies.\n\n**2. Reuben_404.** He sends an instant lowercase follow-up, the extra text meant to make his speed look like a bit.\n\n**3. Reuben_404.** He name-drops an underground band, says he's 4.5 inches with a left hook, and offers a vague \"sometime.\"\n\n**4. Brick_haus.** She attacks \"sometime\" and tells the story of sobbing in a cab until her monocle popped out.\n\n**5. Brick_haus.** She inspects his photo like an auditor and spots the ring light and radiator, which exposes him as a shut-in.\n\n**6. Reuben_404.** \"Inspector gadget\" is a jokey deflection in his lowercase voice.\n\n**7. Reuben_404.** \"From everywhere,\" \"don't believe in clocks,\" and \"let's just vibe\" are his fake-spontaneity script.\n\n**8. Brick_haus.** She points to the weekly planner tattooed on her shaft.\n\n**9. Brick_haus.** She describes Marguerite, the calendar fights, the dumped furniture and the boxed rosé, then demands a timestamp.\n\n**10. Reuben_404.** A stunned lowercase \"jesus\" as his act starts to crack.\n\n**11. Reuben_404.** He admits he hasn't left his apartment in eleven days.\n\n**12. Reuben_404.** He explains the headboard ring light, the fear of \"nothing underneath,\" and Delphine.\n\n**13. Brick_haus.** A clipped, capitalized follow-up question, still probing.\n\n**14. Reuben_404.** He tells the \"we can just watch something\" story and mentions the Meridian Wellness pump.\n\n**15. Brick_haus.** She calls it \"pre-emptive flaw disclosure\" and \"respects the audit,\" which is her corporate framing.\n\n**16. Brick_haus.** She mentions the pigs-in-a-blanket childhood and the eBay monocle, and she addresses him by name as \"Reuben.\"\n\n**17. Reuben_404.** Lowercase \"i,\" and he asks to be held down until he \"cannot do a bit,\" which is his kink. He delivers it as the timestamped schedule she wants.\n\n**18. Brick_haus.** She prompts for the next time slot.\n\n**19. Reuben_404.** His left hook and her bump, plus he reclaims \"we can just watch something.\"\n\n**20. Brick_haus.** She sends a calendar invite and threatens to dock him five minutes, which is her scheduling control."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I'd guess it ends with Reuben giving her an actual time, probably something specific and a little early, like \"Tuesday, 7:45,\" or even a calendar invite. Possibly he also agrees to leave his apartment for the first time in eleven days, or drops some piece of his costume. Since I haven't seen the ending, this is a reading of how the excerpt is built, not knowledge of what happens.\n\nThe chat is structured as a mutual unmasking. Both start in costume, him with the top hat, the fake noise-funk loft and \"i don't believe in clocks,\" her with the monocle, the bespoke-top-hat jab and the clinical \"disclosures.\" Each then strips down in turn. He admits the ring light, the isolation, Delphine, the shrimp story and the pump. She answers by deflating her own props: the eighteen-dollar monocle and the pigs-in-a-blanket over the sink. Her last line drops the bit entirely and states the real need plainly: if you say Tuesday, don't leave me alone at 8:01.\n\nThat leaves the next move with him. The conflict was never about anatomy, which both treat as an \"audit\" they've already passed. It's about vagueness versus commitment: \"sometime\" isn't a unit, the hard fifteen-minute end times, \"give me a timestamp or unmatch.\" The satisfying resolution is for the man who \"doesn't believe in clocks\" to name a clock time. Choosing a time before 8:00 would directly answer the 8:01 fear. The planner tattoo and the Google Calendar fights are set up as callbacks he could land.\n\nThe excerpt also leaves room for a less tidy ending. He hasn't left his apartment in eleven days, so he might promise and the story might hint he can't keep it. He might ask her to give him a hard end time as a safety rail, which would turn her controlling habit into something kind. But the tone has moved steadily from performance toward tenderness, so I lean toward a small, concrete, sincere commitment rather than a collapse."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 12.6,
+   "cost": 0.031556,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 20.8,
+   "cost": 0.052508,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 28.9,
+   "cost": 0.062908,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 19.4,
+   "cost": 0.035840000000000004,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 15.0,
+   "cost": 0.049588,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 17.4,
+   "cost": 0.034423999999999996,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 26.3,
+   "cost": 0.0954252,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 36.2,
+   "cost": 0.10403319999999999,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 45.0,
+   "cost": 0.1268612,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 35.9,
+   "cost": 0.1152172,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:09:56Z",
+ "repo_commit": "2b0c5dd",
+ "cost": 0.7084
+}
