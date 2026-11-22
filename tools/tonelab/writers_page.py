@@ -5,6 +5,8 @@ import writers as w  # noqa: E402
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 RUNS = [  # newest first
+    ("v3", "Run 3: own texting style", "writers-v3",
+     "Run 3. As run 2, but the game's texting-style fragments are removed from the list, and the profile prompt adds one sentence: \"Develop your own texting style for this character, so the character is distinct.\""),
     ("v2", "Run 2: the writer decides", "writers-v2",
      "Run 2. The system prompt makes the writer the author and the authority on the characters and the dialogue; the game's material is raw material they may throw away; form and length are theirs."),
     ("v1", "Run 1: first prompt", "writers",
@@ -19,11 +21,11 @@ def read(p):
     return open(p, encoding="utf-8").read().strip()
 
 
-def after_brief(template, slug):
+def after_brief(template, slug, rid):
     d = chars[slug]
     pron = d.get("gender_identity", "they/them")
     p = template.format(brief="[the brief]", char=d["name"], pronouns=pron, obj=w.OBJ.get(pron, "them"),
-                        tidbits=w.tidbits(d, items))
+                        tidbits=w.tidbits(d, items, texting=w.TEXTING[rid]))
     head, tail = p.split("[the brief]", 1)
     return (head.strip() + "\n\n[the brief]\n\n" + tail.strip()).strip()
 
@@ -43,8 +45,8 @@ for rid, label, sub, about in RUNS:
                               "brick": read(os.path.join(O, "brick", f"{wid}.md"))}
                              for wid, name in w.WRITERS if wid in rec and "error" not in rec[wid]],
                  "how": {"system": P["system"], "brief": w.brief(),
-                         "profile_reuben": after_brief(P["user"], "reuben"),
-                         "profile_brick": after_brief(P["user"], "brick"), "chat": chat}})
+                         "profile_reuben": after_brief(P["user"], "reuben", rid),
+                         "profile_brick": after_brief(P["user"], "brick", rid), "chat": chat}})
 data = {"player": chars["reuben"]["name"], "match": chars["brick"]["name"], "runs": runs}
 t = read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "writers_page.html"))
 out = t.replace("__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))

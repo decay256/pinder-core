@@ -97,7 +97,14 @@ Now write their chat on Pinder. {a} writes first. It's your chat: as long or as 
 """,
     },
 }
-VERSION = "v2"
+# v3: v2 without the game's texting-style fragments, and one sentence asking the writer for their own.
+PROMPTS["v3"] = dict(PROMPTS["v2"], user=PROMPTS["v2"]["user"].replace(
+    "Write the character in whatever form you'd actually hand over, as long or as short as you'd make it.\n",
+    "Write the character in whatever form you'd actually hand over, as long or as short as you'd make it.\n\n"
+    "Develop your own texting style for this character, so the character is distinct.\n"))
+assert PROMPTS["v3"]["user"] != PROMPTS["v2"]["user"]
+TEXTING = {"v1": True, "v2": True, "v3": False}  # whether the game's texting-style fragments are in the list
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v3")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -108,14 +115,16 @@ def brief():
     return y["prompts"]["bible"].strip()
 
 
-def tidbits(d, items):
+def tidbits(d, items, texting=None):
+    if texting is None:
+        texting = TEXTING[VERSION]
     out = [f"Profile bio: {d['bio']}"]
     for iid in d["items"]:
         it = items[iid]
         for k in ("personality_fragment", "backstory_fragment"):
             if it.get(k):
                 out.append(it[k].strip())
-        t = (it.get("texting_style_fragment") or "").replace("SYNTAX:", "").strip()
+        t = (it.get("texting_style_fragment") or "").replace("SYNTAX:", "").strip() if texting else ""
         for line in t.splitlines():
             line = line.strip().lstrip("- ").strip()
             if line:
