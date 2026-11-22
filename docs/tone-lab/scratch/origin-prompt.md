@@ -1,13 +1,13 @@
-# Where this branch starts: the first chat prompt
+# The first chat prompt, for reference
 
 This branch rebuilds how profiles and plans are made, from nothing. The scorecard, the runner, the
 mechanics, the situation table and the dashboard are kept from `tone-lab`; the profile generator,
 the plan prompts and everything they produced are not the starting point.
 
-The starting point is the first prompt the tone lab sent for a chat (commit 652b7ec, 15 November
-2026, variant `baseline`), restored below verbatim. It is the earliest statement of what a Pinder
-chat is for. The exact prompt as sent for Reuben and Brick, with the cards and the turns filled in,
-is in `docs/tone-lab/runs/20261115T143401Z-baseline-reuben-brick-s42/prompt.md`, and what came back is `docs/tone-lab/runs/20261115T143401Z-baseline-reuben-brick-s42/output.md`.
+The starting point is the brief that opened every system prompt of the live tone lab, restored in
+`brief.md`: what Pinder is, what the reader should feel, how a chat makes them feel it, the medium and
+how the characters write. This file keeps the first chat prompt the tone lab sent (commit 652b7ec,
+15 November 2026, variant `baseline`) for reference.
 
 ## system.md
 
