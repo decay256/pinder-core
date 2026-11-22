@@ -325,6 +325,7 @@ WRITER_RUNS = [
     ("writers-v3", 3, "the game's texting fragments removed; the writer develops the texting style"),
     ("writers-v4", 4, "run 3's prompts, given to six comedians"),
     ("writers-v5", 5, "the comedians' run 4 profiles; the chat held to 1,000 words"),
+    ("writers-v6", 6, "the comedians' run 4 profiles; the chat held to 500 words"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first
 

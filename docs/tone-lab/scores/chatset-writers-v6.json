@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v6",
+ "kind": "chat",
+ "label": "Run 6 · all 6 chats",
+ "version": "run 6",
+ "order": 106,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v6/chat-reuben-brick/",
+ "note": "Every chat of run 6 (the comedians' run 4 profiles; the chat held to 500 words): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 6,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 17346,
+   "words": 2999
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All six chats run the same sequence. Reuben opens with a 'caught me' alibi, Brick calls out the reply speed and gives a ridge/blunt-tip/high-ball inventory, a Notes-app slip is followed by 'ignore that', both reveal the cropped portrait and Marguerite's calendar, Reuben admits the lentils and coat, and they end on a timed sex plan where Reuben is silenced and is called or named 'Reuben'. Lines recur in far more than two chats: 'eleven seconds' and 'we can just watch something' in five, 'cropped me out' in five, the lentils in five, and 'until you forget what time it is' or a close variant in four. It stays above a 1 because some beats move: the slip belongs to Brick in Schumer, Booster and Carr; Mae Martin adds the narration twist and ends on 'I wasn't at a bar tonight'; Ansari adds the zero-user login screen. Those are swaps of who carries a beat, not different nights, which keeps it below a 3.",
+   "evidence": [
+    "You replied in four seconds. Unless the bartender lives in your coat pocket, you are on your sofa.",
+    "went quiet for eleven seconds, and said we can just watch something in the kindest voice",
+    "talking about my cousin's drywall until you forget what time it is"
+   ],
+   "raise": "Give each writer a different way into the night, such as a different opener, a different first reveal or a different turning point, and drop the shared props (eleven seconds, cropped portrait, lentils, 'forget what time it is') from more than two chats.",
+   "def": "03d845827225bb57",
+   "material": "4cfd4618f51204c7",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 17.8,
+   "cost": 0.0868852,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T10:34:53Z",
+ "repo_commit": "0576a33",
+ "cost": 0.0869
+}
