@@ -1,0 +1,149 @@
+<title>Eight Writers' Pinder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+/* Layout: a sticky picker (writer, then view) over one reading column; chats as a phone thread. */
+:root {
+  --bg: #f6f5f8; --surface: #ffffff; --line: #e2dfe8; --fg: #1d1a24; --muted: #6b6578;
+  --accent: #a3245a; --accent-fg: #ffffff; --them: #ebe8f0; --them-fg: #1d1a24; --note: #8a8396;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15131a; --surface: #1e1b25; --line: #322d3c; --fg: #ece9f2; --muted: #a39cb1;
+  --accent: #d9518c; --accent-fg: #1a0b12; --them: #2b2734; --them-fg: #ece9f2; --note: #8f889c; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15131a; --surface: #1e1b25; --line: #322d3c; --fg: #ece9f2; --muted: #a39cb1;
+  --accent: #d9518c; --accent-fg: #1a0b12; --them: #2b2734; --them-fg: #ece9f2; --note: #8f889c; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 16px/1.55 var(--body); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--surface); border-bottom: 1px solid var(--line); }
+header .wrap { padding-block: 12px 10px; display: grid; gap: 10px; }
+h1 { font: 700 1.25rem/1.2 var(--display); margin: 0; text-wrap: balance; }
+h1 small { font: 400 .8rem var(--body); color: var(--muted); margin-left: .4em; }
+.row { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.row::-webkit-scrollbar { display: none; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--bg); color: var(--fg); border-radius: 999px; padding: 6px 12px; font: 500 .88rem var(--body); cursor: pointer; white-space: nowrap; }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.chip:focus-visible, .tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tabs { display: flex; gap: 18px; border-top: 1px solid var(--line); padding-top: 8px; }
+.tab { background: none; border: 0; padding: 2px 0 6px; font: 600 .9rem var(--body); color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tab span { font: 400 .75rem var(--mono); color: var(--muted); margin-left: 4px; }
+main .wrap { padding-block: 20px 64px; }
+.meta { color: var(--muted); font-size: .85rem; margin: 0 0 18px; }
+/* chat */
+.thread { display: flex; flex-direction: column; gap: 3px; }
+.who { font: 600 .72rem var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 12px 4px 2px; }
+.who.me { align-self: flex-end; }
+.b { max-width: 82%; padding: 8px 12px; border-radius: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.b.me { align-self: flex-end; background: var(--accent); color: var(--accent-fg); border-bottom-right-radius: 6px; }
+.b.them { align-self: flex-start; background: var(--them); color: var(--them-fg); border-bottom-left-radius: 6px; }
+.note { align-self: center; text-align: center; color: var(--note); font-size: .82rem; font-style: italic; margin: 10px 8%; white-space: pre-wrap; }
+/* profile */
+.doc { min-width: 0; }
+.doc h1, .doc h2, .doc h3, .doc h4 { font-family: var(--display); line-height: 1.25; text-wrap: balance; margin: 1.6em 0 .5em; }
+.doc h1 { font-size: 1.5rem; } .doc h2 { font-size: 1.2rem; } .doc h3 { font-size: 1.05rem; } .doc h4 { font-size: 1rem; }
+.doc > :first-child { margin-top: 0; }
+.doc p, .doc li { max-width: 68ch; }
+.doc blockquote { margin: 1em 0; padding: 2px 14px; border-left: 3px solid var(--accent); color: var(--muted); }
+.doc hr { border: 0; border-top: 1px solid var(--line); margin: 2em 0; }
+.doc code { font: .85em var(--mono); background: var(--them); padding: 1px 4px; border-radius: 4px; }
+.doc pre { overflow-x: auto; background: var(--them); padding: 12px; border-radius: 8px; }
+.doc table { border-collapse: collapse; display: block; overflow-x: auto; }
+.doc td, .doc th { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
+pre.prompt { white-space: pre-wrap; overflow-wrap: anywhere; font: .8rem/1.5 var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+details { margin: 0 0 14px; }
+summary { cursor: pointer; font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) { .b, .note { animation: none; } }
+</style>
+
+<header>
+  <div class="wrap">
+    <h1>Reuben &amp; Brick <small>eight writers, one chat each</small></h1>
+    <div class="row" id="writers" role="group" aria-label="Writer"></div>
+    <div class="tabs" role="tablist" aria-label="What to read" id="tabs"></div>
+  </div>
+</header>
+<main><div class="wrap" id="view"></div></main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script>
+const D = __DATA__;
+const VIEWS = [["chat", "Chat"], ["reuben", "Reuben"], ["brick", "Brick"], ["how", "How it was made"]];
+let st = { w: D.writers[0].id, v: "chat" };
+
+function fromHash() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  for (const w of D.writers) for (const [v] of VIEWS)
+    if (h === w.id + "-" + v) { st = { w: w.id, v }; return; }
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
+function words(s) { return (s.trim().match(/\S+/g) || []).length; }
+
+function chatHTML(text) {
+  const me = D.player, them = D.match;
+  const re = new RegExp("^\\s*(?:\\*\\*)?(" + me + "|" + them + ")(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.*)$");
+  let out = [], last = null;
+  for (const raw of text.split("\n")) {
+    const line = raw.replace(/\s+$/, "");
+    if (!line.trim()) continue;
+    const m = line.match(re);
+    if (m) {
+      const who = m[1] === me ? "me" : "them";
+      if (who !== last) out.push(`<div class="who ${who}">${esc(m[1])}</div>`);
+      out.push(`<div class="b ${who}">${esc(m[2].replace(/\*\*$/, ""))}</div>`);
+      last = who;
+    } else if (/^\s*(---|\*\*\*)\s*$/.test(line)) {
+      continue;
+    } else {
+      out.push(`<div class="note">${esc(line.replace(/^#+\s*/, "").replace(/^\*+|\*+$/g, ""))}</div>`);
+      last = null;
+    }
+  }
+  return `<div class="thread">${out.join("")}</div>`;
+}
+function docHTML(md) {
+  try { return `<div class="doc">${marked.parse(md)}</div>`; }
+  catch (e) { return `<pre class="prompt">${esc(md)}</pre>`; }
+}
+
+function render() {
+  const w = D.writers.find(x => x.id === st.w);
+  document.getElementById("writers").innerHTML = D.writers.map(x =>
+    `<button class="chip" id="w-${x.id}" aria-pressed="${x.id === st.w}" data-w="${x.id}">${esc(x.name)}</button>`).join("");
+  document.getElementById("tabs").innerHTML = VIEWS.map(([v, label]) => {
+    const n = v === "how" ? "" : `<span>${words(w[v]).toLocaleString()}w</span>`;
+    return `<button class="tab" role="tab" id="t-${v}" aria-selected="${v === st.v}" data-v="${v}">${label}${n}</button>`;
+  }).join("");
+  const view = document.getElementById("view");
+  if (st.v === "chat") {
+    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, written from the brief and those two profiles, with no constraints.</p>` + chatHTML(w.chat);
+  } else if (st.v === "how") {
+    view.innerHTML = `<p class="meta">Every call: Gemini 4 Argon, reasoning high. The brief is the pinned "Pinder: the brief"; it opens each prompt and is shown once here.</p>
+      <details><summary>System prompt</summary><pre class="prompt">${esc(D.how.system.replace("{name}", w.name))}</pre></details>
+      <details><summary>Profile prompt for Reuben (after the brief)</summary><pre class="prompt">${esc(D.how.profile_reuben)}</pre></details>
+      <details><summary>Profile prompt for Brick (after the brief)</summary><pre class="prompt">${esc(D.how.profile_brick)}</pre></details>
+      <details><summary>Chat prompt (after the brief; the two profiles go where marked)</summary><pre class="prompt">${esc(D.how.chat)}</pre></details>
+      <details><summary>The brief</summary>${docHTML(D.how.brief)}</details>`;
+  } else {
+    view.innerHTML = `<p class="meta">${esc(w.name)}'s ${st.v === "reuben" ? "Reuben" : "Brick"}, written from the brief and the game's fragments for the character.</p>` + docHTML(w[st.v]);
+  }
+  const h = "#" + st.w + "-" + st.v;
+  if (location.hash !== h) history.replaceState(null, "", h);
+  try { localStorage.setItem("pinder-writers", JSON.stringify(st)); } catch (e) {}
+}
+
+document.addEventListener("click", e => {
+  const c = e.target.closest("[data-w]"), t = e.target.closest("[data-v]");
+  if (c) { st.w = c.dataset.w; render(); window.scrollTo(0, 0); }
+  if (t) { st.v = t.dataset.v; render(); window.scrollTo(0, 0); }
+});
+window.addEventListener("hashchange", () => { fromHash(); render(); });
+try { const s = JSON.parse(localStorage.getItem("pinder-writers") || "null"); if (s && D.writers.some(x => x.id === s.w)) st = s; } catch (e) {}
+if (location.hash) fromHash();
+render();
+</script>
