@@ -326,6 +326,7 @@ WRITER_RUNS = [
     ("writers-v4", 4, "run 3's prompts, given to six comedians"),
     ("writers-v5", 5, "the comedians' run 4 profiles; the chat held to 1,000 words"),
     ("writers-v6", 6, "the comedians' run 4 profiles; the chat held to 500 words"),
+    ("writers-v7", 7, "three comedians with their own pitch; new profiles; the chat as a joke in 500 words"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first
 

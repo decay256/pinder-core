@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v7",
+ "kind": "chat",
+ "label": "Run 7 · all 3 chats",
+ "version": "run 7",
+ "order": 107,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v7/chat-reuben-brick/",
+ "note": "Every chat of run 7 (three comedians with their own pitch; new profiles; the chat as a joke in 500 words): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 7,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8525,
+   "words": 1471
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats run the same beats in the same order. Reuben opens with a weather or four-second-reply excuse and a 'Yours in…' sign-off. Brick quotes one word back with scorn and sends a numbered inventory with a left curve and a mid-shaft ridge, then a hard stop. Next come the ring-light excuse, then confessions: Marguerite and the Google Calendar, being cropped from the family photo at nine for a cousin, and the ex who asked for 'one sentence in my normal voice'. The ending is a timed sex plan where Brick pins Reuben 'so you cannot do a voice', and Brick finally says 'Reuben'. It sits above a 1 because the closing gestures differ: Booster deletes the alarm, Carr has the 23:01 silence, Wong drops the hard stop. Each chat also has a few details of its own, like Carr's dropped recurring meeting and Wong's day-eleven lentils.",
+   "evidence": [
+    "my parents cut my whole left side out of the family photo at nine so my cousin's blazer would fit",
+    "At 22:15 Thursday I am pinning you to the carpet so you cannot do a voice",
+    "I pin your shaft flat by the throat so you physically cannot do the BBC voice."
+   ],
+   "raise": "Have at least two chats differ in their opening move and in which wound surfaces first, for example Brick opening, or the family photo never coming up. Cut lines that recur in all three, such as the 'normal voice' ex and the cropped photo with the cousin.",
+   "def": "03d845827225bb57",
+   "material": "a9e115e93922609c",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 14.8,
+   "cost": 0.061392,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T15:54:01Z",
+ "repo_commit": "7ab5cc0",
+ "cost": 0.0614
+}
