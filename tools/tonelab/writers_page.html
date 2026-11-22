@@ -1,4 +1,5 @@
-<title>Eight Writers' Pinder</title>
+<meta charset="utf-8">
+<title>Writers' Pinder</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap">
@@ -59,6 +60,20 @@ main .wrap { padding-block: 20px 64px; }
 .doc td, .doc th { border: 1px solid var(--line); padding: 6px 8px; vertical-align: top; }
 pre.prompt { white-space: pre-wrap; overflow-wrap: anywhere; font: .8rem/1.5 var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
 details { margin: 0 0 14px; }
+/* how it was made: one card per session, in the order the writer read it */
+.flow { margin: 0 0 22px; padding-left: 1.2em; }
+.flow li { margin: 0 0 4px; max-width: 68ch; }
+.step { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 16px 16px 4px; margin: 0 0 18px; }
+.step h2 { font: 700 1.1rem/1.25 var(--display); margin: 0 0 4px; text-wrap: balance; }
+.step h2 small { font: 400 .8rem var(--body); color: var(--muted); margin-left: .4em; }
+.role { font: 600 .72rem var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); margin: 16px 0 6px; }
+.step .doc { font-size: .95rem; }
+.step .doc h1 { font-size: 1.2rem; } .step .doc h2 { font-size: 1.05rem; } .step .doc h3 { font-size: .98rem; }
+details.insert { border-left: 3px solid var(--accent); background: var(--bg); border-radius: 0 8px 8px 0; padding: 8px 12px; margin: 12px 0; }
+details.insert summary { font: 600 .88rem var(--body); }
+details.insert[open] summary { margin-bottom: 8px; }
+details.raw summary { font: 500 .82rem var(--body); color: var(--muted); }
+.arrow { text-align: center; color: var(--muted); font-size: .85rem; margin: -8px 0 10px; }
 summary { cursor: pointer; font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) { .b, .note { animation: none; } }
 </style>
@@ -115,6 +130,44 @@ function docHTML(md) {
   catch (e) { return `<pre class="prompt">${esc(md)}</pre>`; }
 }
 
+const fmt = n => n.toLocaleString("en-GB");
+function segText(seg, w) {
+  if (seg.t === "md") return seg.s;
+  if (seg.t === "brief") return D.briefs[seg.id];
+  return w[seg.who];
+}
+function segHTML(seg, w) {
+  if (seg.t === "md") return docHTML(seg.s);
+  if (seg.t === "brief") {
+    const b = D.briefs[seg.id];
+    return `<details class="insert"><summary>The brief · ${fmt(words(b))} words</summary>${docHTML(b)}</details>`;
+  }
+  const n = D.names[seg.who];
+  return `<details class="insert"><summary>${esc(n)}, as ${esc(w.name)} wrote ${D.pron[seg.who]} in step ${seg.who === "reuben" ? 1 : 2} ·${fmt(words(w[seg.who]))} words</summary>${docHTML(w[seg.who])}</details>`;
+}
+function howHTML(run, w) {
+  const from = run.profiles_from ? ` in ${run.profiles_from}` : "";
+  const flow = `<ol class="flow">
+    <li>${esc(w.name)} writes ${esc(D.names.reuben)}${from}: a session of its own, with the system prompt, then the brief, then the task and the game's fragments for him.</li>
+    <li>${esc(w.name)} writes ${esc(D.names.brick)}${from}: another session of its own, the same way, at the same time.</li>
+    <li>A new session for the chat: the same system prompt, the brief, and the two profiles from steps 1 and 2, pasted in as written. Nothing else from those sessions carries over.</li>
+  </ol>`;
+  const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, chat: "Step 3 · The chat" };
+  const cards = w.steps.map((s, i) => {
+    const raw = "<!-- system prompt -->\n" + s.system + "\n\n<!-- user message -->\n" + s.user.map(x => segText(x, w)).join("");
+    const out = s.slug === "chat" ? `${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w[s.slug]))} words, on the ${s.slug === "reuben" ? "Reuben" : "Brick"} tab`;
+    return `<section class="step"><h2>${esc(titles[s.slug])}<small>session ${i + 1} of 3${s.slug !== "chat" ? from : ""}</small></h2>${s.note ? `<p class="meta">${esc(s.note)}</p>` : ""}
+      <div class="role">System prompt</div>${docHTML(s.system)}
+      <div class="role">User message</div>${s.user.map(x => segHTML(x, w)).join("")}
+      <div class="role">What came back</div><p class="meta">${out}.</p>
+      <details class="raw"><summary>The exact text, as sent</summary><pre class="prompt">${esc(raw)}</pre></details>
+    </section>`;
+  }).join(`<p class="arrow">↓</p>`);
+  return `<p class="meta">${esc(run.about)}</p>
+    <p class="meta">Every session is one call to ${esc(run.model || "the model")}, reasoning ${esc(run.reasoning || "default")}. Below is what ${esc(w.name)} read, in the order they read it. The brief and the pasted profiles are folded where they occur; open them to read them in place.</p>
+    ${flow}${cards}`;
+}
+
 function render() {
   const run = R();
   if (!run.writers.some(x => x.id === st.w)) st.w = run.writers[0].id;
@@ -131,13 +184,7 @@ function render() {
   if (st.v === "chat") {
     view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, written from the brief and those two profiles.</p>` + chatHTML(w.chat);
   } else if (st.v === "how") {
-    const how = run.how;
-    view.innerHTML = `<p class="meta">${esc(run.about)} Every call: Gemini 4 Argon, reasoning high. The brief is the pinned "Pinder: the brief"; it is the same in every prompt and is shown once here.</p>
-      <details open><summary>System prompt</summary><pre class="prompt">${esc(how.system.replace("{name}", w.name))}</pre></details>
-      <details><summary>Profile prompt for Reuben</summary><pre class="prompt">${esc(how.profile_reuben)}</pre></details>
-      <details><summary>Profile prompt for Brick</summary><pre class="prompt">${esc(how.profile_brick)}</pre></details>
-      <details><summary>Chat prompt</summary><pre class="prompt">${esc(how.chat)}</pre></details>
-      <details><summary>The brief</summary>${docHTML(how.brief)}</details>`;
+    view.innerHTML = howHTML(run, w);
   } else {
     view.innerHTML = `<p class="meta">${esc(w.name)}'s ${st.v === "reuben" ? "Reuben" : "Brick"}, written from the brief and the game's fragments for the character.</p>` + docHTML(w[st.v]);
   }

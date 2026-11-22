@@ -1,60 +1,129 @@
-"""Build the eight-writers reading page with every run: each run's chats, profiles and prompts."""
-import json, os, sys
+"""Build the writers' reading page with every run: each run's chats and profiles, and how each was made.
+
+"How it was made" is built from the exact prompts saved next to every output (<writer>.prompt.md),
+in the order the writer read them: per session, the system prompt, then the user message. Inside a
+user message the brief and the pasted profiles are folded, at the place they occur, so the page
+stores the brief once per run and each profile once.
+"""
+import hashlib, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import writers as w  # noqa: E402
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
-RUNS = [  # newest first: (run id, label, output folder, about, prompt version)
+FIRST = "Gemini 4 Argon"
+# newest first: (run id, label, output folder, about, where its profiles were written)
+RUNS = [
+    ("v7", "Run 7: the writer's own pitch", "writers-v7",
+     "Run 7. Three of the comedians (Ali Wong, Joel Kim Booster, Jimmy Carr), each with a system prompt that says what they are known for and how they work, and that the brief comes first. The game's fragments are given as \"what we know\" about each character, under headings; the profile is written knowing it is for a short chat; the chat is written as a joke, to be read, in at most 500 words.", None),
     ("v6", "Run 6: 500 words", "writers-v6",
-     "Run 6. As run 5, with the chat prompt saying \"no longer than 500 words\": the six comedians' profiles from run 4, unchanged.", "v5"),
+     "Run 6. As run 5, with the chat prompt saying \"no longer than 500 words\": the six comedians' profiles from run 4, unchanged.", "run 4"),
     ("v5", "Run 5: 1,000 words", "writers-v5",
-     "Run 5. The six comedians' profiles from run 4, unchanged; the chat prompt says \"no longer than 1,000 words\" where it said \"as long or as short as it should be\".", "v4"),
+     "Run 5. The six comedians' profiles from run 4, unchanged; the chat prompt says \"no longer than 1,000 words\" where it said \"as long or as short as it should be\".", "run 4"),
     ("v4", "Run 4: six comedians", "writers-v4",
-     "Run 4. Run 3's prompts, unchanged, given to six comedians who work on dating, sex and identity: Aziz Ansari, Ali Wong, Mae Martin, Joel Kim Booster, Jimmy Carr and Amy Schumer.", "v3"),
+     "Run 4. Run 3's prompts, unchanged, given to six comedians who work on dating, sex and identity: Aziz Ansari, Ali Wong, Mae Martin, Joel Kim Booster, Jimmy Carr and Amy Schumer.", None),
     ("v3", "Run 3: own texting style", "writers-v3",
-     "Run 3. As run 2, but the game's texting-style fragments are removed from the list, and the profile prompt adds one sentence: \"Develop your own texting style for this character, so the character is distinct.\"", "v3"),
+     "Run 3. As run 2, but the game's texting-style fragments are removed from the list, and the profile prompt adds one sentence: \"Develop your own texting style for this character, so the character is distinct.\"", None),
     ("v2", "Run 2: the writer decides", "writers-v2",
-     "Run 2. The system prompt makes the writer the author and the authority on the characters and the dialogue; the game's material is raw material they may throw away; form and length are theirs.", "v2"),
+     "Run 2. The system prompt makes the writer the author and the authority on the characters and the dialogue; the game's material is raw material they may throw away; form and length are theirs.", None),
     ("v1", "Run 1: first prompt", "writers",
-     "Run 1. One line of persona (\"You are <writer>.\"); the game's material offered as inspiration, not requirements; the chat \"without any constraints\".", "v1"),
+     "Run 1. One line of persona (\"You are <writer>.\"); the game's material offered as inspiration, not requirements; the chat \"without any constraints\".", None),
 ]
 REPO = w.REPO
-items = {it["id"]: it for it in json.load(open(os.path.join(REPO, "data/items/starter-items.json"), encoding="utf-8"))}
 chars = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in ("reuben", "brick")}
+NAME = {s: chars[s]["name"] for s in chars}
+PRON = {"reuben": "him", "brick": "her"}
+items = {it["id"]: it for it in json.load(open(os.path.join(REPO, "data/items/starter-items.json"), encoding="utf-8"))}
 
 
 def read(p):
     return open(p, encoding="utf-8").read().strip()
 
 
-def after_brief(template, slug, pv):
-    d = chars[slug]
-    pron = d.get("gender_identity", "they/them")
-    p = template.format(brief="[the brief]", char=d["name"], pronouns=pron, obj=w.OBJ.get(pron, "them"),
-                        tidbits=w.tidbits(d, items, texting=w.TEXTING[pv]))
-    head, tail = p.split("[the brief]", 1)
-    return (head.strip() + "\n\n[the brief]\n\n" + tail.strip()).strip()
+def split_prompt(path):
+    t = open(path, encoding="utf-8").read()
+    head, user = t.split("<!-- user prompt -->\n", 1)
+    system = head.split("<!-- system prompt -->\n", 1)[1]
+    return system.strip(), user.rstrip("\n")
 
 
-runs = []
-for rid, label, sub, about, pv in RUNS:
+def fold(text, inserts):
+    """Split text at each insert's exact occurrence: [{"t": "md", "s"}, {"t": kind, ...}]."""
+    segs = [{"t": "md", "s": text}]
+    for needle, seg in inserts:
+        if not needle:
+            continue
+        out = []
+        for s in segs:
+            if s["t"] == "md" and needle in s["s"]:
+                a, b = s["s"].split(needle, 1)
+                out += [{"t": "md", "s": a}, dict(seg), {"t": "md", "s": b}]
+            else:
+                out.append(s)
+        segs = out
+    return [s for s in segs if s["t"] != "md" or s["s"].strip()]
+
+
+briefs, runs, stats = {}, [], {"brief folded": 0, "brief not found": 0, "profile folded": 0, "profile not found": 0}
+for rid, label, sub, about, profiles_from in RUNS:
     O = os.path.join(BASE, sub)
-    P = w.PROMPTS[pv]
-    rec = json.load(open(os.path.join(O, "chat-reuben-brick", "run.json"), encoding="utf-8"))["writers"]
-    chat = P["chat"].format(brief="[the brief]", a=chars["reuben"]["name"], b=chars["brick"]["name"],
-                            a_profile=f"[{chars['reuben']['name']}, as this writer wrote him]",
-                            b_profile=f"[{chars['brick']['name']}, as this writer wrote her]")
-    runs.append({"id": rid, "label": label, "about": about,
-                 "writers": [{"id": wid, "name": name,
-                              "chat": read(os.path.join(O, "chat-reuben-brick", f"{wid}.md")),
-                              "reuben": read(os.path.join(O, "reuben", f"{wid}.md")),
-                              "brick": read(os.path.join(O, "brick", f"{wid}.md"))}
-                             for wid, name in w.WRITERS if wid in rec and "error" not in rec[wid]],
-                 "how": {"system": P["system"], "brief": w.brief(),
-                         "profile_reuben": after_brief(P["user"], "reuben", pv),
-                         "profile_brick": after_brief(P["user"], "brick", pv), "chat": chat}})
-data = {"player": chars["reuben"]["name"], "match": chars["brick"]["name"], "runs": runs}
+    if not os.path.exists(os.path.join(O, "chat-reuben-brick", "run.json")):
+        print(f"{rid}: no chats yet, left out")
+        continue
+    meta = json.load(open(os.path.join(O, "chat-reuben-brick", "run.json"), encoding="utf-8"))
+    rec = meta["writers"]
+    writers = []
+    for wid, name in w.WRITERS:
+        if wid not in rec or "error" in rec[wid]:
+            continue
+        texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
+        texts["chat"] = read(os.path.join(O, "chat-reuben-brick", f"{wid}.md"))
+        steps = []
+        for i, (slug, folder) in enumerate((("reuben", "reuben"), ("brick", "brick"), ("chat", "chat-reuben-brick"))):
+            pp = os.path.join(O, folder, f"{wid}.prompt.md")
+            note = None
+            if os.path.exists(pp):
+                system, user = split_prompt(pp)
+            else:
+                # run 1's Brick came from the first script, which kept no prompt: rebuild it from run 1's template
+                assert rid == "v1" and slug == "brick", pp
+                d = chars[slug]
+                pron = d.get("gender_identity", "they/them")
+                system = w.PROMPTS["v1"]["system"].format(name=name)
+                user = w.PROMPTS["v1"]["user"].format(brief=w.brief(), char=d["name"], pronouns=pron,
+                                                      obj=w.OBJ.get(pron, "them"), tidbits=w.tidbits(d, items, texting=True))
+                note = "This session's prompt was not saved: the first script kept none. Shown is run 1's profile template filled with Brick's fragments, rebuilt the same way as Reuben's, which was saved."
+                # the check that makes the rebuild credible: the same rebuild for Reuben gives his saved prompt
+                rd = chars["reuben"]
+                rs, ru = split_prompt(os.path.join(O, "reuben", f"{wid}.prompt.md"))
+                rb = w.PROMPTS["v1"]["user"].format(brief=w.brief(), char=rd["name"], pronouns=rd["gender_identity"],
+                                                    obj=w.OBJ.get(rd["gender_identity"], "them"), tidbits=w.tidbits(rd, items, texting=True))
+                stats["v1 rebuild matches Reuben's saved prompt"] = stats.get("v1 rebuild matches Reuben's saved prompt", 0) + (rb.rstrip("\n") == ru and rs == system)
+            inserts = []
+            # the brief: the longest stored brief that occurs in this prompt, else the current one
+            cur = w.brief()
+            if cur in user:
+                bid = hashlib.sha256(cur.encode()).hexdigest()[:10]
+                briefs[bid] = cur
+                inserts.append((cur, {"t": "brief", "id": bid}))
+                stats["brief folded"] += 1
+            else:
+                stats["brief not found"] += 1
+            if slug == "chat":
+                for s in ("reuben", "brick"):
+                    if texts[s] in user:
+                        inserts.append((texts[s], {"t": "profile", "who": s}))
+                        stats["profile folded"] += 1
+                    else:
+                        stats["profile not found"] += 1
+            steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
+        writers.append({"id": wid, "name": name, "chat": texts["chat"], "reuben": texts["reuben"],
+                        "brick": texts["brick"], "steps": steps})
+    runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
+                 "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),
+                 "reasoning": meta.get("reasoning"), "writers": writers})
+data = {"player": NAME["reuben"], "match": NAME["brick"], "names": NAME, "pron": PRON, "briefs": briefs, "runs": runs}
 t = read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "writers_page.html"))
 out = t.replace("__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))
 open(os.path.join(BASE, "writers", "index.html"), "w", encoding="utf-8").write(out + "\n")
-print(", ".join(f"{r['id']}: {len(r['writers'])} writers" for r in runs), "|", len(out.encode()) // 1024, "KB")
+print(", ".join(f"{r['id']}: {len(r['writers'])} writers" for r in runs), "|", len(out.encode()) // 1024, "KB |",
+      len(briefs), "brief(s) |", stats)

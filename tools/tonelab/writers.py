@@ -120,11 +120,93 @@ PROMPTS["v5"] = dict(PROMPTS["v3"], chat=PROMPTS["v3"]["chat"].replace(
     "It's your chat: as long or as short as it should be,",
     "It's your chat: no longer than 500 words,"))
 assert PROMPTS["v5"]["chat"] != PROMPTS["v3"]["chat"]
-TEXTING = {"v1": True, "v2": True, "v3": False, "v4": False, "v5": False}  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v5")
+# v6: a portrait of the writer in the system prompt; the brief first in both tasks; the game's
+# fragments grouped under headings ("what we know about him"); the profile written knowing it is for
+# a short chat; the chat written as a joke to be read, with a word limit (--words).
+PORTRAITS = {
+    "wong": """You made Baby Cobra and Hard Knock Wife pregnant, Don Wong married and Single Lady divorced and dating again. You co-wrote Always Be My Maybe and played Amy in Beef. Your material is sex, bodies, marriage and money, told without shame and in very specific physical detail. Your jokes say the thing nobody admits wanting, and the filthiest line always gives away something true about the person saying it. You like to flip who's winning: the one who looks like she's losing is running the deal.""",
+    "booster": """You were born in Korea, adopted by white evangelical parents in the Midwest and homeschooled, and you found gay life with no map. Psychosexual is an hour about sex, apps, bodies and being wanted; you wrote and starred in Fire Island, Pride and Prejudice on a gay holiday, about who gets ranked where. Your jokes are vain and honest at once: you admit the shallow thing you want, name the hierarchies of bodies and race the apps run on, and let the hurt under it show for a second before the next joke covers it.""",
+    "carr": """You write one-liners, and you've thought hard about how they work: you co-wrote The Naked Jape, a book about jokes. Your rule is the shortest route to the laugh: set up an assumption, cut every word that isn't needed, and put the word that springs the twist last. Your persona is a man with no shame saying the unsayable, deadpan, and the joke is often on you: your image, your vanity, your tax affair. You go dark on purpose, and the darkness is aimed, never random.""",
+}
+PROMPTS["v6"] = {
+    "system": """You are {name}: you, with your own ear and your own taste, not someone imitating you.
+
+{portrait}
+
+You're writing for Pinder, a comedy game. Each time, you'll first read its brief: what the game is, what it wants to say about dating apps, and what a reader should be left with. Then you'll get one task.""",
+    "user": """{brief}
+
+# Your task
+
+Write {char} ({pronouns}), one of the game's characters. Below is what we know about {obj}. Keep what interests you, change anything, throw the rest away. If you'd rather invent {obj} differently, do.
+
+Later you'll write a short chat between {obj} and another character, working from what you write here and nothing else. So write {obj} the way you'd want {obj} in hand for that: as long as it needs to be, and no longer. Work out how {subj} types yourself, so {subj} is distinct.
+
+{tidbits}
+""",
+    "chat": """{brief}
+
+# Your task
+
+Here are the two characters you wrote for Pinder.
+
+## {a}
+
+{a_profile}
+
+## {b}
+
+{b_profile}
+
+# The chat
+
+Write their chat on the app, no longer than {words} words. {a} writes first.
+
+Write it as a joke. It will be read, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends. And write it in Pinder's spirit: put a finger in the wound of dating apps, through these two.
+""",
+}
+TEXTING = {"v1": True, "v2": True, "v3": False, "v4": False, "v5": False, "v6": False}
+GROUPED = {"v6"}  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v6")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
+SUBJ = {"she/her": "she", "he/him": "he", "they/them": "they"}
+POSS = {"she/her": "her", "he/him": "his", "they/them": "their"}
+
+
+def system_for(wid, name):
+    return SYSTEM.format(name=name, portrait=PORTRAITS.get(wid, "").strip())
+
+
+def tidbits_grouped(d, items):
+    """The game's fragments under headings, each group shuffled with the seed; no texting fragments."""
+    pron = d.get("gender_identity", "they/them")
+    s, o, p = SUBJ.get(pron, "they"), OBJ.get(pron, "them"), POSS.get(pron, "their")
+    rnd = random.Random(SEED)
+    who, past, claims, fear = [], [], [], []
+    for iid in d["items"]:
+        it = items[iid]
+        if (it.get("personality_fragment") or "").strip():
+            who.append(it["personality_fragment"].strip())
+        if (it.get("backstory_fragment") or "").strip():
+            past.append(it["backstory_fragment"].strip())
+    for cat, v in d["backstory_categories"].items():
+        if cat == "physical_dysmorphia":
+            continue
+        claims.append(f"{s.capitalize()} says: {v['bio_lie'].strip()}  \n  In fact: {v['tragic_reality'].strip()}")
+    for line in d.get("psychological_stake", "").splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if line and "about my body" not in line:
+            fear.append(line)
+    fear += [x.strip() for x in d.get("stake_lines", []) if x.strip()]
+    out = [f"## What {p} profile says\n\n{d['bio'].strip()}"]
+    for head, xs in ((f"Who {s} is", who), (f"What happened to {o}", past),
+                     (f"What {s} claims, and what's actually true", claims), (f"What {s} keeps to {o}self", fear)):
+        if xs:
+            rnd.shuffle(xs)
+            out.append(f"## {head}\n\n" + "\n".join("- " + x for x in xs))
+    return "\n\n".join(out)
 
 
 def brief():
@@ -133,6 +215,8 @@ def brief():
 
 
 def tidbits(d, items, texting=None):
+    if texting is None and VERSION in GROUPED:
+        return tidbits_grouped(d, items)
     if texting is None:
         texting = TEXTING[VERSION]
     out = [f"Profile bio: {d['bio']}"]
@@ -166,7 +250,7 @@ def fan_out(jobs, key, out, label):
 
     def run(wid, name, user):
         try:
-            data, seconds = tl.call_openrouter(SYSTEM.format(name=name), user, MODEL, key,
+            data, seconds = tl.call_openrouter(system_for(wid, name), user, MODEL, key,
                                                {"reasoning": {"effort": "high"}})
         except (SystemExit, Exception) as e:
             results[wid] = {"writer": name, "error": str(e)}
@@ -180,7 +264,7 @@ def fan_out(jobs, key, out, label):
         with open(os.path.join(out, f"{wid}.md"), "w", encoding="utf-8") as f:
             f.write(text + "\n")
         with open(os.path.join(out, f"{wid}.prompt.md"), "w", encoding="utf-8") as f:
-            f.write(f"<!-- system prompt -->\n{SYSTEM.format(name=name)}\n\n<!-- user prompt -->\n{user}")
+            f.write(f"<!-- system prompt -->\n{system_for(wid, name)}\n\n<!-- user prompt -->\n{user}")
         print(f"{label} {wid}: {len(text.split())} words, {seconds}s, ${usage.get('cost')}", flush=True)
 
     threads = [threading.Thread(target=run, args=j) for j in jobs]
@@ -198,6 +282,7 @@ def fan_out(jobs, key, out, label):
     old.update(results)
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"model": MODEL, "seed": SEED, "reasoning": "high", "version": VERSION, "system": SYSTEM,
+                   "portraits": {w: PORTRAITS[w] for w in results if w in PORTRAITS} or None,
                    "writers": old}, f, indent=1)
     return not any("error" in r for r in results.values())
 
@@ -208,6 +293,7 @@ def main():
     ap.add_argument("--only", default="", help="write this character's profiles")
     ap.add_argument("--chat", default="", help="a,b: each writer writes a chat between their a and b")
     ap.add_argument("--writers", default="")
+    ap.add_argument("--words", type=int, default=500, help="the chat's word limit, for prompt versions that have one")
     ap.add_argument("--out", default=os.path.join(REPO, "docs/tone-lab/scratch/writers"))
     a = ap.parse_args()
     if not a.key_stdin:
@@ -224,7 +310,7 @@ def main():
             d = json.load(open(os.path.join(REPO, "data/characters", f"{slug}.json"), encoding="utf-8"))
             pron = d.get("gender_identity", "they/them")
             user = USER.format(brief=brief(), char=d["name"], pronouns=pron, obj=OBJ.get(pron, "them"),
-                               tidbits=tidbits(d, items))
+                               subj=SUBJ.get(pron, "they"), tidbits=tidbits(d, items))
             done[slug] = fan_out([(w, n, user) for w, n in chosen], key, os.path.join(a.out, slug), slug)
 
         ts = [threading.Thread(target=one, args=(s,)) for s in slugs]
@@ -243,7 +329,7 @@ def main():
                 print(f"chat {w}: missing a profile, skipped", flush=True)
                 ok = False
                 continue
-            jobs.append((w, n, CHAT.format(brief=brief(), a=names[x], b=names[y],
+            jobs.append((w, n, CHAT.format(brief=brief(), a=names[x], b=names[y], words=a.words,
                                            a_profile=open(px, encoding="utf-8").read().strip(),
                                            b_profile=open(py, encoding="utf-8").read().strip())))
         ok = fan_out(jobs, key, os.path.join(a.out, f"chat-{x}-{y}"), "chat") and ok
