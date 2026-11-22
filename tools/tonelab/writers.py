@@ -291,6 +291,192 @@ TEXTING["v10"] = False
 SHORT_BRIEF = {"v8", "v9", "v10"}
 PAIRED = {"v10"}  # versions run with --pair: own brief, then both characters in one session, then the chat
 
+# v11 (--turns): the writer's own brief and characters from a paired run, then the chat one turn at a
+# time in one session. Each turn is assembled from the pieces below, picked by the seed's mechanics, so
+# the same seed always gives the same text. The pieces say what happens in the game, not what to write.
+PROMPTS["v11"] = dict(PROMPTS["v10"], chat=OWN_BRIEF + """
+# Your task
+
+Here's what you wrote about the two characters.
+
+{characters}
+
+# The chat
+
+Improvise their chat on the app, one turn at a time: {turns} turns, no longer than {words} words in all. Set something up early and pay it off at the end, so the last message picks up something from the beginning and the chat feels rounded. End on the laugh.
+
+It's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.
+
+Each turn, I tell you how the game goes for {a}. You write {a}'s message and {b}'s reply, one message per line, as "{a}: message" or "{b}: message", and nothing else.
+
+{frame}
+
+# Turn 1
+
+{turn}
+""", turn="""# Turn {n}
+
+{turn}
+""")
+TURNS = {"v11"}  # versions run with --turns
+PRON = {"he/him": dict(he="he", him="him", his="his", himself="himself"),
+        "she/her": dict(he="she", him="her", his="her", himself="herself"),
+        "they/them": dict(he="they", him="them", his="their", himself="themselves")}
+P_FRAME = ("This chat runs on Dungeons & Dragons rules. Each turn, {A} picks one of {a_his} six stats (Charm, Rizz, Honesty, "
+           "Chaos, Wit, Self-awareness) and rolls a twenty-sided die against a difficulty. How far {a_he} beats or misses it "
+           "decides how well {a_his} message comes off.\n\n"
+           "{B}'s interest in {a_him} runs from 0 to 25. At 25 {b_he} agrees to a date; at 0 {b_he} unmatches {a_him}.")
+P_TIME = "It's {clock}. {heat}"
+P_HEAT = [(1, 3, "Tonight the heat between them is low: neither of them is in a hurry."),
+          (4, 6, "Tonight the heat between them is medium: there's something in the air."),
+          (7, 8, "Tonight the heat between them is high: it's on both their minds."),
+          (9, 99, "Tonight the heat between them is very high: neither of them is far from saying it.")]
+P_START = "{A} and {B} have just matched, and the chat is empty. {B}'s interest is {n}. {band}"
+P_BAND = [(0, 0, "{B_He} has unmatched {a_him}."),
+          (1, 4, "{B_He}'s nearly gone: one more wrong message and {b_he} leaves."),
+          (5, 9, "{B_He}'s curious but not convinced, and could drift away."),
+          (10, 15, "{B_He}'s interested, leaning neither way yet."),
+          (16, 20, "{B_He}'s drawn in, but still protecting {b_himself}."),
+          (21, 24, "{B_He}'s close to saying yes to a date, not yet."),
+          (25, 25, "{B_He} agrees to a date, and the chat ends there.")]
+STAT_NAME = {"SelfAwareness": "Self-awareness"}
+P_STAT = {"Charm": "Charm means being warm, easy and reassuring.",
+          "Rizz": "Rizz means saying plainly that {a_he} wants {b_him}.",
+          "Honesty": "Honesty means {a_he} hides nothing: {a_he} shows something real, or asks for it.",
+          "Chaos": "Chaos means swerving somewhere unexpected that still makes sense.",
+          "Wit": "Wit means being quick and funny.",
+          "SelfAwareness": "Self-awareness means naming what's actually going on underneath."}
+SHADOW_OF = {"Charm": "Fixation", "Rizz": "Despair", "Honesty": "Denial", "Chaos": "Madness", "Wit": "Overthinking",
+             "SelfAwareness": "Dread"}
+P_SHADOW = {"Fixation": "the warmth clings: needing to be seen back, too much and too soon.",
+            "Despair": "the want gives up halfway and turns into proof it was never going to work.",
+            "Denial": "the honest thing comes out as its own opposite, insisted on.",
+            "Madness": "something not quite {a_him} leaks in: a detail that doesn't belong, said calmly.",
+            "Overthinking": "it qualifies and explains itself until the joke or the point is dead.",
+            "Dread": "{a_he} sees {a_himself} failing with perfect clarity and narrates it while it happens."}
+P_ROLL = "{A} rolls {stat}. {means} {A_He} rolls {total} against {dc}, {by}. {grade}"
+P_ROLL_NAT = "{A} rolls {stat}. {means} {A_He} rolls a natural {nat}. {grade}"
+P_GRADE = {"success": "That's a success: it works.",
+           "strong": "That's a strong success: it works better than {a_he} meant.",
+           "critical": "That's a critical success: it comes out really, really well.",
+           "exceptional": "That's an exceptional success: it's brilliant, the line {a_he}'d hoped to write.",
+           "nat20": ("That's a natural 20, the best roll there is: by luck or by genius, {a_he} says exactly what {b_he} needed "
+                     "to hear, the way {a_he} would at {a_his} very best."),
+           "Fumble": "That's a fumble: nearly, but it slips, slightly.",
+           "Misfire": "That's a misfire: it comes out wrong.",
+           "TropeTrap": "That's a trope trap: it falls into a dating cliché, and the cliché sticks to {a_him}.",
+           "Catastrophe": "That's a catastrophe: it comes out cringe, embarrassing or inappropriate, in a funny way.",
+           "nat1": ("That's a natural 1, the worst roll there is: by bad luck or by instinct, {a_he} says exactly what {b_he} "
+                    "least needed to hear, the way {a_he} would at {a_his} very worst.")}
+P_MISS = "A miss goes wrong through the stat's shadow. {stat}'s shadow is {shadow}: {means}"
+P_TRAP = "This sets a trap that lasts three turns: the {trap} trap. {acting}"
+P_TRAP_ON = "The {trap} trap is still on. {acting}"
+P_TRAP_STAGE = {1: "It starts, and {a_he} doesn't notice it yet.", 2: "It's the pattern now, and {B} can see it.",
+                3: "It wears off after this turn."}
+P_TRAP_ACT = {"cringe": ("{A} knows how {a_he}'s coming across, and it makes it worse: every message is a little over-explained "
+                         "or undercuts itself, and the harder {a_he} tries to be charming, the harder {a_he} tries."),
+              "creep": ("An accidental agenda leaks into everything {A} sends: when the move lands, one line that could be "
+                        "read two ways; when it misses, the whole message seems to be leading somewhere uncomfortable."),
+              "overshare": ("Personal details keep leaking into {A}'s messages, whatever the move: when it lands, one aside "
+                            "that gives away something private; when it misses, several, and they derail the message."),
+              "unhinged": ("{A}'s messages keep accelerating past where {a_he} meant to land: when the move lands, one extra "
+                           "clause or tangent at the end; when it misses, the message starts controlled and ends somewhere else."),
+              "pretentious": ("{A} can't stop explaining things nobody asked about: when the move lands, one unnecessary "
+                              "clarification or reference; when it misses, the message turns into a lesson."),
+              "spiral": ("{A} keeps narrating the conversation while inside it: when the move lands, one aside about how the "
+                         "chat is going; when it misses, {a_he} narrates {a_his} own failure as it happens, and the narrating "
+                         "is the failure.")}
+P_SHADOW_CHECK = "{A_He} also fails to keep {a_his} {shadow} down, so it leaks into the message whatever the roll did: {means}"
+P_HORNY = ("{A_He} also fails to control {a_his} horniness: the message slides toward sex, with something inappropriate for "
+           "the moment. {tier} {reception}")
+P_HORNY_TIER = {"Fumble": "It's a fumble: one word runs warm.", "Misfire": "It's a misfire: the temperature shifts mid-sentence.",
+                "TropeTrap": "It's a trope trap: it turns into a horny dating-app cliché.",
+                "Catastrophe": "It's a catastrophe: the whole message rewrites itself around it.",
+                "Legendary": "It's a catastrophe: the whole message rewrites itself around it."}
+P_HORNY_LOW, P_HORNY_HIGH, HORNY_HIGH_FROM = "At this point {B} isn't won over by it.", "{B}'s into {a_him} enough that {b_he} might flirt back.", 16
+P_STEER = "{A_He} also rolls Steering and succeeds: {a_he} tries to take control of the conversation with a follow-up question."
+P_COMBO = {"The Setup": "Wit, then Charm: the joke set up the charm, and {b_he} gains a little extra interest.",
+           "The Triple": "Three different stats in three turns, and the third worked: {a_his} next roll gets a boost."}
+P_SWING = "{B}'s interest goes from {x} to {y}: {b_he} {swing}, and {b_his} reply carries that. {band}"
+P_FLAT = "{B}'s interest stays at {x}: {b_he} neither gained nor lost interest, and {b_his} reply carries that. {band}"
+P_SWINGS = [(-99, -3, "lost a lot of interest"), (-2, -1, "lost a little interest"), (1, 2, "gained a little interest"),
+            (3, 99, "gained a lot of interest")]
+P_CLOSE = "Your improvisation: {A}'s message and {B}'s reply."
+
+
+def _pick(table, n):
+    return next(s for lo, hi, s in table if lo <= n <= hi)
+
+
+def turn_texts(m, a_name, a_pron, b_name, b_pron):
+    """(frame, [turn text, ...]) for a pinder-mechanics/1 record, from the pieces alone."""
+    pa, pb = PRON.get(a_pron, PRON["they/them"]), PRON.get(b_pron, PRON["they/them"])
+    f = dict(A=a_name, B=b_name, **{f"a_{k}": v for k, v in pa.items()}, **{f"b_{k}": v for k, v in pb.items()},
+             A_He=pa["he"].capitalize(), B_He=pb["he"].capitalize())
+    fill = lambda s, **kw: s.format(**f, **kw)
+    band = lambda n: fill(_pick(P_BAND, n))
+    clock = m["clock"][11:16]
+    frame = fill(P_FRAME)
+    out, stage = [], {}
+    for k, tn in enumerate(m["turns"]):
+        r, stat = tn["roll"], tn["chosen_stat"]
+        sname = STAT_NAME.get(stat, stat)
+        if r["nat20"]:
+            grade = "nat20"
+        elif r["nat1"]:
+            grade = "nat1"
+        elif r["success"]:
+            d = r["total"] - r["dc"]
+            grade = "exceptional" if d >= 15 else "critical" if d >= 10 else "strong" if d >= 5 else "success"
+        else:
+            grade = r["final_tier"]
+            if grade not in P_GRADE:
+                raise ValueError(f"turn {tn['turn']}: no piece for the result {grade}")
+        g = fill(P_GRADE[grade])
+        means = fill(P_STAT[stat])
+        if r["nat20"] or r["nat1"]:
+            ps = [fill(P_ROLL_NAT, stat=sname, means=means, nat=20 if r["nat20"] else 1, grade=g)]
+        else:
+            d = r["total"] - r["dc"]
+            by = f"beating it by {d}" if d > 0 else "matching it exactly" if d == 0 else f"missing it by {-d}"
+            ps = [fill(P_ROLL, stat=sname, means=means, total=r["total"], dc=r["dc"], by=by, grade=g)]
+        if not r["success"]:
+            sh = SHADOW_OF[stat]
+            ps.append(fill(P_MISS, stat=sname, shadow=sh, means=fill(P_SHADOW[sh])))
+        after = [x.lower() for x in tn.get("active_traps_after") or []]
+        if r.get("activated_trap"):
+            trap = r["activated_trap"].lower()
+            stage[trap] = 1
+            ps.append(fill(P_TRAP, trap=trap.capitalize(), acting=fill(P_TRAP_ACT[trap])) + " " + fill(P_TRAP_STAGE[1]))
+        for trap in [x.lower() for x in tn.get("active_traps_before") or []]:
+            if trap == (r.get("activated_trap") or "").lower():
+                continue
+            stage[trap] = stage.get(trap, 1) + 1
+            st = 3 if trap not in after else min(stage[trap], 2)
+            ps.append(fill(P_TRAP_ON, trap=trap.capitalize(), acting=fill(P_TRAP_ACT[trap])) + " " + fill(P_TRAP_STAGE[st]))
+        s = tn.get("shadow") or {}
+        if s.get("miss"):
+            ps.append(fill(P_SHADOW_CHECK, shadow=s["shadow"], means=fill(P_SHADOW[s["shadow"]])))
+        h = tn.get("horniness") or {}
+        if h.get("miss"):
+            rec = P_HORNY_HIGH if tn["interest_before"] >= HORNY_HIGH_FROM else P_HORNY_LOW
+            ps.append(fill(P_HORNY, tier=P_HORNY_TIER[h["tier"]], reception=fill(rec)))
+        if (tn.get("steering") or {}).get("succeeded"):
+            ps.append(fill(P_STEER))
+        if tn.get("combo"):
+            if tn["combo"] not in P_COMBO:
+                raise ValueError(f"turn {tn['turn']}: no piece for the combo {tn['combo']}")
+            ps.append(fill(P_COMBO[tn["combo"]]))
+        x, y = tn["interest_before"], tn["interest_after"]
+        ps.append(fill(P_FLAT, x=x, band=band(y)) if x == y else
+                  fill(P_SWING, x=x, y=y, swing=_pick(P_SWINGS, y - x), band=band(y)))
+        ps.append(fill(P_CLOSE))
+        if k == 0:
+            ps = [fill(P_TIME, clock=clock, heat=_pick(P_HEAT, m["session_horniness"])),
+                  fill(P_START, n=tn["interest_before"], band=band(tn["interest_before"]))] + ps
+        out.append("\n\n".join(ps))
+    return frame, out
+
 
 def split_joke(text):
     """("joke", "chat") from an answer with a "## The joke" and a "## The chat" heading, else None."""
@@ -300,7 +486,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v10")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v11")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -516,21 +702,120 @@ def pair(a, chosen, key):
     return fan_out(jobs, key, os.path.join(a.out, f"chat-{x}-{y}"), "chat") and ok
 
 
+def turns(a, chosen, key):
+    """v11: per writer, one session: their own brief and characters (from --from), then the chat turn by
+    turn, each turn assembled from the pieces by the seed's mechanics. The writer answers each turn with
+    the player's message and the match's reply; the chat is their answers' lines, in order."""
+    import shutil
+    x, y = a.turns.split(",")
+    ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
+    an, bn = ds[x]["name"], ds[y]["name"]
+    mech = json.load(open(a.mechanics, encoding="utf-8"))
+    frame, texts = turn_texts(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
+    P = PROMPTS[VERSION]
+    for folder in ("brief", "characters"):
+        os.makedirs(os.path.join(a.out, folder), exist_ok=True)
+        for w, n in chosen:
+            shutil.copy(os.path.join(a.src, folder, f"{w}.md"), os.path.join(a.out, folder, f"{w}.md"))
+    shutil.copy(a.mechanics, os.path.join(a.out, "mechanics.json"))
+    out = os.path.join(a.out, f"chat-{x}-{y}")
+    os.makedirs(out, exist_ok=True)
+    line_re = re.compile(rf"^\s*\**\s*({re.escape(an)}|{re.escape(bn)})\s*\**\s*:\s*(.*\S)\s*$")
+    results = {}
+
+    def run(w, n):
+        rd = lambda f: open(os.path.join(a.out, f, f"{w}.md"), encoding="utf-8").read().strip()
+        own, chars = rd("brief"), rd("characters")
+        history, log, chat, cost, secs = [], [], [], 0.0, 0.0
+        for i, tx in enumerate(texts, 1):
+            prompt = (P["chat"].format(own=own, characters=chars, a=an, b=bn, turns=len(texts), words=a.words, frame=frame, turn=tx)
+                      if i == 1 else P["turn"].format(n=i, turn=tx))
+            try:
+                data, seconds = tl.call_openrouter(system_for(w, n), prompt, MODEL, key, {"reasoning": {"effort": "high"}}, history)
+            except (SystemExit, Exception) as e:
+                results[w] = {"writer": n, "error": f"turn {i}: {e}", "turns_done": i - 1}
+                print(f"turns {w}: turn {i} failed: {e}", flush=True)
+                break
+            msg = ((data.get("choices") or [{}])[0].get("message") or {})
+            text = (msg.get("content") or "").strip()
+            usage = data.get("usage") or {}
+            cost += usage.get("cost") or 0
+            secs += seconds
+            lines, stray = [], []
+            for ln in text.splitlines():
+                mm = line_re.match(ln)
+                if mm:
+                    lines.append(f"{mm.group(1)}: {mm.group(2)}")
+                elif ln.strip():
+                    stray.append(ln.strip())
+            log.append({"turn": i, "prompt": prompt, "answer": text, "lines": lines, "stray": stray, "seconds": seconds,
+                        "cost": usage.get("cost"), "completion_tokens": usage.get("completion_tokens"),
+                        "from_a": sum(l.startswith(an + ":") for l in lines), "from_b": sum(l.startswith(bn + ":") for l in lines)})
+            if not usage.get("completion_tokens") or not lines:
+                results[w] = {"writer": n, "error": f"turn {i}: no chat lines in the answer", "turns_done": i - 1}
+                print(f"turns {w}: turn {i} gave no chat lines", flush=True)
+                break
+            history += [{"role": "user", "content": prompt}, {"role": "assistant", "content": text}]
+            chat += lines
+            print(f"turns {w}: turn {i}, {len(lines)} lines, {len(' '.join(lines).split())} words, {seconds}s", flush=True)
+        else:
+            results[w] = {"writer": n, "model": MODEL, "seconds": round(secs, 1), "cost": round(cost, 4),
+                          "words": len("\n".join(chat).split()), "turns": len(log)}
+        with open(os.path.join(out, f"{w}.turns.json"), "w", encoding="utf-8") as f:
+            json.dump({"writer": n, "system": system_for(w, n), "turns": log}, f, indent=1)
+        with open(os.path.join(out, f"{w}.prompt.md"), "w", encoding="utf-8") as f:
+            f.write(f"<!-- system prompt -->\n{system_for(w, n)}\n\n" + "\n\n".join(
+                f"<!-- user prompt, turn {e['turn']} -->\n{e['prompt']}\n\n<!-- answer, turn {e['turn']} -->\n{e['answer']}" for e in log))
+        if "error" not in results[w]:
+            with open(os.path.join(out, f"{w}.md"), "w", encoding="utf-8") as f:
+                f.write("\n".join(chat) + "\n")
+            print(f"turns {w}: done, {results[w]['words']} words, {results[w]['seconds']}s, ${results[w]['cost']}", flush=True)
+
+    threads = [threading.Thread(target=run, args=c) for c in chosen]
+    for th in threads:
+        th.start()
+        time.sleep(1)
+    for th in threads:
+        th.join()
+    with open(os.path.join(out, "run.json"), "w", encoding="utf-8") as f:
+        json.dump({"model": MODEL, "reasoning": "high", "version": VERSION, "system": SYSTEM, "from": a.src,
+                   "mechanics": {k: v for k, v in mech.items() if k != "turns"},
+                   "portraits": {w: PORTRAITS[w] for w in results if w in PORTRAITS} or None, "writers": results}, f, indent=1)
+    return not any("error" in r for r in results.values())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--key-stdin", action="store_true")
     ap.add_argument("--only", default="", help="write this character's profiles")
     ap.add_argument("--chat", default="", help="a,b: each writer writes a chat between their a and b")
     ap.add_argument("--pair", default="", help="a,b: v10's three sessions per writer (own brief, both characters, chat)")
+    ap.add_argument("--turns", default="", help="a,b: v11's chat one turn at a time, from --from's own briefs and characters")
+    ap.add_argument("--from", dest="src", default="", help="--turns: the paired run whose brief/ and characters/ to use")
+    ap.add_argument("--mechanics", default="", help="--turns: the seed's mechanics.json (pinder-mechanics/1)")
+    ap.add_argument("--print-turns", action="store_true", help="--turns: print the assembled turn texts and stop")
     ap.add_argument("--writers", default="")
     ap.add_argument("--words", type=int, default=500, help="the chat's word limit, for prompt versions that have one")
     ap.add_argument("--out", default=os.path.join(REPO, "docs/tone-lab/scratch/writers"))
     a = ap.parse_args()
+    if a.turns and a.print_turns:
+        x, y = a.turns.split(",")
+        ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
+        frame, texts = turn_texts(json.load(open(a.mechanics, encoding="utf-8")), ds[x]["name"], ds[x].get("gender_identity", "they/them"),
+                                  ds[y]["name"], ds[y].get("gender_identity", "they/them"))
+        print(frame)
+        for i, tx in enumerate(texts, 1):
+            print(f"\n# Turn {i}\n\n{tx}")
+        return
     if not a.key_stdin:
         tl.die("writers: the key comes on stdin (--key-stdin)")
     key = sys.stdin.readline().strip().lstrip("﻿").strip()
     chosen = [w for w in WRITERS if not a.writers or w[0] in a.writers.split(",")]
     ok = True
+    if a.turns:
+        if VERSION not in TURNS:
+            tl.die(f"writers: --turns needs a turn-by-turn prompt version, not {VERSION}")
+        ok = turns(a, chosen, key) and ok
     if a.pair:
         if VERSION not in PAIRED:
             tl.die(f"writers: --pair needs a paired prompt version, not {VERSION}")

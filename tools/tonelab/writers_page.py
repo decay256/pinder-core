@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v12", "Run 12: turn by turn on the dice", "writers-v12",
+     "Run 12. Run 11's comedians, with their own briefs and their characters from run 11, unchanged. The chat is now played turn by turn on seed 23's dice, in one session: each turn the comedian gets the game's account of what happened (which stat Reuben rolled and what it means, how well it went, the stat's shadow on a miss, traps, steering, combos, and how Brick's interest moved) and writes Reuben's message and Brick's reply. Every account is put together from fixed pieces of text, so the same dice always give the same words. Eleven turns, at most 500 words in all, set up early and paid off at the end.", "run 11"),
     ("v11", "Run 11: their own brief, both at once", "writers-v11",
      "Run 11. Each comedian first rewrites the short brief in their own words, and that text is their brief from then on. Then one session with the game's notes on both characters: a short take on each (what's funny about them, the one thing they're afraid of, about 150 words each) and how the two clash or click in a way nobody would expect. Then the chat, from their own brief and that text alone: one joke or a run of jokes, at most 500 words, set up early and paid off at the end, so the last message picks up something from the beginning. Only the chat comes back.", None),
     ("v10", "Run 10: the bit, and room", "writers-v10",
@@ -91,6 +93,8 @@ for rid, label, sub, about, profiles_from in RUNS:
             texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
             texts.update(ownbrief=None, characters=None)
         texts["chat"] = read(os.path.join(O, "chat-reuben-brick", f"{wid}.md"))
+        tj = os.path.join(O, "chat-reuben-brick", f"{wid}.turns.json")
+        tlog = json.load(open(tj, encoding="utf-8")) if os.path.exists(tj) else None
         jp = os.path.join(O, "chat-reuben-brick", f"{wid}.joke.md")
         texts["joke"] = read(jp) if os.path.exists(jp) else None
         steps = []
@@ -99,7 +103,13 @@ for rid, label, sub, about, profiles_from in RUNS:
         for i, (slug, folder) in enumerate(order):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
             note = None
-            if os.path.exists(pp):
+            if tlog and slug != "chat":  # run 12: these two sessions are run 11's
+                src = meta["from"].rstrip("/").split("/")[-1]  # the scratch name, or the repo's name without "-out"
+                src = src if os.path.isdir(os.path.join(BASE, src)) else src.replace("-out", "")
+                pp = os.path.join(BASE, src, folder, f"{wid}.prompt.md")
+            if tlog and slug == "chat":
+                system, user = tlog["system"].strip(), tlog["turns"][0]["prompt"].rstrip("\n")
+            elif os.path.exists(pp):
                 system, user = split_prompt(pp)
             else:
                 # run 1's Brick came from the first script, which kept no prompt: rebuild it from run 1's template
@@ -140,10 +150,16 @@ for rid, label, sub, about, profiles_from in RUNS:
                     else:
                         stats["profile not found"] += 1
             steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
+        turns = [{"n": e["turn"], "game": (e["prompt"].split("# Turn 1\n\n", 1)[1] if e["turn"] == 1 else e["prompt"].split("\n\n", 1)[1]).strip(),
+                  "lines": e["lines"]} for e in tlog["turns"]] if tlog else None
         writers.append({"id": wid, "name": name, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
-                        "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps})
+                        "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps,
+                        "turns": turns})
     runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
                  "paired": os.path.isdir(os.path.join(O, "characters")),
+                 "turns": os.path.exists(os.path.join(O, "mechanics.json")),
+                 "seed": (meta.get("mechanics") or {}).get("seed"),
+                 "nturns": (meta.get("mechanics") or {}).get("turns_played"),
                  "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),
                  "reasoning": meta.get("reasoning"), "writers": writers})
 data = {"player": NAME["reuben"], "match": NAME["brick"], "names": NAME, "pron": PRON, "briefs": briefs, "runs": runs}

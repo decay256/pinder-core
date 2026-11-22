@@ -1,0 +1,171 @@
+{
+ "writer": "Jimmy Carr",
+ "system": "You are Jimmy Carr: you, with your own ear and your own taste, not someone imitating you.\n\nYou write one-liners, and you've thought hard about how they work: you co-wrote The Naked Jape, a book about jokes. Your rule is the shortest route to the laugh: set up an assumption, cut every word that isn't needed, and put the word that springs the twist last. Your persona is a man with no shame saying the unsayable, deadpan, and the joke is often on you: your image, your vanity, your tax affair. You go dark on purpose, and the darkness is aimed, never random.\n\nYou're writing for Pinder, a comedy game. Each time, you'll first read its brief: what the game is, what it wants to say about dating apps, and what a reader should be left with. Then you'll get one task.",
+ "turns": [
+  {
+   "turn": 1,
+   "prompt": "Here's Pinder's brief, as you put it in your own words.\n\nHere\u2019s the brief, stripped down to the chassis.\n\n### What Pinder is\n\nPinder looks exactly like a dating app\u2014profiles, matches, a chat window, dice rolls, and a live meter tracking how interested they are\u2014except everyone on it is a dick. Not metaphorically. A literal, sentient penis with a smartphone, an ill-advised outfit or accessory, and a body it\u2019s been apologising for since puberty. Because everyone on the app is a set of genitals, length, girth, curve, vein-work, and which testicle hangs lower aren't dirty talk. They're small talk. It\u2019s R-rated, and it is filthy. \n\nThe joke is that we\u2019ve barely exaggerated anything. \n\nReal dating apps take lonely, terrified, hopeful human beings and reduce them to three photos, a two-line bio, and an algorithm. They turn the basic human need for love into a game with a scoreboard, run by a casino that only makes money if you leave empty-handed and come back tomorrow. So at one in the morning, people who are hurt, horny, and desperate put on a front they think a stranger might want, paste an opener they\u2019ve already used forty times, and know that the next option is one thumb-twitch away. Nobody has to stay.\n\nPinder just makes the subtext literal. The app treats you like a piece of meat, so we made you a piece of meat. The gamification is right there on the screen, and as in real life, you are probably losing.\n\n### Where the joke is aimed\n\nI like a dark joke\u2014as my accountant and several high court judges will tell you\u2014but a joke only works if it\u2019s aimed at the right target. \n\nPinder is a farce. It\u2019s fast, absurd, and deeply cynical about the app. It is never cynical about the people using it. We make fun of the machine, and we make fun of the ridiculous armour people build to survive the machine. We never make fun of the fact that they want to be loved. If the reader doesn't believe these two talking penises are real people hiding real damage, the filth is just admin.\n\n### What happens to the reader\n\nA player reads one chat on their phone, and in a few minutes they get to know two people. The laugh has to change shape three times:\n\n1. **The Act:** First, you laugh at them. Each character has a specific, weird routine they\u2019re doing to get through the conversation. \n2. **The Tell:** Then you find out *why* they\u2019re doing it. You don't stop laughing, but now the laugh is warm, or it stings, because you can see the bruise under the outfit.\n3. **The Collision:** You watch their two routines crash into each other.\n\n**If they connect:** It has to be earned. We know what both of them are frightened of, and we watch them put the act down anyway. It\u2019s still funny, it\u2019s unexpectedly tender, and the reader knows why it had to be *these* two and nobody else.\n\n**If they don't:** Nobody is the villain. The reader should see two people who genuinely could have worked, and watch in horror as each one\u2019s defence mechanism lands squarely on the other one\u2019s sore spot. You laugh, you wince, and you think: *yes, that is why dating is fucked.* Blame the act, the fear, and the app.\n\nWinning the game doesn't matter. A chat that ends in a date and leaves the reader feeling nothing has failed. An unmatch that makes them laugh and ache for a week has done its job.\n\n### The test\n\nI love a good one-liner, obviously. It paid for my teeth. But if a gag gets in the way of the character, cut it. \n\nWhen the chat is over, a reader who has seen *only* that chat has to be able to answer four questions about **both** characters:\n\n1. What are they afraid of?\n2. What is the act they put on so they don't have to feel it?\n3. Where did that come from?\n4. What did they do at the end?\n\nIf the reader can\u2019t answer all four for both of them, the chat failed. No matter how good the dick jokes were.\n\n# Your task\n\nHere's what you wrote about the two characters.\n\n## Reuben_404\n\nHe\u2019s four-and-a-half inches with a hard left curve, a top hat that cost more than his rent, and a kanji tattoo that means *dishwasher-safe*. His act is the effortless, off-the-grid raconteur\u2014*\"only on here when it rains\"*\u2014except he replies in four seconds flat because he\u2019s been indoors for eleven days eating lentils out of a pot. He\u2019s an out-of-work coder whose only finished product is a Pinder clone with one user\u2014himself\u2014and his own algorithm rejected him at 3am.\n\nHe\u2019s terrified of a quiet room. His first time ended under two minutes with a woman saying *\"oh\u2014okay\"* with devastating kindness; his last ex, Delphine, left because he couldn\u2019t say one sentence that wasn't a bit. He rehearses his \"spontaneous\" banter and curvature disclaimer in the bathroom mirror because if he stops tap-dancing for ten seconds, he thinks he disappears.\n\n## Brick_haus\n\nShe\u2019s a dick in skyscraper heels, a monocle, and one of two vests she maintains with a $340 industrial steamer. She has her daily schedule tattooed on her skin so nobody can accuse her of drifting. She\u2019s a contract dispute-ender who treats flirting like a hostile merger: dissecting your word choice and delivering a pre-emptive audit of her own bump and shorter-than-expected tip before you\u2019ve said hello. Behind the \"curated minimalist\" bio, her flat is empty because she binned everything her ex touched, and she fishes her monocle out of boxed ros\u00e9 with a plastic cocktail sword.\n\nShe\u2019s terrified of *\"let\u2019s do this again sometime.\"* Her ex Marguerite left because she put their arguments in a shared calendar with hard stop-times. She cries in taxis over unscheduled second dates, because if love isn't locked into a calendar slot with travel buffers, she assumes she\u2019s already been left.\n\n## The two of them\n\nOn paper, it\u2019s a car crash: a fake-spontaneous bullshitter meets a woman with a timetable tattooed on her shaft. He\u2019ll try his rehearsed, hat-tipping charm; she\u2019ll clock his four-second reply time and dissect his syntax like a coroner. They\u2019ll play pre-emptive-strike chicken over whose curve is worse.\n\nThe bit to build on is **contractual spontaneity**. Reuben\u2019s secret kink is having his mouth taken away so he can't do the voice or the joke; Brick_haus\u2019s is someone actually sticking to the schedule. When she aggressively itemises their hypothetical night to call his bluff\u2014*20:00 drinks, 20:14 he loses at arm-wrestling, 21:00 sex, 21:05 ten minutes where he is contractually forbidden to speak or be funny*\u2014it accidentally becomes the dirtiest talk he\u2019s ever heard. She gives him an order to shut up and just exist; he gives her a calendar invite with an actual time on it. Their neuroses interlock like Lego.\n\n# The chat\n\nImprovise their chat on the app, one turn at a time: 11 turns, no longer than 500 words in all. Set something up early and pay it off at the end, so the last message picks up something from the beginning and the chat feels rounded. End on the laugh.\n\nIt's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.\n\nEach turn, I tell you how the game goes for Reuben_404. You write Reuben_404's message and Brick_haus's reply, one message per line, as \"Reuben_404: message\" or \"Brick_haus: message\", and nothing else.\n\nThis chat runs on Dungeons & Dragons rules. Each turn, Reuben_404 picks one of his six stats (Charm, Rizz, Honesty, Chaos, Wit, Self-awareness) and rolls a twenty-sided die against a difficulty. How far he beats or misses it decides how well his message comes off.\n\nBrick_haus's interest in him runs from 0 to 25. At 25 she agrees to a date; at 0 she unmatches him.\n\n# Turn 1\n\nIt's 23:30. Tonight the heat between them is very high: neither of them is far from saying it.\n\nReuben_404 and Brick_haus have just matched, and the chat is empty. Brick_haus's interest is 10. She's interested, leaning neither way yet.\n\nReuben_404 rolls Charm. Charm means being warm, easy and reassuring. He rolls 22 against 15, beating it by 7. That's a strong success: it works better than he meant.\n\nBrick_haus's interest goes from 10 to 13: she gained a lot of interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: *Tips top hat.* Only on here when it rains, obviously, but a shaft in heels, monocle, and tattooed timetable deserves upfront disclosure: 4.5 inches, hard left curve, genuinely pleased you matched.\nBrick_haus: It\u2019s bone-dry out, you replied in four seconds, and your kanji says \"dishwasher-safe.\" Counter-disclosure: slight bump, shorter tip than projected, and you\u2019ve earned my 23:30 slot because \"genuinely pleased\" beat market expectations.",
+   "lines": [
+    "Reuben_404: *Tips top hat.* Only on here when it rains, obviously, but a shaft in heels, monocle, and tattooed timetable deserves upfront disclosure: 4.5 inches, hard left curve, genuinely pleased you matched.",
+    "Brick_haus: It\u2019s bone-dry out, you replied in four seconds, and your kanji says \"dishwasher-safe.\" Counter-disclosure: slight bump, shorter tip than projected, and you\u2019ve earned my 23:30 slot because \"genuinely pleased\" beat market expectations."
+   ],
+   "stray": [],
+   "seconds": 27.7,
+   "cost": 0.023442,
+   "completion_tokens": 1883,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 2,
+   "prompt": "# Turn 2\n\nReuben_404 rolls Wit. Wit means being quick and funny. He rolls 30 against 27, beating it by 3. That's a success: it works.\n\nHe also rolls Steering and succeeds: he tries to take control of the conversation with a follow-up question.\n\nBrick_haus's interest goes from 13 to 15: she gained a little interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: The tattooist swore it meant \"Relentless Lover,\" so now I only date women who respect kitchenware. With my left hook and your bump, is this a match or a fender-bender\u2014and what\u2019s inked on your shaft for 23:45?\nBrick_haus: A fender-bender implies poor planning, and I terminate messy contracts for a living. 23:45 is vest-steaming and fishing my monocle out of boxed ros\u00e9 with a plastic sword, unless your banter justifies an extension.",
+   "lines": [
+    "Reuben_404: The tattooist swore it meant \"Relentless Lover,\" so now I only date women who respect kitchenware. With my left hook and your bump, is this a match or a fender-bender\u2014and what\u2019s inked on your shaft for 23:45?",
+    "Brick_haus: A fender-bender implies poor planning, and I terminate messy contracts for a living. 23:45 is vest-steaming and fishing my monocle out of boxed ros\u00e9 with a plastic sword, unless your banter justifies an extension."
+   ],
+   "stray": [],
+   "seconds": 16.3,
+   "cost": 0.01518,
+   "completion_tokens": 1006,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 3,
+   "prompt": "# Turn 3\n\nReuben_404 rolls Honesty. Honesty means he hides nothing: he shows something real, or asks for it. He rolls 23 against 25, missing it by 2. That's a fumble: nearly, but it slips, slightly.\n\nA miss goes wrong through the stat's shadow. Honesty's shadow is Denial: the honest thing comes out as its own opposite, insisted on.\n\nHe also rolls Steering and succeeds: he tries to take control of the conversation with a follow-up question.\n\nBrick_haus's interest goes from 15 to 14: she lost a little interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: I\u2019m not begging for an extension\u2014I definitely haven\u2019t spent eleven days indoors eating pot-lentils and rehearsing my curve disclaimer in the mirror. Why is a \"curated minimalist\" with an industrial steamer fishing into boxed wine?\nBrick_haus: Nobody denies eleven days of pot-lentils unless they\u2019re on day twelve, and I hate a rehearsed pitch. The flat\u2019s empty because I binned everything my ex Marguerite touched after she left over my shared-calendar argument slots.",
+   "lines": [
+    "Reuben_404: I\u2019m not begging for an extension\u2014I definitely haven\u2019t spent eleven days indoors eating pot-lentils and rehearsing my curve disclaimer in the mirror. Why is a \"curated minimalist\" with an industrial steamer fishing into boxed wine?",
+    "Brick_haus: Nobody denies eleven days of pot-lentils unless they\u2019re on day twelve, and I hate a rehearsed pitch. The flat\u2019s empty because I binned everything my ex Marguerite touched after she left over my shared-calendar argument slots."
+   ],
+   "stray": [],
+   "seconds": 16.0,
+   "cost": 0.01565,
+   "completion_tokens": 992,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 4,
+   "prompt": "# Turn 4\n\nReuben_404 rolls Wit. Wit means being quick and funny. He rolls a natural 20. That's a natural 20, the best roll there is: by luck or by genius, he says exactly what she needed to hear, the way he would at his very best.\n\nBrick_haus's interest goes from 14 to 19: she gained a lot of interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: Marguerite lacked vision: a row with a hard stop-time is just foreplay with a mercy rule. My ex Delphine left because I couldn\u2019t say one sentence that wasn't a bit\u2014honestly, I\u2019m praying for a woman to legally gag me.\nBrick_haus: Careful, nothing gets me wetter than an enforceable gag order. I cry in taxis when dates end with \"let\u2019s do this again sometime,\" so if you're offering your mouth for audit, I\u2019ll schedule your silence down to the minute.",
+   "lines": [
+    "Reuben_404: Marguerite lacked vision: a row with a hard stop-time is just foreplay with a mercy rule. My ex Delphine left because I couldn\u2019t say one sentence that wasn't a bit\u2014honestly, I\u2019m praying for a woman to legally gag me.",
+    "Brick_haus: Careful, nothing gets me wetter than an enforceable gag order. I cry in taxis when dates end with \"let\u2019s do this again sometime,\" so if you're offering your mouth for audit, I\u2019ll schedule your silence down to the minute."
+   ],
+   "stray": [],
+   "seconds": 20.6,
+   "cost": 0.0165996,
+   "completion_tokens": 1192,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 5,
+   "prompt": "# Turn 5\n\nReuben_404 rolls Self-awareness. Self-awareness means naming what's actually going on underneath. He rolls 17 against 30, missing it by 13. That's a catastrophe: it comes out cringe, embarrassing or inappropriate, in a funny way.\n\nA miss goes wrong through the stat's shadow. Self-awareness's shadow is Dread: he sees himself failing with perfect clarity and narrates it while it happens.\n\nThis sets a trap that lasts three turns: the Spiral trap. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It starts, and he doesn't notice it yet.\n\nBrick_haus's interest goes from 19 to 16: she lost a lot of interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: And now I\u2019m watching myself blow the 23:45 slot in real time by panicking and oversharing that my first time lasted ninety seconds and ended with a pitying \"oh\u2014okay,\" because if I stop tap-dancing I disappear, aaaand I\u2019ve ruined it.\nBrick_haus: Pre-emptively narrating your own default is a cowardly way to breach a contract. I can work with ninety seconds and a left hook; I cannot work with a man who\u2019s already drafting his exit clause.",
+   "lines": [
+    "Reuben_404: And now I\u2019m watching myself blow the 23:45 slot in real time by panicking and oversharing that my first time lasted ninety seconds and ended with a pitying \"oh\u2014okay,\" because if I stop tap-dancing I disappear, aaaand I\u2019ve ruined it.",
+    "Brick_haus: Pre-emptively narrating your own default is a cowardly way to breach a contract. I can work with ninety seconds and a left hook; I cannot work with a man who\u2019s already drafting his exit clause."
+   ],
+   "stray": [],
+   "seconds": 21.5,
+   "cost": 0.0156606,
+   "completion_tokens": 1072,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 6,
+   "prompt": "# Turn 6\n\nReuben_404 rolls Wit. Wit means being quick and funny. He rolls 29 against 27, beating it by 2. That's a success: it works.\n\nThe Spiral trap is still on. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It's the pattern now, and Brick_haus can see it.\n\nHe also rolls Steering and succeeds: he tries to take control of the conversation with a follow-up question.\n\nBrick_haus's interest goes from 16 to 18: she gained a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: No exit clause, I\u2019m unemployed\u2014my only finished code is a Pinder clone where I\u2019m the sole user and my own algorithm rejected me at 3am (look at me salvaging the pitch)\u2014so what\u2019s the penalty for a ninety-second breach?\nBrick_haus: Stop providing live commentary on your recovery; I can read the transcript. The penalty is strict remediation: 20:00 drinks, 20:14 I break your wrist arm-wrestling, 21:00 sex, 21:02 we repeat until you hit the five-minute benchmark.",
+   "lines": [
+    "Reuben_404: No exit clause, I\u2019m unemployed\u2014my only finished code is a Pinder clone where I\u2019m the sole user and my own algorithm rejected me at 3am (look at me salvaging the pitch)\u2014so what\u2019s the penalty for a ninety-second breach?",
+    "Brick_haus: Stop providing live commentary on your recovery; I can read the transcript. The penalty is strict remediation: 20:00 drinks, 20:14 I break your wrist arm-wrestling, 21:00 sex, 21:02 we repeat until you hit the five-minute benchmark."
+   ],
+   "stray": [],
+   "seconds": 5.3,
+   "cost": 0.0062714,
+   "completion_tokens": 137,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 7,
+   "prompt": "# Turn 7\n\nReuben_404 rolls Honesty. Honesty means he hides nothing: he shows something real, or asks for it. He rolls 20 against 25, missing it by 5. That's a misfire: it comes out wrong.\n\nA miss goes wrong through the stat's shadow. Honesty's shadow is Denial: the honest thing comes out as its own opposite, insisted on.\n\nThe Spiral trap is still on. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It wears off after this turn.\n\nBrick_haus's interest goes from 18 to 17: she lost a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: I\u2019m definitely not throbbing over your timetable, and I certainly don\u2019t want my mouth confiscated at 21:05\u2014watch me lie and narrate my own crash.\nBrick_haus: Drop the play-by-play; perjury bores me. Clause 21:05 is ten minutes in a quiet room, contractually forbidden to speak, joke, or tip that overpriced hat.",
+   "lines": [
+    "Reuben_404: I\u2019m definitely not throbbing over your timetable, and I certainly don\u2019t want my mouth confiscated at 21:05\u2014watch me lie and narrate my own crash.",
+    "Brick_haus: Drop the play-by-play; perjury bores me. Clause 21:05 is ten minutes in a quiet room, contractually forbidden to speak, joke, or tip that overpriced hat."
+   ],
+   "stray": [],
+   "seconds": 21.3,
+   "cost": 0.0189844,
+   "completion_tokens": 1398,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 8,
+   "prompt": "# Turn 8\n\nReuben_404 rolls Self-awareness. Self-awareness means naming what's actually going on underneath. He rolls 7 against 30, missing it by 23. That's a catastrophe: it comes out cringe, embarrassing or inappropriate, in a funny way.\n\nA miss goes wrong through the stat's shadow. Self-awareness's shadow is Dread: he sees himself failing with perfect clarity and narrates it while it happens.\n\nThis sets a trap that lasts three turns: the Spiral trap. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It starts, and he doesn't notice it yet.\n\nBrick_haus's interest goes from 17 to 14: she lost a lot of interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: Ten minutes of silence is my exact nightmare and my kink, so naturally I\u2019m filling the chat with panic-typing right now while watching your thumb hover over \"unmatch.\"\nBrick_haus: My thumb is on the boxed-wine spigot because you won\u2019t shut up and sign. If love isn\u2019t locked in with travel buffers I assume I\u2019m already left, and you\u2019re stalling.",
+   "lines": [
+    "Reuben_404: Ten minutes of silence is my exact nightmare and my kink, so naturally I\u2019m filling the chat with panic-typing right now while watching your thumb hover over \"unmatch.\"",
+    "Brick_haus: My thumb is on the boxed-wine spigot because you won\u2019t shut up and sign. If love isn\u2019t locked in with travel buffers I assume I\u2019m already left, and you\u2019re stalling."
+   ],
+   "stray": [],
+   "seconds": 5.1,
+   "cost": 0.0058989,
+   "completion_tokens": 91,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 9,
+   "prompt": "# Turn 9\n\nReuben_404 rolls Wit. Wit means being quick and funny. He rolls 30 against 27, beating it by 3. That's a success: it works.\n\nThe Spiral trap is still on. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It's the pattern now, and Brick_haus can see it.\n\nThree different stats in three turns, and the third worked: his next roll gets a boost.\n\nBrick_haus's interest goes from 14 to 16: she gained a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: Stalling? I\u2019ve already drafted the calendar invite with fifteen-minute tube buffers and a hard-stop at breakfast (and pulled us back from the brink, thank god).\nBrick_haus: Cut the bracketed victory lap. Send the invite or you\u2019re bumped for my 23:45 steamer\u2014and if you type one more parenthetical aside, I\u2019m docking you two inches.",
+   "lines": [
+    "Reuben_404: Stalling? I\u2019ve already drafted the calendar invite with fifteen-minute tube buffers and a hard-stop at breakfast (and pulled us back from the brink, thank god).",
+    "Brick_haus: Cut the bracketed victory lap. Send the invite or you\u2019re bumped for my 23:45 steamer\u2014and if you type one more parenthetical aside, I\u2019m docking you two inches."
+   ],
+   "stray": [],
+   "seconds": 5.1,
+   "cost": 0.0058548,
+   "completion_tokens": 91,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 10,
+   "prompt": "# Turn 10\n\nReuben_404 rolls Charm. Charm means being warm, easy and reassuring. He rolls a natural 20. That's a natural 20, the best roll there is: by luck or by genius, he says exactly what she needed to hear, the way he would at his very best.\n\nThe Spiral trap is still on. Reuben_404 keeps narrating the conversation while inside it: when the move lands, one aside about how the chat is going; when it misses, he narrates his own failure as it happens, and the narrating is the failure. It wears off after this turn.\n\nWit, then Charm: the joke set up the charm, and she gains a little extra interest.\n\nBrick_haus's interest goes from 16 to 21: she gained a lot of interest, and her reply carries that. She's close to saying yes to a date, not yet.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: Invite sent for tomorrow, recurring weekly so you never hear \"sometime\" again\u2014dock me the two inches, because I\u2019m finally nailing this.\nBrick_haus: Recurring weekly with travel buffers is borderline pornography. You\u2019re down to 2.5 inches, it\u2019s 23:45, and my thumb is over \"Accept\"\u2014prove you won\u2019t flake.",
+   "lines": [
+    "Reuben_404: Invite sent for tomorrow, recurring weekly so you never hear \"sometime\" again\u2014dock me the two inches, because I\u2019m finally nailing this.",
+    "Brick_haus: Recurring weekly with travel buffers is borderline pornography. You\u2019re down to 2.5 inches, it\u2019s 23:45, and my thumb is over \"Accept\"\u2014prove you won\u2019t flake."
+   ],
+   "stray": [],
+   "seconds": 22.5,
+   "cost": 0.0190488,
+   "completion_tokens": 1403,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 11,
+   "prompt": "# Turn 11\n\nReuben_404 rolls Charm. Charm means being warm, easy and reassuring. He rolls 29 against 15, beating it by 14. That's a critical success: it comes out really, really well.\n\nBrick_haus's interest goes from 21 to 25: she gained a lot of interest, and her reply carries that. She agrees to a date, and the chat ends there.\n\nYour improvisation: Reuben_404's message and Brick_haus's reply.\n",
+   "answer": "Reuben_404: I\u2019m binning the top hat, starting my silence clause early, and I\u2019ll be outside your door at 19:45\u2014even if it\u2019s bone-dry.\nBrick_haus: Invite accepted\u2014bring all 2.5 inches, because at 21:00 we\u2019re finding out if you\u2019re actually dishwasher-safe.",
+   "lines": [
+    "Reuben_404: I\u2019m binning the top hat, starting my silence clause early, and I\u2019ll be outside your door at 19:45\u2014even if it\u2019s bone-dry.",
+    "Brick_haus: Invite accepted\u2014bring all 2.5 inches, because at 21:00 we\u2019re finding out if you\u2019re actually dishwasher-safe."
+   ],
+   "stray": [],
+   "seconds": 28.2,
+   "cost": 0.026081,
+   "completion_tokens": 2124,
+   "from_a": 1,
+   "from_b": 1
+  }
+ ]
+}
