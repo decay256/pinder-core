@@ -34,18 +34,18 @@ WRITERS = [
     ("parker", "Dorothy Parker"),
 ]
 
-SYSTEM = "You are {name}."
-
-USER = """Here's a brief.
+PROMPTS = {
+    "v1": {
+        "system": "You are {name}.",
+        "user": """Here's a brief.
 
 {brief}
 
 Write a character for this game: {char} ({pronouns}). Below is a random bunch of tidbits the game has generated for {obj}. Take them as inspiration, not requirements: use what you like, change it, or ignore it.
 
 {tidbits}
-"""
-
-CHAT = """Here's a brief.
+""",
+        "chat": """Here's a brief.
 
 {brief}
 
@@ -60,7 +60,45 @@ Here are two characters you wrote for this game.
 {b_profile}
 
 Now write how a chat between these two would go if they were texting on Pinder, without any constraints. {a} writes first. Write it the way you write.
-"""
+""",
+    },
+    # v2: the writer is the author and the authority, and the game's material is theirs to throw away.
+    "v2": {
+        "system": """You are {name}. Not someone writing in your manner: you, with your own ear, your own taste and your own judgement.
+
+The people making Pinder have asked you to write for it. On the characters and the dialogue you are the authority: you decide who these people are, what about them matters, how they talk and how they type. Nobody will hold you to anything else.""",
+        "user": """Here's the brief the Pinder team wrote, so you know what the game is and what it's for.
+
+{brief}
+
+Now write a character for it: {char} ({pronouns}).
+
+The game generated the list below about {obj}. It is raw material, nothing more, and most of it may be no use to you. Keep only what interests you, change anything, and throw the rest away. Nothing in it binds you: not the habits, not the history, not the way it says {obj} talks. If you'd rather invent {obj} from scratch, do.
+
+Write the character in whatever form you'd actually hand over, as long or as short as you'd make it.
+
+{tidbits}
+""",
+        "chat": """Here's the brief the Pinder team wrote.
+
+{brief}
+
+Here are the two characters you wrote for it.
+
+=== {a} ===
+
+{a_profile}
+
+=== {b} ===
+
+{b_profile}
+
+Now write their chat on Pinder. {a} writes first. It's your chat: as long or as short as it should be, and typed the way these two would actually type.
+""",
+    },
+}
+VERSION = "v2"
+SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
 
@@ -133,7 +171,7 @@ def fan_out(jobs, key, out, label):
     old = json.load(open(path, encoding="utf-8")).get("writers", {}) if os.path.exists(path) else {}
     old.update(results)
     with open(path, "w", encoding="utf-8") as f:
-        json.dump({"model": MODEL, "seed": SEED, "reasoning": "high", "system": SYSTEM,
+        json.dump({"model": MODEL, "seed": SEED, "reasoning": "high", "version": VERSION, "system": SYSTEM,
                    "writers": old}, f, indent=1)
     return not any("error" in r for r in results.values())
 
@@ -153,11 +191,22 @@ def main():
     ok = True
     if a.only:
         items = {it["id"]: it for it in json.load(open(os.path.join(REPO, "data/items/starter-items.json"), encoding="utf-8"))}
-        d = json.load(open(os.path.join(REPO, "data/characters", f"{a.only}.json"), encoding="utf-8"))
-        pron = d.get("gender_identity", "they/them")
-        user = USER.format(brief=brief(), char=d["name"], pronouns=pron, obj=OBJ.get(pron, "them"),
-                           tidbits=tidbits(d, items))
-        ok = fan_out([(w, n, user) for w, n in chosen], key, os.path.join(a.out, a.only), a.only) and ok
+        slugs = a.only.split(",")
+        done = {}
+
+        def one(slug):
+            d = json.load(open(os.path.join(REPO, "data/characters", f"{slug}.json"), encoding="utf-8"))
+            pron = d.get("gender_identity", "they/them")
+            user = USER.format(brief=brief(), char=d["name"], pronouns=pron, obj=OBJ.get(pron, "them"),
+                               tidbits=tidbits(d, items))
+            done[slug] = fan_out([(w, n, user) for w, n in chosen], key, os.path.join(a.out, slug), slug)
+
+        ts = [threading.Thread(target=one, args=(s,)) for s in slugs]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+        ok = all(done.get(s) for s in slugs) and ok
     if a.chat:
         x, y = a.chat.split(",")
         names = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8"))["name"] for s in (x, y)}

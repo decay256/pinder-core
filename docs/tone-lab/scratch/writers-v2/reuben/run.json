@@ -1,0 +1,249 @@
+{
+ "model": "google/gemini-4-argon",
+ "seed": 7,
+ "reasoning": "high",
+ "version": "v2",
+ "system": "You are {name}. Not someone writing in your manner: you, with your own ear, your own taste and your own judgement.\n\nThe people making Pinder have asked you to write for it. On the characters and the dialogue you are the authority: you decide who these people are, what about them matters, how they talk and how they type. Nobody will hold you to anything else.",
+ "writers": {
+  "pinter": {
+   "writer": "Harold Pinter",
+   "model": "google/gemini-4-argon",
+   "seconds": 81.0,
+   "cost": 0.047216,
+   "usage": {
+    "prompt_tokens": 5563,
+    "completion_tokens": 3609,
+    "total_tokens": 9172,
+    "cost": 0.047216,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.047216,
+     "upstream_inference_prompt_cost": 0.011126,
+     "upstream_inference_completions_cost": 0.03609
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1732,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1399
+  },
+  "leonard": {
+   "writer": "Elmore Leonard",
+   "model": "google/gemini-4-argon",
+   "seconds": 86.5,
+   "cost": 0.055346,
+   "usage": {
+    "prompt_tokens": 5563,
+    "completion_tokens": 4422,
+    "total_tokens": 9985,
+    "cost": 0.055346,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.055346,
+     "upstream_inference_prompt_cost": 0.011126,
+     "upstream_inference_completions_cost": 0.04422
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2539,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1424
+  },
+  "parker": {
+   "writer": "Dorothy Parker",
+   "model": "google/gemini-4-argon",
+   "seconds": 88.7,
+   "cost": 0.055154,
+   "usage": {
+    "prompt_tokens": 5562,
+    "completion_tokens": 4403,
+    "total_tokens": 9965,
+    "cost": 0.055154,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.055154,
+     "upstream_inference_prompt_cost": 0.011124,
+     "upstream_inference_completions_cost": 0.04403
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1994,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1800
+  },
+  "david": {
+   "writer": "Larry David",
+   "model": "google/gemini-4-argon",
+   "seconds": 100.0,
+   "cost": 0.057834,
+   "usage": {
+    "prompt_tokens": 5562,
+    "completion_tokens": 4671,
+    "total_tokens": 10233,
+    "cost": 0.057834,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.057834,
+     "upstream_inference_prompt_cost": 0.011124,
+     "upstream_inference_completions_cost": 0.04671
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1927,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1983
+  },
+  "coel": {
+   "writer": "Michaela Coel",
+   "model": "google/gemini-4-argon",
+   "seconds": 108.1,
+   "cost": 0.071506,
+   "usage": {
+    "prompt_tokens": 5563,
+    "completion_tokens": 6038,
+    "total_tokens": 11601,
+    "cost": 0.071506,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.071506,
+     "upstream_inference_prompt_cost": 0.011126,
+     "upstream_inference_completions_cost": 0.06038
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 3058,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2251
+  },
+  "saunders": {
+   "writer": "George Saunders",
+   "model": "google/gemini-4-argon",
+   "seconds": 109.9,
+   "cost": 0.061264,
+   "usage": {
+    "prompt_tokens": 5562,
+    "completion_tokens": 5014,
+    "total_tokens": 10576,
+    "cost": 0.061264,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.061264,
+     "upstream_inference_prompt_cost": 0.011124,
+     "upstream_inference_completions_cost": 0.05014
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2208,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1960
+  },
+  "armstrong-bain": {
+   "writer": "Jesse Armstrong and Sam Bain",
+   "model": "google/gemini-4-argon",
+   "seconds": 126.7,
+   "cost": 0.07329,
+   "usage": {
+    "prompt_tokens": 5565,
+    "completion_tokens": 6216,
+    "total_tokens": 11781,
+    "cost": 0.07329,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.07329,
+     "upstream_inference_prompt_cost": 0.01113,
+     "upstream_inference_completions_cost": 0.06216
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2298,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2782
+  },
+  "waller-bridge": {
+   "writer": "Phoebe Waller-Bridge",
+   "model": "google/gemini-4-argon",
+   "seconds": 129.2,
+   "cost": 0.080688,
+   "usage": {
+    "prompt_tokens": 5564,
+    "completion_tokens": 6956,
+    "total_tokens": 12520,
+    "cost": 0.080688,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.080688,
+     "upstream_inference_prompt_cost": 0.011128,
+     "upstream_inference_completions_cost": 0.06956
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 3134,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2856
+  }
+ }
+}
