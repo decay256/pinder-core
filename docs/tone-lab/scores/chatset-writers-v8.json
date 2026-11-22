@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v8",
+ "kind": "chat",
+ "label": "Run 8 · all 3 chats",
+ "version": "run 8",
+ "order": 108,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v8/chat-reuben-brick/",
+ "note": "Every chat of run 8 (run 7's profiles; the joke worked out first, the chat scored without it): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 8,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8601,
+   "words": 1479
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats play the same night in the same order. Reuben opens with a size-and-curve disclosure and an alibi for being on the phone (barometer / compiling build / rain). Brick replies with a numbered spec sheet and a demand for a hard stop. Someone leaks their plan and says \"Ignore that,\" both swap the same backstory (Marguerite and the Google Calendar, the cropped family portrait with the cousin, Delphine asking for one sentence in his normal voice), and it closes on a timestamped sex schedule built around stopping \"the voice.\" Several lines recur in all three chats, and one is verbatim in two, so this is far below the line. It is not a 1 because the leaker changes (Brick in the first two, Reuben in the third), and the last beat differs (\"still there at 21:16\" / \"Thursday.\" / \"Sometime.\"), giving each chat a slightly different landing.",
+   "evidence": [
+    "Fascinating word. Gives you a four-month window and zero liability.",
+    "Marguerite left because I put our arguments in Google Calendar with fifteen-minute agendas",
+    "Then hold me down so I can't do the voice."
+   ],
+   "raise": "Have at least one chat open on a different move than Reuben's disclosure-plus-alibi and reach the characters' wounds through other incidents than the shared Marguerite / portrait / Delphine trio, so no sequence or line runs through all three.",
+   "def": "03d845827225bb57",
+   "material": "6ae0c8f13f3e138f",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 16.2,
+   "cost": 0.06668,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T18:03:48Z",
+ "repo_commit": "933b834",
+ "cost": 0.0667
+}

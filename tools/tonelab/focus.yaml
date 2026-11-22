@@ -17,7 +17,7 @@ mission: >-
 mission_source: Pinder's brief, "What the reader should feel"
 experiment: >-
   Fourteen writers and comedians each wrote both characters and a chat between them, in four runs;
-  in a fifth and a sixth, the six comedians rewrote their chat in at most 1,000 and then 500 words; in a seventh, three of them, each with a system prompt about their own work, wrote new profiles and a 500-word chat written as a joke. Score every chat on the rewritten chat scorecard, whose dimensions come from the brief and from
+  in a fifth and a sixth, the six comedians rewrote their chat in at most 1,000 and then 500 words; in a seventh, three of them, each with a system prompt about their own work, wrote new profiles and a 500-word chat written as a joke; in an eighth, they first worked out the joke, then wrote the chat. Score every chat on the rewritten chat scorecard, whose dimensions come from the brief and from
   what these writers say about their own craft, and score each run as a set: did the writers write
   different nights, or one scene fourteen times?
 gate: Every critical dimension scores 4 or more on a chat, and the run's set scores 4 or more on variety.
