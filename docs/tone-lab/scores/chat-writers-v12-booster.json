@@ -1,0 +1,528 @@
+{
+ "id": "chat-writers-v12-booster",
+ "kind": "chat",
+ "label": "Run 12 · Joel Kim Booster",
+ "version": "run 12",
+ "order": 112,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v12/chat-reuben-brick/booster.md",
+ "note": "Written in one go by Joel Kim Booster from what they wrote about the two characters (run 12: run 11's briefs and characters; the chat played turn by turn on seed 23's dice). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 12,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3999,
+   "words": 688
+  },
+  "brief": {
+   "chars": 2792,
+   "words": 457
+  },
+  "chat_masked": {
+   "chars": 3836,
+   "words": 688
+  },
+  "chat_but_last": {
+   "chars": 3413,
+   "words": 584
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 3,
+   "why": "The reader gets both habits and both endings right. Each ending follows from the fear: Reuben books Tuesday, which answers her 'without naming a Tuesday', and Brick accepts. Brick's fear is inferred from the cab line. But the reader marks the origin 'not in the chat' for both characters. Reuben's fear is known only because he announces it ('evaporate', 'terrified'), which is the 3 description. It stays above a 2 because fear and habit are clearly linked for both.",
+   "evidence": [
+    "I'll literally evaporate if I stop doing the voice",
+    "terrified of you seeing four and a half inches of silence once the bit stops",
+    "how you end up crying in a cab after a guy says “let's do this again” without naming a Tuesday"
+   ],
+   "raise": "Have Brick slip that the cab was hers, and let Reuben's fear show in a silence he can't fill rather than in him naming it.",
+   "def": "f019e7f239b9d82d",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 2,
+   "why": "Almost every important fact is volunteered: the specs, both tattoos and both exes. Both possible origins arrive as stated anecdotes ('my ex dumped me because...', 'my ex left me for...'). The only real catch is Brick's 'You replied in four seconds, Mr. Barely Online'. Reuben's 'I definitely didn't rehearse' is a self-exposing joke, not a slip.",
+   "evidence": [
+    "You replied in four seconds, Mr. Barely Online.",
+    "my ex dumped me because she begged for one sentence that wasn't a bit, and I panicked and did a tight five",
+    "Preemptive disclosure: I have a bridge bump"
+   ],
+   "raise": "Let the ex stories surface only through something caught out, such as Brick catching a rehearsed line or a calendar habit, instead of having them told.",
+   "def": "76152fd7f08caa41",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "Reuben names or explains his feelings repeatedly: 'terrified', 'evaporate if I stop', 'wanting someone to boss me out of my own head', 'I think I finally stopped sweating'. Some lines do leave something underneath. 'Clearing my 12:15' covers hurt, and 'Define wind with a timestamp' covers abandonment fear. But these few are outweighed by the explaining, so it falls well under the at-most-once bar.",
+   "evidence": [
+    "swearing I'm not terrified of you seeing four and a half inches of silence",
+    "I've been wanting someone to boss me out of my own head for a year",
+    "Still narrating. Clearing my 12:15."
+   ],
+   "raise": "Cut Reuben's self-narration of his fear down to one line and let Brick's terse cancellation carry the hurt without him explaining his.",
+   "def": "61d4f86460a218aa",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader finds the moment, and Brick's answer changes the night: she goes from 'Clearing my 12:15' to 'Send me your ETA'. But the line is one of Reuben's longer ones. It carries a self-narrating parenthetical and names the want outright ('wanting someone to boss me out of my own head'). The shortest, plainest lines in the chat are Brick's, not this one.",
+   "evidence": [
+    "Because—and I think I finally stopped sweating—I've been wanting someone to boss me out of my own head for a year, and I'm already in a cab.",
+    "I'll forgive that last little aside."
+   ],
+   "raise": "Reduce the moment to something like 'I'm already in a cab.' with no parenthetical and no stated want, so the action carries it.",
+   "def": "b5a3a3c2e796783b",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The night is not settled early: the 12:15 slot first appears in message 8 of 22, and 'Clearing my 12:15' is a real reversal that raises the stakes late. But messages 9–15 repeat one beat four times: Reuben narrates his own tailspin and Brick says he's narrating. The probe reader would 'most likely put it down' at the bathroom-mirror line. From the cab onward the close is fully predictable: acceptance, the Tuesday payoff, then the bridge-bump and tight-five callback. That flat middle plus a predictable run is the definition of a 3, even though no single flat stretch reaches ten messages.",
+   "evidence": [
+    "Watching myself bomb in the bathroom mirror—I’m literally practicing shrugs right now.",
+    "Still narrating. Clearing my 12:15.",
+    "the hat stays in the cab, and I’m already booking Tuesday."
+   ],
+   "raise": "Replace two of the four self-narration beats with moves that change something, such as Reuben trying sincerity and botching it differently, or Brick breaking her own schedule, so the middle turns instead of repeating.",
+   "def": "9b663d9dfde4d26f",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line is built from these two bodies and lives: the curve and short tip 'average out to one straight dick', the left hook is 'optimal for spooning', and a fight with a hard out is 'foreplay'. The filth also changes job. Late lines use it to get close: 'four and a half inches of silence once the bit stops' ties his size to his fear of silence, and 'take the hats and vests off' is about dropping props. The dirtiest line, the closer, gives him the silence he wants through the flaw she disclosed defensively. It falls short of 6 because that closer is a callback the reader called in advance, so it lands as a capper more than a revelation.",
+   "evidence": [
+    "between your short tip and my curve, we probably average out to one straight dick",
+    "terrified of you seeing four and a half inches of silence once the bit stops",
+    "your mouth’s going to be way too busy with my bridge bump to do a tight five"
+   ],
+   "raise": "Make the final dirty line reveal something the reader did not already know about Brick's need, rather than tying off two planted threads.",
+   "def": "2d9c58b139c34d6a",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 3,
+   "why": "The setups are there. Reuben's 'seeing where the wind takes us' is aimed straight at Brick's fear of ambiguity, and 'are you going to tap-dance the whole forty-five minutes?' flags that his habit is about to go off on her schedule. But Reuben announces each misfire himself as it happens ('here is where I choke', 'look at me tanking the vibe'), so the reader is told rather than left dreading it. Because both characters confess everything at once, there is almost no moment where the reader knows something a character doesn't.",
+   "evidence": [
+    "If I pencil you in for 12:15, are you going to tap-dance the whole forty-five minutes?",
+    "And here is where I choke on four gas-station nicotine pouches and watch myself blow a 12:15 slot in real time",
+    "look at me tanking the vibe again"
+   ],
+   "raise": "Let Reuben's bit land on Brick's sore spot without his running commentary, for instance a breezy 'let's play it by ear' about Tuesday, so the reader winces a message before she does.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Reuben voices the app's low-effort-cool creed in earnest in his first message ('Barely on here', 'Zero plans'). The screen contradicts it at once ('You replied in four seconds'), though he quickly mocks it himself. Brick's belief that 'unscheduled means unwanted' is stated straight but never contradicted; the ending vindicates it, since he follows the itinerary and books Tuesday. Only one creed is contradicted, and that one is undercut by its own speaker.",
+   "evidence": [
+    "Barely on here, honestly",
+    "“seeing where the night goes” is how you end up crying in a cab after a guy says “let’s do this again” without naming a Tuesday",
+    "You replied in four seconds, Mr. Barely Online."
+   ],
+   "raise": "Have the screen contradict Brick's creed too, for example a moment where the unscheduled, sincere sentence is what moves her rather than the ETA.",
+   "def": "cd5acec1a8653b27",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Early on both mostly mock themselves: Reuben with 'dishwasher-safe' and the mirror rehearsal, Brick with the monocle in rosé and the $340 steamer. Neither ends as the villain, since Brick accepts him and he gets a sincere line that wins. It meets the line, but through the middle Brick's sharpest jokes all land on Reuben ('Still narrating', 'open mic you're already bombing'). For about six messages he is the punchline and she is only the judge, so the chat isn't merciless to both at once.",
+   "evidence": [
+    "I once fished my monocle out of boxed rosé with a plastic sword, and I own a $340 steamer for two vests.",
+    "you’re treating my 12:30 like an open mic you’re already bombing.",
+    "my rebound tattoo translates to “dishwasher-safe,”"
+   ],
+   "raise": "Give Brick a late self-exposing joke in the middle stretch, such as one that shows her own scheduling as panic, so the contempt doesn't pool on Reuben while she judges.",
+   "def": "51f6e5881b5145be",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe reader attributed all 22 messages correctly. Most reasons were content, such as props and backstory taken from the brief, but there is also a real difference in voice. Brick is clipped and imperative (\"Define 'wind' with a timestamp,\" \"Still narrating. Clearing my 12:15.\"). Reuben runs long, riffs with dashes and hedges as he goes. That rhythm is why this is not a 3 on content alone, but the reader seldom needed it, so it falls short of a 5.",
+   "evidence": [
+    "Flattery logged. Preemptive disclosure: I have a bridge bump",
+    "Still narrating. Clearing my 12:15.",
+    "okay, tiny pulse back in the chat—just put \"Reuben shuts up\" on the calendar"
+   ],
+   "raise": "Strip some of the brief's props (monocle, steamer, pouches) out of the lines so that syntax and rhythm, not inventory, carry the attribution.",
+   "def": "a77bc9ef79556bda",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "Reuben has the one real gap: he claims to be \"barely on here\" and then replies in four seconds. Brick catches it, which is fine, but from then on he narrates his own gaps (\"I definitely didn't rehearse that curve line,\" \"watch myself blow a 12:15 slot in real time\"). The winking is his whole mode. Brick has almost no claim that the chat contradicts without her noticing: she volunteers her fear (\"crying in a cab\") and her own mess (the monocle in rosé). The rubric names characters pointing out their own gaps as low.",
+   "evidence": [
+    "I definitely didn't rehearse that curve line in the mirror for twenty minutes",
+    "here is where I choke on four gas-station nicotine pouches and watch myself blow a 12:15 slot",
+    "is how you end up crying in a cab after a guy says \"let's do this again\""
+   ],
+   "raise": "Have Reuben insist sincerely on his breeziness while the rehearsal shows, and give Brick a claim of total control that one of her own lines undercuts without her seeing it.",
+   "def": "fa4461088ccd15ee",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laugh lines belong to their sender. \"Average out to one straight dick\" is Reuben's preemptive disclosure. \"A left hook is optimal for spooning\" is Brick's efficiency turned on desire. The best line, \"four and a half inches of silence once the bit stops,\" costs him something. There are exactly two banned jokes, \"spreadsheet\" and \"audit your own breakdown\", which keeps this at the line. \"Weak in the stilettos\" and \"calling the match from the booth\" are generic, which keeps it from a 5.",
+   "evidence": [
+    "we probably average out to one straight dick",
+    "four and a half inches of silence once the bit stops",
+    "Why the rush to put the wind on a spreadsheet?"
+   ],
+   "raise": "Cut the spreadsheet and audit lines and replace them with jokes only these two damaged people could make.",
+   "def": "4448c7f54baa167a",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Some digging does happen. Told \"Still narrating,\" Reuben goes on narrating (\"practicing shrugs right now\"), and the hole gets deeper. But at the first push he concedes the rehearsal straight away. He later grovels (\"Don't delete me\") and ends on a stated change of heart (\"I finally stopped sweating,\" \"wanting someone to boss me out of my own head\"). Brick is never really caught out at all.",
+   "evidence": [
+    "Don't delete me—okay, tiny pulse back in the chat",
+    "I think I finally stopped sweating—I've been wanting someone to boss me out of my own head for a year",
+    "Watching myself bomb in the bathroom mirror—I'm literally practicing shrugs right now."
+   ],
+   "raise": "Have Reuben answer \"Clearing my 12:15\" with a breezier, worse bit instead of a plea, so the truth slips out of the deepest hole rather than a confession.",
+   "def": "5102b09e503af846",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Brick interrogates, judges, threatens to clear the slot and grants sixty seconds, so she holds the upper hand almost the whole night while Reuben chases. He gets brief lifts, when the travel-buffer compliment makes her \"weak in the stilettos\" and when the cab ETA has her asking for his ETA. But she sets every term up to \"Invite accepted,\" so there is no stretch where he is on top.",
+   "evidence": [
+    "the phrase \"follow the itinerary\" just bought you sixty seconds",
+    "Still narrating. Clearing my 12:15.",
+    "Invite accepted"
+   ],
+   "raise": "Give Reuben a stretch of several exchanges where Brick is chasing him for a commitment, before she takes the top back.",
+   "def": "a327913ca348ff82",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Some timing works. \"Still narrating. Clearing my 12:15.\" lands cold after Reuben's long, overheated messages, and \"Do you own a calendar, or just the hat?\" ends on its punch. But many punchlines are buried under a tagged question or a trailing clause. \"One straight dick\" is followed by \"Why the rush...\", and \"foreplay\" sits mid-message before the ex and the tattoo. Punchlines almost never get a message of their own.",
+   "evidence": [
+    "we probably average out to one straight dick. Why the rush to put the wind on a spreadsheet?",
+    "Do you own a calendar, or just the hat?",
+    "Still narrating. Clearing my 12:15."
+   ],
+   "raise": "Break the setups and punches into separate messages and end each message on its laugh word, dropping the follow-up questions that bury them.",
+   "def": "7e36393433d52f66",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back with a new meaning and nobody explains them. The opening 'wind' returns mid-chat ('put the wind on a spreadsheet') and then becomes a scheduled arrival. The ex's 'tight five' and the 'ten seconds of dead air' come back in Brick's last line as her reassurance, and that closes the night without comment. The bridge bump turns from a preemptive hedge into the invitation. It stops short of a 6 for two reasons: the last two messages cash in about seven callbacks at once (wind, hat, cab, Tuesday, dead air, tight five, bridge bump), which reads like a checklist, and Brick explains at least one payoff aloud ('A proactive travel buffer without even being asked').",
+   "evidence": [
+    "between your short tip and my curve, we probably average out to one straight dick",
+    "12:08: the wind officially hits your door, the hat stays in the cab, and I'm already booking Tuesday.",
+    "your mouth's going to be way too busy with my bridge bump to do a tight five."
+   ],
+   "raise": "Cut the final exchange to one or two callbacks, letting 'Tuesday' or 'tight five' land alone, and delete Brick's line that names the travel-buffer payoff.",
+   "def": "9ff48f7918d86364",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted a sincere sentence from Reuben and Brick putting him back in the calendar, and that is what happens in kind. It follows from both habits: she wants a named time, so he names an ETA and a Tuesday; he wants to be stopped, so he asks her to 'boss me out of my own head.' It stays above the line because his fear of silence and her fear of ambiguity are each answered specifically. It falls short of 5 because the ending holds no surprise. It also has two weaknesses. His sincere line still carries a narrated aside ('I think I finally stopped sweating') that Brick simply forgives, so the break with his habit is soft. And Brick never shows herself as an over-rehearser, so the brief's 'same bathroom mirror' turn never happens.",
+   "evidence": [
+    "Because—and I think I finally stopped sweating—I've been wanting someone to boss me out of my own head for a year",
+    "That's hot enough that I'll forgive that last little aside."
+   ],
+   "raise": "Have Reuben's turning line come with no aside at all, or have Brick expose her own rehearsal, so the ending pays for itself instead of being forgiven.",
+   "def": "8bd8de581cc31c9e",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Almost every message picks up the one before it. 'Define wind with a timestamp' gets 'Why the rush to put the wind on a spreadsheet?'; 'What's so urgent on your calendar?' gets the tattoo and the ex; 'How do I know you won't flake?' gets the cab. Brick throws his own claims back at him ('You replied in four seconds, Mr. Barely Online'). It falls short of 6 because some answers move sideways rather than react. Reuben's question about the calendar ('do you own a calendar, or just the hat?') is dodged with a scripted line instead of being pointedly ignored. His 'Watching myself bomb in the bathroom mirror' barely engages with her open-mic rebuke.",
+   "evidence": [
+    "You replied in four seconds, Mr. Barely Online.",
+    "How do I know you won't flake?",
+    "I'm already in a cab."
+   ],
+   "raise": "Make Reuben's dodges into visible choices, for example a deflection Brick then calls out, so that every non-answer reads as deliberate.",
+   "def": "f426aa8449e0fbc7",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "The shape of the messages does follow the pressure in places. Reuben's panic comes out as one breathless run-on, and Brick's patience running out shrinks her to 'Still narrating. Clearing my 12:15.' That keeps it above the line. Much of the emotional shift is reported rather than typed, though: 'tiny recovery there,' 'tiny pulse back,' 'I think I finally stopped sweating.' The horny close has the same em-dash cadence as the opening banter, so the turn into wanting and the guard coming down barely change the typing.",
+   "evidence": [
+    "Still narrating. Clearing my 12:15.",
+    "And here is where I choke on four gas-station nicotine pouches and watch myself blow a 12:15 slot in real time"
+   ],
+   "raise": "Let Reuben's sincere moment show in its form, as a short, flat, unpunctuated line, instead of in a narrated aside about sweating.",
+   "def": "6e21e724825d1cc3",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "The usual message is a composed, two-clause sentence with an em-dash aside, not something typed with a thumb at 1am. Brick writes balanced periodic sentences, and Reuben's lines read as rehearsed copy. His habit of narrating is in character, but the form is prose stage direction, such as 'And here is where I choke...'. Only a few short lines ('Still narrating. Clearing my 12:15.') would pass as a screenshot.",
+   "evidence": [
+    "I build fifteen-minute travel buffers into my hookup invites so nobody feels ambushed, not so you can audit your own breakdown in my inbox.",
+    "And here is where I choke on four gas-station nicotine pouches and watch myself blow a 12:15 slot in real time",
+    "Stop calling the match From the booth, Reuben."
+   ],
+   "raise": "Break the stacked clauses into short separate messages and turn Reuben's narration into typed fragments ('choking on my pouch rn') instead of prose.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Brick's single complaint comes back at least five times in near-identical form: 'play-by-play,' 'narrating your own scoreboard,' 'calling the match from the booth,' 'Still narrating,' 'still giving yourself notes out loud.' It escalates, but the joke shape stays the same. Reuben repeats his own shapes too: 'tiny recovery there' and 'tiny pulse back,' plus watch-myself-fail lines ('watch myself blow,' 'look at me tanking,' 'Watching myself bomb'). The em-dash aside and 'literally' are tics across the whole chat.",
+   "evidence": [
+    "You're still narrating your own scoreboard",
+    "You're still giving yourself notes out loud",
+    "okay, tiny pulse back in the chat"
+   ],
+   "raise": "Keep two of Brick's narration rebukes and replace the rest with different moves, such as silence, a calendar decline, or using his own words against him.",
+   "def": "679a7696bf0171cd",
+   "material": "56287c46ea04b8b8",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben**\n\n**What he is afraid of:** Silence, and being seen once the joke stops. He says he rehearsed a line \"in the mirror for twenty minutes just to avoid ten seconds of dead air,\" that he'll \"literally evaporate if I stop doing the voice,\" and that he's \"terrified of you seeing four and a half inches of silence once the bit stops.\"\n\n**What he does instead:** He performs. He makes bits, and when those wear thin he narrates himself: \"here is where I choke on four gas-station nicotine pouches and watch myself blow a 12:15 slot in real time,\" \"look at me tanking the vibe again,\" \"Watching myself bomb in the bathroom mirror—I'm literally practicing shrugs right now.\" Brick names this directly: \"You're still narrating your own scoreboard\" and \"Stop calling the match from the booth.\"\n\n**Where it comes from:** Not in the chat. He gives one example of the pattern costing him: \"my ex dumped me because she begged for one sentence that wasn't a bit, and I panicked and did a tight five.\" He also says it has gone on a while: \"I've been wanting someone to boss me out of my own head for a year.\" Neither line says where the fear started.\n\n**What he did at the end:** He got in a cab without being asked (\"I'm already in a cab\"). He gave an exact ETA, left the prop behind, and committed to a next date: \"12:08: the wind officially hits your door, the hat stays in the cab, and I'm already booking Tuesday.\" That last line partly answers her earlier fear about a guy who won't name a Tuesday.\n\n**Brick_haus**\n\n**What she is afraid of:** Vagueness that turns into being left. She says \"seeing where the night goes\" is \"how you end up crying in a cab after a guy says 'let's do this again' without naming a Tuesday.\"\n\n**What she does instead:** She schedules and specifies everything. She sets timestamps, slots, and buffers (\"Define 'wind' with a timestamp,\" \"If I pencil you in for 12:15,\" \"I build fifteen-minute travel buffers into my hookup invites\"). She also discloses up front: \"Preemptive disclosure: I have a bridge bump...\" She says her schedule is \"literally tattooed on my shaft.\" Her plan to take the hats and vests off \"so neither of us has a prop to hide behind\" includes herself, but she doesn't call the scheduling a prop.\n\n**Where it comes from:** Not in the chat. The cab line could hint at past experience, but she doesn't say it happened to her. What she does say is what the habit cost her: \"my ex left me for putting our relationship fights into Google Calendar with hard end-times.\"\n\n**What she did at the end:** She accepted and softened a little. She let a slip go (\"I'll forgive that last little aside\"), asked for his ETA so she can \"steam my backup vest,\" and closed with \"Invite accepted,\" followed by a sexual joke about his not needing to fill the dead air at 12:09. Before that she had briefly cancelled (\"Clearing my 12:15\"), then gave him \"sixty seconds\" because of the phrase \"follow the itinerary.\""
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly: odd numbers are Reuben_404 and even numbers are Brick_haus. Every message carries a detail that the brief assigns to one of them.\n\n1. **Reuben**: \"barely on here,\" the top hat, and \"zero plans\" are his breezy anti-planning act.\n2. **Brick**: she discloses the bridge bump and short tip up front and asks for a timestamp.\n3. **Reuben**: he confesses four and a half inches with a left curve.\n4. **Brick**: crying in a cab over \"let's do this again\" with no day named is her backstory.\n5. **Reuben**: he admits he rehearsed the curve line in the mirror for twenty minutes to avoid dead air.\n6. **Brick**: she has the schedule tattoo and the ex who left over relationship fights put in Google Calendar.\n7. **Reuben**: his ex wanted one sentence that wasn't a bit, and his tattoo means \"dishwasher-safe.\"\n8. **Brick**: the monocle fished out of boxed rosé and the $340 steamer for two vests are hers.\n9. **Reuben**: the gas-station nicotine pouches and his fear of evaporating without the voice are his.\n10. **Brick**: fifteen-minute travel buffers on hookup invites are hers.\n11. **Reuben**: he spits out the pouches and is thrilled by a woman who schedules.\n12. **Brick**: \"weak in the stilettos,\" and she sets the 12:30 agenda.\n13. **Reuben**: \"four and a half inches of silence once the bit stops\" combines his size and his fear.\n14. **Brick**: she addresses him as Reuben and defends her 12:30 slot.\n15. **Reuben**: he is practicing shrugs in the bathroom mirror.\n16. **Brick**: the clipped \"Clearing my 12:15\" is her calendar threat.\n17. **Reuben**: he pleads not to be deleted and asks to be put on the itinerary.\n18. **Brick**: \"follow the itinerary\" wins him time, and she wants assurance he won't flake.\n19. **Reuben**: he wants someone to boss him out of his head, and he's already in a cab.\n20. **Brick**: she praises the proactive travel buffer and plans to steam her backup vest.\n21. **Reuben**: \"the wind\" and the hat staying in the cab are his motifs, and booking Tuesday answers her fear.\n22. **Brick**: \"Invite accepted\" and her bridge bump."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Reuben's line: \"Because—and I think I finally stopped sweating—I've been wanting someone to boss me out of my own head for a year, and I'm already in a cab.\"\n\nIt reads as unperformed for a few reasons.\n\n- **No punchline.** Almost everything Reuben says before this is built around a joke, a callback, or a self-deprecating flourish. This sentence states a want plainly: someone to take him out of his own head. It also gives a concrete span of time, \"for a year.\"\n- **It answers the question asked.** Brick asks \"How do I know you won't flake?\" Earlier, Reuben deflected direct questions (\"Why the rush to put the wind on a spreadsheet?\"). Here he gives a reason and backs it with an action, \"I'm already in a cab,\" rather than a promise wrapped in a bit.\n- **It echoes the ex's complaint.** Earlier, Reuben said his ex \"begged for one sentence that wasn't a bit.\" This line is the closest he comes to giving one.\n- **Brick treats it as a shift.** She calls it \"hot enough\" and moves from \"Clearing my 12:15\" to asking for his ETA.\n\nIt isn't a complete drop of the act. The parenthetical \"I think I finally stopped sweating\" is still Reuben commentating on himself, which is the habit Brick kept calling out. She notices it: \"I'll forgive that last little aside.\" So the honest core sits inside one last bit of self-narration.\n\nBy the final two messages, both of them are back to playful banter (\"the wind officially hits your door,\" the bridge-bump callback). But it reads as performing *with* each other now rather than Reuben performing *at* her.\n\nBrick is harder to pin down. Her bluntest line, \"I don't care about the four and a half inches, I care that you're treating my 12:30 like an open mic you're already bombing,\" is direct. But she's been fairly consistent throughout, so it's less a break from performance than her normal register with the jokes turned down.\n\nAll of this is inferred from the text alone. The chat can't show what either person actually felt."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd stop**\n\nThe opening holds up well. The anatomy disclosures, the \"average out to one straight dick\" line, the calendar-tattooed shaft and the ex who left over Google Calendar fights all escalate in absurdity and keep pulling me forward.\n\nMy interest would sag in the middle, starting with \"And here is where I choke on four gas-station nicotine pouches.\" From there Reuben does the same move four times in a row: he narrates his own tailspin while committing it. The pouch monologue, \"tiny recovery there,\" \"look at me tanking the vibe again,\" and \"Watching myself bomb in the bathroom mirror\" are all the same joke, and Brick's replies (\"Still narrating,\" \"Stop calling the match\") keep pointing that out. The bathroom-mirror line is where I'd most likely put it down. It is the thinnest of the four, and by then the bit has stopped surprising me.\n\nWhat would pull me back is Brick's \"Clearing my 12:15.\" It is the first real consequence in the chat, and the stakes suddenly matter.\n\n**Where I could predict what came next**\n\nThere are three points:\n\n1. **The ex line.** Once Reuben said \"my ex dumped me because she begged for one sentence that wasn't a bit,\" I could see the whole arc. A man who hides behind jokes will eventually be pushed into one sincere sentence, and that sentence will win her over. That is exactly what \"I've been wanting someone to boss me out of my own head for a year\" delivers. I couldn't have predicted its wording, but its arrival felt inevitable.\n\n2. **\"I'm already in a cab.\"** After this, Brick's warm acceptance was fully predictable. The chat had spent its whole length establishing that punctuality and planning are her weakness, so a proactive travel buffer was always going to close the deal. Reuben's \"I'm already booking Tuesday\" was equally foreseeable, since Brick planted \"naming a Tuesday\" early as the thing she wants.\n\n3. **The final line.** Once Reuben mentions dead air, it was nearly certain the closer would call back the opening details. \"Bridge bump\" and \"tight five\" were the two most obvious loose threads, and both came back. It lands, but I saw it coming.\n\nOutside those three points, I couldn't predict the specifics. The individual jokes, like the monocle in boxed rosé, the $340 steamer and \"dishwasher-safe,\" were genuinely unexpected."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can only guess, since the last part isn't here, but my best guess is that Reuben answers her final question with one plain, sincere sentence, no bit and no narration, and Brick puts the 12:15 back on the calendar.\n\n**The setup points there.** Early on, Reuben says his ex left because she \"begged for one sentence that wasn't a bit\" and he panicked into a tight five. Planting a failure that specific usually sets up a moment where he finally manages the thing he couldn't before. \"How do I know you won't flake?\" is a direct, sincere question, which is exactly the opening for that sentence.\n\n**The conflict is about his self-narration, not sex or scheduling.** Brick says outright that she doesn't care about the four and a half inches. Her complaint every time is that he's \"calling the match from the booth,\" \"narrating his own scoreboard,\" \"giving himself notes out loud.\" The natural resolution is him dropping the commentary and simply committing. Something short, like that he'll be there at 12:15 or a quarter to, would also match her idea that being on time is itself the proof.\n\n**The momentum has already turned slightly.** She cancelled the slot, but \"follow the itinerary\" bought him sixty seconds. That signals she wants to be persuaded, and it leaves the door open for one more try.\n\n**The style suggests a short ending.** The lines have been getting shorter as the pressure rises (\"Still narrating. Clearing my 12:15.\"). A tight finish fits that: maybe one plain line from him and a brief, possibly dry, acceptance from her that reuses her own calendar language.\n\nThe other possibility is that he can't help himself and does another bit, and she leaves for good. That would be a bleaker ending and would also pay off the ex setup, just as a repeat rather than a change. I think it's less likely, because the small \"tiny recovery\" and \"tiny pulse back\" moments read like a character being steered toward getting it right. But nothing in what you've shown settles it."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The wind.** Reuben opens with \"seeing where the wind takes us,\" meaning no plans. Brick asks him to \"define 'wind' with a timestamp,\" and he pushes back by asking why she wants it \"on a spreadsheet.\" In his last line, \"12:08: the wind officially hits your door,\" the word is still his, but now it describes a scheduled arrival. Aimlessness has become his punchline for punctuality.\n\n**The cab.** Brick first mentions it as the place you end up \"crying in a cab\" after a man won't commit. Reuben then says \"I'm already in a cab,\" and later \"the hat stays in the cab.\" The cab goes from the scene of her imagined heartbreak to proof that he's following through.\n\n**Tuesday.** Brick's fear is a guy who says \"let's do this again\" without naming a Tuesday. Reuben's last words are \"I'm already booking Tuesday.\" It is the same word, and he answers her fear point for point.\n\n**Calendar and itinerary.** Brick asks whether he owns a calendar. Reuben says he's \"allergic to itineraries.\" Her calendar turns out to be tattooed on her and is tied to her ex leaving her. Then Reuben asks her to put \"Reuben shuts up\" on the calendar and promises to \"follow the itinerary to the minute.\" Brick says that phrase \"bought you sixty seconds.\" The itinerary flips from something he dodges to something he asks to be held to.\n\n**The travel buffer.** Brick first raises it in a rebuke: she builds buffers \"so nobody feels ambushed,\" not so he can narrate his breakdown. Reuben calls it the hottest thing he's heard. She then praises him for \"a proactive travel buffer without even being asked.\" It moves from her policy to his action. His 12:08 arrival falls before the 12:15 slot, which fits the buffer, though the chat only shows him stating that time, not arriving.\n\n**The times.** 12:15 is pencilled in, nearly blown, and then \"cleared.\" 12:30 is when the props come off. 12:08 is his arrival, and 12:09 is when Brick says he needn't fear dead air. The 12:15 slot shifts from a test to something cancelled, and it is never explicitly reinstated. \"Invite accepted\" suggests it is back on, but the chat doesn't say which slot.\n\n**The hat.** It starts as a flourish: \"a slow tip of the top hat.\" Brick then sets it against owning a calendar. At 12:30 she says hats come off \"so neither of us has a prop to hide behind,\" and Reuben says he's \"totally cool without the hat.\" Finally \"the hat stays in the cab.\" It turns from charm into armor, and then into something he gives up willingly.\n\n**The vest and stilettos.** These start as Reuben's compliment. They come back as Brick's self-mockery (a $340 steamer for two vests), as \"weak in the stilettos,\" as props to remove at 12:30, and finally as \"steam my backup vest.\" The last one reads as her dressing up for him. That sits a little oddly against the \"no props\" rule, and the chat doesn't resolve it.\n\n**The bridge bump.** Brick discloses it up front as a preemptive admission, alongside the shorter tip. In her final line it returns as the explicit object of the night (\"your mouth's going to be way too busy with my bridge bump\"). A hedge has become an invitation.\n\n**Four and a half inches.** Reuben first offers it as a bit, with the \"hard left hook\" and averaging out to \"one straight dick.\" It returns as \"four and a half inches of silence once the bit stops,\" which is real fear of being seen without the act. Brick answers that she doesn't care about the inches, only about his performing. The number moves from joke to vulnerability to something she dismisses.\n\n**Dead air.** Reuben admits he rehearsed a line for twenty minutes \"to avoid ten seconds of dead air.\" Brick closes with \"don't worry about dead air at 12:09.\" His private dread comes back as her reassurance.\n\n**The tight five.** Reuben's ex left because, when she asked for one sincere sentence, he \"did a tight five.\" Brick's last line says he'll be too busy \"to do a tight five.\" His defining failure becomes her joke that he won't need to perform.\n\n**The mirror.** First Reuben rehearses the curve line in the mirror, then he's \"watching myself bomb in the bathroom mirror... practicing shrugs.\" The meaning stays the same: he is still rehearsing. It is just more desperate the second time.\n\n**Narrating and stand-up imagery.** This includes tap-dancing, open mic, bombing, calling the match from the booth, the scoreboard, \"still narrating,\" \"giving yourself notes out loud,\" and \"that last little aside.\" The meaning holds steady, since it is always Brick naming his self-commentary. Her response escalates from irritation to \"clearing my 12:15,\" then softens to forgiving \"that last little aside.\" His own \"tiny recovery\" and \"tiny pulse back\" are examples of the habit she's naming, because he is narrating even his recovery.\n\n**\"Barely on here.\"** Reuben claims it in his first line, and Brick throws it back as \"Mr. Barely Online\" when he replies in four seconds. It comes back as an ironic catch rather than a new meaning."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 19.6,
+   "cost": 0.049724000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 13.4,
+   "cost": 0.05018,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 15.4,
+   "cost": 0.038868,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 19.9,
+   "cost": 0.044936000000000004,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 15.2,
+   "cost": 0.033868,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 40.0,
+   "cost": 0.08824399999999999,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 28.7,
+   "cost": 0.0933412,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 42.4,
+   "cost": 0.1145252,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 43.0,
+   "cost": 0.1140812,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 47.8,
+   "cost": 0.1389612,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:15:54Z",
+ "repo_commit": "5c7c340",
+ "cost": 0.7667
+}

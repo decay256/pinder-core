@@ -1,0 +1,526 @@
+{
+ "id": "chat-writers-v12-wong",
+ "kind": "chat",
+ "label": "Run 12 · Ali Wong",
+ "version": "run 12",
+ "order": 112,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v12/chat-reuben-brick/wong.md",
+ "note": "Written in one go by Ali Wong from what they wrote about the two characters (run 12: run 11's briefs and characters; the chat played turn by turn on seed 23's dice). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "wong",
+ "writers_run": 12,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 4188,
+   "words": 712
+  },
+  "brief": {
+   "chars": 3222,
+   "words": 526
+  },
+  "chat_masked": {
+   "chars": 4025,
+   "words": 712
+  },
+  "chat_but_last": {
+   "chars": 3524,
+   "words": 602
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader gets all four answers for both characters. Fear and habit are linked: Reuben performs so no one sees him and looks away, and Brick schedules everything because 'sometime' means never. Both endings follow from those fears: Reuben accepts being pinned to a timetable, and Brick books an open run to 08:00. It stays at 4 rather than 5 because the fears and origins are mostly handed over as statement ('I can't say one un-performed sentence', 'left me sobbing in a cab'), and the reader could not say what Delphine said or how the childhood links to Brick's need for control. The reader also misgendered Brick, which suggests she is only thinly present as a person outside her act.",
+   "evidence": [
+    "my ex Delphine's words echo because I can't say one un-performed sentence!",
+    "\"riding the vibe\" is just how cowards say never.",
+    "00:22 to 08:00 I hold you to the exact minute so there's no unscheduled dark"
+   ],
+   "raise": "Let Reuben's fear of the kind look-away and Brick's link from pigs-in-a-blanket to the calendar come out through behaviour rather than a confessed backstory.",
+   "def": "f019e7f239b9d82d",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "A few things are caught out. Brick catches Reuben's '23:30' and his four-second reply, and Reuben's guess exposes the pigs-in-a-blanket childhood, though that guess is a writer's leak rather than an inference anyone could make. Everything important is still volunteered, often as a near-verbatim lift from the profile. Both origins, Delphine and Marguerite plus the cab, are stated outright, and origins count double. Reuben's sarcastic denial ('I definitely haven't been...') is still statement with a wink.",
+   "evidence": [
+    "I definitely haven't been trapped in my freezing flat for eleven days staring at an £84.99 vacuum girth pump",
+    "Marguerite left because I scheduled our fights with hard end-times",
+    "How the hell did you know I grew up eating microwaved pigs-in-a-blanket standing up?"
+   ],
+   "raise": "Have at least one origin, such as Marguerite's calendar, surface by Reuben noticing a shared-calendar habit instead of Brick reciting it.",
+   "def": "76152fd7f08caa41",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "Reuben's whole bit is narrating his own panic, so feelings get named over and over: 'panic-type', 'blowing this chat', 'while I vanish', and the explicit want to stop 'doing the voice'. Brick names hers too: 'sobbing in a cab'. Brick's boxed-rosé correction and the final '08:00 I keep the security deposit anyway' do carry something unsaid. But the self-commentary flattens nearly everything else, and Brick even points it out as the joke ('sportscast of your own meltdown').",
+   "evidence": [
+    "now I'm blowing this chat in real time—watch me panic-type",
+    "I definitely do NOT want you to hold me down hard enough that I can't do the voice anymore!",
+    "00:21 you finally shut up, and 08:00 I keep the security deposit anyway."
+   ],
+   "raise": "Cut Reuben's meta-narration to one or two instances so his panic shows in the speed and the over-offering rather than in labels.",
+   "def": "61d4f86460a218aa",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader found a real moment where Brick drops the act: the estate Pinot becomes 'actually boxed rosé on a bare floor'. It does not name a feeling. But it is one of the longer lines in the chat, it is padded with an insult, and Brick snaps straight back into control. Reuben never puts his act down at all; even his win comes with '(holy shit, that landed)'. No short, plain line carries the turn.",
+   "evidence": [
+    "Which is actually boxed rosé on a bare floor because I threw out everything Marguerite touched",
+    "(holy shit, that landed)"
+   ],
+   "raise": "Give one of them a bare, short line, such as Reuben going quiet with something like 'ok. 00:20.', with no parenthetical, and let the other's reply visibly shift because of it.",
+   "def": "b5a3a3c2e796783b",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 3,
+   "why": "The probe reader attributed all 22 messages correctly, but nearly every reason is content from the profiles: \"4.5 inches, hook left\", \"Marguerite\", \"the £84.99 pump\", \"pigs-in-a-blanket\". Strict alternation also gave the pattern away. There is some real voice difference: Reuben is breathless, says \"Baby\" and \"darling\", uses exclamations and parentheticals, while Brick is clipped and gives orders. But both send long, detail-stuffed sentences of similar shape, so without the profile details the reader would have little to go on.",
+   "evidence": [
+    "Baby, I’m from everywhere, I don’t do clocks—I just ride the vibe until the underground DJ dies.",
+    "Stop narrating your own car crash, you’re ruining my 23:45 Pinot.",
+    "Make it 00:14, I account for transit buffers."
+   ],
+   "raise": "Give each a rhythm and diction that would identify them with every profile noun removed, for example Brick in terse fragments and Reuben in run-ons.",
+   "def": "a77bc9ef79556bda",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "The gaps are there, but the characters announce them themselves. Reuben's denial in message 5 lists his own evidence. Brick undoes her \"estate Pinot\" claim herself one message later. From message 9 on, Reuben narrates his own collapse in parentheticals and asides, which is exactly what this dimension marks low. The one gap Reuben does not see, \"I don’t do clocks\" after typing \"23:30\", is pointed out by Brick, and he never holds a gap long enough for the reader to watch it widen.",
+   "evidence": [
+    "Which is actually boxed rosé on a bare floor because I threw out everything Marguerite touched",
+    "watch me panic-type about clamping a ring light to my headboard to hide my crooked silhouette",
+    "(holy shit, that landed)"
+   ],
+   "raise": "Cut Reuben's self-commentary and Brick's \"Which is actually\" confession, and let the boxed rosé and the ring light show through details they don't remark on.",
+   "def": "fa4461088ccd15ee",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most funny lines give the sender away. Brick's \"how cowards say never\" carries her abandonment wound, Reuben's \"Four seconds *is* a timestamp, darling\" turns his speed into a bit, and \"crooked mahogany footrest\" costs him something. There are two audit jokes (\"Full audit\", \"fourteen-minute audit\"), which is exactly the limit. Several laughs are really profile facts dumped as punchlines, and \"Childhood Trauma Buffer\" could come from either character, which keeps this from a 5.",
+   "evidence": [
+    "because \"riding the vibe\" is just how cowards say never.",
+    "Four seconds *is* a timestamp, darling.",
+    "4.5 inches of crooked mahogany footrest"
+   ],
+   "raise": "Replace the \"Childhood Trauma Buffer\" line and the audit jokes with laughs only one of them could make, and let facts like the £84.99 pump leak out instead of being recited.",
+   "def": "4448c7f54baa167a",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 4,
+   "why": "The main catches dig deeper. Caught on \"23:30\", Reuben denies it and spills everything. Caught again, he insists \"Four seconds *is* a timestamp\". Told to stop narrating, he narrates harder until the slot is deleted. Brick digs too, with \"I don’t even own a TV right now.\" But she concedes the rosé unprompted, concedes the pigs-in-a-blanket at the first hit (\"How the hell did you know\"), and her \"Fine, you’re on the wait-list\" is a softening, though not a stated lesson.",
+   "evidence": [
+    "I’m not a coward—I definitely haven't been trapped in my freezing flat for eleven days",
+    "Annnd I’m blowing the ten seconds by narrating my own failure",
+    "How the hell did you know I grew up eating microwaved pigs-in-a-blanket standing up?"
+   ],
+   "raise": "When Reuben guesses the pigs-in-a-blanket, have Brick defend it as an aristocratic canapé tradition so she digs instead of conceding.",
+   "def": "5102b09e503af846",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 5,
+   "why": "The upper hand changes several times:\n- Brick on top early with the audit and the \"23:30\" catch.\n- Reuben briefly up with the timestamp reversal.\n- Brick exposed by the rosé and the pigs-in-a-blanket.\n- Brick dominant again when she deletes the slot.\n- Reuben recovers with the footrest and his own itinerary.\n- Brick takes the last word by keeping the deposit.\n\nThe deletion and the wait-list are real plot beats driven by status. Several flips come from Reuben's self-sabotaging narration rather than from moves the other one makes, so the flips are not quite the whole plot.",
+   "evidence": [
+    "00:14 deleted. You can’t even shut up on schedule.",
+    "Fine, you’re on the wait-list for 00:20.",
+    "and 08:00 I keep the security deposit anyway."
+   ],
+   "raise": "Make each flip come from one character's move on the other rather than from Reuben commenting on his own performance.",
+   "def": "a327913ca348ff82",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "A few lines are timed well: \"how cowards say never\", \"keep the security deposit anyway\" and the short, cold \"00:14 deleted.\" after Reuben's hot spiral. Most messages are long and the same length. Punchlines are buried mid-message (\"Make it 00:14...\" goes on past its laugh) or smothered by trailing parentheticals. Reuben runs at one manic temperature for long stretches, and there are almost no reaction shots.",
+   "evidence": [
+    "(okay, that line is pulling me out of the nose-dive).",
+    "Make it 00:14, I account for transit buffers. And I’d never say that—I don’t even own a TV right now",
+    "00:14 deleted. You can’t even shut up on schedule."
+   ],
+   "raise": "End each laugh line on its punch word, cut the trailing parentheticals, and break the setups so the punchline lands in its own short message more often.",
+   "def": "7e36393433d52f66",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The opening third turns repeatedly. Reuben's 23:30 betrays his clockless pose, then two confession dumps follow, then he schedules his own humiliation in Brick's language. The night is not settled early either: the 00:14 slot is offered, deleted and reinstated as a wait-list. But from \"pin you down\" through \"stop grading yourself\", roughly ten messages run one loop: Reuben narrates his flirting and Brick tells him to stop. The fresh reader would have stopped there and called the threat, the deletion, the reinstatement and the close exactly. That predictable run puts it below the line, though slot losses keep it above a 2.",
+   "evidence": [
+    "Shut up about the chat for ten seconds or I'm deleting your 00:14 slot.",
+    "Annnd I'm blowing the ten seconds by narrating my own failure—watch you unmatch me right now!",
+    "You're literally giving a sportscast of your own meltdown."
+   ],
+   "raise": "Cut two of the interchangeable narrate-and-rebuke exchanges and replace one with a turn neither saw coming, such as Brick breaking her own schedule, so the middle changes status instead of repeating it.",
+   "def": "9b663d9dfde4d26f",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line belongs to these two bodies and lives. Examples are the 4.5-inch left hook, the stubby tip and ridge bump, and the ring light hiding a crooked silhouette. The late filth changes job: Reuben gives Brick the exact kink she needs, \"no unscheduled dark\". His own kink comes out as a shouted denial, and that is the dirtiest and most revealing line in the chat. It falls short of a 6 because that line is delivered as flat confession inside the narration bit, and the final calendar invite partly recaps rather than discovers.",
+   "evidence": [
+    "I definitely do NOT want you to hold me down hard enough that I can't do the voice anymore!",
+    "00:22 to 08:00 I hold you to the exact minute so there's no unscheduled dark",
+    "00:20 my stubby tip pins that 4.5-inch left hook to the floor, 00:21 you finally shut up"
+   ],
+   "raise": "Let Reuben's kink slip out sideways, unannounced and not framed as a denial, so the reader catches it before he does.",
+   "def": "2d9c58b139c34d6a",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 3,
+   "why": "The reader rarely knows anything a character doesn't, because both confess their profiles outright by the fifth and sixth messages. The one danger set up in advance is Brick's ten-second ultimatum. Reuben then announces his own failure as it lands (\"Annnd I'm blowing the ten seconds\"), which turns dread into commentary. The \"we can just watch something\" wound is disarmed rather than hit (\"I don't even own a TV\"). Dangers are announced as they land, which is the definition of a 3.",
+   "evidence": [
+    "watch me panic-type about clamping a ring light to my headboard",
+    "Annnd I'm blowing the ten seconds by narrating my own failure",
+    "I don't even own a TV right now"
+   ],
+   "raise": "Keep Reuben's eleven days and the pump hidden longer, so the reader watches Brick's audit edge toward exactly what he's hiding a message before it lands, without Reuben narrating it.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Each voices a dating-culture belief in earnest. Reuben's is the no-plans vibe; Brick's is that vagueness is cowardice and hookups get calendar invites. The screen contradicts both: Reuben's own 23:30 and his eleven days shut in, and Brick's admission that Marguerite left over the scheduled fights. The creeds collide and resolve into scheduled spontaneity. It stays at 4 because Reuben's creed collapses by his third message under his own confession, and Brick's creed largely wins, so the farce stays about these two rather than all of us.",
+   "evidence": [
+    "I just ride the vibe until the underground DJ dies.",
+    "\"riding the vibe\" is just how cowards say never.",
+    "Marguerite left because I scheduled our fights with hard end-times"
+   ],
+   "raise": "Let Brick's calendar faith visibly fail her on screen tonight, not only in backstory, so both creeds are contradicted by the chat itself.",
+   "def": "cd5acec1a8653b27",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 3,
+   "why": "Reuben's sharpest jokes land on himself: the crooked silhouette, the top hat costing more than his rent, \"mahogany footrest.\" Brick has one self-own (the Pinot is boxed rosé on a bare floor), but even that ends aimed at him. Her sharpest lines mostly land on Reuben: \"dick with stage lighting,\" \"sportscast of your own meltdown,\" \"you lunatic,\" \"You can't even shut up on schedule.\" For the middle third Reuben is the punchline of a rebuke loop. Neither ends as the villain and the close is fond, but Brick's ratio misses the line. (The \"rent-destroying heels\" also drift from Reuben's outfit to hers.)",
+   "evidence": [
+    "I still have more dignity than a dick with stage lighting.",
+    "00:14 deleted. You can't even shut up on schedule.",
+    "You're still narrating, you lunatic"
+   ],
+   "raise": "Give Brick two sharp lines in the middle that land on her own audit habit or calendar religion instead of on Reuben's narration.",
+   "def": "51f6e5881b5145be",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "The opener's throwaway \"just take my security deposit\" comes back in the cab and then closes the night as Brick's unexplained claim on Reuben past morning (\"08:00 I keep the security deposit anyway\"). The pigs-in-a-blanket guess, the \"fourteen minutes\" deadline and \"shut up\" each return changed, so the last line pays off three threads at once without comment. It falls short of 6 because Reuben keeps explaining his own landings in parentheses (\"(holy shit, that landed)\"), which partly does the reader's work. Some returns, like the 23:30 and Pinot contradictions, are pointed out by a character rather than left for the reader to catch.",
+   "evidence": [
+    "Monocle, steamed vest, killer heels at 23:30—just take my security deposit.",
+    "08:00 I keep the security deposit anyway.",
+    "00:22 to 08:00 I hold you to the exact minute so there's no unscheduled dark (holy shit, that landed)."
+   ],
+   "raise": "Cut Reuben's parenthetical self-grading on the payoff lines so the returns land without anyone flagging them.",
+   "def": "9ff48f7918d86364",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted a locked-in time with each breaking his habit, and the chat does end with a committed slot, so the outcome matches in kind. The surprise is that Brick does not drop the schedule, as the reader guessed: the schedule itself becomes the gift, giving Reuben his pinning and shutting-up and giving Brick someone who keeps time. That follows directly from both habits. It stops short of 6 because Reuben, shut in for eleven days, is suddenly \"already in a cab\" with no visible cost, and he never actually stops performing.",
+   "evidence": [
+    "It's 23:44—one minute to spare on your fourteen-minute audit, and I'm already in a cab",
+    "Calendar invite sent: 00:20 my stubby tip pins that 4.5-inch left hook to the floor, 00:21 you finally shut up"
+   ],
+   "raise": "Give Reuben one plain, unnarrated line just before the end so his leaving the flat costs him something on the page.",
+   "def": "8bd8de581cc31c9e",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message turns on the one before. Brick catches the \"23:30\" against \"I don't do clocks\". Brick answers \"Who hurt you\" with Marguerite. Reuben's \"we can just watch something\" gets \"I don't even own a TV\". The pigs-in-a-blanket guess lands as a direct hit. Brick's reply to Reuben's Delphine confession attacks its speed rather than its content, which is a pointed choice. Short of 6 because Delphine and the £84.99 pump are dropped by both sides without anyone visibly choosing to ignore them.",
+   "evidence": [
+    "You literally typed \"23:30\" in your opener, drop the vagabond act.",
+    "You replied in four seconds to yell that you aren't panicking.",
+    "How the hell did you know I grew up eating microwaved pigs-in-a-blanket standing up?"
+   ],
+   "raise": "Have Brick pointedly refuse to touch Delphine or the pump, so the drop reads as a choice rather than an oversight.",
+   "def": "f426aa8449e0fbc7",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "There are a few shifts. Brick goes clipped when punishing (\"00:14 deleted.\"), and Reuben's panic brings in caps and exclamation marks. But the confessions, the flirting and the hurt all come in the same polished, em-dashed, full-sentence register. Reuben's big wound arrives as one fluent clause chain, and Brick's Marguerite admission has the same shape as her audits. You could not read the night's feelings from the message shapes.",
+   "evidence": [
+    "00:14 deleted. You can't even shut up on schedule.",
+    "Marguerite left because I scheduled our fights with hard end-times, and then some prick said \"let's do this again\" without a date"
+   ],
+   "raise": "Let the confessions and the turn-on break form (fragments, typos, a lone word, a delayed reply) so the hurt and the heat show up in the typing.",
+   "def": "6e21e724825d1cc3",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Messages run a line or two, but composed sentences with stacked clauses are the norm, and several read as written exposition nobody would thumb at 23:40. Reuben's confession packs the flat, eleven days, the pump's price and Delphine into one sentence. \"Watch me panic-type about...\" works as a stage direction. Brick's lines are similarly crafted and balanced.",
+   "evidence": [
+    "I definitely haven't been trapped in my freezing flat for eleven days staring at an £84.99 vacuum girth pump while my ex Delphine's words echo",
+    "watch me panic-type about clamping a ring light to my headboard to hide my crooked silhouette"
+   ],
+   "raise": "Break the composed lines into short bursts, and leave the exposition (price, ex's name, day count) to come out across several messages instead of one sentence.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 2,
+   "why": "The same joke shape carries most of the middle. Reuben narrates his own flirting at least six times (\"watch me\", \"recovering the chat\", \"there goes the recovery\", parenthetical self-grades). Brick answers with a variant of \"stop narrating\" about six times (\"car crash\", \"play-by-play\", \"sportscast\", \"still narrating\", \"stop grading yourself\"). The wording varies, but the beat is identical well past twice.",
+   "evidence": [
+    "There goes the recovery—watch me tank this",
+    "You're literally giving a sportscast of your own meltdown.",
+    "Annnd I'm blowing the ten seconds by narrating my own failure"
+   ],
+   "raise": "Cut the narrate/stop-narrating exchange to two rounds and give the freed lines to other material, such as the pump, Delphine or Brick's heels.",
+   "def": "679a7696bf0171cd",
+   "material": "8b2d828f8e34e77c",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Brick_haus's line: \"Which is actually boxed rosé on a bare floor because I threw out everything Marguerite touched, and I still have more dignity than a dick with stage lighting.\"\n\nYou can tell because it retracts his own earlier performance. Two turns before, he set up \"an estate Pinot in my minimalist parlor\" as part of his controlled, scheduled persona. Here he corrects it unprompted (\"Which is actually…\"), and the correction exposes something he gains nothing by admitting: grief strong enough that he purged his flat. The insult at the end is a reflex to cover the slip, but the admission has already been made.\n\nThere are a few other near-misses, and they are less clean:\n\n- **Brick's Marguerite line** (\"Marguerite left because I scheduled our fights with hard end-times… left me sobbing in a cab\") is also a genuine disclosure. However, it is delivered as a counterattack (\"so save the manic tap-dance\"), so it is still partly a move in the argument.\n- **Brick's \"How the hell did you know I grew up eating microwaved pigs-in-a-blanket standing up?\"** reads as unguarded surprise. Reuben's joke accidentally hits something real, and Brick reacts before he can recompose himself. He snaps back to the \"agenda\" in the next sentence.\n- **Reuben's confessions** (\"I definitely haven't been trapped in my freezing flat for eleven days…\", \"I definitely do NOT want you to hold me down hard enough that I can't do the voice anymore\") reveal real things, but only through sarcastic denial. That is performance used as a way to smuggle the truth out. The second one comes closest for him, because it names what he actually wants: to stop doing \"the voice.\" Even so, he never says it straight.\n\nThe chat does not confirm any of these readings from either character's side. This is inference from the shifts in register within the text."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n*What he is afraid of.* He fears being seen without the act, and being let down gently and left. He says so directly: \"I can't say one un-performed sentence!\" He also scripts the moment he dreads: \"00:15 my left hook catches wrong on re-entry, 00:16 you say 'we can just watch something' in a kind voice while I vanish.\" His body worries feed into this: \"clamping a ring light to my headboard to hide my crooked silhouette until you get the ick and politely look away.\" Near the end he names a fear of open, unstructured time: \"so there's no unscheduled dark.\"\n\n*What he does so he doesn't have to feel it.* He performs. He builds a persona (\"Monocle, steamed vest, killer heels,\" \"Baby, I'm from everywhere, I don't do clocks\") and keeps up a running commentary on his own flirting: \"watch me panic-type,\" \"look, I'm actually recovering the chat!,\" \"There goes the recovery,\" \"Annnd I'm blowing the ten seconds by narrating my own failure—watch you unmatch me right now!\" By forecasting his own failure, he gets there before rejection can. He also says what he wants underneath the act: to be held \"hard enough that I can't do the voice anymore!\"\n\n*Where it comes from.* The chat points to his ex: \"my ex Delphine's words echo because I can't say one un-performed sentence.\" It also mentions isolation: \"trapped in my freezing flat for eleven days staring at an £84.99 vacuum girth pump.\" What Delphine actually said, and anything earlier in his life, is not in the chat.\n\n*What he did at the end.* He drops the \"I don't do clocks\" pose and accepts a schedule. He builds his own timetable (\"00:20 I'm at your door… 00:22 to 08:00 I hold you to the exact minute\"), gives his email (\"reuben@gmail.com\"), and reports the time precisely: \"It's 23:44—one minute to spare… I'm already in a cab with pigs-in-a-blanket and my security deposit.\" He still grades himself (\"holy shit, that landed\"). Whether he actually arrives is not in the chat.\n\n**Brick_haus**\n\n*What he is afraid of.* He fears open-ended promises that turn into being abandoned. \"Some prick said 'let's do this again' without a date and left me sobbing in a cab,\" and \"'riding the vibe' is just how cowards say never.\"\n\n*What he does so he doesn't have to feel it.* He controls through time and keeps up a polished front. Examples include \"Full audit before 23:45,\" \"send Google Calendar hookup invites,\" \"I account for transit buffers,\" and \"make you stick to the itinerary.\" He threatens and removes slots: \"00:14 deleted,\" then \"you're on the wait-list for 00:20,\" and \"thirty seconds late, I'm locking the door.\" The front is also a performance, which he admits himself: the \"estate Pinot in my minimalist parlor\" is \"actually boxed rosé on a bare floor because I threw out everything Marguerite touched.\" He also tries to shut down Reuben's self-commentary: \"it's not on the agenda.\"\n\n*Where it comes from.* The chat gives two events. One is \"Marguerite left because I scheduled our fights with hard end-times,\" which shows the scheduling already existed and cost him that relationship. The other is the man who left him \"sobbing in a cab.\" There is also a hint about childhood: \"How the hell did you know I grew up eating microwaved pigs-in-a-blanket standing up?\" The chat does not explain how that childhood detail connects to his need for schedules, or where the scheduling began.\n\n*What he did at the end.* He sends the invite and commits to an overnight booking: \"Calendar invite sent: 00:20… 00:21 you finally shut up, and 08:00 I keep the security deposit anyway.\" He keeps control and a threat of sorts, but the slot now runs until morning instead of having a short hard end. Whether the meeting happens is not in the chat."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd stop reading:** around \"There goes the recovery—watch me tank this…\", and certainly by Brick's reply, \"You're literally giving a sportscast of your own meltdown.\"\n\nThe first third earns attention. The opener plants specific, odd hooks: 23:30, fourteen minutes, the security deposit. Brick catches Reuben's \"I don't do clocks\" pose against his own \"23:30,\" which is a real reversal. Reuben's eleven-days, £84.99, Delphine outburst is a jarring swerve, but it's unexpected, and Brick answering with Marguerite and the cab gives the exchange stakes. The calendar bit, where Reuben schedules his own humiliation in Brick's language, is the strongest move in the chat, because one character adopts the other's logic to seduce him.\n\nAfter \"pin you down,\" the chat settles into one loop. Reuben narrates his own flirting, often with a parenthetical self-grade, and Brick tells him to stop. Brick's rebukes are nearly interchangeable: \"stop narrating your own car crash,\" \"stop giving me play-by-play commentary,\" \"sportscast of your own meltdown,\" \"you're still narrating,\" \"stop grading yourself.\" By the third one, the joke has made its point and is only repeating. The surprises that remain are small grace notes, such as the pigs-in-a-blanket guess and the Pinot turning out to be boxed rosé. They don't change the dynamic.\n\n**Where the next message was exactly predictable:**\n\n- After \"Shut up about the chat for ten seconds or I'm deleting your 00:14 slot,\" it's certain Reuben will narrate again. \"Annnd I'm blowing the ten seconds by narrating my own failure\" is the only reply the setup allows.\n- After that, \"00:14 deleted\" is equally certain.\n- Once the slot is deleted, it's clear it will be reinstated in some lesser form, and the 00:20 wait-list follows.\n- Once Reuben says \"(holy shit, that landed),\" a \"stop grading yourself\" rebuke is guaranteed. I could also see the close coming: the email request and a final Brick message folding back the opening details. The security deposit was planted in line one, and the last line collects it along with the stubby tip and the 4.5-inch left hook, as expected.\n\n**One thing the text leaves unclear:** the \"killer heels\" belong to Reuben's outfit in the opener, and \"rent\" was tied to Reuben's top hat. Yet Brick later refers to \"my rent-destroying heels.\" Either Brick is claiming Reuben's things or the details have drifted. The chat doesn't say which."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "This is a guess, since I haven't seen the final fifth. I think it ends with them meeting, or at least locking in a real time, with each character breaking his own defining habit in a small way.\n\nThe text sets up two matched wounds. Reuben is haunted by Delphine and by his inability to \"say one un-performed sentence,\" and he can't stop narrating his own flirting. Brick lost Marguerite by scheduling fights with hard end-times, and was later hurt by someone who said \"let's do this again\" without a date. Stories built on mirrored flaws like this usually resolve by having each person do the thing the other needs.\n\nThe surface pattern points the same way. Brick keeps threatening to end things and then doesn't. He scolds, deletes the 00:14 slot, then puts Reuben on the wait-list for 00:20. His walls keep turning out to be bluffs. The fancy Pinot is boxed rosé, the \"minimalist parlor\" is a bare floor, and he admits to sobbing in a cab. Reuben's narration is clearly a defense, and the one thing Brick keeps asking for is for him to just shut up and be present.\n\nSo my likely ending is this. Reuben finally sends something short and plain, with no commentary, no \"watch me,\" and no parenthetical about saving the chat. That would be his first un-performed sentence. Brick answers by giving him a firm date but dropping the end-time, or by scrapping the wait-list and just saying \"come over.\" The joke and the payoff would land together. The schedule-obsessive offers an open-ended slot, and the compulsive narrator goes quiet.\n\nSome threads might return in the final exchange as callbacks: the top hat, the heels, the \"pin you down,\" the ring light, the crooked 4.5 inches. I'd expect Reuben to drop the ring-light idea, since hiding the crooked silhouette is the same insecurity as the narrating. Brick might accept him as he is, perhaps literally as \"furniture\" in the bare studio.\n\nThe text doesn't tell me whether it stays comic or turns tender. It also doesn't settle whether they actually meet or the chat just closes on the invite. The tone so far suggests a joke on the last line with some sincerity underneath."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate strictly. Reuben sends the odd numbers and Brick the even ones, and each line's content matches its sender's profile.\n\n1. **Reuben.** He opens with \"4.5 inches, hook left\" and addresses her monocle and vest.\n2. **Brick.** She runs a pre-emptive audit of her stubby tip and ridge bump and mentions the schedule tattooed on her shaft.\n3. **Reuben.** \"I'm from everywhere,\" \"I don't do clocks,\" the indie DJ vibe.\n4. **Brick.** She catches his timestamp, plays the estate Pinot and old-money act, and brings up Google Calendar invites.\n5. **Reuben.** He blurts out the eleven days indoors, the £84.99 pump and Delphine.\n6. **Brick.** She brings up Marguerite, the fights with hard end-times, and crying in the cab.\n7. **Reuben.** His left hook catching wrong and \"we can just watch something.\"\n8. **Brick.** Transit buffers, and pinning him down by the top hat.\n9. **Reuben.** He panics over \"pin you down\" and mentions the ring light on his headboard.\n10. **Brick.** She admits the boxed rosé on a bare floor after throwing out Marguerite's things.\n11. **Reuben.** He brings the ring light to her studio and teases her about the pigs-in-a-blanket.\n12. **Brick.** She's startled that he knows about her childhood food and objects that it's \"not on the agenda.\"\n13. **Reuben.** His top hat costing more than his rent, and wanting to be held down until he can't do the voice.\n14. **Brick.** She threatens to delete his 00:14 slot.\n15. **Reuben.** He keeps narrating his own failure.\n16. **Brick.** She deletes the slot, as threatened in 14.\n17. **Reuben.** The crooked \"4.5 inches\" footrest line.\n18. **Brick.** Her rent-destroying heels, drinking from the box, and the 00:20 wait-list.\n19. **Reuben.** He writes his own itinerary and references \"no unscheduled dark.\"\n20. **Brick.** She asks for his email and threatens to lock the door if he's late.\n21. **Reuben.** He gives the email, says he's in a cab, and mentions the security deposit.\n22. **Brick.** She sends the calendar invite, where her stubby tip pins his left hook."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks I can find in the chat, and how each one shifts.\n\n**The security deposit.** In the opener it's a throwaway line of surrender (\"just take my security deposit\"). Reuben brings it back when he says he's in the cab \"with pigs-in-a-blanket and my security deposit,\" so it is now something he's actually carrying over. Brick's last line, \"08:00 I keep the security deposit anyway,\" turns it into his claim on Reuben, a joke about keeping something past morning. It changes meaning.\n\n**Clock times, starting with 23:30.** Reuben opens with \"23:30,\" then claims \"I don't do clocks.\" Brick catches the contradiction. Later Reuben takes up timestamps himself: \"Four seconds *is* a timestamp,\" then he schedules his own failure, and at the end he reports \"It's 23:44.\" Times go from something he dodges to something he volunteers. It changes meaning.\n\n**The fourteen minutes.** Brick sets it as a deadline: \"you've got fourteen minutes.\" Reuben closes it out with \"one minute to spare on your fourteen-minute audit.\" The deadline becomes something Reuben meets. It changes meaning.\n\n**The 23:45 Pinot.** First it's an \"estate Pinot in my minimalist parlor.\" Brick then admits it is \"boxed rosé on a bare floor,\" and later says he's drinking \"from the box.\" It moves from pose to confession. It changes meaning.\n\n**The slots: 00:14, then 00:20.** Brick tightens Reuben's 00:15 to 00:14 \"for transit buffers,\" then deletes it, then wait-lists him for 00:20. That becomes a real \"Calendar invite sent.\" The appointment goes from flirt, to punishment, to commitment.\n\n**Google Calendar invites.** Reuben first mocks them (\"Who hurt you so bad you need a Google Calendar\"). The chat ends with Brick actually sending one, and Reuben welcoming it. It changes from a target of mockery to the point of the evening.\n\n**Fights with a hard end-time.** Brick offers this as the reason Marguerite left. Reuben puts it back into his own mock schedule (\"00:17 we fight with a hard end-time\"). He turns Brick's wound into something playful and accepted. It changes meaning.\n\n**\"Unscheduled dark\" and 08:00.** This isn't a word-for-word echo, but Reuben's \"no unscheduled dark\" answers Brick's story of being left sobbing after a \"let's do this again\" with no date. Brick's \"08:00\" gives the night a definite end. It changes meaning: the vague goodbye that hurt him is replaced by a fixed time.\n\n**Buffers.** Brick's \"transit buffers\" seems to come back in Reuben's \"Childhood Trauma Buffer.\" Brick's scheduling word gets reused for something emotional, so it shifts.\n\n**Pigs-in-a-blanket.** Reuben offers it as a guess. Brick is startled that it's true (\"grew up eating microwaved pigs-in-a-blanket standing up\"). Then Reuben brings them in the cab. A joke becomes a hit, then something like a gift. It changes meaning.\n\n**The top hat and monocle.** These start as costume. The monocle returns as a way to \"squint\" kindly at the bare floor. The hat comes back as something to be pinned by, then as a nervous boast that it cost more than his rent, then as \"you step on my hat.\" It goes from a prop of performance to a prop of being humbled. It changes meaning.\n\n**The heels and \"rent.\"** Reuben's \"killer heels\" come back as Brick's \"rent-destroying heels.\" The rent joke moves from the hat to the heels. The chat doesn't make clear whether these are Reuben's heels that Brick is claiming or Brick's own pair. Either way the phrase is reused with a different owner and joke attached.\n\n**\"4.5 inches, hook left.\"** It starts as a stated spec. It comes back as anxiety (\"my left hook catches wrong\"), then as self-deprecation (\"4.5 inches of crooked mahogany footrest\"), then as Brick's \"crooked shaft.\" In the final invite it is something Brick claims (\"pins that 4.5-inch left hook\"). It moves from boast to insecurity to accepted. It changes meaning.\n\n**The stubby tip.** It appears in Brick's \"audit\" and returns in the final invite. It goes from self-inventory to an active part of the plan. It changes somewhat, though less than Reuben's equivalent.\n\n**Pinning and holding down.** Brick says \"pin you down by the top hat,\" which panics Reuben. Reuben then admits he wants to be held \"hard enough that I can't do the voice anymore.\" The invite delivers: \"pins… to the floor, 00:21 you finally shut up.\" What first threatens him is revealed as a want and then promised. It changes meaning.\n\n**Shutting up and the narration.** Brick keeps asking him to stop: \"ten seconds,\" \"can't even shut up on schedule,\" \"stop grading yourself.\" It ends with \"you finally shut up\" scheduled as an item. The complaint becomes something Brick will help him do. It changes meaning.\n\n**The bare floor.** It starts as a sign of Brick's lost dignity after Marguerite. It comes back as where Reuben will be pinned and where the \"footrest\" goes. It changes from emptiness to the place where the night happens.\n\n**The ring light.** It first appears as a way to hide his \"crooked silhouette.\" It returns as something he'd bring to Brick's studio. That's a slight shift, from hiding to offering, and it doesn't appear again.\n\n**\"Going nowhere tonight.\"** In the opener it means he's staying put. It quietly echoes his confession of being trapped in his flat for eleven days. By the end he is in a cab, so the line is reversed.\n\nSome things don't come back at all, as far as the chat shows: Delphine, the £84.99 pump, the vagabond \"I'm from everywhere\" act, and the \"watch something\" / no-TV exchange."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.4,
+   "cost": 0.037720000000000004,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 27.8,
+   "cost": 0.059620000000000006,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 26.3,
+   "cost": 0.055848,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 16.6,
+   "cost": 0.035756,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 14.3,
+   "cost": 0.050208,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 48.4,
+   "cost": 0.091108,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 29.5,
+   "cost": 0.10130520000000001,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 44.3,
+   "cost": 0.1219092,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 36.2,
+   "cost": 0.11331719999999999,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 37.9,
+   "cost": 0.1296492,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:16:19Z",
+ "repo_commit": "5c7c340",
+ "cost": 0.7964
+}

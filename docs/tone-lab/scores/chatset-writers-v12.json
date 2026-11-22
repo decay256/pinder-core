@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v12",
+ "kind": "chat",
+ "label": "Run 12 · all 3 chats",
+ "version": "run 12",
+ "order": 112,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v12/chat-reuben-brick/",
+ "note": "Every chat of run 12 (run 11's briefs and characters; the chat played turn by turn on seed 23's dice): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 12,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 12654,
+   "words": 2116
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats tell the same night in the same order. Reuben opens with a hat-tip and his 4.5-inch left-curve disclosure, and Brick counters with her bump and short tip. Reuben then denies rehearsing or being shut in for eleven days, and the exes follow: calendar fights with hard end-times, and Delphine wanting 'one sentence that wasn't a bit'. Next comes Reuben narrating himself blowing the slot 'in real time', Brick ordering him to stop narrating, and Reuben recovering through asides. Every chat ends with 'Invite accepted' and a sex punchline. Many lines recur in all three: the four-second reply, crying in a cab over 'let's do this again', boxed rosé, and watching himself blow the slot. Others recur in two: 'plastic sword', 'already in a cab', 'won't flake', and a fight with a hard stop as 'foreplay'. It stays above a 1 only because each writer adds its own furniture: Carr's Pinder clone and the inch-docking, Booster's taking the props off at 12:30, and Wong's ring light, pigs-in-a-blanket and footrest bid.",
+   "evidence": [
+    "watching myself blow the 23:45 slot in real time by panicking and oversharing",
+    "watch myself blow a 12:15 slot in real time by typing a frantic monologue",
+    "a row with a hard stop-time is just foreplay with a mercy rule"
+   ],
+   "raise": "Let at least one chat break the shared order of disclosure, exes, meltdown narration, scolding, recovery and accepted invite. For example, Brick could crack first, or the turning point could come from something other than Reuben narrating himself.",
+   "def": "03d845827225bb57",
+   "material": "31eb60ff7946ab2a",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 17.8,
+   "cost": 0.0708212,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T20:14:24Z",
+ "repo_commit": "5c7c340",
+ "cost": 0.0708
+}
