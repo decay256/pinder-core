@@ -1,31 +1,28 @@
-# The scorecard's current focus (v24 draft): which dimensions decide the next experiment.
+# The scorecard's current focus (v24, tone-lab-scratch): which dimensions decide the experiment.
 #
-# The experiment: two new characters, written from Pinder's brief rather than from the game's
-# character files, each with a profile, and one plan for the pair. Profiles and plans first;
-# the chat scorecard is off until both reach the gate.
+# The experiment: writers write Reuben and Brick from Pinder's brief, then a chat between their own
+# two, in one go (tools/tonelab/writers.py). The chats are scored on the rewritten chat scorecard,
+# one by one and run by run as a set. Profiles and plans keep their earlier tiers for reference.
 #
-# tier: critical = drives the generator and the gate; watch = scored and shown, not targeted;
+# tier: critical = decides the experiment and the gate; watch = scored and shown, not targeted;
 # off = not scored in this experiment. Every entry says why. Quote "off": bare, YAML reads it as false.
+# detail: kinds whose every result the focus page shows in full.
 
-title: Two characters from the brief
+title: The writers' chats
 mission: >-
   When the chat is over, someone who has read only the chat is asked, for each of the two: what
   are they afraid of, what do they do so they don't have to feel it, where does that come from,
   and what did they do at the end? If they can't answer, the chat failed, however good the lines
   were.
-mission_source: Pinder's brief, the planner's system prompt
+mission_source: Pinder's brief, "What the reader should feel"
 experiment: >-
-  Step back from the game's character files. Write two characters from the brief alone, give
-  each a profile and the pair one plan, and score them only on the dimensions below that are
-  critical. Chats come once profiles and plans pass.
-gate: Every critical dimension scores 4 or more, on both profiles and on the plan.
-disabled: [chat]
-disabled_note: Off until both profiles and the plan pass the gate.
-
-planned:
-  - {id: new-a-profile, kind: profile, label: "Character A · new", top: "A", sub: "new"}
-  - {id: new-b-profile, kind: profile, label: "Character B · new", top: "B", sub: "new"}
-  - {id: new-ab-plan, kind: plan, label: "A and B · new plan", top: "A×B", sub: "new"}
+  Fourteen writers and comedians each wrote both characters and a chat between them, in four runs;
+  in a fifth, the six comedians rewrote their chat in at most 1,000 words. Score every chat on the rewritten chat scorecard, whose dimensions come from the brief and from
+  what these writers say about their own craft, and score each run as a set: did the writers write
+  different nights, or one scene fourteen times?
+gate: Every critical dimension scores 4 or more on a chat, and the run's set scores 4 or more on variety.
+disabled: []
+detail: [chat]
 
 # Reference columns: the best we have today on the same dimensions.
 reference: [profile-reuben-v22, profile-reuben-v22-panel, profile-reuben-v24, profile-reuben-v24-panel,
@@ -78,3 +75,29 @@ tiers:
   plan.original:       {tier: "off", why: "Diagnostic; the default plot is a worry for later."}
   plan.format:         {tier: "off", why: "The plan's format changes with the experiment."}
   plan.seeds:          {tier: "off", why: "Needs several seeds of one version."}
+  # ── the chat ──
+  chat.test:        {tier: critical, why: "The brief's own pass/fail test, word for word. The old scorecard asked for a dossier (job, address) instead."}
+  chat.subtext:     {tier: critical, why: "Pinter: the feeling is in what they avoid. The brief kills chats where characters explain their feelings."}
+  chat.plainest:    {tier: critical, why: "The brief's understatement rule; merges two old dimensions that asked for the same moment twice."}
+  chat.voices:      {tier: critical, why: "Two people you can tell apart without the names; the masked reader test is concrete."}
+  chat.gap:         {tier: critical, why: "The brief's main source of laughs: the claim and the evidence on screen, unseen by the speaker. Nothing scored it before."}
+  chat.wit:         {tier: critical, why: "Parker: a laugh counts only if it gives the sender away. The old dimension gave 5s to day-job jokes the brief bans."}
+  chat.commitment:  {tier: critical, why: "Caught out, they dig deeper; no lesson. Nothing scored it before."}
+  chat.escalation:  {tier: critical, why: "Saunders: every stretch raises the stakes or turns. Replaces pacing, which docked chats for explicit sex the brief asks for."}
+  chat.medium:      {tier: critical, why: "Leonard: typed, not written. 3 on every played chat: the chats read like prose."}
+  chat.variety:     {tier: critical, why: "Fourteen writers wrote one scene; only a set can show it."}
+  chat.sideways:    {tier: watch, why: "Already separates chats (3 to 4); keep it in view."}
+  chat.status:      {tier: watch, why: "New: in every run 3 and run 4 opening Brick is on top and stays there."}
+  chat.timing:      {tier: watch, why: "Carr's punch-word-last rule, countable; shows whether the lines are timed by the medium."}
+  chat.filth:       {tier: watch, why: "Sharpened: the dirtiest line should give the speaker away. Explicitness never counts against it."}
+  chat.wince:       {tier: watch, why: "The brief's wince; new."}
+  chat.creed:       {tier: watch, why: "The satire through their mouths, scored on the profile before but never on the chat."}
+  chat.humanity:    {tier: watch, why: "Sharpened from 5, 5, 5: whom the jokes land on, and no villain."}
+  chat.callbacks:   {tier: watch, why: "Sharpened from 5, 5, 5: a throwaway that means something else at the end, unexplained."}
+  chat.ending:      {tier: watch, why: "The reader's prediction test; inevitability is the brief's cynical laugh."}
+  chat.listening:   {tier: watch, why: "Each message answers the last; cheap to keep."}
+  chat.situational: {tier: watch, why: "The typing changes with the night."}
+  chat.fresh:       {tier: watch, why: "Repetition inside one chat; the set's variety covers repetition across chats."}
+  chat.leaks:       {tier: "off", why: "Pipeline health: needs a plan; the writers' chats have none."}
+  chat.plan:        {tier: "off", why: "Pipeline health: the writers' chats have no plan."}
+  chat.dice:        {tier: "off", why: "Pipeline health: the writers' chats have no dice."}

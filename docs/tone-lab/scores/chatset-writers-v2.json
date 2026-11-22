@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v2",
+ "kind": "chat",
+ "label": "Run 2 · all 8 chats",
+ "version": "run 2",
+ "order": 102,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v2/chat-reuben-brick/",
+ "note": "Every chat of run 2 (the writer is the author and the authority): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 2,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 122543,
+   "words": 21262
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All eight chats run nearly the same night. Each opens with Reuben's flourish plus an alibi for replying fast (kettle, cab, rain). Brick answers \"hm.\" and a numbered anatomical disclosure, someone pastes a note by accident and says \"ignore that,\" a confession cascade follows (ring-light shadow, eleven seconds and \"we can just watch something,\" Delphine's one plain sentence, the cropped portrait nobody paid twelve pounds/quid to fix, the dropped work invite, the self-built clone that unmatched him). The finale is nearly always the clipboard handover, a minute-by-minute sex agenda, present-tense narration \"so I know I'm in the room,\" and a hand flat on the back with talk of lentils or landlords. Whole sentences recur in far more than two chats, so this is well below the line. It stays above 1 because some things do shift between chats: who leaks the note (Reuben in David, Armstrong/Bain, Leonard and Waller-Bridge; Brick in Coel, Saunders, Parker and Pinter), the date (tonight, Thursday or Friday), and the coda (Armstrong/Bain's eleven-second silence, Saunders's \"Stephen sounds like a prick,\" Coel's tile spacer).",
+   "evidence": [
+    "Very few, very right things. (Coel; near-identical in Armstrong/Bain, Saunders, Waller-Bridge)",
+    "watched her face shut like a shopfront (Coel; also Leonard, Waller-Bridge, Pinter)",
+    "She said she couldn't be with someone who scheduled being loved. (David; also Armstrong/Bain, Saunders, Parker)"
+   ],
+   "raise": "Give each writer a different spine, with different wounds surfacing and no shared clipboard-agenda finale, so that no beat sequence or stock line appears in more than half the chats.",
+   "def": "03d845827225bb57",
+   "material": "0bdc3f98f9d05081",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    false,
+    false,
+    false
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 18.2,
+   "cost": 0.3999412,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:32:37Z",
+ "repo_commit": "579a54a",
+ "cost": 0.3999
+}

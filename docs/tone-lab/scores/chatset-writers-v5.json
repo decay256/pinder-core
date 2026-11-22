@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v5",
+ "kind": "chat",
+ "label": "Run 5 · all 6 chats",
+ "version": "run 5",
+ "order": 105,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v5/chat-reuben-brick/",
+ "note": "Every chat of run 5 (the comedians' run 4 profiles; the chat held to 1,000 words): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 5,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 40929,
+   "words": 7207
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All six chats are nearly the same night, which falls far short of the Line. Five open with Reuben's fake-casual \"caught me\". In all six Brick clocks the reply speed and then gives a body inventory. Then come a notes-app slip, a confession run (mum's crop, eleven seconds of silence, the \"nice voice\" saying \"we can just watch something\"), Brick's calendar-ex story, a timestamped sex itinerary, and an ending where she is touched or talked to until she \"forgets what time it is\", with Thursday or a named day set. Many lines recur in far more than two chats: \"nicest voice you've ever heard\", \"until you forget what time it is\", \"hand flat on my back\", \"scheduled being loved\", \"Don't be late, Reuben\". It stays above a 1 only because there is some variation in surface and order: Mae Martin opens with \"you're in my seat\", Carr's Brick nearly unmatches before Reuben confesses, and Booster's night runs at 02:00 with Brick writing the itinerary.",
+   "evidence": [
+    "caught me on the one night a month I actually open this thing",
+    "she said \"we can just watch something\" in the nicest voice you ever heard in your life",
+    "stay until I forget what time it is reuben"
+   ],
+   "raise": "Give each chat a different turning point and ending: one where the confession never comes, one where the itinerary fails, one where Brick breaks first. Drop the shared lines (\"nice voice\", \"forget what time it is\", \"hand flat on my back\") from all but one or two chats.",
+   "def": "03d845827225bb57",
+   "material": "a613278924dc7bab",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    false,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 18.0,
+   "cost": 0.1532732,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:50:20Z",
+ "repo_commit": "579a54a",
+ "cost": 0.1533
+}

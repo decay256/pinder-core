@@ -1,0 +1,534 @@
+{
+ "id": "chat-writers-v2-leonard",
+ "kind": "chat",
+ "label": "Run 2 · Elmore Leonard",
+ "version": "run 2",
+ "order": 102,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v2/chat-reuben-brick/leonard.md",
+ "note": "Written in one go by Elmore Leonard from the two profiles they wrote (run 2: the writer is the author and the authority). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "leonard",
+ "writers_run": 2,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 14572,
+   "words": 2579
+  },
+  "brief": {
+   "chars": 14939,
+   "words": 2701
+  },
+  "chat_masked": {
+   "chars": 13709,
+   "words": 2579
+  },
+  "chat_but_last": {
+   "chars": 12084,
+   "words": 2124
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader gets Reuben's fear, his cover, and his ending, and links them closely. They also reach his origin through the cropped portrait and his mother calling him Stephen, though they hedge on it. For Brick they get the fear, the scheduling habit and the ending, but her origin is missing: the profile's broke childhood and cropped-portrait story was given to Reuben, and the Luton fridge appears once with no link to anything. Both endings follow from their fears, which keeps this above the line. Both fears are given as stated maxims rather than found, and Brick has only three of the four, which keeps it from a 5.",
+   "evidence": [
+    "What kills me is when they're nice.",
+    "When someone leaves the time open, they're already gone.",
+    "since I had to turn sideways to get past our fridge in Luton until I was eighteen."
+   ],
+   "raise": "Give Brick her own origin, the childhood of not taking up space, as a slip that ties it to the heels and the empty flat, and keep the cropped-portrait beat off Reuben's lines.",
+   "def": "f019e7f239b9d82d",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "The early surface details come out well by slip or being caught. The Barclays fraud alert pasted from the clipboard exposes the pump. Reuben spots the half-shaded planner and the empty flat from the photos. The cocktail rapier gets explained after he notices it. The deep material is all volunteered in unprompted monologues: the cropped portrait, the dropped calendar invite, the Delphine story, the nice-voice fear, and Brick's Marguerite and taxi stories. No habit's origin comes out by slip or inference, and origins count double here.",
+   "evidence": [
+    "BARCLAYS SECURITY: Did you attempt £84.99 at MERIDIAN WELLNESS SOLUTIONS LLC at 02:14?",
+    "When I was nine my mother had the family portrait reframed for the downstairs hall and cropped me out",
+    "Half of it's just empty boxes. The shading stops right around the curve."
+   ],
+   "raise": "Have the portrait and the calendar invite surface because Brick reads them off something Reuben lets slip, instead of Reuben laying them out in sequence.",
+   "def": "76152fd7f08caa41",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "There is real subtext in places. The ring light that erases his shadow, the line \"You didn't name a day,\" and the rosé defended with 'maths' all carry more than they say. But the chat explains its feelings several times: Reuben states his fear and the reason behind it, Brick spells out her taxi-door theory, and Brick later explains the 10:45 mechanism outright. That is several explanations, against a limit of at most one.",
+   "evidence": [
+    "What kills me is when they're nice.",
+    "Because if you're looking right at it and saying it out loud, I'm in the room.",
+    "So I call time at 10:45. That way the meeting just adjourned on schedule."
+   ],
+   "raise": "Cut Brick's explanation of why she calls time and Reuben's 'What kills me' line, and let 'It's 10:45' and the pat on the hip carry them.",
+   "def": "61d4f86460a218aa",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader finds the moment straight away. Reuben takes back the Dean Street story, then says 'That wasn't a bit.' and Brick answers 'I know it wasn't.' The exchange turns the night from her soft exit into the Friday plan. Neither line names a feeling, which keeps it above the line. But the act is mostly put down in one long run-on message, and the short line labels the drop instead of being it, so it lands half as announcement. Plainer lines exist elsewhere, such as \"Don't pat me on the head.\"",
+   "evidence": [
+    "That wasn't a bit.",
+    "I know it wasn't.",
+    "Don't pat me on the head."
+   ],
+   "raise": "Cut 'That wasn't a bit' and shorten the overcoat message to one or two flat facts, so the drop is the shortest line in the chat instead of a labelled list.",
+   "def": "b5a3a3c2e796783b",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "The night isn't settled until the last dozen messages, and it turns hard several times. The Barclays paste flips banter into exposure. The Delphine and ring-light run raises the stakes. The 10:45 hard stop reverses the temperature, and the overcoat confession strips Reuben's act. The early rosé/rapier/vacuum-bladder exchange is mostly Brick explaining, a gentle plateau rather than a turn. The reader also called several beats ('You didn't name a day', the Delphine_1 return, her accepting the schedule), so it falls short of a 6.",
+   "evidence": [
+    "BARCLAYS SECURITY: Did you attempt £84.99 at MERIDIAN WELLNESS SOLUTIONS LLC at 02:14?",
+    "You're very charming, Reuben_404. We can pick this up another time.",
+    "I have my winter overcoat on right now."
+   ],
+   "raise": "Make the final schedule cost Brick something unexpected (a minute she can't control) so that her acceptance is not the near-certain beat the reader saw coming.",
+   "def": "9b663d9dfde4d26f",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line is built from these two bodies. The twelve-degree ridge, the thirty-degree hook and the dishwasher-safe kanji are worked into positions ('come in from the side of the mattress at forty-five degrees'). Late on, the filth changes job: the explicit 21:22 to 21:35 sequence is the most revealing thing she says, and it gives him exactly what he needs. What holds it below a 6 is Brick's own kink request, which is a clean explanation ('Tell me what is going to happen to me, in order') rather than a dirty line that gives her away.",
+   "evidence": [
+    "Thirty degrees left against a twelve-degree left ridge means straight-on is out of the question unless you enjoy bruising your own pubic bone.",
+    "read every single inch of you back to you in the present tense until you shut up and come.",
+    "I want my mouth taken away from me."
+   ],
+   "raise": "Give Brick a filthy, body-specific line for her own surrender, so her confession hits as hard as her 21:22 line does.",
+   "def": "2d9c58b139c34d6a",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 5,
+   "why": "The 10:45 hard stop is planted in her first turn ('I have until 10:45'), and her rule about open time is stated outright. So while Reuben pours out the ring light, the reader can feel the clock running. She then goes off on the exact wrong spot: she is kind and vague right after he says kindness is what kills him. The Dean Street lie also sits visible until he retracts it. It stops short of a 6 because the second danger (the clipboard paste) arrives unannounced, so the reader winces early clearly only once.",
+   "evidence": [
+    "I have until 10:45 while the garment steamer heats up. Go ahead.",
+    "When someone leaves the time open, they're already gone.",
+    "What kills me is when they're nice."
+   ],
+   "raise": "Plant Reuben's clipboard hazard a message early (him copying something before he 'pastes the splash copy') so that a second wince is seen before it lands.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 5,
+   "why": "Brick voices app efficiency in earnest ('get the geometry out of the way in the first minute', 'with a hard stop, nobody drifts'), and the screen contradicts it: an empty flat, a planner shaded only to 14:30, Marguerite gone. Reuben voices the cool, low-investment pose ('I only open this thing when it's raining', 'nights nobody planned'). It is undone by eleven days indoors and a Pinder clone built to test openers that unmatched him, which is satire on all of us. The planned and unplanned creeds collide only implicitly in the ending. Neither challenges the other's creed directly, which keeps this from a 6.",
+   "evidence": [
+    "The best nights are the ones nobody planned.",
+    "If it's on the calendar with an agreed start and a hard stop, nobody drifts.",
+    "my own bot unmatched me."
+   ],
+   "raise": "Have Brick audit 'the best nights are the ones nobody planned' head-on early, so the two creeds argue on screen before the timestamps resolve them.",
+   "def": "cd5acec1a8653b27",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's sharpest jokes land on himself: the arm-wrestling loss, the Tupperware tattoo, the bot unmatching him, the pump that 'sounded like a pug drowning'. Brick's best lines land on Reuben ('the top rack', the doorframe cold-read). Her own 'systems', though (the wet monocle, the boxed-rosé maths), make her the comic target as often. She risks villainy with 'another time', but her heels-and-no-sofa confession redeems her. Her early contempt aimed at him is slightly heavier than her self-mockery, which keeps this from a 6.",
+   "evidence": [
+    "it sounded like a pug drowning in a drainpipe.",
+    "I wore it wet for forty minutes afterward. It's a system.",
+    "if I take them off I'm five inches shorter and the flat feels bigger"
+   ],
+   "raise": "Give Brick one early line where her dry verdict turns back on her own body or flat, balancing the cold-reads she aims at him.",
+   "def": "51f6e5881b5145be",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back changed with no one explaining them. The lentils and wooden spoon begin as a shameful detail in his confession, become the 21:45 plan with \"no punchline,\" and end as her invitation. The pat (\"patted me twice on the hip\") becomes his request to \"keep one hand flat on my back.\" The last line closes the night and drops the handle to \"Reuben\" without comment. It falls short of a 6 because the cab-door callback is spelled out by a character (\"after telling me what that means\"), and the not-naming-a-day thread is argued aloud rather than left for the reader to assemble.",
+   "evidence": [
+    "I've been eating the same pot of green lentils with a wooden spoon out of the saucepan",
+    "Bring the wooden spoon, Reuben.",
+    "You just shut the cab door on my coat and said \"another time\" after telling me what that means."
+   ],
+   "raise": "Cut Reuben's gloss on the cab door so that \"You didn't name a day.\" has to do the work alone.",
+   "def": "9ff48f7918d86364",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted a named day in her calendar shorthand, and that is what happens in kind (\"Tomorrow is Friday,\" \"21:00 is on the calendar\"). Both habits produce it: her 10:45 exit fails because he has learned her rule, and his plain sentence earns her stopping. There is also a surprise the reader did not foresee. He keeps the time for her, and he refuses her request for a hard stop (\"there isn't an end time\"). It is not a 6 because the turn comes through explicit confrontation and confession, so it lands as tidy rather than inevitable-but-startling.",
+   "evidence": [
+    "What's the hard stop after 21:35?",
+    "There's no punchline in it and there isn't an end time.",
+    "21:00 is on the calendar."
+   ],
+   "raise": "Let her open time arrive without his spoken accusation, so that her own slip forces the reversal.",
+   "def": "8bd8de581cc31c9e",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message answers the one before it, and the dodges are pointed. Reuben deflects \"Who was Delphine_1?\" and she later asks it back verbatim. She answers his long ring-light confession with \"It's 10:45.\", a deliberate non-reply that drives the climax. His day-job and portrait confession answers her \"they're already gone\" sideways. It misses a 6 because a few offers just drop away, such as his two-drink and torque line, which she passes over without making the ignoring mean anything.",
+   "evidence": [
+    "Who was Delphine_1? Wait—don't answer that, that's my question.",
+    "Brick_haus: Who was Delphine_1?",
+    "Brick_haus: It's 10:45."
+   ],
+   "raise": "Have Brick visibly decline his \"two-drink maximum\" line, so every skipped offer reads as a choice.",
+   "def": "f426aa8449e0fbc7",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 5,
+   "why": "Reuben's ceremonial sentences and emoji give way to clipped lines when he is caught (\"All right.\") and when he is hurt (\"Don't pat me on the head.\"). Brick moves from numbered audits to a run-on clause pile at her third glass, as her profile says she should. The sex plan switches into timestamped lines, which makes its own shape. It is not a 6 because Reuben's wounded confessions stay in long, polished paragraphs, so his most exposed stretch keeps the same register as his act.",
+   "evidence": [
+    "All right.",
+    "I'm on my third glass of boxed wine at the kitchen counter in four-hundred-pound heels because if I take them off I'm five inches shorter",
+    "That wasn't a bit."
+   ],
+   "raise": "Break Reuben's Delphine and ring-light confession into short, ragged lines, so the drop is visible on the screen.",
+   "def": "6e21e724825d1cc3",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Messages are split into lines, and Brick's are mostly short. Even so, long composed messages are the norm rather than the rare event. Reuben stacks clauses and em-dash asides in the Interpol message, and the confession block reads like narrated prose with literary similes. Brick's monocle and rosé messages are also stacked explanations. In-character lawyering excuses some of this, but nobody thumbs \"Watched her face close up like a shopfront\" at 10pm.",
+   "evidence": [
+    "Watched her face close up like a shopfront, and because I couldn't stand the quiet, I did another bit on top of it",
+    "had to let a regular go one night because he wouldn't stop insisting he was the bass player from Interpol, when I happened to know",
+    "That thirty-degree left hook did what I spend twenty minutes in front of the bathroom mirror rehearsing how to warn people it does"
+   ],
+   "raise": "Cut the confession and backstory messages to one or two plain lines each, and save a single long message for the lentils admission.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Brick's standalone \"hm.\" opens a verdict six times, far past the twice the line allows, and it becomes predictable well before the last one. A second shape also repeats: she explains a mishap as a system (the rosé rapier, then the boxed-wine maths). The jokes themselves vary widely, from the Tupperware kanji and the pump to the bot unmatching him, and that keeps this from a 2.",
+   "evidence": [
+    "Brick_haus: hm.",
+    "It's a system.",
+    "If you're going to come at my kitchen, bring better maths."
+   ],
+   "raise": "Keep \"hm.\" for two or three verdicts that matter, and replace the rest with other dry openers.",
+   "def": "679a7696bf0171cd",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 5,
+   "why": "The reader attributed all 108 messages correctly. Many calls rest on voice rather than content: Brick's lone \"hm.\", her numbered lists and clipped periods, and Reuben's ceremonial, hat-tipping clauses with a soft emoji at the end. It falls short of a 6 because some stretches were attributed by content. The reader needed the Calendar invite, Stephen and Delphine to place Reuben's confessions, and flagged two messages (48, 102) as uncertain. Late on, both voices also fall into the same timestamp format.",
+   "evidence": [
+    "Brick_haus: hm.",
+    "Good evening to the monocle, and to the waistcoat doing all that quiet structural work beneath it.",
+    "21:22 is yours."
+   ],
+   "raise": "Keep the voices apart in the timestamp sequence. Reuben could still dress his times up while Brick stays bare, so that those messages can be placed by voice alone.",
+   "def": "a77bc9ef79556bda",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 5,
+   "why": "There are plenty of gaps, and nobody sees their own while it is open. Reuben claims a \"strict two-drink maximum\" and a stealth app, then admits his kit \"requires four drinks\" and his own bot unmatched him. Brick calls her flat \"curated\" and \"not because the flat is empty\" while describing the ex's furniture at the dump, and calls the monocle accident \"a system\". Brick's gap widens steadily until the heels confession. Reuben's act collapses around message 39 rather than widening to the end, which keeps this from a 6.",
+   "evidence": [
+    "It's curated.",
+    "I have a strict two-drink maximum. Purely for the tempo of the evening.",
+    "requires four drinks before it leaves my coat pocket"
+   ],
+   "raise": "Keep a piece of Reuben's man-about-town claim standing past the pump reveal, so that his gap goes on widening into the final third.",
+   "def": "fa4461088ccd15ee",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 5,
+   "why": "Nearly every laugh gives its sender away. Reuben's Tupperware kanji, the pump that \"sounded like a pug drowning\" and \"my own bot unmatched me\" are all his. Brick's ball-hang read from his punctuation and the monocle fished out with a cocktail sword are all hers. The best lines cost the sender something, such as the Luton fridge and the bot cutting off the arm-wrestling line. It stops short of a 6 because some of Brick's material is audit or data humour of the kind the brief rules out, such as the boxed-rosé vacuum-bladder maths and the numbered audit. \"Top rack\" could also have come from either character.",
+   "evidence": [
+    "my own bot unmatched me",
+    "if you're going to come at my kitchen, bring better maths.",
+    "it sounded like a pug drowning in a drainpipe"
+   ],
+   "raise": "Replace the boxed-wine oxidation maths with a defence that exposes Brick's fear of open time instead of her number-crunching.",
+   "def": "4448c7f54baa167a",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 5,
+   "why": "Most catches are answered by digging deeper. Caught on the rain, Reuben offers \"barometrically speaking\". Caught by the Barclays paste, he offers \"a Delaware corporation\". Caught on the empty flat, Brick produces the dumped furniture and the leaky seals. Caught on the planner, she explains the booty call and then Marguerite. No lesson is stated, and Brick's deepest hole is where her truth comes out: third glass, the heels, no sofa. It misses a 6 because Reuben concedes with \"All right.\" at the second hit on the pump. The flood of confessions that follows is worse, but it is a concession, not a deeper explanation.",
+   "evidence": [
+    "Meridian is the holding company for the server rack. Delaware corporation. Very dry stuff.",
+    "the steamer and the barstool are pulled into the middle of the floor because the sash windows... have a minor seal issue",
+    "All right."
+   ],
+   "raise": "Give Reuben one more cover story for the pump before \"All right.\", so that his collapse also comes from the bottom of a hole.",
+   "def": "5102b09e503af846",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 5,
+   "why": "Status changes hands several times. Brick opens on top with her audit. Reuben takes ground by needling the flat, the sword and the rosé. Brick retakes it by identifying the pump, and loses it on the shaded planner and the maintenance appointment. She reasserts herself with the 10:45 hard stop, and Reuben flips it with \"You didn't name a day\". The final schedule hands control back and forth, ending with Brick granting the slot. It is just short of a 6 because the long confessional run (59–71) has no one clearly on top, so the plot slackens there.",
+   "evidence": [
+    "You have until 10:45 while the garment steamer heats up. Go ahead.",
+    "You didn't name a day.",
+    "21:00 is on the calendar."
+   ],
+   "raise": "Keep a status edge inside Reuben's long confession, with Brick pressing or Reuben deflecting, so that the flips carry the middle as well.",
+   "def": "a327913ca348ff82",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    false,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 5,
+   "why": "Most punchlines land as the last word of a message or in a message of their own. Examples are \"ignore that\" after the pasted fraud alert, \"At least you know you can go on the top rack.\" after \"hm.\", and the deadpan \"Your own code unmatched you.\". One-line reaction shots like \"hm.\" and \"That wasn't a bit.\" sit well after long messages, and the cold 10:45 stop follows the hot confession. It falls short of a 6 for two reasons. The Interpol gag is buried mid-message in a parenthetical, and Reuben's run from 63 to 71 holds one warm-sad temperature across nine messages.",
+   "evidence": [
+    "ignore that",
+    "At least you know you can go on the top rack.",
+    "That wasn't a bit."
+   ],
+   "raise": "Break the Interpol aside into its own message and put a short Brick interjection into the 63–71 run, so the temperature changes.",
+   "def": "7e36393433d52f66",
+   "material": "7c12b9383b5e611d",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest point is Reuben's message after Brick calls time at 10:45:\n\n\"I have my winter overcoat on right now. I haven't left this room in eleven days. I've been eating the same pot of green lentils with a wooden spoon out of the saucepan, I didn't get fired from a club on Dean Street, it was a dive near Dalston Junction and it actually wasn't the guy from Interpol, and my top hat is sitting on a styrofoam mannequin head facing the pillow because I don't have a hook for it.\" Followed by: \"That wasn't a bit.\"\n\nYou can tell for several reasons:\n\n- **He corrects his own earlier story.** The Dean Street door and the man claiming to be from Interpol's band were part of his opening act. Here he takes them back. Earlier \"confessions,\" like the pump and the fake app, still landed as jokes with a punchline (the drowning pug, his own bot unmatching him). This one has no punchline.\n- **The details are flat and unflattering.** Lentils, a saucepan, eleven days indoors. None of them is shaped for a laugh.\n- **He labels it.** He says outright that it wasn't a bit. That answers Delphine_1's request for \"one plain sentence with nothing on it,\" which he says he failed to give her.\n- **She confirms it.** Brick replies \"I know it wasn't.\"\n\nBrick has a matching moment just before his: \"I'm on my third glass of boxed wine at the kitchen counter in four-hundred-pound heels because if I take them off I'm five inches shorter and the flat feels bigger, and I don't have a sofa to sit on anyway.\" This undoes her earlier performance. She had said the flat was \"curated\" and that the steamer and stool were in the middle \"not because the flat is empty,\" and she had defended the boxed rosé with \"maths.\" Here she admits the emptiness and explains why she calls time: so that people who regret opening up \"just adjourned on schedule.\"\n\nTwo smaller signals come later. \"I want someone to take the clipboard out of my hand\" names her system as something she wants relief from rather than something she defends. Her last line, \"Bring the wooden spoon, Reuben,\" is the only time she calls him by his name without the \"_404.\" It also picks up the lentil detail from his unperformed message rather than any of his jokes.\n\nThe chat itself doesn't say whether Friday happens, or whether either of them slips back into performing afterward."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped**\n\nI wouldn't have stopped. The closest I came was early, at Brick_haus's opening list. Point 2 and point 3 are crude cold-reads delivered with no warmth, and if the whole chat had stayed at that pitch I could see putting it down as a two-person contest of escalating bluntness. What kept me going was the texture underneath the crudeness: the precise numbers, the oddly specific alibis (the rapier for the monocle, the vacuum-bladder rosé), and the sense that both of them were performing in ways the text was setting up to crack.\n\nAfter that, the hooks kept coming. The pasted Barclays text is the moment the chat turns from banter into exposure. Once Reuben admits the app has no users except him and a bot that unmatched him, I was reading for the people rather than the jokes.\n\n**Where I could predict what came next**\n\nNot exactly anywhere, but there were a few places I saw coming.\n\n* **\"You didn't name a day.\"** This is the clearest one. Brick_haus states the rule: \"When someone leaves the time open, they're already gone.\" Later she ends with \"We can pick this up another time.\" The chat has planted the trap and she walks into it, so I expected Reuben to call it out. I didn't predict his exact words, or that he would add \"Don't pat me on the head,\" tying it back to the woman who patted his hip.\n\n* **Delphine_1.** Reuben asks who she was and immediately takes the question back. Unanswered questions like that tend to return, and when Brick_haus asks it bluntly later, it lands where I expected.\n\n* **The ending, once the timestamps start.** When Reuben replies \"Tomorrow is Friday\" and begins the schedule, he is giving her the exact thing she just said she wants. Her accepting and putting it \"on the calendar\" felt nearly certain. What I didn't foresee was the specific turn at 21:35–21:45: the lentils, the absence of an end time, and \"Bring the wooden spoon,\" which turns his most pathetic confession into the closing intimacy.\n\n* **\"hm.\"** By the third or fourth time, I could reliably predict that Brick_haus would open her more important turns this way. That's a pattern rather than a plot prediction.\n\nSo the answer to \"exactly\" is never. There were a handful of strongly signposted moments, mostly built from rules or questions the characters had already put on the table."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Most turns follow from the two profiles: Reuben's top hat, rapid-fire triple messages and ceremonial sentences, against Brick's \"hm.\", numbered lists, hard stops and anatomical geometry. Only a few are judgment calls, and I've noted those.\n\n**1–3, Reuben.** The arm-wrestling line, the apology for replying in four seconds, the claim that he only opens the app when it's raining, and the 🎩 are all from his brief.\n\n**4–9, Brick.** \"hm.\" on its own line, a numbered audit of his opener, the ball-hang read from his punctuation, her own twelve-degree geometry up front, and a 10:45 hard stop with the steamer.\n\n**10–13, Reuben.** The barometer excuse, the stealth app, four and a half inches \"six when the pound is strong,\" and the dishwasher-safe kanji story with 😌.\n\n**14–17, Brick.** \"hm.\" again, a dry top-rack joke, angle-and-leverage logistics, and an interrogation about the app.\n\n**18–20, Reuben.** The two-drink maximum, \"nobody planned,\" the Interpol door story, and teasing about her empty flat.\n\n**21–23, Brick.** \"It's curated,\" dumping the ex's furniture, and explaining away the leaky windows.\n\n**24, Reuben.** He spots the cocktail sword.\n\n**25–27, Brick.** She turns the monocle-in-rosé accident into \"a system.\"\n\n**28, Reuben.** He needles her about the boxed rosé.\n\n**29–30, Brick.** Boxed-wine maths, then a demand for the link with a time limit.\n\n**31–34, Reuben.** The NDA dodge, the pasted Barclays fraud alert for Meridian Wellness, and a cover story.\n\n**35–38, Brick.** \"hm.\", identifying the pump billing name exactly, and the November Triumph guy.\n\n**39–42, Reuben.** He gives in and confesses the pump, the tongue attachment, and the fake app with Delphine_2.\n\n**43, Brick.** A flat, incredulous restatement.\n\n**44, Reuben.** His bot cut off his arm-wrestling line.\n\n**45–46, Brick.** The Luton fridge she had to turn sideways past, and a practical question.\n\n**47, Reuben.** The tip-the-hat chivalry.\n\n**48, Reuben, with some uncertainty.** The tattoo he asks about, the grid down her left side, is Brick's daily planner. \"That's my question\" reads as him anticipating that she'll ask about Delphine.\n\n**49–50, Brick.** She explains the planner tattoo and Marguerite.\n\n**51, Reuben.** He notes the shading stops.\n\n**52–53, Brick.** She corrects him to 14:30 and gives the early booty-call explanation.\n\n**54, Reuben.** He catches her calling it a \"maintenance appointment.\"\n\n**55–58, Brick.** The hard-stop philosophy, the Marguerite calendar story, and the cab and \"sometime\" fear.\n\n**59–61, Reuben.** Being dropped from the calendar invite, the cropped portrait, and his mother calling him Stephen. Brick also has a cropped portrait, but the calendar invite and the brother's name are his.\n\n**62, Brick.** She asks the Delphine question.\n\n**63–71, Reuben.** The Delphine story, fearing kindness more than laughter, the \"we can just watch something\" night, and the ring light.\n\n**72–75, Brick.** \"hm.\", calling her 10:45 stop, and \"another time.\"\n\n**76–77, Reuben.** He points out she didn't name a day.\n\n**78, Brick.** She denies patting him on the head.\n\n**79, Reuben.** He throws her cab-door line back at her.\n\n**80–81, Brick.** Third glass, the heels, no sofa, and why she calls time.\n\n**82–84, Reuben.** The coat indoors, eleven days inside, the lentils, the corrected Dalston story, the mannequin head, and \"That wasn't a bit.\"\n\n**85–86, Brick.** She acknowledges it and asks what he wants.\n\n**87–89, Reuben.** His actual kink, almost verbatim from his brief.\n\n**90–92, Brick.** Hers: take the clipboard away and give her times.\n\n**93–98, Reuben.** He keeps the schedule for her, as she asked. The hat goes on the floor, she takes the vest off and kneels, he goes down on her ridge. \"21:22 is yours\" hands her the slot.\n\n**99–101, Brick.** She uses it on his kink: hand across the throat, under the ring light, describing him in the present tense.\n\n**102, Brick, with some uncertainty.** Asking for the hard stop is her instinct, and Reuben answers it.\n\n**103–105, Reuben.** His aftercare, the hand on his back and not having to be funny, combined with hers: boring talk about lentils with no end time.\n\n**106–108, Brick.** \"hm.\", putting it on the calendar, and addressing him by name."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can only guess, since the final turn isn't here. Based on the threads the chat has laid down, I expect it to end with Brick_haus naming a day.\n\n**Why a named day matters.** The story has made \"another time\" without a day the clearest sign that someone is leaving. Brick_haus says it outright about Marguerite and the cab door. She then does exactly that to Reuben at 10:45, and he catches her. Her hard stop has already lapsed: she kept talking past it and admitted the heels, the third glass and the missing sofa. So the natural reversal is that she does the thing she says people who mean it do. She gives a specific day, time and place, probably in her calendar shorthand, maybe even booked as a \"maintenance appointment.\" That would be her version of tenderness: committing to a slot instead of patting him on the hip.\n\n**How his last line fits.** \"I want my mouth taken away from me\" is the plain sentence Delphine_1 asked for and never got. I'd expect Brick to answer it with structure rather than comfort. That might be instructions, terms, or a rule that he doesn't talk, set out in her usual clipped, numbered way. Her schedule would then be what lets him stop performing. It would also answer the \"nice\" response he dreads. She wouldn't be gentle and vague. She'd be exact, which is the opposite of the \"we can just watch something\" moment.\n\n**Smaller details I'd watch for.** There may be an exchange of physical gestures: his coat coming off, her heels coming off, or the ring light being turned down so the crooked shadow is allowed back. Her \"hm.\" might return one last time. I also suspect the 14:30 shading on her planner tattoo, the place where her day goes blank, could be where she pencils him in.\n\nI could be wrong, though. The story could equally close on a final unanswered silence, with no day named. But everything it has carefully set up points toward that one concrete appointment."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**Not naming a day / \"another time.\"** Brick defines it in the Marguerite story: someone who leaves the time open is already gone. She then uses the same move on Reuben (\"We can pick this up another time\"), and he catches it: \"You didn't name a day.\" It resolves with \"Tomorrow is Friday\" and her \"21:00 is on the calendar.\" It changes from her wound, to her weapon, to the thing she drops.\n\n**The cab, the rain, the shut door.** It starts as Reuben's cover story (rain, a cab, scenic route), which she debunks at once. She reuses the image for Marguerite: a kiss outside a cab in the rain and a door shut on her hem. Reuben then turns it on her: \"You just shut the cab door on my coat.\" Later we learn there was no cab at all; he hasn't left the room in eleven days. So a lie becomes her emblem of being left, then his accusation.\n\n**The pat.** The new partner who patted his hip and said \"We can just watch something\" is the kindness he can't bear. It returns as \"Don't pat me on the head\" when Brick tries to leave, and finally as his request at 21:35 to \"keep one hand flat on my back.\" Touch he heard as pity becomes touch he asks for.\n\n**The geometry.** Her twelve-degree ridge, his thirty-degree hook and her forty-five-degree workaround start as defensive banter, \"getting it out of the way.\" His hook is also the source of his worst moment. In the plan, the same numbers become the choreography (45 degrees at the barstool, his mouth on the ridge, her riding at 45). Saying them aloud is what he asks for: \"if you're looking right at it and saying it out loud, I'm in the room.\" Brick also says she'd otherwise \"spend the whole forty minutes calculating the angles,\" so the geometry shifts from her armour to something she wants taken off her hands.\n\n**Calendar, hard stops and travel buffers.** These cover the planner tattoo, the \"maintenance appointment,\" the Sunday arguments with fifteen-minute buffers, and the 10:45 hard stop she uses as an exit. Then she asks him to schedule her, and he writes \"You don't get a travel buffer and you don't get to call time.\" When she asks for the hard stop after 21:35, he gives her none: \"there isn't an end time.\" Her control system becomes the means of surrender, and then is deliberately left open.\n\n**The top hat.** It begins as an emoji flourish, then becomes the Charing Cross bus-lane video, a humiliation he could \"ride.\" Later it's sitting on a styrofoam head facing his pillow because he has no hook. Brick asks what he wants \"without the hat.\" In the plan he leaves it on the floor in the hall. It moves from costume, to quiet evidence of loneliness, to something shed at the door.\n\n**Arm wrestling.** It's his opening gag, then the line his own bot unmatched him before he could finish, then Brick's shorthand for his act (\"without the hat and the arm wrestling\").\n\n**Performance versus a plain sentence.** Delphine_1 asked him for one sentence \"with nothing on it,\" and he did another bit. It comes back when he retracts the Interpol and Dean Street story and says \"That wasn't a bit,\" and she answers \"I know it wasn't.\" The failed test is passed.\n\n**His mouth.** At first it's a boast (\"the mouth is fast\"). Then he asks for it to be taken away. In the plan he uses it on her and puts fingers in her mouth to stop her critiques. Its speed shifts from his defence to something both want stopped.\n\n**Hand on the throat.** He asks for it, and she schedules it for 21:22 \"until you stop trying to narrate it.\" The meaning stays the same, but it moves from request to promise.\n\n**The Tupperware kanji.** It starts as a self-deprecating story and her \"top rack\" quip. He then lists it among the things to be said aloud, and she does: \"One dishwasher-safe kanji at the base.\" The joke becomes something she witnesses rather than laughs at.\n\n**Lentils and the wooden spoon.** These first appear as the shameful detail of his confession. They return as the 21:45 plan, telling her how to stretch lentils with no punchline, and as her last line, \"Bring the wooden spoon, Reuben.\" What he admitted becomes what she invites.\n\n**The ring light.** He uses it to erase his crooked shadow. She places him \"under that ring light\" at 21:22. The chat doesn't say whether its meaning changes for him; it only puts her there with him.\n\n**The room's details.** The barstool and the dry spot where the sash window doesn't leak start as her defence of an empty-looking flat and become the stage directions for 21:05 and 21:12.\n\n**Heels, monocle and vest.** The vest is in his opening line and comes off at 21:02. The monocle (the rosé rescue) stays on. The heels appear twice: first \"for leverage,\" then as the confession that without them the flat feels bigger. In the plan she keeps them \"until your heels slip,\" so her prop for height and control is allowed to stay but expected to give way.\n\n**The clipboard.** His \"wrong item in the clipboard\" covers the Barclays text. Her \"take the clipboard out of my hand\" uses the word in a different sense, as her need to manage everything. The chat doesn't flag it as an echo, but the word returns with a new meaning.\n\n**His name.** She signs off with \"You're very charming, Reuben_404\" and ends with \"Reuben,\" dropping the handle.\n\n**Small echoes.** \"Eleven seconds\" (his message burst, then the dead quiet) and \"eleven days\" recur, as do \"forty minutes\" and \"hm.\" The text doesn't make anything of these, so I can't say whether they're meant to carry new meaning."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n*Afraid of:* Not being seen as he actually is, and especially being met with gentleness. \"What kills me is when they're nice.\" A laugh is survivable: \"A laugh is easy. You can ride a laugh all the way to the street.\" The partner who patted his hip and said \"We can just watch something\" is the moment he can't get past. What he wants instead is to be looked at and named: \"if you're looking right at it and saying it out loud, I'm in the room.\"\n\n*What he does so he doesn't have to feel it:* He performs. Delphine_1 told him she \"had never once heard me say a single sentence that wasn't a performance,\" and when she asked for one plain sentence, \"I did a bit about a waiter in Vienna… and because I couldn't stand the quiet, I did another bit on top of it to cover the first one.\" He also invents a cover story: the stealth app and the seed round (\"there isn't a seed round\"), Dean Street (\"it was a dive near Dalston Junction\"). And he erases what he can't stand to look at: the ring light, because \"if you turn the ring light all the way up there's no shadow.\"\n\n*Where it comes from:* He offers three things: his mother cropping him out of the family portrait \"so my cousin's elbow would fit\" and calling him Stephen; being dropped from the Tuesday calendar invite at work, which \"nobody's mentioned\"; and the Delphine_1 breakup. The chat puts these next to his fear, but he never says they are its cause. The origin itself is not in the chat.\n\n*At the end:* He drops the act (\"That wasn't a bit\") and tells the plain facts: eleven days indoors, the lentils, the hat on the mannequin head. He refuses her soft exit (\"You didn't name a day.\" / \"Don't pat me on the head.\"). He asks to have his \"mouth taken away,\" gives her the exact timed plan she asked for, and closes with something deliberately unperformed: \"There's no punchline in it and there isn't an end time.\"\n\n**Brick_haus**\n\n*Afraid of:* Being left, and open-endedness as the sign of it. \"When someone leaves the time open, they're already gone.\" She also fears being known: \"When people tell me things like the ring light, they disappear the next morning because they hate that I know it.\"\n\n*What she does so she doesn't have to feel it:* She schedules, systematises, and ends things first. Her examples:\n- \"If it's on the calendar with an agreed start and a hard stop, nobody drifts.\"\n- The planner \"so I wouldn't start letting the afternoons go soft.\"\n- Logging arguments with \"fifteen-minute travel buffers.\"\n- The clinical readings of the people she talks to.\n- Calling time herself: \"So I call time at 10:45. That way the meeting just adjourned on schedule.\"\n\nShe also keeps up height and composure: \"if I take them off I'm five inches shorter and the flat feels bigger.\"\n\n*Where it comes from:* The chat ties the planner to Marguerite leaving (\"I got it the week after Marguerite left\"). But her calendar habit was already there before the breakup, since it is what drove Marguerite away. So the origin of the need for control is not in the chat. The Luton fridge detail is mentioned, but she does not link it to anything.\n\n*At the end:* She first does the very thing she described as leaving: \"We can pick this up another time.\" When he calls her on it, she explains herself plainly (the third glass, the heels, no sofa). She then admits what she wants: \"I want someone to take the clipboard out of my hand… hold me to it without letting me renegotiate a single minute.\" She accepts his schedule, takes her slot, and asks for a hard stop. She says nothing against his \"there isn't an end time.\" Her last lines name the day and use his real name, without the \"_404\": \"21:00 is on the calendar. / Bring the wooden spoon, Reuben.\""
+  }
+ },
+ "calls": [
+  {
+   "seconds": 15.4,
+   "cost": 0.07120399999999999,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 18.8,
+   "cost": 0.071724,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 29.8,
+   "cost": 0.143008,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 17.4,
+   "cost": 0.060756000000000004,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 47.3,
+   "cost": 0.13039199999999998,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 24.6,
+   "cost": 0.09190000000000001,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 29.7,
+   "cost": 0.1640452,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 40.0,
+   "cost": 0.1732092,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 41.2,
+   "cost": 0.1893532,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 45.5,
+   "cost": 0.1980092,
+   "label": "batch 2"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:30:28Z",
+ "repo_commit": "579a54a",
+ "cost": 1.2936
+}

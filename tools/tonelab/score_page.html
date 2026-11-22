@@ -208,11 +208,12 @@ const DATA = /*DATA*/null;
 const FAM_NOTE = {
   profile: "Reuben and Brick as the v22 profile generator writes them, against the character cards the v21 planner used before it. The v21 cards were never meant to hold a life, so low scores there show the gap the generator was built to close.",
   plan: "Every plan the lab has written for Reuben and Brick on seed 23, one per version. The early plans were small by design; dimensions they were never built for score low on purpose, which is what makes the trend readable.",
-  chat: "The three newest full chats, and the v22 first look, which wrote only the first two turns of an eleven-turn game. Where a dimension needs turns that were not written, it is marked n/a."
+  chat: "The three newest full chats the game played, the v22 first look (two turns of eleven), and every writer's chat from the scratch branch's runs, each followed by the run as a set. A writer's chat has no plan and no dice, so the pipeline checks are blank there; only a set is scored on whether the chats differ."
 };
 const FOC_NOTE = {
-  profile: "The two new characters, A and B, will be written from the brief alone. Until then their columns are empty. Beside them is the best we have today, Reuben and Brick as the v22 generator wrote them, scored on the same dimensions. Rows are grouped by how much they count in this experiment.",
-  plan: "One plan for A and B, scored on the plan's critical dimensions. Beside it are the two latest v22 plans for Reuben and Brick. Switch on every version for the whole history and the trend."
+  chat: "Every writer's chat, run by run, with the set column after each run scoring whether the writers wrote different nights. The three newest chats the game played come first, for comparison.",
+  profile: "For reference: Reuben and Brick as the v22 and v24 profile generators wrote them, with the author panel beside each. Rows are grouped by how much they counted in the profile experiment.",
+  plan: "For reference: the two latest v22 plans for Reuben and Brick. Switch on every version for the whole history and the trend."
 };
 const PRI = { core: "Core", useful: "Useful", diagnostic: "Diag." };
 const $ = (t, a = {}, ...kids) => { const e = document.createElement(t);
@@ -260,7 +261,8 @@ function tabs() {
 function columns(f) {
   const rs = results(f);
   if (!FOC) return rs;
-  const planned = (FOC.planned || []).filter(p => p.kind === f).map(p => ({ ...p, planned: true, scores: {} }));
+  if ((FOC.detail || []).includes(f)) return rs;  // the experiment's own kind: every piece of it
+  const planned =(FOC.planned || []).filter(p => p.kind === f).map(p => ({ ...p, planned: true, scores: {} }));
   const refs = (FOC.reference || []).map(id => rs.find(r => r.id === id)).filter(Boolean).map(r => ({ ...r, reference: true }));
   const rest = state.all ? rs.filter(r => !(FOC.reference || []).includes(r.id)) : [];
   return [...planned, ...refs, ...rest];
@@ -282,7 +284,7 @@ function focusPage() {
     $("h2", { text: FOC.title }), $("p", { text: FOC.experiment }),
     $("blockquote", { class: "mission" }, document.createTextNode(FOC.mission), $("cite", { text: FOC.mission_source })),
     $("p", {}, $("strong", { text: "The gate: " }), document.createTextNode(FOC.gate)),
-    $("p", { class: "def" }, $("strong", { text: "Chats: " }), document.createTextNode(FOC.disabled_note))));
+    FOC.disabled_note ? $("p", { class: "def" }, $("strong", { text: "Off: " }), document.createTextNode(FOC.disabled_note)) : null));
   for (const f of ["profile", "plan", "chat"]) {
     const fam = DATA.families[f];
     if (isOff(f)) { w.append($("div", { class: "card focus-fam offfam" }, $("h3", { text: fam.title + " · off" }),
@@ -340,7 +342,7 @@ function controls() {
 
 function matrix(f) {
   const rs = columns(f);
-  let ds = byFam(f).filter(d => d.scope !== "set" && (FOC ? tierOf(d.id) && state.tiers[tierOf(d.id)] : state.pri[d.priority]));
+  let ds = byFam(f).filter(d => (d.scope !== "set" || rs.some(r => r.scores?.[d.id])) && (FOC ?tierOf(d.id) && state.tiers[tierOf(d.id)] : state.pri[d.priority]));
   if (state.order === "weak") ds = ds.map(d => [d, mean(rs.map(r => r.scores?.[d.id]?.score).filter(x => x != null)) ?? 9])
     .sort((a, b) => a[1] - b[1]).map(x => x[0]);
   if (FOC) ds = TIERS.flatMap(t => ds.filter(d => tierOf(d.id) === t));
@@ -349,6 +351,7 @@ function matrix(f) {
   for (const r of rs) {
     const [top, bottom] = r.planned ? [r.top, r.sub]
       : f === "profile" ? [r.label.split(" · ")[0], r.version + (r.version === "v21" ? " card" : "") + (r.panel_of ? " panel" : "")]
+      : r.writers_run ? [r.version, r.label.split(" · ")[1] || ""]
       : [r.version, (r.when || "") + (r.label.includes("preview") ? " · prev" : r.label.includes("first") ? " · 2 turns" : "")];
     hr.append($("th", { class: "col" + (r.planned ? " plannedcol" : r.reference ? " refcol" : "") + (state.sel?.r === r.id && !state.sel?.d ? " sel" : ""),
       title: r.label + (r.reference ? " (reference)" : ""), onclick: () => { state.sel = { r: r.id }; render(); } },

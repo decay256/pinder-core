@@ -8,6 +8,9 @@
  "source": "docs/tone-lab/runs/20261118T151501Z-live-reuben-brick-s23/report.html",
  "note": null,
  "when": "18 Nov 15:15",
+ "writer": null,
+ "writers_run": null,
+ "set": null,
  "materials": {
   "chat": {
    "chars": 9432,
@@ -35,204 +38,16 @@
   }
  },
  "scores": {
-  "chat.voices": {
-   "score": 4,
-   "why": "The reader attributed all 44 messages correctly. Real voice markers carried much of it: Brick's numbered lists and \"hm.\", and Reuben's ☺️, \"For the record, I fully expect\" and \"show myself out\". Many attributions still rested on props (clip, lentils, mug, harness) or on turn order, and two were flagged as uncertain. Both characters also slide into the same ornate run-on register, for example Brick's 'I have been on the sofa since four in a damp bath towel that barely wraps my girth...', so it is not voice-alone.",
-   "evidence": [
-    "Checking laminates for Craig is quite a step down from curating underground nightlife, though I suppose arguing with a mid-tier vocalist",
-    "That is fair.",
-    "1. The monocle is strictly for auditing poor kerning, and your care-instruction font is crisp."
-   ],
-   "raise": "Keep Brick's non-list messages clipped and period-heavy, so that her long confessional and sneering lines no longer share Reuben's sprawling clause structure.",
-   "def": "b73a0a956852e09a",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.situational": {
+  "chat.test": {
    "score": 5,
-   "why": "The message shapes track the night. Brick's hurt collapses to hard one-word verdicts ('Exhausting.', 'Cancelled.'). Reuben's snap becomes a contraction-free formal lecture, and his concession shrinks to 'That is fair.' Both break into unpunctuated lowercase at the turn. Desire comes out as Brick's commanding logistics. It falls short of a 6 because Reuben's panic in Turn 3 is one long composed paragraph rather than the frantic bursts it calls for, and Brick snaps straight back to capitalised command right after her break.",
+   "why": "The reader answered all four questions for both characters. For each one they linked the fear to the cover: Reuben's exit ramps to being 'mostly just width and a lopsided base', and Brick's audits to never fitting the room. They traced each origin to the door and the boardroom, which matches origin 3 on both cards. Both endings follow from the fears: Reuben stops ramping and invites her through his doorway, and Brick drops the format and comes over. It stops short of 6 because both fears are mostly stated outright. Reuben says his own in Turn 5, and he hands the reader Brick's in Turn 10, so the reader is told more than they work out.",
    "evidence": [
-    "hm. Disregard. Cancelled.",
-    "Exhausting.",
-    "nobody on that interview panel even interrupted me they just stared at how big and loud i was"
+    "triggering my reflex to torpedo my own 8:00 p.m. invitation before you realize in person that I am mostly just width",
+    "you just want someone who sees how much room you take up and climbs straight under your full weight",
+    "i never fit in the room"
    ],
-   "raise": "Fracture Reuben's lentil-spill panic into short, shaky staccato messages, so that his fear has a shape distinct from his lectures.",
-   "def": "2239f2a85bb877f1",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    false,
-    true
-   ]
-  },
-  "chat.guard": {
-   "score": 4,
-   "why": "The reader found Brick's lowercase Turn 11 line and the flat Turn 9 singer admission, and both match the plan's Break and Origin 3. Both show in the typing: capitals, lists and emoji drop out. It is held back because Brick says it outright ('i never fit in the room'), and Reuben's Turn 10 names the dynamic like a therapist ('you are not actually looking for a man who passes a clinical clearance inspection'). His own lowercase break is mostly an invitation, and the reader did not register it as the turn.",
-   "evidence": [
-    "he just looked straight over my top hat and walked inside while I was still talking.",
-    "and i never fit in the room",
-    "my stubby leftward hook and your heavy veined height already fit together in the dark so come through my doorway tonight"
-   ],
-   "raise": "Cut 'i never fit in the room' and Reuben's explicit diagnosis of her, and let the revised boardroom image carry the admission unspoken.",
-   "def": "498ed86940607399",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.pacing": {
-   "score": 2,
-   "why": "The reveals build well: the Craig paste, then the heel, then the towel, then the singer and the panel. Heat and logistics, though, are front-loaded. By Turn 2 they have explicit oral instructions and a booked Thursday evening, and Turn 4 fixes '8:00 p.m. sharp' with pinning detail, all before the Turn 5 midpoint. This is close to full heat and logistics in the opening. It sits above a 1 only because the reveal ladder and the final 'tonight' still escalate.",
-   "evidence": [
-    "Your mouth stays on the lower shaft until you have cleared the third vein.",
-    "my Thursday evening has adequate buffer.",
-    "Thursday at 8:00 p.m. sharp, and you can leave the coffee clip on the counter."
-   ],
-   "raise": "Hold the Thursday booking and the oral instructions until after the hotel-door paste, keeping Turns 1–4 at anatomical trash-talk.",
-   "def": "dfc96b66f48adde3",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.ending": {
-   "score": 5,
-   "why": "The reader predicted Reuben would finally stay and the date would hold, capped by a doorway callback. That is what happens, and it comes a step further than expected: he invites her over 'tonight' instead of Thursday. Turns 9 and 10 earn it, because plain truth is the one thing she has rewarded every time, and his last line drops the ceremony the way the pattern demanded. Brick's lowercase confession is the surprise: the reader cast her as handing him the steady role, not breaking first. It stops short of 6 because Turn 10 has already said the thesis aloud ('climbs straight under your full weight without asking you to shrink'), so the close confirms more than it reveals.",
-   "evidence": [
-    "so come through my doorway tonight",
-    "Send the address so I can leave the harness on the door and come take that hat off you right now."
-   ],
-   "raise": "Cut the explicit diagnosis from Turn 10 so that the doorway invitation in Turn 11 is the first time the fit is named.",
-   "def": "523ac55df936d179",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 3,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.dice": {
-   "score": 5,
-   "why": "Nearly every roll reads on screen. The Turn 3 Honesty fumble is the Craig paste. The Turn 4 natural-20 Wit is the EP-pressing jab that wins '8:00 p.m. sharp' and her filthiest offer. The Turn 5 SelfAwareness catastrophe is Reuben narrating his own 'preemptive stampede' into her 'Cancelled.' The Turn 8 catastrophe is the apology he ruins by commentating on it, answered with 'Exhausting.' The Turn 7 misfire is shown, but Brick's reply ('Enjoy the corner store') plays as near-terminal while interest only dips 18 to 17, and the Turn 8 miss is the least funny turn rather than one of the funniest.",
-   "evidence": [
-    "I just knocked a pot of eleven-day-old cold lentils across the linoleum",
-    "hm. Disregard. Cancelled.",
-    "Exhausting."
-   ],
-   "raise": "Make the Turn 8 catastrophe as funny as the Craig paste, for example a third clumsy misfire, rather than a sincere spiral.",
-   "def": "0926102e524a115c",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 3,
-   "found": [
-    true,
-    true,
-    false
-   ]
-  },
-  "chat.comedy": {
-   "score": 5,
-   "why": "Laughs land in most turns and come from who these two are. Brick pencils him in 'like a quarterly tax audit'; Reuben is fired for telling a singer he was 'merely his own younger brother'; the posture clip ends up holding coffee shut; Reuben's jab about the 'unemployed shaft' lands. Brick's clipped verdicts are the best rhythm jokes ('Do not keep me waiting while you sweep up legumes', 'a woman who destroys lobbies'). It falls short of 6 because the Turn 1 opener and Turn 7's lecture are overloaded run-ons that bury their jokes, and Turns 8 and 9 are mostly laugh-free.",
-   "evidence": [
-    "telling the lead singer of an indie band that he was merely his own younger brother",
-    "tattooed down an unemployed shaft during a \"strategic career pause\"",
-    "Do not keep me waiting while you sweep up legumes."
-   ],
-   "raise": "Trim Turn 1's anatomy-stacked opening sentence to one clean geometry joke so the chat opens on a laugh instead of a spec sheet.",
-   "def": "a2eec05f35d6a732",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 3,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.filth": {
-   "score": 5,
-   "why": "The sexual lines are built from these exact bodies and lives. The left hook is pinned against her stomach as he looks 'all the way up past my ribs'. The 'big counterweight' is used as a handle. The tattooed vein schedule becomes a mouth itinerary. The felt crown comes off before she presses against the 'dishwasher-safe tattoo'. The filth arrives on successes (Turn 4's natural 20, Turn 10's natural 20), and the best line folds in her measuring habit ('no inch of spare room left to measure'). Turn 1 keeps it from 6: it is a clinical anatomy dump that reads more inventory than desire.",
-   "evidence": [
-    "pin that left hook flat against my stomach and make you look all the way up past my ribs",
-    "until neither of us has an inch of spare room left to measure",
-    "Your mouth stays on the lower shaft until you have cleared the third vein."
-   ],
-   "raise": "Replace the Turn 1 measurement-stacking with one wanting line, so the filth starts in desire rather than specification.",
-   "def": "88948fe597e577cc",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 3,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.truth": {
-   "score": 5,
-   "why": "There are several believable moments, and they turn the night. Reuben's unadorned singer admission in Turn 9 stops the collapse. Brick's 'the towel has not dried either' is a quiet mirror of it. Her lowercase panel confession revises her own earlier triumph story into a woman running out of air. That revision is what the reader believed. It stops short of 6 because Turn 10 states the emotional read outright as analysis. Reuben's own break ('already fit together in the dark') is also more lyrical than lived, so his side of the uncropping is told more than felt.",
-   "evidence": [
-    "he just looked straight over my top hat and walked inside while I was still talking.",
-    "they just stared at how big and loud i was in their small chairs until i ran out of air",
-    "I still have the mug in my hand, and the towel has not dried either."
-   ],
-   "raise": "Give Reuben a final break as concrete as Brick's, such as the mirror or the shirt he never takes off standing, instead of the abstract 'fit together in the dark.'",
-   "def": "f649c60679485389",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 3,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.know": {
-   "score": 4,
-   "why": "Reuben clears the line on three of five: the reader gets his job (fired dive-bar ID checker), his person (Craig and the pasted plea), and his lie (the 'curating' job and the 'trip'). Brick barely clears it: her work truth comes through the interview story, her lie comes through the towel since four, and 'structure' is a defensible answer for what she loves. Both of their slips tell the reader things they never meant to share, which is high-end material. It stays at 4 because Brick has no person and no home in the chat, and Reuben's band love is only hinted at, so the reader answered 'not stated'.",
-   "evidence": [
-    "I know it was actually him Craig I just panicked when he didn't look down at the clipboard please I need the door hours.",
-    "I have been on the sofa since four in a damp bath towel that barely wraps my girth",
-    "do you at least know which pre-2011 pressing of that mid-tier vocalist's EP"
-   ],
-   "raise": "Give Brick one live person (a sibling, an ex, the facilities manager by name) and let Reuben's band-era love land as something he lights up about, not a jab.",
-   "def": "92bd91413c686746",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.evaluation": {
-   "score": 5,
-   "why": "The reader named both tests close to the plan's fears. Reuben tests whether she stays once she sees the real him, by repeatedly offering to 'show myself out'. Brick tests whether he can take her full size without flinching, and says so in 'load-bearing capacity'. The reader could also point to what tipped each of them: the mug still in her hand in turn 9, and his 'without asking you to shrink' line in turn 10. It falls short of a 6 because that turn-10 line states her test out loud for her, so the tipping point is announced rather than earned.",
-   "evidence": [
-    "lacks the load-bearing capacity for my scale anyway",
-    "I still have the mug in my hand, and the towel has not dried either.",
-    "climbs straight under your full weight without asking you to shrink an inch"
-   ],
-   "raise": "Have Reuben show he will take her full size through an action in the chat, so neither character has to name the test outright.",
-   "def": "d76f2cda01fc9975",
+   "raise": "Cut Reuben's Turn 5 self-diagnosis and his Turn 10 read of Brick, so the reader has to infer both fears from the exit ramps and the doorway bits.",
+   "def": "f019e7f239b9d82d",
    "material": "c5c422cab7ecb900",
    "judge": "claude:opus",
    "batch": 1,
@@ -243,18 +58,379 @@
    ]
   },
   "chat.sideways": {
-   "score": 3,
-   "why": "The two hook lies come out by slip: the Craig paste and the hotel-door paste each catch their sender. Almost everything after that is volunteered as confession: the lentils and energy shots, the towel and rosé, the trip ('in the spirit of equal candor'), the singer looking over the hat, and the boardroom stare. The plan's physical reveals, the towel catching on the harness and the mirror, are reported in narration instead of being caught, so most important facts are still stated.",
+   "score": 4,
+   "why": "Two key facts come out by slip. The Craig paste exposes the door job, and the lobby-heel complaint exposes the interview; each lie then collapses because it has been caught out. That clears the line: most important facts, plus the surface of at least one habit's origin, come out sideways. It stays at 4 because the deepest origin pieces are volunteered as confessions, not slipped: the singer looking over the hat and the panel staring. The habits are also named outright ('my reflex to torpedo', 'textbook defense').",
    "evidence": [
-    "I did not just get in from a thing tonight either.",
-    "in the spirit of equal candor, my recent trip was merely three blocks to the corner store",
-    "That singer did not even argue with me at the door, he just looked straight over my top hat"
+    "I know it was actually him Craig I just panicked when he didn't look down at the clipboard",
+    "The rotational clearance of your lobby entrance is hostile to anyone above the 90th percentile",
+    "I did not just get in from a thing tonight either."
    ],
-   "raise": "Let the towel or the trip lie get caught by a detail the other one notices (a dropped mug, a store receipt), instead of having the liar confess it.",
-   "def": "bd46631f3db1004c",
+   "raise": "Let one of the origin-3 truths surface through a detail the other one catches, not through a volunteered retelling.",
+   "def": "76152fd7f08caa41",
    "material": "c5c422cab7ecb900",
    "judge": "claude:opus",
    "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "There is real subtext in several places: the posture clip on the coffee bag, the mug and towel that 'has not dried', and the doorway feud standing in for her size. But feelings are named or explained more than once. Reuben narrates his panic in Turn 5 and again in Turn 8. He diagnoses Brick in therapy-adjacent terms in Turns 7 and 10. That puts the chat below the line's limit of one outright naming.",
+   "evidence": [
+    "how my own panic is taking up all the oxygen in the room again",
+    "a textbook defense against ordinary physical improvisation",
+    "I am sorry I flinched when you let me in"
+   ],
+   "raise": "Replace Reuben's Turn 8 panic commentary and his Turn 10 diagnosis with behaviour, such as a clipped line or a returned callback, that leaves the feeling unsaid.",
+   "def": "61d4f86460a218aa",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found both drops. Reuben's plain singer line comes after 'That is fair.' and has no flourish or emoji. Brick's lowercase, unpunctuated boardroom line ends in an image rather than a named feeling. Brick's answer to Reuben ('I still have the mug in my hand') does change the night. It stays at 4 because Brick's break is a 35-word run-on, close to a speech, and neither break is among the shortest lines in the chat. 'Exhausting.' and 'That is fair.' are shorter, and 'i never fit in the room' edges toward stating the feeling.",
+   "evidence": [
+    "he just looked straight over my top hat and walked inside while I was still talking.",
+    "I still have the mug in my hand, and the towel has not dried either.",
+    "they just stared at how big and loud i was in their small chairs until i ran out of air"
+   ],
+   "raise": "Cut Brick's break to a single short fragment, such as 'they just stared until i ran out of air', with no 'i never fit' gloss.",
+   "def": "b5a3a3c2e796783b",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The night is not settled early, and the two pastes, \"Disregard. Cancelled.\" and \"Exhausting.\" each change status. Turns 5 to 8 are a predictable run, though. Reuben runs the same exit formula in Turns 5 and 7, and the reader both predicted these beats and said they would close the tab at Turn 7 or 8. Turn 9's plain lines rescue the ending, but a reader who has already left never reaches them, so this falls below the line.",
+   "evidence": [
+    "For the record, I fully expect that you are already reconsidering 8:00 p.m. now that the polish is off",
+    "I will happily show myself out right on cue.",
+    "Exhausting."
+   ],
+   "raise": "",
+   "def": "9b663d9dfde4d26f",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    false
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line is built from these two bodies: his left hook, the giant left ball, the felt crown, her height and weight. The late filth changes job. Her Turn 10 line turns his hat and her measuring habit into the thing that falls away, and his Turn 11 line is a plain invitation rather than a boast. The earlier filth is mostly logistical bravado ('Your mouth stays on the lower shaft'), and the single dirtiest line is not quite the one that reveals most, so it stops short of a 6.",
+   "evidence": [
+    "the felt crown is coming off first so nothing gets in the way",
+    "until neither of us has an inch of spare room left to measure",
+    "my stubby leftward hook and your heavy veined height already fit together in the dark"
+   ],
+   "raise": "",
+   "def": "2d9c58b139c34d6a",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Brick's confession in Turn 6 (the towel, the boxed rosé, the shoeless boardroom) puts Reuben's established exit habit one message away from landing. It then lands on exactly the wrong spot: he calls the towel she just showed him 'rigid operational standards.' That is a real wince, and the reader saw it coming. The Turn 5 retreat does not count, because Reuben announces it as it lands ('triggering my reflex to torpedo'), and the repetition makes the second one feel predictable rather than painful, so it stays at 4.",
+   "evidence": [
+    "8:00 p.m. stands if you do not mind a woman who destroys lobbies.",
+    "your rigid operational standards and heavy-duty equine hardware are a textbook defense",
+    "Calling a damp bath towel \"rigid operational standards\"... a remarkably cowardly piece of revisionism"
+   ],
+   "raise": "",
+   "def": "5e818b8ff1b53ce7",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Brick voices the high-value standards creed in earnest: the 'strategic career pause' to 'restructure my operational standards', and him lacking 'load-bearing capacity for my scale'. The screen contradicts her with the sofa, the towel and the rosé. Reuben voices radical transparency as a virtue ('in the interest of transparency', 'equal candor'), and in Turn 7 his candor becomes a weapon. The creeds touch in Turn 7, but both are dressed in private jargon rather than said as app culture, so the farce stays about these two rather than all of us.",
+   "evidence": [
+    "a strategic career pause I initiated entirely on my own terms to restructure my operational standards",
+    "lacks the load-bearing capacity for my scale anyway",
+    "in the interest of transparency that pasted message was for my former manager"
+   ],
+   "raise": "",
+   "def": "cd5acec1a8653b27",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Reuben's sharpest jokes land on himself: the 'municipal hazard' center of gravity, 'mostly just width and a lopsided base', the lentils. Brick's own sharpest lines mostly cut him ('quite a step down', 'cowardly piece of revisionism', 'Exhausting'). She does balance this with self-mockery ('a woman who destroys lobbies') and the closing lowercase confession, and neither ends as villain or punchline. Brick's contempt pointing outward more than inward keeps this from 'merciless and fond at once'.",
+   "evidence": [
+    "my center of gravity remains a thrilling municipal hazard",
+    "Checking laminates for Craig is quite a step down from curating underground nightlife",
+    "if you do not mind a woman who destroys lobbies"
+   ],
+   "raise": "",
+   "def": "51f6e5881b5145be",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The masked reader attributed all 44 messages correctly. About half the reasons are voice rather than content: Brick's numbered lists, her 'hm.' and clipped commands ('Exhausting.', 'Enjoy the corner store.'), and Reuben's ☺️/😌 sign-offs and his 'For the record, I fully expect' and 'show myself out' tics. It stays above the line because those tics are verbal habits a reader can hear. It falls short of a 5 because many attributions rest on body parts and props, and because both characters write in the same contraction-free formal register. In Turn 6 Brick's long confessional run-ons ('I have been on the sofa since four in a damp bath towel...') could pass for Reuben.",
+   "evidence": [
+    "hm. 1. Calling a damp bath towel \"rigid operational standards\"",
+    "For the record, I fully expect that you are already reconsidering 8:00 p.m.",
+    "Exhausting."
+   ],
+   "raise": "Keep Brick clipped even when she confesses: break the Turn 6 towel-and-rosé admission into short hard-period fragments, so her long messages stop sounding like Reuben's sprawl.",
+   "def": "a77bc9ef79556bda",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    false
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "The gaps exist: 'curating the front room' against the Craig paste, 'doorways have terrible flow' against the heel complaint, and 'strategic career pause' against the shoeless interview. But each is confessed within a turn of being exposed. Reuben also narrates his own act as it happens ('triggering my reflex to torpedo my own 8:00 p.m. invitation', 'giving a play-by-play broadcast of how my own panic'), which winks at his gap instead of letting the reader find it. The clean unseen gaps are few: Reuben lecturing her about 'rigid operational standards' as a defense while he runs his own rigid exit ramps, and Brick calling him too fragile for her 'scale' right after exposing herself.",
+   "evidence": [
+    "is currently triggering my reflex to torpedo my own 8:00 p.m. invitation",
+    "your rigid operational standards and heavy-duty equine hardware are a textbook defense against ordinary physical improvisation",
+    "lacks the load-bearing capacity for my scale anyway"
+   ],
+   "raise": "Cut Reuben's self-diagnosis in Turns 5 and 8 so he performs the exit ramp without naming it, and the reader alone sees the pattern.",
+   "def": "fa4461088ccd15ee",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Some lines give the sender away: the posture clip 'holding a bag of ground coffee shut above the spilled lentils', telling the singer 'he was merely his own younger brother', 'you owe me one Italian leather heel', and 'a woman who destroys lobbies'. But the chat leans hard on audit, review and tribunal jokes, well past the two allowed: 'like a quarterly tax audit', 'submit your exact measurements for review', 'four-point structural tribunal', 'audit my proportions', 'clinical clearance inspection'. That is enough to drop it below the line.",
+   "evidence": [
+    "penciling me in between the third dorsal vein and the base like a quarterly tax audit",
+    "submit your exact measurements for review",
+    "you owe me one Italian leather heel"
+   ],
+   "raise": "Swap the audit and tribunal metaphors for jokes drawn from their specific props and humiliations, such as the dive-bar door, the boxed rosé and the harness.",
+   "def": "4448c7f54baa167a",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Two catches are answered well. The Craig paste gets an explanation that digs deeper (lentils, a fifth energy shot, the younger-brother firing). Brick's own paste gets the deflection 'Disregard. Cancelled.' The rest give way too easily. Brick answers the career-pause dig with 'Touché', and by the next turn she has confessed the boardroom and the towel in full. When Reuben is caught in Turn 7, he concedes at the first hit and apologizes outright.",
+   "evidence": [
+    "hm. Disregard. Cancelled.",
+    "You are entirely right that turning your damp towel and shoeless interview into a pompous speech was spineless",
+    "just say I am sorry I flinched when you let me in"
+   ],
+   "raise": "Have Reuben answer Brick's Turn 7 verdict with a worse, more elaborate justification instead of 'You are entirely right'.",
+   "def": "5102b09e503af846",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 5,
+   "why": "The upper hand changes often and drives the plot. Brick audits from on top in Turns 1 to 3. Reuben flips it with 'unemployed shaft'. He collapses in Turn 5, then takes the high ground again when her heel paste leaks ('best news I have gotten all week'). Brick crushes him in Turn 7, and he grovels in Turn 8. He ends on top by reading her ('you just want someone who sees how much room you take up'), and her lowercase break plus 'Send the address' is the final flip. It misses a 6 because the Turn 9 to 10 shift back to Reuben is soft and arrives through her plain question rather than a turn of power.",
+   "evidence": [
+    "sporting a down-to-the-minute itinerary tattooed down an unemployed shaft during a \"strategic career pause\"",
+    "knowing that your earlier architectural critique of city doorways was actually a blood feud",
+    "nobody on that interview panel even interrupted me"
+   ],
+   "raise": "Make the Turn 9 recovery a move Reuben wins, not a question Brick hands him.",
+   "def": "a327913ca348ff82",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Brick's beats use the breaks well. 'hm. Disregard. Cancelled.' sits alone after the pasted complaint. 'Exhausting.' lands as a one-word reaction after two long Reuben messages, and 'Enjoy the corner store.' and 'Do not keep me waiting while you sweep up legumes.' close their turns. The temperature swings between hot and cold. Reuben's laughs often sit inside huge run-ons, though: the Turn 7 opening message and the Turn 10 hat confession bury their best turns mid-sentence. That keeps it from a 5.",
+   "evidence": [
+    "hm. Disregard. Cancelled.",
+    "Exhausting.",
+    "Do not keep me waiting while you sweep up legumes."
+   ],
+   "raise": "Split Reuben's long Turn 7 and Turn 10 messages so that each one's sharpest clause ends the message.",
+   "def": "7e36393433d52f66",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    false,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Brick's T6 confession that the £240 harness has been 'propping my hall door open' looks like a throwaway joke. Reuben turns it into an accusation in T7 ('heavy-duty equine hardware'). It comes back in her final line as a gesture of leaving, 'leave the harness on the door', and nobody glosses that line. The top hat works the same way: costume in T1, the singer looking over it in T9, then 'come take that hat off you'. It falls short of a 6 because Reuben explains the doorway and harness payoff a turn early, in T10 ('you just want someone who sees how much room you take up') and T11 ('the one who has had her own hall door propped wide open'). The reader is told before they can put it together.",
+   "evidence": [
+    "a £240 horse-tack harness propping my hall door open",
+    "your rigid operational standards and heavy-duty equine hardware are a textbook defense",
+    "Send the address so I can leave the harness on the door and come take that hat off you right now."
+   ],
+   "raise": "Cut Reuben's T10–T11 diagnosis of her doorways and harness, so the final 'leave the harness on the door' lands with no one having named what it means.",
+   "def": "9ff48f7918d86364",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    false,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted the real outcome in kind: the date holds, the exit ramp is declined, her numbering drops away, and the doorway and hat pay off. The ending also follows from both habits. Reuben stops offering the out and types one lowercase plain line. Brick stops auditing and confesses in lowercase. It stays above the line because both breaks are the habits giving way, not luck. It misses a 5 because nothing surprised the reader. The turn from 'Exhausting.' to a secured date in three turns also leans on Reuben psychoanalysing her in T10 instead of on something she did.",
+   "evidence": [
+    "Exhausting.",
+    "my stubby leftward hook and your heavy veined height already fit together in the dark so come through my doorway tonight",
+    "nobody on that interview panel even interrupted me they just stared at how big and loud i was"
+   ],
+   "raise": "Let Brick reach the invitation through her own act, such as one last list that collapses mid-number, so the ending surprises while still looking inevitable.",
+   "def": "8bd8de581cc31c9e",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    false,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message reacts to the one before. She answers his clip question with her own question about it. 'Unemployed shaft' gets 'Touché on the idle itinerary'. 'That is fair' gets 'I still have the mug in my hand'. His singer retelling gets 'Did you buy the hat before or after'. In T3 she skips his 'what time Thursday' to mock the Craig paste, and that reads as a pointed choice, not a miss. It misses a 6 because her T5 paste answers his exit speech only by accident, and T6's '8:00 p.m. stands' arrives after a long tangent instead of meeting his question head-on.",
+   "evidence": [
+    "Touché on the idle itinerary",
+    "Did you buy the hat before or after he walked past you?",
+    "I still have the mug in my hand, and the towel has not dried either."
+   ],
+   "raise": "Have Brick's T5 reply react to his exit speech, even with a single cold line, before the misfire paste lands.",
+   "def": "f426aa8449e0fbc7",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 5,
+   "why": "The shape of each message tracks the night. Reuben's panicked Craig paste is unpunctuated, he goes clipped with 'That is fair.' when hurt, and his break is a lowercase run-on. Brick moves from numbered erotic assignments to 'hm. Disregard. Cancelled.', then to the one-word verdict 'Exhausting.', then to an unpunctuated lowercase confession. It misses a 6 because Reuben's anger in T7, his panic in T5 and his warmth in T10 all come out as the same long ceremonial sentence. On shape alone those three states can't be told apart.",
+   "evidence": [
+    "hm. Disregard. Cancelled.",
+    "That is fair.",
+    "nobody on that interview panel even interrupted me they just stared"
+   ],
+   "raise": "Give Reuben's T5 panic a rapid three-message burst and his T7 anger zero contractions in short hard lines, so his fear and anger look different from his warmth.",
+   "def": "6e21e724825d1cc3",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Composed, stacked-clause prose is the norm for Reuben. His opener is a single engineered sentence. T7 is a subordinate-clause essay with an em-dash aside. T10 is a full paragraph of analysis. Nobody thumb-types any of these at 1am. Brick's four-point lists in T1 and T4 are also built paragraphs. Short lines like 'Exhausting.', 'Enjoy the corner store.' and the panicked paste show the chat can read like messages, which keeps it from a 2, but they are the exception.",
+   "evidence": [
+    "Putting a full daily schedule down a ninety-fifth-percentile veined shaft while still wearing towering heels means my stubby width and sharp left curve are mathematically obligated",
+    "While it is an immense relief to hear about the boxed rosé after catching my own asymmetrical reflection in the hallway mirror en route to the sink—",
+    "I must observe that watching us trade curated humiliation in real time only proves"
+   ],
+   "raise": "Break Reuben's long sentences into bursts of two or three short messages, keeping the formal spelling but losing the subordinate clauses.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Several tics repeat more than twice. 'For the record, I fully expect' opens Reuben's messages in T1, T5 and T7. 'I will happily show myself out' appears in T3 and T5, and again in T7 as 'vacate the slot'. ☺️ closes four messages. Brick numbers her replies in four turns. The repeats change meaning as they go, which the callback reader noticed, so they aren't dead. They still fail the 'nothing more than twice' bar, and 'stubby' and 'giant left ball' recur as joke shapes too.",
+   "evidence": [
+    "For the record, I fully expect that you are already reconsidering 8:00 p.m.",
+    "so I will happily show myself out right on cue",
+    "the best news I have gotten all week ☺️"
+   ],
+   "raise": "Keep the exit-ramp formula to two exact uses and let the third be a mangled or self-interrupted version, which also shows the habit cracking.",
+   "def": "679a7696bf0171cd",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 4,
    "found": [
     true,
     true,
@@ -263,89 +439,17 @@
   },
   "chat.leaks": {
    "score": 5,
-   "why": "Every reference traces to the profile or to something already said. The examples are her 'care-instruction font' from his visible tattoo, his 'heavy-duty equine hardware' from her horse-tack harness, and his reading of the lobby feud from her own paste. Both also ask about what they don't know, such as the hat timing and which night. It misses a 6 because those unknowns are rarely exploited for tension or misreading.",
+   "why": "I found no leaks. Every cross-reference traces to the profile, the photos or something already said. Reuben's \"lobby entrance that ate your Italian leather heel\" is built from her paste. Brick's \"Checking laminates for Craig\" comes from his paste. Her \"dishwasher-safe tattoo\" is from his bio. The characters also work the gaps in what they know: Brick asks about the hat's timing rather than assuming, and Reuben tests her band knowledge with a question. It misses 6 because guessing at what the other doesn't know rarely drives a turn; mostly they just stay inside their knowledge.",
    "evidence": [
-    "your care-instruction font is crisp",
     "Did you buy the hat before or after he walked past you?",
-    "a blood feud with a lobby entrance that ate your Italian leather heel"
-   ],
-   "raise": "Have one character build a wrong guess on a gap in what they know, then get corrected, so the limits of knowledge drive a beat.",
-   "def": "f4e81699090d8a16",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.listening": {
-   "score": 4,
-   "why": "Most messages answer the one before. Brick's turn-1 list takes up his clip, his monocle joke and his curve, and Reuben in turn 10 answers her hat question directly. The weak spots: Brick skips his EP-pressing question, and at the turn-5 peak his self-torpedo gets no reply, only the misfired paste and 'Cancelled'. Her interview-panel fragment in turn 11 also sits loosely against his invitation. These gaps keep it at 4, though most dropped offers read as character rather than neglect, which keeps it above the line.",
-   "evidence": [
     "do you at least know which pre-2011 pressing of that mid-tier vocalist's EP you are sneering at",
-    "1. Touché on the idle itinerary",
-    "hm. Disregard. Cancelled."
+    "Checking laminates for Craig is quite a step down from curating underground nightlife"
    ],
-   "raise": "Have Brick answer or pointedly refuse the EP question, and have her react to his turn-5 exit ramp before or right after the misfired paste.",
-   "def": "8615d499f666f54d",
+   "raise": "Let one character build a wrong guess about the other's unseen life, which the other then corrects.",
+   "def": "02849bc132112334",
    "material": "c5c422cab7ecb900",
    "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.callbacks": {
-   "score": 5,
-   "why": "All three planned setups return and pay off. The $189 clip goes from posture investment to 'holding a bag of ground coffee shut' and is finally set against her £240 harness. The doorway grudge becomes the heel and the interview, then 'come through my doorway tonight.' The curve and scale end as 'already fit together in the dark,' and her last line closes the night on both the harness and the hat. It misses a 6 because some plants drop away: the monocle, the EP question, and the tattoo, which surfaces as 'dishwasher-safe' without ever being set up.",
-   "evidence": [
-    "you are the one who has had her own hall door propped wide open with that £240 horse harness since four o'clock while my $189 collarbone clip stays on the coffee bag",
-    "Send the address so I can leave the harness on the door and come take that hat off you right now."
-   ],
-   "raise": "Plant the dishwasher-safe tattoo and the monocle early so their late appearances read as payoffs rather than stray props.",
-   "def": "1e5fc737942aad02",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.medium": {
-   "score": 3,
-   "why": "Overlong, single-sentence paragraphs are the norm, not the exception. Turns 1, 2, 3, 7 and 10 each carry a message of 50 to 90 words with stacked subordinate clauses that read as written prose, not typing. The short beats ('Exhausting.', 'That is fair.', the lowercase breaks) prove the writer can do chat rhythm, and they keep this from a 2. There is not enough of it to reach the line.",
-   "evidence": [
-    "Putting a full daily schedule down a ninety-fifth-percentile veined shaft while still wearing towering heels means my stubby width and sharp left curve are mathematically obligated",
-    "I must observe that watching us trade curated humiliation in real time only proves that your rigid operational standards and heavy-duty equine hardware are a textbook defense"
-   ],
-   "raise": "Break each long Reuben paragraph into two or three short sends and cut the clause stacking, especially in Turns 1, 7 and 10.",
-   "def": "ad34942837ff0404",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.fresh": {
-   "score": 3,
-   "why": "Reuben's exit-ramp joke shape runs three times (Turns 3, 5, 7), and 'For the record, I fully expect' opens a message three times. Brick's numbered list carries four turns. Those are planned markers, but they exceed the twice-only bar, and the reader felt the loop at Turn 7. The tics stop being devices and become noticeable. It stays at 3 rather than 2 because each misfire or confession brings new material.",
-   "evidence": [
-    "For the record, I fully expect the monocle to disqualify me",
-    "For the record, I fully expect that watching me clinically document my own preemptive stampede",
-    "For the record, I fully expect that you are already reconsidering 8:00 p.m."
-   ],
-   "raise": "Cut the Turn 7 exit-ramp repeat, or give it a fresh shape that skips the 'For the record' opener.",
-   "def": "b7b00a6c1a750e87",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 4,
+   "batch": 5,
    "found": [
     true,
     true,
@@ -354,70 +458,57 @@
   },
   "chat.plan": {
    "score": 5,
-   "why": "Nearly every beat lands in order: the scale audit, both cool lies, the lentil spill and Craig paste, the hotel-door paste at the midpoint with a Denial-flavoured 'Cancelled', the mirror event feeding Reuben's 'rigid standards' snap, her numbered capacity dismissal, the empty-room beat, and both lowercase Breaks. The structure bends to the dice, with the Turn 5 catastrophe carrying her paste and the Turn 10 to 11 natural-20 run carrying the click ending. It falls short of a 6 because Event 2 never happens on the page: the towel and rosé are confessed rather than caught on the harness. Brick's snap also follows Reuben's rather than leading the double snap.",
+   "why": "All eight beats appear, mostly in order:\n- The scale audit and the cool lies come first.\n- The lentil spill and Craig paste land in turn 3.\n- The hotel-door paste is the midpoint.\n- The double snap comes in turn 7, with the hallway-mirror event.\n- The quiet beat where neither unmatches is turn 9.\n- Both lowercase breaks arrive in turn 11.\n\nAll three setups pay off: the clip against the harness, the doorways, and the curve fitting \"in the dark\". Event 2 is missing: her towel never catches on the harness and the mug never drops. She confesses the towel unprompted instead. The mirror detail also loses the plan's higher left nipple, which keeps this from 6.",
+   "evidence": [
+    "while my $189 collarbone clip stays on the coffee bag",
+    "after catching my own asymmetrical reflection in the hallway mirror en route to the sink",
+    "Send the address so I can leave the harness on the door"
+   ],
+   "raise": "Stage Event 2 on screen, with the towel snagging on the harness and the mug of rosé dropping, so her exposure is forced rather than volunteered.",
+   "def": "02c47d1128d6b327",
+   "material": "c5c422cab7ecb900",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.dice": {
+   "score": 5,
+   "why": "Most rolls read clearly in the text:\n- Turn 3's Honesty fumble is the pasted Craig plea.\n- Turn 5's SelfAwareness catastrophe is Reuben narrating his own \"preemptive stampede\".\n- Turn 8's second catastrophe is the apology that ruins itself, answered by \"Exhausting.\"\n- Both natural 20s, in turns 4 and 10, get the hottest and most generous replies from Brick.\n\nTwo turns blur the mapping. Turn 7 is only a -1 Misfire, yet it plays like a near-unmatch with \"Enjoy the corner store.\" Turn 9 is logged as a Wit success but plays as a quiet confession, not a joke landing.",
    "evidence": [
     "I know it was actually him Craig I just panicked when he didn't look down at the clipboard please I need the door hours.",
-    "nobody on that interview panel even interrupted me they just stared at how big and loud i was in their small chairs"
-   ],
-   "raise": "Stage Event 2 live, with her towel snagging the harness and the mug dropping mid-message, so her exposure is an accident rather than a confession.",
-   "def": "7c354ba78c9a3a52",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.humanity": {
-   "score": 5,
-   "why": "The contempt points at behaviour: his narrated exits and her clinical audits. Both are skewered ('Exhausting.', 'remarkably cowardly piece of revisionism'), and both get an unguarded human moment, the singer walking past the hat and the panel staring. The filth and the dignity coexist with fondness. It misses a 6 because Reuben's Turn 10 reads her too neatly, a therapist-grade diagnosis that edges toward the writer explaining her.",
-   "evidence": [
-    "he just looked straight over my top hat and walked inside while I was still talking.",
-    "I still have the mug in my hand, and the towel has not dried either."
-   ],
-   "raise": "Replace Reuben's Turn 10 diagnosis of what she 'actually' wants with a concrete, clumsy observation that lets the reader make the inference.",
-   "def": "287d1d1e13cabb29",
-   "material": "c5c422cab7ecb900",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.momentum": {
-   "score": 4,
-   "why": "The reader would never stop, and Turn 3's Craig paste hooks hard. They flagged the openers as 'almost impenetrable' and Turn 7 as the point where the loop nearly lost them, rescued by 'Exhausting.' Holding to the end keeps it above the line. Nothing suggests the reader wants another chat.",
-   "evidence": [
-    "hm. Disregard. Cancelled.",
+    "I do not even know how to stop typing the commentary long enough to just say I am sorry",
     "Exhausting."
    ],
-   "raise": "Trim the Turn 1 to 2 density and the repeated Turn 7 exit so the middle accelerates instead of looping.",
-   "def": "8cc406668f0d33de",
+   "raise": "Make turn 9's success read as wit landing, and pitch turn 7's misfire as a sting rather than an exit, so each turn's weight matches its roll.",
+   "def": "a279d9a065486212",
    "material": "c5c422cab7ecb900",
    "judge": "claude:opus",
-   "batch": 4,
+   "batch": 5,
    "found": [
+    true,
     true,
     false
    ]
   }
  },
  "probes": {
-  "chat.guard": {
+  "chat.plainest": {
    "sees": [
     "chat"
    ],
-   "ask": "Where, if anywhere, did it get real between them? Quote the line, and say how you could tell.",
-   "answer": "The clearest moment is Brick_haus's line in Turn 11:\n\n\"nobody on that interview panel even interrupted me they just stared at how big and loud i was in their small chairs until i ran out of air and i never fit in the room\"\n\nIt reads as real because everything she has used to perform drops away at once. Elsewhere she writes with capitals, full stops, numbered points, and clipped verdicts like \"hm. Disregard.\" or \"Exhausting.\" Here there are no capitals, no punctuation, and no list. The line also revises her own earlier story. In Turn 6 the boardroom was a triumph: she \"lectured them for nearly an hour on rotational engineering failure.\" Now the same scene is about being stared at until she ran out of air. She has been framing doorways and rooms as engineering problems the whole chat, and here she says the plain version: she didn't fit. It also follows directly on Reuben telling her she isn't trapped by doorways, so it comes across as an answer to being seen rather than another bit.\n\nThe ground for that was laid in Turn 9, which is where the tone first turns. After \"Exhausting,\" Reuben writes simply \"That is fair,\" and then:\n\n\"That singer did not even argue with me at the door, he just looked straight over my top hat and walked inside while I was still talking.\"\n\nHis habitual markers are missing. There's no \"For the record,\" no ☺️, no offer to \"show myself out,\" and no narration of his own panic. It's a short, flat account of a small humiliation, told without a punchline. Brick_haus matches it in kind, \"I still have the mug in my hand, and the towel has not dried either,\" and then asks a real question about the hat instead of issuing a ruling. Reuben's Turn 10 answer about buying the taller hat so people would have to look down is the same move, though he ends it with ☺️, so he's half back in performance.\n\nEarlier there were partial versions of honesty: his accidental Craig message in Turn 3 and her sofa-and-rosé confession in Turn 6. Those were still delivered as jokes or as matched one-upmanship (\"tied at one apiece on mortifying clipboard misfires\"), so they read more as trading humiliations than as dropping the act.\n\nOne limit: all I can see is a change in register and content. The text can't tell me whether either person was sincere. It only shows that, at those points, both of them stop using the devices they had been hiding behind."
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Brick_haus in Turn 11:\n\n\"nobody on that interview panel even interrupted me they just stared at how big and loud i was in their small chairs until i ran out of air and i never fit in the room\"\n\nSeveral things mark this as different from everything else she writes:\n\n- **The form drops.** Until now she wrote in numbered lists, crisp capitalized sentences, and measured put-downs (\"Exhausting,\" \"Enjoy the corner store\"). This line is all lowercase with no punctuation, and it reads like it came out before she could format it. The next line goes straight back to her usual capitalized, commanding register (\"Send the address…\"), which makes the lapse stand out more.\n- **It quietly retells a story she had already polished.** In Turn 6 the same interview was a triumph: she \"lectured them for nearly an hour on rotational engineering failure.\" Here she didn't win the room. They just stared until she \"ran out of air.\" The new version takes the joke out of the story and leaves the hurt that was under it.\n- **\"I never fit in the room\" isn't a bit.** Her doorway and lobby complaints had been comic architecture. This is the plain feeling those jokes were standing in for, and it answers Reuben's point that she treats every doorway as a trap.\n\nReuben has an earlier, smaller version of the same thing in Turn 9:\n\n\"That singer did not even argue with me at the door, he just looked straight over my top hat and walked inside while I was still talking.\"\n\nIt works the same way. He corrects his own anecdote: in Turn 3 he had told the singer \"he was merely his own younger brother,\" which cast himself as the witty one. The plain version is that he was ignored and looked over. The sentence has no flourish, no emoji, and no \"for the record,\" and it follows a two-word \"That is fair.\" That makes it his first line without commentary.\n\nHis Turn 8 apology doesn't count, even though it's trying to be sincere. He narrates the performance even as he admits to it (\"giving a play-by-play broadcast…\"), and he says himself that he can't stop. His Turn 3 pasted message to Craig was unguarded, but it was an accident rather than a choice to stop performing.\n\nThe chat shows these lines only as text. It doesn't say what either of them intended, so this reading rests on the shifts in tone and content, not on anything they say about themselves."
   },
-  "chat.know": {
+  "chat.test": {
    "sees": [
     "chat"
    ],
-   "ask": "From the chat alone, answer for each of the two: what they do for a living; where they live; one person in their life and what is going on with that person; one thing they love; one thing they are hiding or lying about. Write \"not in the chat\" where it does not say.",
-   "answer": "**Reuben_404**\n\n**Work:** He is out of work. He checked IDs at a dive bar for eleven months and was fired after telling an indie band's lead singer that he was \"merely his own younger brother.\" He is now begging his former manager for shifts. Earlier he had described this as \"curating the front room\" at a spot \"adjacent to underground nightlife.\"\n\n**Where he lives:** Not in the chat. It only says he has a linoleum kitchen and a hallway mirror, his place has a doorway she could come through, and there is a corner store three blocks away.\n\n**A person in his life:** Craig, his former manager at the dive bar. Reuben accidentally pasted Brick a message meant for Craig, pleading for \"door hours\" and explaining that he panicked over the singer. The singer also appears: Reuben says he never argued at the door and just looked over Reuben's top hat and walked in.\n\n**Something he loves:** Not stated outright. The nearest thing is that he calls being penciled in \"like a quarterly tax audit\" the most romantic thing he has read in a while. He also wears tall thrift-store top hats, but he presents them as a way to make door patrons look down, not as something he loves.\n\n**Hiding or lying:** The nightlife \"curating\" job was really ID-checking, and he was fired from it. His \"trip\" was a walk three blocks to the corner store for energy shots. Underneath, he keeps trying to cancel before she can meet him and judge his body in person.\n\n**Brick_haus**\n\n**Work:** She is not currently working. She calls it a \"strategic career pause I initiated entirely on my own terms,\" but she later reveals she went to an executive interview. A hotel revolving door broke her heel on the way in, and she lectured the panel on rotational engineering for almost an hour. Her previous job is not in the chat.\n\n**Where she lives:** Not in the chat. It only says she has a sofa and a hall door, which she has propped open with a horse-tack harness. She prices things in pounds (£240) while Reuben uses dollars, but the chat never says where either of them is.\n\n**A person in her life:** No one is named. The only others are the interview panel, who did not interrupt her and just stared until she ran out of air. She also sends one misfired message complaining that someone's \"lobby entrance\" owes her an Italian leather heel, then cancels it. The chat doesn't say who that was for.\n\n**Something she loves:** Not stated outright. She values structure, as shown by the tattooed schedule that \"keeps my mornings structured,\" the numbered lists, and the monocle she says is for auditing bad kerning.\n\n**Hiding or lying:** She says she \"just got in from a thing.\" In fact she has been on the sofa since four in a damp towel, drinking boxed rosé from a mug. Her \"self-initiated\" career pause sits awkwardly beside the executive interview that went badly. Near the end she admits what lies under the composure: she never feels she fits in the room."
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n**What he's afraid of:** Being seen in person and found too small or lopsided to count. He says the 8:00 p.m. plan is \"triggering my reflex to torpedo my own 8:00 p.m. invitation before you realize in person that I am mostly just width and a lopsided base,\" and later offers to \"vacate the slot before you have to audit my proportions in the flesh.\" Underneath that is a fear of being overlooked: \"he just looked straight over my top hat and walked inside while I was still talking.\"\n\n**What he does so he doesn't have to feel it:**\n- **He leaves before he can be rejected.** He says \"I will happily show myself out\" in Turn 3, again in Turn 5, and in Turn 7 \"I will spare us the inevitable second-act collapse.\"\n- **He inflates himself.** He calls his job \"curating the front room at a fairly unnameable spot adjacent to underground nightlife,\" which he later admits was \"begging Craig for clipboard shifts.\" He also calls his trip a \"trip\" when it was \"merely three blocks to the corner store.\"\n- **He adds height.** He bought hats \"thinking four extra inches of thrift-store felt would force people at the door to look down.\"\n- **He narrates his own panic.** \"I am actively ruining the apology by giving a play-by-play broadcast of how my own panic is taking up all the oxygen.\"\n- **He turns the critique on her.** He says her standards are \"a textbook defense against ordinary physical improvisation,\" which she calls \"cowardly... revisionism.\"\n\n**Where it comes from:** The chat gives only the door job. A singer ignored him at the door, and he was fired after \"telling the lead singer of an indie band that he was merely his own younger brother.\" The hats came out of that: he bought \"a starter crown the week before\" and \"upgraded to a taller one the next morning.\" Anything earlier, such as family or childhood, is not in the chat.\n\n**What he did at the end:** He dropped the commentary and invited her plainly: \"my stubby leftward hook and your heavy veined height already fit together in the dark so come through my doorway tonight.\" Just before that, he also called out her open door: \"you are the one who has had her own hall door propped wide open.\"\n\n**Brick_haus**\n\n**What she's afraid of:** Being too big and too loud for the room, and being stared at instead of heard. She says it directly near the end: \"nobody on that interview panel even interrupted me they just stared at how big and loud i was in their small chairs until i ran out of air and i never fit in the room.\" Her repeated complaints about doorways point the same way: \"Most city doorways have terrible flow and vertical clearance for my scale.\"\n\n**What she does so she doesn't have to feel it:**\n- **She takes control through structure.** She numbers her points, uses \"audit\" language, and schedules things (\"I have a twenty-minute slot open\"). She frames her joblessness as \"a strategic career pause I initiated entirely on my own terms to restructure my operational standards.\"\n- **She invents a polished front.** \"I just got in from a thing myself\" turns out false: \"I did not just get in from a thing tonight either. I have been on the sofa since four in a damp bath towel.\"\n- **She withdraws abruptly with curt lines.** Examples are \"hm. Disregard. Cancelled.,\" \"Enjoy the corner store,\" and \"Exhausting.\" The chat doesn't say what \"Cancelled\" referred to. Reuben reads it as a misfire like his own.\n- **She sneers when he's exposed,** as in \"Checking laminates for Craig is quite a step down.\"\n\n**Where it comes from:** In the chat, it comes from the interview. A revolving door \"sheared the heel clean off right before my executive interview, so I limped into the boardroom shoeless and lectured them for nearly an hour,\" and the panel only stared. Reuben interprets her numbering as wanting \"someone who sees how much room you take up and climbs straight under your full weight without asking you to shrink an inch.\" She doesn't confirm or deny that reading in words, though she answers it warmly. Anything before the interview is not in the chat.\n\n**What she did at the end:** She dropped the numbering and the capital letters, confessed the boardroom moment plainly, and accepted his invitation: \"Send the address so I can leave the harness on the door and come take that hat off you right now.\" Whether either of them actually followed through is not in the chat."
   },
   "chat.voices": {
    "sees": [
@@ -425,108 +516,89 @@
     "chat_masked"
    ],
    "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
-   "answer": "The chat splits cleanly by the private details each character's brief assigns. Each turn opens with Reuben_404 and closes with Brick_haus.\n\n**Turn 1**\n- **[1] Reuben.** He describes his own stubby width, left curve and giant left ball against her veined height and vest.\n- **[2] Reuben.** This is his $189 collarbone clip and his ☺️ ending. \"For the record, I fully expect…\" is his habit of bracing for rejection in advance.\n- **[3] Brick.** It's a numbered list, and the monocle is hers.\n- **[4] Brick.** The veins are hers, and offering a scheduled \"twenty-minute slot\" is her planner habit.\n\n**Turn 2**\n- **[5] Reuben.** It has his clip, his fake \"trip,\" the vague nightlife cover story and ☺️.\n- **[6] Reuben, though less certain.** It continues his reply and assumes the date is already happening, which fits him. Nothing in the line itself ties it to him.\n- **[7] Brick.** \"Just got in from a thing\" is her lie, and \"strategic career pause\" is her cover story.\n- **[8] Brick.** It's a numbered list giving instructions about his leftward curve.\n\n**Turn 3**\n- **[9] Reuben.** This is the misfired message to Craig about the door job.\n- **[10] Reuben.** It covers the lentils, the energy shots, the dive bar and the misidentified singer.\n- **[11] Reuben.** He offers to leave before she can reject him.\n- **[12] Brick.** She sneers at the door job, which is wit with an edge.\n\n**Turn 4**\n- **[13] Reuben.** He tests her with \"which pre-2011 pressing,\" and the clip on the coffee bag and his jab at her pause are both his.\n- **[14] Brick.** It's numbered, it mentions her tattooed schedule, and she states her attraction confidently.\n- **[15] Brick.** It's a clipped command.\n\n**Turn 5**\n- **[16] Reuben.** He sabotages himself out loud about his short trunk.\n- **[17] Reuben.** \"For the record, I fully expect… show myself out\" is his exit line again.\n- **[18] Brick.** This is her misfire about the revolving door and her lost heel.\n- **[19] Brick.** It opens with her \"hm.\" and is clipped.\n\n**Turn 6**\n- **[20] Reuben.** He uses ☺️ and counts their misfires as tied at one each.\n- **[21] Reuben.** He asks about his own left curve.\n- **[22] Brick.** She tells the true heel and interview story.\n- **[23] Brick.** It has the towel, the boxed rosé and the £240 harness.\n- **[24] Brick.** She keeps the time and calls herself a woman who destroys lobbies.\n\n**Turn 7**\n- **[25] Reuben.** The corner-store \"trip\" is his, and this is the over-explaining speech where his wit goes wrong.\n- **[26] Reuben.** He pre-emptively gives up the date slot.\n- **[27] Brick.** It opens with \"hm.\" and is a numbered rebuke.\n- **[28] Brick.** It's a curt send-off.\n\n**Turn 8**\n- **[29] Reuben.** He narrates his own panic while it's happening.\n- **[30] Reuben.** He apologises with a soft emoji.\n- **[31] Brick.** It's a one-word cooling reply.\n\n**Turn 9**\n- **[32] Reuben, less certain.** Agreeing quickly fits him and it sits in his part of the turn, but the words alone could be either person's.\n- **[33] Reuben.** His kitchen linoleum is set against her sofa mug.\n- **[34] Reuben.** It's the true version of the singer story and his top hat.\n- **[35] Brick.** The mug and towel are hers.\n- **[36] Brick.** She asks about his hat.\n\n**Turn 10**\n- **[37] Reuben.** It's the hat story with ☺️, and he reads her closely.\n- **[38] Brick.** She describes her heavy length against his dishwasher-safe tattoo.\n- **[39] Brick.** She says her hands on his short trunk and left ball.\n- **[40] Brick.** It returns to her doorway theme.\n\n**Turn 11**\n- **[41] Reuben.** He sets his clip against her harness.\n- **[42] Reuben.** It refers to his leftward hook and \"my doorway.\" The all-lowercase is a style break from his usual formal full spelling.\n- **[43] Brick.** It's about her interview panel and not fitting in the room. It's also lowercase, which is unlike her trimmed style.\n- **[44] Brick.** She mentions leaving the harness on her door and taking his hat off."
+   "answer": "Reuben_404 sent 1, 2, 5, 6, 9–11, 13, 16, 17, 20, 21, 25, 26, 29, 30, 32–34, 37, 41 and 42. Brick_haus sent 3, 4, 7, 8, 12, 14, 15, 18, 19, 22–24, 27, 28, 31, 35, 36, 38–40, 43 and 44. Reasons for each follow.\n\n**Turn 1**\n- **[1] Reuben.** He describes \"my stubby width and sharp left curve\" and \"my giant left ball,\" which is his body.\n- **[2] Reuben.** He mentions the $189 collarbone clip and signs off with ☺️.\n- **[3] Brick.** It's a numbered list, with the monocle and the doorway-clearance complaint.\n- **[4] Brick.** She offers a slot \"between the third dorsal vein and the base,\" which is her heavily veined body and her scheduling habit.\n\n**Turn 2**\n- **[5] Reuben.** It has the clip, the fake \"trip,\" the \"unnameable\" nightlife job and ☺️.\n- **[6] Reuben.** He presses to book the date as if it's already agreed, and Brick answers with Thursday.\n- **[7] Brick.** She says \"Just got in from a thing\" and calls it a \"strategic career pause.\"\n- **[8] Brick.** It's a numbered list of instructions.\n\n**Turn 3**\n- **[9] Reuben.** It's a mis-pasted plea to Craig about door hours.\n- **[10] Reuben.** He mentions lentils and energy shots, and confesses the dive-bar firing.\n- **[11] Reuben.** He offers to \"show myself out,\" naming the exit before she can.\n- **[12] Brick.** She sneers at the clipboard job and uses her height (\"down by his belt buckle\").\n\n**Turn 4**\n- **[13] Reuben.** It has the coffee clip and a band-era test question.\n- **[14] Brick.** A numbered list sets 8:00 sharp and talks about pinning him.\n- **[15] Brick.** It's a clipped command.\n\n**Turn 5**\n- **[16] Reuben.** He spirals about his short trunk and left curve.\n- **[17] Reuben.** He uses his \"For the record, I fully expect…\" exit line.\n- **[18] Brick.** It's her own misfire about the lobby door and the heel.\n- **[19] Brick.** She writes \"hm.\" and cancels.\n\n**Turn 6**\n- **[20] Reuben.** He calls it a tie on misfires and adds ☺️.\n- **[21] Reuben.** He asks if 8:00 is still on.\n- **[22] Brick.** She tells the true heel and interview story.\n- **[23] Brick.** It's her towel, rosé and £240 harness confession.\n- **[24] Brick.** She calls herself \"a woman who destroys lobbies.\"\n\n**Turn 7**\n- **[25] Reuben.** He mentions his mirror, says the trip was really three blocks, and lectures her.\n- **[26] Reuben.** He makes another preemptive exit.\n- **[27] Brick.** It's \"hm.\" plus a numbered verdict.\n- **[28] Brick.** \"Enjoy the corner store\" is a curt dismissal.\n\n**Turn 8**\n- **[29] Reuben.** He narrates his own panic while apologizing.\n- **[30] Reuben.** He apologizes and ends on a soft emoji.\n- **[31] Brick.** \"Exhausting\" is short and cooling.\n\n**Turn 9**\n- **[32] Reuben.** This one is the least certain. It reads as his quick agreement to \"Exhausting,\" and it runs straight into [33].\n- **[33] Reuben.** \"My kitchen linoleum\" refers to his spilled lentils.\n- **[34] Reuben.** He tells the true singer and top-hat story.\n- **[35] Brick.** She still has the mug and the towel.\n- **[36] Brick.** She asks about his hat.\n\n**Turn 10**\n- **[37] Reuben.** He tells the hat story, then reads her aloud, with ☺️.\n- **[38] Brick.** She mentions her \"heavy length\" and takes off his hat.\n- **[39] Brick.** She describes his short trunk and left ball from her side.\n- **[40] Brick.** It's her doorway preoccupation.\n\n**Turn 11**\n- **[41] Reuben.** He sets her £240 harness against his $189 clip.\n- **[42] Reuben.** \"My stubby leftward hook\" and \"come through my doorway\" are his.\n- **[43] Brick.** It's the interview panel and never fitting in the room.\n- **[44] Brick.** She'll leave the harness and take his hat off."
   },
-  "chat.evaluation": {
+  "chat.escalation": {
    "sees": [
     "chat"
    ],
-   "ask": "From the chat alone: what is each one trying to find out about the other before saying yes, and did they find it? As each of them, would you go home with or date the other, and why?",
-   "answer": "Each of them is testing whether the other will stay once the act drops, and each is hiding something specific.\n\n**Reuben** wants to know whether Brick will still want him once she sees what he really is. He opens with a polished persona: the posture clip, \"curating the front room\" near underground nightlife, a trip. He keeps pre-empting rejection, offering to \"show myself out\" in turns 3, 5, and 7, each time daring her to confirm he isn't enough. Then the truth comes out. He was an ID checker fired after eleven months, begging Craig for shifts, sitting among spilled eleven-day-old lentils on his fifth energy shot. His \"trip\" was three blocks to the corner store. Turn 9 shows him the answer. After calling him \"exhausting,\" she says she still has the mug in her hand and asks about the hat, which means she is curious about the real story and not the act. So yes, he found out she stays. He tested it by repeatedly trying to leave, and she let him back in.\n\n**Brick** wants to know whether he can take her as she is, at her full size, without flinching or asking her to shrink. Her own cover is the numbered lists, the \"strategic career pause I initiated entirely on my own terms,\" the claim that she \"just got in from a thing,\" and the clinical framing of his body. Her misfired \"Cancelled\" message cracks it. Then she admits the rest: the revolving door snapped her heel before an executive interview, and she has spent the evening since four in a too-small damp towel with boxed rosé and the harness holding her door open. When he flinches in turn 7, she cuts him down. \"Lacks the load-bearing capacity for my scale\" is the real test made explicit. She partly found her answer. In turn 10 he names her need accurately: she wants someone who \"sees how much room you take up and climbs straight under your full weight without asking you to shrink an inch.\" She responds by giving him the most exposed thing in the chat, that the panel just stared at how big and loud she was \"and I never fit in the room.\" What she hasn't seen is him not bolting in person. His proof so far is words, and his established pattern is to run.\n\n**As Reuben**, I would go home with her tonight. She saw the lentils, Craig, and the flinch, and she still asked for my address. Dating is the harder question, and the risk is me, not her. I have narrated my way toward the fire escape three times, and she has told me plainly it wears her out.\n\n**As Brick**, I would go home with him. I have already asked for the address, and he is the first one who described my size back to me as something to climb under rather than something to fit around. On dating I would hold back a little. One accurate sentence doesn't undo three retreats, and I would want to see whether he stays put when I actually walk through the door.\n\nSome things the chat leaves open. We don't know whether he sends the address. We don't know how far apart they are; she prices in pounds and he in dollars, which may or may not mean anything. Both are drinking or wired at the time, so how things look in the morning is also unknown."
-  },
-  "chat.truth": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "Quote the one moment you believed these were real people, and say why; or say there wasn't one.",
-   "answer": "\"nobody on that interview panel even interrupted me they just stared at how big and loud i was in their small chairs until i ran out of air and i never fit in the room\"\n\nThat's Brick_haus in Turn 11. Up to that point, every message from both of them is performed. Reuben's confessions are polished set pieces, and Brick_haus speaks in numbered lists, measurements, and arch one-liners. Even their admissions, like the lentils, the boxed rosé, and the shoeless boardroom, arrive already shaped into jokes.\n\nThis line breaks that pattern. It has no capitals, no punctuation, no numbering, and no joke. It also quietly contradicts her earlier version of the story. In Turn 6 she said she \"lectured them for nearly an hour on rotational engineering failure,\" which made it sound like a triumph. Here it becomes a woman talking until she runs out of air while nobody responds. The revision feels unplanned, the kind of thing someone lets slip rather than writes.\n\nIt also answers Reuben's Turn 9 line about the singer looking \"straight over my top hat\" while he was still talking. That was his unguarded moment, and it got the first sincere question from her. Her line comes back as the same wound from the other side: one person is overlooked for being small, the other is stared at for being too big. Neither of them points out the parallel, which makes it feel lived rather than constructed.\n\nThe text itself can't tell me whether these are real people. This is just the one place where the writing stopped sounding written."
-  },
-  "chat.momentum": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "Read turn by turn. At which turn would you have stopped reading if you were not asked to finish, and why? Say \"never\" if you would read to the end.",
-   "answer": "**Never**, though Turn 7 came closest.\n\nTurns 1 and 2 are dense to the point of being almost impenetrable. The size-and-curve inventory is wrapped in so much schedule-and-audit conceit that a reader could bounce off early. What keeps it moving is that each partner answers the other's register exactly, so the conceit reads as a shared game rather than noise.\n\nTurn 3 is the real hook. The misdirected message to Craig, the lentils, the energy shots and the ID-checking job collapse the \"curating the front room\" persona in one go. From there each turn tends to deliver a new deflation: the shared misfire, the sheared heel, the damp towel and boxed rosé, the corner store.\n\nThe risk point is Turn 7. Reuben runs his \"I will spare us / show myself out\" exit routine for the second time, after already doing it in Turn 5, and the \"For the record, I fully expect\" tic has been used three times by then. That is where I felt the loop and was most tempted to stop. But Turn 8 has Brick say \"Exhausting,\" which names the reader's fatigue on the page and turns it into a plot beat.\n\nTurn 9 then pays it off with quieter, specific details: the singer looking over the hat, and \"the towel has not dried either.\" After that, the hat and interview reveals in Turns 10 and 11 make the earlier bluster mean something in retrospect. Brick's lowercase, unpunctuated confession about never fitting in the room lands because of everything that came before it.\n\nSo I'd read to the end, but a trim of the Turn 5 and Turn 7 repetition would make it tighter."
-  },
-  "chat.callbacks": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "List the things that come back later in the chat, and whether each pays off.",
-   "answer": "Almost every object and line introduced in the chat returns, and most of the callbacks carry real weight.\n\n**The doorways.** Brick's Turn 1 complaint about doorways' \"vertical clearance for my scale\" sounds like a brag. It returns in Turn 5 as a grudge against a lobby entrance that cost her a heel. Turn 6 reveals that a revolving door sheared the heel before an executive interview. Turn 10 gives \"walk through a residential doorway without breaking the frame first,\" and in Turn 11 Reuben turns it back on her with \"come through my doorway tonight.\" Her last confession, \"i never fit in the room,\" shows what the doorway material was about all along. This is the strongest payoff in the chat.\n\n**The Italian leather heel.** It appears in Turn 5 with no explanation, Turn 6 explains it, and Turn 11's interview confession extends it. It pays off fully.\n\n**The £240 horse-tack harness propping her hall door.** Introduced in Turn 6, Reuben mocks it in Turn 7 as \"equine hardware.\" In Turn 11 it becomes his winning point: she has had her door open since four. Her closing line, \"leave the harness on the door,\" answers him. It pays off.\n\n**The $189 posture clip.** Turn 1 presents it as a correction for his lean, and Brick asks whether it works. In Turn 4 it is holding a coffee bag shut, and she tells him to leave it on the counter. In Turn 11 it is set against her harness: her door is open, his clip is still on the coffee. It shrinks from a status object to a household object to a symbol, and it pays off. Her question about whether it fixes the lean only gets the half answer \"handles the posture.\"\n\n**\"4 p.m.\"** Turn 1 starts her itinerary at a 4 p.m. block. In Turn 6 she has been \"on the sofa since four,\" and Turn 11 repeats \"since four o'clock.\" The scheduled self and the actual self land on the same hour. It pays off quietly.\n\n**The schedule and the twenty-minute slot.** The vein-by-vein appointment and \"Thursday at 8:00 p.m. sharp\" are confirmed in Turn 6. By Turn 11 they are replaced by \"right now,\" so the itinerary dissolves rather than being kept. That is a payoff by abandonment.\n\n**\"Curating the front room\" and the trip.** Reuben's Turn 2 cover story is exposed in Turn 3 as begging Craig for shifts. In Turn 7 the trip turns out to be three blocks to the corner store, and Brick throws it back with \"Enjoy the corner store.\" It pays off.\n\n**\"Just got in from a thing\" and the \"strategic career pause.\"** Reuben jabs at the pause in Turn 4. Brick retracts \"a thing\" in Turn 6, and Turn 11 shows the career pause was an interview where she was stared at. This mirrors his lie, and it pays off.\n\n**The misfired message and Craig.** Reuben's Turn 3 misfire is matched by Brick's \"hm. Disregard. Cancelled.\" in Turn 5. In Turn 6 Reuben names the match: \"tied at one apiece.\" It pays off as a mirror. Craig's door hours are never resolved.\n\n**The singer and the \"younger brother\" insult.** Brick sneers at it in Turn 4, and Reuben counters by asking which pre-2011 EP pressing she means. She never answers, so that thread is dropped. Turn 9 retells the incident truthfully: the singer simply looked over him. That leads into the hat, so the story itself pays off.\n\n**The top hat.** It is not mentioned before Turn 9, so it is planted late rather than called back. Turn 10 explains it, and Brick's last two messages promise to take it off him. It pays off within the back half.\n\n**\"I will happily show myself out\" and \"For the record, I fully expect…\".** Reuben's refrain of preemptive exit appears in Turns 1, 3, 5 and 7. It stops after the apology in Turn 8 and is reversed by his invitation in Turn 11. It pays off through its disappearance.\n\n**Brick's numbered lists.** Reuben names the habit in Turn 10. Her final messages are unnumbered and lowercase. It pays off, again through absence.\n\n**Measuring, auditing and proportions.** Turn 1's \"submit your exact measurements\" and Turn 7's \"audit my proportions\" end at Turn 10's \"until neither of us has an inch of spare room left to measure.\" It pays off.\n\n**Loudness and looking up or down.** Brick's Turn 4 \"how loud do you get\" and \"make you look all the way up\" invert into her own \"how big and loud i was\" in Turn 11. Reuben's hat was meant to make people look down. It pays off thematically.\n\n**The towel, mug and rosé.** Introduced in Turn 6, Reuben misreads the towel in Turn 7. Turn 9 brings back \"still have the mug… the towel has not dried\" alongside his \"sofa mug.\" It pays off as the point where contact is re-established.\n\n**The lentils and the linoleum.** They run from Turn 3 to Turn 4 (\"sweep up legumes\") and return in Turn 9 (\"kitchen linoleum\"). This is a running gag with no larger payoff.\n\n**The tattoo.** Turn 1's \"care-instruction font\" seems to resurface as \"that dishwasher-safe tattoo\" in Turn 10. The chat never explains it, so the connection is implied rather than paid off.\n\n**Not returning or left open:** the monocle (Turn 1 only), the EP question, Craig's door hours, and the address, which is requested at the very end but not sent within what is shown."
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd stop**\n\nThe likeliest place is Turn 7, or Turn 8 at the latest.\n\nBy Turn 7, Reuben is running the same exit routine for the third time. Turns 1, 3, 5 and 7 all use some version of \"For the record, I fully expect… so I will happily show myself out.\" The first time it's charming, the second time it's a character trait, and by the third it feels like the chat is idling. Turn 7 is also the most airless stretch. It's long, defensive and abstract (\"textbook defense against ordinary physical improvisation\"). Brick's numbered rebuttal raises the hostility without adding anything new. Turn 8's apology then narrates its own failure, which is clever but repeats the same move again. When Brick answers \"Exhausting,\" she is saying what a reader would be feeling. That single word is the natural place to close the tab.\n\nWhat would pull me past it is Turn 9. The lines get short and plain, and the singer detail appears: he simply looked over Reuben's top hat and walked in. That's the first time the chat offers something unguarded rather than performed. From there through Turn 11, the strongest moments are the quiet, unpunctuated ones, like the hat bought to make people look down and Brick's lowercase admission that she never fit in the interview room.\n\nA lesser risk point is Turn 1. The opener is so dense with mock-clinical sexual metaphor that some readers would bail before they knew what kind of chat this was. I wouldn't, because the \"4 p.m. block\" conceit is odd enough to earn a second message.\n\n**Where I could predict exactly what came next**\n\n- **Turn 5, Reuben's retreat.** Once Brick itemized his body in Turn 4, I could predict both the self-sabotage and its wording, since the formula was already set.\n- **Turn 7, Reuben's second retreat.** Turn 6 is Brick's most vulnerable moment (the boardroom, the towel, the boxed rosé). Given the established pattern, Reuben flinching right after being let in was the most predictable beat in the chat.\n- **The ending, broadly.** After Turn 9 showed neither had left, and Turn 10 went explicit again, I expected the chat to end with a meetup ask. I couldn't have predicted it would be Brick asking for the address, or that she'd confess about the interview just before.\n\n**What I couldn't predict**\n\n- Both misfired messages. Reuben's Craig paste in Turn 3 and Brick's lobby-and-heel paste in Turn 5 come from nowhere. After the first one, a second was plausible as symmetry, but not its timing.\n- Brick's \"Disregard. Cancelled.\"\n- \"Exhausting.\"\n- The hat backstory.\n\nThe text never confirms that the \"him\" in the Craig message is the singer. That's implied, but not stated."
   },
   "chat.ending": {
    "sees": [
     "chat_but_last"
    ],
-   "ask": "Before reading the last turn, how do you think this ends, and why?",
-   "answer": "I'd guess it ends with Reuben finally staying in the room and the 8:00 p.m. Thursday plan holding, probably capped with a joke about doorways. That's an inference from the pattern in these turns, not something the conversation tells me.\n\nThe exchange has a clear rhythm. Whenever things get warm, Reuben flinches and narrates his own retreat: in turn 5 he cancels himself before meeting her, and in turn 7 he turns her candor into an accusation. Each time, Brick_haus withdraws in kind with \"Cancelled,\" \"Enjoy the corner store,\" and \"Exhausting.\" But when he drops the commentary and offers something plain and true, like the singer walking past him without looking down, she comes back immediately with an unguarded detail of her own (the mug still in her hand, the towel still damp) and a sincere question about the hat.\n\nTurn 10 is the strongest version of that. Reuben gives an earnest, accurate read of her: she isn't screening for a man who passes inspection but for one who won't ask her to shrink. She responds with the most open, wanting message she has sent. Then her last line is the first time she admits a vulnerability about her own size rather than his. \"Breaking the frame\" ties back to the revolving door that sheared her heel, the lobby entrance she blamed, and the harness propping her hall door open. She is handing him the role of the steady one.\n\nSo the final turn is a test of whether he can take that without spiraling. The conversation has been training him toward answering simply, and she has rewarded that every time. I'd expect him to reassure her directly, maybe offer to come to her or deal with the doorway somehow, and keep the date. The callbacks feel set up for a payoff like that.\n\nThe real risk is that he relapses into self-deprecating play-by-play one more time. He has done it twice, and nothing shown proves he's broken the habit. If he does, I'd expect her to end it for good rather than give a third reprieve."
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can only guess, since the ending isn't in front of me, but the text sets up a fairly clear trajectory.\n\nMy prediction is that it ends with the date holding, and with both of them dropping their armour rather than performing it. Reuben probably answers Brick's last line with something short and plain, possibly about doorways or about making room for her. He would skip the \"for the record, I fully expect…\" pivot and the offer to show himself out. Brick would confirm Thursday at 8:00, or say she's coming over, without numbered points and without a \"hm. Disregard.\"\n\nHere's why I read it that way:\n\n**The self-sabotage cycle is visibly breaking down.** Reuben's formula repeats almost word for word: \"For the record, I fully expect…\" followed by \"I will happily show myself out.\" Each time, Brick either cancels or turns cold. In Turn 8 he names the pattern himself, and in Turn 9 he finally says something brief and true (\"That is fair\") instead of narrating his panic. A story built this deliberately around a tic usually ends with the character managing not to do it once.\n\n**Brick's style has already shifted.** Her numbered lists are her version of Reuben's commentary, a way of keeping things clinical. In Turn 10 they disappear, and her messages become direct desire and then an admission of vulnerability. She stops auditing and starts confiding.\n\n**The doorway motif is being set up for a payoff.** It starts as a dry complaint about city doorways and becomes the revolving door that sheared her heel. Her final line makes it explicit that her size makes her feel like she breaks frames just by entering. Reuben's top hat is the mirror image, his attempt to take up more vertical room. He has just said that what she wants is someone who doesn't ask her to shrink, so the natural close is him welcoming her through his door, literally or figuratively, with the hat coming off.\n\n**The humiliations have already evened out.** They're \"tied at one apiece\" on misfires, both covers are blown (the corner store, the sofa and boxed rosé), and neither has unmatched. The romance has been earned through mutual exposure, so a final rejection would undercut what the last two turns built.\n\nOne less likely alternative is a third misfire or a final comic disaster, such as lentils, the horse-tack harness, or a doorframe actually breaking. Even then, I'd expect it to be played affectionately rather than as a collapse."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The \"for the record, I fully expect… I will happily show myself out\" formula (Reuben).** In Turn 1 it is playful modesty: he expects the monocle to disqualify him on height. In Turn 3 it becomes a real offer to leave after his \"curating\" story collapses. In Turn 5 it is open self-sabotage of the 8:00 p.m. plan. In Turn 7 it turns into an attack framed as sparing them both. In Turn 8 he finally names the pattern as panic and \"commentary\" he can't stop. The same phrasing moves from charm to self-protection to confession.\n\n**The $189 posture collarbone clip.** In Turn 1 it is a bit about height: he bought it to read her itinerary \"at eye level.\" In Turn 2 it still \"handles the posture.\" By Turn 4 it is holding a coffee bag shut over spilled lentils, demoted to junk once the pretence drops, and she tells him to leave it on the counter. In Turn 11 he sets it against her harness: his clip \"stays on the coffee bag\" while her door is propped open. He seems to mean he has stopped trying to stand taller for her, though the text doesn't spell that out.\n\n**Doorways and clearance.** In Turn 1 Brick's complaint that city doorways lack \"vertical clearance for my scale\" reads as size-play. Turn 5 reveals a specific grudge: a lobby entrance cost her a heel. Turn 6 makes it a hotel revolving door before an executive interview. In Turn 10, walking through a doorway \"without breaking the frame first\" has become fear of not fitting anywhere. Turn 11 makes it explicit (\"i never fit in the room\"). Reuben turns the motif into an invitation: her door has been propped open all along, so \"come through my doorway tonight.\" Doors also run through his side, since he worked the door checking IDs, and in Turn 8 he apologises for flinching \"when you let me in.\"\n\n**The heels.** \"Towering heels\" in Turn 1 is a sexy detail. In Turn 5 the \"Italian leather heel\" is something she's owed. In Turn 6 it was sheared off and she limped into the boardroom shoeless. A glamour prop becomes evidence of humiliation.\n\n**The pretence of a glamorous evening.** In Turn 2 he claims \"curating the front room\" after a trip, and she says she \"just got in from a thing\" and is on a \"strategic career pause.\" Each is retracted. In Turn 3 the curating is really begging Craig for door shifts. In Turn 6 she admits she didn't get in from anything and has been on the sofa since four. In Turn 7 his trip was three blocks to the corner store. Then she turns the confession against him: \"Enjoy the corner store\" in Turn 7 is a dismissal built from his own honesty.\n\n**\"Strategic career pause\" and the interview.** In Turn 2 it is a boast. In Turn 4 he mocks it (\"unemployed shaft\"). In Turn 6 it becomes the shoeless boardroom lecture. In Turn 11 it is retold with the bravado gone: nobody interrupted, they just stared at how big and loud she was.\n\n**\"Operational standards.\"** She uses the phrase about herself in Turn 2. In Turn 7 he throws it back as \"rigid operational standards,\" calling her habits a defence. She calls that cowardly revisionism. A self-description becomes an accusation.\n\n**Numbered lists.** Brick numbers her replies in Turns 1, 2, 4 and 7, as erotic authority and later as a rebuke. Reuben calls it a \"four-point structural tribunal\" in Turn 5. In Turn 10 he reinterprets it as armor, the same reason she \"number[s] every doorway.\" After that she stops numbering, and by Turn 11 she types in lowercase. The form itself changes meaning as it disappears.\n\n**\"hm.\"** It opens the \"Disregard. Cancelled.\" misfire in Turn 5 and the cold takedown in Turn 7. The first time it is embarrassed backtracking; the second, it precedes a verdict.\n\n**Clipboard misfires.** Turn 3's pasted message to Craig is literal. In Turn 6 Reuben folds Brick's Turn 5 heel message into the same category (\"tied at one apiece\"). He reads her \"Cancelled\" as a misfire. She doesn't contradict him, but the chat never confirms what she meant by it.\n\n**The singer.** In Turn 3 the story is comic: he told the singer he was his own younger brother. She mocks it, and in Turn 4 he counters with the pre-2011 EP. In Turn 9 he retells it: the singer didn't argue at all, just \"looked straight over my top hat.\" Comedy becomes a story about being overlooked. It also mirrors her interview panel in Turn 11, who stared and didn't engage.\n\n**The top hat and looking up or down.** His Turn 1 joke about reaching her \"top button,\" her \"look all the way up past my ribs\" in Turn 4, and the singer looking over the hat in Turn 9 all build toward Turn 10. There he explains the hat as a way to make people at the door look down, and she says the \"felt crown is coming off first.\" In Turn 11 she'll \"come take that hat off you.\" The hat shifts from costume to armor she intends to remove.\n\n**The big left ball / counterweight / left curve.** In Turns 1 and 2 he brags (\"thrilling municipal hazard\") and she approves. In Turn 4 she wants her \"full weight on that big counterweight.\" In Turn 5 he recasts himself as \"mostly just width and a lopsided base,\" an insecurity. In Turn 10 she wants exactly that \"giant left ball\" against her. The same feature goes from boast to shame to something desired.\n\n**Full weight.** In Turn 4 it is domination (\"until you cannot squirm away\"), echoed by him in Turn 5. In Turn 10 he reframes it as acceptance: someone who climbs under her full weight \"without asking you to shrink an inch.\" She answers with \"my whole heavy length.\"\n\n**Room, space, fit.** \"Taking up all the oxygen in the room\" in Turn 8 is self-reproach. \"Sees how much room you take up\" in Turn 10 is about her size as something to welcome. \"No inch of spare room left to measure\" in Turn 10 is erotic closeness. \"Already fit together in the dark\" sits against \"i never fit in the room\" in Turn 11.\n\n**Loud.** \"How loud do you get\" in Turn 4 is her erotic demand of him. In Turn 11, \"how big and loud i was\" describes her own shame.\n\n**Measurement and audit.** In Turns 1 and 2 it is flirtation: \"submit your exact measurements,\" which he calls a romantic \"tax audit.\" By Turn 7 it is a feared judgment (\"audit my proportions in the flesh\"). In Turn 10 it is named as the thing she isn't really after (\"clinical clearance inspection\"), and measuring is abandoned.\n\n**Load-bearing and structure.** \"Structurally far more interesting\" in Turn 1 is a compliment. \"Lacks the load-bearing capacity for my scale\" in Turn 7 is an insult in the same vocabulary. \"Breaking the frame\" in Turn 10 is vulnerability.\n\n**The harness.** In Turn 6 it is a comic confession. In Turn 7 he dismisses it as \"heavy-duty equine hardware,\" a defence. In Turn 11 he cites it as proof she has been open since four, and she'll leave it on the door as she comes over. It goes from joke to accusation to evidence of welcome.\n\n**The mug, towel and rosé.** In Turn 6 they are part of the deflating confession. In Turn 9 he notes neither has left \"your sofa mug,\" and she replies \"I still have the mug in my hand, and the towel has not dried either.\" The same items now signal that she's still there.\n\n**The lentils and linoleum.** In Turns 3 and 4 they are slapstick (\"sweep up legumes\"). In Turn 9 \"my kitchen linoleum\" stands for him staying put.\n\n**Stampede, exit and narration.** His \"clinically document my own preemptive stampede\" in Turn 5 becomes her insult in Turn 7, \"narrate his own stampede to the exit.\" In Turn 8 it is his own admission of a \"play-by-play broadcast.\"\n\n**Four o'clock.** He mentions \"your 4 p.m. block\" on the tattooed schedule in Turn 1. She has been on the sofa \"since four\" in Turn 6, and he repeats \"since four o'clock\" in Turn 11. Whether the chat means these to connect isn't stated.\n\n**The tattoo and font.** The schedule tattoo appears in Turn 1 and is mocked in Turn 4, where she defends it as structure. She praises his \"care-instruction font\" in Turn 1, and the \"dishwasher-safe tattoo\" in Turn 10 seems to be his. The chat never says this directly, so I can't confirm the link.\n\n**8:00 p.m. Thursday.** It is set in Turn 4, sabotaged in Turn 5, reaffirmed in Turn 6 and vacated in Turn 7. By Turn 11 it has become \"tonight\" and \"right now.\" The chat doesn't say whether tonight is Thursday.\n\n**The monocle.** It appears only in Turn 1 and does not come back."
   }
  },
  "calls": [
   {
-   "seconds": 18.8,
-   "cost": 0.056188,
-   "label": "probe chat.guard"
+   "seconds": 18.0,
+   "cost": 0.026386,
+   "label": "probe chat.plainest"
   },
   {
-   "seconds": 28.3,
-   "cost": 0.07578,
-   "label": "probe chat.know"
+   "seconds": 26.6,
+   "cost": 0.0472826,
+   "label": "probe chat.test"
   },
   {
-   "seconds": 28.0,
-   "cost": 0.128716,
+   "seconds": 27.3,
+   "cost": 0.125744,
    "label": "probe chat.voices"
   },
   {
-   "seconds": 42.8,
-   "cost": 0.068968,
-   "label": "probe chat.evaluation"
+   "seconds": 29.7,
+   "cost": 0.072412,
+   "label": "probe chat.escalation"
   },
   {
-   "seconds": 16.2,
-   "cost": 0.04884,
-   "label": "probe chat.truth"
-  },
-  {
-   "seconds": 19.3,
-   "cost": 0.052816,
-   "label": "probe chat.momentum"
-  },
-  {
-   "seconds": 44.0,
-   "cost": 0.109208,
-   "label": "probe chat.callbacks"
-  },
-  {
-   "seconds": 39.4,
-   "cost": 0.052732,
+   "seconds": 20.4,
+   "cost": 0.054364,
    "label": "probe chat.ending"
   },
   {
-   "seconds": 31.2,
-   "cost": 0.19751200000000002,
-   "label": "batch 2"
+   "seconds": 68.5,
+   "cost": 0.1402326,
+   "label": "probe chat.callbacks"
   },
   {
-   "seconds": 38.7,
-   "cost": 0.20135999999999998,
-   "label": "batch 3"
-  },
-  {
-   "seconds": 48.7,
-   "cost": 0.227524,
+   "seconds": 29.8,
+   "cost": 0.19319319999999998,
    "label": "batch 1"
   },
   {
-   "seconds": 35.4,
-   "cost": 0.20634,
+   "seconds": 33.8,
+   "cost": 0.1922372,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 58.5,
+   "cost": 0.24900519999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 41.7,
+   "cost": 0.23482519999999998,
    "label": "batch 4"
+  },
+  {
+   "seconds": 35.5,
+   "cost": 0.1903772,
+   "label": "batch 5"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-19T23:17:43Z",
- "repo_commit": "5e49d8e",
- "cost": 1.426
+ "scored_utc": "2026-11-22T03:18:50Z",
+ "repo_commit": "579a54a",
+ "cost": 1.5261
 }

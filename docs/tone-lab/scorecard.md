@@ -219,7 +219,7 @@ Useful facts per word, whether a director can find what they need.
 
 ## The plan
 
-Scored: the story plan a planner writes for one match at the start of the night. The judge sees: everything the planner was given about the two characters and tonight, the plan.
+Scored: the story plan a planner writes for one match at the start of the night. The judge sees: what the chat was written from: for a chat the game played, everything the planner was given about the two characters and tonight; for a writer's chat, the two profiles that writer wrote, the plan.
 
 ### Grounded in the characters (core)
 
@@ -392,7 +392,7 @@ The plan follows the structure it was asked for.
 - **Line:** A 4 follows the structure and writes no chat lines. A 3 misses sections or writes the chat.
 - **High:** Exactly as asked.
 
-### Variety across seeds (useful, needs a set of runs, not scored per artefact)
+### Variety across seeds (useful, scored on a set of chats or runs at once, not per artefact)
 
 The same pair on different seeds gets different stories.
 
@@ -403,47 +403,185 @@ The same pair on different seeds gets different stories.
 
 ## The chat
 
-Scored: the chat as the reader sees it, written turn by turn as the game's dice fall. The judge sees: the chat, the plan, everything the planner was given about the two characters and tonight, what the game rolled each turn, and what it did to interest.
+Scored: the chat as the reader sees it, played turn by turn as the game's dice fall, or written in one go by a writer. The judge sees: the chat, the plan, what the chat was written from: for a chat the game played, everything the planner was given about the two characters and tonight; for a writer's chat, the two profiles that writer wrote, what the game rolled each turn, and what it did to interest.
 
-### You get to know them (core)
+### The brief's test (core)
 
-The point of the chat, that by the end you know who each one is.
+The brief's own pass/fail question: by the end, a reader of the chat alone knows each of the two from the inside.
 
-- **How:** A reader who sees only the chat answers questions with known answers; the judge compares with the brief.
-- **Probe** (sees chat): From the chat alone, answer for each of the two: what they do for a living; where they live; one person in their life and what is going on with that person; one thing they love; one thing they are hiding or lying about. Write "not in the chat" where it does not say.
-- **Low:** The reader learns almost nothing beyond the bodies.
-- **Line:** A 4 has the reader right on at least three of the five for each character, with answers coming from their lives, not their bodies. A 3 has fewer.
-- **High:** All five for both, and the reader learns things the characters did not mean to tell.
-
-### The evaluation reads (core)
-
-You can see each one deciding whether the other is safe and fun, or the vibe.
-
-- **How:** A reader names what each was testing for; the judge compares with the plan's needs.
-- **Probe** (sees chat): From the chat alone: what is each one trying to find out about the other before saying yes, and did they find it? As each of them, would you go home with or date the other, and why?
-- **Low:** Nobody is evaluating; it is one long seduction.
-- **Line:** A 4 lets the reader name the actual tests for both, close to the plan's. A 3 manages one or neither.
-- **High:** The reader can say exactly what tipped each of them.
+- **From:** Pinder's brief, "What the reader should feel"
+- **How:** A reader who sees only the chat answers the brief's four questions for each character; the judge compares the answers with what the chat was written from (the cards or the profiles) and with the chat itself.
+- **Probe** (sees chat): From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write "not in the chat" where it does not say.
+- **Low:** The reader can say how each one behaves, not why.
+- **Line:** A 4 has the reader right on at least three of the four for each character, with the fear and the habit that covers it linked. A 3 gets the habit but not the fear, or the fear only because someone states it.
+- **High:** All four for both, and what each one did at the end follows from their fear; the reader could explain both people to a friend.
 
 ### Found out sideways (core)
 
-Facts come out by slip, inference or being caught, not by statement.
+Facts and causes come out by slip, inference or being caught, not by statement.
 
-- **How:** Label each disclosure as asked, volunteered, slipped, inferred or caught out.
+- **From:** Pinder's brief, "Affection comes from finding out why"
+- **How:** Label each important disclosure as asked, volunteered, slipped, inferred or caught out. The origin of each one's habit counts double.
 - **Low:** Everything is stated.
-- **Line:** A 4 has most important facts coming out by slip, inference or being caught. A 3 states most of them.
+- **Line:** A 4 has most important facts, and the origin of at least one habit, coming out by slip, inference or being caught. A 3 states most of them.
 - **High:** Nothing important is said outright.
 
-### No knowledge leaks (core)
+### Says less than it means (core)
 
-Nobody mentions what they cannot know.
+The feelings are in what they avoid saying, not in what they say.
 
-- **How:** Track what each could know (their own life, the other's public profile and photos, what has been said) and flag references beyond it. Higher means fewer leaks.
-- **Low:** Several leaks.
-- **Line:** A 4 has none. A 3 has one a reader would notice.
-- **High:** None, and the characters use what they don't know.
+- **From:** Harold Pinter, "Writing for the Theatre" (1962): speech as a way of covering what is underneath; the brief's "characters explaining their feelings" and "therapy-speak"
+- **How:** Count the messages that name a feeling outright or explain one ("I think I'm scared of", "I realise I", "that's my trauma", therapy-speak), and mark the places where the reader can name what a message is avoiding.
+- **Low:** They tell each other how they feel.
+- **Line:** A 4 names a feeling outright at most once, and has at least three places where what a message is avoiding is legible. A 3 explains feelings more than once, or has nothing underneath.
+- **High:** Nobody names a feeling, and the reader always knows what is being avoided.
 
-### They listen (core)
+### The plainest line (core)
+
+The moment one of them puts the act down, and how it is written.
+
+- **From:** Pinder's brief, "Tenderness comes from understatement"; replaces "The guard comes down" and "One moment you believe", which asked for the same moment twice
+- **How:** A reader finds the moment; the judge checks that it is there, that it is one of the shortest and plainest lines in the chat, and that it does not name the feeling.
+- **Probe** (sees chat): Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.
+- **Low:** No such moment, or it is announced.
+- **Line:** A 4 has the reader find a moment where one of them puts the act down, carried by a short, plain line that does not name the feeling. A 3 has it missed, stated, or delivered as a speech.
+- **High:** It is the shortest, plainest line in the chat, the reader feels it, and the other one's answer changes the night.
+
+### Two voices you can tell apart (core)
+
+You know who is talking without the names.
+
+- **From:** Pinder's brief, "How they write"
+- **How:** A reader attributes the messages with the names hidden; the judge checks against the real speakers.
+- **Probe** (sees brief, chat_masked): The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.
+- **Low:** The reader guesses.
+- **Line:** A 4 has the reader right on at least 85% of messages, for reasons of voice rather than content. A 3 is below that, or right only by content.
+- **High:** Every message attributed, by voice alone.
+
+### The claim and the evidence (core)
+
+The laughs come from a claim and the evidence against it, both on screen, that the speaker does not see.
+
+- **From:** Pinder's brief, "Laughter comes from the gap" and "Play it straight"
+- **How:** List each moment where a character claims something and the chat shows the opposite, and mark whether the speaker notices or comments on it.
+- **Low:** No gaps; or the characters point out their own.
+- **Line:** A 4 has at least three such gaps, at least one for each character, and the speaker never sees their own. A 3 has fewer, or a character winks at the gap.
+- **High:** Each character's act is one long gap the reader watches widen.
+
+### Wit, not wisecracks (core)
+
+Whether the funny lines give the sender away.
+
+- **From:** Dorothy Parker, Paris Review (1956): wit has truth in it, wisecracking is calisthenics with words; replaces "Lines land", which counted laughs
+- **How:** Mark each line meant to be funny. Label it wit if it reveals something about the person who sent it, a wisecrack if either character could have sent it. Day-job, data, spreadsheet or audit jokes count as wisecracks: the brief rules them out by name.
+- **Low:** Quips that fill turns.
+- **Line:** A 4 has most funny lines giving the sender away, and at most two day-job, data or spreadsheet jokes. A 3 is mostly wisecracks.
+- **High:** Every laugh is about who the sender is, and the best ones cost them something.
+
+### Caught out, nobody concedes (core)
+
+Caught, they explain, and the explanation is worse; nobody learns a lesson.
+
+- **From:** Pinder's brief, "The unhinged comes from commitment"; Larry David's rule for Seinfeld, no hugging, no learning
+- **How:** Find each moment a character is caught out, and label the answer: concedes, deflects, or explains and digs deeper. Flag any stated lesson, apology for being themselves or change of heart.
+- **Low:** They concede at the first hit, or learn a lesson.
+- **Line:** A 4 has most catches answered by an explanation that makes it worse, no concession at the first hit, and no stated lesson. A 3 concedes early or ends in a lesson.
+- **High:** Every catch digs deeper, and the deepest hole is where the truth comes out.
+
+### Status moves (useful)
+
+Who is chasing and who is on top changes during the night.
+
+- **From:** Pinder's brief, "Status flips are funny"; Jesse Armstrong and Sam Bain's Peep Show and Succession, which run on who is up and who is down
+- **How:** Exchange by exchange, say who is chasing and who has the upper hand; count the flips.
+- **Low:** One of them is on top throughout.
+- **Line:** A 4 has at least two flips, and each character spends a stretch on top and a stretch below. A 3 keeps one of them on top throughout, or flips once.
+- **High:** The flips are the plot, and the last one is the ending.
+
+### Timing in the message breaks (useful)
+
+Whether the jokes are timed by the medium.
+
+- **From:** Pinder's brief, "Timing is in the message breaks"; Jimmy Carr and Lucy Greeves, The Naked Jape (2006): a joke is a surprise, so the word that delivers it comes last
+- **How:** For each laugh line, check that the word that delivers it is the last word of its message and that the punchline sits in its own message after the setup. Mark one-word reaction shots after long messages, and runs of messages at the same temperature.
+- **Low:** Punchlines buried mid-message.
+- **Line:** A 4 has most punchlines last, in their own message, and hot follows cold. A 3 buries most of them or runs one temperature.
+- **High:** You could hear the pauses.
+
+### It escalates or it changes (core)
+
+Whether the night keeps moving, and whether the reader can see what comes next.
+
+- **From:** George Saunders, A Swim in a Pond in the Rain (2021): every passage has to raise the stakes or turn; replaces "Pacing" and "You'd keep reading"
+- **How:** A reader reads message by message and says where they would stop and where they could predict the next beat. The judge finds the longest stretch where nothing changes (stakes, status, information or temperature) and checks whether the night is settled early: a time and a place agreed in the first quarter settles it. Explicit sex does not count against escalation; on Pinder bodies are small talk.
+- **Probe** (sees chat): Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say "never" if neither.
+- **Low:** Settled in the opening, or flat for most of it.
+- **Line:** A 4 has no stretch of more than about ten messages where nothing changes, keeps the reader to the end, and is not settled in the first quarter. A 3 has a flat stretch, a predictable run, or the night decided early.
+- **High:** Every exchange raises the stakes or turns, and the reader cannot call the next beat.
+
+### Filth that gives them away (useful)
+
+Whether the sex talk is about these two people.
+
+- **From:** Pinder's brief, "How they write": filthy and specific, bravado at the start and how they get close by the end; Ali Wong's material, which works because it is unflattering to her
+- **How:** Label each sexual line as specific to this body and life or generic, and as bravado or closeness. How explicit a line is never lowers the score.
+- **Low:** Generic filth.
+- **Line:** A 4 has most sexual lines specific to this person, and at least one late in the chat used to get close rather than to perform. A 3 is generic, or the filth never changes job.
+- **High:** The dirtiest line is the one that tells you most about them.
+
+### You see it coming (useful)
+
+The reader sees a habit about to land on the wrong spot and cannot stop it.
+
+- **From:** Pinder's brief, "The wince comes from seeing it coming"
+- **How:** Find the moments where the reader knows something one character does not, and the danger is visible at least one exchange before it goes off. Check that it then goes off.
+- **Low:** Nothing is seen coming.
+- **Line:** A 4 has at least one danger visible before it goes off, and it goes off on exactly the wrong spot. A 3 has none, or the danger is announced as it lands.
+- **High:** The reader is wincing a message early, more than once.
+
+### The app talks through them (useful)
+
+Each one believes something dating culture taught them, says it straight, and the screen contradicts it.
+
+- **From:** Pinder's brief, "The satire comes out of their mouths"; Joel Kim Booster's Fire Island, about who gets picked
+- **How:** List the beliefs from apps and dating culture each one voices (standards, red flags, high value, efficiency, "not looking for anything serious", leagues) and whether the evidence on screen contradicts them.
+- **Low:** Nobody believes anything from the app.
+- **Line:** A 4 has each character voice at least one such belief in earnest, contradicted on screen. A 3 has one character, or the belief is mocked by the speaker.
+- **High:** The two creeds collide, and the farce is about all of us.
+
+### The joke is on them, not on the other (useful)
+
+Where the contempt points.
+
+- **From:** Pinder's brief, "never cynical about the people" and "Nobody is the villain"; Amy Schumer's material, where the speaker is the first target
+- **How:** For each character's sharpest jokes, say who they land on: themselves, the culture they believe in, or the other person. Say whether either ends up the villain or the punchline.
+- **Low:** One of them is the joke.
+- **Line:** A 4 has each character's sharpest jokes land on themselves or the culture at least as often as on the other, and neither ends as the villain. A 3 makes one of them the joke or the villain.
+- **High:** Merciless and fond at once.
+
+### A payoff the reader puts together (useful)
+
+A throwaway that turns out to mean something else, unexplained.
+
+- **From:** Pinder's brief, "A payoff is the reader putting it together"
+- **How:** A reader lists what came back; the judge checks each return: did it look like a throwaway at first, come back once in the middle, mean something else at the end, and go unexplained?
+- **Probe** (sees chat): List the things that come back later in the chat, and for each, whether it means something different when it comes back.
+- **Low:** Nothing returns, or a joke is repeated.
+- **Line:** A 4 has at least one setup that looked like a throwaway, came back in the middle, and means something else at the end, with nobody explaining it. A 3 repeats jokes, or a character explains the payoff.
+- **High:** The last payoff closes the night, and nobody says a word about it.
+
+### The ending is earned (useful)
+
+The outcome follows from the two habits, whichever way it goes.
+
+- **From:** Pinder's brief, "The cynical laugh comes from inevitability"
+- **How:** A reader predicts the ending before the last part; the judge compares with the real one.
+- **Probe** (sees chat_but_last): Before reading the end, how do you think this ends, and why?
+- **Low:** The ending comes from nowhere, or a date that leaves the reader cold.
+- **Line:** A 4 has the reader's prediction matching the real outcome in kind, and the end follows from each one's habit. A 3 arrives from nowhere, or ends warm without being earned.
+- **High:** Inevitable in hindsight, surprising in the moment.
+
+### They listen (useful)
 
 Each message answers the one before.
 
@@ -451,16 +589,6 @@ Each message answers the one before.
 - **Low:** Two monologues.
 - **Line:** A 4 has nearly every message responding to the last, with offers taken up or pointedly ignored. A 3 leaves several unanswered.
 - **High:** Every message is a reaction, and ignoring is a choice.
-
-### Two voices you can tell apart (core)
-
-You know who is talking without the names.
-
-- **How:** A reader attributes the messages with the names hidden; the judge checks against the real speakers.
-- **Probe** (sees brief, chat_masked): The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.
-- **Low:** The reader guesses.
-- **Line:** A 4 has the reader right on at least 85% of messages, for reasons of voice rather than content. A 3 is below that, or right only by content.
-- **High:** Every message attributed, by voice alone.
 
 ### The voice changes with the situation (useful)
 
@@ -471,124 +599,58 @@ Typing changes when they are hurt, horny, late, or have their guard down.
 - **Line:** A 4 shows the typing change at most situation changes. A 3 keeps one register.
 - **High:** You could read the night's feelings from the message shapes alone.
 
-### The guard comes down, and you notice (core)
+### Typed, not written (core)
 
-The turning point exists and reads.
+Whether every message is something a person would type into a dating app.
 
-- **How:** A reader finds the moment; the judge checks it against the plan's turning point.
-- **Probe** (sees chat): Where, if anywhere, did it get real between them? Quote the line, and say how you could tell.
-- **Low:** No such moment.
-- **Line:** A 4 has the reader find the moment, and it shows in how they type. A 3 has it missed, or only stated.
-- **High:** Unmistakable, earned, and nobody says it outright.
-
-### Pacing (core)
-
-Heat and reveals build across the game.
-
-- **How:** Per turn, judge heat and new facts; flag full sexual detail or meeting logistics before the midpoint.
-- **Low:** Full heat and logistics in the opening.
-- **Line:** A 4 builds across the game with nothing fully explicit or logistical before the midpoint. A 3 rushes, or stays flat.
-- **High:** Every turn raises the stakes a notch.
-
-### The ending is earned (useful)
-
-The outcome follows from the chat.
-
-- **How:** A reader predicts the ending before the last turn; the judge compares with the real one.
-- **Probe** (sees chat_but_last): Before reading the last turn, how do you think this ends, and why?
-- **Low:** The ending comes from nowhere.
-- **Line:** A 4 has the reader's prediction matching the real outcome in kind, and the last turn follows from what came before. A 3 arrives from nowhere.
-- **High:** Inevitable in hindsight, surprising in the moment.
-
-### The dice show (useful)
-
-Successes land and misses misfire on screen.
-
-- **How:** Match each turn's text to its roll.
-- **Low:** The dice are invisible.
-- **Line:** A 4 makes most successes and misses visible in the text. A 3 hides them.
-- **High:** Every roll visible, and the misses are the funniest turns.
-
-### Lines land (useful)
-
-Whether it is funny.
-
-- **How:** Mark the lines that land and judge the rate and the kind.
-- **Low:** No laughs.
-- **Line:** A 4 has several genuine laughs, at least one every two turns, coming from character rather than template. A 3 is amusing but rarely funny.
-- **High:** Laughs throughout, and the best ones are about who they are.
-
-### Filth quality (useful)
-
-Specific, earned, character-driven.
-
-- **How:** Label each sexual line as specific or generic, earned or gratuitous.
-- **Low:** Generic or gratuitous.
-- **Line:** A 4 has sexual lines specific to these bodies and lives, arriving when earned. A 3 is generic.
-- **High:** Filthy and funny and about them.
-
-### One moment you believe (core)
-
-Emotional truth inside the satire.
-
-- **How:** A reader quotes the moment they believed these were people.
-- **Probe** (sees chat): Quote the one moment you believed these were real people, and say why; or say there wasn't one.
-- **Low:** None.
-- **Line:** A 4 has at least one earned moment of real feeling. A 3 has none, or one that is stated.
-- **High:** Several, and they change the night.
-
-### Things come back (useful)
-
-Setups pay off for a reader.
-
-- **How:** A reader lists what came back; the judge compares with the plan's setups.
-- **Probe** (sees chat): List the things that come back later in the chat, and whether each pays off.
-- **Low:** Nothing returns.
-- **Line:** A 4 has at least two setups returning and paying off. A 3 has none a reader notices.
-- **High:** Every return lands, and the last one closes the night.
-
-### Reads like a real chat (useful)
-
-Message length, rhythm and content plausible for a dating app.
-
-- **How:** Flag essays, stage directions, shared-space moments, impossible knowledge.
+- **From:** Elmore Leonard, "Easy on the Adverbs, Exclamation Points and Especially Hooptedoodle" (2001): if it sounds like writing, rewrite it; Pinder's brief, "The medium"
+- **How:** Flag messages nobody would type with a thumb at 1am: composed sentences, stacked clauses, essays, narration, stage directions, shared-space moments. A long message counts once, as the event the brief allows when someone finally tells something.
 - **Low:** Prose, not messages.
-- **Line:** A 4 reads like messages with at most occasional overlong ones. A 3 reads like prose.
+- **Line:** A 4 reads like messages: a line or two each, the rare long one an event, no narration. A 3 has composed sentences or long messages as the norm.
 - **High:** You could screenshot it.
 
-### Fresh (diagnostic)
+### Fresh within the chat (diagnostic)
 
-Tics, openers and joke shapes do not repeat.
+Tics, openers and joke shapes do not repeat inside the chat.
 
 - **How:** Find repeated tics, openers and joke shapes. Higher means fewer.
 - **Low:** The same joke all night.
 - **Line:** A 4 repeats nothing more than twice. A 3 has noticeable tics.
 - **High:** Nothing repeats.
 
-### Plays the plan (diagnostic)
+### No knowledge leaks (diagnostic, only where there is a plan)
 
-The plan's beats, events and setups appear, adapted to the dice.
+Pipeline health. Nobody mentions what they cannot know.
+
+- **How:** Track what each could know (their own life, the other's public profile and photos, what has been said) and flag references beyond it. Higher means fewer leaks.
+- **Low:** Several leaks.
+- **Line:** A 4 has none. A 3 has one a reader would notice.
+- **High:** None, and the characters use what they don't know.
+
+### Plays the plan (diagnostic, only where there is a plan)
+
+Pipeline health. The plan's beats, events and setups appear, adapted to the dice.
 
 - **How:** Check the plan's beats against the chat.
 - **Low:** The plan is unused.
 - **Line:** A 4 has most beats and events present. A 3 leaves the plan largely unused.
 - **High:** Every beat present, adapted to the dice rather than forced.
 
-### Satire with humanity (useful)
+### The dice show (diagnostic, only where there is a dice)
 
-The satire hits behaviour, and both stay people.
+Pipeline health. Successes land and misses misfire on screen.
 
-- **How:** Judge where the contempt points.
-- **Low:** Two punchlines.
-- **Line:** A 4 keeps both people human somewhere. A 3 makes them the joke.
-- **High:** Merciless and fond at once.
+- **How:** Match each turn's text to its roll.
+- **Low:** The dice are invisible.
+- **Line:** A 4 makes most successes and misses visible in the text. A 3 hides them.
+- **High:** Every roll visible, and the misses are the funniest turns.
 
-### You'd keep reading (useful)
+### One night, not a template (core, scored on a set of chats or runs at once, not per artefact)
 
-Whether it holds a reader.
+Different writers or seeds with the same pair produce different nights.
 
-- **How:** A reader says where they would stop.
-- **Probe** (sees chat): Read turn by turn. At which turn would you have stopped reading if you were not asked to finish, and why? Say "never" if you would read to the end.
-- **Low:** Stops in the opening.
-- **Line:** A 4 holds the reader to the end, or nearly. A 3 loses them by the middle.
-- **High:** The reader wants the next chat.
+- **From:** The writers' runs: fourteen writers wrote one scene. A chat scored on its own cannot see that it is a copy.
+- **How:** For each chat in the set, write down the opening move, who is on top in the first exchanges, the first thing found out, the turning point and the ending; then count how many chats share each, and list lines and jokes that recur across chats.
+- **Low:** The same scene in every chat.
+- **Line:** A 4 has no opening move or sequence of three beats shared by more than half the chats, and no line recurring across more than two. A 3 has most chats sharing the opening and its order.
+- **High:** Every chat is its own night, and the two characters are still recognisable in all of them.

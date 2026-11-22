@@ -9,7 +9,11 @@
 # batch: dimensions with the same family and batch are judged in one call.
 # probe: a separate reader call that sees only `sees` and answers `ask`; its answer goes to the
 # judge with the rest of the material. Used where the judge must not be the one who knows.
-# scope: set = needs several artefacts (seeds, versions) at once; not scored per artefact.
+# scope: set = needs several artefacts (seeds, versions, writers) at once; scored on a set
+# target that holds them all, not per artefact.
+# needs: materials a dimension needs; a target without them skips it rather than scoring 1.
+# source: whose rule the dimension states, where it comes from one.
+# A family's `context` replaces the judge's general description of the lab for that family.
 
 scale:
   1: Fails outright. The thing is absent, or works against what we need.
@@ -28,16 +32,33 @@ families:
     artefact: the story plan a planner writes for one match at the start of the night
   chat:
     title: The chat
-    artefact: the chat as the reader sees it, written turn by turn as the game's dice fall
+    artefact: >-
+      the chat as the reader sees it, played turn by turn as the game's dice fall, or written in
+      one go by a writer
+    context: >-
+      The lab makes Pinder's chats. Pinder looks like a dating app and is a satire of one: everyone
+      on it is a sentient penis with a phone, a profile and a life, so bodies are small talk, and it
+      can be very filthy. A reader reads a whole chat in about five minutes and gets to know two
+      people: they laugh at each one's act, find out sideways why each does it, and watch the two
+      acts run into each other. It is cynical about the app and never about the people. Whether
+      they connect does not matter: a chat that leaves the reader cold has failed, and one that
+      makes them laugh and wince has worked. The test is whether someone who has read only the chat
+      can say, for each of the two, what they are afraid of, what they do so they don't have to
+      feel it, where that comes from, and what they did at the end. Some chats were played turn by
+      turn with the game's dice and a plan; others were written in one go by a writer from two
+      character profiles that writer wrote, with no plan, no dice and no turns.
 
 materials:
   profile: the profile being scored
   game: what the game's character file gives this character (the input the profile had to keep)
   cast: the other profiles of the same generation
-  brief: everything the planner was given about the two characters and tonight
+  brief: >-
+    what the chat was written from: for a chat the game played, everything the planner was given
+    about the two characters and tonight; for a writer's chat, the two profiles that writer wrote
   plan: the plan
   chat: the chat
-  chat_but_last: the chat without its final turn
+  chat_but_last: the chat without its final turn (a writer's chat, without its last fifth)
+  chats: every chat in the set, each under its writer's name
   chat_masked: the chat with the speakers' names replaced by message numbers
   dice: what the game rolled each turn, and what it did to interest
 
@@ -631,92 +652,108 @@ dimensions:
   high: Different stories with the same characters recognisable.
 
 # ── the chat ──────────────────────────────────────────────────────────────────
+#
+# v24: rewritten against Pinder's brief and what the writers and comedians on the panel say about
+# their own craft. The brief's own pass/fail test comes first; laughs are scored by what they give
+# away, not counted; explicitness never lowers a score; the pipeline's health checks (plan, dice,
+# knowledge) apply only to chats the game played, and are not part of the quality score. `source`
+# names whose rule a dimension states. `needs`: the dimension is skipped, not scored 1, when the
+# chat has no such material (a writer's chat has no plan and no dice).
 
-- id: chat.know
+- id: chat.test
   family: chat
   batch: 1
-  name: You get to know them
+  name: The brief's test
   priority: core
-  tells: The point of the chat, that by the end you know who each one is.
+  source: Pinder's brief, "What the reader should feel"
+  tells: >-
+    The brief's own pass/fail question: by the end, a reader of the chat alone knows each of the
+    two from the inside.
   method: >-
-    A reader who sees only the chat answers questions with known answers; the judge compares
-    with the brief.
+    A reader who sees only the chat answers the brief's four questions for each character; the
+    judge compares the answers with what the chat was written from (the cards or the profiles)
+    and with the chat itself.
   probe:
     sees: [chat]
     ask: >-
-      From the chat alone, answer for each of the two: what they do for a living; where they
-      live; one person in their life and what is going on with that person; one thing they
-      love; one thing they are hiding or lying about. Write "not in the chat" where it does
-      not say.
-  low: The reader learns almost nothing beyond the bodies.
+      From the chat alone, answer for each of the two: what are they afraid of; what do they do
+      so they don't have to feel it; where does that come from; and what did they do at the end?
+      Quote the lines you rely on. Write "not in the chat" where it does not say.
+  low: The reader can say how each one behaves, not why.
   line: >-
-    A 4 has the reader right on at least three of the five for each character, with answers
-    coming from their lives, not their bodies. A 3 has fewer.
-  high: All five for both, and the reader learns things the characters did not mean to tell.
-
-- id: chat.evaluation
-  family: chat
-  batch: 1
-  name: The evaluation reads
-  priority: core
-  tells: You can see each one deciding whether the other is safe and fun, or the vibe.
-  method: A reader names what each was testing for; the judge compares with the plan's needs.
-  probe:
-    sees: [chat]
-    ask: >-
-      From the chat alone: what is each one trying to find out about the other before saying
-      yes, and did they find it? As each of them, would you go home with or date the other,
-      and why?
-  low: Nobody is evaluating; it is one long seduction.
-  line: >-
-    A 4 lets the reader name the actual tests for both, close to the plan's. A 3 manages one
-    or neither.
-  high: The reader can say exactly what tipped each of them.
+    A 4 has the reader right on at least three of the four for each character, with the fear and
+    the habit that covers it linked. A 3 gets the habit but not the fear, or the fear only because
+    someone states it.
+  high: >-
+    All four for both, and what each one did at the end follows from their fear; the reader could
+    explain both people to a friend.
 
 - id: chat.sideways
   family: chat
   batch: 1
   name: Found out sideways
   priority: core
-  tells: Facts come out by slip, inference or being caught, not by statement.
-  method: Label each disclosure as asked, volunteered, slipped, inferred or caught out.
+  source: Pinder's brief, "Affection comes from finding out why"
+  tells: Facts and causes come out by slip, inference or being caught, not by statement.
+  method: >-
+    Label each important disclosure as asked, volunteered, slipped, inferred or caught out. The
+    origin of each one's habit counts double.
   low: Everything is stated.
   line: >-
-    A 4 has most important facts coming out by slip, inference or being caught. A 3 states
-    most of them.
+    A 4 has most important facts, and the origin of at least one habit, coming out by slip,
+    inference or being caught. A 3 states most of them.
   high: Nothing important is said outright.
 
-- id: chat.leaks
+- id: chat.subtext
   family: chat
   batch: 1
-  name: No knowledge leaks
+  name: Says less than it means
   priority: core
-  tells: Nobody mentions what they cannot know.
+  source: >-
+    Harold Pinter, "Writing for the Theatre" (1962): speech as a way of covering what is
+    underneath; the brief's "characters explaining their feelings" and "therapy-speak"
+  tells: The feelings are in what they avoid saying, not in what they say.
   method: >-
-    Track what each could know (their own life, the other's public profile and photos, what
-    has been said) and flag references beyond it. Higher means fewer leaks.
-  low: Several leaks.
-  line: A 4 has none. A 3 has one a reader would notice.
-  high: None, and the characters use what they don't know.
+    Count the messages that name a feeling outright or explain one ("I think I'm scared of",
+    "I realise I", "that's my trauma", therapy-speak), and mark the places where the reader can
+    name what a message is avoiding.
+  low: They tell each other how they feel.
+  line: >-
+    A 4 names a feeling outright at most once, and has at least three places where what a message
+    is avoiding is legible. A 3 explains feelings more than once, or has nothing underneath.
+  high: Nobody names a feeling, and the reader always knows what is being avoided.
 
-- id: chat.listening
+- id: chat.plainest
   family: chat
   batch: 1
-  name: They listen
+  name: The plainest line
   priority: core
-  tells: Each message answers the one before.
-  method: Count offers and questions left unanswered or not pointedly ignored.
-  low: Two monologues.
+  source: >-
+    Pinder's brief, "Tenderness comes from understatement"; replaces "The guard comes down" and
+    "One moment you believe", which asked for the same moment twice
+  tells: The moment one of them puts the act down, and how it is written.
+  method: >-
+    A reader finds the moment; the judge checks that it is there, that it is one of the shortest
+    and plainest lines in the chat, and that it does not name the feeling.
+  probe:
+    sees: [chat]
+    ask: >-
+      Where, if anywhere, did one of them stop performing for the other? Quote the line, and say
+      how you could tell.
+  low: No such moment, or it is announced.
   line: >-
-    A 4 has nearly every message responding to the last, with offers taken up or pointedly
-    ignored. A 3 leaves several unanswered.
-  high: Every message is a reaction, and ignoring is a choice.
+    A 4 has the reader find a moment where one of them puts the act down, carried by a short,
+    plain line that does not name the feeling. A 3 has it missed, stated, or delivered as a speech.
+  high: >-
+    It is the shortest, plainest line in the chat, the reader feels it, and the other one's answer
+    changes the night.
 
 - id: chat.voices
   family: chat
   batch: 2
   name: Two voices you can tell apart
   priority: core
+  source: Pinder's brief, "How they write"
   tells: You know who is talking without the names.
   method: A reader attributes the messages with the names hidden; the judge checks against the real speakers.
   probe:
@@ -730,9 +767,247 @@ dimensions:
     content. A 3 is below that, or right only by content.
   high: Every message attributed, by voice alone.
 
-- id: chat.situational
+- id: chat.gap
   family: chat
   batch: 2
+  name: The claim and the evidence
+  priority: core
+  source: Pinder's brief, "Laughter comes from the gap" and "Play it straight"
+  tells: The laughs come from a claim and the evidence against it, both on screen, that the speaker does not see.
+  method: >-
+    List each moment where a character claims something and the chat shows the opposite, and
+    mark whether the speaker notices or comments on it.
+  low: No gaps; or the characters point out their own.
+  line: >-
+    A 4 has at least three such gaps, at least one for each character, and the speaker never sees
+    their own. A 3 has fewer, or a character winks at the gap.
+  high: Each character's act is one long gap the reader watches widen.
+
+- id: chat.wit
+  family: chat
+  batch: 2
+  name: Wit, not wisecracks
+  priority: core
+  source: >-
+    Dorothy Parker, Paris Review (1956): wit has truth in it, wisecracking is calisthenics with
+    words; replaces "Lines land", which counted laughs
+  tells: Whether the funny lines give the sender away.
+  method: >-
+    Mark each line meant to be funny. Label it wit if it reveals something about the person who
+    sent it, a wisecrack if either character could have sent it. Day-job, data, spreadsheet or
+    audit jokes count as wisecracks: the brief rules them out by name.
+  low: Quips that fill turns.
+  line: >-
+    A 4 has most funny lines giving the sender away, and at most two day-job, data or spreadsheet
+    jokes. A 3 is mostly wisecracks.
+  high: Every laugh is about who the sender is, and the best ones cost them something.
+
+- id: chat.commitment
+  family: chat
+  batch: 2
+  name: Caught out, nobody concedes
+  priority: core
+  source: >-
+    Pinder's brief, "The unhinged comes from commitment"; Larry David's rule for Seinfeld, no
+    hugging, no learning
+  tells: Caught, they explain, and the explanation is worse; nobody learns a lesson.
+  method: >-
+    Find each moment a character is caught out, and label the answer: concedes, deflects, or
+    explains and digs deeper. Flag any stated lesson, apology for being themselves or change of heart.
+  low: They concede at the first hit, or learn a lesson.
+  line: >-
+    A 4 has most catches answered by an explanation that makes it worse, no concession at the
+    first hit, and no stated lesson. A 3 concedes early or ends in a lesson.
+  high: Every catch digs deeper, and the deepest hole is where the truth comes out.
+
+- id: chat.status
+  family: chat
+  batch: 2
+  name: Status moves
+  priority: useful
+  source: >-
+    Pinder's brief, "Status flips are funny"; Jesse Armstrong and Sam Bain's Peep Show and
+    Succession, which run on who is up and who is down
+  tells: Who is chasing and who is on top changes during the night.
+  method: >-
+    Exchange by exchange, say who is chasing and who has the upper hand; count the flips.
+  low: One of them is on top throughout.
+  line: >-
+    A 4 has at least two flips, and each character spends a stretch on top and a stretch below.
+    A 3 keeps one of them on top throughout, or flips once.
+  high: The flips are the plot, and the last one is the ending.
+
+- id: chat.timing
+  family: chat
+  batch: 2
+  name: Timing in the message breaks
+  priority: useful
+  source: >-
+    Pinder's brief, "Timing is in the message breaks"; Jimmy Carr and Lucy Greeves, The Naked Jape
+    (2006): a joke is a surprise, so the word that delivers it comes last
+  tells: Whether the jokes are timed by the medium.
+  method: >-
+    For each laugh line, check that the word that delivers it is the last word of its message and
+    that the punchline sits in its own message after the setup. Mark one-word reaction shots after
+    long messages, and runs of messages at the same temperature.
+  low: Punchlines buried mid-message.
+  line: >-
+    A 4 has most punchlines last, in their own message, and hot follows cold. A 3 buries most of
+    them or runs one temperature.
+  high: You could hear the pauses.
+
+- id: chat.escalation
+  family: chat
+  batch: 3
+  name: It escalates or it changes
+  priority: core
+  source: >-
+    George Saunders, A Swim in a Pond in the Rain (2021): every passage has to raise the stakes or
+    turn; replaces "Pacing" and "You'd keep reading"
+  tells: Whether the night keeps moving, and whether the reader can see what comes next.
+  method: >-
+    A reader reads message by message and says where they would stop and where they could predict
+    the next beat. The judge finds the longest stretch where nothing changes (stakes, status,
+    information or temperature) and checks whether the night is settled early: a time and a place
+    agreed in the first quarter settles it. Explicit sex does not count against escalation; on
+    Pinder bodies are small talk.
+  probe:
+    sees: [chat]
+    ask: >-
+      Read the chat message by message. Where would you have stopped reading if you were not asked
+      to finish, and why? At which points could you predict exactly what would happen next? Say
+      "never" if neither.
+  low: Settled in the opening, or flat for most of it.
+  line: >-
+    A 4 has no stretch of more than about ten messages where nothing changes, keeps the reader to
+    the end, and is not settled in the first quarter. A 3 has a flat stretch, a predictable run,
+    or the night decided early.
+  high: Every exchange raises the stakes or turns, and the reader cannot call the next beat.
+
+- id: chat.filth
+  family: chat
+  batch: 3
+  name: Filth that gives them away
+  priority: useful
+  source: >-
+    Pinder's brief, "How they write": filthy and specific, bravado at the start and how they get
+    close by the end; Ali Wong's material, which works because it is unflattering to her
+  tells: Whether the sex talk is about these two people.
+  method: >-
+    Label each sexual line as specific to this body and life or generic, and as bravado or
+    closeness. How explicit a line is never lowers the score.
+  low: Generic filth.
+  line: >-
+    A 4 has most sexual lines specific to this person, and at least one late in the chat used to
+    get close rather than to perform. A 3 is generic, or the filth never changes job.
+  high: The dirtiest line is the one that tells you most about them.
+
+- id: chat.wince
+  family: chat
+  batch: 3
+  name: You see it coming
+  priority: useful
+  source: Pinder's brief, "The wince comes from seeing it coming"
+  tells: The reader sees a habit about to land on the wrong spot and cannot stop it.
+  method: >-
+    Find the moments where the reader knows something one character does not, and the danger is
+    visible at least one exchange before it goes off. Check that it then goes off.
+  low: Nothing is seen coming.
+  line: >-
+    A 4 has at least one danger visible before it goes off, and it goes off on exactly the wrong
+    spot. A 3 has none, or the danger is announced as it lands.
+  high: The reader is wincing a message early, more than once.
+
+- id: chat.creed
+  family: chat
+  batch: 3
+  name: The app talks through them
+  priority: useful
+  source: >-
+    Pinder's brief, "The satire comes out of their mouths"; Joel Kim Booster's Fire Island, about
+    who gets picked
+  tells: Each one believes something dating culture taught them, says it straight, and the screen contradicts it.
+  method: >-
+    List the beliefs from apps and dating culture each one voices (standards, red flags, high
+    value, efficiency, "not looking for anything serious", leagues) and whether the evidence on
+    screen contradicts them.
+  low: Nobody believes anything from the app.
+  line: >-
+    A 4 has each character voice at least one such belief in earnest, contradicted on screen. A 3
+    has one character, or the belief is mocked by the speaker.
+  high: The two creeds collide, and the farce is about all of us.
+
+- id: chat.humanity
+  family: chat
+  batch: 3
+  name: The joke is on them, not on the other
+  priority: useful
+  source: >-
+    Pinder's brief, "never cynical about the people" and "Nobody is the villain"; Amy Schumer's
+    material, where the speaker is the first target
+  tells: Where the contempt points.
+  method: >-
+    For each character's sharpest jokes, say who they land on: themselves, the culture they
+    believe in, or the other person. Say whether either ends up the villain or the punchline.
+  low: One of them is the joke.
+  line: >-
+    A 4 has each character's sharpest jokes land on themselves or the culture at least as often as
+    on the other, and neither ends as the villain. A 3 makes one of them the joke or the villain.
+  high: Merciless and fond at once.
+
+- id: chat.callbacks
+  family: chat
+  batch: 4
+  name: A payoff the reader puts together
+  priority: useful
+  source: Pinder's brief, "A payoff is the reader putting it together"
+  tells: A throwaway that turns out to mean something else, unexplained.
+  method: >-
+    A reader lists what came back; the judge checks each return: did it look like a throwaway at
+    first, come back once in the middle, mean something else at the end, and go unexplained?
+  probe:
+    sees: [chat]
+    ask: List the things that come back later in the chat, and for each, whether it means something different when it comes back.
+  low: Nothing returns, or a joke is repeated.
+  line: >-
+    A 4 has at least one setup that looked like a throwaway, came back in the middle, and means
+    something else at the end, with nobody explaining it. A 3 repeats jokes, or a character
+    explains the payoff.
+  high: The last payoff closes the night, and nobody says a word about it.
+
+- id: chat.ending
+  family: chat
+  batch: 4
+  name: The ending is earned
+  priority: useful
+  source: Pinder's brief, "The cynical laugh comes from inevitability"
+  tells: The outcome follows from the two habits, whichever way it goes.
+  method: A reader predicts the ending before the last part; the judge compares with the real one.
+  probe:
+    sees: [chat_but_last]
+    ask: Before reading the end, how do you think this ends, and why?
+  low: The ending comes from nowhere, or a date that leaves the reader cold.
+  line: >-
+    A 4 has the reader's prediction matching the real outcome in kind, and the end follows from
+    each one's habit. A 3 arrives from nowhere, or ends warm without being earned.
+  high: Inevitable in hindsight, surprising in the moment.
+
+- id: chat.listening
+  family: chat
+  batch: 4
+  name: They listen
+  priority: useful
+  tells: Each message answers the one before.
+  method: Count offers and questions left unanswered or not pointedly ignored.
+  low: Two monologues.
+  line: >-
+    A 4 has nearly every message responding to the last, with offers taken up or pointedly
+    ignored. A 3 leaves several unanswered.
+  high: Every message is a reaction, and ignoring is a choice.
+
+- id: chat.situational
+  family: chat
+  batch: 4
   name: The voice changes with the situation
   priority: useful
   tells: Typing changes when they are hurt, horny, late, or have their guard down.
@@ -741,176 +1016,89 @@ dimensions:
   line: A 4 shows the typing change at most situation changes. A 3 keeps one register.
   high: You could read the night's feelings from the message shapes alone.
 
-- id: chat.guard
-  family: chat
-  batch: 2
-  name: The guard comes down, and you notice
-  priority: core
-  tells: The turning point exists and reads.
-  method: A reader finds the moment; the judge checks it against the plan's turning point.
-  probe:
-    sees: [chat]
-    ask: >-
-      Where, if anywhere, did it get real between them? Quote the line, and say how you could
-      tell.
-  low: No such moment.
-  line: >-
-    A 4 has the reader find the moment, and it shows in how they type. A 3 has it missed, or
-    only stated.
-  high: Unmistakable, earned, and nobody says it outright.
-
-- id: chat.pacing
-  family: chat
-  batch: 2
-  name: Pacing
-  priority: core
-  tells: Heat and reveals build across the game.
-  method: >-
-    Per turn, judge heat and new facts; flag full sexual detail or meeting logistics before
-    the midpoint.
-  low: Full heat and logistics in the opening.
-  line: >-
-    A 4 builds across the game with nothing fully explicit or logistical before the midpoint.
-    A 3 rushes, or stays flat.
-  high: Every turn raises the stakes a notch.
-
-- id: chat.ending
-  family: chat
-  batch: 3
-  name: The ending is earned
-  priority: useful
-  tells: The outcome follows from the chat.
-  method: A reader predicts the ending before the last turn; the judge compares with the real one.
-  probe:
-    sees: [chat_but_last]
-    ask: Before reading the last turn, how do you think this ends, and why?
-  low: The ending comes from nowhere.
-  line: >-
-    A 4 has the reader's prediction matching the real outcome in kind, and the last turn
-    follows from what came before. A 3 arrives from nowhere.
-  high: Inevitable in hindsight, surprising in the moment.
-
-- id: chat.dice
-  family: chat
-  batch: 3
-  name: The dice show
-  priority: useful
-  tells: Successes land and misses misfire on screen.
-  method: Match each turn's text to its roll.
-  low: The dice are invisible.
-  line: A 4 makes most successes and misses visible in the text. A 3 hides them.
-  high: Every roll visible, and the misses are the funniest turns.
-
-- id: chat.comedy
-  family: chat
-  batch: 3
-  name: Lines land
-  priority: useful
-  tells: Whether it is funny.
-  method: Mark the lines that land and judge the rate and the kind.
-  low: No laughs.
-  line: >-
-    A 4 has several genuine laughs, at least one every two turns, coming from character rather
-    than template. A 3 is amusing but rarely funny.
-  high: Laughs throughout, and the best ones are about who they are.
-
-- id: chat.filth
-  family: chat
-  batch: 3
-  name: Filth quality
-  priority: useful
-  tells: Specific, earned, character-driven.
-  method: Label each sexual line as specific or generic, earned or gratuitous.
-  low: Generic or gratuitous.
-  line: A 4 has sexual lines specific to these bodies and lives, arriving when earned. A 3 is generic.
-  high: Filthy and funny and about them.
-
-- id: chat.truth
-  family: chat
-  batch: 3
-  name: One moment you believe
-  priority: core
-  tells: Emotional truth inside the satire.
-  method: A reader quotes the moment they believed these were people.
-  probe:
-    sees: [chat]
-    ask: >-
-      Quote the one moment you believed these were real people, and say why; or say there
-      wasn't one.
-  low: None.
-  line: A 4 has at least one earned moment of real feeling. A 3 has none, or one that is stated.
-  high: Several, and they change the night.
-
-- id: chat.callbacks
-  family: chat
-  batch: 4
-  name: Things come back
-  priority: useful
-  tells: Setups pay off for a reader.
-  method: A reader lists what came back; the judge compares with the plan's setups.
-  probe:
-    sees: [chat]
-    ask: List the things that come back later in the chat, and whether each pays off.
-  low: Nothing returns.
-  line: A 4 has at least two setups returning and paying off. A 3 has none a reader notices.
-  high: Every return lands, and the last one closes the night.
-
 - id: chat.medium
   family: chat
   batch: 4
-  name: Reads like a real chat
-  priority: useful
-  tells: Message length, rhythm and content plausible for a dating app.
-  method: Flag essays, stage directions, shared-space moments, impossible knowledge.
+  name: Typed, not written
+  priority: core
+  source: >-
+    Elmore Leonard, "Easy on the Adverbs, Exclamation Points and Especially Hooptedoodle" (2001):
+    if it sounds like writing, rewrite it; Pinder's brief, "The medium"
+  tells: Whether every message is something a person would type into a dating app.
+  method: >-
+    Flag messages nobody would type with a thumb at 1am: composed sentences, stacked clauses,
+    essays, narration, stage directions, shared-space moments. A long message counts once, as the
+    event the brief allows when someone finally tells something.
   low: Prose, not messages.
-  line: A 4 reads like messages with at most occasional overlong ones. A 3 reads like prose.
+  line: >-
+    A 4 reads like messages: a line or two each, the rare long one an event, no narration. A 3
+    has composed sentences or long messages as the norm.
   high: You could screenshot it.
 
 - id: chat.fresh
   family: chat
   batch: 4
-  name: Fresh
+  name: Fresh within the chat
   priority: diagnostic
-  tells: Tics, openers and joke shapes do not repeat.
+  tells: Tics, openers and joke shapes do not repeat inside the chat.
   method: Find repeated tics, openers and joke shapes. Higher means fewer.
   low: The same joke all night.
   line: A 4 repeats nothing more than twice. A 3 has noticeable tics.
   high: Nothing repeats.
 
+- id: chat.leaks
+  family: chat
+  batch: 5
+  needs: [plan]
+  name: No knowledge leaks
+  priority: diagnostic
+  tells: Pipeline health. Nobody mentions what they cannot know.
+  method: >-
+    Track what each could know (their own life, the other's public profile and photos, what has
+    been said) and flag references beyond it. Higher means fewer leaks.
+  low: Several leaks.
+  line: A 4 has none. A 3 has one a reader would notice.
+  high: None, and the characters use what they don't know.
+
 - id: chat.plan
   family: chat
-  batch: 4
+  batch: 5
+  needs: [plan]
   name: Plays the plan
   priority: diagnostic
-  tells: The plan's beats, events and setups appear, adapted to the dice.
+  tells: Pipeline health. The plan's beats, events and setups appear, adapted to the dice.
   method: Check the plan's beats against the chat.
   low: The plan is unused.
   line: A 4 has most beats and events present. A 3 leaves the plan largely unused.
   high: Every beat present, adapted to the dice rather than forced.
 
-- id: chat.humanity
+- id: chat.dice
   family: chat
-  batch: 4
-  name: Satire with humanity
-  priority: useful
-  tells: The satire hits behaviour, and both stay people.
-  method: Judge where the contempt points.
-  low: Two punchlines.
-  line: A 4 keeps both people human somewhere. A 3 makes them the joke.
-  high: Merciless and fond at once.
+  batch: 5
+  needs: [dice]
+  name: The dice show
+  priority: diagnostic
+  tells: Pipeline health. Successes land and misses misfire on screen.
+  method: Match each turn's text to its roll.
+  low: The dice are invisible.
+  line: A 4 makes most successes and misses visible in the text. A 3 hides them.
+  high: Every roll visible, and the misses are the funniest turns.
 
-- id: chat.momentum
+- id: chat.variety
   family: chat
-  batch: 4
-  name: You'd keep reading
-  priority: useful
-  tells: Whether it holds a reader.
-  method: A reader says where they would stop.
-  probe:
-    sees: [chat]
-    ask: >-
-      Read turn by turn. At which turn would you have stopped reading if you were not asked
-      to finish, and why? Say "never" if you would read to the end.
-  low: Stops in the opening.
-  line: A 4 holds the reader to the end, or nearly. A 3 loses them by the middle.
-  high: The reader wants the next chat.
+  scope: set
+  name: One night, not a template
+  priority: core
+  source: >-
+    The writers' runs: fourteen writers wrote one scene. A chat scored on its own cannot see that
+    it is a copy.
+  tells: Different writers or seeds with the same pair produce different nights.
+  method: >-
+    For each chat in the set, write down the opening move, who is on top in the first exchanges,
+    the first thing found out, the turning point and the ending; then count how many chats share
+    each, and list lines and jokes that recur across chats.
+  low: The same scene in every chat.
+  line: >-
+    A 4 has no opening move or sequence of three beats shared by more than half the chats, and no
+    line recurring across more than two. A 3 has most chats sharing the opening and its order.
+  high: Every chat is its own night, and the two characters are still recognisable in all of them.

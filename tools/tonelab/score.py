@@ -54,7 +54,7 @@ SEED_TAG = "-s23"      # plans: every live and preview run on seed 23 (other see
 
 JUDGE_SYSTEM = """You score work from a comedy-writing lab against a scorecard.
 
-The lab makes Pinder's chats: funny, filthy, satirical dating-app conversations between two adult characters (the cast are anthropomorphic genitals with human lives, jobs and flats), written turn by turn while the game's dice decide how each turn goes. What we want: the reader gets to know two people indirectly; each one is deciding whether the other is safe and fun for a night, or the vibe for a date; and the night reaches a moment where the guard comes down, or a decision about going home together.
+{context}
 
 Score each dimension you are given from 1 to 6. There is no midpoint:
 {scale}
@@ -71,6 +71,9 @@ For each dimension return:
 
 Return only JSON, one entry per dimension in the order given:
 {{"scores": [{{"id": "...", "score": 4, "why": "...", "evidence": ["..."], "raise": "..."}}]}}"""
+
+# The lab as the judge is told about it, unless the family's own `context` in scorecard.yaml replaces it.
+LAB_CONTEXT = ("The lab makes Pinder's chats: funny, filthy, satirical dating-app conversations between two adult characters (the cast are anthropomorphic genitals with human lives, jobs and flats), written turn by turn while the game's dice decide how each turn goes. What we want: the reader gets to know two people indirectly; each one is deciding whether the other is safe and fun for a night, or the vibe for a date; and the night reaches a moment where the guard comes down, or a decision about going home together.")
 
 PROBE_SYSTEM = ("You are a reader, not an editor. Answer only from what you are shown, and say so where it "
                 "does not tell you; never guess beyond it. Plain prose, no JSON, no preamble.")
@@ -91,8 +94,11 @@ def sha(text):
 def catalogue():
     cat = yaml.safe_load(CARD.read_text(encoding="utf-8"))
     for d in cat["dimensions"]:
-        d["sha"] = sha(json.dumps({k: d.get(k) for k in ("name", "tells", "method", "low", "line", "high", "probe")},
-                                  sort_keys=True))
+        keys = {k: d.get(k) for k in ("name", "tells", "method", "low", "line", "high", "probe")}
+        ctx = (cat["families"].get(d.get("family")) or {}).get("context")
+        if ctx:  # a family with its own context: the judge reads the dimension through it
+            keys["context"] = ctx
+        d["sha"] = sha(json.dumps(keys, sort_keys=True))
     return cat
 
 
@@ -121,6 +127,10 @@ def problems_in(cat):
         p = d.get("probe")
         if p and (not p.get("ask") or not set(p.get("sees") or []) <= mats or not p.get("sees")):
             out.append(f"{i}: probe")
+        if not set(d.get("needs") or []) <= mats:
+            out.append(f"{i}: needs")
+        if d.get("scope") == "set" and d.get("probe"):
+            out.append(f"{i}: a set dimension takes no probe")
     for f, s in cat["sees"].items():
         if not set(s) <= mats:
             out.append(f"sees.{f}")
@@ -306,6 +316,81 @@ def variant_dirs():
     return sorted(d for d in root.iterdir() if (d / "generator.yaml").exists()) if root.is_dir() else []
 
 
+# The writers' runs on tone-lab-scratch: each writer wrote both characters, then a chat between them in
+# one go, with no plan, no dice and no turns (tools/tonelab/writers.py). Folder, run number, what changed.
+WRITERS_DIR = ROOT / "docs" / "tone-lab" / "scratch"
+WRITER_RUNS = [
+    ("writers", 1, "one line of persona, the game's material as inspiration"),
+    ("writers-v2", 2, "the writer is the author and the authority"),
+    ("writers-v3", 3, "the game's texting fragments removed; the writer develops the texting style"),
+    ("writers-v4", 4, "run 3's prompts, given to six comedians"),
+    ("writers-v5", 5, "the comedians' run 4 profiles; the chat held to 1,000 words"),
+]
+CHAT_PAIR = ("reuben", "brick")  # the player writes first
+
+
+def char_name(slug):
+    return json.loads((ROOT / "data" / "characters" / f"{slug}.json").read_text(encoding="utf-8"))["name"]
+
+
+def writer_messages(text, names):
+    """[(line index, speaker, message)] from a writer's chat: one "Name: message" per line, the name
+    sometimes in bold, sometimes in another case ("reuben_404"). Headings, notes and stage directions
+    are not messages."""
+    pat = re.compile(r"^\s*(?:\*\*)?(" + "|".join(map(re.escape, names)) + r")(?:\*\*)?\s*:\s*(?:\*\*)?\s*(.*?)\s*$", re.I)
+    canon = {n.lower(): n for n in names}
+    out = []
+    for i, ln in enumerate(text.splitlines()):
+        m = pat.match(ln)
+        if m and m.group(2).strip():
+            out.append((i, canon[m.group(1).lower()], m.group(2).strip()))
+    return out
+
+
+def writer_targets():
+    """A target for every writer's chat, and one set target per run that holds all of that run's chats."""
+    names = [char_name(s) for s in CHAT_PAIR]
+    out = []
+    for folder, n, about in WRITER_RUNS:
+        base = WRITERS_DIR / folder
+        rec = base / "chat-reuben-brick" / "run.json"
+        if not rec.exists():
+            continue
+        writers = json.loads(rec.read_text(encoding="utf-8")).get("writers") or {}
+        done = []
+        for wid, w in writers.items():
+            if w.get("error"):
+                continue
+            paths = [base / "chat-reuben-brick" / f"{wid}.md"] + [base / s / f"{wid}.md" for s in CHAT_PAIR]
+            if not all(p.exists() for p in paths):
+                continue
+            text, *profiles = (p.read_text(encoding="utf-8").strip() for p in paths)
+            msgs = writer_messages(text, names)
+            if len(msgs) < 6:
+                continue
+            lines = text.splitlines()
+            cut = len(msgs) - max(4, len(msgs) // 5)
+            masked_text = "\n".join(f"[{k}] {m}" for k, (_, _, m) in enumerate(msgs, 1))
+            brief = "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles))
+            out.append({"id": f"chat-{folder}-{wid}", "kind": "chat", "label": f"Run {n} · {w['writer']}",
+                        "version": f"run {n}", "order": 100 + n, "writer": wid, "writers_run": n,
+                        "source": f"docs/tone-lab/scratch/{folder}/chat-reuben-brick/{wid}.md",
+                        "note": (f"Written in one go by {w['writer']} from the two profiles they wrote (run {n}: {about}). "
+                                 "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges."),
+                        "speakers": [s for _, s, _ in msgs],
+                        "material": {"chat": text, "brief": brief, "chat_masked": masked_text,
+                                     "chat_but_last": "\n".join(lines[:msgs[cut][0]]).strip()}})
+            done.append((w["writer"], text))
+        if len(done) >= 2:
+            out.append({"id": f"chatset-{folder}", "kind": "chat", "set": True, "label": f"Run {n} · all {len(done)} chats",
+                        "version": f"run {n}", "order": 100 + n, "writers_run": n,
+                        "source": f"docs/tone-lab/scratch/{folder}/chat-reuben-brick/",
+                        "note": (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
+                                 "each written by a different writer."),
+                        "material": {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}})
+    return out
+
+
 def targets():
     """Everything that can be scored, newest first within a kind, with its material."""
     profs = pf.read_profiles()
@@ -368,7 +453,7 @@ def targets():
                         material={"chat": text, "plan": plan_call(d)["output"], "brief": plan_call(d)["user"],
                                   "dice": dice_text(d, written), "chat_but_last": text[:last].strip() if last > 0 else text,
                                   "chat_masked": masked(turns)}))
-    return out
+    return out + writer_targets()
 
 
 # ── the judge ─────────────────────────────────────────────────────────────────
@@ -392,11 +477,27 @@ def make_caller(judge, model, key=None):
     return caller
 
 
+def sees_of(cat, t):
+    """What the judge reads for this target: a set target reads its chats; the rest read their family's
+    materials, without the ones this target has none of (a writer's chat has no plan and no dice)."""
+    if t.get("set"):
+        return ["chats"]
+    return [m for m in cat["sees"][t["kind"]] if m in t["material"]]
+
+
+def dims_for(cat, t):
+    """The dimensions this target is scored on: set dimensions for a set target, the rest otherwise,
+    without those whose `needs` the target lacks (skipped, not scored 1)."""
+    return [d for d in cat["dimensions"] if d["family"] == t["kind"]
+            and (d.get("scope") == "set") == bool(t.get("set"))
+            and set(d.get("needs") or []) <= set(t["material"])]
+
+
 def block(cat, t, names, kind_label=None):
     parts = []
     for n in names:
         title = cat["materials"][n]
-        mark = " (the work being scored)" if n == t["kind"] else ""
+        mark = " (the work being scored)" if n in (t["kind"], "chats") else ""
         parts.append(f"=== {n.upper().replace('_', ' ')}{mark}: {title} ===\n{t['material'][n].strip()}")
     return "\n\n".join(parts)
 
@@ -407,7 +508,7 @@ def dim_text(d):
 
 
 def judge_prompt(cat, t, dims, probes):
-    parts = [block(cat, t, cat["sees"][t["kind"]])]
+    parts = [block(cat, t, sees_of(cat, t))]
     if t.get("note"):
         parts.append("=== NOTE ===\n" + t["note"])
     pr = [f"For {d['id']}, a fresh reader who saw only {', '.join(d['probe']['sees'])} was asked:\n"
@@ -420,8 +521,10 @@ def judge_prompt(cat, t, dims, probes):
     return "\n\n".join(parts)
 
 
-def judge_system(cat):
-    return JUDGE_SYSTEM.format(scale="\n".join(f"{k}. {v}" for k, v in sorted(cat["scale"].items())))
+def judge_system(cat, kind=None):
+    ctx = (cat["families"].get(kind) or {}).get("context") or LAB_CONTEXT
+    return JUDGE_SYSTEM.format(context=ctx.strip(),
+                               scale="\n".join(f"{k}. {v}" for k, v in sorted(cat["scale"].items())))
 
 
 def parse_scores(text, dims):
@@ -473,10 +576,11 @@ def save_result(t, rec):
 
 
 def score_target(t, cat, caller, judge_id, force=False):
-    dims = [d for d in cat["dimensions"] if d["family"] == t["kind"] and d.get("scope") != "set"]
+    dims = dims_for(cat, t)
     msha = sha(json.dumps(t["material"], sort_keys=True))
     rec = {} if force else load_result(t)
-    rec.update({k: t.get(k) for k in ("id", "kind", "label", "version", "order", "run", "source", "note", "when")})
+    rec.update({k: t.get(k) for k in ("id", "kind", "label", "version", "order", "run", "source", "note", "when",
+                                      "writer", "writers_run", "set")})
     rec["materials"] = {k: {"chars": len(v), "words": len(v.split())} for k, v in t["material"].items()}
     rec.setdefault("scores", {})
     rec.setdefault("probes", {})
@@ -510,12 +614,12 @@ def score_target(t, cat, caller, judge_id, force=False):
 
     batches = {}
     for d in todo:
-        batches.setdefault(d["batch"], []).append(d)
+        batches.setdefault(d.get("batch", 0), []).append(d)
 
     def run_batch(item):
         b, ds = item
         user = judge_prompt(cat, t, ds, rec["probes"])
-        system = judge_system(cat)
+        system = judge_system(cat, t["kind"])
         for attempt in (1, 2):
             text, meta = caller(system, user, f"{t['id']} batch {b}")
             with lock:
@@ -630,8 +734,13 @@ def write_doc(cat):
         L += [f"## {f['title']}", "", f"Scored: {f['artefact']}. The judge sees: "
               + ", ".join(cat["materials"][m] for m in cat["sees"][fam]) + ".", ""]
         for d in [d for d in cat["dimensions"] if d["family"] == fam]:
-            tag = d["priority"] + (", needs a set of runs, not scored per artefact" if d.get("scope") == "set" else "")
-            L += [f"### {d['name']} ({tag})", "", d["tells"], "", f"- **How:** {d['method']}"]
+            tag = d["priority"] + (", scored on a set of chats or runs at once, not per artefact" if d.get("scope") == "set" else "")
+            if d.get("needs"):
+                tag += ", only where there is a " + " and a ".join(d["needs"])
+            L += [f"### {d['name']} ({tag})", "", d["tells"], ""]
+            if d.get("source"):
+                L.append(f"- **From:** {d['source']}")
+            L.append(f"- **How:** {d['method']}")
             if d.get("probe"):
                 L.append(f"- **Probe** (sees {', '.join(d['probe']['sees'])}): {d['probe']['ask']}")
             L += [f"- **Low:** {d['low']}", f"- **Line:** {d['line']}", f"- **High:** {d['high']}", ""]
@@ -657,7 +766,8 @@ def page_data(cat):
     focus = yaml.safe_load(FOCUS.read_text(encoding="utf-8")) if FOCUS.exists() else None
     data = {"scale": cat["scale"], "families": cat["families"], "materials": cat["materials"],
             "dimensions": [{k: d.get(k) for k in ("id", "family", "name", "priority", "tells", "method", "low", "line",
-                                                  "high", "probe", "scope", "batch", "proposed")} for d in cat["dimensions"]],
+                                                  "high", "probe", "scope", "batch", "proposed", "source", "needs")}
+                           for d in cat["dimensions"]],
             "results": results, "texts": texts, "prompts": prompts, "focus": focus, "lean": False,
             "built": dt.datetime.now(dt.timezone.utc).strftime("%d %b %Y %H:%M UTC")}
     return data, focus
@@ -697,6 +807,7 @@ def lean_data(data, focus):
     the app's file viewer opens. The experiment needs the detail only for its own work and its references;
     older versions keep their scores so the grid and the trend still show them."""
     keep = set(focus.get("reference") or []) | {p["id"] for p in focus.get("planned") or []}
+    keep |= {r["id"] for r in data["results"] if r["kind"] in (focus.get("detail") or [])}
     off = set(focus.get("disabled") or [])
     slim_keys = ("id", "kind", "label", "version", "order", "run", "source", "when", "note", "summary", "judge")
     results = []

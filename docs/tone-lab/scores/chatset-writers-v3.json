@@ -1,0 +1,58 @@
+{
+ "id": "chatset-writers-v3",
+ "kind": "chat",
+ "label": "Run 3 · all 8 chats",
+ "version": "run 3",
+ "order": 103,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v3/chat-reuben-brick/",
+ "note": "Every chat of run 3 (the game's texting fragments removed; the writer develops the texting style): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 3,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 109293,
+   "words": 18990
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All eight chats run the same beat sequence in the same order: Reuben opens with a fake weather or out-and-about alibi, Brick clocks his four-second reply and front-loads her specs, the dishwasher-kanji reveal follows, then Marguerite scheduled being loved, the snapped heel with frozen peas, a pasted bracketed note or code (in six of eight), Delphine asking for one normal sentence, the eleven seconds and 'we can just watch something', and a minute-by-minute schedule that ends in a boring story told 'until you forget the clock'. Many lines and jokes recur across far more than two chats, which fails the Line outright. A few chats do bend the template, which keeps this above a 1: Pinter has Reuben relapse into 'sometime' after the schedule, Coel has him retreat to 'play Thursday by ear', Leonard gives the pasted note to Brick, and Saunders ends on 'It's Clara'. Even these deviations sit inside the shared sequence, and the turning point and ending are the same everywhere.",
+   "evidence": [
+    "she couldn't be with someone who minuted being loved.",
+    "while he held a bag of frozen peas to my shaft.",
+    "until you forget to check the clock."
+   ],
+   "raise": "Have at least half the chats depart from the shared spine, for example by ending without the minute-by-minute schedule, leaving out the bracket-paste reveal, or letting Brick's backstory come out in a different scene, and rewrite the stock lines (frozen peas, scheduled being loved, we can just watch something) so that none appears in more than two chats.",
+   "def": "03d845827225bb57",
+   "material": "4cf687e60f825a76",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 18.0,
+   "cost": 0.35878920000000003,
+   "label": "batch 0"
+  },
+  {
+   "seconds": 18.4,
+   "cost": 0.3584332,
+   "label": "batch 0 retry"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:39:20Z",
+ "repo_commit": "579a54a",
+ "cost": 0.7172
+}

@@ -374,10 +374,35 @@ def check_scorecard():
               and t["variant"] in made["tool"] and made["steps"][0]["text"] != main_prompt,
               f"{t['id']}: scored, and how it was made shows its own variant's prompt, not the main one")
     plans = [t for t in ts.values() if t["kind"] == "plan"]
-    chats = [t for t in ts.values() if t["kind"] == "chat"]
+    chats = [t for t in ts.values() if t["kind"] == "chat" and not t.get("writers_run")]
     check(len(plans) >= 20 and sum(1 for t in chats if not t.get("note")) == score.CHAT_FULL
           and sum(1 for t in chats if t.get("note")) == 1,
           f"every seed-23 plan, the newest full chats and the first look are targets ({len(plans)} plans, {len(chats)} chats)")
+    written = [t for t in ts.values() if t.get("writers_run") and not t.get("set")]
+    sets = [t for t in ts.values() if t.get("set")]
+    pair = [score.char_name(s) for s in score.CHAT_PAIR]
+    got = score.writer_messages(f"{pair[0]}: one\n**{pair[1]}:** two\n{pair[0].lower()}: three\nA note: four", pair)
+    check([s for _, s, _ in got] == [pair[0], pair[1], pair[0]] and got[2][2] == "three",
+          "a writer's messages are found under the handle in bold or in another case, and named by the handle")
+    if written:  # tone-lab-scratch: the writers' chats, one by one and each run as a set
+        w = written[0]
+        mk = w["material"]["chat_masked"]
+        check(len(re.findall(r"(?m)^\[\d+\] ", mk)) == len(w["speakers"]) > 5
+              and not any(n + ":" in mk for n in set(w["speakers"]))
+              and not {"plan", "dice"} & set(w["material"])
+              and 0 < len(w["material"]["chat_but_last"]) < len(w["material"]["chat"]),
+              f"a writer's chat is scored with its messages numbered and masked, no plan or dice, and its end held back ({w['id']})")
+        wd, sd = {d["id"] for d in score.dims_for(cat, w)}, [score.dims_for(cat, s) for s in sets]
+        check("chat.dice" not in wd and "chat.plan" not in wd and "chat.test" in wd
+              and not any(d.get("scope") == "set" for d in score.dims_for(cat, w)),
+              "a writer's chat skips the pipeline checks it has no material for, and the set dimensions")
+        check(bool(sets) and all(s and all(d.get("scope") == "set" for d in s) for s in sd)
+              and all(t["material"]["chats"].count("=== The chat by ") >= 2 for t in sets)
+              and score.sees_of(cat, sets[0]) == ["chats"],
+              f"each writers' run is a set target that holds its chats and is scored only on the set dimensions ({len(sets)} sets)")
+    check("safe and fun" in score.judge_system(cat, "profile") and "what they are afraid of" in score.judge_system(cat, "chat")
+          and "safe and fun" not in score.judge_system(cat, "chat"),
+          "the judge reads chats through the brief's context, and profiles and plans through the lab's")
     c = next(t for t in chats if not t.get("note"))
     masked = c["material"]["chat_masked"]
     numbered = re.findall(r"(?m)^\[\d+\] ", masked)

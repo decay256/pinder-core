@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v4",
+ "kind": "chat",
+ "label": "Run 4 · all 6 chats",
+ "version": "run 4",
+ "order": 104,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v4/chat-reuben-brick/",
+ "note": "Every chat of run 4 (run 3's prompts, given to six comedians): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 4,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 83078,
+   "words": 14583
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All six chats run the same skeleton. Each opens with Reuben's cover story (cab, bar, awning, phone already in hand). Brick then calls out the four-second reply, fronts her measurements, and Reuben answers with 4.5 inches and a left hook. That three-beat opening is shared by every chat, so the work fails the line. After the opening, the same props arrive in near-identical form in nearly every chat: the eleven-second silence and \"we can just watch something,\" the cropped family photo, the mother using the brother's name, Marguerite and \"scheduled being loved,\" boxed rosé in crystal at 21:00, the lentils, the ring light that kills the shadow, and the snapped stiletto with frozen peas. The endings converge too: Reuben asks to be narrated in present tense so he knows he's in the room, Reuben gives a timed schedule, and four chats close on his name without the 404. Variation is mostly surface: who pastes the stray note, and whether a \"sometime\" retreat collapses the deal (Jimmy, Aziz, Amy, Joel; absent in Mae and Ali). That keeps it off a 1, but it is far below a 3.",
+   "evidence": [
+    "If I’m honest I’m exhausted from holding the clipboard.",
+    "I am sick to death of holding the clipboard.",
+    "she couldn't stay with someone who scheduled being loved."
+   ],
+   "raise": "Give each writer a different subset of the backstory props and a different opening move, so no catchphrase or reveal sequence appears in more than two chats.",
+   "def": "03d845827225bb57",
+   "material": "62e19af341bc1da5",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 20.2,
+   "cost": 0.2829972,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:45:51Z",
+ "repo_commit": "579a54a",
+ "cost": 0.283
+}

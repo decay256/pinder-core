@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers",
+ "kind": "chat",
+ "label": "Run 1 · all 8 chats",
+ "version": "run 1",
+ "order": 101,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers/chat-reuben-brick/",
+ "note": "Every chat of run 1 (one line of persona, the game's material as inspiration): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 1,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 111827,
+   "words": 19314
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All eight chats run the same night in the same order. Reuben opens with a hat-tip and a fake alibi for replying in seconds (barometer, Lisbon kettle, espresso valve). Brick answers \"hm.\", times his reply and sends a numbered inventory that discloses the dorsal bump. Then come the spontaneity-versus-schedule fight, a pasted planning note followed by \"Ignore that.\", the Marguerite calendar, the Delphine 'normal voice' story, the cropped family portrait and turning sideways past the fridge. Each ends with a timestamped sex agenda, the question \"what happens at [time]\" answered by \"nothing\", a hand flat on the back, and boring talk about lentils or a radiator. Nearly every set piece recurs in more than two chats, far past the line's limit: the snapped heel with frozen peas, the tattoo gap left by a man forty minutes early, \"we can just watch something\", finishing in ninety seconds with one boot on, the ring light that kills the shadow, and present-tense narration so neither disappears. It scores 2 rather than 1 because a few chats move who holds the clipboard: in Coel, Brick bails using the vet voice; in Parker and Armstrong & Bain, Brick writes the agenda; in Saunders, Brick narrates in bed out of habit. These are re-assignments within one template, not different nights.",
+   "evidence": [
+    "You put one flat hand on my back so I know I'm still on the mattress",
+    "you keep one hand flat on my back so I know I'm in the bed",
+    "she patted my hip and said \"We can just watch something\" in the kindest voice"
+   ],
+   "raise": "Have at least half the chats break the shared spine: no pasted note, no timed-agenda ending, or a different first discovery and turning point, so that no three-beat sequence and no stock line recurs in more than half of them.",
+   "def": "03d845827225bb57",
+   "material": "96d6921b1756ab83",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 20.6,
+   "cost": 0.3739852,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T03:24:37Z",
+ "repo_commit": "579a54a",
+ "cost": 0.374
+}
