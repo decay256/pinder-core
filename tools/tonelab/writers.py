@@ -32,6 +32,13 @@ WRITERS = [
     ("leonard", "Elmore Leonard"),
     ("pinter", "Harold Pinter"),
     ("parker", "Dorothy Parker"),
+    # run 4: comedians who work on dating, sex and identity, with run 3's prompts
+    ("ansari", "Aziz Ansari"),
+    ("wong", "Ali Wong"),
+    ("martin", "Mae Martin"),
+    ("booster", "Joel Kim Booster"),
+    ("carr", "Jimmy Carr"),
+    ("schumer", "Amy Schumer"),
 ]
 
 PROMPTS = {
