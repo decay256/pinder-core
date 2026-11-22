@@ -1,0 +1,249 @@
+{
+ "model": "google/gemini-4-argon",
+ "seed": 7,
+ "character": "brick",
+ "reasoning": "high",
+ "system": "You are {name}.",
+ "writers": {
+  "coel": {
+   "writer": "Michaela Coel",
+   "model": "google/gemini-4-argon",
+   "seconds": 71.7,
+   "cost": 0.055578,
+   "usage": {
+    "prompt_tokens": 5034,
+    "completion_tokens": 4551,
+    "total_tokens": 9585,
+    "cost": 0.055578,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.055578,
+     "upstream_inference_prompt_cost": 0.010068,
+     "upstream_inference_completions_cost": 0.04551
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1835,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1983
+  },
+  "pinter": {
+   "writer": "Harold Pinter",
+   "model": "google/gemini-4-argon",
+   "seconds": 77.9,
+   "cost": 0.047658,
+   "usage": {
+    "prompt_tokens": 5034,
+    "completion_tokens": 3759,
+    "total_tokens": 8793,
+    "cost": 0.047658,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.047658,
+     "upstream_inference_prompt_cost": 0.010068,
+     "upstream_inference_completions_cost": 0.03759
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1496,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1630
+  },
+  "david": {
+   "writer": "Larry David",
+   "model": "google/gemini-4-argon",
+   "seconds": 85.8,
+   "cost": 0.059856,
+   "usage": {
+    "prompt_tokens": 5033,
+    "completion_tokens": 4979,
+    "total_tokens": 10012,
+    "cost": 0.059856,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.059856,
+     "upstream_inference_prompt_cost": 0.010066,
+     "upstream_inference_completions_cost": 0.04979
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2313,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1932
+  },
+  "parker": {
+   "writer": "Dorothy Parker",
+   "model": "google/gemini-4-argon",
+   "seconds": 89.1,
+   "cost": 0.062156,
+   "usage": {
+    "prompt_tokens": 5033,
+    "completion_tokens": 5209,
+    "total_tokens": 10242,
+    "cost": 0.062156,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.062156,
+     "upstream_inference_prompt_cost": 0.010066,
+     "upstream_inference_completions_cost": 0.05209
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2451,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1961
+  },
+  "saunders": {
+   "writer": "George Saunders",
+   "model": "google/gemini-4-argon",
+   "seconds": 95.3,
+   "cost": 0.062476,
+   "usage": {
+    "prompt_tokens": 5033,
+    "completion_tokens": 5241,
+    "total_tokens": 10274,
+    "cost": 0.062476,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.062476,
+     "upstream_inference_prompt_cost": 0.010066,
+     "upstream_inference_completions_cost": 0.05241
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2019,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2283
+  },
+  "armstrong-bain": {
+   "writer": "Jesse Armstrong and Sam Bain",
+   "model": "google/gemini-4-argon",
+   "seconds": 107.8,
+   "cost": 0.065332,
+   "usage": {
+    "prompt_tokens": 5036,
+    "completion_tokens": 5526,
+    "total_tokens": 10562,
+    "cost": 0.065332,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.065332,
+     "upstream_inference_prompt_cost": 0.010072,
+     "upstream_inference_completions_cost": 0.05526
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2185,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2360
+  },
+  "leonard": {
+   "writer": "Elmore Leonard",
+   "model": "google/gemini-4-argon",
+   "seconds": 102.8,
+   "cost": 0.055458,
+   "usage": {
+    "prompt_tokens": 5034,
+    "completion_tokens": 4539,
+    "total_tokens": 9573,
+    "cost": 0.055458,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.055458,
+     "upstream_inference_prompt_cost": 0.010068,
+     "upstream_inference_completions_cost": 0.04539
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1895,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1932
+  },
+  "waller-bridge": {
+   "writer": "Phoebe Waller-Bridge",
+   "model": "google/gemini-4-argon",
+   "seconds": 109.7,
+   "cost": 0.07465,
+   "usage": {
+    "prompt_tokens": 5035,
+    "completion_tokens": 6458,
+    "total_tokens": 11493,
+    "cost": 0.07465,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.07465,
+     "upstream_inference_prompt_cost": 0.01007,
+     "upstream_inference_completions_cost": 0.06458
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 3075,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 2338
+  }
+ }
+}
