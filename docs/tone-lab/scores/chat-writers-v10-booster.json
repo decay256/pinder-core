@@ -1,0 +1,528 @@
+{
+ "id": "chat-writers-v10-booster",
+ "kind": "chat",
+ "label": "Run 10 · Joel Kim Booster",
+ "version": "run 10",
+ "order": 110,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v10/chat-reuben-brick/booster.md",
+ "note": "Written in one go by Joel Kim Booster from the two profiles they wrote (run 10: new profiles and chat from the short brief; notes unsorted; the chat worked out as a bit). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 10,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2669,
+   "words": 471
+  },
+  "brief": {
+   "chars": 15834,
+   "words": 2698
+  },
+  "chat_masked": {
+   "chars": 2562,
+   "words": 471
+  },
+  "chat_but_last": {
+   "chars": 2014,
+   "words": 357
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got all four answers right for both characters, and they match the profiles. Reuben fears pity, covers it with speed and the preemptive joke, and traces it to the boot and hospice-voice incidents. Brick fears drifting and being cropped out, covers it with logistics, and traces it to the portrait. Both endings follow from the fears: Reuben schedules the very finish he dreads with 'zero pity', and Brick hands over the clipboard and then renegotiates in her own timestamps. It misses a 6 because much of this reaches the reader by being stated, and the reader notes that Reuben's childhood cropping is only implied as a cause, not linked.",
+   "evidence": [
+    "You rehearsed that in a mirror so I'd laugh at your bit before I could pity your geometry.",
+    "\"Sometime\" is how you drift until you're cropped out.",
+    "my fifteen-minute block runs till 8:15, so after the commute story you owe me six minutes"
+   ],
+   "raise": "Let Reuben's cropping and his mother's wrong name surface in how he types, rather than in a list, so the reader links the childhood to the speed without being told.",
+   "def": "f019e7f239b9d82d",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "A few things come out sideways. The trip collapses by slip ('Okay not a trip'). Brick catches Reuben's rehearsal and names the fear before he does. 'My left elbow made the cut' lets the reader infer the rest. But both origins, which count double, are volunteered outright: Brick explains the fridge and the portrait unprompted, and Reuben recites the cropping, the age, the app, Delphine and the boot in a single confession. Most of the important facts are stated, which is the bar's description of a 3.",
+   "evidence": [
+    "Okay not a trip, checked the dead radiator and kept my coat on.",
+    "I grew up turning sideways past the fridge and got cropped out of our family portrait",
+    "I'm 38, not 34, there's no app, and Delphine left because I never used my normal voice."
+   ],
+   "raise": "Have Brick's portrait origin come out only through 'My left elbow made the cut' and the fridge habit, with no explaining sentence, so at least one origin is inferred.",
+   "def": "76152fd7f08caa41",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "There is real subtext in places. 'Wait. They cropped you out of the family photo too?' and 'Wait. Ninety seconds?' let the reader see recognition and nerves that go unspoken. Brick's closing renegotiation for more holding hides a want inside a schedule. But the characters explain their own feelings several times, each with a 'so that' or 'because': 'I have to beat you to the joke', 'I talk fast so nobody looks', 'if I'm not in pen, I don't exist'. That is more than the one allowed, which caps it at 3.",
+   "evidence": [
+    "I talk fast so nobody looks at a four-inch curve and says a gentle \"Oh—okay\"",
+    "drinking boxed rosé in an empty flat because if I'm not in pen, I don't exist.",
+    "Wait. They cropped you out of the family photo too?"
+   ],
+   "raise": "Cut the 'so'/'because' explanations from Reuben's confession and Brick's rosé line, and leave just the facts.",
+   "def": "61d4f86460a218aa",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader found the moment, and it opens on a short, plain 'No bit.' But that line announces the drop. It then runs on as a speech that lists the history and explains the fear outright, and Brick confirms it by naming it ('You dropped the voice'). The genuinely plainest exchange, 'They cropped you out... too?' / 'My left elbow made the cut', is not where the act goes down. So the moment is delivered as a stated speech rather than carried by one plain line.",
+   "evidence": [
+    "No bit. I was nine—cropped out to fit my cousin, and Mum still calls me my brother's name.",
+    "You dropped the voice. Quite sharp.",
+    "My left elbow made the cut."
+   ],
+   "raise": "End Reuben's message after one plain fact, such as 'I'm 38. There's no app.', and let Brick answer without naming that the voice dropped.",
+   "def": "b5a3a3c2e796783b",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 5,
+   "why": "The blind reader attributed all 14 messages correctly. Much of that rests on voice: Reuben's four-second triple-text ending in '*tips hat*', and Brick's 'Amusing.', 'Quite sharp' and clipped full stops. Several attributions still lean on profile content (portrait, Delphine, Marguerite), and the reader hedged on message 8. Brick's last line also drifts into Reuben's kink ('holding me down'), which blurs her voice where it matters most.",
+   "evidence": [
+    "Okay not a trip, checked the dead radiator and kept my coat on. *tips hat*",
+    "Three texts in ten seconds. Amusing.",
+    "you owe me six minutes of holding me down while the vest steams"
+   ],
+   "raise": "Keep Brick's closing line in her own register, a timestamped counter-term, rather than borrowing Reuben's need to be held down.",
+   "def": "a77bc9ef79556bda",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "Almost every gap is announced by its owner instead of left for the reader to see. Reuben corrects his own 'trip' lie one message later and explains his own act ('I have to beat you to the joke'). Brick explains her armour ('I disclose first so nobody double-takes') and her origin outright. The only unseen gap is Brick's final renegotiation after 'don't let me renegotiate', which is one gap for one character.",
+   "evidence": [
+    "Okay not a trip, checked the dead radiator",
+    "I have to beat you to the joke",
+    "I disclose first so nobody double-takes."
+   ],
+   "raise": "Let Reuben keep the trip lie and the stealth app unexplained while the cold flat leaks through, so the reader rather than Reuben catches it.",
+   "def": "fa4461088ccd15ee",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laughs are character-bound. 'Haunted shopping cart' and 'dishwasher-safe' are Reuben's; 'another tight five?' and 'My left elbow made the cut' are Brick's. 'Under two minutes. Guaranteed disaster' costs Reuben something. It stays above the line because there is only one ruled-out joke ('McKinsey audit'), but long stretches of messages 6, 9 and 10 are confessional exposition rather than funny, so it is not every laugh.",
+   "evidence": [
+    "My left elbow made the cut. Why, another tight five?",
+    "Under two minutes. Guaranteed disaster. You can keep the heels on.",
+    "No \"haha,\" just a McKinsey audit."
+   ],
+   "raise": "Cut the McKinsey line and turn the message 9 confession into a joke that exposes him while he tells it.",
+   "def": "4448c7f54baa167a",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 2,
+   "why": "When Brick catches Reuben rehearsing, he half-admits his method straight away. At the first soft probe ('another tight five?') he concedes everything: age, the app, Delphine. Brick folds at once with 'I'm 38 too', and then hands over the clipboard, which is a change of heart, not a deeper hole. Only her last-line renegotiation shows the act holding.",
+   "evidence": [
+    "No bit. I was nine",
+    "I'm 38 too, drinking boxed rosé in an empty flat",
+    "Take the clipboard, Reuben."
+   ],
+   "raise": "Have Reuben answer 'another tight five?' with a worse, longer bit that collapses on its own, so the truth comes out of the hole rather than at the first hit.",
+   "def": "5102b09e503af846",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Reuben opens chasing and Brick is on top with her audit and her 'Name a Tuesday or unmatch' ultimatum. The status flips when Reuben drops the voice and Brick invites him to take the clipboard; he then holds the top with his schedule. Brick reclaims ground in the last line by extending the block. That gives at least two flips, each with a stretch on top, but the middle is mutual confession with nobody contesting, so the flips are not yet the plot.",
+   "evidence": [
+    "Name a Tuesday with timestamps or unmatch.",
+    "Schedule Tuesday down to the minute and don't let me renegotiate.",
+    "my fifteen-minute block runs till 8:15"
+   ],
+   "raise": "Make the middle exchange a contest, with Brick grading his confession before she yields, so the flip to Reuben is won rather than offered.",
+   "def": "a327913ca348ff82",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Several punchlines land last: '*tips hat*', 'Hard stop at 10:15.', 'Wait. Ninety seconds?'. Short reaction shots also break the long blocks ('My left elbow made the cut'). It stays at a 4 rather than a 5 for two reasons. Jokes are buried mid-message ('hospice voice' and 'McKinsey audit' in message 5, Marguerite in message 6). Messages 6, 9 and 10 also run one warm-confessional temperature.",
+   "evidence": [
+    "she used a hospice voice to say \"We can just watch something.\" Anyway I'm building a stealth app",
+    "Wait. Ninety seconds?"
+   ],
+   "raise": "Split message 5 so the 'hospice voice' line ends its own message before the stealth-app pivot.",
+   "def": "7e36393433d52f66",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "Something changes in every exchange. Reuben's barrage is named as rehearsed. 'Sometime' gets rejected with an ultimatum. The shared cropped-photo wound surfaces, Reuben drops the act, and Brick hands over control. The night is not settled until the last two messages, and the reader probe says they would never have stopped. It stays below a 5 because the reader called two beats almost exactly: Reuben's 'No bit' confession after 'too?', and the timestamped plan after 'Take the clipboard'. The confession also arrives as a five-reveal dump rather than as a turn.",
+   "evidence": [
+    "Wait. They cropped you out of the family photo too?",
+    "Take the clipboard, Reuben. Schedule Tuesday down to the minute and don't let me renegotiate."
+   ],
+   "raise": "Make Reuben's answer to 'too?' a swerve the reader can't predict, such as a deflecting bit he abandons halfway, so the confession is not the obvious next beat.",
+   "def": "9b663d9dfde4d26f",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Every sexual line belongs to these two bodies: the left curve, the dorsal bump, the 'hospice voice', the ninety seconds with a boot on. In the closing schedule the filth changes job from bravado to closeness. The ring light kills his shadow, he turns his fast finish into a gift ('before your vest's off'), and she asks for six more minutes of being held down. The dirtiest lines are the most revealing ones. It falls short of a 6 because Reuben explains the subtext out loud ('so neither of us can do our act') instead of letting the image carry it.",
+   "evidence": [
+    "8:01, flat hand on your back, holding you down so neither of us can do our act.",
+    "8:02:30, I finish before your vest's off.",
+    "you owe me six minutes of holding me down while the vest steams"
+   ],
+   "raise": "Cut 'so neither of us can do our act' and let the flat hand and the held-down body say it.",
+   "def": "2d9c58b139c34d6a",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 3,
+   "why": "The only near-wince is Reuben's 'let's get a drink sometime' landing one message after Brick's schedule tattoo and hard stop. The reader only sees why 'sometime' is exactly the wrong word when Brick explains it, so the danger is announced as it lands. Brick's snag on 'Ninety seconds?' hits the wound Reuben hoped would slide by, but it comes inside the same exchange that revealed the wound, with no earlier warning.",
+   "evidence": [
+    "Anyway I'm building a stealth app, let's get a drink sometime.",
+    "\"Sometime\" is how you drift until you're cropped out."
+   ],
+   "raise": "Plant Brick's horror of vague plans an exchange earlier, for example a dig at someone else's 'let's do this again', so the reader winces before Reuben types 'sometime'.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Each character voices a dating creed in earnest that the screen then breaks. Brick lives by preemptive disclosure, hard stops and 'name a Tuesday or unmatch', yet she ends by booking past her own fifteen-minute block. Reuben's creed is beating them to the joke plus a stealth-app status pose, and he contradicts it himself with 'there's no app'; dropping the voice is what works. The creeds collide at 'sometime'. They stay below a 5 because they read as personal coping more than app culture, so the farce is about these two rather than all of us.",
+   "evidence": [
+    "I disclose first so nobody double-takes. Hard stop at 10:15.",
+    "I have to beat you to the joke",
+    "Name a Tuesday with timestamps or unmatch."
+   ],
+   "raise": "Have one of them voice a recognisable app maxim straight, about high-value matches or red flags, and let the ending refute it in front of both of them.",
+   "def": "cd5acec1a8653b27",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's sharpest jokes all land on himself: the curve, the tattoo, the coat in a dead-radiator flat. Brick's opening cuts aim at Reuben ('pity your geometry', 'another tight five?'), but she turns the knife on herself just as hard ('My left elbow made the cut', the boxed rosé in an empty flat). Neither becomes the villain, and the end is fond toward both. It misses a 6 because Brick's barbs at Reuben slightly outnumber her self-directed jokes early on, so the mercilessness tilts toward her at first.",
+   "evidence": [
+    "so I'd laugh at your bit before I could pity your geometry.",
+    "My left elbow made the cut.",
+    "drinking boxed rosé in an empty flat because if I'm not in pen, I don't exist."
+   ],
+   "raise": "Give Brick one early self-own as precise as her audit of Reuben, so she is as hard on herself as on him from the start.",
+   "def": "51f6e5881b5145be",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back in the middle and mean something else at the end. Brick's 'Hard stop' and her fifteen-minute calendar blocks, which cost her Marguerite, return in the last line as a request for more closeness, and nobody remarks on the turn. The hat, the boot and heels, and the ninety seconds are also reversed without comment. It falls short of a 6 because Reuben explains one payoff while it lands ('so neither of us can do our act'), and 'to kill my shadow' half-glosses the silhouette return.",
+   "evidence": [
+    "Hard stop at 10:15.",
+    "my fifteen-minute block runs till 8:15, so after the commute story you owe me six minutes of holding me down",
+    "holding you down so neither of us can do our act"
+   ],
+   "raise": "Cut 'so neither of us can do our act' and let the hold-down stand without its stated purpose.",
+   "def": "9ff48f7918d86364",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The ending follows from both habits. Brick hands over the clipboard, Reuben schedules his own shame (8:02:30), and Brick's need to schedule turns into asking for more time. The reader's prediction matched in kind and nearly in detail: they guessed a named Tuesday, and that the fifteen-minute block would become a point of compatibility. So the ending is earned but not surprising. It stays above the line because Brick's final extension is still her act, now pointed at closeness. It stays below a 5 because the reader saw it coming and the turn to 'No bit' arrives after one prompt.",
+   "evidence": [
+    "Take the clipboard, Reuben. Schedule Tuesday down to the minute and don't let me renegotiate.",
+    "8:02:30, I finish before your vest's off.",
+    "Booked in pen."
+   ],
+   "raise": "Give the last move something the reader could not forecast, such as Brick breaking her own block rather than neatly extending it.",
+   "def": "8bd8de581cc31c9e",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message reacts to the one before. Brick dissects the triple-text, then seizes on Reuben's 'sometime'. Reuben picks up her cropped portrait, and Brick catches 'Ninety seconds?' out of his confession. Reuben's swerve to 'stealth app' after 'Brutal' reads as a chosen dodge, and Brick punishes it. It falls short of a 6 because Brick's long confession answers 'sometime' with more backstory than the prompt invites, so it lands partly as a delivery rather than a reaction.",
+   "evidence": [
+    "\"Sometime\" is how you drift until you're cropped out.",
+    "Wait. They cropped you out of the family photo too?",
+    "You dropped the voice. Quite sharp."
+   ],
+   "raise": "Make Brick's portrait reveal a direct, shorter answer to 'sometime' instead of a list of grievances.",
+   "def": "f426aa8449e0fbc7",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 5,
+   "why": "The typing shifts with the situation. Reuben's opening triple-text gives way to 'No bit', and Brick's clipped 'Amusing.' periods spiral into a paragraph when she is threatened by 'sometime'. When she is caught off guard she drops to 'Wait. Ninety seconds?', and at the end Reuben adopts her timestamp register as care. It falls short of a 6 because Reuben's 'normal voice' confession is still fast and stacked, so his guard dropping does not show in the shape of the message.",
+   "evidence": [
+    "Three texts in ten seconds. Amusing.",
+    "Wait. Ninety seconds?",
+    "No bit. I was nine—cropped out to fit my cousin"
+   ],
+   "raise": "Write Reuben's 'No bit' message in short, halting lines so the dropped voice is visible in its form.",
+   "def": "6e21e724825d1cc3",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Long, composed messages are the norm rather than the exception: five of fourteen are multi-clause backstory blocks. Brick's portrait message reads as character-sheet exposition ('I grew up turning sideways past the fridge... nobody paid for a reprint'). Reuben's second message stacks an anecdote, a hospice quote and a fake app pitch. The 'No bit' confession is a legitimate event, but the others crowd it out.",
+   "evidence": [
+    "I grew up turning sideways past the fridge and got cropped out of our family portrait because nobody paid for a reprint.",
+    "Marguerite dumped me for putting our fights in fifteen-minute calendar blocks.",
+    "last time my curve caught wrong, we went dead silent and she used a hospice voice"
+   ],
+   "raise": "Break Brick's and Reuben's backstory messages into one-line thumb-typed fragments and leave only the 'No bit' confession long.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "No joke shape repeats more than twice, and the returns are callbacks rather than tics. The 'Wait.' opener is used once by each, and the heels line appears twice. The mirrored 'me too' structure recurs across the cropped portrait, the age, and the ex who left over the act, so the confessions start to feel formulaic. That pattern keeps it from a 5.",
+   "evidence": [
+    "Wait. They cropped you out of the family photo too?",
+    "I'm 38 too, drinking boxed rosé in an empty flat",
+    "Wait. Ninety seconds?"
+   ],
+   "raise": "Let one of the matching disclosures differ instead of mirroring, and drop one of the two 'Wait.' openers.",
+   "def": "679a7696bf0171cd",
+   "material": "b4a0edfdb9d52256",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Reuben's line: \"No bit. I was nine—cropped out to fit my cousin, and Mum still calls me my brother's name. I'm 38, not 34, there's no app, and Delphine left because I never used my normal voice.\"\n\nSeveral things in the text show the shift. He announces it himself with \"No bit,\" answering Brick's \"another tight five?\" He also retracts his earlier claims. The age becomes 38 instead of 34, and the \"stealth app\" turns out not to exist, much as he'd already backed off the \"trip\" that was really a dead radiator. He names the performance as his problem (\"never used my normal voice\") and explains it: he talks fast to get ahead of the \"Oh—okay\" reaction. The rhythm changes too. The three rapid texts and the \"*tips hat*\" give way to one plain, unjoking message. Finally, Brick confirms it from the other side with \"You dropped the voice. Quite sharp.\"\n\nBrick follows right after with \"I'm 38 too, drinking boxed rosé in an empty flat because if I'm not in pen, I don't exist.\" It mirrors Reuben's age correction and drops the monocle-and-heels poise for something bleak and unflattering. Her bigger break is \"Take the clipboard, Reuben. Schedule Tuesday down to the minute and don't let me renegotiate.\" Until then her act was control: the hard stop at 10:15, the \"name a Tuesday with timestamps or unmatch.\" Here she hands that control over. Her last line slides partway back into her scheduling voice (\"my fifteen-minute block runs till 8:15\"), but it's now used playfully, asking for more time rather than limiting it.\n\nThe text doesn't say whether either of them fully stays out of the act after that point, only that the masks came down there."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "**[1] Reuben_404.** This is his preemptive disclosure, nearly word for word from his mirror rehearsal: the haunted shopping cart, the hat padding his height, the Osaka \"dishwasher-safe\" tattoo.\n\n**[2] Reuben_404.** It is the second text of his triple-text, apologizing for the fast reply and repeating his \"just got back from a trip\" lie.\n\n**[3] Reuben_404.** It is the third text, which turns the apology into a bit. It mentions his freezing sublet and coat and ends with the hat-tip sign-off.\n\n**[4] Brick_haus.** She uses \"Amusing\" instead of \"haha,\" calls out his timing, gives a clipped list of her own geometry (dorsal bump, short tip, schedule tattoo), and ends with her 10:15 hard stop.\n\n**[5] Reuben_404.** He mocks her lack of \"haha\" and recounts the \"We can just watch something\" hookup. He also repeats the stealth-app lie and makes a vague \"sometime\" offer.\n\n**[6] Brick_haus.** She fears \"sometime\" and drifting. She mentions squeezing sideways past the fridge, the portrait crop with no reprint, the monocle and heels, and Marguerite's calendar blocks, and demands a named Tuesday.\n\n**[7] Reuben_404.** He recognizes his own family-portrait crop in her story.\n\n**[8] Brick_haus.** She suspects he is doing a bit (\"another tight five\"). The elbow detail isn't in her profile, but the guarded, clipped reply fits her.\n\n**[9] Reuben_404.** He drops the act and tells the truth: cropped out at nine for his cousin, his mum using his brother's name, his real age of 38, no app, Delphine, and the \"Oh—okay\" girl. One mismatch: he says \"ninety seconds,\" while his profile says \"under two minutes.\" Message 11 corrects it.\n\n**[10] Brick_haus.** She says \"Quite sharp,\" admits her real age of 38, mentions the boxed rosé, the empty flat, and her fear of not being \"in pen,\" and checks the ninety-second figure.\n\n**[11] Reuben_404.** He corrects himself to \"under two minutes\" and echoes his rehearsed line about finishing while her coat (here, heels) is still on.\n\n**[12] Brick_haus.** This is her secret kink: someone takes the clipboard and sets a schedule she can't renegotiate. She addresses him by name.\n\n**[13] Reuben_404.** He writes the timestamped schedule she asked for, with the hat coming off and his ring light killing the shadow. He hands her his own needs (a flat hand on the back, being held down so the act stops) and takes on her aftercare (the mundane commute talk until she forgets the clock).\n\n**[14] Brick_haus.** She says \"Booked in pen,\" cites her fifteen-minute block, and mentions the vest steamer. She asks to be held down, which is his kink in the profiles rather than hers, so that detail fits her less cleanly than the rest of the message."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben**\n\n*What he's afraid of:* Pity, specifically the gentle, disappointed reaction to his body and his performance. He names it twice: \"she used a hospice voice to say 'We can just watch something'\" and \"a gentle 'Oh—okay' like the girl did when I finished in ninety seconds with her boot still on.\"\n\n*What he does so he doesn't have to feel it:* He jokes first and talks fast. \"I have to beat you to the joke,\" and \"I talk fast so nobody looks at a four-inch curve and says a gentle 'Oh—okay'.\" He also builds a false front. He claims a trip (\"Okay not a trip, checked the dead radiator\"), a stealth app, and a younger age, then retracts them: \"I'm 38, not 34, there's no app.\" Brick names the tactic: \"You rehearsed that in a mirror so I'd laugh at your bit before I could pity your geometry.\"\n\n*Where it comes from:* The chat gives the sexual incidents above as direct sources. He also offers a childhood memory right after Brick's photo story: \"I was nine—cropped out to fit my cousin, and Mum still calls me my brother's name.\" He puts this alongside his fear of being overlooked, but he never says outright that it caused the fast-talking habit. That link is implied, not stated. The cost of the habit is stated: \"Delphine left because I never used my normal voice.\"\n\n*What he did at the end:* He dropped the act (\"No bit\") and accepted the clipboard. He scheduled Tuesday minute by minute, including the outcome he fears: \"8:02:30, I finish before your vest's off.\" He also promised \"8:03, zero pity—I say your name and talk about my commute until you forget the clock.\" That plan keeps both of them from performing: \"holding you down so neither of us can do our act.\"\n\n**Brick_haus**\n\n*What they're afraid of:* Being drifted away from, cropped out, and not existing to anyone. \"'Sometime' is how you drift until you're cropped out,\" and \"if I'm not in pen, I don't exist.\" There is also a fear of someone's surprised reaction: \"I disclose first so nobody double-takes.\"\n\n*What they do so they don't have to feel it:* They control everything up front. They disclose before anyone can react, set time limits (\"Hard stop at 10:15\"), and demand specifics (\"Name a Tuesday with timestamps or unmatch\"). They schedule even their conflicts. The cost is stated: \"Marguerite dumped me for putting our fights in fifteen-minute calendar blocks.\"\n\n*Where it comes from:* Childhood. \"I grew up turning sideways past the fridge and got cropped out of our family portrait because nobody paid for a reprint,\" and \"My left elbow made the cut.\" The chat doesn't say where the urge to disclose first comes from, beyond that.\n\n*What they did at the end:* They handed over control: \"Take the clipboard, Reuben. Schedule Tuesday down to the minute and don't let me renegotiate.\" They accepted his plan (\"Booked in pen\") and then immediately renegotiated anyway, stretching it to fill their usual block: \"my fifteen-minute block runs till 8:15, so after the commute story you owe me six minutes of holding me down while the vest steams.\" The request itself is for more closeness, but it comes in their usual scheduled form.\n\nThe chat doesn't say whether Tuesday actually happens."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I wouldn't have stopped. Each message ends on something that pulls you into the next: a self-correction, a specific detail, or a demand that needs an answer. If I had to name the place where my attention was most at risk, it would be the opening. Reuben's first three messages are a dense run of bits (\"haunted shopping cart,\" \"dishwasher-safe,\" the fake trip and the dead radiator). A reader who finds that kind of patter tiring could bail before Brick arrives. Brick's flat reply (\"Amusing. You rehearsed that in a mirror…\") is what saves it, because it names the problem and turns the barrage into a character trait rather than the writer's tic.\n\nThe other soft spot is Reuben's confession, which drops five revelations in one message: he's nine in the photo, he's 38 not 34, there's no app, Delphine left, and the ninety-second story. It's the emotional core, so I'd keep going, but it reads more like an information dump than a voice. Brick's \"Wait. Ninety seconds?\" recovers it by snagging on the one detail Reuben was hoping would slide by.\n\nThere are two points where I could predict what came next almost exactly.\n\nThe first is \"Wait. They cropped you out of the family photo too?\" By then the chat has set up two people who perform first so nobody pities them. Once a shared wound surfaces, Reuben dropping the act and confessing his own cropped-out story is close to certain. His \"No bit\" confirms it.\n\nThe second is \"Take the clipboard, Reuben. Schedule Tuesday down to the minute.\" That tells you the form of the reply: a timestamped plan. It also tells you it will reuse the established props, and it does, with the heels, the hat, the ninety seconds and the commute. What I couldn't predict were the particular images, like the ring light killing his shadow or the hand on her back so neither can do their act.\n\nThe final line was only partly predictable. A callback to Brick's fifteen-minute blocks was likely as a closing button. Turning it into her asking for six more minutes, rather than enforcing her hard stop, is the one move that surprised me.\n\nOne thing the text doesn't settle: Reuben says there's no app and offers no job, yet promises to talk about \"my commute.\" It may be a deliberate small truth or an inconsistency. The chat doesn't say which."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can only guess, since the final fifth isn't in front of me, but the chat sets up its ending fairly clearly.\n\nMy guess is it ends with the two of them agreeing to meet, on terms that bend both of their defenses. Most likely Brick_haus turns \"ninety seconds\" into something warm rather than wounding. She might joke that it fits neatly into one of her fifteen-minute blocks, so his deepest shame becomes, in her calendar-brain, a point of compatibility. Then one of them names an actual Tuesday with an actual time. I'd also expect her 10:15 hard stop to come back and be quietly ignored or pushed, which would show her loosening the way he dropped his voice.\n\nThere's a decent chance the cropped family photo returns too. They might agree to take a picture together where nobody gets cut out, or simply say they'd stay in frame for each other.\n\nHere's why I read it that way:\n\n- **They mirror each other.** Both are 38, both were cropped out of family photos, and both have a partner who left because of their defense mechanism: his performance voice, her calendar blocks.\n- **The turn has already happened.** Once he says \"No bit\" and drops the lies about his age and the app, she notices (\"You dropped the voice\") and answers with her own unguarded confession about the boxed rosé and the empty flat.\n- **The last line reopens his worst memory.** \"Wait. Ninety seconds?\" brings back the woman's gentle \"Oh—okay.\" The story has steadily swapped pity for recognition, so I'd expect her reply to land as recognition, possibly humor, but not the hospice voice he dreads.\n\nWhat I can't tell is whether the ending stays tender or snaps back to one last joke. The chat could go either way, though a joke made in his \"normal voice\" would fit best."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The schedule and calendar blocks.** Brick opens with a schedule tattoo and a \"hard stop at 10:15,\" and says Marguerite left over \"fifteen-minute calendar blocks.\" At first the schedule is armor and the reason for a past breakup. It returns as a demand (\"Name a Tuesday with timestamps\"), then as something Brick hands over (\"Take the clipboard, Reuben… don't let me renegotiate\"). In Reuben's minute-by-minute plan it becomes a form of care. In the last line, the fifteen-minute block that cost Brick a relationship is used to ask for more closeness: \"you owe me six minutes.\"\n\n**\"In pen.\"** \"If I'm not in pen, I don't exist\" is a confession of loneliness. \"Booked in pen\" answers it: Brick now exists on someone's calendar.\n\n**Being cropped out.** Brick first uses it as a warning about drifting (\"Sometime is how you drift until you're cropped out\"). It then turns literal with the family portrait and the left elbow. Reuben repeats it with his own story, and it becomes a shared wound instead of a threat.\n\n**The bit, or act.** Brick accuses Reuben of rehearsing \"your bit,\" then asks \"another tight five?\" At 8:01 the act comes back as something they plan to stop together: \"so neither of us can do our act.\"\n\n**Voice and speed.** Reuben's rapid texts, \"four-second reply,\" and talking fast give way to \"Delphine left because I never used my normal voice.\" Brick notices: \"You dropped the voice.\" In the plan, the voice returns as plain talk about his commute. The fast-talking that hid him is replaced by ordinary speech that's meant to keep Brick present. The fake \"trip\" from the start may echo here as a real, mundane commute, though the chat doesn't make that link explicit.\n\n**Pity.** Brick says Reuben joked so Brick wouldn't \"pity your geometry.\" Reuben describes the \"hospice voice\" and the gentle \"Oh—okay.\" At 8:03 he promises \"zero pity.\" What was feared becomes something ruled out.\n\n**Ninety seconds.** It starts as a humiliating memory. Brick's \"Ninety seconds?\" invites it back, and Reuben recasts it as \"Under two minutes. Guaranteed disaster.\" Then he schedules it at 8:02:30. The shame becomes something owned and planned.\n\n**The boot and the heels.** In the bad memory, the girl's \"boot still on\" was part of the embarrassment. Brick's heels first appear as an expensive costume bought for a date that might never happen. Reuben brings them back twice, \"You can keep the heels on\" and \"Heels stay on.\" Kept footwear stops being part of the disaster and becomes accepted, even wanted.\n\n**The hat.** The top hat starts as \"three inches of fraud,\" and \"*tips hat*\" is part of the performance. At 8:00, \"Hat comes off\" means dropping the disguise.\n\n**Silhouette and shadow.** Reuben warns Brick not to \"fall madly for the silhouette,\" meaning the flattering outline. \"Ring light stays on to kill my shadow\" reverses this: he wants to be seen clearly, not as an outline.\n\n**Age.** \"I'm 38, not 34\" corrects a lie. Brick's \"I'm 38 too\" turns the correction into common ground.\n\n**Names.** Reuben's mother \"still calls me my brother's name.\" Brick then uses his name for the first time (\"Take the clipboard, Reuben\"), and Reuben's plan includes \"I say your name.\" Being misnamed is answered by being named properly.\n\n**Holding down.** At 8:01 it is a way to stop both of them from performing. When Brick asks for \"six minutes of holding me down,\" it becomes something Brick wants for its own sake.\n\n**The vest.** It appears only in the plan, \"before your vest's off,\" then returns as \"while the vest steams.\" It goes from a marker of how fast things will happen to part of the lingering afterward."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 17.1,
+   "cost": 0.028952,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 21.3,
+   "cost": 0.085152,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 26.5,
+   "cost": 0.050736,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 29.6,
+   "cost": 0.04608,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 17.6,
+   "cost": 0.029884,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 32.0,
+   "cost": 0.066852,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 32.4,
+   "cost": 0.1356292,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 35.5,
+   "cost": 0.1460692,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 37.6,
+   "cost": 0.1372372,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 41.4,
+   "cost": 0.1547772,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T19:45:52Z",
+ "repo_commit": "6229a8d",
+ "cost": 0.8814
+}

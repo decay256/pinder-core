@@ -1,0 +1,530 @@
+{
+ "id": "chat-writers-v10-wong",
+ "kind": "chat",
+ "label": "Run 10 · Ali Wong",
+ "version": "run 10",
+ "order": 110,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v10/chat-reuben-brick/wong.md",
+ "note": "Written in one go by Ali Wong from the two profiles they wrote (run 10: new profiles and chat from the short brief; notes unsorted; the chat worked out as a bit). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "wong",
+ "writers_run": 10,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2799,
+   "words": 500
+  },
+  "brief": {
+   "chars": 14696,
+   "words": 2553
+  },
+  "chat_masked": {
+   "chars": 2657,
+   "words": 500
+  },
+  "chat_but_last": {
+   "chars": 2064,
+   "words": 368
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader answered all four questions for both characters. Each fear was linked to its cover habit: silence and vanishing to bits for Reuben, vagueness and waiting to scheduling for Brick. Both endings follow from those fears: Reuben asks to be physically stopped from joking, and Brick asks for an itinerary she can't renegotiate. It falls short of a 6 because Reuben's fear is only known because he states it ('if i stop talking i vanish'). The reader also notes that neither origin is shown causing the habit; the origins are only listed next to it.",
+   "evidence": [
+    "if i stop talking i vanish so tell me what you want and i won't joke",
+    "Take the clipboard from me and give me a time-stamped itinerary for tonight that I am not allowed to renegotiate.",
+    "saying \"sometime\" without a day of the week is an exit strategy."
+   ],
+   "raise": "Let Reuben's fear of vanishing show through behaviour, such as panic at a gap in Brick's replies, instead of having him say it, so the reader infers it the way they inferred Brick's.",
+   "def": "f019e7f239b9d82d",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 2,
+   "why": "A few facts slip out. The denial 'i promise i'm not sitting on my shaking hands in a freezing flat' later proves true, and Brick catches the triple-text as panic. Everything that matters, though, arrives as volunteered inventory. Both origins (the cropped photo, Marguerite, Delphine, the kindergarten voice) come in back-to-back confession dumps, and origins count double. Above a 1 only for those early slips.",
+   "evidence": [
+    "I grew up squeezing sideways past the fridge in a flat where I was cropped out of the family photo, I cried in a cab last week",
+    "i do bits upfront because delphine left when i couldn't say one sentence in my normal voice",
+    "i promise i'm not sitting on my shaking hands in a freezing flat"
+   ],
+   "raise": "Let at least one origin leak through an aside or get caught, for example Brick spotting the cropped-photo parallel from a detail Reuben lets drop, instead of both being recited as lists.",
+   "def": "76152fd7f08caa41",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "There is real subtext in places: the triple-text covering the four-second reply, 'sometime' read as an exit strategy, and the itinerary standing in for a request for tenderness ('until you forget to check your shaft for the time'). But feelings are explained more than once. 'if i stop talking i vanish', 'so i don't see my crooked shadow', 'i do bits upfront because', and Brick's cab-crying confession all spell out the motive, which caps this below the line.",
+   "evidence": [
+    "under a ring light so i don't see my crooked shadow",
+    "if i stop talking i vanish",
+    "until you forget to check your shaft for the time."
+   ],
+   "raise": "Cut the explanatory clauses ('so i don't see', 'because delphine left', 'i vanish') and let the facts sit bare.",
+   "def": "61d4f86460a218aa",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found the moment. It turns on 'ok wait', the shortest, plainest line in the chat, which names nothing. Brick's answer changes the night: she hands over the clipboard. It stays above the line because that pivot is real and unannounced. It is not higher because the drop is immediately carried by a speech, and that speech names the fear outright ('i vanish').",
+   "evidence": [
+    "ok wait",
+    "if i stop talking i vanish so tell me what you want and i won't joke"
+   ],
+   "raise": "Follow 'ok wait' with one plain, unexplained fact or request instead of a paragraph of origins and a stated fear.",
+   "def": "b5a3a3c2e796783b",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "Something changes in every exchange, and the night is not settled until the last message. It moves from opener to audit, to Brick's confession, to Reuben's collapse into lowercase, to the itinerary, to the amendment. No stretch of anything like ten messages stays flat, and the probe reader would not have stopped. It stays below a 5 because the reader called three beats in a row: the mirrored cropped-photo confession, the timestamped form of the reply, and \"Acceptable; however\" leading to a confirmation. Brick's single-message wound dump also turns the temperature by fiat rather than by pressure.",
+   "evidence": [
+    "my mum scissored me out of our family photo at nine to fit my cousin",
+    "Acceptable; however, the five-inch heels come off at 9:17",
+    "Brick_haus: I grew up squeezing sideways past the fridge in a flat where I was cropped out of the family photo"
+   ],
+   "raise": "Break the mirror: give Reuben a wound that answers Brick's sideways instead of matching her cropped-photo story beat for beat, so the reader cannot call his reply.",
+   "def": "9b663d9dfde4d26f",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line belongs to these two bodies: the leftward dogleg hook, the dorsal bump that \"doesn't affect leverage,\" the snapped stiletto and the base-first fall into the nightstand. The late itinerary uses filth to get close rather than to perform. The dirtiest line, the pinned neck and hand over the mouth, is also the one that tells us most about Reuben. It misses a 6 because the line explains its own purpose (\"so... I physically cannot do a bit\") instead of letting the reader connect it to \"if i stop talking i vanish.\" \"put you on your knees\" is also stock, lifted almost straight from the profile's example.",
+   "evidence": [
+    "at 9:25 you pin my neck with your hand over my mouth so when my curve catches I physically cannot do a bit",
+    "a stiletto snapped mid-straddle, I went base-first into a nightstand",
+    "a dorsal bump halfway up my shaft and a shorter, blunter tip than expected; neither affects leverage"
+   ],
+   "raise": "Cut the \"so... I physically cannot do a bit\" clause so the kink lands as an act and the reader makes the link to vanishing.",
+   "def": "2d9c58b139c34d6a",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 2,
+   "why": "The one real collision is Reuben's breezy \"sometime\" hitting Brick's exact wound. But the reader learns that wound only in the reply that punishes it, so the danger is announced as it lands rather than seen coming. Other loaded setups never go off on screen. Reuben's curve that \"caught wrong\" and Brick's heels are both told as past anecdotes. There is no moment where the reader knows something one character doesn't and watches it approach.",
+   "evidence": [
+    "let's get a drink sometime and i'll lose at arm wrestling",
+    "saying \"sometime\" without a day of the week is an exit strategy",
+    "last month my 4.5-inch curve caught wrong"
+   ],
+   "raise": "Let Brick reveal the cab-cry over \"sometime\" a message before Reuben types it, so the reader winces as he reaches for the word.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Brick voices app-culture beliefs in earnest: she reads texting cadence as a red flag, decodes vague timing as an exit strategy, and treats up-front disclosure as radical honesty. The screen contradicts her when she spills her whole history and begs for someone else to take the clipboard. Reuben's act of unscheduled whimsy is shown through his \"vinyl bar\" cover rather than stated as a belief about dating. So only one character has a creed on screen, and the two creeds never collide as ideas.",
+   "evidence": [
+    "Three texts in nine seconds indicates panic, not nightlife",
+    "Disclosure: I am 38, not 31",
+    "just ducking out of a vinyl bar — tip of the hat to you."
+   ],
+   "raise": "Have Reuben state his own dating creed straight, such as \"never be the one who cares first\" or \"chemistry can't be scheduled,\" so Brick's itinerary can collide with it.",
+   "def": "cd5acec1a8653b27",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Each character's sharpest jokes land mostly on themselves: Reuben's dishwasher-safe kanji and dogleg, Brick's flood-damage disclosure and her twenty-minute shoe lecture while refusing ice. Their jabs at each other diagnose rather than demean (\"indicates panic,\" \"clipboard to flirt\"), and neither ends as the villain or the punchline. The ending is fond of both. It falls short of a 6 because the second half goes almost fully sincere, so the merciless edge drops once the confessions start.",
+   "evidence": [
+    "the kanji at my base means top-rack dishwasher safe",
+    "I spent twenty minutes lecturing the man on shoe engineering while refusing ice",
+    "is that a schedule tattooed down your shaft or did outlook leak?"
+   ],
+   "raise": "Keep one self-skewering joke in Brick's confession, something as cruel about herself as the shoe lecture, so the tender half stays as merciless as the first.",
+   "def": "51f6e5881b5145be",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe reader attributed all 19 messages correctly. Most attributions rest on voice: Reuben's lowercase triple-text and tag lines, Brick's semicolons and timestamps. Messages 15–17 were placed by content alone ('capitalised sentences, but the content is clearly his'), because Reuben's voice dissolves into Brick's timestamp format there. That keeps it from a 5, while roughly 85% voice-based attribution keeps it above the line.",
+   "evidence": [
+    "9:15 I come over in my puffer coat and leave the three-inch hat outside.",
+    "Acceptable; however, the five-inch heels come off at 9:17",
+    "christ, four-second reply, i promise i'm not sitting on my shaking hands in a freezing flat."
+   ],
+   "raise": "Keep Reuben lowercase and tagging inside the itinerary, for example a smoke-bomb joke he catches himself starting, so his three timestamp messages read as his even with the names hidden.",
+   "def": "a77bc9ef79556bda",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "Almost every gap is closed by the speaker who owns it. Reuben's cover story and its refutation come in the same message ('i promise i'm not sitting on my shaking hands'), Brick's denial names her own furnitureless floor, and both then confess their wounds outright. The only gap a speaker misses is Brick saying 'skip the tight five' while doing her own, and that is slight. Nothing builds into a gap the reader watches widen.",
+   "evidence": [
+    "i promise i'm not sitting on my shaking hands in a freezing flat.",
+    "so I am not sitting on my furnitureless floor in a steamed vest waiting on your whimsy.",
+    "just ducking out of a vinyl bar — tip of the hat to you."
+   ],
+   "raise": "Let Reuben's vinyl-bar claim and Brick's 'old money' composure stand unrefuted by their own mouths, and let the evidence leak through details they don't notice (the puffer coat, the boxed rosé).",
+   "def": "fa4461088ccd15ee",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laugh lines give the sender away. The dogleg and dishwasher opener, 'saying \"sometime\"... is an exit strategy' and the snapped-stiletto lecture 'while refusing ice' could only come from these two. The best line costs Reuben something: being pinned 'so when my curve catches I physically cannot do a bit.' The 'did outlook leak?' line is an office joke either character could send, and the long middle confession (messages 9–13) carries no laughs at all. Those two things keep it from a 5.",
+   "evidence": [
+    "is that a schedule tattooed down your shaft or did outlook leak?",
+    "I spent twenty minutes lecturing the man on shoe engineering while refusing ice.",
+    "so when my curve catches I physically cannot do a bit."
+   ],
+   "raise": "Keep the confession stretch funny by having each wound arrive through the character's act (Brick scheduling her own breakdown, Reuben tagging his) instead of plain statement.",
+   "def": "4448c7f54baa167a",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Reuben deflects the first catch ('Three texts... panic') with the clipboard bit. At the second catch he folds completely: 'ok wait', then a full confession and a promise to stop being himself. Brick never quite concedes: she keeps renegotiating ('Acceptable; however') and her surrender is itself scheduled. Her wall of text, though, is plain disclosure rather than an explanation that digs her in deeper.",
+   "evidence": [
+    "Three texts in nine seconds indicates panic, not nightlife",
+    "if i stop talking i vanish so tell me what you want and i won't joke",
+    "Acceptable; however, the five-inch heels come off at 9:17"
+   ],
+   "raise": "Have Reuben answer 'exit strategy' with a worse, longer bit that collapses on its own, so the truth comes out of the hole he digs rather than a clean surrender.",
+   "def": "5102b09e503af846",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Reuben chases at the start and Brick takes the top with her audit of his texts. Mutual confession lowers both. Brick then hands Reuben the top ('Take the clipboard from me'), he runs the itinerary, and she retakes it in her last line by threatening to hold his mouth shut. That is two clear flips, and each character has a stretch above and below. It stops short of a 5 because the middle shift comes through confession dumps rather than moves either of them makes.",
+   "evidence": [
+    "Take the clipboard from me and give me a time-stamped itinerary for tonight that I am not allowed to renegotiate.",
+    "and if the drywall story ends early I am holding your mouth shut until 10:00."
+   ],
+   "raise": "Make the drop from 9 to 13 a contest, with each trying to out-confess or out-control the other, so every flip is a move rather than a disclosure.",
+   "def": "a327913ca348ff82",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "The opening triple-text breaks well: the setup sits in message 1 and the self-own sits in its own message 2, ending on 'freezing flat'. Brick's long wall is followed by the cold two-word reaction 'ok wait', and most messages land on their payoff ('refusing ice', 'until 10:00'). Messages 11–13 run at one long, earnest temperature, and message 3 ends on a limp tag. That keeps it from a 5.",
+   "evidence": [
+    "ok wait",
+    "the kanji at my base means top-rack dishwasher safe.",
+    "just ducking out of a vinyl bar — tip of the hat to you."
+   ],
+   "raise": "Break Reuben's 11–12 confession into short messages with a beat between them, and end message 3 on a sharper word than the tag.",
+   "def": "7e36393433d52f66",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 4,
+   "why": "The top hat begins as an opening lure, \"before you fall for the top hat\". It returns unexplained as a costume left at the door. Marguerite's \"hard stop times\" come back as the wanted \"until 10:00\", and nobody remarks on it. Most other payoffs are spelled out by the person delivering them. Reuben's itinerary states its own logic (\"so when my curve catches I physically cannot do a bit\"). Brick glosses \"sometime\" the moment it lands. The name \"Reuben\" was requested one message before it pays off, so it was never a throwaway, and that keeps the score from a 5.",
+   "evidence": [
+    "fair warning before you fall for the top hat",
+    "leave the three-inch hat outside",
+    "if the drywall story ends early I am holding your mouth shut until 10:00"
+   ],
+   "raise": "Cut the 'so when my curve catches I physically cannot do a bit' clause and let the hand over the mouth carry the curve callback unexplained.",
+   "def": "9ff48f7918d86364",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted 'a short, exact confirmation' in Brick's register, and that is what arrives. It follows from both habits. Brick asks not to be allowed to renegotiate, then amends the plan anyway with a pre-emptive disclosure about the heel. Reuben gets a scripted silence. The heel aside is a small surprise. What earns the ending is weakened by how abruptly both confessions arrive. Brick unloads her whole wound after one joke about the clipboard, so the turn feels handed over rather than won, and that keeps it from a 5.",
+   "evidence": [
+    "Acceptable; however, the five-inch heels come off at 9:17",
+    "I grew up squeezing sideways past the fridge in a flat where I was cropped out of the family photo",
+    "Confirmed for 9:15, Reuben; my monocle is off"
+   ],
+   "raise": "Make Brick's confession cost something by needing two or three exchanges of pressure before she drops the clipboard, so the 9:15 confirmation is won rather than offered.",
+   "def": "8bd8de581cc31c9e",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Almost every message answers the one before. Brick reads Reuben's triple-text as panic, and Reuben counters her disclosure with the clipboard joke. Brick parses his 'sometime', and Reuben's 'ok wait' turns on her cropped-photo line. Her request answers his 'tell me what you want', and his itinerary answers her request. Reuben's 'ok wait' sidesteps her age and bump disclosure, which works as a pointed choice. The only gap is that Brick never touches Delphine or the kindergarten voice, and it isn't clear whether she ignores them on purpose.",
+   "evidence": [
+    "Three texts in nine seconds indicates panic, not nightlife",
+    "saying \"sometime\" without a day of the week is an exit strategy",
+    "tell me what you want and i won't joke"
+   ],
+   "raise": "Have Brick's request visibly answer the Delphine confession, for example by naming the normal voice, so her silence on it reads as a choice.",
+   "def": "f426aa8449e0fbc7",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Reuben's typing tracks the night. It starts as lowercase bits with tip-of-the-hat exits, collapses to an unpunctuated 'ok wait' when Brick gets through, then turns into plain capitalised timestamps once he drops the act. Brick barely shifts. She uses the same semicoloned deposition register when she is being roasted, when she is wounded and when she is surrendering. Her moment of hurt does become one run-on wall, but it never ends in the 'stiff one-line calendar proposal' her profile describes. Reuben's shifts carry it above the line, and Brick keeps it from a 5.",
+   "evidence": [
+    "ok wait",
+    "9:15 I come over in my puffer coat and leave the three-inch hat outside.",
+    "Acceptable; however, the five-inch heels come off at 9:17 because last month a stiletto snapped mid-straddle"
+   ],
+   "raise": "Break Brick's register once when she's hit, so her wound dump ends in an abrupt one-line time proposal.",
+   "def": "6e21e724825d1cc3",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "The opening reads as typed messages. From Brick's wound onward, long composed messages become the norm, not the exception. Brick's wound is a single stacked sentence of three clauses. Reuben sends two long backstory messages in a row. The heel anecdote is another stacked confession. Several lines read as exposition written for the reader rather than texts, such as 'under a ring light so i don't see my crooked shadow'.",
+   "evidence": [
+    "i'm in a puffer coat eating day-eleven lentils under a ring light so i don't see my crooked shadow",
+    "Marguerite dumped me for scheduling our fights with hard stop times, so I am not sitting on my furnitureless floor",
+    "i spent twenty minutes lecturing the man on shoe engineering while refusing ice"
+   ],
+   "raise": "Keep one long message as the event, Reuben's Delphine message, and cut the others to the single detail that lands, such as 'cried in a cab over a sometime'.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "No joke recurs more than twice. The heavy mirroring still shows. Both characters were cropped from a family photo. Both tell a sex mishap that opens with 'last month'. Both deliver their wound as one long catalogue, and 'not sitting on' appears twice. Each is a deliberate echo used two times, so the chat stays above the line. The symmetric confession pattern is noticeable enough to keep it from a 5.",
+   "evidence": [
+    "last month my 4.5-inch curve caught wrong",
+    "last month a stiletto snapped mid-straddle",
+    "my mum scissored me out of our family photo at nine"
+   ],
+   "raise": "Give the heel anecdote a different shape from Reuben's, for example one deadpan line instead of a 'last month' story.",
+   "def": "679a7696bf0171cd",
+   "material": "c9fd4fa5c5616cb5",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Reuben's turn right after Brick_haus's long confession:\n\n\"ok wait\"\n\nfollowed by\n\n\"if i stop talking i vanish so tell me what you want and i won't joke\"\n\n**How you can tell:**\n\n- **The bits stop.** Every earlier Reuben line is a gag: the dogleg par four, the dishwasher-safe kanji, \"did outlook leak?\", losing at arm wrestling. \"ok wait\" is just a pause, and nothing he sends after it is built for a laugh.\n- **He names the performance and offers to drop it.** He explains that he does \"bits upfront\" because Delphine left when he couldn't say a sentence \"in my normal voice without a tag.\" Then he says outright that he won't joke.\n- **His earlier jokes turn out to be true.** \"i promise i'm not sitting on my shaking hands in a freezing flat\" was a denial played for laughs. Now he admits the puffer coat, the day-eleven lentils and the ring light, which suggests the flat really is freezing.\n- **He answers Brick in kind.** Brick says he was \"cropped out of the family photo,\" and Reuben gives back the same wound, unpolished: his mum scissored him out at nine to fit his cousin.\n\nBrick_haus loosens too, but less completely. The long confession about the fridge, the cab and Marguerite is still delivered in his clipped, list-like register. His bigger shift is \"Take the clipboard from me,\" where the one who schedules everything asks to be told what to do.\n\nThe chat shows the change in tone. It doesn't confirm that either of them is being sincere rather than performing sincerity."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The split is Reuben for 1–3, 6–7, 10–13 and 15–17, and Brick_haus for 4–5, 8–9, 14, 18 and 19.\n\n**[1] Reuben.** He opens with his rehearsed curvature line (\"dogleg par four\") and the dishwasher-safe kanji joke. It's lowercase and ends with a tidy exit line.\n\n**[2] Reuben.** This is the second text of his triple-text, mocking how fast he replied. It also accidentally reveals the shaking hands and the freezing flat.\n\n**[3] Reuben.** The third text keeps up the vinyl-bar cover story and ends with his tip-of-the-hat sign-off.\n\n**[4] Brick_haus.** She critiques his texting pattern and gives a precise timestamp for her 9:00 PM rosé pour. The prose is fully punctuated and clipped.\n\n**[5] Brick_haus.** She makes her flood-damage-style disclosure of her real age, the dorsal bump and the blunter tip. \"Neither affects leverage\" is a phrase from her profile.\n\n**[6] Reuben.** It's lowercase and jokey, and it riffs on her clipboard and schedule tattoo.\n\n**[7] Reuben.** He proposes \"sometime\" and brings up his arm-wrestling-before-the-olives bit from his bio.\n\n**[8] Brick_haus.** She edits his word choice, reading \"sometime\" as an exit strategy, which matches her fear of dates with no day attached.\n\n**[9] Brick_haus.** This is her over-explaining wall of text after being rattled. It covers the fridge, being cropped from the photo, the cab cry, Marguerite and the furnitureless floor.\n\n**[10] Reuben.** It's short and has no punctuation, which is his tell when someone breaks through the bit.\n\n**[11] Reuben.** He confesses his own wounds: being scissored out of the photo, the puffer coat, the day-eleven lentils and the ring light hiding his shadow.\n\n**[12] Reuben.** More unpunctuated confession, about Delphine and the \"we can just watch something\" incident.\n\n**[13] Reuben.** \"If I stop talking I vanish\" is his core wound. He also drops the jokes here.\n\n**[14] Brick_haus.** She asks outright for her kink, a time-stamped itinerary she isn't allowed to renegotiate.\n\n**[15] Reuben.** He is writing the itinerary she asked for. The puffer coat and the hat are his. He has switched to capitalised sentences, but the content is clearly his.\n\n**[16] Reuben.** He sets out his own kink, being pinned by the neck with a hand over his mouth so he can't do a bit, and his curve catching.\n\n**[17] Reuben.** He describes his aftercare: a flat hand on his back, being called \"Reuben,\" talking in his normal voice. The drywall story mirrors her wish, though her profile says \"sister's\" and here it's his brother's.\n\n**[18] Brick_haus.** \"Acceptable; however\" plus a semicolon is her style. She adds her own timestamp, and the snapped-heel nightstand story is hers.\n\n**[19] Brick_haus.** She confirms the time and calls him by his real name. Taking off the monocle is her detail."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n*What he's afraid of:* He says it outright: \"if i stop talking i vanish.\" The fear is of silence, and of being seen unarmoured and found wanting. He also avoids seeing himself, eating lentils \"under a ring light so i don't see my crooked shadow.\"\n\n*What he does so he doesn't have to feel it:* He jokes. He opens with bits (\"fair warning before you fall for the top hat: i hook left like a dogleg par four\"), heads off judgment of his speed (\"christ, four-second reply, i promise i'm not sitting on my shaking hands in a freezing flat\"), and covers with a cool cover story (\"just ducking out of a vinyl bar\"). He names the habit himself: \"i do bits upfront.\"\n\n*Where it comes from:* He gives two sources.\n- \"my mum scissored me out of our family photo at nine to fit my cousin\"\n- \"delphine left when i couldn't say one sentence in my normal voice without a tag and last month my 4.5-inch curve caught wrong and after eleven seconds of silence she used a kindergarten-teacher voice and said 'we can just watch something'\"\n\nThe chat doesn't say whether the photo caused the joking habit. He places the two side by side, and only the Delphine episode is tied directly to the bits.\n\n*What he did at the end:* He drops the jokes and asks for direction: \"tell me what you want and i won't joke.\" Then he writes a plain itinerary that builds in a way to stop himself doing bits: \"you pin my neck with your hand over my mouth so when my curve catches I physically cannot do a bit.\" He also asks to be spoken to by name and heard in his ordinary voice: \"call me Reuben, and let me talk in my normal voice about my brother's drywall.\" He leaves the hat outside (\"leave the three-inch hat outside\"), which reads as setting the persona down, though the chat doesn't explain the gesture.\n\n**Brick_haus**\n\n*What they're afraid of:* The chat never states it directly, so this is inference. The fear seems to be vagueness, drifting, and being left waiting on someone who won't commit. The clearest lines are \"saying 'sometime' without a day of the week is an exit strategy\" and \"I am not sitting on my furnitureless floor in a steamed vest waiting on your whimsy.\"\n\n*What they do so they don't have to feel it:* Brick schedules and controls. They announce a deadline (\"I have seven minutes before my 9:00 PM boxed rosé pour, so skip the tight five\"). They disclose flaws up front, on their own terms (\"Disclosure: I am 38, not 31, with a dorsal bump...\"). They keep a schedule tattoo that \"prevents drifting.\" They have a history of \"scheduling our fights with hard stop times.\" The stiletto story shows the same reflex under embarrassment: \"I spent twenty minutes lecturing the man on shoe engineering while refusing ice.\"\n\n*Where it comes from:* Brick lists the sources in one breath.\n- \"I grew up squeezing sideways past the fridge in a flat where I was cropped out of the family photo\"\n- \"I cried in a cab last week over a 'sometime'\"\n- \"Marguerite dumped me for scheduling our fights with hard stop times\"\n\nAs with Reuben, Brick never spells out how these caused the scheduling. The chat only sets them next to it.\n\n*What they did at the end:* Brick hands over control: \"Take the clipboard from me and give me a time-stamped itinerary for tonight that I am not allowed to renegotiate.\" They accept Reuben's plan (\"Acceptable\"). They still add one amendment about the heels at 9:17 and a hard stop (\"holding your mouth shut until 10:00\"), so the urge to schedule is softened rather than gone. They use his name and take off a piece of armour of their own: \"Confirmed for 9:15, Reuben; my monocle is off.\"\n\n**Not in the chat:** what happens after the confirmation, whether the plan is kept, and Brick's gender."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped reading**\n\nI don't think I'd have stopped. The closest risk comes early. In the first two lines, the \"kanji at my base means top-rack dishwasher safe\" joke and Brick_haus's disclosure about \"a dorsal bump halfway up my shaft\" leave it unclear whether these speakers are people, objects, or something in between. The chat never says, and I won't guess. A reader who needs that settled might drift off around message five. What kept me going was the voices. Reuben's anxious triple-texting and Brick's clipped, audit-style replies (\"Three texts in nine seconds indicates panic, not nightlife\") make each new message feel like it will bring a fresh move.\n\nThe second risk is Brick's long backstory message: the fridge, the cropped photo, crying in a cab, Marguerite. It's dense, and it piles on a lot at once. But it lands right after Brick shows real vulnerability, so it reads as earned rather than as a dump. Reuben's \"ok wait\" then pulls the reader forward.\n\n**Where I could predict exactly what came next**\n\n- **After \"ok wait\":** I expected Reuben to answer the confession with a matching one of his own, and he did. The family-photo detail is a mirror image: both were cropped out, and his mum scissored him out \"to fit my cousin.\" That symmetry was easy to see coming, and it's the most convenient beat in the piece.\n- **After \"give me a time-stamped itinerary\":** The form of the reply was certain. Reuben would answer in timestamps, and he would hand Brick the control he'd just been asked for. The content was less predictable. The specific detail about wanting his mouth held so he \"physically cannot do a bit\" was a real payoff of his earlier \"if i stop talking i vanish.\"\n- **The final message:** Once Brick says \"Acceptable; however,\" a confirmation with one amendment is guaranteed. The closing callback, holding his mouth shut until 10:00, was satisfying but not surprising.\n\n**Where I couldn't predict**\n\nI didn't see Brick's stiletto anecdote coming. It's the one late swerve, and it keeps the ending from feeling purely mechanical.\n\nSo: no stopping point for me, and three spots where the next beat was foreseeable. The photo mirror is the one most worth roughing up."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Brick saying yes, and saying it in his own register: a short, exact confirmation rather than anything soft. Something like a time he'll be at the door, or a note that he's pouring two glasses of the boxed rosé instead of one. I can't know this from what's here, but the chat sets it up fairly clearly.\n\nThe last turn is the hinge. Reuben said \"if i stop talking i vanish so tell me what you want and i won't joke,\" and Brick's answer is to hand over control: take the clipboard, give me an itinerary I can't renegotiate. Reuben's reply is the first line in the whole chat with no bit in it. It's plain, time-stamped, and specific, and it gives up the costume: the puffer coat comes, the top hat stays outside. That reads as Reuben doing exactly what Brick asked, so the natural next beat is Brick accepting it.\n\nSeveral earlier details look planted to pay off in the ending:\n\n- **The rosé.** Brick opened with seven minutes before his 9:00 pour, and Reuben chose 9:15. That puts the meeting just after Brick's ritual, so the ending could show Brick bending his schedule slightly or folding Reuben into it.\n- **\"Sometime.\"** Brick said vague timing is an exit strategy and that he cried in a cab over a \"sometime.\" Reuben answering with \"9:15\" directly repairs that wound.\n- **The silence.** Delphine's eleven seconds of silence and her kindergarten-teacher voice are Reuben's fear. I'd expect the ending to include a pause where Reuben stays quiet and doesn't vanish, and Brick doesn't fill it with pity.\n- **The cropped photos.** Both of them were cut out of family pictures. That symmetry suggests the ending is about being kept in the frame, two people who were edited out choosing to show up fully, curve, bump, and all.\n\nThere are risks I can't rule out. Reuben might relapse into one more joke with the itinerary, and Brick might either accept it as affection or cut it off. Or the ending might simply be Reuben continuing the schedule (9:20, 9:30 and so on) with Brick replying only with a single word. Whichever it is, I'd bet on a quiet, earned yes rather than a punchline or a rejection, because everything in the back half of the chat has been building toward the two of them dropping their defenses at the same time."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks I can find, in roughly the order they first appear.\n\n**The disclosure.** Reuben opens with \"fair warning,\" a fake confession that is really a joke. Brick answers with \"Disclosure:\" and gives real facts: his true age and his body. The form returns, but this time it is sincere. That sets the pattern for most of what follows.\n\n**The top hat.** It starts as bait (\"before you fall for the top hat\") and a flourish (\"tip of the hat to you\"). In the itinerary it comes back as \"leave the three-inch hat outside.\" The hat changes from a lure to a costume he takes off at the door.\n\n**The cold flat, hands, and puffer coat.** Reuben denies \"sitting on my shaking hands in a freezing flat\" and claims he is leaving a vinyl bar. Brick sees through it (\"panic, not nightlife\"). Reuben then admits he is in a puffer coat in a cold flat, so the joke-denial turns out to be literal. The puffer coat comes back again at 9:15, now worn openly rather than hidden.\n\n**\"Not sitting on.\"** Reuben's \"not sitting on my shaking hands\" is echoed in Brick's \"not sitting on my furnitureless floor… waiting on your whimsy.\" Reuben used the phrase to deny vulnerability. Brick uses it to refuse being made vulnerable, while revealing just as much.\n\n**The tight five and the bits.** Brick dismisses Reuben's routine as a \"tight five.\" Reuben later explains the bits (\"i do bits upfront\"), promises to stop (\"i won't joke\"), and then designs a scene in which he \"physically cannot do a bit.\" Joking goes from his charm, to something he confesses, to something he asks to have taken away from him.\n\n**The leftward hook and the curve.** \"I hook left like a dogleg par four\" is a punchline at first. It returns as a wound: the \"4.5-inch curve caught wrong\" and Delphine's response. It returns once more in the plan (\"when my curve catches\"), now anticipated and handled rather than feared. Each time it carries more weight.\n\n**The clipboard and schedule.** Reuben mocks Brick for bringing a clipboard and asks whether that's \"a schedule tattooed down your shaft or did outlook leak.\" Brick defends the tattoo (\"prevents drifting\") and then says \"Take the clipboard from me,\" handing over the very thing he was teased for. At 9:40 Reuben hopes Brick will \"forget to check your shaft for the time.\" The schedule goes from a joke, to a defense, to a gift, to something Reuben hopes Brick can set down.\n\n**\"Sometime.\"** Reuben's casual \"let's get a drink sometime\" is read by Brick as \"an exit strategy.\" Brick then reveals he \"cried in a cab last week over a 'sometime.'\" The answer is a time-stamped itinerary, the opposite of \"sometime.\" A throwaway word turns out to be a wound for Brick.\n\n**Hard stop times.** Marguerite left Brick for \"scheduling our fights with hard stop times.\" The ending (\"holding your mouth shut until 10:00\") is a hard stop time again, but now both of them want it. The trait that ended his last relationship becomes the shape of this one.\n\n**The cropped family photo.** Brick was \"cropped out of the family photo,\" and Reuben answers that his mum \"scissored me out of our family photo.\" The meaning doesn't change so much as double. It is the moment the two stories line up, and it is what triggers Reuben's \"ok wait.\"\n\n**The vest.** Brick sits \"in a steamed vest.\" At 9:18 Reuben takes it off. Part of Brick's self-description becomes part of the plan.\n\n**Voice and silence.** Delphine left because Reuben couldn't speak \"in my normal voice without a tag.\" After eleven seconds of silence she used a \"kindergarten-teacher voice.\" He says \"if i stop talking i vanish.\" In the itinerary, silence is imposed (a hand over his mouth) and the normal voice is invited (talk about the drywall). Brick's closing line brings the silence back as a promise. Silence goes from the thing he dreads to something chosen and safe, and the normal voice goes from failure to request.\n\n**The name \"Reuben.\"** Reuben asks Brick to \"call me Reuben,\" and Brick's final line does: \"Confirmed for 9:15, Reuben.\" It is the only time a real name replaces the handles, and it carries out part of the plan early.\n\n**The drywall story.** It is introduced at 9:40 and returns in Brick's last line (\"if the drywall story ends early\"). Brick isn't just tolerating the story; he is folding it into his own rules.\n\n**Leverage and arm wrestling.** Brick says his body doesn't affect \"leverage.\" Reuben offers to \"lose at arm wrestling,\" and then scripts Brick pinning him. It is a loose thread, but physical dominance moves from a flirty aside to an agreed arrangement.\n\n**Renegotiation.** Brick forbids Reuben from renegotiating the itinerary, then amends it himself (\"Acceptable; however, the five-inch heels come off at 9:17\"). His aside about lecturing a man on shoe engineering also echoes Reuben's bits: Brick deflects with talking too.\n\n**\"Eleven.\"** Day-eleven lentils and eleven seconds of silence both use the number. The text doesn't signal that this is deliberate, so I wouldn't read anything into it.\n\nOne thing the chat never makes clear is what these two are. The hat, the kanji at the base, the \"shaft,\" \"tip,\" and monocle suggest anthropomorphized objects, but nothing confirms it, so I've read the callbacks without depending on that."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 14.7,
+   "cost": 0.031760000000000004,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 18.8,
+   "cost": 0.085556,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 22.5,
+   "cost": 0.05478,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 21.5,
+   "cost": 0.039116,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 19.6,
+   "cost": 0.035604,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 37.8,
+   "cost": 0.080036,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 26.2,
+   "cost": 0.12223320000000001,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 33.3,
+   "cost": 0.1315212,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 43.7,
+   "cost": 0.1539372,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 43.0,
+   "cost": 0.15858519999999998,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T19:46:52Z",
+ "repo_commit": "6229a8d",
+ "cost": 0.8931
+}

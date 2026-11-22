@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v10",
+ "kind": "chat",
+ "label": "Run 10 · all 3 chats",
+ "version": "run 10",
+ "order": 110,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v10/chat-reuben-brick/",
+ "note": "Every chat of run 10 (new profiles and chat from the short brief; notes unsorted; the chat worked out as a bit): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 10,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8529,
+   "words": 1482
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats run the same night beat for beat. Each opens with Reuben's triple text: a disclosure of the left curve, the 'dishwasher-safe' kanji and the top hat, then an apology for the four-second reply, then a fake excuse. Brick answers by counting the texts and making counter-disclosures (dorsal bump, short tip, schedule tattoo). The order that follows never changes: a 'sometime' objection, the shared family-photo cropping, Reuben confessing to Delphine and the 'we can just watch something' line, Brick asking him to 'take the clipboard,' and a time-stamped itinerary that ends in being held down and boring talk. Many lines recur across all three, well past the 'no more than two' bar. Only surface details keep this above a 1: Carr's '47 hours' payoff, Wong's stiletto-snap anecdote, and differing timestamps and register.",
+   "evidence": [
+    "Take the clipboard, Reuben. Schedule Tuesday down to the minute and don’t let me renegotiate.",
+    "Take the clipboard from me and give me a time-stamped itinerary for tonight that I am not allowed to renegotiate.",
+    "I want someone to take the clipboard, set the exact times, and talk about something boring afterwards until I forget the clock."
+   ],
+   "raise": "Have at least one chat break the shared spine by choosing a different opener, a different first discovery than the family-photo cropping, or a different ending than a time-stamped hookup, so that no three-beat sequence appears in more than half the chats.",
+   "def": "03d845827225bb57",
+   "material": "db65585a66857c3b",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 15.4,
+   "cost": 0.053341200000000005,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T19:44:52Z",
+ "repo_commit": "6229a8d",
+ "cost": 0.0533
+}
