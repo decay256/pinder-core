@@ -1,0 +1,189 @@
+{
+ "model": "google/gemini-4-argon",
+ "seed": 7,
+ "reasoning": "high",
+ "version": "v3",
+ "system": "You are {name}. Not someone writing in your manner: you, with your own ear, your own taste and your own judgement.\n\nThe people making Pinder have asked you to write for it. On the characters and the dialogue you are the authority: you decide who these people are, what about them matters, how they talk and how they type. Nobody will hold you to anything else.",
+ "writers": {
+  "ansari": {
+   "writer": "Aziz Ansari",
+   "model": "google/gemini-4-argon",
+   "seconds": 90.7,
+   "cost": 0.053462,
+   "usage": {
+    "prompt_tokens": 5546,
+    "completion_tokens": 4237,
+    "total_tokens": 9783,
+    "cost": 0.053462,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.053462,
+     "upstream_inference_prompt_cost": 0.011092,
+     "upstream_inference_completions_cost": 0.04237
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1778,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1756
+  },
+  "martin": {
+   "writer": "Mae Martin",
+   "model": "google/gemini-4-argon",
+   "seconds": 92.9,
+   "cost": 0.055072,
+   "usage": {
+    "prompt_tokens": 5546,
+    "completion_tokens": 4398,
+    "total_tokens": 9944,
+    "cost": 0.055072,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.055072,
+     "upstream_inference_prompt_cost": 0.011092,
+     "upstream_inference_completions_cost": 0.04398
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2006,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1748
+  },
+  "wong": {
+   "writer": "Ali Wong",
+   "model": "google/gemini-4-argon",
+   "seconds": 94.9,
+   "cost": 0.056162,
+   "usage": {
+    "prompt_tokens": 5546,
+    "completion_tokens": 4507,
+    "total_tokens": 10053,
+    "cost": 0.056162,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.056162,
+     "upstream_inference_prompt_cost": 0.011092,
+     "upstream_inference_completions_cost": 0.04507
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1837,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1907
+  },
+  "booster": {
+   "writer": "Joel Kim Booster",
+   "model": "google/gemini-4-argon",
+   "seconds": 99.2,
+   "cost": 0.054894,
+   "usage": {
+    "prompt_tokens": 5547,
+    "completion_tokens": 4380,
+    "total_tokens": 9927,
+    "cost": 0.054894,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.054894,
+     "upstream_inference_prompt_cost": 0.011094,
+     "upstream_inference_completions_cost": 0.0438
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1746,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1938
+  },
+  "carr": {
+   "writer": "Jimmy Carr",
+   "model": "google/gemini-4-argon",
+   "seconds": 112.8,
+   "cost": 0.057692,
+   "usage": {
+    "prompt_tokens": 5546,
+    "completion_tokens": 4660,
+    "total_tokens": 10206,
+    "cost": 0.057692,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.057692,
+     "upstream_inference_prompt_cost": 0.011092,
+     "upstream_inference_completions_cost": 0.0466
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2483,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1562
+  },
+  "schumer": {
+   "writer": "Amy Schumer",
+   "model": "google/gemini-4-argon",
+   "seconds": 115.1,
+   "cost": 0.064924,
+   "usage": {
+    "prompt_tokens": 5547,
+    "completion_tokens": 5383,
+    "total_tokens": 10930,
+    "cost": 0.064924,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.064924,
+     "upstream_inference_prompt_cost": 0.011094,
+     "upstream_inference_completions_cost": 0.05383
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2666,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1996
+  }
+ }
+}

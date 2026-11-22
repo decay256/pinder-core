@@ -5,6 +5,8 @@ import writers as w  # noqa: E402
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 RUNS = [  # newest first: (run id, label, output folder, about, prompt version)
+    ("v6", "Run 6: 500 words", "writers-v6",
+     "Run 6. As run 5, with the chat prompt saying \"no longer than 500 words\": the six comedians' profiles from run 4, unchanged.", "v5"),
     ("v5", "Run 5: 1,000 words", "writers-v5",
      "Run 5. The six comedians' profiles from run 4, unchanged; the chat prompt says \"no longer than 1,000 words\" where it said \"as long or as short as it should be\".", "v4"),
     ("v4", "Run 4: six comedians", "writers-v4",
