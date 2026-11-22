@@ -5,6 +5,8 @@ import writers as w  # noqa: E402
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 RUNS = [  # newest first: (run id, label, output folder, about, prompt version)
+    ("v5", "Run 5: 1,000 words", "writers-v5",
+     "Run 5. The six comedians' profiles from run 4, unchanged; the chat prompt says \"no longer than 1,000 words\" where it said \"as long or as short as it should be\".", "v4"),
     ("v4", "Run 4: six comedians", "writers-v4",
      "Run 4. Run 3's prompts, unchanged, given to six comedians who work on dating, sex and identity: Aziz Ansari, Ali Wong, Mae Martin, Joel Kim Booster, Jimmy Carr and Amy Schumer.", "v3"),
     ("v3", "Run 3: own texting style", "writers-v3",

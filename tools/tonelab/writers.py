@@ -110,8 +110,13 @@ PROMPTS["v3"] = dict(PROMPTS["v2"], user=PROMPTS["v2"]["user"].replace(
     "Write the character in whatever form you'd actually hand over, as long or as short as you'd make it.\n\n"
     "Develop your own texting style for this character, so the character is distinct.\n"))
 assert PROMPTS["v3"]["user"] != PROMPTS["v2"]["user"]
-TEXTING = {"v1": True, "v2": True, "v3": False}  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v3")
+# v4: v3 with the chat held to 1,000 words; the profiles are run 4's, unchanged.
+PROMPTS["v4"] = dict(PROMPTS["v3"], chat=PROMPTS["v3"]["chat"].replace(
+    "It's your chat: as long or as short as it should be,",
+    "It's your chat: no longer than 1,000 words,"))
+assert PROMPTS["v4"]["chat"] != PROMPTS["v3"]["chat"]
+TEXTING = {"v1": True, "v2": True, "v3": False, "v4": False}  # whether the game's texting-style fragments are in the list
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v4")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
