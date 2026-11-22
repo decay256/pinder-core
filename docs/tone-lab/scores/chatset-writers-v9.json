@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v9",
+ "kind": "chat",
+ "label": "Run 9 · all 3 chats",
+ "version": "run 9",
+ "order": 109,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v9/chat-reuben-brick/",
+ "note": "Every chat of run 9 (run 7's profiles; the brief cut to its what and why; one joke, one punchline): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 9,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8485,
+   "words": 1489
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats run the same beats in the same order. Reuben opens with a deflecting bit signed \"Yours in ___\". Brick answers by quoting one word back (\"Rains.\" / \"Loft.\" / \"Sometime.\") and then lists his own body first. Next come the mirrored cropped-family-photo backstories, then Marguerite's calendar and Delphine's \"normal voice\", then the paired wants (Reuben gagged and described \"in the present tense\"; Brick timestamps followed by talk \"until I forget the time\"), and every chat closes on a timestamped booking. Many lines recur across all three, not just two: \"oh — okay\", the dishwasher-safe tattoo, \"present tense\", \"normal voice\" and the cousin crop. Others recur in two: \"scheduled being loved\", boxed rosé, \"thirty-eight, not thirty-one\" and \"ten quiet minutes\". It rises above a 1 only because the endings differ in emphasis: Booster's Reuben slides back into a bit (\"or whenever you're free, no rush\"), Wong's Brick sets the schedule, and Carr's Brick redefines intimacy as the hand on the back.",
+   "evidence": [
+    "\"Rains.\"",
+    "\"Loft.\" Fascinating.",
+    "\"Sometime.\""
+   ],
+   "raise": "Give at least one chat a different opening move and turning point, for example Brick opening, or the backstory coming out through a fight instead of a mutual confession, and cut the shared stock lines (\"oh — okay\", dishwasher-safe, \"present tense\", \"until I forget the time\") so none appears in more than two chats.",
+   "def": "03d845827225bb57",
+   "material": "62629ad3f561cabb",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    false,
+    true,
+    false
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 21.3,
+   "cost": 0.080012,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T19:39:08Z",
+ "repo_commit": "2f6e8ec",
+ "cost": 0.08
+}
