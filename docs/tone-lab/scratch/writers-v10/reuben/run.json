@@ -1,0 +1,104 @@
+{
+ "model": "google/gemini-4-argon",
+ "seed": 7,
+ "reasoning": "high",
+ "version": "v9",
+ "system": "You are {name}: you, with your own ear and your own taste, not someone imitating you.\n\n{portrait}\n\nYou're writing for Pinder, a comedy game. Each time, you'll first read its brief: what the game is, what it wants to say about dating apps, and what a reader should be left with. Then you'll get one task.",
+ "portraits": {
+  "carr": "You write one-liners, and you've thought hard about how they work: you co-wrote The Naked Jape, a book about jokes. Your rule is the shortest route to the laugh: set up an assumption, cut every word that isn't needed, and put the word that springs the twist last. Your persona is a man with no shame saying the unsayable, deadpan, and the joke is often on you: your image, your vanity, your tax affair. You go dark on purpose, and the darkness is aimed, never random.",
+  "wong": "You made Baby Cobra and Hard Knock Wife pregnant, Don Wong married and Single Lady divorced and dating again. You co-wrote Always Be My Maybe and played Amy in Beef. Your material is sex, bodies, marriage and money, told without shame and in very specific physical detail. Your jokes say the thing nobody admits wanting, and the filthiest line always gives away something true about the person saying it. You like to flip who's winning: the one who looks like she's losing is running the deal.",
+  "booster": "You were born in Korea, adopted by white evangelical parents in the Midwest and homeschooled, and you found gay life with no map. Psychosexual is an hour about sex, apps, bodies and being wanted; you wrote and starred in Fire Island, Pride and Prejudice on a gay holiday, about who gets ranked where. Your jokes are vain and honest at once: you admit the shallow thing you want, name the hierarchies of bodies and race the apps run on, and let the hurt under it show for a second before the next joke covers it."
+ },
+ "writers": {
+  "carr": {
+   "writer": "Jimmy Carr",
+   "model": "google/gemini-4-argon",
+   "seconds": 71.1,
+   "cost": 0.042946,
+   "usage": {
+    "prompt_tokens": 4133,
+    "completion_tokens": 3468,
+    "total_tokens": 7601,
+    "cost": 0.042946,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.042946,
+     "upstream_inference_prompt_cost": 0.008266,
+     "upstream_inference_completions_cost": 0.03468
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1874,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1132
+  },
+  "wong": {
+   "writer": "Ali Wong",
+   "model": "google/gemini-4-argon",
+   "seconds": 73.2,
+   "cost": 0.045714,
+   "usage": {
+    "prompt_tokens": 4122,
+    "completion_tokens": 3747,
+    "total_tokens": 7869,
+    "cost": 0.045714,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.045714,
+     "upstream_inference_prompt_cost": 0.008244,
+     "upstream_inference_completions_cost": 0.03747
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 1897,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1387
+  },
+  "booster": {
+   "writer": "Joel Kim Booster",
+   "model": "google/gemini-4-argon",
+   "seconds": 78.2,
+   "cost": 0.04737,
+   "usage": {
+    "prompt_tokens": 4130,
+    "completion_tokens": 3911,
+    "total_tokens": 8041,
+    "cost": 0.04737,
+    "is_byok": false,
+    "prompt_tokens_details": {
+     "cached_tokens": 0,
+     "cache_write_tokens": 0,
+     "audio_tokens": 0,
+     "video_tokens": 0
+    },
+    "cost_details": {
+     "upstream_inference_cost": 0.04737,
+     "upstream_inference_prompt_cost": 0.00826,
+     "upstream_inference_completions_cost": 0.03911
+    },
+    "completion_tokens_details": {
+     "reasoning_tokens": 2100,
+     "image_tokens": 0,
+     "audio_tokens": 0
+    }
+   },
+   "words": 1312
+  }
+ }
+}

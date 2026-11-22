@@ -206,6 +206,42 @@ TEXTING["v8"] = False
 GROUPED = {"v6", "v7", "v8"}
 SHORT_BRIEF = {"v8"}  # versions that get brief_short()
 JOKE_FIRST = {"v7", "v8"}  # versions whose chat answer is "## The joke" then "## The chat", saved apart
+# v9: the short brief for both tasks. The character task gives the game's notes shuffled per writer,
+# with no headings and the claims apart from what's true; the writer states their own take first and
+# picks the form. The chat is worked out as a bit under "## The bit" (the idea and how they found it,
+# why it's funny, why it's Pinder), with no punchline written in advance and no required first speaker.
+PROMPTS["v9"] = dict(PROMPTS["v8"], user="""{brief}
+
+# Your task
+
+Pinder needs a character: {char} ({pronouns}). Below are notes about {obj} from the game's files, in no particular order. Some are better than others, and a few contradict each other. They're raw material, not a spec: keep the two or three that make you laugh, change them, or ignore them all and invent {obj} yourself.
+
+Start with your take on {obj}: in a few lines, what's funny about {obj} to you, the thing you'd build a bit on. Then write {obj} in whatever form you'd want in hand later: notes, a list, a monologue in {poss} voice, anything. Make it as long as it's useful to you, and no longer. Somewhere in it, say how {subj} types.
+
+Later you'll write a chat between {obj} and another Pinder character, working from what you write here and nothing else.
+
+## Notes on {char}
+
+{tidbits}
+""", chat=PROMPTS["v8"]["chat"][:PROMPTS["v8"]["chat"].index("# The chat")] + """# The chat
+
+Write their chat on the app: a comedy bit to be read on a phone. One idea, played out, ending on the laugh. Use as much or as little of the characters as the bit needs.
+
+First, under the heading "## The bit", work it out. This is for you; the reader never sees it.
+
+1. The idea. What comic premise do you see in these two together, the thing you'd build a bit on? And how did you get there: what in the material caught you, what you're exaggerating or turning around, how you usually find a bit and how you found this one. Don't write the punchline here. Say what kind of turn it will be and why it follows from the premise.
+2. Why it's funny. What does the reader expect, what do they get instead, and why does that gap make them laugh? "Because it's true" or "because it's sad" is not an answer: say where the laugh is.
+3. Why it's Pinder. What about dating apps does this make fun of (a belief, a habit, a phrase people say with a straight face), and how do these two make it ridiculous? The reader should laugh at it first and recognise themselves second.
+
+Then, under the heading "## The chat", write the chat: no longer than {words} words (shorter is fine), one message per line, as "{a}: message" or "{b}: message", and nothing else under that heading.
+
+It's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.
+""")
+assert PROMPTS["v9"]["chat"].startswith("{brief}") and "{a} first" not in PROMPTS["v9"]["chat"]
+TEXTING["v9"] = False
+SHORT_BRIEF = {"v8", "v9"}
+JOKE_FIRST = {"v7", "v8", "v9"}  # v9's heading is "## The bit"; it is saved as <writer>.joke.md like the joke
+LOOSE = {"v9"}  # versions that give the notes ungrouped, shuffled per writer, claims apart from truths
 
 
 def split_joke(text):
@@ -213,10 +249,10 @@ def split_joke(text):
     m = re.search(r"^(?:#{1,4}\s*|\*\*)The chat(?:\*\*)?:?\s*$", text, re.I | re.M)
     if not m:
         return None
-    joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The joke(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
+    joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v8")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v9")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -282,6 +318,31 @@ def brief():
     return brief_short() if VERSION in SHORT_BRIEF else brief_full()
 
 
+def tidbits_loose(d, items, wid):
+    """The game's notes as one list with no headings, shuffled with a seed of the writer's own: the app
+    profile, personality and backstory fragments, each claim and each truth as separate notes, and the
+    fears. No texting fragments and no physique."""
+    pron = d.get("gender_identity", "they/them")
+    p = POSS.get(pron, "their")
+    out = [f"{p.capitalize()} profile on the app: {d['bio'].strip()}"]
+    for iid in d["items"]:
+        it = items[iid]
+        for k in ("personality_fragment", "backstory_fragment"):
+            if (it.get(k) or "").strip():
+                out.append(it[k].strip())
+    for cat, v in d["backstory_categories"].items():
+        if cat == "physical_dysmorphia":
+            continue
+        out += [v["bio_lie"].strip(), v["tragic_reality"].strip()]
+    for line in d.get("psychological_stake", "").splitlines():
+        line = line.strip().lstrip("- ").strip()
+        if line and "about my body" not in line:
+            out.append(line)
+    out += [x.strip() for x in d.get("stake_lines", []) if x.strip()]
+    random.Random(f"{SEED}-{wid}").shuffle(out)
+    return "\n".join("- " + x for x in out)
+
+
 def tidbits(d, items, texting=None):
     if texting is None and VERSION in GROUPED:
         return tidbits_grouped(d, items)
@@ -335,12 +396,12 @@ def fan_out(jobs, key, out, label):
             parts = split_joke(text)
             if not parts:
                 results[wid]["error"] = "no \"## The joke\" and \"## The chat\" headings in the answer (kept in .raw.md)"
-                print(f"{label} {wid}: no joke/chat headings; answer kept in {wid}.raw.md", flush=True)
+                print(f"{label} {wid}: no bit/chat headings; answer kept in {wid}.raw.md", flush=True)
                 return
             joke, text = parts
             results[wid].update(words=len(text.split()), joke_words=len(joke.split()))
             lines = [ln.split(":", 1)[1].strip() for ln in text.splitlines() if ":" in ln]
-            if lines:
+            if lines and VERSION == "v8":  # only v8 states its punchline word for word
                 norm = lambda s: re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
                 results[wid]["punchline_is_last"] = norm(lines[-1]) in norm(joke)
             with open(os.path.join(out, f"{wid}.joke.md"), "w", encoding="utf-8") as f:
@@ -394,9 +455,14 @@ def main():
         def one(slug):
             d = json.load(open(os.path.join(REPO, "data/characters", f"{slug}.json"), encoding="utf-8"))
             pron = d.get("gender_identity", "they/them")
-            user = USER.format(brief=brief(), char=d["name"], pronouns=pron, obj=OBJ.get(pron, "them"),
-                               subj=SUBJ.get(pron, "they"), tidbits=tidbits(d, items))
-            done[slug] = fan_out([(w, n, user) for w, n in chosen], key, os.path.join(a.out, slug), slug)
+            fill = dict(brief=brief(), char=d["name"], pronouns=pron, obj=OBJ.get(pron, "them"),
+                        subj=SUBJ.get(pron, "they"), poss=POSS.get(pron, "their"))
+            if VERSION in LOOSE:  # each writer gets the notes in an order of their own
+                jobs = [(w, n, USER.format(tidbits=tidbits_loose(d, items, w), **fill)) for w, n in chosen]
+            else:
+                user = USER.format(tidbits=tidbits(d, items), **fill)
+                jobs = [(w, n, user) for w, n in chosen]
+            done[slug] = fan_out(jobs, key, os.path.join(a.out, slug), slug)
 
         ts = [threading.Thread(target=one, args=(s,)) for s in slugs]
         for t in ts:

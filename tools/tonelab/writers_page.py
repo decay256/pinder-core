@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v10", "Run 10: the bit, and room", "writers-v10",
+     "Run 10. The same three comedians write both characters and the chat again, all from the brief cut to what Pinder is and what the reader should feel. Each writer gets the game's notes about a character in an order of their own, with no headings and with each claim apart from what's true; they start with their own take on the character and write it in whatever form they want. The chat is worked out first as a bit, under \"The bit\": the comic idea and how they found it (without the punchline), why it's funny, and why it's Pinder. Then the chat, at most 500 words, with either character free to start.", None),
     ("v9", "Run 9: one punchline, short brief", "writers-v9",
      "Run 9. Run 7's profiles, unchanged, and a new chat session for the same three comedians. The brief is cut to what Pinder is and what the reader should feel; the how, the medium, how they write and the writer's job are gone. The chat is one joke with one punchline: under \"The joke\" the writer gives the punchline (the chat's last message, word for word), the joke in one sentence, and why it is Pinder; then the chat, at most 500 words, ending on the punchline, using only what the joke needs.", "run 7"),
     ("v8", "Run 8: the joke first", "writers-v8",

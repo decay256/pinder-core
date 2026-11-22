@@ -186,7 +186,7 @@ function render() {
   if (st.v === "chat") {
     view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, written from the brief and those two profiles.</p>` + chatHTML(w.chat);
   } else if (st.v === "joke") {
-    view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked out the joke and why it is the right one for these two. The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
+    view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked it out under its own heading, as the prompt asked (How it was made has the exact wording). The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
   } else if (st.v === "how") {
     view.innerHTML = howHTML(run, w);
   } else {

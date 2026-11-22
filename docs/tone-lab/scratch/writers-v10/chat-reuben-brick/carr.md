@@ -1,0 +1,14 @@
+Reuben_404: Evening. Full disclosure before you squint: 4.5 inches, bends hard left like a Wotsit, and the kanji on the base means "dishwasher-safe." *Tips bespoke top hat.*
+Reuben_404: Christ, I replied in four seconds. Don't panic, I'm between lines of stealth-mode code.
+Reuben_404: Look at me, already my own warm-up act. *Bows into an empty room.*
+Brick_haus: "Stealth-mode." Translation: you have been unemployed for nine months and your heating is off. Humor noted; filing under pre-emptive defense.
+Brick_haus: My disclosures, so we stay on schedule: dorsal bump on the bridge; a tip that finishes shorter than expected; untidy base hair, which is deliberate. I have twenty minutes Thursday at 9:10 p.m., with a fifteen-minute buffer.
+Reuben_404: Hang on—you're mugging yourself before I get my wallet out. That's my bit. *Adjusts hat.*
+Reuben_404: I don't need a buffer, darling. My first time lasted ninety seconds with one boot on, I faked a calf cramp on her rug, and she said "Oh—okay" so gently I became a comedian just so nobody would ever pity me again.
+Reuben_404: Next girl, the curve caught wrong and she whispered "We can just watch something." Your monocle doesn't scare me. *Bows.*
+Brick_haus: "Pity." You heckle yourself so nobody else gets the microphone. I do not do pity; I do logistics.
+Brick_haus: I grew up turning sideways past the fridge and got cropped out of the family portrait. The waistcoat, heels, and monocle are forensic proof I am in the room. Marguerite left because I put our arguments in a shared calendar with hard stops; an adjourned meeting cannot break your heart.
+Reuben_404: Since we are comparing darkroom casualties, I was cropped from the family portrait at nine to fit my cousin, and last year I vanished from a work calendar invite for three weeks without anyone noticing; consequently, I am wearing a winter coat indoors with a ring-light clamped to my headboard solely to erase my curved shadow from the wall, largely because Delphine left after observing I had never once uttered a sentence that wasn't a performance. *Tips hat, less jauntily.*
+Brick_haus: "Performance." 1. My flat is only minimalist because I binned everything Marguerite touched and drink boxed rosé at 9:00 p.m. so loneliness looks like a regimen. 2. My schedule is tattooed down my shaft, except 9:30 p.m. onwards is unfinished because a hookup arrived forty minutes early. 3. Last time a man said "let's do this again sometime" without naming a day, I cried in the Uber, and I just knocked my ring light over because I want someone to take the clipboard, set the exact times, and talk about something boring afterwards until I forget the clock.
+Reuben_404: come over at 9:30, hold me down so i can't do the voice, and don't leave until tuesday.
+Brick_haus: Confirmed, Reuben. Accounting for your ninety-second runtime, that leaves forty-seven hours, fifty-eight minutes, and thirty seconds to discuss your commute; do not be late.
