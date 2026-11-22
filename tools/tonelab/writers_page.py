@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v13", "Run 13: turn by turn, any number of messages", "writers-v13",
+     "Run 13. Run 12 again, with one change: the chat prompt and the end of each turn's account no longer ask for \"Reuben's message and Brick's reply\", which made every turn of run 12 exactly two lines. They now ask for what Reuben sends this turn and what Brick sends back, however many messages that takes. Everything else is run 12's: run 11's briefs and characters, seed 23's dice, the same pieces, eleven turns in one session, at most 500 words in all.", "run 11"),
     ("v12", "Run 12: turn by turn on the dice", "writers-v12",
      "Run 12. Run 11's comedians, with their own briefs and their characters from run 11, unchanged. The chat is now played turn by turn on seed 23's dice, in one session: each turn the comedian gets the game's account of what happened (which stat Reuben rolled and what it means, how well it went, the stat's shadow on a miss, traps, steering, combos, and how Brick's interest moved) and writes Reuben's message and Brick's reply. Every account is put together from fixed pieces of text, so the same dice always give the same words. Eleven turns, at most 500 words in all, set up early and paid off at the end.", "run 11"),
     ("v11", "Run 11: their own brief, both at once", "writers-v11",

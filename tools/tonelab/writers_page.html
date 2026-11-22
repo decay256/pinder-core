@@ -161,7 +161,7 @@ function howHTML(run, w) {
   const flow = run.turns ? `<ol class="flow">
     <li>In run 11, ${esc(w.name)} rewrote Pinder's brief (the short one) in their own words, in a session of its own.</li>
     <li>In run 11, in a new session, they wrote a short take on both characters and how the two clash or click, from their own brief and the game's notes.</li>
-    <li>A new session for the chat, played turn by turn on seed ${esc(String(run.seed))}: the same system prompt, their own brief and that text, then the game's account of turn 1. They answer with ${esc(D.names.reuben)}'s message and ${esc(D.names.brick)}'s reply, and the next turn's account comes in the same session: ${run.nturns} turns in all. Each account is put together from fixed pieces of text by what the dice did.</li>
+    <li>A new session for the chat, played turn by turn on seed ${esc(String(run.seed))}: the same system prompt, their own brief and that text, then the game's account of turn 1. They answer with what ${esc(D.names.reuben)} sends and what ${esc(D.names.brick)} sends back, and the next turn's account comes in the same session: ${run.nturns} turns in all. Each account is put together from fixed pieces of text by what the dice did.</li>
   </ol>` : run.paired ? `<ol class="flow">
     <li>${esc(w.name)} rewrites Pinder's brief (the short one: what Pinder is and what the reader should feel) in their own words: a session of its own.</li>
     <li>A new session: the same system prompt, their own brief from step 1, and the game's notes on both characters. They write a short take on each and how the two clash or click.</li>

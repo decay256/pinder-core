@@ -318,7 +318,11 @@ Each turn, I tell you how the game goes for {a}. You write {a}'s message and {b}
 
 {turn}
 """)
-TURNS = {"v11"}  # versions run with --turns
+# v12: as v11, but neither the intro nor the turn's closing piece fixes the turn at one message each.
+PROMPTS["v12"] = dict(PROMPTS["v11"], chat=PROMPTS["v11"]["chat"].replace(
+    'Each turn, I tell you how the game goes for {a}. You write {a}\'s message and {b}\'s reply, one message per line, as "{a}: message" or "{b}: message", and nothing else.',
+    'Each turn, I tell you how the game goes for {a}. You write what {a} sends and what {b} sends back, however many messages that takes: one message per line, as "{a}: message" or "{b}: message", and nothing else.'))
+TURNS = {"v11", "v12"}  # versions run with --turns
 PRON = {"he/him": dict(he="he", him="him", his="his", himself="himself"),
         "she/her": dict(he="she", him="her", his="her", himself="herself"),
         "they/them": dict(he="they", him="them", his="their", himself="themselves")}
@@ -401,7 +405,8 @@ P_SWING = "{B}'s interest goes from {x} to {y}: {b_he} {swing}, and {b_his} repl
 P_FLAT = "{B}'s interest stays at {x}: {b_he} neither gained nor lost interest, and {b_his} reply carries that. {band}"
 P_SWINGS = [(-99, -3, "lost a lot of interest"), (-2, -1, "lost a little interest"), (1, 2, "gained a little interest"),
             (3, 99, "gained a lot of interest")]
-P_CLOSE = "Your improvisation: {A}'s message and {B}'s reply."
+P_CLOSES = {"v11": "Your improvisation: {A}'s message and {B}'s reply.",
+            "v12": "Your improvisation: what {A} sends this turn, and what {B} sends back."}
 
 
 def _pick(table, n):
@@ -470,7 +475,7 @@ def turn_texts(m, a_name, a_pron, b_name, b_pron):
         x, y = tn["interest_before"], tn["interest_after"]
         ps.append(fill(P_FLAT, x=x, band=band(y)) if x == y else
                   fill(P_SWING, x=x, y=y, swing=_pick(P_SWINGS, y - x), band=band(y)))
-        ps.append(fill(P_CLOSE))
+        ps.append(fill(P_CLOSES[VERSION]))
         if k == 0:
             ps = [fill(P_TIME, clock=clock, heat=_pick(P_HEAT, m["session_horniness"])),
                   fill(P_START, n=tn["interest_before"], band=band(tn["interest_before"]))] + ps
@@ -486,7 +491,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v11")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v12")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
