@@ -91,8 +91,9 @@ summary { cursor: pointer; font-weight: 600; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script>
 const D = __DATA__;
-const VIEWS = [["chat", "Chat"], ["joke", "The joke"], ["reuben", "Reuben"], ["brick", "Brick"], ["how", "How it was made"]];
-const viewsFor = w => VIEWS.filter(([v]) => v !== "joke" || w.joke);
+const VIEWS = [["chat", "Chat"], ["joke", "The joke"], ["characters", "The characters"], ["reuben", "Reuben"], ["brick", "Brick"], ["ownbrief", "Their brief"], ["how", "How it was made"]];
+const viewsFor = w => VIEWS.filter(([v]) => v === "how" || w[v]);
+const TAB = { reuben: "the Reuben tab", brick: "the Brick tab", characters: "The characters tab", ownbrief: "the Their brief tab" };
 let st = { r: D.runs[0].id, w: D.runs[0].writers[0].id, v: "chat" };
 const R = () => D.runs.find(x => x.id === st.r) || D.runs[0];
 
@@ -135,6 +136,8 @@ const fmt = n => n.toLocaleString("en-GB");
 function segText(seg, w) {
   if (seg.t === "md") return seg.s;
   if (seg.t === "brief") return D.briefs[seg.id];
+  if (seg.t === "ownbrief") return w.ownbrief;
+  if (seg.t === "chars") return w.characters;
   return w[seg.who];
 }
 function segHTML(seg, w) {
@@ -143,20 +146,28 @@ function segHTML(seg, w) {
     const b = D.briefs[seg.id];
     return `<details class="insert"><summary>The brief · ${fmt(words(b))} words</summary>${docHTML(b)}</details>`;
   }
+  if (seg.t === "ownbrief")
+    return `<details class="insert"><summary>Pinder's brief, as ${esc(w.name)} rewrote it in step 1 · ${fmt(words(w.ownbrief))} words</summary>${docHTML(w.ownbrief)}</details>`;
+  if (seg.t === "chars")
+    return `<details class="insert"><summary>The two characters, as ${esc(w.name)} wrote them in step 2 · ${fmt(words(w.characters))} words</summary>${docHTML(w.characters)}</details>`;
   const n = D.names[seg.who];
   return `<details class="insert"><summary>${esc(n)}, as ${esc(w.name)} wrote ${D.pron[seg.who]} in step ${seg.who === "reuben" ? 1 : 2} ·${fmt(words(w[seg.who]))} words</summary>${docHTML(w[seg.who])}</details>`;
 }
 function howHTML(run, w) {
   const from = run.profiles_from ? ` in ${run.profiles_from}` : "";
-  const flow = `<ol class="flow">
+  const flow = run.paired ? `<ol class="flow">
+    <li>${esc(w.name)} rewrites Pinder's brief (the short one: what Pinder is and what the reader should feel) in their own words: a session of its own.</li>
+    <li>A new session: the same system prompt, their own brief from step 1, and the game's notes on both characters. They write a short take on each and how the two clash or click.</li>
+    <li>A new session for the chat: the same system prompt, their own brief, and what they wrote in step 2, pasted in as written. Nothing else from those sessions carries over.</li>
+  </ol>` : `<ol class="flow">
     <li>${esc(w.name)} writes ${esc(D.names.reuben)}${from}: a session of its own, with the system prompt, then the brief, then the task and the game's fragments for him.</li>
     <li>${esc(w.name)} writes ${esc(D.names.brick)}${from}: another session of its own, the same way, at the same time.</li>
     <li>A new session for the chat: the same system prompt, the brief, and the two profiles from steps 1 and 2, pasted in as written. Nothing else from those sessions carries over.</li>
   </ol>`;
-  const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, chat: "Step 3 · The chat" };
+  const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, ownbrief: "Step 1 · Their brief", characters: "Step 2 · The characters", chat: "Step 3 · The chat" };
   const cards = w.steps.map((s, i) => {
     const raw = "<!-- system prompt -->\n" + s.system + "\n\n<!-- user message -->\n" + s.user.map(x => segText(x, w)).join("");
-    const out = s.slug === "chat" ? (w.joke ? `The joke, ${fmt(words(w.joke))} words, on The joke tab; then the chat, ${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w.chat))} words, on the Chat tab`) : `${fmt(words(w[s.slug]))} words, on the ${s.slug === "reuben" ? "Reuben" : "Brick"} tab`;
+    const out = s.slug === "chat" ? (w.joke ? `The joke, ${fmt(words(w.joke))} words, on The joke tab; then the chat, ${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w.chat))} words, on the Chat tab`) : `${fmt(words(w[s.slug]))} words, on ${TAB[s.slug]}`;
     return `<section class="step"><h2>${esc(titles[s.slug])}<small>session ${i + 1} of 3${s.slug !== "chat" ? from : ""}</small></h2>${s.note ? `<p class="meta">${esc(s.note)}</p>` : ""}
       <div class="role">System prompt</div>${docHTML(s.system)}
       <div class="role">User message</div>${s.user.map(x => segHTML(x, w)).join("")}
@@ -184,9 +195,13 @@ function render() {
   }).join("");
   const view = document.getElementById("view");
   if (st.v === "chat") {
-    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, written from the brief and those two profiles.</p>` + chatHTML(w.chat);
+    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat);
   } else if (st.v === "joke") {
     view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked it out under its own heading, as the prompt asked (How it was made has the exact wording). The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
+  } else if (st.v === "characters") {
+    view.innerHTML = `<p class="meta">${esc(w.name)}'s take on both characters and how the two clash or click, written in one session from their own brief and the game's notes on both.</p>` + docHTML(w.characters);
+  } else if (st.v === "ownbrief") {
+    view.innerHTML = `<p class="meta">Pinder's brief, as ${esc(w.name)} rewrote it in their own words from the short brief. It is the brief they read in both later sessions.</p>` + docHTML(w.ownbrief);
   } else if (st.v === "how") {
     view.innerHTML = howHTML(run, w);
   } else {

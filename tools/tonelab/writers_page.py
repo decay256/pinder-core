@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v11", "Run 11: their own brief, both at once", "writers-v11",
+     "Run 11. Each comedian first rewrites the short brief in their own words, and that text is their brief from then on. Then one session with the game's notes on both characters: a short take on each (what's funny about them, the one thing they're afraid of, about 150 words each) and how the two clash or click in a way nobody would expect. Then the chat, from their own brief and that text alone: one joke or a run of jokes, at most 500 words, set up early and paid off at the end, so the last message picks up something from the beginning. Only the chat comes back.", None),
     ("v10", "Run 10: the bit, and room", "writers-v10",
      "Run 10. The same three comedians write both characters and the chat again, all from the brief cut to what Pinder is and what the reader should feel. Each writer gets the game's notes about a character in an order of their own, with no headings and with each claim apart from what's true; they start with their own take on the character and write it in whatever form they want. The chat is worked out first as a bit, under \"The bit\": the comic idea and how they found it (without the punchline), why it's funny, and why it's Pinder. Then the chat, at most 500 words, with either character free to start.", None),
     ("v9", "Run 9: one punchline, short brief", "writers-v9",
@@ -81,12 +83,20 @@ for rid, label, sub, about, profiles_from in RUNS:
     for wid, name in w.WRITERS:
         if wid not in rec or "error" in rec[wid]:
             continue
-        texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
+        paired = os.path.isdir(os.path.join(O, "characters"))
+        if paired:  # run 11 on: their own brief, then both characters in one session
+            texts = {"ownbrief": read(os.path.join(O, "brief", f"{wid}.md")), "characters": read(os.path.join(O, "characters", f"{wid}.md")),
+                     "reuben": None, "brick": None}
+        else:
+            texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
+            texts.update(ownbrief=None, characters=None)
         texts["chat"] = read(os.path.join(O, "chat-reuben-brick", f"{wid}.md"))
         jp = os.path.join(O, "chat-reuben-brick", f"{wid}.joke.md")
         texts["joke"] = read(jp) if os.path.exists(jp) else None
         steps = []
-        for i, (slug, folder) in enumerate((("reuben", "reuben"), ("brick", "brick"), ("chat", "chat-reuben-brick"))):
+        order = (("ownbrief", "brief"), ("characters", "characters"), ("chat", "chat-reuben-brick")) if paired else \
+            (("reuben", "reuben"), ("brick", "brick"), ("chat", "chat-reuben-brick"))
+        for i, (slug, folder) in enumerate(order):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
             note = None
             if os.path.exists(pp):
@@ -116,7 +126,13 @@ for rid, label, sub, about, profiles_from in RUNS:
                 stats["brief folded"] += 1
             else:
                 stats["brief not found"] += 1
-            if slug == "chat":
+            if paired and slug != "ownbrief":
+                inserts.append((texts["ownbrief"], {"t": "ownbrief"}))
+                stats["own brief folded"] = stats.get("own brief folded", 0) + (texts["ownbrief"] in user)
+            if paired and slug == "chat":
+                inserts.append((texts["characters"], {"t": "chars"}))
+                stats["characters folded"] = stats.get("characters folded", 0) + (texts["characters"] in user)
+            if slug == "chat" and not paired:
                 for s in ("reuben", "brick"):
                     if texts[s] in user:
                         inserts.append((texts[s], {"t": "profile", "who": s}))
@@ -125,8 +141,9 @@ for rid, label, sub, about, profiles_from in RUNS:
                         stats["profile not found"] += 1
             steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
         writers.append({"id": wid, "name": name, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
-                        "brick": texts["brick"], "steps": steps})
+                        "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps})
     runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
+                 "paired": os.path.isdir(os.path.join(O, "characters")),
                  "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),
                  "reasoning": meta.get("reasoning"), "writers": writers})
 data = {"player": NAME["reuben"], "match": NAME["brick"], "names": NAME, "pron": PRON, "briefs": briefs, "runs": runs}

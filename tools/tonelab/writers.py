@@ -242,6 +242,54 @@ TEXTING["v9"] = False
 SHORT_BRIEF = {"v8", "v9"}
 JOKE_FIRST = {"v7", "v8", "v9"}  # v9's heading is "## The bit"; it is saved as <writer>.joke.md like the joke
 LOOSE = {"v9"}  # versions that give the notes ungrouped, shuffled per writer, claims apart from truths
+# v10 (--pair): three sessions per writer. The writer first rewrites the short brief in their own words;
+# that text is their brief from then on. Then one session sees both characters' notes and writes a
+# short take on each (what's funny, what they're afraid of) and how the two clash or click. Then the
+# chat, from their own brief and that text alone: one joke or a run of jokes, set up early and paid off
+# at the end, chat only.
+OWN_BRIEF = """Here's Pinder's brief, as you put it in your own words.
+
+{own}
+"""
+PROMPTS["v10"] = dict(PROMPTS["v9"], brief_task="""{brief}
+
+# Your task
+
+Rewrite this brief in your own words.
+""", user=OWN_BRIEF + """
+# Your task
+
+Two of Pinder's characters are about to match: {a} ({a_pron}) and {b} ({b_pron}). Below are notes about each of them from the game's files, in no particular order. Some are better than others, and a few contradict each other. They're raw material, not a spec: keep what makes you laugh, change it, or ignore it and invent.
+
+Write your take on each of them: what's funny about them to you, and the one thing they're afraid of, in no more than about 150 words each. Then say how the two of them clash, or click, in a way nobody would expect: the thing you'd build a bit on. Use the headings "## {a}", "## {b}" and "## The two of them".
+
+Keep it short. This is what you'll have in hand when you write their chat, and nothing else.
+
+# Notes on {a}
+
+{a_notes}
+
+# Notes on {b}
+
+{b_notes}
+""", chat=OWN_BRIEF + """
+# Your task
+
+Here's what you wrote about the two characters.
+
+{characters}
+
+# The chat
+
+Improvise their chat on the app: one joke, or a run of jokes, no longer than {words} words. Set something up early and pay it off at the end, so the last message picks up something from the beginning and the chat feels rounded. End on the laugh.
+
+Write only the chat: one message per line, as "{a}: message" or "{b}: message".
+
+It's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.
+""")
+TEXTING["v10"] = False
+SHORT_BRIEF = {"v8", "v9", "v10"}
+PAIRED = {"v10"}  # versions run with --pair: own brief, then both characters in one session, then the chat
 
 
 def split_joke(text):
@@ -252,7 +300,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v9")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v10")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -433,11 +481,47 @@ def fan_out(jobs, key, out, label):
     return not any("error" in r for r in results.values())
 
 
+def pair(a, chosen, key):
+    """v10: per writer, their own brief, then both characters in one session, then the chat."""
+    x, y = a.pair.split(",")
+    items = {it["id"]: it for it in json.load(open(os.path.join(REPO, "data/items/starter-items.json"), encoding="utf-8"))}
+    ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
+    P = PROMPTS[VERSION]
+    ok = fan_out([(w, n, P["brief_task"].format(brief=brief())) for w, n in chosen], key, os.path.join(a.out, "brief"), "brief")
+
+    def done(folder, w):
+        p = os.path.join(a.out, folder, f"{w}.md")
+        return open(p, encoding="utf-8").read().strip() if os.path.exists(p) else None
+
+    jobs = []
+    for w, n in chosen:
+        own = done("brief", w)
+        if not own:
+            print(f"characters {w}: no brief of their own, skipped", flush=True)
+            ok = False
+            continue
+        jobs.append((w, n, P["user"].format(own=own, a=ds[x]["name"], b=ds[y]["name"],
+                                            a_pron=ds[x].get("gender_identity", "they/them"),
+                                            b_pron=ds[y].get("gender_identity", "they/them"),
+                                            a_notes=tidbits_loose(ds[x], items, w), b_notes=tidbits_loose(ds[y], items, w))))
+    ok = fan_out(jobs, key, os.path.join(a.out, "characters"), "characters") and ok
+    jobs = []
+    for w, n in chosen:
+        own, chars = done("brief", w), done("characters", w)
+        if not (own and chars):
+            print(f"chat {w}: missing their brief or characters, skipped", flush=True)
+            ok = False
+            continue
+        jobs.append((w, n, P["chat"].format(own=own, characters=chars, a=ds[x]["name"], b=ds[y]["name"], words=a.words)))
+    return fan_out(jobs, key, os.path.join(a.out, f"chat-{x}-{y}"), "chat") and ok
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--key-stdin", action="store_true")
     ap.add_argument("--only", default="", help="write this character's profiles")
     ap.add_argument("--chat", default="", help="a,b: each writer writes a chat between their a and b")
+    ap.add_argument("--pair", default="", help="a,b: v10's three sessions per writer (own brief, both characters, chat)")
     ap.add_argument("--writers", default="")
     ap.add_argument("--words", type=int, default=500, help="the chat's word limit, for prompt versions that have one")
     ap.add_argument("--out", default=os.path.join(REPO, "docs/tone-lab/scratch/writers"))
@@ -447,6 +531,10 @@ def main():
     key = sys.stdin.readline().strip().lstrip("﻿").strip()
     chosen = [w for w in WRITERS if not a.writers or w[0] in a.writers.split(",")]
     ok = True
+    if a.pair:
+        if VERSION not in PAIRED:
+            tl.die(f"writers: --pair needs a paired prompt version, not {VERSION}")
+        ok = pair(a, chosen, key)
     if a.only:
         items = {it["id"]: it for it in json.load(open(os.path.join(REPO, "data/items/starter-items.json"), encoding="utf-8"))}
         slugs = a.only.split(",")
