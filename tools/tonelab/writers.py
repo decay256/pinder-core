@@ -13,7 +13,7 @@ between them would go on Pinder, with no constraints: no dice, no turns, no leng
     python3 -I tools/tonelab/writers.py --key-stdin --chat reuben,brick    # chats from the profiles
     python3 -I tools/tonelab/writers.py --key-stdin --only reuben --chat reuben,brick
 """
-import argparse, json, os, random, sys, threading, time
+import argparse, json, os, random, re, sys, threading, time
 
 REPO = "/root/projects/pinder-core"
 sys.path.insert(0, os.path.join(REPO, "tools", "tonelab"))
@@ -166,8 +166,37 @@ Write it as a joke. It will be read, not performed: nobody hears your voice or y
 """,
 }
 TEXTING = {"v1": True, "v2": True, "v3": False, "v4": False, "v5": False, "v6": False}
-GROUPED = {"v6"}  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v6")
+# v7: v6, with the chat task asking first for the joke and why it is the right joke for these two.
+PROMPTS["v7"] = dict(PROMPTS["v6"], chat=PROMPTS["v6"]["chat"].replace("""# The chat
+
+Write their chat on the app, no longer than {words} words. {a} writes first.
+
+Write it as a joke. It will be read, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends. And write it in Pinder's spirit: put a finger in the wound of dating apps, through these two.
+""", """# The chat
+
+You'll write their chat on the app as a joke. Before you write it, work the joke out.
+
+First, under the heading "## The joke", say what the joke is and why it's the right joke for these two: the setup, where it turns, the punchline, and why it could only land on these two. A few sentences.
+
+Then, under the heading "## The chat", write the chat: no longer than {words} words, {a} first, one message per line, as "{a}: message" or "{b}: message", and nothing else under that heading.
+
+The chat is that joke, and it has to work without the explanation: the reader never sees it. It will be read, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends. And write it in Pinder's spirit: put a finger in the wound of dating apps, through these two.
+"""))
+assert PROMPTS["v7"]["chat"] != PROMPTS["v6"]["chat"]
+TEXTING["v7"] = False
+GROUPED = {"v6", "v7"}
+JOKE_FIRST = {"v7"}  # versions whose chat answer is "## The joke" then "## The chat", saved apart
+
+
+def split_joke(text):
+    """("joke", "chat") from an answer with a "## The joke" and a "## The chat" heading, else None."""
+    m = re.search(r"^(?:#{1,4}\s*|\*\*)The chat(?:\*\*)?:?\s*$", text, re.I | re.M)
+    if not m:
+        return None
+    joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The joke(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
+    chat = text[m.end():].strip()
+    return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v7")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -261,11 +290,24 @@ def fan_out(jobs, key, out, label):
         usage = data.get("usage") or {}
         results[wid] = {"writer": name, "model": data.get("model"), "seconds": seconds,
                         "cost": usage.get("cost"), "usage": usage, "words": len(text.split())}
+        if label == "chat" and VERSION in JOKE_FIRST:
+            with open(os.path.join(out, f"{wid}.raw.md"), "w", encoding="utf-8") as f:
+                f.write(text + "\n")
+            parts = split_joke(text)
+            if not parts:
+                results[wid]["error"] = "no \"## The joke\" and \"## The chat\" headings in the answer (kept in .raw.md)"
+                print(f"{label} {wid}: no joke/chat headings; answer kept in {wid}.raw.md", flush=True)
+                return
+            joke, text = parts
+            results[wid].update(words=len(text.split()), joke_words=len(joke.split()))
+            with open(os.path.join(out, f"{wid}.joke.md"), "w", encoding="utf-8") as f:
+                f.write(joke + "\n")
         with open(os.path.join(out, f"{wid}.md"), "w", encoding="utf-8") as f:
             f.write(text + "\n")
         with open(os.path.join(out, f"{wid}.prompt.md"), "w", encoding="utf-8") as f:
             f.write(f"<!-- system prompt -->\n{system_for(wid, name)}\n\n<!-- user prompt -->\n{user}")
-        print(f"{label} {wid}: {len(text.split())} words, {seconds}s, ${usage.get('cost')}", flush=True)
+        print(f"{label} {wid}: {len(text.split())} words, {seconds}s, ${usage.get('cost')}"
+              + (f", joke {results[wid]['joke_words']} words" if "joke_words" in results[wid] else ""), flush=True)
 
     threads = [threading.Thread(target=run, args=j) for j in jobs]
     for t in threads:

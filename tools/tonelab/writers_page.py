@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v8", "Run 8: the joke first", "writers-v8",
+     "Run 8. Run 7's profiles, unchanged, and a new chat session for the same three comedians. The chat task asks first for the joke, under its own heading: the setup, where it turns, the punchline, and why it could only land on these two. Then the chat under its own heading, at most 500 words, one message per line as \"Name: message\". The joke is saved apart from the chat; the chat is read and scored without it.", "run 7"),
     ("v7", "Run 7: the writer's own pitch", "writers-v7",
      "Run 7. Three of the comedians (Ali Wong, Joel Kim Booster, Jimmy Carr), each with a system prompt that says what they are known for and how they work, and that the brief comes first. The game's fragments are given as \"what we know\" about each character, under headings; the profile is written knowing it is for a short chat; the chat is written as a joke, to be read, in at most 500 words.", None),
     ("v6", "Run 6: 500 words", "writers-v6",
@@ -77,6 +79,8 @@ for rid, label, sub, about, profiles_from in RUNS:
             continue
         texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
         texts["chat"] = read(os.path.join(O, "chat-reuben-brick", f"{wid}.md"))
+        jp = os.path.join(O, "chat-reuben-brick", f"{wid}.joke.md")
+        texts["joke"] = read(jp) if os.path.exists(jp) else None
         steps = []
         for i, (slug, folder) in enumerate((("reuben", "reuben"), ("brick", "brick"), ("chat", "chat-reuben-brick"))):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
@@ -116,7 +120,7 @@ for rid, label, sub, about, profiles_from in RUNS:
                     else:
                         stats["profile not found"] += 1
             steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
-        writers.append({"id": wid, "name": name, "chat": texts["chat"], "reuben": texts["reuben"],
+        writers.append({"id": wid, "name": name, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
                         "brick": texts["brick"], "steps": steps})
     runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
                  "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),

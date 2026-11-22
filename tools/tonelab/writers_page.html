@@ -91,7 +91,8 @@ summary { cursor: pointer; font-weight: 600; }
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script>
 const D = __DATA__;
-const VIEWS = [["chat", "Chat"], ["reuben", "Reuben"], ["brick", "Brick"], ["how", "How it was made"]];
+const VIEWS = [["chat", "Chat"], ["joke", "The joke"], ["reuben", "Reuben"], ["brick", "Brick"], ["how", "How it was made"]];
+const viewsFor = w => VIEWS.filter(([v]) => v !== "joke" || w.joke);
 let st = { r: D.runs[0].id, w: D.runs[0].writers[0].id, v: "chat" };
 const R = () => D.runs.find(x => x.id === st.r) || D.runs[0];
 
@@ -105,15 +106,15 @@ function words(s) { return (s.trim().match(/\S+/g) || []).length; }
 
 function chatHTML(text) {
   const me = D.player, them = D.match;
-  const re = new RegExp("^\\s*(?:\\*\\*)?(" + me + "|" + them + ")(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.*)$");
+  const re = new RegExp("^\\s*(?:\\*\\*)?(" + me + "|" + them + ")(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.*)$", "i");
   let out = [], last = null;
   for (const raw of text.split("\n")) {
     const line = raw.replace(/\s+$/, "");
     if (!line.trim()) continue;
     const m = line.match(re);
     if (m) {
-      const who = m[1] === me ? "me" : "them";
-      if (who !== last) out.push(`<div class="who ${who}">${esc(m[1])}</div>`);
+      const who = m[1].toLowerCase() === me.toLowerCase() ? "me" : "them";
+      if (who !== last) out.push(`<div class="who ${who}">${esc(who === "me" ? me : them)}</div>`);
       out.push(`<div class="b ${who}">${esc(m[2].replace(/\*\*$/, ""))}</div>`);
       last = who;
     } else if (/^\s*(---|\*\*\*)\s*$/.test(line)) {
@@ -155,7 +156,7 @@ function howHTML(run, w) {
   const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, chat: "Step 3 · The chat" };
   const cards = w.steps.map((s, i) => {
     const raw = "<!-- system prompt -->\n" + s.system + "\n\n<!-- user message -->\n" + s.user.map(x => segText(x, w)).join("");
-    const out = s.slug === "chat" ? `${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w[s.slug]))} words, on the ${s.slug === "reuben" ? "Reuben" : "Brick"} tab`;
+    const out = s.slug === "chat" ? (w.joke ? `The joke, ${fmt(words(w.joke))} words, on The joke tab; then the chat, ${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w.chat))} words, on the Chat tab`) : `${fmt(words(w[s.slug]))} words, on the ${s.slug === "reuben" ? "Reuben" : "Brick"} tab`;
     return `<section class="step"><h2>${esc(titles[s.slug])}<small>session ${i + 1} of 3${s.slug !== "chat" ? from : ""}</small></h2>${s.note ? `<p class="meta">${esc(s.note)}</p>` : ""}
       <div class="role">System prompt</div>${docHTML(s.system)}
       <div class="role">User message</div>${s.user.map(x => segHTML(x, w)).join("")}
@@ -172,17 +173,20 @@ function render() {
   const run = R();
   if (!run.writers.some(x => x.id === st.w)) st.w = run.writers[0].id;
   const w = run.writers.find(x => x.id === st.w);
+  if (!viewsFor(w).some(([v]) => v === st.v)) st.v = "chat";
   document.getElementById("runs").innerHTML = D.runs.map(x =>
     `<button class="chip" id="r-${x.id}" aria-pressed="${x.id === run.id}" data-r="${x.id}">${esc(x.label)}</button>`).join("");
   document.getElementById("writers").innerHTML = run.writers.map(x =>
     `<button class="chip" id="w-${x.id}" aria-pressed="${x.id === st.w}" data-w="${x.id}">${esc(x.name)}</button>`).join("");
-  document.getElementById("tabs").innerHTML = VIEWS.map(([v, label]) => {
+  document.getElementById("tabs").innerHTML = viewsFor(w).map(([v, label]) => {
     const n = v === "how" ? "" : `<span>${words(w[v]).toLocaleString()}w</span>`;
     return `<button class="tab" role="tab" id="t-${v}" aria-selected="${v === st.v}" data-v="${v}">${label}${n}</button>`;
   }).join("");
   const view = document.getElementById("view");
   if (st.v === "chat") {
     view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, written from the brief and those two profiles.</p>` + chatHTML(w.chat);
+  } else if (st.v === "joke") {
+    view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked out the joke and why it is the right one for these two. The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
   } else if (st.v === "how") {
     view.innerHTML = howHTML(run, w);
   } else {
