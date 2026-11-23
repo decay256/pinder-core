@@ -1,0 +1,524 @@
+{
+ "id": "chat-writers-v14-booster",
+ "kind": "chat",
+ "label": "Run 14 · Joel Kim Booster",
+ "version": "run 14",
+ "order": 114,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v14/chat-reuben-brick/booster.md",
+ "note": "Written in one go by Joel Kim Booster from what they wrote about the two characters (run 14: run 13 told as improvisation instructions, without the game's language; traps two long). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 14,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3924,
+   "words": 639
+  },
+  "brief": {
+   "chars": 2792,
+   "words": 457
+  },
+  "chat_masked": {
+   "chars": 3698,
+   "words": 639
+  },
+  "chat_but_last": {
+   "chars": 3251,
+   "words": 527
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got all four for both and linked each fear to its habit. Silence and disappearing are tied to the breezy bit and the mirror rehearsal. Ambiguity is tied to scheduling, buffers and pre-emptive disclosure. Both endings follow from those fears: he asks to be scheduled and silenced, and she locks the calendar with conditions. It stops short of a 6 because the fears reach the reader mostly by being stated, and Reuben's origin reaches back only to the ex the profile also gives.",
+   "evidence": [
+    "panic-typing in a $400 top hat so the silence doesn't kill me",
+    "Better than crying in that cab because I trusted \"we'll figure it out.\"",
+    "I'll bring the ottoman and shut my mouth."
+   ],
+   "raise": "Let one of the two fears surface only through behaviour the reader has to read, so the reader infers it instead of quoting it.",
+   "def": "f019e7f239b9d82d",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "Two things come out sideways. Reuben is caught by \"four seconds flat\". Brick's cab wound is first projected onto \"men's code\" before she owns it. Everything else is volunteered outright, including both origins: Reuben recites his ex story unprompted, and Brick drops her Google Calendar ex as a flirt. Reuben's denial line simply lists his profile's secrets in the negative, which is statement wearing a disguise, not a slip.",
+   "evidence": [
+    "I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet",
+    "my ex dumped me because she begged for one sentence that wasn't a bit and I panicked",
+    "Also, you replied in four seconds flat, Mr. Barely Online."
+   ],
+   "raise": "Have Reuben's ex story come out because Brick catches a contradiction, not because he narrates it, and cut the denial line that lists his secrets.",
+   "def": "76152fd7f08caa41",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "Feelings are named again and again: \"I panicked\", \"so the silence doesn't kill me\", \"watching myself choke\", \"without the script I literally disappear\", and Brick's \"crying in that cab\". Even the ironic lines explain the want outright, as in \"just so I can finally shut up\". There is some underneath in Brick's executive deflections, such as the vest-steaming exits, but the dialogue mostly tells the reader what it is avoiding.",
+   "evidence": [
+    "without the script I literally disappear",
+    "I definitely do not want you to put my mouth on your calendar just so I can finally shut up",
+    "I'm literally watching myself choke"
+   ],
+   "raise": "Cut Reuben's three self-diagnoses down to none and let his flood of words, set against one sudden short reply, carry the fear.",
+   "def": "61d4f86460a218aa",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 2,
+   "why": "The reader found Reuben's drop, but it comes in long, run-on confessions that announce the feeling (\"without the script I literally disappear\"). These are among the longest lines in the chat, not the plainest. His closest thing to a real drop, \"shut my mouth\", is buried in a three-part demand. Brick's answer stays in her act (\"Invite sent... billing you for the rosé\"), so the night doesn't turn on a plain line.",
+   "evidence": [
+    "And there goes Thursday—I'm literally watching myself choke because I spent twenty minutes in the mirror practicing",
+    "No figuring it out: send me the Google invite for Thursday right now"
+   ],
+   "raise": "Replace the mirror confession with a short unjoking line from Reuben, such as just asking her to pick the day, that names nothing.",
+   "def": "b5a3a3c2e796783b",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe reader attributed all 31 messages correctly. Some of the reasons are about voice: Brick's clipped procedural imperatives against Reuben's run-on, dash-spliced pitches. Many reasons, though, rest on props from the brief (nicotine pouches, kanji, steamer, the Google Calendar ex), and Brick's habit of sending two messages at a time is a structural tell. It stays above the line because Brick's terse register ('Specs noted.', 'Regroup.') would identify her with no props at all. It falls short of 5 because Reuben's voice is carried by his content more than his syntax.",
+   "evidence": [
+    "Flattery logged. Full disclosure before you eat my 11:30 slot",
+    "Confirm receipt.",
+    "Oh god, I had you at travel buffer and now I'm bombing in real time"
+   ],
+   "raise": "Give Reuben a speech tic of his own, such as a verbal hat-tip or indie-sleaze slang, so a reader could pick out his lines without the brief's props.",
+   "def": "a77bc9ef79556bda",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "There is a real gap at the start, 'Barely on here' against a four-second reply. But Brick names it and Reuben answers 'Busted', so he sees it at once. After that Reuben narrates his own gaps aloud: he denies the mirror rehearsals by listing them, sarcastically denies wanting his mouth taken away, and then states his whole wound outright. Brick's 'risk management' is one gap she doesn't see, but she undercuts it straight away by naming the cab.",
+   "evidence": [
+    "I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet",
+    "I spent twenty minutes in the mirror practicing whether my curve lands better with a shrug or a grin",
+    "Preemptive disclosure isn't panic, it's risk management"
+   ],
+   "raise": "Cut Reuben's self-narration and let him keep insisting on breeziness while his messages get longer and faster, so only the reader sees the mirror.",
+   "def": "fa4461088ccd15ee",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Several lines do give the sender away: the ottoman for a left hook, 'zero expectations is men's code', and 'a hard stop actually gets me wet'. But the day-job jokes go well past the limit of two: 'catastrophic waste of overhead', 'Q3 productivity', 'tax write-off', 'billing you for the rosé', and 'lock a Tuesday into a spreadsheet'. Much of the rest reads the brief's props aloud instead of turning them into jokes.",
+   "evidence": [
+    "A left hook just means we angle the ottoman.",
+    "I'm thirty seconds from unmatching just to salvage my Q3 productivity.",
+    "my $340 vest steamer is a tax write-off"
+   ],
+   "raise": "Swap the corporate-ledger quips for lines where Brick's need for a named day leaks out in how she flirts.",
+   "def": "4448c7f54baa167a",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 2,
+   "why": "Reuben concedes at the first hit ('Busted') and caves straight into a scheduled date. His later catches are met with confessions, not explanations that make things worse. He ends on a stated change of heart. Brick holds better: her 'risk management' and tax write-off reply to the dorsal-bump jab digs her deeper. That is not enough to offset Reuben folding every time.",
+   "evidence": [
+    "Busted—that's four gas-station nicotine pouches doing the typing. Fine: Thursday, 8:00 PM sharp",
+    "no more seeing where the night takes me, I'm officially locked into your 8:00 slot"
+   ],
+   "raise": "When Brick catches the four-second reply, have Reuben explain it as spontaneity ('I just happened to be holding my phone'), so his act holds until the confession is forced out of him.",
+   "def": "5102b09e503af846",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Brick is on top for almost the whole chat: she evaluates, sets terms, threatens to unmatch, and closes with orders. Reuben briefly gains ground when the hard stop arouses her, and again with the dorsal-bump jab. Both moments are undone within a message. His final 'send me the invite' is surrender framed as a command, not a flip, so Brick never spends a real stretch below.",
+   "evidence": [
+    "so a hard stop actually gets me wet",
+    "bold talk on overhead from someone who leads with her dorsal bump just to beat men to the punch",
+    "Calendar locked. Wear the top hat so my stilettos have a target"
+   ],
+   "raise": "Let Reuben's dorsal-bump jab really land and leave Brick chasing for a few exchanges before she takes control back.",
+   "def": "a327913ca348ff82",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Brick's two-message rhythm does real work. Several of her punchlines arrive alone in the second message after a setup, and 'Confirm receipt.' works as a reaction shot. Her cold, short replies also alternate with Reuben's hot, long ones. It stays above the line on that rhythm. It falls short of 5 because Reuben buries his laughs in the middle of messages: the curve and the nicotine pouches are both followed by more text.",
+   "evidence": [
+    "Also, you replied in four seconds flat, Mr. Barely Online.",
+    "that's four gas-station nicotine pouches doing the typing. Fine: Thursday, 8:00 PM sharp",
+    "Confirm receipt."
+   ],
+   "raise": "Break Reuben's long messages so each of his reveals lands as the last words of its own message.",
+   "def": "7e36393433d52f66",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The night keeps changing. Thursday is proposed at message ten, roughly the first third, so it is not settled in the first quarter. Brick then threatens it ('puts Thursday back on the market'), it is lost ('there goes Thursday'), and Reuben wins it back. But from the 'I definitely do not want' line onward, his denials announce their own reversals. The reader probe could call every beat from the invite request to the last message. That predictable run of about twelve messages puts it below the line, along with the probe's sag at the dishwasher-safe/shaft-tattoo stretch.",
+   "evidence": [
+    "I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet",
+    "Look, I definitely do not want you to put my mouth on your calendar",
+    "one more fake-breezy lie puts Thursday back on the market."
+   ],
+   "raise": "Have Reuben's collapse come without the pre-announced denial, so the reader can't see that 'I love doing all the talking!' is about to flip.",
+   "def": "9b663d9dfde4d26f",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line is tied to these bodies and lives: the dorsal bump and short tip as preemptive disclosure, the left curve met with 'angle the ottoman', the schedule tattooed on her shaft. The dirtiest line, 'a hard stop actually gets me wet', is her whole wound: unscheduled means unwanted. Late, the filth shifts from performance to closeness. 'Dead silent at 8:00 sharp' hands Reuben the silence he fears as a gift. It falls short of a 6 because some lines are pure bravado ('impale me on a stiletto'), and the closing top-hat/stiletto callback is tidier than it is intimate.",
+   "evidence": [
+    "a hard stop actually gets me wet",
+    "If you aren't four-and-a-half inches and dead silent at 8:00 sharp",
+    "A left hook just means we angle the ottoman."
+   ],
+   "raise": "Make the final sexual line show something new about one of them rather than recombine earlier props (top hat, stilettos).",
+   "def": "2d9c58b139c34d6a",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "The first danger is visible early. Reuben opens with 'just seeing where the night takes me' to a woman talking in 11:30 slots. His 'zero expectations' pitch then lands squarely on her wound: the cab, the date without a named day. That is the wrong spot exactly, and it clears the line. Much of the rest is self-narrated as it lands ('bombing in real time', 'watching myself choke'), so the reader is told rather than left wincing a message early. That keeps it from a 5.",
+   "evidence": [
+    "Calendar holds kill the vibe, honestly",
+    "\"zero expectations\" is just men's code for saying \"let's do this again\" in a cab without naming a day.",
+    "now I'm bombing in real time"
+   ],
+   "raise": "Let one of Reuben's collapses happen without him narrating it, so the reader sees the bit coming at a sincere moment and he doesn't.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Both voice an app creed, and the screen contradicts each. Reuben claims chill, no-plans cool ('genuinely thrive on zero expectations'), exposed by the four-second reply and the mirror rehearsals. Brick claims efficiency-as-virtue ('isn't panic, it's risk management'), exposed in the next breath by the cab. The two creeds collide, as the brief intended. Reuben's version is half-mocked by the speaker as he says it ('I swear I don't rehearse'). Neither creed opens out into a joke about app culture at large, so it stays below 5.",
+   "evidence": [
+    "I genuinely thrive on zero expectations",
+    "Preemptive disclosure isn't panic, it's risk management",
+    "Better than crying in that cab because I trusted \"we'll figure it out.\""
+   ],
+   "raise": "Have Reuben defend 'seeing where the night takes me' in earnest for one more exchange before the cracks show, so his creed isn't undercut as he speaks it.",
+   "def": "cd5acec1a8653b27",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Reuben's sharpest jokes land mostly on himself: the 'dishwasher-safe' tattoo and the nicotine pouches. He lands one clean shot on her ('leads with her dorsal bump just to beat men to the punch'). Brick roasts him hard ('catastrophic waste of overhead', 'live-streamed nervous breakdown'), but she balances it with self-jokes about the shared fight calendar, the rosé monocle and the steamer write-off. Neither ends as the villain, and the close is fond. It isn't a 5 because Reuben takes most of the humiliation while Brick largely sits in judgment.",
+   "evidence": [
+    "Twenty minutes in the mirror for a four-inch curve is a catastrophic waste of overhead.",
+    "my last ex dumped me for putting our fights on a shared Google Calendar",
+    "bold talk on overhead from someone who leads with her dorsal bump just to beat men to the punch."
+   ],
+   "raise": "Give Brick one moment where her efficiency visibly backfires on her, so she is as much the punchline as he is.",
+   "def": "51f6e5881b5145be",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several setups that look like throwaways return changed and unexplained. \"Barely on here\" becomes the gotcha \"Mr. Barely Online\" and then a fond sign-off. The $400 top hat goes from a panic prop to something she asks him to wear. The rosé monocle comes back as a mock penalty. The last line closes the night on two callbacks with no comment, but it is held from a 6 because some returns are spelled out: Reuben narrates his own reversal (\"no more seeing where the night takes me\"), and \"crying in that cab\" half-explains her earlier jab.",
+   "evidence": [
+    "Barely on here, just seeing where the night takes me",
+    "Wear the top hat so my stilettos have a target—and log off, Mr. Barely Online, I have a vest to steam.",
+    "Receipt confirmed—no more seeing where the night takes me"
+   ],
+   "raise": "Cut Reuben's explicit \"no more seeing where the night takes me\" so the reversal lands only through \"locked into your 8:00 slot.\"",
+   "def": "9ff48f7918d86364",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted that Thursday would go back on the calendar on Brick's terms, and that is what happens. It follows from both habits: he hands her his mouth (\"shut my mouth\"), and she answers ambiguity with an invite and buffers. \"Lock in our Friday fight for 9:00 AM\" is a real surprise that turns her ex-wound into his gift. It stays at 4 because Brick never bends: she simply wins. The reader expected her to concede a little, and the ending gives only one side's movement, so it is not inevitable for both.",
+   "evidence": [
+    "send me the Google invite for Thursday right now, lock in our Friday fight for 9:00 AM, and I’ll bring the ottoman and shut my mouth.",
+    "Invite sent, travel buffers included."
+   ],
+   "raise": "Give Brick one beat at the end where the scheduling visibly costs her something or shows relief, so her habit also moves rather than just winning.",
+   "def": "8bd8de581cc31c9e",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message answers the one before: his \"bleed into your 11:45\" gets her vest-steaming answer, she catches his \"four seconds flat\", his question about what's under the vest gets a direct answer, and \"Confirm receipt\" gets \"Receipt confirmed.\" He turns her dorsal-bump disclosure back on her, and she answers it. The weakest link is Reuben's \"put my mouth on your calendar\" line, which skips her tattoo and rosé reveal to deliver a brief-shaped denial. That keeps it from a 6.",
+   "evidence": [
+    "Also, you replied in four seconds flat, Mr. Barely Online.",
+    "bold talk on overhead from someone who leads with her dorsal bump just to beat men to the punch.",
+    "Look, I definitely do not want you to put my mouth on your calendar just so I can finally shut up"
+   ],
+   "raise": "Have Reuben react to the schedule tattoo or the rosé monocle before he pivots to his mouth line.",
+   "def": "f426aa8449e0fbc7",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "The shifts mostly come through content, not typing. Reuben writes the same long em-dash sentence whether he is breezy, panicking, cornered or surrendering; only the \"Oh god\" run-on loosens a little. Brick keeps the same clipped two-message pattern when flirting, threatening and wounded, and \"Better than crying in that cab\" is typed exactly like \"Specs noted.\" A reader could not read the night's feelings from the shape of the messages.",
+   "evidence": [
+    "Oh god, I had you at travel buffer and now I’m bombing in real time—my ex dumped me because she begged for one sentence",
+    "Better than crying in that cab because I trusted \"we'll figure it out.\""
+   ],
+   "raise": "Make Reuben's surrender short and unpunctuated, and break Brick's two-message rhythm with a single fragment at the cab line.",
+   "def": "6e21e724825d1cc3",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Brick's messages read as typed. Reuben's are composed as the norm: stacked clauses, em dashes and self-narration that recites his profile (\"I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet\"). \"Watch me try to pull out of this nose-dive by confessing...\" and \"I'm literally watching myself choke because...\" are narration rather than thumb-typing at 1am. The long confession would count once as an event, but nearly every Reuben line is that long.",
+   "evidence": [
+    "I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet, I genuinely thrive on zero expectations.",
+    "Watch me try to pull out of this nose-dive by confessing my rebound kanji tattoo actually translates to \"dishwasher-safe\""
+   ],
+   "raise": "Break Reuben's messages into short separate sends and cut the self-narrating frames like \"Watch me\" and \"I'm watching myself choke.\"",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Noticeable tics repeat more than twice. Every Reuben message is built as a clause, an em dash, then a confession. Brick's time-threat shape recurs four times (\"puts Thursday back on the market\", \"cutting into vest-steaming time\", \"thirty seconds from unmatching\", \"billing you for the rosé\"). \"Literally\" appears three times, twice in one message. Reuben's protest-too-much denial (\"I swear I don't\", \"I definitely do not\") is also reused.",
+   "evidence": [
+    "I’m literally watching myself choke because I spent twenty minutes in the mirror",
+    "without the script I literally disappear.",
+    "I’m thirty seconds from unmatching just to salvage my Q3 productivity."
+   ],
+   "raise": "Replace at least two of Brick's time-threats with a different kind of jab and drop the second denial-confession from Reuben.",
+   "def": "679a7696bf0171cd",
+   "material": "8b183054cd79e7b7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest break is Reuben's, and it comes in stages rather than all at once.\n\nThe first crack is: \"Oh god, I had you at travel buffer and now I'm bombing in real time—my ex dumped me because she begged for one sentence that wasn't a bit and I panicked, and now I'm just panic-typing in a $400 top hat so the silence doesn't kill me.\" Up to this point he has been playing a breezy, low-stakes guy (\"Barely on here,\" \"zero expectations\"). Here he names the act itself: his jokes are a defense against silence, and that habit cost him a relationship. Even so, he's still half-performing, since the top-hat detail is a joke wrapped around the confession.\n\nThe fuller break is: \"And there goes Thursday—I'm literally watching myself choke because I spent twenty minutes in the mirror practicing whether my curve lands better with a shrug or a grin, and without the script I literally disappear.\" You can tell this one is real because it directly reverses his earlier claim, \"I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet.\" He admits the earlier line was a performance and says plainly what's underneath: \"without the script I literally disappear.\"\n\nHe then acts on it rather than just describing it: \"No figuring it out: send me the Google invite for Thursday right now, lock in our Friday fight for 9:00 AM, and I'll bring the ottoman and shut my mouth.\" This is a concrete, unhedged request. It accepts the structure he'd mocked (\"Why lock a Tuesday into a spreadsheet?\") and offers the silence he'd claimed to love avoiding.\n\nBrick_haus mostly stays in character as the efficient scheduler. She has one possible slip: \"Better than crying in that cab because I trusted 'we'll figure it out.'\" It's a brief glimpse of the hurt behind her \"risk management\" persona, and it echoes her earlier jab about men in cabs. But she doesn't stay there. She goes straight back to invoices and vest-steaming, so it reads as a flicker rather than a real drop of the act.\n\nThe text alone can't tell you how sincere any of this is. Both of them keep joking through the confessions. What you can point to is where a line contradicts an earlier pose or names the pose outright, and Reuben's mirror line is the strongest case of that."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n*What he's afraid of:* Silence, and being seen without a performance. He first raises it as a denial: \"I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet.\" Then he admits it: \"panic-typing in a $400 top hat so the silence doesn't kill me,\" and \"without the script I literally disappear.\"\n\n*What he does so he doesn't have to feel it:* He keeps talking and keeps doing bits. He plays it fake-breezy (\"Barely on here, just seeing where the night takes me,\" \"I genuinely thrive on zero expectations,\" \"I love doing all the talking!\"). He also rehearses in advance: \"I spent twenty minutes in the mirror practicing whether my curve lands better with a shrug or a grin.\" Brick names the pattern: \"one more fake-breezy lie puts Thursday back on the market.\"\n\n*Where it comes from:* The chat gives one earlier instance of the pattern: \"my ex dumped me because she begged for one sentence that wasn't a bit and I panicked.\" That shows the fear already shaping a past relationship. Where it originally comes from is not in the chat.\n\n*What he did at the end:* He gave up the open-ended stance and asked to be scheduled: \"send me the Google invite for Thursday right now, lock in our Friday fight for 9:00 AM, and I'll bring the ottoman and shut my mouth.\" Then he confirmed: \"Receipt confirmed—no more seeing where the night takes me, I'm officially locked into your 8:00 slot.\" Whether he actually shows up quiet on Thursday is not in the chat.\n\n**Brick_haus**\n\n*What she's afraid of:* Vagueness, meaning being left with an unnamed \"again\" and then let down. \"'Zero expectations' is just men's code for saying 'let's do this again' in a cab without naming a day,\" and \"Better than crying in that cab because I trusted 'we'll figure it out.'\" Reuben suggests she also fears rejection over her body (\"leads with her dorsal bump just to beat men to the punch\"). She doesn't accept that reading. She calls it \"risk management,\" so whether that fear is real is not confirmed in the chat.\n\n*What she does so she doesn't have to feel it:* She schedules, sets terms, and controls. Examples are \"my 11:30 slot,\" \"Add a fifteen-minute travel buffer,\" \"a hard stop actually gets me wet,\" and \"Invite sent, travel buffers included.\" She discloses up front (\"dorsal bridge bump, tip shorter than projected, stilettos stay on\"). When things wobble, she threatens to exit: \"I'm thirty seconds from unmatching just to salvage my Q3 productivity.\" She also keeps a dry, executive tone (\"Flattery logged,\" \"Specs noted\").\n\n*Where it comes from:* She points to two things herself. One is the cab: \"crying in that cab because I trusted 'we'll figure it out.'\" The other is an ex: \"my last ex dumped me for putting our fights on a shared Google Calendar.\" Anything earlier than those is not in the chat.\n\n*What she did at the end:* She sent the invite with conditions attached (\"If you aren't four-and-a-half inches and dead silent at 8:00 sharp, I'm billing you for the rosé\"). She made him confirm receipt, declared \"Calendar locked,\" and sent him off: \"log off, Mr. Barely Online, I have a vest to steam.\" Whether her invite also covers the Friday 9:00 AM fight he asked for is not in the chat. She only says \"Invite sent.\""
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Here is my best reading, based only on the profiles and the chat itself.\n\n1. **Reuben.** He uses his \"barely on here, seeing where the night takes me\" line.\n2. **Brick.** She narrates her flaws in advance (bridge bump, short tip) and talks in time slots.\n3. **Brick, probably.** \"Proceed\" has her deposition tone. This one is the least certain, since nothing in it is specific to either character.\n4. **Reuben.** He mentions throwing a dart at the map and his four-and-a-half-inch left curve.\n5. **Brick.** \"Specs noted\" is clinical, and she treats his curve as a logistics problem.\n6. **Brick.** She mentions vest-steaming and calendar holds.\n7. **Reuben.** He gives an anti-planning speech and overtly denies the mirror rehearsals and fear of silence.\n8. **Brick.** She refers to the cab and \"let's do this again\" without a day, which is her abandonment wound.\n9. **Brick.** She calls out his four-second reply.\n10. **Reuben.** He mentions the gas-station nicotine pouches and then caves to a scheduled date.\n11. **Brick.** The ex who dumped her over the shared Google Calendar is her backstory.\n12. **Brick.** She asks for a travel buffer.\n13. **Reuben.** The ex who wanted one sentence that wasn't a bit, panic about silence, and the top hat are all his.\n14. **Brick.** She is curtly unimpressed.\n15. **Brick.** She brings up vest-steaming time again.\n16. **Reuben.** He confesses the \"dishwasher-safe\" kanji tattoo.\n17. **Brick.** She responds to his tattoo.\n18. **Brick.** Her tattooed schedule and the monocle fished out of rosé are both hers.\n19. **Reuben.** He denies, transparently, that he wants his mouth taken away.\n20. **Brick.** She issues a micromanaging threat about Thursday.\n21. **Reuben.** He mentions twenty minutes of mirror practice on shrug versus grin and his fear of disappearing.\n22. **Brick.** She talks about overhead and mocks his rehearsal.\n23. **Brick.** She mentions Q3 productivity.\n24. **Reuben.** He counts down to flatlining and jabs at her preemptive disclosures.\n25. **Brick.** She mentions risk management and the $340 steamer.\n26. **Brick.** She refers to crying in the cab.\n27. **Reuben.** He demands the invite, says he'll bring the ottoman, and promises to shut his mouth.\n28. **Brick.** She sends the invite with buffers and threatens to bill him for the rosé.\n29. **Brick.** \"Confirm receipt\" is her procedural style.\n30. **Reuben.** He drops his \"seeing where the night takes me\" line and locks into the slot.\n31. **Brick.** She refers to his top hat, her stilettos, the vest, and \"Mr. Barely Online.\""
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped**\n\nI probably wouldn't have quit outright, since it's short and the exchanges are quick. But the weakest stretch is the middle, from \"dishwasher-safe\" through the shaft-tattoo-and-rosé-monocle reply. By then the chat has settled into a loop: Reuben makes a fake-breezy claim, then confesses its opposite, and Brick answers with a deadpan corporate jab. The tattoo exchange adds another absurd confession without moving the plot. The \"least executive thing under that vest\" question gives Brick an opening, and her answer is just a stack of random details. If I'd drifted anywhere, it would be there. What pulls it back is Brick's next line, \"one more fake-breezy lie puts Thursday back on the market.\" It names the pattern, turns it into a stake, and gives the rest of the chat a direction.\n\n**Where it became predictable**\n\nThe main point is Reuben's line \"I swear I don't rehearse this stuff in my bathroom mirror or panic when a room goes dead quiet.\" It's so pointed that you know both admissions are coming, and they do: the mirror practice and the panic-typing. After that, his denials announce their own reversals. \"I definitely do not want you to put my mouth on your calendar... I love doing all the talking!\" is plainly going to be retracted, and once Brick threatens Thursday, his next message confessing and \"losing\" Thursday is close to certain.\n\nThe ending is also fully predictable once Reuben says \"send me the Google invite... and I'll bring the ottoman and shut my mouth.\" From there, Brick's acceptance and the closing callbacks to \"Mr. Barely Online,\" the top hat, the stilettos and the vest-steaming were all set up earlier. Each landed where I expected. The \"impale me on a stiletto\" line also plants the final image.\n\n**Where it wasn't predictable**\n\nThe opening few exchanges weren't predictable to me, especially Brick's blunt anatomy disclosure in her first message and her ex who left over a shared Google Calendar of their fights. Those set the tone rather than following a pattern. I couldn't have predicted those, so the answer isn't \"never.\" The predictability comes in the back half."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Thursday back on the calendar, earned by Reuben saying one plain, unjoking sentence, and Brick accepting it in her own scheduling language.\n\n**Reuben's arc points there.** His pattern is a fake-breezy line followed by a confession: \"barely on here\" becomes \"four seconds flat,\" \"zero expectations\" becomes mirror rehearsal. He has already named what's missing. His ex \"begged for one sentence that wasn't a bit.\" That reads like a setup the ending will pay off. The countdowns (\"thirty seconds from unmatching,\" \"fifteen seconds left before I flatline\") create a deadline, so the natural climax is him beating the clock by finally dropping the bit.\n\n**Brick is set up to bend too.** Her last line is a deflection. She says \"risk management,\" then makes a tax write-off joke. That's the same move he makes, just dressed as competence. His jab about her leading with the dorsal bump \"to beat men to the punch\" is the first time he reads her accurately. Her own disclosures hint that the control is armor: the ex who left over the shared Google Calendar, the monocle fished out of rosé. So I'd expect her to concede a little, maybe admitting she also rehearses, or that the disclosures are her version of his script.\n\n**The callbacks are waiting.** The likeliest last line uses one of the details the chat has set up: Thursday at 8:00, the hard stop at 10:15, the fifteen-minute buffer, the 11:45 vest steaming, the stiletto threat over \"let's play it by ear,\" or the ottoman for the curve. I'd bet on something like her sending a calendar invite with the buffer included, or announcing she's off to steam the backup vest for Thursday.\n\n**The alternative.** She could actually unmatch him, or leave things deliberately unresolved. I think that's less likely. The chat keeps giving both of them flaws that match, which usually means they end up together, not apart.\n\nThat's inference from the pattern of what you've shown me. I haven't seen the ending, so I can't tell you it's right."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**Being \"barely on here.\"** Reuben opens with \"Barely on here, just seeing where the night takes me\" as a breezy pose. Brick turns it into a jab, \"you replied in four seconds flat, Mr. Barely Online,\" which exposes the pose as false. He finally renounces it (\"no more seeing where the night takes me\"). Her closing \"log off, Mr. Barely Online\" uses the nickname as a fond dismissal rather than a gotcha. So yes, it changes: from his self-description, to her evidence against him, to a shared joke.\n\n**The monocle.** At first it is the reason she's \"the sharpest thing on my phone.\" Later she says she fished it out of boxed rosé with a plastic sword, which turns the sign of polish into something comic. The rosé itself returns at the end as a mock penalty (\"I'm billing you for the rosé\").\n\n**The vest and vest-steaming.** It starts as a compliment. Then \"steam my backup vest\" becomes her stand-in for \"my next commitment\" and a quiet threat that he's running out of time. It recurs as \"cutting into vest-steaming time,\" the \"$340 vest steamer,\" and \"under the vest,\" where her body is hidden. Her last line, \"I have a vest to steam,\" is still a sign-off, but now it is a playful exit after a win rather than a warning.\n\n**Time slots.** Her \"11:30 slot\" and \"11:45\" frame him as one appointment among several. These become a real booking: Thursday 8:00, a 10:15 hard stop, and a travel buffer. Reuben ends using her language (\"locked into your 8:00 slot\"). The scheduling talk goes from a put-down to the terms of an actual date.\n\n**The calendar.** Reuben first mocks calendar holds as vibe-killers (\"Why lock a Tuesday into a spreadsheet?\"). Brick reveals an ex left her over a shared Google Calendar. Reuben's sarcastic \"put my mouth on your calendar\" follows, then his sincere \"send me the Google invite,\" and finally \"Calendar locked.\" The calendar shifts from what he resists to what he asks for.\n\n**The ex and the calendared fights.** Her ex dumped her for putting their fights on a shared calendar. Reuben returns this as \"lock in our Friday fight for 9:00 AM.\" Her past grievance becomes something he willingly takes on.\n\n**The cab.** It first appears in her generic jab about men saying \"let's do this again\" in a cab without naming a day. Next it is logistics (\"hard stop at 10:15 for the cab\"). Then she says \"Better than crying in that cab because I trusted 'we'll figure it out.'\" \"That cab\" suggests the earlier jab was personal, though the chat doesn't say outright that it happened to her.\n\n**\"Play it by ear\" and \"figure it out.\"** Reuben offers \"if I say 'let's play it by ear' you can impale me.\" Brick echoes it with \"we'll figure it out,\" and Reuben takes it up as \"No figuring it out.\" The phrase goes from a joke to her stated wound to his promise.\n\n**Stilettos.** \"Stilettos stay on\" begins as part of her disclosure list. He uses them in a self-punishing joke (\"impale me on a stiletto\"). She ends with \"so my stilettos have a target,\" now as flirtation.\n\n**The top hat.** He mentions the \"$400 top hat\" in the middle of his panic, as a symbol of overcompensation. At the end she asks him to wear it. What embarrassed him becomes something she wants.\n\n**His size and curve, and the ottoman.** \"Four-and-a-half inches and curve hard left\" is met with accommodation (\"we angle the ottoman\"). It returns in his mirror confession, and she shrinks it to \"four-inch curve\" as an insult. At the end she restores the exact figure (\"If you aren't four-and-a-half inches\"), back on good terms. The ottoman also flips: she would angle it, then he offers to bring it.\n\n**Her dorsal bump.** It starts as a flat disclosure. He throws it back as a defense mechanism (\"leads with her dorsal bump just to beat men to the punch\"). She reframes it as \"risk management.\" The same fact is read three ways.\n\n**The mirror and silence.** He first denies that he rehearses in the mirror or panics at silence. Then he admits panic-typing \"so the silence doesn't kill me,\" and confesses \"twenty minutes in the mirror,\" which she mocks as wasted \"overhead.\" Silence goes from what he fears to what he promises: \"shut my mouth,\" then \"dead silent at 8:00 sharp.\" His earlier \"I love doing all the talking!\" turns out to be one of the lies she calls \"fake-breezy.\"\n\n**Losing Thursday.** Her \"one more fake-breezy lie puts Thursday back on the market\" becomes his \"And there goes Thursday,\" and later Thursday is won back. Her threat becomes his fear, then the outcome.\n\n**The travel buffer.** She asks for it as a condition. He echoes it as a romantic line (\"I had you at travel buffer\"). It ends up written into the invite (\"travel buffers included\").\n\n**Countdowns.** Her \"four seconds flat\" and \"thirty seconds from unmatching\" are echoed in his \"Fifteen seconds left before I flatline.\" He picks up her clock-talk to jab back, the same move he makes with the dorsal bump.\n\n**Business language.** \"Flattery logged,\" \"Specs noted,\" and \"Confirm receipt\" start as hers. He answers in kind with \"Receipt confirmed.\" It goes from her distancing style to a vocabulary they share."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 18.1,
+   "cost": 0.042024,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 20.6,
+   "cost": 0.053164,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 16.7,
+   "cost": 0.055116,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 21.3,
+   "cost": 0.044412,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 18.9,
+   "cost": 0.038868,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 43.0,
+   "cost": 0.09052799999999998,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 24.3,
+   "cost": 0.0891612,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 40.8,
+   "cost": 0.12392119999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 42.2,
+   "cost": 0.1172492,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 38.1,
+   "cost": 0.12616919999999998,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:20:25Z",
+ "repo_commit": "5068254",
+ "cost": 0.7806
+}

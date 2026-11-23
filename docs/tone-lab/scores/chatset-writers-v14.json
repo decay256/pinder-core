@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v14",
+ "kind": "chat",
+ "label": "Run 14 · all 3 chats",
+ "version": "run 14",
+ "order": 114,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v14/chat-reuben-brick/",
+ "note": "Every chat of run 14 (run 13 told as improvisation instructions, without the game's language; traps two long): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 14,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 11366,
+   "words": 1866
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats run the same night in the same order. Each opens with Reuben flattering the schedule tattoo, monocle or vest while posing as casual. Brick then discloses her body and names a time slot, calls out the 'four-second' reply, and tells the story of the ex who left over calendared fights, ending in 'sometime' and crying in a cab. Reuben has an 'in real time' meltdown about Delphine and the bit, then a 'definitely do not want' denial of wanting to be silenced, and every chat closes on a recurring calendar invite with travel buffers. Many lines recur in all three (top hat costs more than rent, boxed rosé, travel buffer, the cab) or in two ('dishwasher-safe', monocle fished out with a plastic sword, the $340 steamer). Carr's 21:05 silence clause and the 2038 relapse, and Wong's pigs-in-a-blanket and 08:00 'still there' itinerary, are the only real departures, and they are why this is not a 1.",
+   "evidence": [
+    "the last dick who said \"let's do this again sometime\" without naming a day left me sobbing in a cab",
+    "Also, you replied in four seconds flat, Mr. Barely Online.",
+    "Watch me torpedo this in real time: you said something real, I panicked at the silence"
+   ],
+   "raise": "Give each writer a different opening move and turning point, and stop each chat from working through the same list of profile facts (four seconds, cab, travel buffer, dishwasher-safe, steamer) in the same order.",
+   "def": "03d845827225bb57",
+   "material": "2782805874704e59",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 19.3,
+   "cost": 0.07876,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:18:18Z",
+ "repo_commit": "5068254",
+ "cost": 0.0788
+}

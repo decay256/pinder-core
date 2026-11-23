@@ -333,6 +333,7 @@ WRITER_RUNS = [
     ("writers-v11", 11, "each comedian's own brief; both characters in one short take; the chat set up and paid off"),
     ("writers-v12", 12, "run 11's briefs and characters; the chat played turn by turn on seed 23's dice"),
     ("writers-v13", 13, "run 12 with the turn no longer fixed at one message from each"),
+    ("writers-v14", 14, "run 13 told as improvisation instructions, without the game's language; traps two long"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first
 
