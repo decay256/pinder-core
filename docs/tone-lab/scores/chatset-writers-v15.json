@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v15",
+ "kind": "chat",
+ "label": "Run 15 · all 3 chats",
+ "version": "run 15",
+ "order": 115,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v15/chat-zyx-sable/",
+ "note": "Every chat of run 15 (Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 15,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 7810,
+   "words": 1386
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats open the same way: Zyx leads with a wizard-hat persona bit, and Sable answers at once by announcing her asymmetry and saying she names flaws 'within four minutes.' The middle beats repeat in every chat: the ninety-seconds-plus-eleven-minutes confession, the 2am coupon-app job, being cropped out of the family portrait, the $94 maid costume with the limescale tub and the twenty-dollar tip, the lint roller, and the deleted sleeping photo. Booster and Carr even land the same closing gag, tipping twenty for eleven minutes of silence. Only Ali Wong's ending is a different night, since Sable bolts when asked for the candid photo, and one divergent ending out of three is too little to reach 3.",
+   "evidence": [
+    "scrubbed his tub limescale for an hour until he went soft and tipped me twenty bucks.",
+    "I’ll tip you twenty quid for the eleven minutes of silence.",
+    "Too late, I just went softer than bathtub guy."
+   ],
+   "raise": "",
+   "def": "03d845827225bb57",
+   "material": "67d38224eb63d1ef",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 20.8,
+   "cost": 0.0618012,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:43:21Z",
+ "repo_commit": "6709700",
+ "cost": 0.0618
+}

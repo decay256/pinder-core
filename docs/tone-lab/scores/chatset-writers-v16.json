@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v16",
+ "kind": "chat",
+ "label": "Run 16 · all 3 chats",
+ "version": "run 16",
+ "order": 116,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/",
+ "note": "Every chat of run 16 (Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 16,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 13234,
+   "words": 2321
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats play the same night in the same order. Zyx opens with a photo compliment plus a needy follow-up. Sable says 'breathe' or 'needy' and roasts her own low nut. Then come the cropped-family-portrait reveal, the mother who audits selfies like a returns desk, the $94 maid limescale story, the 90-second finish with the stand-up set, the ghosted ex over an unposed photo, a 'partner in crime/Hallmark' plea and 'gag me'. Every chat ends with Sable leaving. Many lines recur in all three, not just two: the family-portrait crop, the returns desk or Zara return, the 29% APR extensions, the dry-scooped pre-workout and the 5am lint roller. The differences are in texture only: Carr's British register, Booster's 'bank around corners' thaw and last-chance beat, Wong's account deletion. That lifts it off a 1, but it is far below the line, which forbids even shared openings.",
+   "evidence": [
+    "my mom still audits my selfies like a returns desk",
+    "My mother still inspects my selfies like a returns desk.",
+    "scrubbed a guy's limescale until he went soft and tipped me $20"
+   ],
+   "raise": "Give each writer a different opening move and order of reveals, for example Sable leading or Zyx withholding, and keep the backstory props out of the shared prompt so they cannot all recur.",
+   "def": "03d845827225bb57",
+   "material": "db1fb4ef0050e199",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 18.9,
+   "cost": 0.0739292,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:45:23Z",
+ "repo_commit": "6709700",
+ "cost": 0.0739
+}

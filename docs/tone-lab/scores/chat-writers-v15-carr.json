@@ -1,0 +1,526 @@
+{
+ "id": "chat-writers-v15-carr",
+ "kind": "chat",
+ "label": "Run 15 · Jimmy Carr",
+ "version": "run 15",
+ "order": 115,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v15/chat-zyx-sable/carr.md",
+ "note": "Written in one go by Jimmy Carr from what they wrote about the two characters (run 15: Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 15,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2537,
+   "words": 444
+  },
+  "brief": {
+   "chars": 2662,
+   "words": 460
+  },
+  "chat_masked": {
+   "chars": 2456,
+   "words": 444
+  },
+  "chat_but_last": {
+   "chars": 1987,
+   "words": 344
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader got all four answers right for both characters. Each fear is tied to its habit: silence leads to nonstop patter, and fear of being seen leads to pre-emptive flaw-announcing and lint-rolling. Each ending answers that fear, and both endings call back the ninety seconds, the twenty quid and the unedited photo. It stays at 4 because both fears are only known because the characters say them outright, which is what the rubric's 3 warns about. The bathtub story also never ties back to Sable's fear, as the reader noted.",
+   "evidence": [
+    "I’m so terrified of being seen unedited I dumped the one man who loved an unposed photo of me asleep.",
+    "Five seconds of silence leads to a plain question like \"do you want me to stay?\" and stopping means disappearing.",
+    "stuff the wizard hat in your mouth—I’ll tip you twenty quid for the eleven minutes of silence."
+   ],
+   "raise": "Let the reader infer Sable's fear from the lint-rolling and the dumped man, and Zyx's from the kebab-tab slip, and cut the lines where each one names their own fear.",
+   "def": "f019e7f239b9d82d",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "One disclosure is genuinely caught out: the wrong-tab slip exposes the coupon-app job, and Sable pounces on it. 'Damaged in transit' also lets the mother's influence be inferred. Most of the rest is volunteered or answered when asked: the flaws and the strategy behind them, Zyx's freezing-house origin, the silence fear, and the fake tattoo. Zyx's origin is volunteered outright. Sable's origin comes as an aside after a question, so neither origin counts as sideways.",
+   "evidence": [
+    "Elite defence—SORRY YOUR KEBAB CODE EXPIRED LINDA, TICKET RESOLVED—shit, wrong tab.",
+    "I grew up in a freezing house where you spoke fast or got cropped out of the family photo.",
+    "I announce my flaws in the first four minutes so my mouth says it before your face does."
+   ],
+   "raise": "Have Zyx's freezing-house origin leak through a slip (a family-photo detail, a reflex) rather than be announced in the sentence after he is caught out.",
+   "def": "76152fd7f08caa41",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "The characters keep explaining themselves. 'So my mouth says it before your face does', 'so I look effortless', 'I’m so terrified', 'stopping means disappearing' and 'until I stop performing' each name a feeling or explain the mechanism behind one. That is far over the single allowed naming. There is some subtext: the lint-rolling image and Zyx's hasty 'Harsh. Faulty packaging?' sit on something unsaid. But it is buried under the self-diagnosis.",
+   "evidence": [
+    "I’m so terrified of being seen unedited",
+    "so my mouth says it before your face does",
+    "secretly I just want to be gagged and photographed badly so I can shut up."
+   ],
+   "raise": "Cut the 'so that' clauses and the 'terrified' line, and leave the 5am lint-roller and the dumped photo to carry the fear unexplained.",
+   "def": "61d4f86460a218aa",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader found the moment: Zyx's 'Christ, look at us' confession and Sable's wrists reply. Sable's answer does turn the night into an invitation. But the moment is announced. 'Christ, look at us' steps outside the scene to name the contest. 'Until I stop performing' is self-commentary about the act rather than a plain line spoken while setting it down. Neither is among the shortest lines, and 'Deal.' and 'Harsh. Faulty packaging?' are plainer.",
+   "evidence": [
+    "Christ, look at us.",
+    "And I just want someone to hold my wrists still until I stop performing.",
+    "Harsh. Faulty packaging?"
+   ],
+   "raise": "Replace the wrists line with a short, concrete request that never uses the word 'performing', so the act drops without being named.",
+   "def": "b5a3a3c2e796783b",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "The night is not settled early: the invitation only arrives in the second-to-last message. The 'wrong tab' slip turns the brag contest into exposure, which keeps a reader moving. The first four messages are one flat move, trading pre-emptive flaws and brags, and the reader called that shape from the opening line. From 'Christ, look at us' the reader could also predict the confession and the invite. It stays above the line because the middle reveals keep changing what we know; it stays below 5 because both the opening run and the last turn are predictable.",
+   "evidence": [
+    "I announce my flaws in the first four minutes so my mouth says it before your face does.",
+    "Elite defence—SORRY YOUR KEBAB CODE EXPIRED LINDA, TICKET RESOLVED—shit, wrong tab.",
+    "Christ, look at us."
+   ],
+   "raise": "Have the invitation go wrong once: one of them falls back into their act and the other has to call it, so the final turn is not the one 'Christ, look at us' announces.",
+   "def": "9b663d9dfde4d26f",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line belongs to this body and life: the ninety seconds and the eleven-minute tight five, the French maid limescale scrub, the 5am lint-rolling. Late in the chat the filth changes job, from bravado to closeness. Being gagged and photographed badly is the dirtiest wish and also the one that tells us most about Zyx. It falls short of a 6 because the wishes are introduced with 'secretly I just want', so they arrive as confession rather than desire played in the moment.",
+   "evidence": [
+    "secretly I just want to be gagged and photographed badly so I can shut up.",
+    "I’ll hold your wrists down on my terrible mattress",
+    "stuff the wizard hat in your mouth—I’ll tip you twenty quid for the eleven minutes of silence."
+   ],
+   "raise": "Cut 'secretly I just want' and let Zyx ask to be gagged in the middle of the patter, so the wish shows itself instead of being announced.",
+   "def": "2d9c58b139c34d6a",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 2,
+   "why": "Nothing is set up for the reader to see coming. The wrong-tab slip goes off with no warning: it is announced as it lands. Each habit, the fear of silence and the lint roller, is explained after the fact rather than shown heading for the wrong spot. The ending turns both habits into gifts instead of letting either one misfire, so the reader never winces ahead of a character.",
+   "evidence": [
+    "shit, wrong tab.",
+    "Now I wake at 5am after hookups to lint-roll my own shed hair fibers off the pillowcase"
+   ],
+   "raise": "Plant Sable's need for an edited photo early, then have Zyx's 'unedited photo with the flash on' land as a wound before it becomes a gift.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Both characters arrive with self-branding job titles taken from dating culture, and the screen contradicts them: the coupon-app helpdesk, the ring light hiding a floor mattress. But Sable undercuts her own title in the same breath, and Zyx's title is punctured by Sable within a few lines. Neither holds a belief about dating in earnest for long enough to be contradicted by events, and the two titles never collide as creeds.",
+   "evidence": [
+    "I’m a Personal Brand Strategist, so I’ll beat you to the insult",
+    "Does \"Conversational Dominance\" mean working 2am live-chat for a coupon app?"
+   ],
+   "raise": "Have one of them state a dating rule in earnest, such as Sable calling the extensions 'marketing spend' with no irony, and let the other's behaviour disprove it on screen.",
+   "def": "cd5acec1a8653b27",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Almost every sharp joke lands on its teller: the limescale tip, the ninety seconds, the mother's 'returns desk'. Sable's one jab at Zyx's job is taken in good part and turns into a confession. The final line ribs Zyx with three callbacks but makes them an act of care, so neither ends up as the villain or the punchline. It stops short of a 6 because the explicit 'terrified' and 'Christ, look at us' tip toward self-pity rather than staying merciless.",
+   "evidence": [
+    "scrubbed it for an hour until he went soft and tipped me twenty quid.",
+    "Paid per ticket, darling, that’s why I text like a hostage negotiator on speed.",
+    "I’m so terrified of being seen unedited"
+   ],
+   "raise": "Replace Sable's 'I’m so terrified of being seen unedited' with a joke that shows the fear, so the fondness never relies on stated pathos.",
+   "def": "51f6e5881b5145be",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 3,
+   "why": "The reader attributed all 16 messages correctly, but every reason given is content from the brief: the hat, the ring light, the maid costume, the coupon job. Strict alternation did the rest. In register the two are nearly interchangeable: both open with job-title lists, both use clipped verdicts ('Smart.' / 'Amateur.' / 'Harsh.'), and both slip into the same British-confessional cadence. A content slip, 'my terrible mattress' when the floor mattress is Sable's, shows the voices aren't anchored.",
+   "evidence": [
+    "Smart. I use speed.",
+    "Amateur. A match on Tuesday wanted a French maid fantasy.",
+    "I’ll hold your wrists down on my terrible mattress"
+   ],
+   "raise": "Give Zyx a run-on, tab-switching, no-full-stop patter and Sable short, deleted-and-retyped polished lines, so a reader could split them with the props removed.",
+   "def": "a77bc9ef79556bda",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "The characters narrate their own gaps instead of showing them. Sable explains her defence mechanism in her first message, Zyx explains why stopping talking is fatal, and Sable names her own fear outright. The one real gap, 'Conversational Dominance Consultant' undone by the wrong-tab helpdesk message, gets caught and explained within two lines. Neither act is left for the reader to see through.",
+   "evidence": [
+    "I announce my flaws in the first four minutes so my mouth says it before your face does.",
+    "I’m so terrified of being seen unedited",
+    "stopping means disappearing."
+   ],
+   "raise": "Cut the self-diagnosis lines and let Sable's 'effortless' pose sit next to visible signs of rehearsal she never mentions, and Zyx's dominance claim next to evidence he never explains.",
+   "def": "fa4461088ccd15ee",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Many funny lines are character-specific: the eleven-minute tight five, scrubbing limescale in a maid costume, the misdelivered rose tattoo. But the chat has at least three day-job jokes, over the limit of two: the kebab-code ticket, the coupon-app live-chat jab and 'paid per ticket… hostage negotiator'. 'Faulty packaging? / Damaged in transit' is a wisecrack either character could have sent.",
+   "evidence": [
+    "SORRY YOUR KEBAB CODE EXPIRED LINDA, TICKET RESOLVED",
+    "Does \"Conversational Dominance\" mean working 2am live-chat for a coupon app?",
+    "Paid per ticket, darling"
+   ],
+   "raise": "Fold the coupon-job exposure into one joke and spend the freed lines on habits that only Zyx would reveal.",
+   "def": "4448c7f54baa167a",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 2,
+   "why": "When Zyx is caught by the wrong-tab message, he concedes at once and moves straight to childhood backstory instead of digging in. Sable confesses unprompted, without being caught. The chat then turns to mutual confession ('Christ, look at us') and both drop the act: 'No ring light, no lint roller.' That is a change of heart, which is what the dimension rules out.",
+   "evidence": [
+    "Paid per ticket, darling, that’s why I text like a hostage negotiator on speed. I grew up in a freezing house",
+    "Christ, look at us.",
+    "Come over. No ring light, no lint roller."
+   ],
+   "raise": "When caught on the coupon job, have Zyx insist it's deep-cover consultancy and build a worse lie, so the backstory leaks out against his will.",
+   "def": "5102b09e503af846",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Sable takes the upper hand early ('I’ll beat you to the insult', 'Amateur') and holds it through the wrong-tab catch and her questioning of Zyx. Zyx regains ground only briefly with 'Faulty packaging?', and she absorbs it. After that the chat levels into shared confession, and Sable's final jab puts her back on top. That is roughly one flip, not two clear ones.",
+   "evidence": [
+    "Amateur.",
+    "Does \"Conversational Dominance\" mean working 2am live-chat for a coupon app?",
+    "Harsh. Faulty packaging?"
+   ],
+   "raise": "Give Zyx a real catch on Sable, such as spotting a deleted-and-retyped reply, so he holds the upper hand for a stretch before she wins it back.",
+   "def": "a327913ca348ff82",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    false,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Some punchlines land last: 'tipped me twenty quid', 'shit, wrong tab.' and 'eleven minutes of silence'. The short 'Damaged in transit.' works as a reaction shot. But most messages carry setup and punchline together, and several stack two or three jokes. The tattoo punchline is buried mid-message, followed by 'Why are you up at 3am?'. The confession stretch from message 9 to 14 runs at one earnest temperature.",
+   "evidence": [
+    "delivered to the widow upstairs by mistake. Why are you up at 3am?",
+    "Elite defence—SORRY YOUR KEBAB CODE EXPIRED LINDA, TICKET RESOLVED—shit, wrong tab.",
+    "Damaged in transit."
+   ],
+   "raise": "Split the stacked opening messages so each punchline gets its own message, and break the confession run with a cold one-liner.",
+   "def": "7e36393433d52f66",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "The last line gathers three opening throwaways and turns each one: the wizard hat becomes the gag Zyx wanted, the eleven-minute tight five becomes 'eleven minutes of silence', and Sable's humiliating twenty-quid tip becomes her paying him. Nobody explains any of it, and it closes the night. It falls short of a 6 because the middle return 'No ring light, no lint roller' reads like a checklist of her props. The callbacks also lean on confessions the chat states outright, such as 'I just want to be gagged', so the reader has little left to assemble.",
+   "evidence": [
+    "the wizard hat stays on in bed",
+    "scrubbed it for an hour until he went soft and tipped me twenty quid",
+    "stuff the wizard hat in your mouth—I’ll tip you twenty quid for the eleven minutes of silence."
+   ],
+   "raise": "Keep the gag wish unspoken (cut 'secretly I just want to be gagged'), so the wizard-hat payoff is the reader's discovery rather than a fulfilled request.",
+   "def": "9ff48f7918d86364",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted a small ending built on a callback to an opening prop, with each one letting go a little of the armour. That matches the real ending in kind, and Sable signing off with a bit is true to her habit of beating him to the joke. It stays at 4 because the ending is earned through self-diagnosis rather than behaviour: both name their fear and their wish outright. Zyx answers with more talk ('Come over...') rather than the silence the reader expected, so his turn is offered rather than shown.",
+   "evidence": [
+    "I’m so terrified of being seen unedited",
+    "And I just want someone to hold my wrists still until I stop performing.",
+    "Come over. No ring light, no lint roller."
+   ],
+   "raise": "Have Zyx answer Sable's wrist line with almost nothing, a one-word or empty reply that is his first unfilled silence, before the invitation.",
+   "def": "8bd8de581cc31c9e",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 4,
+   "why": "Most messages answer the last one. 'Smart. I use speed.' and 'Amateur.' answer the previous brag, 'Faulty packaging?' / 'Damaged in transit' picks up the returns-desk image, and Sable's job question calls out the wrong-tab slip. It stays at 4 rather than 5 because the opening exchanges are parallel CVs rather than reactions. Zyx's rose-tattoo anecdote is also dropped into his answer about silence with no prompt, which is profile material inserted rather than a response.",
+   "evidence": [
+    "Even my rose tattoo is a prop—got it for a secret admirer bouquet",
+    "Harsh. Faulty packaging?",
+    "Damaged in transit."
+   ],
+   "raise": "Cut the rose-tattoo aside, and make the first two messages react to each other instead of running as parallel introductions.",
+   "def": "f426aa8449e0fbc7",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "There is one real shape change: the all-caps wrong-tab slip, 'SORRY YOUR KEBAB CODE EXPIRED LINDA'. The confession section does also get slightly shorter. Otherwise both write in the same polished, clause-built register whether bragging, exposed or turned on. Zyx supposedly 'text[s] like a hostage negotiator on speed' but types tidy complete sentences, and Sable's 3am pre-workout state never shows in her typing.",
+   "evidence": [
+    "SORRY YOUR KEBAB CODE EXPIRED LINDA, TICKET RESOLVED—shit, wrong tab.",
+    "Paid per ticket, darling, that’s why I text like a hostage negotiator on speed."
+   ],
+   "raise": "Make Zyx's messages visibly rapid-fire and fragmentary, and once the guard drops, make the typing go short and lowercase, with no punchlines.",
+   "def": "6e21e724825d1cc3",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Composed, stacked multi-clause messages are the norm rather than the rare event. The two opening messages are formatted inventories, and lines like 'so my mouth says it before your face does' are polished prose lifted from the profile. Zyx's explanation of silence reads as narration of his own psychology rather than something typed with a thumb at 3am. The short exchanges, such as 'Amateur.' and 'Damaged in transit.', keep it from a 2.",
+   "evidence": [
+    "I announce my flaws in the first four minutes so my mouth says it before your face does.",
+    "Five seconds of silence leads to a plain question like \"do you want me to stay?\" and stopping means disappearing."
+   ],
+   "raise": "Break the opening inventories and the silence explanation into short separate texts, and drop the explanatory 'so that' clauses.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "The one-word verdict opener is a tic used four times: 'Smart.', 'Amateur.', 'Harsh.', 'Christ'. The two openers share the same shape, a job title followed by a list of flaws. The anecdote shape ('Last week I...' / 'A match on Tuesday...') runs twice back to back. The parallel 'I just want...' confessions are deliberate, but they add to the sense of a template.",
+   "evidence": [
+    "Smart. I use speed.",
+    "Amateur. A match on Tuesday",
+    "Harsh. Faulty packaging?"
+   ],
+   "raise": "Vary the reply openers so that no more than two messages start with a one-word verdict.",
+   "def": "679a7696bf0171cd",
+   "material": "d46332703f8c7787",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is a pair of lines near the end:\n\n> Zyx_444: \"Christ, look at us. My bedroom's full of expired loyalty coupons, and secretly I just want to be gagged and photographed badly so I can shut up.\"\n> Sable_xo: \"And I just want someone to hold my wrists still until I stop performing.\"\n\n**How I could tell**\n\n- **The register changes.** Until this point, almost every line is a bid to win: job-title inflation, prices quoted to the pound or dollar, \"Smart.\" / \"Amateur.\" one-upmanship. Here the numbers, brand-speak and score-keeping disappear. \"Christ, look at us\" steps outside the contest and names it.\n- **They say what they want instead of displaying what they are.** \"Secretly\" and \"I just want\" are the first wishes either of them states. Everything before was a credential or a pre-emptive confession used as armour. Sable says outright that the confessions are tactical: \"so my mouth says it before your face does.\"\n- **The wants match their stated fears.** Zyx has said silence means disappearing, so wanting to be made to \"shut up\" undoes his strategy. Sable has said she's terrified of being seen unedited, so wanting to be held still \"until I stop performing\" undoes hers. Sable names the act directly with the word \"performing.\"\n\n**Earlier cracks**\n\n- The \"SORRY YOUR KEBAB CODE EXPIRED LINDA\" slip exposes Zyx, but it's accidental, not a choice to drop the act.\n- Sable's call-out (\"Does 'Conversational Dominance' mean working 2am live-chat…\") gets a franker answer from Zyx, but \"darling\" and the hostage-negotiator joke keep it in performance mode.\n- Sable's line about dumping the man who loved the unposed photo, and the 5am lint-rolling, reads as unguarded. It still opens with a quip, though (\"Damaged in transit\").\n\n**Caveats**\n\nThe last two lines go back to jokes: the wizard hat, the twenty quid, the ninety seconds. They're callbacks to earlier material, now offered to each other rather than used against each other. Whether that's the performance returning or turning playful between them, the text doesn't settle. I also can't tell from the chat alone whether either of them means it beyond the moment."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx_444**\n\n*What he's afraid of:* Silence, and what it leads to. \"Five seconds of silence leads to a plain question like 'do you want me to stay?' and stopping means disappearing.\" The fear is of a pause where someone asks something real, and of vanishing if he stops.\n\n*What he does so he doesn't have to feel it:* He keeps talking, fast. He calls himself a \"Conversational Dominance Consultant\" and says \"I use speed.\" After sex he fills the gap: \"I finished in ninety seconds and immediately delivered an eleven-minute tight five so she'd still tell her friends I was great in bed.\" He also leans on props and stories. The wizard hat and the clip-on nose piece are \"mystery,\" and \"Even my rose tattoo is a prop.\" The chat also gives a practical side: \"Paid per ticket, darling, that's why I text like a hostage negotiator on speed.\"\n\n*Where it comes from:* \"I grew up in a freezing house where you spoke fast or got cropped out of the family photo.\"\n\n*What he did at the end:* He said what he wants instead: \"secretly I just want to be gagged and photographed badly so I can shut up.\" Then he invited her over and offered her what she had asked for: \"Come over. No ring light, no lint roller. I'll hold your wrists down on my terrible mattress, and you can take an unedited photo of me with the flash on.\"\n\n**Sable_xo**\n\n*What she's afraid of:* Being seen as she really is. \"I'm so terrified of being seen unedited.\"\n\n*What she does so she doesn't have to feel it:* She names her flaws before anyone else can: \"I announce my flaws in the first four minutes so my mouth says it before your face does.\" She manages how she looks: \"deleting my replies twice so I look effortless,\" and the \"£212 ring light is hiding a floor mattress.\" After hookups she erases traces of herself: \"I wake at 5am after hookups to lint-roll my own shed hair fibers off the pillowcase before he opens his eyes.\" She also left the one person who liked her unposed: \"I dumped the one man who loved an unposed photo of me asleep.\" She tells the bathtub-scrubbing story too, but the chat doesn't say why she did it.\n\n*Where it comes from:* Her mother. \"My mother still critiques my profile photos like a returns desk.\" When Zyx asks \"Faulty packaging?\", she answers \"Damaged in transit.\"\n\n*What she did at the end:* She said what she wants: \"I just want someone to hold my wrists still until I stop performing.\" Then she accepted his invitation with \"Deal.\" She added a joke that gives him what he asked for: \"stuff the wizard hat in your mouth—I'll tip you twenty quid for the eleven minutes of silence.\" This calls back his ninety seconds, his eleven-minute routine, and her own twenty-quid tip. It also hands him the gag and the silence he said he wanted.\n\n**What the chat does not say:** Whether they actually met, and what happened if they did, is not in the chat. Why Sable scrubbed the bathtub is not in the chat. Anything about Zyx's family beyond the one line about the freezing house is not in the chat. Anything about Sable's past beyond her mother and the man she dumped is not in the chat."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I wouldn't have stopped. The chat earns its length because each message either tops the last or reframes it. But it has one soft spot and two stretches where I was ahead of it.\n\n**Where I'd have been most tempted to stop**\n\nIt's Zyx's rose tattoo line (\"got it for a secret admirer bouquet that was actually delivered to the widow upstairs by mistake\"). It comes right after the most sincere thing Zyx has said, that five seconds of silence leads to \"do you want me to stay?\" and stopping means disappearing. Then it piles another absurd prop-gag on top. It's a funny image, but it's one gag too many. It reads like the character, or the writer, flinching away from the emotional beat. Before that, I'd have been mildly at risk during the French maid and limescale story, which is the peak of the escalating gags. A third round of that would have lost me. The \"wrong tab\" slip rescues it by turning the bravado into a real job and a real person, and from there the momentum carries.\n\n**Where I could predict what came next**\n\nAfter Sable's opening line (\"I announce my flaws in the first four minutes so my mouth says it before your face does\"), I could predict the shape of the first half: two people trading pre-emptive self-insults and trying to out-do each other. I couldn't predict the specific jokes, though, and those are what keep it alive.\n\nThe second point is \"Christ, look at us.\" That line announces the turn to confession. Once both have admitted their secret wish, being gagged and photographed badly, and having their wrists held still, I could predict exactly what would happen next: one of them invites the other over, framed as giving each other those things. \"Come over. No ring light, no lint roller\" arrived as expected.\n\nI could also tell that the final line would be a callback that turns earlier humiliations into tenderness. I just couldn't tell which one. Folding in three of them (the ninety seconds, the wizard hat, and the twenty-quid tip mapped onto the eleven minutes) is the one place the ending beats my guess.\n\nSo the middle surprised me, while the opening premise and the final turn played out as I expected."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can only guess, since the ending isn't shown, but the chat sets up a fairly clear shape.\n\nThe first stretch is a contest of pre-emptive self-mockery. Each tries to out-confess the other before they can be judged: the wizard hat, the credit-card extensions, the ninety seconds plus eleven-minute set, scrubbing a tub in a maid costume. Then the misfired \"KEBAB CODE EXPIRED LINDA\" message cracks the act. After that the jokes thin out and the real wounds come through. Zyx talks fast because silence once meant being cropped out, and stopping feels like disappearing. Sable curates herself because her mother treated her like returned merchandise, and she pushed away the one man who loved an unposed picture of her.\n\nThat leaves each holding the exact fear the other could test. Sable's last line is the most exposed thing either has said, and it hands the next move to Zyx. I'd expect the ending to turn on Zyx not filling the space. He might go silent for a moment, or he might ask the plain question he said five seconds of silence leads to: \"do you want me to stay?\" Sable might answer by doing something unedited, like switching off the ring light, sending a photo she hasn't fixed, or replying without deleting it first.\n\nIt probably ends small rather than as a big romance, because both are too defended for that. It may finish on a callback to one of the opening props, which would let them keep a little of their armour while showing they've been seen. A more cynical ending is also possible, where one of them snaps back into performance at the moment of closeness. But the steady drift from bravado to confession suggests the writer is building toward a quiet moment of honesty, most likely a silence that doesn't mean leaving."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks, roughly in the order they first appear.\n\n1. **The wizard hat.** It starts as part of Zyx's opening act, a quirky boast that it \"stays on in bed.\" At the end Sable tells him to stuff it in his mouth. **It changes:** a prop for performing becomes the gag he said he secretly wanted, a tool for silence rather than show.\n\n2. **Ninety seconds and the eleven-minute tight five.** Zyx first brags about finishing in ninety seconds and then talking for eleven minutes so she'd still call him great. Sable brings both back in the last line. **It changes:** the ninety seconds is no longer something to cover up; she simply expects and accepts it. The eleven minutes of compensating talk becomes \"eleven minutes of silence.\"\n\n3. **Twenty quid.** First it's the tip Sable got after scrubbing a match's bathtub instead of doing the fantasy, an awkward, faintly humiliating payment. At the end she offers to tip Zyx twenty quid. **It changes:** the roles reverse, and the money becomes an affectionate joke rewarding him for stopping performing. It also loosely echoes his \"paid per ticket\" job.\n\n4. **The ring light.** Sable mentions her £212 ring light hiding a floor mattress. Zyx's invitation says \"No ring light.\" **It changes:** a tool for concealment and image becomes something deliberately left out.\n\n5. **The mattress.** Her floor mattress is something hidden. His \"terrible mattress\" is offered openly. **It changes:** a cheap mattress shifts from a source of shame to something admitted without fuss.\n\n6. **The lint roller.** It first appears in Sable's 5am ritual of removing her own hair from the pillowcase before a hookup wakes. Zyx says \"no lint roller.\" **It changes:** the same idea as the ring light, a hiding habit set aside.\n\n7. **Unedited photos.** This thread runs through several moments:\n   * Zyx being cropped out of the family photo.\n   * Sable's mother critiquing her profile pictures.\n   * The man Sable dumped for loving an unposed photo of her asleep.\n   * Zyx wanting to be \"photographed badly.\"\n   * Zyx's final offer that she take an unedited flash photo of him.\n\n   **It changes:** throughout, photos are about being judged or exposed, and being seen unedited is Sable's fear. At the end she is the one holding the camera, and the unflattering photo is a gift he wants rather than a threat.\n\n8. **Held wrists.** Sable says she wants someone to hold her wrists still until she stops performing, and Zyx immediately repeats it back as an offer. **It stays the same:** this is a direct echo, the wish taken up as stated.\n\n9. **Being gagged.** Zyx's wish to be gagged so he can shut up returns as the wizard hat in his mouth. **It stays the same:** the wish is fulfilled, through an object that has itself changed meaning (see item 1).\n\n10. **Silence.** Early on, five seconds of silence is frightening to Zyx because it leads to questions and to people disappearing. At the end silence is what Sable is \"paying\" for. **It changes:** from threat to something wanted.\n\n11. **Coupons.** The \"kebab code\" slip is first a cover-blown gag, which Sable then exposes as his real live-chat job. It returns as the expired loyalty coupons filling his bedroom. **It changes:** from a comic slip to a rather bleak image of his life.\n\nThe chat doesn't say whether the meeting actually happens, so whether these reversals hold up isn't something the text shows."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Every message can be assigned from the brief, and the speakers simply alternate, with Zyx_444 sending the odd numbers and Sable_xo the even ones.\n\n1. **Zyx.** The Conversational Dominance Consultant line, the wizard hat and the clip-on nose piece are all Zyx's details.\n2. **Sable.** The Personal Brand Strategist line, the asymmetry, the extensions on a 29% card, the £212 ring light and the floor mattress are all Sable's.\n3. **Zyx.** The ninety seconds followed by an eleven-minute tight five is Zyx's story.\n4. **Sable.** The $94 French maid costume and the hour of scrubbing limescale are hers.\n5. **Zyx.** The coupon-app helpdesk message sent to the wrong tab fits Zyx's tab-switching.\n6. **Sable.** She is the one calling out the 2am live-chat job, which is Zyx's real work.\n7. **Zyx.** Being paid per ticket, the hostage negotiator texting and the freezing family house are Zyx's background.\n8. **Sable.** She is asking about Zyx's fear of silence.\n9. **Zyx.** The five-second silence, \"do you want me to stay?\" and the misdelivered rose tattoo are all Zyx's.\n10. **Sable.** The dry-scooped pre-workout, deleting replies twice and her mother as a returns desk are hers.\n11. **Zyx.** This replies to Sable's mother line with the returns-desk joke.\n12. **Sable.** Dumping the man who loved the sleeping photo and the 5am lint-rolling are hers.\n13. **Zyx.** The expired loyalty coupons and wanting to be gagged and photographed badly are Zyx's.\n14. **Sable.** Wanting someone to hold her wrists still until she stops performing is her stated wish.\n15. **Zyx.** This message tells Sable to come without the ring light or lint roller, offers to hold her wrists, and asks for an unflattering flash photo of the sender, which is Zyx's wish. One oddity is that it says \"my terrible mattress,\" when the brief gives the floor mattress to Sable. The rest of the message points clearly to Zyx, so this looks like a slip in the chat rather than a sign of the other speaker.\n16. **Sable.** She is speaking to Zyx about the ninety seconds and the wizard hat, and the twenty-quid tip echoes her own maid story."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.9,
+   "cost": 0.036216,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 19.5,
+   "cost": 0.047856,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 24.3,
+   "cost": 0.04020800000000001,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 15.6,
+   "cost": 0.030216,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 25.2,
+   "cost": 0.057812,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 16.1,
+   "cost": 0.046228000000000005,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 27.2,
+   "cost": 0.0919692,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 29.7,
+   "cost": 0.0876652,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 35.7,
+   "cost": 0.10489319999999999,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 34.8,
+   "cost": 0.10300519999999999,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:44:34Z",
+ "repo_commit": "6709700",
+ "cost": 0.6461
+}

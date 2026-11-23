@@ -334,8 +334,10 @@ WRITER_RUNS = [
     ("writers-v12", 12, "run 11's briefs and characters; the chat played turn by turn on seed 23's dice"),
     ("writers-v13", 13, "run 12 with the turn no longer fixed at one message from each"),
     ("writers-v14", 14, "run 13 told as improvisation instructions, without the game's language; traps two long"),
+    ("writers-v15", 15, "Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go"),
+    ("writers-v16", 16, "Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14"),
 ]
-CHAT_PAIR = ("reuben", "brick")  # the player writes first
+CHAT_PAIR = ("reuben", "brick")  # the player writes first; runs 1 to 14
 
 
 def char_name(slug):
@@ -358,13 +360,17 @@ def writer_messages(text, names):
 
 def writer_targets():
     """A target for every writer's chat, and one set target per run that holds all of that run's chats."""
-    names = [char_name(s) for s in CHAT_PAIR]
     out = []
     for folder, n, about in WRITER_RUNS:
         base = WRITERS_DIR / folder
-        rec = base / "chat-reuben-brick" / "run.json"
-        if not rec.exists():
+        # the pair is the chat folder's name, chat-<player>-<match>
+        recs = sorted(base.glob("chat-*/run.json"))
+        if not recs:
             continue
+        rec = recs[0]
+        chat_dir = rec.parent.name
+        pair = tuple(chat_dir[len("chat-"):].split("-"))
+        names = [char_name(s) for s in pair]
         writers = json.loads(rec.read_text(encoding="utf-8")).get("writers") or {}
         done = []
         for wid, w in writers.items():
@@ -372,8 +378,8 @@ def writer_targets():
                 continue
             # run 11 on: both characters were written together, in one text
             paired = (base / "characters" / f"{wid}.md").exists()
-            paths = [base / "chat-reuben-brick" / f"{wid}.md"] + (
-                [base / "characters" / f"{wid}.md"] if paired else [base / s / f"{wid}.md" for s in CHAT_PAIR])
+            paths = [base / chat_dir / f"{wid}.md"] + (
+                [base / "characters" / f"{wid}.md"] if paired else [base / s / f"{wid}.md" for s in pair])
             if not all(p.exists() for p in paths):
                 continue
             text, *profiles = (p.read_text(encoding="utf-8").strip() for p in paths)
@@ -387,7 +393,7 @@ def writer_targets():
                      "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles)))
             out.append({"id": f"chat-{folder}-{wid}", "kind": "chat", "label": f"Run {n} · {w['writer']}",
                         "version": f"run {n}", "order": 100 + n, "writer": wid, "writers_run": n,
-                        "source": f"docs/tone-lab/scratch/{folder}/chat-reuben-brick/{wid}.md",
+                        "source": f"docs/tone-lab/scratch/{folder}/{chat_dir}/{wid}.md",
                         "note": (f"Written in one go by {w['writer']} from {'what they wrote about the two characters' if paired else 'the two profiles they wrote'} (run {n}: {about}). "
                                  "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges."),
                         "speakers": [s for _, s, _ in msgs],
@@ -397,7 +403,7 @@ def writer_targets():
         if len(done) >= 2:
             out.append({"id": f"chatset-{folder}", "kind": "chat", "set": True, "label": f"Run {n} · all {len(done)} chats",
                         "version": f"run {n}", "order": 100 + n, "writers_run": n,
-                        "source": f"docs/tone-lab/scratch/{folder}/chat-reuben-brick/",
+                        "source": f"docs/tone-lab/scratch/{folder}/{chat_dir}/",
                         "note": (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
                                  "each written by a different writer."),
                         "material": {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}})

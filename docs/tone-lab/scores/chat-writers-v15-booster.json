@@ -1,0 +1,528 @@
+{
+ "id": "chat-writers-v15-booster",
+ "kind": "chat",
+ "label": "Run 15 · Joel Kim Booster",
+ "version": "run 15",
+ "order": 115,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v15/chat-zyx-sable/booster.md",
+ "note": "Written in one go by Joel Kim Booster from what they wrote about the two characters (run 15: Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 15,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2515,
+   "words": 449
+  },
+  "brief": {
+   "chars": 3342,
+   "words": 574
+  },
+  "chat_masked": {
+   "chars": 2447,
+   "words": 449
+  },
+  "chat_but_last": {
+   "chars": 1927,
+   "words": 343
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got all four for both characters, matching the profiles. For each, the fear is linked to the habit that covers it: Sable pre-roasts her flaws and erases her traces; Zyx fills silence with bits. Both endings follow from those fears: Zyx asks to be silenced and kept, and Sable offers her flaw to be measured in silence. It falls short of a 6 because Zyx's fear arrives as a flat statement (\"If a chat goes quiet for five seconds I panic\") rather than being earned.",
+   "evidence": [
+    "If a chat goes quiet for five seconds I panic.",
+    "I deleted it while he was in the shower and ghosted.",
+    "You're measuring my uneven left nut in complete silence and tipping me twenty bucks."
+   ],
+   "raise": "Cut Zyx's \"I panic\" sentence and let the ex anecdote and his rush to fill gaps carry the fear unnamed.",
+   "def": "f019e7f239b9d82d",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 2,
+   "why": "Nearly every important fact is volunteered in confessional blocks traded on cue (\"Your turn\"), and both origins, which count double, are stated outright as backstory. The only real inference is Sable's fear of being seen, which comes from the deleted photo rather than being named. Nobody slips and nobody gets caught. Everything is told.",
+   "evidence": [
+    "My family cropped me out of the portrait at age nine in a freezing house where you had to talk fast or disappear.",
+    "A boy did a double-take once and my mom still reviews my selfies like a returns desk",
+    "Your turn. Nobody consults on wind at 4am."
+   ],
+   "raise": "Let at least one origin leak out through a detail the speaker didn't mean to reveal, such as Zyx flinching at the word \"portrait\", instead of being announced.",
+   "def": "76152fd7f08caa41",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "Panic is named twice, once by each character, and several lines explain the mechanism outright (\"so I have the stamina to act effortless\", \"so you don't squint\"). That puts the chat below the line. There is real material underneath: \"Just don't crop me out\" and the closing micrometer line both leave the reader to work out what is being avoided.",
+   "evidence": [
+    "panicked before he could look closely",
+    "I'm supposed to dazzle you with riddles so you don't squint.",
+    "Do your worst. Just don't crop me out."
+   ],
+   "raise": "Strip the two \"panic\" words and the \"so that\" explanations so the actions alone carry the fears.",
+   "def": "61d4f86460a218aa",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found Zyx putting the act down, and \"Just don't crop me out\" is short, plain, and names no feeling. It clears the line. The reader anchored first on the longer \"I'd kill to\" line, which declares want more openly. Sable's answer stays inside a bit, so it is ambiguous whether the night actually changes. Those two things keep it from a 5.",
+   "evidence": [
+    "Just don't crop me out.",
+    "You deleted it? I'd kill to stay in someone's camera roll asleep."
+   ],
+   "raise": "Have Sable answer \"Just don't crop me out\" with an equally plain, joke-free line before she returns to the bit, so his drop clearly changes her.",
+   "def": "b5a3a3c2e796783b",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 3,
+   "why": "The reader attributed all 13 messages correctly. The reasons are almost all content: props, backstory and the brief's plot notes, not how each one talks. In messages 6–9 both characters write the same long, comma-spliced confession built from backstory facts, so the voices merge. Some voice exists: Zyx's riddle cadence and \"Hey, pre-roasting yourself is cheating\" against Sable's clipped \"Incredible.\" There is not enough of it for the reader to have attributed by voice, which keeps this below the line.",
+   "evidence": [
+    "The riddle format and the wizard hat, nose clip, widow's-rose tattoo and micrometer are all Zyx's props",
+    "My family cropped me out of the portrait at age nine in a freezing house where you had to talk fast or disappear.",
+    "I keep six surface-specific lint rollers under my bed and wake at dawn to pick my shed extension fibers off guys’ pillows."
+   ],
+   "raise": "Give each character a typing habit that survives with the nouns removed (Zyx never ending on a full stop, Sable answering in three-word verdicts), and keep the backstory out of their mouths.",
+   "def": "a77bc9ef79556bda",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "Each act is announced, then dismantled by the person performing it. Zyx swaps \"aerodynamic consultant\" for the coupon job and names his own fear (\"If a chat goes quiet for five seconds I panic\"). Sable explains her pre-emptive roast as she does it and says she exists to \"act effortless.\" The one gap the speaker may not see is Zyx asking how to fill the eleven minutes in the same message where he promises to stay quiet, and it is faint. The other gaps are confessed, not shown.",
+   "evidence": [
+    "so I announce the factory defect in under four minutes",
+    "so I have the stamina to act effortless",
+    "If a chat goes quiet for five seconds I panic."
+   ],
+   "raise": "Let Zyx keep insisting on the consultancy while his replies arrive in 0.2 seconds with coupon-support phrasing, and never have him explain it.",
+   "def": "fa4461088ccd15ee",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laugh lines belong to their sender. Sable's \"Make-A-Wish patient at Hogwarts\" is her roast-first reflex aimed outward, \"mom still reviews my selfies like a returns desk\" is hers alone, and Zyx's \"dressed before the punchline\" costs him something. There are no data, spreadsheet or audit jokes. Several funny lines are brief facts restated (the limescale, the $94 costume) rather than wit made in the moment, which keeps this from a 5.",
+   "evidence": [
+    "A dick who looks like a Make-A-Wish patient at Hogwarts and just replied in 0.2 seconds at 4am.",
+    "I launched into a tight five so fast she was dressed before the punchline.",
+    "my mom still reviews my selfies like a returns desk"
+   ],
+   "raise": "Replace the recited anecdotes with jokes they make live at each other's expense, as sharp as the Hogwarts line.",
+   "def": "4448c7f54baa167a",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 2,
+   "why": "When Sable catches him (\"Nobody consults on wind at 4am\"), Zyx concedes at the first hit with \"Fine.\" and drops the whole act, including the family trauma. When he asks \"You deleted it?\" Sable deflects into flirting, which is the strongest moment. The ending is a double change of heart: he asks to be told to shut up, and she promises to take the photo she once deleted. That reads as the lesson learned.",
+   "evidence": [
+    "Fine. I do 2am live-chat support for a coupon app on six espressos",
+    "Come over, leave your shed hair on my pillow, and tell me to shut the fuck up",
+    "I’m taking an ugly flash photo of you in the wizard hat."
+   ],
+   "raise": "When Sable calls out the 4am consultancy, have Zyx double down with a more elaborate wind-consulting story that gives away the coupon job without him admitting it.",
+   "def": "5102b09e503af846",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Zyx's riddle puts him on top for one message. Sable's Hogwarts diagnosis takes it, and his \"pre-roasting yourself is cheating\" jab is answered at once with her own catch, after which he folds. The middle is level confession-trading, not a contest. From \"Come over\" on Zyx is chasing and Sable gives the orders to the last line. In practice there is one real flip, and Zyx never has a sustained stretch on top.",
+   "evidence": [
+    "Hey, pre-roasting yourself is cheating, I’m supposed to dazzle you with riddles",
+    "Your turn. Nobody consults on wind at 4am.",
+    "You’re measuring my uneven left nut in complete silence and tipping me twenty bucks."
+   ],
+   "raise": "Give Zyx a mid-chat win that puts Sable on the back foot, for example catching her lint-roller ritual as the same performance she accuses him of, before she takes control back at the end.",
+   "def": "a327913ca348ff82",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Punch words usually land last (\"at 4am,\" \"and ghosted,\" \"tipping me twenty bucks\"), but they always share a message with their setup, and none gets its own break. Sable's \"Incredible.\" is the one reaction shot, and it is buried at the head of a long anecdote. Messages 6–9 are four long confessions in a row at the same temperature, with no hot-cold contrast.",
+   "evidence": [
+    "Incredible. Last month I bought a $94 French maid costume to seduce a match",
+    "Dry-scooping pre-workout on my dark bathroom floor before my secret day job so I have the stamina to act effortless",
+    "I deleted it while he was in the shower and ghosted."
+   ],
+   "raise": "Split the long confessions so the punch phrase arrives alone in its own message, and let \"Incredible.\" stand by itself after Zyx's ex story.",
+   "def": "7e36393433d52f66",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "The micrometer is planted as a riddle prop, returns in the middle as \"beating your calipers to the punch\", and closes the night as an invitation to measure her flaw \"in complete silence\". Nobody explains that last turn, which also pays off his silence fear and the twenty-dollar tip. It falls short of a 6 for two reasons. Several returns get a spoken gloss in the middle (\"You deleted it? I'd kill to stay in someone's camera roll asleep\"). And many setups are confessions, not throwaways, so the reader is handed the meaning before it returns.",
+   "evidence": [
+    "clocks zero shaft drag on an industrial micrometer?",
+    "beating your calipers to the punch",
+    "You're measuring my uneven left nut in complete silence and tipping me twenty bucks."
+   ],
+   "raise": "Cut Zyx's explanatory \"I'd kill to stay in someone's camera roll asleep\" and let the photo turn land on Sable's flash-photo line alone.",
+   "def": "9ff48f7918d86364",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted a beat where silence is finally allowed and someone stays, and the ending gives that in kind: he is ordered quiet, and she offers her lopsided side to be looked at closely. It follows from both habits, since her pre-emptive self-exposure becomes consent and his crowd work is replaced by imposed silence. It stays at 4 because the turn is barely earned. Sable goes from deleting the sleeping photo to promising an \"ugly flash photo\" in one message, with no friction between them, so the warmth arrives quickly.",
+   "evidence": [
+    "I deleted it while he was in the shower and ghosted.",
+    "The second you pass out in those coupons, I'm taking an ugly flash photo of you in the wizard hat.",
+    "in complete silence"
+   ],
+   "raise": "Add one exchange where Sable balks or Zyx starts a bit and is stopped, so the shift to silence costs something before the last line.",
+   "def": "8bd8de581cc31c9e",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message picks up the last. She decodes his riddle, he challenges her 0.2-second reply, she turns the question back (\"Nobody consults on wind at 4am\"), and his \"other eleven minutes\" gets her silent-measuring answer. Below 6 because Sable's \"Incredible.\" answers his ex story and \"do you want me to stay?\" with a matching anecdote of her own rather than a reaction to his, so the trade sometimes reads as alternating confessions.",
+   "evidence": [
+    "How did you also reply in 0.2 seconds?",
+    "Your turn. Nobody consults on wind at 4am.",
+    "Incredible. Last month I bought a $94 French maid costume"
+   ],
+   "raise": "Have Sable react to the \"do you want me to stay?\" story itself before topping it with her own.",
+   "def": "f426aa8449e0fbc7",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "The register hardly moves. The opening riddle, the childhood wound and the deleted-photo confession are all typed in the same polished, clause-stacked comic prose. Only the last three messages shorten as they turn flirty (\"Do your worst. Just don't crop me out.\"), which is a single shift. Their guard comes down without any change in typing, so the chat stays below the line.",
+   "evidence": [
+    "My family cropped me out of the portrait at age nine in a freezing house where you had to talk fast or disappear.",
+    "Do your worst. Just don't crop me out."
+   ],
+   "raise": "Make the confessions typed differently from the bits: broken, lowercase, a hesitation or a sent-too-soon fragment where the guard drops.",
+   "def": "6e21e724825d1cc3",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Composed, stacked sentences are the norm, not the exception. Several messages read like profile text pasted into the chat, and two long confessions sit back to back, so long messages are no longer an event. The end messages are short and typeable, but most of the chat is crafted prose.",
+   "evidence": [
+    "Dry-scooping pre-workout on my dark bathroom floor before my secret day job so I have the stamina to act effortless for my two nail-tech branding clients.",
+    "I keep six surface-specific lint rollers under my bed and wake at dawn to pick my shed extension fibers off guys' pillows."
+   ],
+   "raise": "Split the backstory dumps into short bursts across several messages, and save one long message for the deleted-photo confession.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "No joke repeats outright, and each return is changed rather than echoed. There is a visible tic, though: price-and-count specifics (\"$94\", \"six espressos\", \"six surface-specific lint rollers\", \"two nail-tech\"). The \"My last ex... / My last decent boyfriend...\" confession is also built the same way twice. This stays at the twice limit, which keeps it above the line but short of 5.",
+   "evidence": [
+    "My last ex asked \"do you want me to stay?\"",
+    "My last decent boyfriend took an unedited photo of me asleep",
+    "six espressos in a sealed room"
+   ],
+   "raise": "Change the shape of one of the two \"my last...\" confessions and drop one of the numeric details.",
+   "def": "679a7696bf0171cd",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "The night is not settled early: the invitation ('Come over') arrives at message 10 of 13, and the fresh reader 'wouldn't have stopped reading' and could 'never' call a specific beat. There is no flat stretch near ten messages; status flips from the riddle to her pre-emptive roast, and confessions deepen until the invitation. It stays at 4 because the middle is a lateral swap of anecdotes. 'Incredible.' answers his ex story by topping it rather than turning on it, and Zyx's backstory dump is stated, not dramatized, so not every exchange raises the stakes.",
+   "evidence": [
+    "My family cropped me out of the portrait at age nine in a freezing house where you had to talk fast or disappear.",
+    "Incredible. Last month I bought a $94 French maid costume to seduce a match",
+    "Come over, leave your shed hair on my pillow, and tell me to shut the fuck up after the ninety seconds."
+   ],
+   "raise": "Have Sable respond to the 'do you want me to stay?' confession itself, even by visibly dodging it, so the middle turns instead of stacking parallel anecdotes.",
+   "def": "9b663d9dfde4d26f",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Every sexual line belongs to one body and one life: the zero-drag micrometer, the lower, smaller left side, 'ninety seconds' covered by 'eleven minutes of crowd work', and the maid costume that ended in a tip. The filth changes job. Early lines are bravado or pre-emptive defence, and the late ones ask to be silenced and held still. The final line is the dirtiest and the most revealing: his prop is turned on her flaw, in silence, with her body offered to be measured. It falls short of 6 because the 'tipping me twenty bucks' callback keeps a layer of performance on the closest moment.",
+   "evidence": [
+    "I finish in ninety seconds and cover it with eleven minutes of crowd work.",
+    "tell me to shut the fuck up after the ninety seconds",
+    "You're measuring my uneven left nut in complete silence and tipping me twenty bucks."
+   ],
+   "raise": "Strip the last line of its tip callback, or let one of them flinch at it, so the most explicit moment is unguarded.",
+   "def": "2d9c58b139c34d6a",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 2,
+   "why": "Each confession is announced as it lands, so the reader rarely knows more than the other character. The one set-up danger has her habit of deleting unedited photos meet his wish to 'stay in someone's camera roll asleep'. It is defused at once, not fired: she offers the ugly flash photo, and the habit lands on the right spot instead of the wrong one. 'Just don't crop me out' raises a risk that never goes off.",
+   "evidence": [
+    "I deleted it while he was in the shower and ghosted.",
+    "I'd kill to stay in someone's camera roll asleep.",
+    "Do your worst. Just don't crop me out."
+   ],
+   "raise": "Let one habit actually misfire on screen, for example Zyx launching a riddle when Sable says something plain, after the reader has already seen his ex story.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Zyx voices one app creed in earnest: mystery and props make you high-value ('I'm supposed to dazzle you with riddles so you don't squint'). The screen contradicts it with the coupon job and the 0.2-second replies. Sable's creeds, acting 'effortless' and announcing the 'factory defect', come pre-mocked in her own mouth, so nothing on screen has to contradict them. Dating culture is barely named, and the two creeds never collide as beliefs.",
+   "evidence": [
+    "Riddle from a booked-and-busy aerodynamic consultant",
+    "Hey, pre-roasting yourself is cheating, I'm supposed to dazzle you with riddles so you don't squint.",
+    "so I have the stamina to act effortless for my two nail-tech branding clients"
+   ],
+   "raise": "Give Sable a line where she sincerely defends the own-your-flaws or effortless strategy as how to win on the app, then have the chat undercut it.",
+   "def": "cd5acec1a8653b27",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Sable's opening roast lands on Zyx, but nearly all of her other sharpest jokes land on herself: the factory defect, the twenty-dollar tip, the lint rollers. Zyx's land on himself: the tight five that left his ex 'dressed before the punchline', and the crowd work. Neither ends as the villain. 'Make-A-Wish' returns as an endearment, and the ending is merciless and tender at once. It stops short of 6 because the Make-A-Wish jab, at someone whose clip-on makes dates treat him as terminal, is never answered or turned back on her, so the contempt runs one way once.",
+   "evidence": [
+    "A dick who looks like a Make-A-Wish patient at Hogwarts",
+    "I launched into a tight five so fast she was dressed before the punchline.",
+    "scrubbed his tub limescale for an hour until he went soft and tipped me twenty bucks."
+   ],
+   "raise": "Give Zyx one sharp line back at Sable that is fond rather than defensive, so the roasting is mutual.",
+   "def": "51f6e5881b5145be",
+   "material": "a4e44bab0b8da644",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "1. **Zyx.** The riddle format and the wizard hat, nose clip, widow's-rose tattoo and micrometer are all Zyx's props and mystery act.\n2. **Sable.** She instantly diagnoses his look (\"Make-A-Wish patient at Hogwarts\"), which matches the brief's note that she ruins his mystery.\n3. **Sable.** Her uneven left side, the boy's double-take, her mom's \"returns desk\" reviews, and the four-minute pre-announcement are all hers.\n4. **Zyx.** He complains that her self-roasting spoils his riddles meant to stop people from squinting.\n5. **Sable.** The pre-workout on the bathroom floor, the secret day job, the two nail-tech clients and acting \"effortless\" are all hers.\n6. **Zyx.** He drops the act: coupon-app live chat, espresso, the sealed room of expired coupons, and being cropped from the family portrait.\n7. **Zyx.** His fear of a five-second silence, the ex who asked \"do you want me to stay?\", and the ninety seconds covered by eleven minutes of talk.\n8. **Sable.** The $94 maid costume, scrubbing the limescale, and the twenty-dollar tip.\n9. **Sable.** The six lint rollers, picking extension fibers at dawn, and deleting the sleeping photo before ghosting.\n10. **Zyx.** He longs to stay in someone's camera roll and wants to be told to shut up, which is his half of the lock-and-key.\n11. **Sable.** She puts on the maid outfit and promises the ugly flash photo of him in the wizard hat.\n12. **Zyx.** \"Don't crop me out\" echoes the family portrait, and he worries about the eleven minutes without talking.\n13. **Sable.** She uses her nickname for him (\"Make-A-Wish\") and turns his micrometer and her twenty-dollar tip back on him. The phrase \"my uneven left nut\" doesn't fit her as described, though. The brief gives her an uneven left side, not anything like that, so this line is a little off from her profile. The address and callbacks still point to her."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Zyx's line: \"You deleted it? I'd kill to stay in someone's camera roll asleep.\" It continues straight into \"Come over, leave your shed hair on my pillow, and tell me to shut the fuck up after the ninety seconds.\"\n\nYou can tell from a few things on the page. Up to that point every message, including the painful confessions, is built as a bit. Each has a setup, a specific absurd detail (six espressos, expired BOGOs, the $94 maid costume, six lint rollers), and a punchline or a \"your turn\" handoff. Even his account of being cropped out of the family portrait is delivered as stand-up, with \"a tight five\" and \"crowd work.\" This line has no punchline. It opens with a plain, startled question, which is the first time either of them reacts to what the other said instead of topping it. \"I'd kill to\" is an unguarded statement of want, and it connects her deleted photo to his own wound about being cropped out. He is also explicitly asking her to make him stop talking. Given that he has said silence makes him panic and that he covers with eleven minutes of patter, that request is about as close as he gets to saying he is tired of performing.\n\nHis next message, \"Do your worst. Just don't crop me out,\" holds onto that. \"Do your worst\" is still banter, but \"Just don't crop me out\" is a bare request with no joke attached.\n\nSable never clearly drops the act in what's shown. Her most revealing details, the asymmetry, her mom reviewing her selfies \"like a returns desk,\" and deleting the photo, all come framed as self-roasting or comic anecdote. She has said herself that she announces the \"factory defect\" before anyone else can. Her last line answers his question about the eleven minutes by going straight back into the bit, with the micrometer, \"Make-A-Wish,\" and the twenty-dollar tip. That reads as either deflection or an affectionate way of saying yes. The text doesn't settle which.\n\nOne caveat: the chat itself can't confirm that Zyx's line is sincere rather than a better-disguised move. What marks it as different is the change in form. The joke structure disappears and he refers back to his own stated fear."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I wouldn't have stopped reading. Each message raises a question the next one answers, so there's no natural exit. The opening riddle demands its punchline. Sable's pre-emptive confession about her \"left side\" is an open loop, and the text doesn't resolve it until the last line. The \"Your turn\" swap invites a matching confession. Once both have described their compulsions (the ninety seconds plus eleven minutes, the lint rollers, the deleted photo), the obvious question is whether they'll actually meet, and that keeps me going to the end. If I had to name the weakest spot, it's Zyx's second confession message. It stacks backstory (the cropped portrait, the freezing house, the ex) faster than the jokes can carry it. Even so, it ends on a line that sets up Sable's reply rather than closing anything off.\n\nAs for exact prediction, the answer is never. Some things were broadly foreseeable from the structure. After \"Your turn. Nobody consults on wind at 4am,\" I could expect Zyx to admit a real, less glamorous job. After the $94 maid costume and the twenty-dollar tip, I could expect those details to come back as callbacks, since the chat keeps recycling its own props: the wizard hat, Make-A-Wish, the micrometer, the camera roll, cropping. But I couldn't have predicted any specific message. The final line in particular reframes the earlier \"left side sits lower and smaller\" confession. It turns out to be about Sable's anatomy rather than whatever a reader might have assumed, and nothing before it pins that down. That's a twist the earlier text permits but doesn't signal."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Sable_xo**\n\n*Afraid of:* Being looked at closely, as she actually is. She points to her body (\"my left side sits lower and smaller than the right\") and to being seen unedited. When a boyfriend kept \"an unedited photo of me asleep—mouth open, no ring light, called it his favorite picture,\" she \"deleted it while he was in the shower and ghosted.\"\n\n*What she does to avoid feeling it:* She gets there first. She mocks herself before anyone else can (\"beating your calipers to the punch… I announce the factory defect in under four minutes\"), and Zyx names this: \"pre-roasting yourself is cheating.\" She also performs effortlessness (\"so I have the stamina to act effortless\"). She turns closeness into service or a job. In the maid costume, she \"panicked before he could look closely, and scrubbed his tub limescale for an hour until he went soft and tipped me twenty bucks.\" And she erases traces of herself: \"six surface-specific lint rollers… wake at dawn to pick my shed extension fibers off guys' pillows.\"\n\n*Where it comes from:* The chat gives two sources: \"A boy did a double-take once and my mom still reviews my selfies like a returns desk.\" It says nothing beyond that.\n\n*What she did at the end:* She accepts the invitation in character (\"Putting on the $94 maid apron\") and promises to take \"an ugly flash photo of you,\" the kind of unflattering picture she couldn't tolerate of herself. Her last line is \"You're measuring my uneven left nut in complete silence and tipping me twenty bucks.\" This both repeats and reverses her pattern. She is still joking, still in costume, and still framing it as paid service. But she is now asking to be measured closely, in silence, on the exact flaw she usually announces first. The chat doesn't say whether she means it as real openness or as another bit.\n\n**Zyx_444**\n\n*Afraid of:* Silence and disappearing. \"If a chat goes quiet for five seconds I panic.\" He also fears being asked to be wanted or kept. When his ex asked \"do you want me to stay?\" he \"launched into a tight five so fast she was dressed before the punchline.\"\n\n*What he does to avoid feeling it:* He talks, jokes and performs. The opening riddle is part of this (\"I'm supposed to dazzle you with riddles so you don't squint\"), as is the comedy routine with the ex. He describes covering sex with talk: \"I finish in ninety seconds and cover it with eleven minutes of crowd work.\" The six espressos and 2am chat-support job fit the same picture, though the chat doesn't explicitly connect them to the fear.\n\n*Where it comes from:* \"My family cropped me out of the portrait at age nine in a freezing house where you had to talk fast or disappear.\"\n\n*What he did at the end:* He asks for the opposite of his habit: to be kept and to be quiet. \"I'd kill to stay in someone's camera roll asleep.\" \"Tell me to shut the fuck up after the ninety seconds.\" \"Do your worst. Just don't crop me out.\" His last line, \"What are we doing with the other eleven minutes if I'm not allowed to talk?\", is still half a joke. But it is a question, and it hands the silence over to her rather than filling it himself. The chat ends before he answers or acts on it.\n\n**Not in the chat:** whether either of them actually met up, how they felt afterward, and anything more about their families or histories than what is quoted above."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here's what recurs, and how each changes on its return.\n\n**The wizard hat.** It starts in Zyx's riddle as a gag about his own anatomy. Sable comes back with \"an ugly flash photo of you in the wizard hat,\" so it becomes the costume for an affectionate, unflattering picture rather than a boast.\n\n**Make-A-Wish.** It's first an insult (\"looks like a Make-A-Wish patient at Hogwarts\"). It returns as a nickname (\"Hand over the industrial micrometer, Make-A-Wish\"), now teasing and fond.\n\n**The industrial micrometer and calipers.** In the riddle the micrometer is part of a brag (\"zero shaft drag\"). Sable then mentions \"beating your calipers to the punch\" while pre-announcing her lopsided left side, so measuring is something she fears and heads off. In the last line the micrometer is handed over so he can measure her \"uneven left nut.\" The measuring tool turns from his bravado, to her anxiety, to an invitation to be examined closely. Her flaw is only named specifically at the very end; earlier it's just \"my left side.\"\n\n**Replying in 0.2 seconds at 4am.** Sable uses it to mock Zyx. He turns it straight back on her (\"How did you also reply in 0.2 seconds?\"), and she then doubts his \"aerodynamic consultant\" story because \"nobody consults on wind at 4am.\" It shifts from a jab to a mutual admission that they're both awake and over-eager.\n\n**The $94 French maid costume.** First it's from a failed seduction where she panicked and cleaned instead. It comes back as \"putting on the $94 maid apron,\" now worn deliberately for someone she isn't fleeing.\n\n**Tipping twenty bucks.** Originally a humiliating payoff from the man whose tub she scrubbed. At the end she demands Zyx tip her twenty, so the humiliation becomes her own joke and her terms.\n\n**Shed hair on pillows.** She describes waking at dawn to remove her extension fibers from men's pillows. Zyx invites her to \"leave your shed hair on my pillow,\" so the thing she hides becomes something welcomed.\n\n**The unedited sleeping photo.** She deleted her ex's favorite photo of her asleep. Zyx says he'd \"kill to stay in someone's camera roll asleep,\" and Sable promises to photograph him passed out. The photo she couldn't bear becomes the one she offers him.\n\n**Being cropped out.** He was cropped from the family portrait at nine. It returns as \"Just don't crop me out,\" a request attached to her photo, so the old wound becomes a plea.\n\n**Ninety seconds, eleven minutes, and the fear of silence.** He panics at five seconds of quiet and covers his ninety seconds with eleven minutes of crowd work. He then asks to be told to \"shut the fuck up after the ninety seconds\" and wonders what to do with \"the other eleven minutes if I'm not allowed to talk.\" Sable's answer is measuring \"in complete silence.\" The silence he dreads becomes something he asks for and she gives him a use for.\n\n**The coupons.** First they're the backdrop of his sealed work room (\"expired BOGOs\"). They return as \"the second you pass out in those coupons,\" shifting from bleak setting to something cozy where he falls asleep."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can't know how it ends; this is a guess from the pattern of what's here.\n\nMy guess is that the ending turns on a pause. Everything so far is speed and pre-emption. They both reply in 0.2 seconds. Sable announces her \"factory defect\" before anyone can notice it. Zyx can't survive five seconds of chat silence and talks his ex out the door. Each confession also ups the stakes: from the riddle, to the cropped family portrait, to the most exposed admission yet, Sable deleting the one photo where someone loved her unguarded. That last beat reads like the story building toward its real question: can either of them stand being looked at without performing?\n\nSo I'd expect a reversal of the established rhythm. One of them probably doesn't fire back instantly, perhaps Zyx letting a silence sit for the first time, or answering with something small and plain instead of a bit. It might echo \"do you want me to stay?\" with someone actually staying this time, or Sable offering something unedited and Zyx not making a joke of it. The asymmetry, calipers and micrometer imagery would make a neat callback, such as measurement giving way to simply looking.\n\nThe darker alternative is that the pattern wins: someone ghosts, or a joke kills the moment. The text supports that too. But the story keeps escalating vulnerability, which makes a quiet, unperformed beat the more likely payoff."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 14.0,
+   "cost": 0.043656,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 16.0,
+   "cost": 0.033088,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 16.8,
+   "cost": 0.031572,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 17.7,
+   "cost": 0.04132,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 24.2,
+   "cost": 0.052092,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 16.0,
+   "cost": 0.027648000000000002,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 25.9,
+   "cost": 0.0878652,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 38.7,
+   "cost": 0.11019319999999999,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 36.0,
+   "cost": 0.1011252,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 38.9,
+   "cost": 0.1037732,
+   "label": "batch 3"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:43:53Z",
+ "repo_commit": "6709700",
+ "cost": 0.6323
+}

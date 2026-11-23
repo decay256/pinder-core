@@ -1,0 +1,526 @@
+{
+ "id": "chat-writers-v15-wong",
+ "kind": "chat",
+ "label": "Run 15 · Ali Wong",
+ "version": "run 15",
+ "order": 115,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v15/chat-zyx-sable/wong.md",
+ "note": "Written in one go by Ali Wong from what they wrote about the two characters (run 15: Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "wong",
+ "writers_run": 15,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2657,
+   "words": 471
+  },
+  "brief": {
+   "chars": 2589,
+   "words": 444
+  },
+  "chat_masked": {
+   "chars": 2557,
+   "words": 471
+  },
+  "chat_but_last": {
+   "chars": 2189,
+   "words": 387
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader got all four answers for both characters, and each fear is linked to its cover: talking fast against silence, controlling the edit against being seen. Both endings follow from those fears: Zyx asks to be in the frame, and Sable exits the moment a candid is proposed. It stays at 4 because both fears reach the reader mainly by being stated ('If I shut up you'll leave', 'control the edit, I'm dead'), not worked out. The reader's deeper inference that Zyx fears not being seen is what keeps it above the line.",
+   "evidence": [
+    "If I shut up you'll leave before I even take the hat off.",
+    "If I don't reply in four seconds and control the edit, I'm dead.",
+    "Too late, I just went softer than bathtub guy."
+   ],
+   "raise": "Cut the lines where each character spells out their fear, so the reader works it out from the panicked 'Wait, it's been five seconds' and the camera-roll deletion alone.",
+   "def": "f019e7f239b9d82d",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 2,
+   "why": "Almost every important disclosure is volunteered as a statement. Sable opens with a self-declared 'brand audit', and both origins are announced in full sentences, with no slip or catch. The only real catch is Sable inferring Zyx's day job ('God, you work 2am live-chat support for a coupon app'), and the tub-ring backstory comes out of a reaction ('Wait. You have nasty porcelain?'). Since origins count double and both are stated, it stays low.",
+   "evidence": [
+    "I grew up in a freezing house where you talked fast or got ignored, right down to being cropped out of the family portrait.",
+    "My mom treated my face like a defective Zara return, babe.",
+    "God, you work 2am live-chat support for a coupon app."
+   ],
+   "raise": "Let one origin come out by slip, for example Zyx glancing past a family photo he isn't in, instead of reciting the freezing house.",
+   "def": "76152fd7f08caa41",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "Feelings are explained repeatedly through purpose clauses: 'so dates talk to me like Make-A-Wish', 'so nobody catches me unedited', 'so I'm finally in the frame', 'If I don't reply... I'm dead'. That is more than one explanation, which caps it below the line. There is real material underneath in a few places: 'Wait. You have nasty porcelain?' is legible appetite, and 'Too late, I just went softer' dodges the fear behind a bit. That keeps it off the floor.",
+   "evidence": [
+    "so I'm finally in the frame.",
+    "so nobody catches me unedited at 5am.",
+    "Wait. You have nasty porcelain?"
+   ],
+   "raise": "Strip the 'so that' explanations from at least three lines so each act is shown without its motive attached.",
+   "def": "61d4f86460a218aa",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 5,
+   "why": "The reader found the moment without prompting: 'Wait, just photograph me! You can crop yourself out!' It is short, has no joke, names no feeling, and gives ground to her fear. Her answer changes the night, since she ends it. It falls short of a 6 because the line just before it already spells out the need ('so I'm finally in the frame'), which half-announces the moment. It is also not the shortest line in the chat ('Fearless audit. Still kneeling, though.' is shorter).",
+   "evidence": [
+    "Wait, just photograph me! You can crop yourself out!",
+    "so I'm finally in the frame.",
+    "Scrub your own Arby's tub."
+   ],
+   "raise": "Drop 'so I'm finally in the frame' from the earlier request so the plain photograph line carries the need alone.",
+   "def": "b5a3a3c2e796783b",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The night is not settled early: the invitation comes at about message 15 of 21, and status keeps shifting from audit to confession to invitation to photo to unmatch, with no flat run near ten messages. But both wounds are stated plainly and in matching shape at messages 9–11. The reader probe says it would have stopped there, and that from the photo request onward it 'could predict exactly what happened.' Only 'crop yourself out' resists prediction, so the back third is a predictable run and the score falls below the line.",
+   "evidence": [
+    "I grew up in a freezing house where you talked fast or got ignored, right down to being cropped out of the family portrait.",
+    "My mom treated my face like a defective Zara return, babe.",
+    "Too late, I just went softer than bathtub guy."
+   ],
+   "raise": "Hold back one of the two backstories, letting it leak through behaviour until the photo collision, so the reader is still guessing what the candid request will hit.",
+   "def": "9b663d9dfde4d26f",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line belongs to one specific body and life: the lower left side, the clip-on nose, ninety seconds then an eleven-minute monologue, being pinned 'by my clip-ins.' The filth changes job late. 'Hold me down and force me to shut the fuck up' is the dirtiest request and also his deepest fear, a wish to be relieved of the talking that keeps people from leaving. It falls short of a 6 because the early lines are confession-as-audit lifted straight from the profile, and 'unsanded stucco' is unclear, as the probe noted.",
+   "evidence": [
+    "then you can hold me down and force me to shut the fuck up.",
+    "Only if you pin me by my clip-ins and force me to shut up too.",
+    "thirty-eight-year-old who finishes in ninety seconds."
+   ],
+   "raise": "Make Sable's late sexual line give away as much as his does, for example by tying the pinning to her terror of being seen unedited, rather than mirroring his request.",
+   "def": "2d9c58b139c34d6a",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Her terror of being 'caught unedited' and his wound of being cropped out are both on screen several messages before he asks for an 'ugly, unposed candid.' A reader sees the request heading for exactly the wrong spot, and it goes off. Then 'crop yourself out' lands a second time on the same bruise, which keeps this above the line. It is not a 5 because the decisive fact, the deleted camera roll, arrives only after the request, and the tub ring is not foreseen either, since her scrubbing story comes after he mentions it.",
+   "evidence": [
+    "so nobody catches me unedited at 5am.",
+    "you can take an ugly, unposed candid photo of us on your phone so I'm finally in the frame.",
+    "Wait, just photograph me! You can crop yourself out!"
+   ],
+   "raise": "Plant the camera-roll ghosting before his photo request, so the reader winces a full exchange early instead of learning the trap as it springs.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Sable voices dating-as-branding culture in earnest ('brand audit', 'unbothered', 'retention strategy', 'control the edit'). The screen contradicts it: she is so bothered she unmatches over a hypothetical photo. Zyx voices no app or dating-culture belief in earnest. His 'mysterious dominator bit' is dropped and mocked by him one message later, and his fast-talking comes from his family, not the app. With only one character holding a creed, this falls below the line.",
+   "evidence": [
+    "Let's do the brand audit now: I'm an unbothered boutique strategist",
+    "Fine, drop the mysterious dominator bit.",
+    "If I don't reply in four seconds and control the edit, I'm dead."
+   ],
+   "raise": "Give Zyx a sincere app-culture creed, such as 'whoever keeps them engaged wins', that he states straight and that the screen then undoes.",
+   "def": "cd5acec1a8653b27",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Most of the sharpest jokes are self-inflicted: his ninety seconds, the Arby's coupons and the nose piece, her lopsided chest, the APR card and the hour of scrubbing that left her knees raw. 'Crop yourself out' turns his own wound on her without his noticing, which is fond rather than villainous. It stays at 4 because Sable's two direct digs, the coupon-app read and the closer 'Scrub your own Arby's tub', land on him, and the ending gives her the last putdown and leaves him as the punchline.",
+   "evidence": [
+    "God, you work 2am live-chat support for a coupon app.",
+    "My last hookup tipped me twenty bucks to leave",
+    "Scrub your own Arby's tub."
+   ],
+   "raise": "Let Sable's exit line cost her something visible, a flinch at herself as she runs, so neither ends as the other's punchline.",
+   "def": "51f6e5881b5145be",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 3,
+   "why": "The probe reader attributed all 20 messages correctly, but every reason given is content matched against the profiles: wizard, pre-workout, audit, coupons, Zara. None is a difference in how the two talk. Both speakers use the same breathless, comma-stacked confessional register full of numbers and brand names. Zyx's profiled tic of five-word riddles appears only in messages 1 and 4, then gives way to long sentences that Sable's lines could share. It sits at 3, not 2, because the content cues are so specific that no reader is guessing.",
+   "evidence": [
+    "A tight eleven-minute monologue at 140 words per minute so she tells her friends I’m \"great in bed\"",
+    "Relax, I was rehearsing both sides of this chat out loud while lint-rolling shed hair fibers off my pillow"
+   ],
+   "raise": "Give Zyx a speech rhythm he keeps throughout, such as clipped riddle fragments that crack under pressure, against Sable's polished strategist sentences, so a reader could tell them apart with the nouns removed.",
+   "def": "a77bc9ef79556bda",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "Both acts are named and taken apart by their owners rather than shown against evidence the speaker misses. Zyx drops his dominator act himself in his third line and states his own fear outright. Sable labels her persona and explains her pre-emptive tactic as she uses it. The one near-gap is Sable's \"Relax\" sitting on a frantic lint-rolling confession, and it is too thin to carry the chat.",
+   "evidence": [
+    "Fine, drop the mysterious dominator bit.",
+    "Can’t flinch if I announce it within four minutes.",
+    "If I shut up you’ll leave before I even take the hat off."
+   ],
+   "raise": "Let Zyx keep insisting on the velvet wizard while his messages swell into frantic monologue, and let Sable claim she is unbothered while her replies speed up, with neither of them saying why.",
+   "def": "fa4461088ccd15ee",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Several laughs do give the sender away: the Arby's coupons from the hat, \"defective Zara return\", and \"softer than bathtub guy\". But the chat runs past the limit of two day-job jokes. It has the \"brand audit\", the \"retention strategy\", the coupon-app support reveal, and arguably \"control the edit\". Lines like the limescale ring \"thick enough to bread and fry\" are wisecracks either character could send.",
+   "evidence": [
+    "Let’s do the brand audit now",
+    "What’s the retention strategy after ninety seconds?",
+    "bathtub limescale ring thick enough to bread and fry"
+   ],
+   "raise": "Cut the audit and retention-strategy framing and replace it with lines only Sable's vanity or Zyx's terror of silence could produce.",
+   "def": "4448c7f54baa167a",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "One catch digs deeper. Asked about \"retention strategy\", Zyx explains with the monologue and then the coupon disaster, which makes it worse. But when Sable clocks him at the start, he deflects once and then concedes the whole act in his next message. Sable is never really caught, because she pre-confesses everything. The ending has no lesson: she unmatches and stays herself.",
+   "evidence": [
+    "Fearless audit. Still kneeling, though.",
+    "Fine, drop the mysterious dominator bit."
+   ],
+   "raise": "Have Zyx defend the wizard act with an escalating explanation instead of dropping it, so the truth about the freezing house leaks out at the bottom of that hole.",
+   "def": "5102b09e503af846",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Status flips at least three times. Zyx opens on top with \"Kneel\" and Sable takes over by clocking him. Zyx's dirty tub then turns her into the chaser. His candid-photo request hands control back to her, and the chat ends with him begging while she unmatches, so the last flip is the ending. It stays below 5 because messages 8 to 11 are parallel backstory with no status in motion, and Zyx's opening stretch on top lasts one message.",
+   "evidence": [
+    "Wait. You have nasty porcelain?",
+    "Wait, just photograph me! You can crop yourself out!",
+    "Here’s a five-word riddle before I unmatch you in four seconds"
+   ],
+   "raise": "Give Zyx a real stretch on top early by letting the riddle act work on her for several exchanges before she breaks it.",
+   "def": "a327913ca348ff82",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Most punchlines land on the last words of their messages, for example \"finishes in ninety seconds\" and \"he went completely soft\". Some setups are paid off in the next message, as with porcelain into the tub story and the candid photo into the camera-roll deletion. \"Wait. You have nasty porcelain?\" works as a short reaction shot. It is held at 4 by overstuffed messages that bury beats, such as the three-item reveal in message 3 and the silence panic folded into backstory, and by long runs of messages at the same confessional temperature.",
+   "evidence": [
+    "thirty-eight-year-old who finishes in ninety seconds.",
+    "Wait. You have nasty porcelain?",
+    "Can’t flinch if I announce it within four minutes."
+   ],
+   "raise": "Break the long confessions into setup and punch messages, and let Zyx's five seconds of silence play out as an actual empty gap before his panicked message.",
+   "def": "7e36393433d52f66",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Two returns pay off without comment. The bathtub guy going soft looks like a throwaway in her story, then turns into her own exit: \"I just went softer than bathtub guy.\" Zyx's opening five-word line, which she mocks as a \"five-word riddle,\" becomes her weapon in the last message, fused with his tub and coupons. Cropping also turns over: done to him in the family portrait, then offered to her as \"crop yourself out!\" It misses a 6 because the five-word riddle never returns in the middle, and the photo thread is explained on the way (\"so I'm finally in the frame\").",
+   "evidence": [
+    "Cute five-word riddle.",
+    "until my knees were raw and he went completely soft.",
+    "Too late, I just went softer than bathtub guy. Here's a five-word riddle before I unmatch you"
+   ],
+   "raise": "Bring the five-word riddle back once mid-chat, with Sable trying one and failing, so the final riddle lands as her finally winning his game; and cut Zyx's \"so I'm finally in the frame.\"",
+   "def": "9ff48f7918d86364",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The exit follows from both habits. Zyx's need to be seen runs straight into Sable's terror of an unedited candid, and she does what she always does: she beats him to it, leaving \"in four seconds\" in his own five-word format. That keeps it above the line even though the reader predicted a silence or tender beat, which matches only loosely, via the reader's 'comic failure to stay quiet' option. It falls short of a 5 because the trigger is new information dropped two messages before the end, which makes the turn feel delivered rather than inevitable.",
+   "evidence": [
+    "I deleted my ex's entire camera roll in the shower and ghosted him forever",
+    "Wait, just photograph me! You can crop yourself out!",
+    "before I unmatch you in four seconds: Scrub your own Arby's tub."
+   ],
+   "raise": "Plant Sable's horror of candids earlier as a throwaway, so the ex's camera roll pays off something the reader already half-knows instead of arriving as a fresh confession.",
+   "def": "8bd8de581cc31c9e",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Almost every message picks up the last one:\n- \"Fearless audit\" answers her audit.\n- Her retention question comes straight from his \"ninety seconds.\"\n- \"nasty porcelain?\" seizes his tub ring.\n- \"Come over\" takes up her scrubbing story.\n- \"crop yourself out!\" answers her ex story.\nIt misses a 6 because Zyx's reply to her mother confession is a limp pivot rather than a pointed ignore, and her coupon-app guess is dropped without comment.",
+   "evidence": [
+    "What's the retention strategy after ninety seconds?",
+    "Good thing my sealed apartment is just floor-coupons and a bathtub limescale ring",
+    "Wait. You have nasty porcelain?"
+   ],
+   "raise": "Have Zyx's tub line visibly dodge the Zara-return confession (or answer it), so that skipping it reads as a choice.",
+   "def": "f426aa8449e0fbc7",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "Panic does change the typing in places: \"Wait. You have nasty porcelain?\" is clipped, and \"Wait, just photograph me!\" pleads with exclamation marks. But hurt, horny and guarded moments all arrive in the same register, long confessional sentences stacked with specifics. Zyx's terror of silence comes out as a composed backstory paragraph, and her mother wound is a polished quip.",
+   "evidence": [
+    "I grew up in a freezing house where you talked fast or got ignored, right down to being cropped out of the family portrait.",
+    "My mom treated my face like a defective Zara return, babe."
+   ],
+   "raise": "Let the five-second panic and the mother confession break the typing, with fragments, double-sends or a typo, instead of arriving as finished sentences.",
+   "def": "6e21e724825d1cc3",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Long, clause-stacked sentences are the norm, not a rare event. Zyx's retention answer and Sable's hookup story each run 35+ words of composed narrative. \"I was rehearsing both sides of this chat out loud while lint-rolling...\" narrates action like prose. Short lines (\"Deal.\", \"Fearless audit. Still kneeling, though.\") show it can type like a phone, but the brief's phrasing has been lifted nearly whole into messages.",
+   "evidence": [
+    "A tight eleven-minute monologue at 140 words per minute so she tells her friends I'm \"great in bed\" and ignores the expired Arby's coupons",
+    "My last hookup tipped me twenty bucks to leave because I saw his tub ring in my maid outfit and stress-scrubbed it for an hour"
+   ],
+   "raise": "Split the long confessions into two or three thumb-length sends, and keep a single long message for the night's one real reveal.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "\"Wait\" opens three messages across both speakers. Nearly every turn has the same joke shape: a gross specific, a brand or number, then a 'so nobody/so she' clause. Numbers and timings pile up (four minutes, ninety seconds, five seconds, four seconds, 140 wpm) until they read as a tic rather than a running bit.",
+   "evidence": [
+    "Wait, it's been five seconds of silence.",
+    "Wait. You have nasty porcelain?",
+    "Wait, just photograph me!"
+   ],
+   "raise": "Cut two of the \"Wait\" openers and vary the confession shape so some turns land as a bare question or a single word.",
+   "def": "679a7696bf0171cd",
+   "material": "28b7bb744daa79ed",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx_444**\n\n*What he's afraid of:* Silence, and being left or overlooked because of it. \"Wait, it's been five seconds of silence… If I shut up you'll leave before I even take the hat off.\" Underneath that is a fear of not being seen. He wants to be \"finally in the frame.\"\n\n*What he does so he doesn't have to feel it:* He talks fast and fills the space. After sex he does \"a tight eleven-minute monologue at 140 words per minute so she tells her friends I'm 'great in bed.'\" He also hides behind a persona: the \"velvet wizard,\" the hat, and \"a clip-on nose piece under this wizard hat so dates talk to me like Make-A-Wish instead of a thirty-eight-year-old who finishes in ninety seconds.\" He asks to be stopped from outside himself: \"you can hold me down and force me to shut the fuck up.\"\n\n*Where it comes from:* \"I grew up in a freezing house where you talked fast or got ignored, right down to being cropped out of the family portrait.\"\n\n*What he did at the end:* He asked for \"an ugly, unposed candid photo of us on your phone so I'm finally in the frame.\" When she told him about deleting her ex's camera roll, he pushed again: \"Wait, just photograph me! You can crop yourself out!\" The chat doesn't say anything he did after that.\n\n**Sable_xo**\n\n*What she's afraid of:* Being seen unedited, especially her \"bad side,\" and losing control of how she comes across. \"…so nobody catches me unedited at 5am\" and \"If I don't reply in four seconds and control the edit, I'm dead.\"\n\n*What she does so she doesn't have to feel it:* She controls the edit in advance. She rehearses \"both sides of this chat out loud while lint-rolling shed hair fibers off my pillow.\" She replies within seconds. She announces her flaws before anyone can react to them: \"Can't flinch if I announce it within four minutes.\" She stress-cleans; she scrubbed a tub ring \"for an hour until my knees were raw.\" When control fails, she erases and leaves: \"I deleted my ex's entire camera roll in the shower and ghosted him forever because he took one unposed candid of my bad side.\"\n\n*Where it comes from:* \"My mom treated my face like a defective Zara return, babe.\"\n\n*What she did at the end:* She pulled back from his request for a candid photo. \"Too late, I just went softer than bathtub guy.\" Then she closed with a five-word line that echoes his opening: \"Here's a five-word riddle before I unmatch you in four seconds: Scrub your own Arby's tub.\" She says she will unmatch him. Whether she actually did is not in the chat."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Zyx's near-last line: \"Wait, just photograph me! You can crop yourself out!\"\n\nAlmost everything else in the chat is performance, including the confessions. The \"brand audit,\" the stucco shaft, the ninety seconds, the Arby's coupons, and the limescale ring all work as bits. Each has a punchline and vivid gross-out detail, and each tries to top the last. Sable even sets the rules out loud (\"Can't flinch if I announce it within four minutes\"), so the vulnerability is a timed contest. When Zyx says \"Fine, drop the mysterious dominator bit,\" he isn't dropping the act. He's switching to a different one, the self-deprecating confessor.\n\nThe photograph line is different in a few ways you can see on the page:\n\n- **It has no joke in it.** There's no image, no number, no punchline, just a plain want.\n- **It gives something up.** He offers to let her crop herself out, bending his request to fit her fear rather than trying to outdo her. Until then, every reply was escalation.\n- **It points to something real he said earlier.** He'd mentioned being \"cropped out of the family portrait.\" That was framed as backstory, but here it comes out as an actual need, and it's urgent enough that he says it a second time after she has already refused.\n\nA near-miss is Zyx's earlier \"Wait, it's been five seconds of silence. I grew up in a freezing house…\" It's revealing, but it's still delivered as fast patter meant to stop her from leaving, so it's half confession and half bargaining. Sable's \"My mom treated my face like a defective Zara return, babe\" works the same way. It's a real wound, but it's styled, with \"babe\" and a brand-name punchline, and it comes back to control: \"control the edit.\"\n\nSable never visibly stops performing. Even her exit is staged. It's a five-word riddle that calls back to his opening line, and it comes with a four-second countdown. From the text alone, I can't tell whether her \"went softer\" line is sincere or just one more bit."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Every attribution below is inferred from the message content matched against Ali Wong's two profiles. The chat itself doesn't label anyone. The turns don't strictly alternate: Sable sends two in a row at 10–11 and again at 13–14.\n\n1. **Zyx**: a wizard and a five-word riddle, the \"mysterious dominator\" act.\n2. **Sable**: she clocks his speed and admits she's been dry-scooping pre-workout since midnight.\n3. **Sable**: the brand-strategist \"audit,\" announcing her lower side, and the $94 maid costume on a 29% APR card.\n4. **Zyx**: he keeps up the terse, commanding riddle voice.\n5. **Zyx**: the unsanded shaft, the clip-on nose piece, being thirty-eight, and finishing in ninety seconds.\n6. **Sable**: \"retention strategy\" is her brand-strategist framing.\n7. **Zyx**: the eleven-minute monologue and the Arby's coupons spilled from the hat.\n8. **Sable**: she sees through his act to his coupon-app support job.\n9. **Zyx**: his fear of five seconds of silence, the freezing house, and being cropped from the portrait.\n10. **Sable**: rehearsing both sides out loud and lint-rolling the pillow at 5am.\n11. **Sable**: her mom and the Zara-return face, plus the four-second reply.\n12. **Zyx**: his sealed apartment full of floor-coupons. Here he claims the limescale tub himself, which the profile doesn't spell out.\n13. **Sable**: she gets excited about dirty porcelain, which is her actual foreplay.\n14. **Sable**: the hookup who tipped her twenty dollars to leave after she scrubbed his tub.\n15. **Zyx**: he offers the disinfecting-while-critiqued scenario and wants to be held down and silenced.\n16. **Sable**: her clip-ins, and she shares the shut-me-up wish.\n17. **Zyx**: his post-sex fantasy of an ugly, unposed candid photo.\n18. **Sable**: she deleted her ex's camera roll and ghosted him.\n19. **Zyx**: he's desperate to be in the frame and offers to let her crop herself out.\n20. **Sable**: \"softer than bathtub guy\" and her four-second deadline. She turns his five-word riddle format back on him."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I would have stopped**\n\nI would have stopped at Zyx's \"Wait, it's been five seconds of silence\" message, or one line later at Sable's Zara line.\n\nUp to that point the chat runs on escalating, oddly specific confessions: the $94 costume on a 29% APR card, the clip-on nose piece, the eleven-minute monologue at 140 words per minute, the Arby's coupons mistaken for rose petals. The density is tiring, since nearly every line stacks three or four precise details, but the confessions are still surprising and still read as banter.\n\nThen Zyx explains himself outright. He grew up in a freezing house, had to talk fast or be ignored, and was cropped out of the family portrait. Sable answers immediately in the same shape: rehearsing both sides of the chat, lint-rolling, a mother who treated her face like a defective return. Once both wounds are stated plainly and in matching cadence, the scene stops being two strangers sizing each other up. It becomes a diagram of two compulsions, and I can see where it is going. One smaller snag earlier: \"base shaft is unsanded stucco\" is crude and not clear from the text. I can't tell what it is meant to describe beyond roughness, and the chat never clarifies it.\n\n**Where I could predict exactly what would happen next**\n\n- **After the backstories:** I could predict that his need to be in the frame and her need to control the edit would collide. The wounds are set up as opposites.\n- **At Zyx's photo request:** \"an ugly, unposed candid photo of us… so I'm finally in the frame.\" At this point I knew Sable would refuse, and that the refusal would rest on her bad side and her control of images. Her camera-roll story confirms it rather than surprising me.\n- **The ending:** Two earlier details make it nearly certain. The bathtub guy \"went completely soft,\" and the first exchange labels \"Kneel before the velvet wizard\" a five-word riddle. So \"went softer than bathtub guy\" and a five-word parting riddle were what I expected. The four-seconds unmatch also echoes her four-second rule. The closer, \"Scrub your own Arby's tub,\" does count to five words, so the callback is executed cleanly. But it is the expected payoff, not a turn.\n\n**What I did not predict**\n\n\"Wait, just photograph me! You can crop yourself out!\" is the one beat that lands with some force. He offers her the exact injury he has been complaining about, without noticing. It follows logically from what came before, but its wording and its irony were not something I saw coming. It is also the line that most justifies the ending.\n\nSo: I would have stopped at the paired backstory reveal. From the photo request onward I could predict exactly what happened, with the \"crop yourself out\" line as the partial exception."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "This is a guess; the excerpt doesn't show the ending. My best prediction is that the final turn lands on silence, either a pause that both of them finally survive or a comic failure to stay quiet at all.\n\n**The arc points there.** Every beat so far is about the terror of not talking. Zyx panics after \"five seconds of silence\" and ties it to a freezing childhood house where you \"talked fast or got ignored.\" Sable has a four-second reply rule and rehearses both sides of the chat so nobody catches her \"unedited,\" which comes from a mother who treated her face like a \"defective Zara return.\" The comedy is fast and performed, but the wound underneath is the same for both of them: stop performing and you get left.\n\n**The last exchange sets up the payoff.** Their kink negotiation stops being really about sex or the tub ring. Each one asks the other to \"force me to shut the fuck up\" or \"force me to shut up too.\" That is a mutual request for permission to stop talking. When two characters both name the thing they need in the penultimate beat, the ending usually delivers it.\n\n**So I see two likely shapes:**\n\n1. **The tender version.** One of them doesn't reply, or sends something very short, and the other doesn't bolt. The writer might end on a single line, a lone word, or a stated gap like \"neither of them typed anything for a while.\" The joke would be that this is the most intimate thing either has done all night.\n\n2. **The comic version.** They agree to meet and promise silence, then immediately break it. Both keep firing messages, proving neither can actually shut up, though they're now doing it together rather than alone.\n\nI lean toward the first. The piece has spent its length escalating the absurd confessions (the clip-on nose, the Arby's coupons, the limescale ring) while steadily exposing the same fear in both characters. That kind of build usually resolves in a quieter beat that undercuts the noise rather than adding more.\n\nWhat I can't tell from the text is whether they actually meet in person or whether it all stays in the chat. Nothing settles that, and the ending could plausibly go either way."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the recurring elements, with what each means the first time and what it means when it returns. Where a shift seems to be the point, I say so; the chat itself never labels any of these as callbacks.\n\n**Kneeling.** The opener \"Kneel before the velvet wizard\" is a mock-dominant command. \"Still kneeling, though\" turns it into a stubborn running joke. It returns a third time, unspoken, when Sable describes scrubbing a tub \"until my knees were raw.\" Kneeling has shifted from a pose of submission someone demands to the physical cost of her own compulsion.\n\n**The \"five-word riddle.\"** Sable first uses the phrase to tease Zyx's opener, which is exactly five words, as a bot-like gimmick. She closes with her own five-word riddle, \"Scrub your own Arby's tub.\" The format that was his bit becomes her weapon, and it ends the conversation.\n\n**Countdowns in minutes and seconds.**\n- \"Can't flinch if I announce it within four minutes\" is bravado.\n- \"If I don't reply in four seconds… I'm dead\" shows the timing is actually anxiety.\n- \"Before I unmatch you in four seconds\" makes it an exit deadline.\n\nZyx has a parallel track. \"Ninety seconds\" is a sexual confession. The \"eleven-minute monologue at 140 words per minute\" is a compensation strategy. \"Five seconds of silence\" reveals that the fast talking comes from a childhood where \"you talked fast or got ignored.\"\n\n**Shutting up.** At first Zyx fears silence: \"If I shut up you'll leave.\" Then he asks to be held down and forced to \"shut the fuck up,\" and Sable asks for the same. Silence goes from the thing he dreads to the thing both of them want imposed on them.\n\n**The wizard hat.** It starts as costume, and a place to hide the clip-on nose. Then it's the prop he fails to pull rose petals from. Finally, \"before I even take the hat off\" makes it stand for being unmasked emotionally, not just undressed.\n\n**Arby's coupons.** They first appear as a pathetic detail: expired coupons dumped on a duvet. Sable picks this up with her \"coupon app\" guess, and Zyx brings them back as \"floor-coupons.\" In the last line they're fused with the tub and turned into a dismissal.\n\n**The tub ring.** Zyx's limescale ring is a gross joke. Sable's response, \"nasty porcelain?\", reveals it as a trigger, through the story of scrubbing a hookup's tub. Zyx then reframes it as an erotic scenario (\"disinfect my ceramic\"). Finally it's the punchline of her rejection.\n\n**The maid costume.** It begins as part of a financial and body confession: $94, on a 29% APR card. It comes back as the outfit she actually scrubbed a stranger's tub in. A joke about debt becomes evidence of the compulsion.\n\n**Going soft.** First it's the bathtub guy losing his erection while she cleaned. Later Sable herself goes \"softer than bathtub guy.\" The phrase moves from his loss of arousal to her loss of desire.\n\n**Photos, frames, and cropping.**\n- Zyx was \"cropped out of the family portrait,\" which is a wound.\n- He asks for an unposed candid \"so I'm finally in the frame,\" which is a hope.\n- Sable reveals she ghosted an ex over exactly such a candid.\n- Zyx offers \"you can crop yourself out!\"\n\nCropping goes from what was done to him to something he proposes for her. That clashes with her need to \"control the edit.\" This connects to her \"bad side,\" which echoes her opening \"left side hangs lower than my right\" and her mother treating her face \"like a defective Zara return.\" It also connects to lint-rolling so nobody catches her \"unedited.\"\n\n**Clip-ons and clip-ins.** Zyx's clip-on nose piece and Sable's clip-ins, with the \"shed hair fibers\" on her pillow, are parallel concealments. When she asks to be pinned \"by my clip-ins,\" her own disguise becomes part of the proposed sex.\n\n**Cold parents.** Zyx's freezing house and Sable's mother are a pairing rather than a repeat. Both explain why each of them can't tolerate a pause.\n\nI'd read \"unbothered boutique strategist\" and \"fearless audit\" as framing that the rest of the chat undercuts, rather than as true callbacks. The timestamps (3am, 2am, 5am) recur, but nothing in the text suggests they change meaning."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 15.6,
+   "cost": 0.042164,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 16.8,
+   "cost": 0.03602,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 18.4,
+   "cost": 0.050232,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 30.0,
+   "cost": 0.055852,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 17.3,
+   "cost": 0.03054,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 30.5,
+   "cost": 0.06934,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 29.8,
+   "cost": 0.0921132,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 30.9,
+   "cost": 0.0920012,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 44.9,
+   "cost": 0.11613319999999999,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 45.2,
+   "cost": 0.1285892,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:44:30Z",
+ "repo_commit": "6709700",
+ "cost": 0.713
+}

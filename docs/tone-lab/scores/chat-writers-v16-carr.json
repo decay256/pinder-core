@@ -1,0 +1,530 @@
+{
+ "id": "chat-writers-v16-carr",
+ "kind": "chat",
+ "label": "Run 16 · Jimmy Carr",
+ "version": "run 16",
+ "order": 116,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/carr.md",
+ "note": "Written in one go by Jimmy Carr from what they wrote about the two characters (run 16: Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 16,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 4496,
+   "words": 769
+  },
+  "brief": {
+   "chars": 2662,
+   "words": 460
+  },
+  "chat_masked": {
+   "chars": 4341,
+   "words": 769
+  },
+  "chat_but_last": {
+   "chars": 3758,
+   "words": 636
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader gets fear, habit and origin right for both, and the fear and the habit are linked. For Zyx that is silence and dropping out of view, covered by nonstop talk and rooted in the family photo. For Sable it is being seen unedited, covered by curation and pre-emptive put-downs and rooted in her mother's 'returns desk'. Both endings follow from those fears: Zyx begs to be gagged and badly photographed, and Sable exits the moment 'bad lighting' is offered, turning his fear of the dots against him. It stays at 4 because much of Zyx's fear is stated rather than shown. The reader also could not tie Sable's exit to her fear ('Whether she actually blocked... not in the chat'), nor read Zyx's squirrel line, so the endings don't land as clearly following from the fears.",
+   "evidence": [
+    "Keep typing, if those dots stop for five seconds I assume you've died.",
+    "Bad lighting? Count to five, wizard boy—the typing dots are stopping forever",
+    "My mother still inspects my selfies like a returns desk."
+   ],
+   "raise": "Make Sable's last line visibly flinch at 'photograph me in bad lighting' rather than just quip, so a reader links her exit to her fear without inference.",
+   "def": "f019e7f239b9d82d",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "There are some real slips. The 'wrong tab' coupon reveal is caught out, and the ninety-seconds 'oddly specific denial' gives a fact away through denial. Both origins, though, are delivered flat. Zyx volunteers his outright and labels it, and Sable's comes as a direct answer to a direct question. Most of Sable's facts are announced too: the ring light, the clip-ins, the maid outfit, the dumped bloke, the mirror rehearsal.",
+   "evidence": [
+    "I panic-type because in my house if you went quiet you got cropped out of the family photo",
+    "who taught you to audit your own bollocks",
+    "Dominating your inbox with 15% off—wrong tab"
+   ],
+   "raise": "Let one origin leak by slip, e.g. Sable reflexively critiquing his photo in her mother's returns-desk phrasing without being asked who taught her.",
+   "def": "76152fd7f08caa41",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "Zyx names or explains feelings repeatedly: 'I'm over-explaining emotional neglect', 'I'm so desperate for affection', and 'I talk at 140wpm so you don't ask me to stay'. He even diagnoses Sable's feelings for her ('You scrub tubs so they can't see you still'). That is far past the once allowed. Sable carries real subtext: her block threats and 'you're losing me' avoid wanting him, and that is legible. This keeps the chat from a 2.",
+   "evidence": [
+    "I'm over-explaining emotional neglect",
+    "I'm so desperate for affection I got a rose tattoo",
+    "You scrub tubs so they can't see you still, I talk at 140wpm so you don't ask me to stay"
+   ],
+   "raise": "Cut Zyx's self-diagnoses and let his over-explaining of jokes carry the fear unlabelled, as the cock-ring and rigor-mortis lines already do.",
+   "def": "61d4f86460a218aa",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found Sable's admission without help. The line is clipped ('Stiff corpses. In my inbox.'), has no jab and no exit threat, and confesses the rehearsal without naming a feeling. Zyx's 'You rehearsed for me?' seizes it, and his overreach after that turns the night toward her exit. It falls short of 5 because it is not among the shortest lines and still ends on a quip about 'killed' replies. It is also an admission of performing rather than a clean dropping of the act.",
+   "evidence": [
+    "Stiff corpses. In my inbox. I rehearsed three snappy replies in my bathroom mirror and you just killed all of them.",
+    "You rehearsed for me?"
+   ],
+   "raise": "Pare it to the bare admission, e.g. 'I rehearsed. In the mirror.', so it becomes the shortest, plainest line in the chat.",
+   "def": "b5a3a3c2e796783b",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The night is not settled early. There are real turns: the 140wpm/scrub-tubs diagnosis, Sable's 'rehearsed three snappy replies', and Zyx's late lurch into 'Gag me so I finally shut up'. But the probe reader would have stopped at the rigor mortis line, two-thirds in, because the joke, disclaimer and apology loop had become the whole show. They could also call the APR line almost word for word and Sable's block threats 'on a fixed schedule'. Sable threatens to leave about seven times without the stakes moving, and the ending was foreseeable from Zyx's second message, so it falls below the line.",
+   "evidence": [
+    "Let me clear your 29% APR—that's a consolidation loan joke, not prostitution, please don't leave.",
+    "my finger is on the block button.",
+    "you're ten seconds from being blocked."
+   ],
+   "raise": "Cut or vary two of Sable's empty block threats and Zyx's 'that's an X joke, not Y' disclaimers after the midpoint, and replace them with a beat where one of them actually stops performing, so the last third changes temperature instead of repeating.",
+   "def": "9b663d9dfde4d26f",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Nearly every sexual line belongs to these bodies and lives: the ring light 'to hide a lazy left bollock', the ninety seconds followed by 'eleven minutes of stand-up', the widow's rose 'on your shaft'. The filth changes job late. 'Gag me so I finally shut up, photograph me in bad lighting' is the dirtiest request in the chat and the barest admission of Zyx's fear of his own patter. It falls short of a 6 because Sable's filth never stops being bravado ('that actually made my lazy bollock twitch'). The wrists line also arrives as Zyx's offer, so the reader never learns it is what she wants.",
+   "evidence": [
+    "Gag me so I finally shut up, photograph me in bad lighting",
+    "The light's £212 on credit to hide a lazy left bollock.",
+    "finished in ninety seconds and done eleven minutes of stand-up"
+   ],
+   "raise": "Give Sable one late sexual line that asks to be held still or unedited, so her filth also turns from performance into exposure.",
+   "def": "2d9c58b139c34d6a",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Two dangers are planted ahead of time and go off on exactly the wrong spot. Sable said she dumped a man 'for taking an unposed photo of me asleep', and Zyx later begs to be photographed 'in bad lighting'. His opening 'if those dots stop for five seconds I assume you've died' is turned on him in the final line. His escalating neediness after her 'you're losing me' is visible a message ahead. It stays at 4 because Zyx keeps announcing his own disasters as they land ('Watch me talk myself out of a shag in real time'), which takes away the reader's private dread.",
+   "evidence": [
+    "I dumped a bloke just for taking an unposed photo of me asleep",
+    "if those dots stop for five seconds I assume you've died",
+    "the typing dots are stopping forever, so assume I've died"
+   ],
+   "raise": "Stop Zyx from narrating his self-sabotage ('watch me', 'there I go') so the reader, not the character, is the one who sees the crash coming.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Both characters voice an app belief earnestly, and the screen contradicts it. Sable polices the ick and the red flags ('I don't have the bandwidth for tragic', 'I'm a personal brand strategist') while dry-scooping on a floor mattress on a 29% card. Zyx earnestly pushes the instant soulmate fantasy ('let's delete this app right now—say you feel it too?'), and the chat shows he barely knows her. It stops at 4 because his consultant creed is mocked by him the moment it comes up ('wrong tab'). The two beliefs never collide head-on into a farce about dating in general.",
+   "evidence": [
+    "I don't have the bandwidth for tragic.",
+    "let's delete this app right now—say you feel it too?",
+    "you're giving me the ick."
+   ],
+   "raise": "Have Sable's 'personal brand' efficiency creed and Zyx's delete-the-app romance directly argue with each other in one exchange, so the collision exposes the app itself.",
+   "def": "cd5acec1a8653b27",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 3,
+   "why": "Zyx's jokes land almost entirely on himself, and his one shot at Sable ('she knows she couldn't afford you at retail') is fond. Sable has real self-deprecation ('you can't out-damage me', the rehearsed mirror replies), but her sharpest lines all point at him: 'coroner', 'cling-film', 'Hallmark', 'prosthetic hooter'. The last word turns his disclosed childhood fear into a funeral tattoo gag, so Zyx ends as the punchline and Sable ends close to the villain. That falls below the line.",
+   "evidence": [
+    "A nest of dead vouchers and a prosthetic hooter?",
+    "Take a breath, cling-film, you're losing me.",
+    "tattoo my funeral wreath on your bellend."
+   ],
+   "raise": "Let Sable's exit line cut her as well as him, for example by flinching at the bad-lighting request in a way that shows her own fear of being seen unedited, so neither ends as the joke.",
+   "def": "51f6e5881b5145be",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe's per-message list gets all 33 attributions right, including Zyx's double and triple sends. Many of its reasons are content from the brief, though: the ring light, the mother, the lint roll, the rose tattoo. Real voice markers back them up. Zyx corrects mid-sentence after a dash and explains the joke ('that's a cock ring joke', 'that's a consolidation loan joke'). Sable uses British put-down nicknames and block threats ('wizard boy', 'Freud', 'cling-film', 'Hallmark'). Those tics would carry most messages without content, which keeps this above the line. It is not a 5 because the reader's stated reasons lean on content.",
+   "evidence": [
+    "that's a consolidation loan joke, not prostitution, please don't leave.",
+    "Take a breath, cling-film, you're losing me.",
+    "Take your finger off the self-destruct, Freud, you're giving me the ick."
+   ],
+   "raise": "Strip some brief props from the messages so each line is placed by its cadence alone, for example Sable's clipped nickname-plus-threat against Zyx's dash-and-correct sprawl.",
+   "def": "a77bc9ef79556bda",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Sable has real gaps she doesn't see. She is a debt-held 'personal brand strategist' on a floor mattress who sneers 'Coupon support? Tragic' and says she lacks 'the bandwidth for tragic'. Zyx, however, narrates every gap of his own as it opens ('I'm over-explaining emotional neglect', 'I'm basically handing you a stopwatch', 'Watch me talk myself out of a shag'). He also diagnoses hers for her ('You scrub tubs so they can't see you still'). A character winking at the gap is the definition of a 3, and here one of the two winks constantly.",
+   "evidence": [
+    "I'm over-explaining emotional neglect.",
+    "You scrub tubs so they can't see you still, I talk at 140wpm so you don't ask me to stay",
+    "Coupon support? Tragic."
+   ],
+   "raise": "Cut Zyx's self-diagnoses so he keeps insisting he's in control while the messages pile up, and let the reader do the noticing.",
+   "def": "fa4461088ccd15ee",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laughs give the sender away. Zyx's are over-explained and end in panic ('please note the squirrel in my wall knows how I die'). Sable's are pre-emptive and money-anxious ('my credit card won't be the only thing declining'). Day-job jokes come close to the limit: 'Dominating your inbox with 15% off—wrong tab' and the 'mattress of expired coupons' are coupon-app gags. Some lines are generic wisecracks ('USB-C, not a medieval horse'). None of the best lines costs the sender much.",
+   "evidence": [
+    "Keep begging, Hallmark, and my credit card won't be the only thing declining.",
+    "Dominating your inbox with 15% off—wrong tab, I actually work night-shift chat for a coupon app",
+    "meaning USB-C, not a medieval horse"
+   ],
+   "raise": "Swap the coupon-tab and charger gags for lines that only Zyx's fear could produce, and make Sable's best line expose her editing rather than her debt.",
+   "def": "4448c7f54baa167a",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 4,
+   "why": "When Sable catches Zyx ('dissect your own knob gag like a coroner', 'you're losing me'), he digs deeper each time. He moves from the family-photo confession to the stopwatch non-denial, then to begging her to delete the app, then to the gag-me plea. No stated lesson appears. Sable leaves in character, using his own fear against him. Zyx does apologise reflexively ('sorry, rigor mortis joke', 'please don't leave'). Sable is rarely caught, and when Zyx asks about her bollock-auditing she answers almost straight. So the deepest hole isn't quite where her truth comes out.",
+   "evidence": [
+    "Did you just dissect your own knob gag like a coroner?",
+    "Don't block me, I panic-type because in my house if you went quiet you got cropped out of the family photo",
+    "sorry, rigor mortis joke, death isn't sexy"
+   ],
+   "raise": "Have Zyx catch Sable lying about being effortless and make her explanation dig her own hole, so both characters are put through the test.",
+   "def": "5102b09e503af846",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Sable has the upper hand almost throughout, and she ends on top by leaving. Zyx chases from the first line. Two upward moments for Zyx are visible: 'that actually made my lazy bollock twitch' and 'I rehearsed three snappy replies... you just killed all of them'. Each lasts one message before he blows it, so neither is a stretch on top. Sable is never really below.",
+   "evidence": [
+    "Okay, that actually made my lazy bollock twitch.",
+    "I rehearsed three snappy replies in my bathroom mirror and you just killed all of them.",
+    "my finger is on the block button."
+   ],
+   "raise": "Let Zyx hold the rehearsal advantage for two or three exchanges, with Sable chasing, before he overplays it.",
+   "def": "a327913ca348ff82",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Sable's messages often land on the last word ('you won't even need the ninety seconds', 'on your bellend'). Zyx's over-explanations deliberately bury his punchlines mid-message, behind the dash. Nearly every message is long and at the same heat. There are no one-word reaction shots, though 'Stiff corpses. In my inbox.' gestures at one. Zyx's double sends split question from riff rather than setup from punch.",
+   "evidence": [
+    "At least a widow's rose stays stiff—sorry, rigor mortis joke, death isn't sexy",
+    "Stiff corpses. In my inbox.",
+    "tattoo my funeral wreath on your bellend."
+   ],
+   "raise": "Break Zyx's joke and its over-explanation into separate sends, and give Sable a one- or two-word reply after his longest spiral.",
+   "def": "7e36393433d52f66",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "The opener 'if those dots stop for five seconds I assume you've died' reads as a needy throwaway. It returns through the middle as the death strand ('watching my last chance with you die', 'you just killed all of them'). At the end Sable turns it into her exit and pairs it with the widow's-rose tattoo as a 'funeral wreath', and nobody explains it. It falls short of a 6 because Zyx over-explains the jokes the callbacks are built from ('sorry, rigor mortis joke'). The squirrel arrives with no setup, which muddies the closing beat.",
+   "evidence": [
+    "Keep typing, if those dots stop for five seconds I assume you've died.",
+    "I'm watching my last chance with you die while I explain corpse mechanics.",
+    "the typing dots are stopping forever, so assume I've died and tattoo my funeral wreath on your bellend."
+   ],
+   "raise": "Cut Zyx's explanation of the rigor-mortis joke and drop the unplanted squirrel so the death strand reaches the last line clean.",
+   "def": "9ff48f7918d86364",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted that she leaves and that the typing dots bookend the chat, and both happen. The exit follows from both habits: his spiral escalates to 'Gag me... photograph me in bad lighting', and she runs from exactly the unedited exposure she fears. It holds above the line because it is earned. It falls short of a 5 because there is no surprise. The last six exchanges flag the exit over and over ('you're losing me', 'I'm gone', 'finger is on the block button'), so the ending lands as foretold rather than as a turn.",
+   "evidence": [
+    "Take a breath, cling-film, you're losing me.",
+    "Gag me so I finally shut up, photograph me in bad lighting",
+    "Bad lighting? Count to five, wizard boy"
+   ],
+   "raise": "Give Sable one beat where his 'what if you didn't have to edit anything' nearly lands before she bolts, so the exit stings instead of confirming the forecast.",
+   "def": "8bd8de581cc31c9e",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 4,
+   "why": "Most exchanges answer the one before. Each of his questions gets a real answer: 'what else is that £212 shadow hiding' gets the clip-in hair, 'who taught you to audit' gets her mother, and 'what do you do after you've shagged' gets the lint-rolling. She also names his habits back to him ('Freud', 'spiral-typing'). It falls short of a 5 because some offers are dropped without being pointedly ignored. Her unposed-photo confession gets a rigor-mortis riff instead of a response, and several of his confessions arrive unprompted ('Watch me talk myself out of a shag'). The 'My turn' question format feels like a quiz rather than replies.",
+   "evidence": [
+    "I dumped a bloke just for taking an unposed photo of me asleep",
+    "At least a widow's rose stays stiff—sorry, rigor mortis joke",
+    "My turn: what do you do after you've shagged?"
+   ],
+   "raise": "Have Zyx answer or visibly swerve from her unposed-photo confession instead of drifting to corpse jokes.",
+   "def": "f426aa8449e0fbc7",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 3,
+   "why": "Content shifts while the shapes mostly don't. Zyx sends the same long clause-plus-dash-correction message whether he is flirting, confessing or begging. Sable sends a jab plus a threat throughout. There are a few small shifts: her 'Okay, that actually made my lazy bollock twitch' is a guard-down beat, and his short 'Be my partner in crime... say you feel it too?' reads as desperation. Panic and the late hour never break his punctuation or rhythm.",
+   "evidence": [
+    "Okay, that actually made my lazy bollock twitch.",
+    "Be my partner in crime, let's delete this app right now—say you feel it too?",
+    "I want to hold your wrists still on my mattress of expired coupons—not that you'd ever touch a dick whose nose piece gets mistaken"
+   ],
+   "raise": "Let Zyx's late, desperate messages fracture into fragments and double-sends while Sable's warm moment comes out shorter and unpolished.",
+   "def": "6e21e724825d1cc3",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Composed, stacked-clause sentences are the norm rather than the rare event. Zyx's messages are polished multi-clause constructions with dashes and corrections that read as written gags, not thumb-typed at midnight. Sable's replies are neat two-sentence quips. His over-explaining habit excuses some length, but not the finish on every line.",
+   "evidence": [
+    "A wizard hat only cuts off circulation if you wear it at the base—that's a cock ring joke, because brims are circular, though velvet isn't actually tight enough",
+    "Don't block me, I panic-type because in my house if you went quiet you got cropped out of the family photo—obviously cameras aren't voice-activated"
+   ],
+   "raise": "Break Zyx's long messages into rushed, typo-prone double-sends and roughen Sable's quips so they are not so neatly balanced.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 2,
+   "why": "One joke shape runs all night. Zyx makes a joke and then disclaims it with 'that's a X joke, not Y' at least five times (cock ring, wrong tab/clearance, rigor mortis, USB-C/horse, consolidation loan/prostitution). Sable's block threat recurs about six times. His question openers repeat as well ('My turn', 'My question', 'Answer me this'). The disclaimer is a character habit, but it is repeated far past twice without changing.",
+   "evidence": [
+    "meaning USB-C, not a medieval horse",
+    "that's a consolidation loan joke, not prostitution, please don't leave.",
+    "I'm a personal brand strategist, my finger is on the block button."
+   ],
+   "raise": "Keep the joke-disclaimer to two uses and make the third time break, such as Zyx starting the disclaimer and stopping, and vary Sable's threats.",
+   "def": "679a7696bf0171cd",
+   "material": "3f20b81c9d589cc0",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Sable's:\n\n\"Stiff corpses. In my inbox. I rehearsed three snappy replies in my bathroom mirror and you just killed all of them.\"\n\nYou can tell from what the line does and what it lacks. Nearly every other Sable message pairs a put-down with a threat to leave: \"ten seconds from being blocked,\" \"you're not making it to 4am,\" \"my finger is on the block button.\" This one has no jab and no exit warning. More importantly, it admits the performance. She says her wit was prepared in advance, in a mirror, which reveals the effort behind the persona she'd been presenting as effortless. Zyx clearly reads it as a crack in the act, because he seizes on it (\"You rehearsed for me?\").\n\nTwo earlier lines come close but don't quite get there:\n\n- Sable's \"Okay, that actually made my lazy bollock twitch.\" The word \"actually\" signals a real reaction slipping through, but she pulls back immediately with a warning about the last bloke she liked.\n- Zyx's \"Don't block me, I panic-type because in my house if you went quiet you got cropped out of the family photo.\" The content is confessional, but he wraps it straight away in a joke and a self-diagnosis (\"I'm over-explaining emotional neglect\"). His candour stays a bit, so it's hard to call it him stopping.\n\nZyx arguably never drops the performance at all. His later lines turn into pleading (\"please say I'm your favourite match,\" \"please don't leave\"), which may be sincere desperation, but it is still delivered through jokes and caveats.\n\nThe text alone can't confirm what either person actually felt. It only shows where the style of their messages changes."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx_444**\n\n*Afraid of:* Silence and being dropped. He opens with \"Keep typing, if those dots stop for five seconds I assume you've died,\" and later begs \"Don't block me\" and \"please don't leave.\"\n\n*What he does so he doesn't have to feel it:* He fills every gap with talk, explaining his own jokes and then explaining the explanation: \"that's a cock ring joke, because brims are circular…\" and \"sorry, rigor mortis joke, death isn't sexy.\" He names this himself: \"I panic-type,\" and \"I talk at 140wpm so you don't ask me to stay.\" He also rushes toward closeness: \"I've already pictured us sharing a charger,\" \"let's delete this app right now—say you feel it too?\" And he narrates his own sabotage while doing it: \"Watch me talk myself out of a shag in real time.\"\n\n*Where it comes from:* He says it directly: \"in my house if you went quiet you got cropped out of the family photo… I'm over-explaining emotional neglect.\" The chat gives nothing beyond that one line.\n\n*At the end:* He asks to be silenced and seen unflattered: \"Gag me so I finally shut up, photograph me in bad lighting, and please note the squirrel in my wall knows how I die.\" What he means by the squirrel is not in the chat.\n\n**Sable_xo**\n\n*Afraid of:* Being seen as she is, unedited. The chat never states this fear outright. It is inferred from what she hides and polices: the ring light \"to hide a lazy left bollock,\" \"The hair's clip-in,\" lint-rolling \"my shed hair off the pillowcase\" at 5am, and \"I dumped a bloke just for taking an unposed photo of me asleep.\"\n\n*What she does so she doesn't have to feel it:* She curates and rehearses: \"I rehearsed three snappy replies in my bathroom mirror.\" She pays for the polish on credit (\"£212 on credit,\" \"a 29% credit card\"). She keeps the upper hand with put-downs and repeated threats to leave: \"you're ten seconds from being blocked,\" \"One more weird flex and I'm gone,\" \"my finger is on the block button.\" Zyx reads her as \"You scrub tubs so they can't see you still,\" but that is his interpretation. She never confirms it, and the maid-outfit story itself isn't explained.\n\n*Where it comes from:* When Zyx asks \"who taught you to audit your own bollocks,\" she answers, \"My mother still inspects my selfies like a returns desk.\" The chat says nothing more about her mother or her past.\n\n*At the end:* She leaves, and she uses his fear to do it: \"Count to five, wizard boy—the typing dots are stopping forever, so assume I've died.\" Whether she actually blocked or unmatched him is not in the chat."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Zyx_444 sent the odd messages from 1 to 7, plus 8, 10, 12, 14, 15, 17, 19, 21, 23, 25, 27, 28, 30 and 32. Sable_xo sent 3, 6, 9, 11, 13, 16, 18, 20, 22, 24, 26, 29, 31 and 33. Zyx sends two in a row three times (4–5, 7–8, 14–15) and three in a row once (27–28).\n\n[1] Zyx. Teases her about the ring light, which is Sable's possession.\n[2] Zyx. The fear of five seconds of silence is Zyx's.\n[3] Sable. Owns the £212 ring light on credit and mocks the wizard hat. Calling her asymmetry a \"lazy left bollock\" isn't in the brief, which only mentions \"asymmetry.\"\n[4] Zyx. Wizard hat, clip-on nose piece and over-explaining their own joke.\n[5] Zyx. Asks what else the £212 light is hiding, so it's aimed at Sable.\n[6] Sable. Clip-in hair on a 29% card, and she threatens to block.\n[7] Zyx. Being cropped out of the family photo is Zyx's backstory.\n[8] Zyx. Questions her habit of pre-emptive self-insult.\n[9] Sable. Her mother as a returns desk, pre-workout and the floor mattress.\n[10] Zyx. Riffs on her mum and mentions \"my wizard hat.\"\n[11] Sable. The $94 maid outfit and the bathtub scrubbing.\n[12] Zyx. Typing at 140 wpm and dreading being asked to stay.\n[13] Sable. Asks about the \"conversational dominance consultant.\"\n[14] Zyx. Admits to the coupon-app night shift.\n[15] Zyx. Asks what she does after sex, which 16 answers.\n[16] Sable. Lint-rolling the pillowcase at 5am.\n[17] Zyx. The ninety seconds and the eleven-minute set.\n[18] Sable. Mocks that story.\n[19] Zyx. The rose tattoo and the widow's bouquet.\n[20] Sable. Dumped a man over an unposed photo of her asleep.\n[21] Zyx. Over-explains the rigor mortis joke.\n[22] Sable. Rehearsed replies in the bathroom mirror.\n[23] Zyx. Clingy, over-explains \"charger,\" and begs to be the favourite.\n[24] Sable. Pushes back with \"cling-film.\"\n[25] Zyx. Begs to delete the app together.\n[26] Sable. Mocks with \"Hallmark.\"\n[27] Zyx. Offers to pay off her 29% card, over-explains, says \"please don't leave.\"\n[28] Zyx. \"What if you didn't have to edit anything\" targets her fear of being seen unedited.\n[29] Sable. Hair extensions, and threatens to leave.\n[30] Zyx. The mattress of expired coupons and the nose piece. He offers the wrist-holding that the brief says she wants.\n[31] Sable. Mocks the vouchers and the nose, and calls herself a brand strategist.\n[32] Zyx. Asks to be gagged and photographed badly, which is his secret wish.\n[33] Sable. \"Wizard boy,\" and turns his five-second-silence fear against him."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped**\n\nAround the rigor mortis line (\"At least a widow's rose stays stiff—sorry, rigor mortis joke, death isn't sexy…\"), roughly two-thirds of the way through.\n\nThe opening is quick and the insults land. The dynamic is clear early: Zyx makes a joke, explains it, then apologises for explaining it, while Sable threatens to leave and doesn't. The high point is \"You scrub tubs so they can't see you still, I talk at 140wpm so you don't ask me to stay.\" It's the one moment where the over-talking turns into real insight about both of them, and Sable's next line, telling him to stop self-destructing and asking what he does, suggests something might change.\n\nNothing does, though. After that, the engine just keeps running. By the rigor mortis line, I've seen the same move many times: the cock ring explanation, \"obviously cameras aren't voice-activated,\" \"wrong tab,\" \"an oddly specific denial,\" and now \"sorry, rigor mortis joke.\" Each is funny alone, but by then the pattern is the whole show, and I'd stop expecting the next one to surprise me. Sable's \"I rehearsed three snappy replies\" briefly re-hooks interest, because it's the first time she shows vulnerability. But the chat goes straight back to the formula.\n\n**Where I could predict exactly what came next**\n\n- **After \"Partner in crime\"/\"Hallmark\":** I could have written Zyx's next line almost word for word. He would make a joke about her debt, add a \"that's an X joke, not Y\" disclaimer, and plead for her not to go. \"Let me clear your 29% APR—that's a consolidation loan joke, not prostitution, please don't leave\" is exactly that.\n- **After \"One more weird flex and I'm gone\":** I knew Zyx would make another weird flex and Sable would say her finger was on the block button again rather than actually leave. Her threats rise on a fixed schedule: ten seconds from blocking, unmatch, ick, block button, gone.\n- **The ending:** I could predict it in kind, and nearly in wording. Zyx's second message (\"if those dots stop for five seconds I assume you've died\") is a setup that demands a payoff. With the widow's-rose tattoo already on the table, Sable leaving with a callback to the dots, her death, and a tattoo was very likely. The punchline is well made, but I saw it coming.\n\n**What I couldn't predict**\n\nThe squirrel in the wall that \"knows how I die\" came out of nowhere. So did the clip-on nose piece being mistaken for a medical device, and the widow's bouquet story. These are the moments where the chat stays alive.\n\n**Things the chat doesn't explain**\n\nThe chat never establishes where \"conversational dominance consultant\" comes from. Sable quotes it, but Zyx never says it, so it presumably comes from a profile I'm not shown. The maid outfit is priced in dollars while everything else is in pounds. I can't tell from the text whether that's intentional."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks I can trace in the chat, and whether each shifts in meaning when it returns.\n\n**Typing dots and dying.** Zyx opens with \"if those dots stop for five seconds I assume you've died,\" a joke about his own neediness. Sable's final line turns it back on him: \"Count to five... the typing dots are stopping forever, so assume I've died.\" It changes meaning. His anxious joke becomes her exit, and the thing he feared actually happens.\n\n**Death and corpses.** Death runs through the whole chat, with the meaning shifting each time:\n- Sable says he dissects his gag \"like a coroner.\"\n- He makes a rigor mortis joke and says he's \"watching my last chance with you die.\"\n- She says he \"killed\" her rehearsed replies.\n- He says \"the squirrel in my wall knows how I die.\"\n- Her \"assume I've died\" closes it out.\n\nIt starts as figurative mockery of his over-explaining and ends as the literal death of the conversation. The squirrel appears only once, with no earlier setup that I can see.\n\n**The widow's rose tattoo.** It first appears as his pathetic confession. It returns twice:\n- In his \"at least a widow's rose stays stiff\" joke.\n- In her parting shot, \"tattoo my funeral wreath on your bellend.\"\n\nIt does change. Her version turns his sad tattoo story into an insult and a mock funeral for their match.\n\n**The wizard hat.** Sable first uses it to mock his look. He turns it into a cock-ring joke, then a comeback (\"my wizard hat needs the headroom\"). She keeps calling him \"wizard boy,\" including in her goodbye. It moves from insult, to his sexual material, to a nickname.\n\n**The £212 ring light, lighting and the lazy bollock.** The ring light starts as her admission that she hides a flaw. He asks what else \"that £212 shadow\" hides. Later the \"lazy bollock twitch\" signals she's actually amused, so the insecurity becomes a sign of attraction. \"Bad lighting\" returns at the end when he asks to be photographed badly. That inverts her ring light: he offers to be seen unflattered, which she rejects.\n\n**The 29% credit card.** It begins as her confession that her clip-in hair is on credit. It returns three times:\n- Her line \"my credit card won't be the only thing declining,\" a rejection joke.\n- His offer to \"clear your 29% APR.\"\n- Her reading of that as \"pay off my hair extensions.\"\n\nThe meaning shifts from self-mockery, to her threat to leave, to his offer to rescue her, which she hears as transactional.\n\n**Hair.** The clip-in hair returns as the shed hair she lint-rolls and as the extensions. It stays a sign of her maintained, edited self.\n\n**The clip-on nose piece.** It begins as a throwaway in his cock-ring explanation. It returns as \"a dick whose nose piece gets mistaken for a medical device,\" then as her \"prosthetic hooter.\" It goes from aside to self-deprecation to her ammunition.\n\n**Blocking and leaving.** This builds steadily:\n- \"Ten seconds from being blocked\"\n- \"Don't block me\"\n- \"the unmatch button\"\n- \"finger off the self-destruct\"\n- \"you're losing me\"\n- \"one more weird flex and I'm gone\"\n- \"my finger is on the block button\"\n- the final exit\n\nThe meaning stays the same while the threat escalates until she carries it out.\n\n**The floor mattress.** It starts as her proof of being damaged. He says \"keep the floor mattress.\" Then it becomes his \"mattress of expired coupons,\" which she calls a \"nest of dead vouchers.\" It shifts from her squalor to his.\n\n**The coupon job and retail language.** Several commerce images connect:\n- Her mother as a \"returns desk.\"\n- \"Couldn't afford you at retail.\"\n- \"15% off.\"\n- \"My cock's on clearance.\"\n- The expired coupons.\n\nThe returns-desk image, about being judged, becomes a compliment from him, then his own self-devaluation.\n\n**Photos, editing and being seen.** This thread includes:\n- His family-photo cropping.\n- Her mother inspecting selfies.\n- The ex dumped for an unposed sleeping photo.\n- Her mirror-rehearsed replies.\n- His \"I want to watch you delete texts forever\" and \"what if you didn't have to edit anything.\"\n- \"Photograph me in bad lighting.\"\n\nIt moves from both of their wounds about being seen, to his pitch that she could stop curating herself. She doesn't take it up.\n\n**Over-explaining his own jokes.** This recurs with the cock ring, the family photo, rigor mortis, USB-C and the consolidation loan. Sable names it early (\"dissect... like a coroner\") and later calls it a TED Talk and \"spiral-typing.\" His \"gag me so I finally shut up\" echoes her earlier \"knob gag,\" with \"gag\" shifting from joke to restraint. That's a wordplay link I'm inferring; the chat doesn't flag it.\n\n**Ninety seconds.** His \"ninety seconds and eleven minutes of stand-up\" denial returns in her \"you won't even need the ninety seconds.\" It shifts from his confession to her prediction that his talking will kill things first.\n\n**Scrubbing tubs.** Her ex in the $94 maid outfit returns when Zyx says \"you scrub tubs so they can't see you still.\" Her anecdote about the ex becomes his reading of her own avoidance. The chat doesn't confirm whether he's right."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I think it ends with Sable leaving, probably by blocking or unmatching, and Zyx left typing into silence. I can't know that from what's here, and since the final fifth is missing there may be a few more exchanges first.\n\n**Why the evidence points that way:**\n\n- **Her exits are set up as live threats.** She warns him early that he's \"ten seconds from being blocked,\" later that he's \"not making it to 4am,\" and he himself mentions her \"reach for the unmatch button.\" Stories that plant a threat this often usually pay it off.\n- **The trajectory has turned against him.** In the middle stretch she warms. She says his line \"actually made my lazy bollock twitch\" and admits she rehearsed replies for him. That's the high point. From there he escalates: sharing a charger, \"say I'm your favourite match,\" deleting the app together. Her replies cool in step: \"Take a breath, cling-film, you're losing me,\" then \"Keep begging, Hallmark.\" His last message ends with \"please don't leave,\" which reads like the low point.\n- **He keeps saying it out loud.** He narrates his own self-sabotage: \"Watch me talk myself out of a shag in real time,\" and \"I'm watching my last chance with you die.\" The text keeps signalling the outcome through him.\n- **She's shown she leaves people over less.** She dumped someone for an unposed photo of her asleep and says she lacks \"the bandwidth for tragic.\"\n- **There's a possible bookend.** His second line is \"if those dots stop for five seconds I assume you've died.\" An ending where her typing indicator simply stops would close that loop neatly. This is the most speculative part of my guess, but the setup is there.\n\n**The case against:** they recognise each other's damage. He names why she scrubs tubs, and she admits her mother \"inspects my selfies like a returns desk.\" A softer ending, where she stays or leaves the door open, isn't ruled out. If it happens, I'd expect it to come through one of the running motifs: the 29% card, the wizard hat, the 4am deadline. But the last several turns all lean towards her going."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 15.1,
+   "cost": 0.039212,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 19.8,
+   "cost": 0.05352799999999999,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 24.4,
+   "cost": 0.07309199999999999,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 29.3,
+   "cost": 0.064472,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 36.1,
+   "cost": 0.08108800000000001,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 18.6,
+   "cost": 0.0414,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 35.6,
+   "cost": 0.1045372,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 42.3,
+   "cost": 0.11582119999999999,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 50.8,
+   "cost": 0.1378972,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 39.7,
+   "cost": 0.12410919999999999,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-23T00:47:12Z",
+ "repo_commit": "6709700b",
+ "cost": 0.8352
+}
