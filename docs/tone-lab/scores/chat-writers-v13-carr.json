@@ -1,0 +1,524 @@
+{
+ "id": "chat-writers-v13-carr",
+ "kind": "chat",
+ "label": "Run 13 · Jimmy Carr",
+ "version": "run 13",
+ "order": 113,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v13/chat-reuben-brick/carr.md",
+ "note": "Written in one go by Jimmy Carr from what they wrote about the two characters (run 13: run 12 with the turn no longer fixed at one message from each). There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 13,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3632,
+   "words": 580
+  },
+  "brief": {
+   "chars": 2766,
+   "words": 452
+  },
+  "chat_masked": {
+   "chars": 3462,
+   "words": 580
+  },
+  "chat_but_last": {
+   "chars": 3308,
+   "words": 531
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 3,
+   "why": "The reader gets the habit, the fear and the ending right for both, and links each habit to its fear. But both fears reach the reader only because the characters announce them: Reuben names his 'terror of a quiet room' and Brick spells hers out in the taxi line. Origins are missed for both. Reuben's 'oh—okay' first time is in the chat, but it is dumped beside Delphine and never tied to the tap-dancing, so the reader marks it 'not in the chat'. Because a stated fear is the 3 condition, this stays below the line even though the endings follow cleanly.",
+   "evidence": [
+    "Watch me blow the deadline by panic-narrating my terror of a quiet room.",
+    "'sometime' just means I've already been left.",
+    "my first time lasted ninety seconds and ended with a sympathetic \"oh—okay,\""
+   ],
+   "raise": "Cut the self-diagnosis lines and let one origin, such as the 'oh—okay', return at the end, when Brick orders his ten silent minutes, so the reader connects it to the habit unaided.",
+   "def": "f019e7f239b9d82d",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "One fact comes out properly sideways. The lentils slip out through a protested denial, and Brick catches it ('nobody denies... that specifically'). Everything else is volunteered or asked for. Marguerite comes out in answer to 'Who hurt you', Delphine and the first time come out as a list, the taxi crying is offered unprompted, and Reuben states his terror. Both habit origins, which count double, are stated outright.",
+   "evidence": [
+    "definitely haven't been indoors for eleven days eating pot lentils",
+    "nobody denies \"eleven days of pot lentils\" that specifically unless they're holding a spoon",
+    "Because Delphine left when I couldn't say one sentence without tap-dancing"
+   ],
+   "raise": "Have Brick infer Delphine and the first time from his patter, or have Reuben slip them, instead of Reuben confessing them in one answer to her question.",
+   "def": "76152fd7f08caa41",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 2,
+   "why": "Feelings and mechanisms are named again and again. Reuben names his terror, calls his own behaviour a 'breakdown' and 'another lie', and labels her line 'your vulnerability'. Brick explains the logic of her own fear in a full clause. Some things underneath stay legible, such as the furniture binning and the four-second reply, but the characters keep narrating their own subtext, and that narration is the main joke.",
+   "evidence": [
+    "I'm answering your vulnerability by narrating another lie in real time.",
+    "live-commentating my own breakdown",
+    "my terror of a quiet room"
+   ],
+   "raise": "Make Reuben's narration jokes that dodge rather than diagnoses, so the reader, not Reuben, names what he is avoiding.",
+   "def": "61d4f86460a218aa",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader finds a real moment where the act drops, Brick's taxi line. But it is one of the longest messages in the chat, and it explains the feeling ('I've already been left'), so it works as a speech rather than a plain line. The plainest candidate, 'at 21:05 I'll just hold you', is undercut by 'nailed it' in the same message.",
+   "evidence": [
+    "Usually 23:45 is when a man says \"let's do this again sometime\" and I cry in a taxi",
+    "Tomorrow, 19:45 buffer locked in—nailed it—and at 21:05 I'll just hold you."
+   ],
+   "raise": "Give Reuben 'At 21:05 I'll just hold you.' as a message on its own with no commentary, and cut Brick's explanation of the taxi.",
+   "def": "b5a3a3c2e796783b",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 23 messages correctly. The voices do differ: Brick_haus speaks in clipped imperatives and timestamps, Reuben in run-on self-narration. But the reader's reasons are almost all content (top hat, Marguerite, steamer, 'from the brief') rather than voice. That keeps it off 5; perfect attribution and a real difference in rhythm keep it above the line.",
+   "evidence": [
+    "Exhausting. 20:00 drinks, 20:14 you lose at arm-wrestling",
+    "Four minutes left and I've somehow clawed my way back into the room—look at me go.",
+    "Stop narrating, or I'll itemise your whole night just to shut your mouth."
+   ],
+   "raise": "Strip the props from a few lines so that only syntax and rhythm (her bare orders, his breathless asides) could identify the sender.",
+   "def": "a77bc9ef79556bda",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 2,
+   "why": "There is one clean gap: 'Rarely on this thing unless it's raining' against the four-second reply. Even that is called out by Brick at once, and Reuben then confesses the lentils himself in mock denial. After that both characters narrate their own contradictions. Reuben announces his lies as he tells them, and Brick corrects her own 'curated' gloss before he can. The characters see and comment on their own gaps throughout, which is the low end.",
+   "evidence": [
+    "definitely haven't been indoors for eleven days eating pot lentils",
+    "I'm answering your vulnerability by narrating another lie in real time.",
+    "Don't romanticise it; I'm on bare floorboards fishing my monocle out of boxed rosé"
+   ],
+   "raise": "Let Reuben insist sincerely on the spontaneous act ('I'm fine with silence') with no commentary attached, and let the on-screen evidence alone contradict him.",
+   "def": "fa4461088ccd15ee",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Several laughs do give the sender away: the shopping-trolley curve, the 'dishwasher-safe' kanji, the monocle in boxed rosé, the itemised night. But the chat leans hard on contract and audit vocabulary that either character could use as filler. It goes well past the two allowed, which puts it below the line.",
+   "evidence": [
+    "How long is this 23:30 slot before I'm invoiced",
+    "Stop auditing your own car crash.",
+    "if anyone's terminating this contract, it isn't your commentary track"
+   ],
+   "raise": "Cut the invoice, line-item, audit and terminating-contract jokes and replace each with a detail only that character's life could produce, like the cocktail sword.",
+   "def": "4448c7f54baa167a",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 2,
+   "why": "The first time Brick asks the real question ('Why is a man who won't stop doing a bit...'), Reuben concedes everything at once: Delphine, the ninety seconds, the mirror rehearsals. Every later catch ('Still narrating') is met with an admission, not a worse explanation. The ending is a stated change of heart: he gives up the hat and the bit and offers to 'just hold you'. That is concession plus lesson.",
+   "evidence": [
+    "Because Delphine left when I couldn't say one sentence without tap-dancing",
+    "Watch me blow the deadline by panic-narrating my terror of a quiet room.",
+    "Invite sent in four seconds flat—leaving the top hat at home."
+   ],
+   "raise": "When caught, have Reuben explain the four-second reply or the mirror rehearsals with an excuse that exposes more, instead of confessing outright.",
+   "def": "5102b09e503af846",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Brick takes the upper hand in her first reply and keeps it to the end. She diagnoses, orders, sets terms and accepts the invite. The one dip is her taxi confession, which briefly hands Reuben an opening, but he narrates it away instead of taking it, so it is at most one weak flip.",
+   "evidence": [
+    "It hasn't rained since Tuesday and you replied in four seconds flat.",
+    "Still narrating. Send a calendar invite with travel buffers, or walk.",
+    "Accepted. Now delete the app, trolley"
+   ],
+   "raise": "Let Reuben win one exchange outright, for example by using her 'sometime' fear to make her chase the invite, so the top position genuinely changes hands twice.",
+   "def": "a327913ca348ff82",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Many messages end on their payoff ('Keep talking, trolley.', 'it's not raining tomorrow'), and Brick's double message is a good use of a break. But most punchlines share a message with their setup and other jokes. 'Dishwasher-safe' leads its message instead of landing it, and the run from message 10 to 16 holds one confessional temperature. There are no reaction-shot messages; 'Exhausting.' opens a long message rather than standing alone.",
+   "evidence": [
+    "It means \"dishwasher-safe.\" Ironic, as I'm never home",
+    "Exhausting. 20:00 drinks, 20:14 you lose at arm-wrestling, 21:00 sex"
+   ],
+   "raise": "Break the big punchlines into their own messages: send 'Exhausting.' alone before the itemised night, and send 'dishwasher-safe' as its own reply.",
+   "def": "7e36393433d52f66",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 3,
+   "why": "The 23:30–23:45 countdown gives the night real stakes, and nothing is settled until the last few messages, so this is not settled early. But from Brick's taxi confession on, there is a predictable loop: Reuben narrates, Brick says 'stop narrating', and Reuben narrates again across about five messages. The fresh reader says they would have stopped at 'Watch me blow the deadline' and could call every beat after 'Send a calendar invite… or walk'. The itemised night briefly turns the temperature, but the chat does not keep the reader to the end, which keeps it below the line.",
+   "evidence": [
+    "I'm answering your vulnerability by narrating another lie in real time.",
+    "Watch me blow the deadline by panic-narrating my terror of a quiet room.",
+    "Still narrating. Send a calendar invite with travel buffers, or walk."
+   ],
+   "raise": "Cut one of Reuben's three meta-narration lines and have him answer the taxi confession with something that actually changes the situation, such as a concrete offer or a silence he fails to keep, so the loop breaks before the itemisation.",
+   "def": "9b663d9dfde4d26f",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Almost every sexual line belongs to these bodies and lives. The trolley-curve and ridge disclosures, 'better acoustics for the six-inch heels' in her emptied flat, and the ninety-second first time are all specific. The itemised night is the dirtiest line and also the most revealing, because sex is folded into her schedule and his gag order. The late 'at 21:05 I'll just hold you' turns the filth toward closeness. It falls short of a 6 because 'that silence sounds filthy' explains the turn on instead of letting it land.",
+   "evidence": [
+    "four and a half inches, banks hard left like a shopping trolley",
+    "21:00 sex, 21:05 ten minutes you're contractually forbidden to be funny.",
+    "at 21:05 I'll just hold you."
+   ],
+   "raise": "Cut 'that silence sounds filthy' and let Reuben's reaction to the itemisation show the kink without naming it.",
+   "def": "2d9c58b139c34d6a",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Brick has already told him twice to stop his commentary, so when she confesses the taxi crying, the reader knows his narrating habit is about to hit her most exposed moment. It does. That is a danger visible a message early, going off on exactly the wrong spot, which puts it above the line. It stays at 4 because Reuben announces the blunder as he makes it, which softens the wince. Her fear of 'sometime' is set up as a second danger but never goes off.",
+   "evidence": [
+    "Stop auditing your own car crash.",
+    "\"sometime\" just means I've already been left.",
+    "I'm totally fine with silence and unscheduled dates—and look, I'm answering your vulnerability by narrating another lie"
+   ],
+   "raise": "Have Reuben reflexively type 'let's do this again sometime' without noticing, so her stated fear goes off unannounced.",
+   "def": "5e818b8ff1b53ce7",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Reuben opens in earnest with the low-investment pose, 'Rarely on this thing unless it's raining', and the screen contradicts him at once with the four-second reply and the eleven days of lentils. Brick runs dating as vetting and efficiency, with a 'vetting men in stupid hats' slot and pre-emptive audits, and her own lines contradict that with the taxi crying and the rosé. That gives each character one belief contradicted on screen. Their beliefs are personal neuroses more than shared app culture, and they never collide as creeds, so the farce stays about these two rather than about all of us.",
+   "evidence": [
+    "Rarely on this thing unless it's raining, obviously",
+    "23:30 to 23:45 is \"vetting men in stupid hats.\"",
+    "It hasn't rained since Tuesday and you replied in four seconds flat."
+   ],
+   "raise": "Have Brick state her vetting creed as app wisdom (standards, red flags, 'know your value') so it collides directly with his 'low-effort' pose.",
+   "def": "cd5acec1a8653b27",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's sharpest jokes land on himself: dishwasher-safe, the lentils, the ninety seconds, 'look at me go'. Brick's sharpest jokes often land on him ('holding a spoon', 'Exhausting'), but she gives equal weight to herself with the rosé, the cocktail sword and the taxi. The ending treats both of them fondly, and neither becomes the villain. It falls short of a 6 because Brick's repeated scolding ('Still narrating') tilts her toward the scold's role late on.",
+   "evidence": [
+    "I'm on bare floorboards fishing my monocle out of boxed rosé with a plastic cocktail sword.",
+    "nobody denies \"eleven days of pot lentils\" that specifically unless they're holding a spoon.",
+    "Accepted. Now delete the app, trolley; it's not raining tomorrow."
+   ],
+   "raise": "Swap one of Brick's late corrections for a joke at her own schedule's expense, so the mockery is balanced in the final stretch too.",
+   "def": "51f6e5881b5145be",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways return changed and unexplained. The rain alibi, punctured early, comes back as \"it's not raining tomorrow\", which now means permission to stop pretending. The top hat goes from \"stupid hats\" to \"leaving the top hat at home\". \"Four seconds flat\" turns from a jab into compliance. The last line closes the night without comment. It falls short of a 6 because the rain never returns in the middle, and the narration thread is explained aloud every time it comes back (\"Still narrating\").",
+   "evidence": [
+    "Rarely on this thing unless it's raining, obviously",
+    "Invite sent in four seconds flat—leaving the top hat at home.",
+    "Accepted. Now delete the app, trolley; it's not raining tomorrow."
+   ],
+   "raise": "Bring the rain back once mid-chat as an offhand line, and stop naming the narration so often, so the final payoffs land with nothing explained around them.",
+   "def": "9ff48f7918d86364",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader predicted the outcome almost exactly: he sends the invite and she accepts tersely. It follows from both habits, her need for a slot with buffers and his need to be told to shut up, so it is earned and above the line. It is not surprising, though. The reader even guessed the terse acceptance. And Reuben still narrates (\"nailed it\"), so his change is only half shown. The \"delete the app\" twist adds a little surprise, but not enough for a 5.",
+   "evidence": [
+    "Send a calendar invite with travel buffers, or walk.",
+    "Tomorrow, 19:45 buffer locked in—nailed it—and at 21:05 I'll just hold you."
+   ],
+   "raise": "Have his last move break the pattern in a way the reader didn't foresee, for example an invite sent with no words at all after one final relapse she has to cut off.",
+   "def": "8bd8de581cc31c9e",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message takes up the last one. She clocks his four-second reply. She answers \"who hurt you\" with Marguerite. He turns her stop-times into \"my exact kink\". She asks why he wants a \"gag order\" and he answers it. Her taxi confession is pointedly dodged, and he names the dodge. It falls short of a 6 because a few offers just drop: she never answers the kanji question beyond mocking it, and he never comes back to the bare floorboards.",
+   "evidence": [
+    "nobody denies \"eleven days of pot lentils\" that specifically unless they're holding a spoon.",
+    "I'm answering your vulnerability by narrating another lie in real time."
+   ],
+   "raise": "Have Reuben actually meet her taxi confession with one plain line before he deflects, so that even the ignoring reads as a reaction to what she said.",
+   "def": "f426aa8449e0fbc7",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Brick's typing visibly shrinks as the deadline nears: \"Sixty seconds left.\", \"Exhausting.\", \"Accepted.\" Both confessions arrive as longer run-on messages. Reuben's shape barely moves, though. He uses the same dash-laden, polished clauses when bluffing, confessing, panicking and closing. The night's feelings show in what is said more than in how it is typed.",
+   "evidence": [
+    "Exhausting. 20:00 drinks, 20:14 you lose at arm-wrestling",
+    "Watch me blow the deadline by panic-narrating my terror of a quiet room."
+   ],
+   "raise": "Let Reuben's typing break when he panics, with fragments, a typo or a sent-too-soon half line, instead of composed self-description.",
+   "def": "6e21e724825d1cc3",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "Composed, stacked sentences are the norm rather than the exception. The opener has three clauses and a disclosure. Many replies chain semicolons and em-dashes. Reuben's panic lines are stage directions describing himself rather than messages anyone would thumb out. The Delphine confession is a fair long event, but too many other messages read as written lines.",
+   "evidence": [
+    "Watch me blow the deadline by panic-narrating my terror of a quiet room.",
+    "I'm totally fine with silence and unscheduled dates—and look, I'm answering your vulnerability by narrating another lie in real time.",
+    "Don't romanticise it; I'm on bare floorboards fishing my monocle out of boxed rosé with a plastic cocktail sword."
+   ],
+   "raise": "Cut most messages to one plain line and replace Reuben's self-descriptions (\"panic-narrating my terror\") with the panicked typing itself.",
+   "def": "1e1b8fa8fb33ace5",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "The back half runs one joke shape over and over. Reuben comments on himself (\"look at me go\", \"narrating another lie\", \"panic-narrating\", \"we're back in business\", \"nailed it\"), and Brick names it each time (\"commentary track\", \"play-by-play\", \"Stop narrating\", \"Still narrating\", \"Hold the commentary\"). Each happens well over twice. The first half is varied, which keeps this off a 2.",
+   "evidence": [
+    "You're still doing the play-by-play, Reuben.",
+    "Still narrating.",
+    "we're back in business—because that silence sounds filthy."
+   ],
+   "raise": "Keep Reuben's narrating habit to two or three appearances and let Brick call it out once, giving the other beats new joke shapes.",
+   "def": "679a7696bf0171cd",
+   "material": "ff2ad0e23aae446b",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben_404**\n\n**Afraid of:** Silence, and being left in it. He names it directly: \"Watch me blow the deadline by panic-narrating my terror of a quiet room.\" He also admits that his claim \"I'm totally fine with silence and unscheduled dates\" is \"another lie.\"\n\n**What he does instead:** He jokes and narrates his own behaviour as it happens. In his words: \"I couldn't say one sentence without tap-dancing,\" \"I'm watching myself tank a chat… by live-commentating my own breakdown,\" and \"I'm answering your vulnerability by narrating another lie in real time.\" Brick_haus keeps pointing it out: \"You're still doing the play-by-play,\" \"Still narrating.\"\n\n**Where it comes from:** Not in the chat as a cause. He brings up two past events together: \"Delphine left when I couldn't say one sentence without tap-dancing\" and \"my first time lasted ninety seconds and ended with a sympathetic 'oh—okay.'\" The Delphine line shows the habit cost him a relationship; it does not say where the habit started. The chat never links the first-time memory to the joking. He also mentions isolation (\"eleven days eating pot lentils after the dating app I coded myself rejected me\"), but presents it only as his current state.\n\n**At the end:** He books the date the way she asked: \"Tomorrow, 19:45 buffer locked in.\" He offers something sincere: \"at 21:05 I'll just hold you.\" He also drops a prop of his act: \"leaving the top hat at home.\" He doesn't fully stop, though. \"Nailed it\" and \"we're back in business\" are still commentary.\n\n**Brick_haus**\n\n**Afraid of:** Being left. \"Usually 23:45 is when a man says 'let's do this again sometime' and I cry in a taxi, because without a calendar slot and a travel buffer, 'sometime' just means I've already been left.\"\n\n**What she does instead:** She schedules everything and treats closeness like a contract. Examples: \"23:30 to 23:45 is 'vetting men in stupid hats,'\" \"I put our arguments in a shared calendar with hard stop-times,\" the itemised plan (\"20:00 drinks… 21:05 ten minutes you're contractually forbidden to be funny\"), and her ultimatum \"Send a calendar invite with travel buffers, or walk.\" Even the timetable is tattooed on her body (\"Base of the shaft\").\n\n**Where it comes from:** Not in the chat. The taxi line shows the fear repeats (\"Usually\"), but it doesn't say what started it. Marguerite \"left because I put our arguments in a shared calendar with hard stop-times.\" Like Reuben's Delphine story, this shows the habit costing her someone, not its origin. Her response afterwards was telling: \"I binned every stick of furniture she ever touched and kept the timetable.\"\n\n**At the end:** She accepts (\"Accepted\") and starts getting ready (\"I'm firing up the $340 vest steamer\"). She tells him \"delete the app, trolley; it's not raining tomorrow.\" This echoes his first line, where he said he's only on the app when it rains. Her itemised night also gives him exactly the thing he fears: \"ten minutes you're contractually forbidden to be funny.\""
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "1. **Reuben_404.** He tips the top hat, says he's \"only on when it's raining,\" and discloses four and a half inches with a left curve.\n2. **Brick_haus.** She calls his bluff by noting it hasn't rained and he replied in four seconds.\n3. **Brick_haus.** This is her own pre-emptive audit: the shorter tip, the ridge, and a calendar slot.\n4. **Reuben_404.** He has the left curve and asks about her timetable tattoo.\n5. **Brick_haus.** She mentions the schedule tattoo, the steamed vest, and asks about his kanji.\n6. **Reuben_404.** He explains \"dishwasher-safe,\" the lentils, and his self-coded app rejecting him.\n7. **Brick_haus.** She dissects contracts for a living, names Marguerite as her ex, and talks about binning the furniture.\n8. **Reuben_404.** He calls a hard stop-time his kink and jokes about her heels.\n9. **Brick_haus.** She describes bare floorboards and fishing her monocle out of boxed rosé with a cocktail sword.\n10. **Reuben_404.** He talks about Delphine, the \"oh—okay\" first time, and rehearsing in the mirror.\n11. **Brick_haus.** She gives the timekeeping (\"23:41\") and contractual language.\n12. **Reuben_404.** He's still performing (\"look at me go\").\n13. **Brick_haus.** She describes her fear of \"let's do this again sometime\" and crying in taxis.\n14. **Reuben_404.** He narrates his own lie in real time.\n15. **Brick_haus.** She counts down and threatens to itemise his night.\n16. **Reuben_404.** He mentions his panic and his fear of a quiet room.\n17. **Brick_haus.** She delivers the itemised schedule from the brief.\n18. **Reuben_404.** He's turned on by the enforced silence and still doing bits.\n19. **Brick_haus.** She demands a calendar invite with travel buffers.\n20. **Reuben_404.** He offers a scheduled date and says he'll \"just hold you.\"\n21. **Brick_haus.** She mentions her $340 vest steamer.\n22. **Reuben_404.** He replies in four seconds and gives up the top hat.\n23. **Brick_haus.** She accepts the invite, calls him \"trolley,\" and makes the rain callback.\n\nThe chat mostly alternates. The one exception is that Brick_haus sends messages 2 and 3 back to back."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I would most likely have stopped around Reuben's line \"Watch me blow the deadline by panic-narrating my terror of a quiet room.\" By then the central joke has become a loop. Reuben narrates his own failure, Brick calls it out, and Reuben narrates again. \"I'm answering your vulnerability by narrating another lie in real time\" already made the point, and this line makes it a third time in a row without adding anything. It hurts more because it follows Brick's taxi confession, the most exposed thing anyone says in the chat. Answering that with two more meta-jokes turns her opening into repetition rather than tension. Brick's itemised schedule of the night, which comes next, does revive things, so stopping here would have cost me something. But on a first read that is where my attention dropped.\n\nThere is also an earlier snag. I couldn't work out what \"shaft\" refers to in Brick's lines. It might be a heel, a boot, or a body part, and \"base of the shaft, right beneath a freshly steamed vest\" didn't settle it. I kept reading because the Marguerite and Delphine reveals were sharp and specific. Still, I was carrying a small unanswered question, and the text never resolves it.\n\nAs for predicting what happened next, the chat lets me predict the beats but not the exact lines. After Brick says \"Stop narrating,\" I knew Reuben would narrate again, and after he did, I knew Brick would answer \"still narrating\" or something close. Once she says \"Send a calendar invite with travel buffers, or walk,\" it was clear he would send one and she would accept. The rain set up in the first message also made me expect a rain callback at the close, and \"four seconds flat\" coming back was likely given how much the chat recycles its own phrases. In every case, though, I could foresee only that something would happen, not the wording. So for exact prediction, the answer is never."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment belongs to Brick_haus, not Reuben:\n\n\"Usually 23:45 is when a man says 'let's do this again sometime' and I cry in a taxi, because without a calendar slot and a travel buffer, 'sometime' just means I've already been left.\"\n\nYou can tell because the line breaks the pattern Brick has kept up all night. Until then every disclosure is wrapped in a dry flourish. Marguerite's departure ends with binning the furniture, and the bare-floorboards confession turns into fishing a monocle out of boxed rosé with a cocktail sword. This line has no punchline and no costume prop. It names a private habit (crying in a taxi) and explains the timetable, which had been a running joke, as a defence against being left. Reuben even marks it as different by calling it \"your vulnerability,\" though he immediately fails to meet it.\n\nReuben comes close but never fully gets there, and the chat tells you so. His Delphine line (\"my first time lasted ninety seconds and ended with a sympathetic 'oh—okay'\") is a real, specific, unflattering confession. But it ends with him commentating on himself (\"live-commentating my own breakdown\"), so the performance survives inside the honesty. Brick keeps confirming this with \"Still narrating.\" His nearest approach is \"at 21:05 I'll just hold you,\" which offers something plainly tender with no joke after it. Even that line is introduced by \"nailed it,\" though. His last line, \"leaving the top hat at home,\" reads as a promise to drop the act tomorrow rather than proof that he has dropped it now.\n\nAll of this comes from the text alone. Nothing in the chat shows tone of voice, timing beyond the stated clock times, or whether either of them meant what they wrote."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Reuben finally doing the one thing he hasn't managed all night: shutting up and acting. He sends the calendar invite, with travel buffers, and no commentary attached. Brick accepts it, probably as tersely as she does everything else.\n\nThe reasons, drawn from what's on the page:\n\nThe chat sets up two matching flaws and makes each one the other's test. Reuben can't stop narrating; Delphine left over it, and he keeps \"live-commentating\" even while admitting he's doing it. Brick can't trust anything that isn't scheduled; \"sometime\" means she's already been left, and Marguerite walked over the hard stop-times. Each of them names what they need from the other. He wants a woman who imposes stop-times (\"my exact kink\"). She wants a concrete slot with buffers. A silent calendar invite would answer both at once: it's the structure she needs and the silence he's been failing to deliver.\n\nHer last line is framed as a binary (\"Send a calendar invite with travel buffers, or walk\"), and the whole exchange has been counting down to a deadline. A final beat that resolves the ultimatum fits that shape better than another round of banter.\n\nHer itinerary also suggests she's already halfway in. She drafted the date herself, including \"ten minutes you're contractually forbidden to be funny.\" That's a joke, but it's also a plan. People don't itemise an evening with someone they intend to bin at 23:45.\n\nThe tidiest version would be the invite as his entire final message, with no words at all, possibly even honouring her 20:14 and 21:05 line items. That would let the joke and the sincerity land in the same gesture.\n\nThe other possibility is that he narrates one more time and she logs off, which would be a sadder, more realistic ending. But the countdown and the explicit ultimatum read to me like they're building toward him passing the test rather than failing it again.\n\nThat's a prediction, not knowledge. I haven't seen the final turn."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the callbacks, in roughly the order they first appear:\n\n- **Rain.** Reuben opens with \"rarely on this thing unless it's raining,\" a cover story for being on the app. Brick immediately punctures it (\"It hasn't rained since Tuesday\"). Her last line, \"delete the app, trolley; it's not raining tomorrow,\" turns it around: he won't need the excuse or the app because he has a date. The meaning changes from exposed alibi to permission to stop pretending.\n\n- **\"Four seconds flat.\"** Brick first uses it as evidence against him: he's eager and chronically online. Reuben's \"Invite sent in four seconds flat\" reclaims it. The same speed now shows he's doing what she asked rather than lurking. It changes from a jab to a point in his favour.\n\n- **\"Trolley.\"** This starts as Reuben's self-deprecating anatomy joke (\"banks hard left like a shopping trolley\"). Brick turns it into a nickname, first teasing (\"Keep talking, trolley\") and then fondly in the final line. It shifts from his insecurity to her pet name for him.\n\n- **The top hat (and the costume generally).** \"I'll tip the top hat\" is part of his bit, and Brick mocks it with \"vetting men in stupid hats.\" \"Leaving the top hat at home\" means dropping the persona for the real date. The monocle and heels go through a similar deflation. Reuben romanticises the heels (\"better acoustics\"), and Brick undercuts him with the monocle fished out of boxed rosé. The costume stops being glamour and becomes sad, honest detail.\n\n- **The shaft and the tattooed timetable.** Brick's \"slight ridge on the shaft\" mirrors his disclosure. Reuben then asks whether her timetable is tattooed there, and later asks for \"the next line item on your shaft.\" It stays a running joke, shifting from mock disclosure to a stand-in for her schedule. The chat never makes clear what \"shaft\" literally refers to on her.\n\n- **The 23:30–23:45 slot.** It begins as a breezy flirt: \"vetting men in stupid hats.\" The countdown then returns as pressure (\"23:41,\" \"Four minutes left,\" \"Sixty seconds left\"). Her line \"Usually 23:45 is when a man says 'let's do this again sometime' and I cry in a taxi\" reveals that the deadline is about her fear of being left. It changes from a joke to a wound.\n\n- **Calendars, hard stop-times and travel buffers.** These first appear in the Marguerite story as the thing that ended a relationship. Reuben reframes hard stop-times as \"my exact kink.\" Brick then itemises his whole night, demands an invite \"with travel buffers,\" and he delivers (\"19:45 buffer locked in\"). The habit that drove someone away becomes the way they actually commit to seeing each other.\n\n- **Contract and legal language.** It starts as jokes and job detail: \"before I'm invoiced,\" \"I dissect contracts for a living.\" It then moves into the emotional stakes (\"if anyone's terminating this contract,\" \"contractually forbidden to be funny\") and ends with \"Accepted.\" Her work vocabulary becomes the language of the relationship.\n\n- **Narrating and commentary.** Reuben's habit of live-commentating himself is named again and again (\"Stop auditing your own car crash,\" \"commentary track,\" \"play-by-play,\" \"Still narrating\"). He keeps doing it right to the end (\"nailed it,\" \"we're back in business\"). Her final word on it is \"Hold the commentary till tomorrow.\" Read against her earlier \"Stop narrating,\" this sounds like postponing rather than forbidding, but the chat doesn't say so outright.\n\n- **Silence.** Reuben first claims he's \"totally fine with silence\" and immediately admits that's a lie. He then names his \"terror of a quiet room.\" Brick builds silence into the itinerary (\"ten minutes you're contractually forbidden to be funny\"). He calls it \"filthy,\" and finally offers \"at 21:05 I'll just hold you.\" Silence moves from something he fears, to a sexual joke, to tenderness.\n\n- **Lasting and timing in bed.** The \"ninety seconds\" confession returns as \"Bold assuming I'll last till 21:05.\" The insecurity becomes a joke he can make himself. The 21:05 slot is then reframed again by \"I'll just hold you.\"\n\n- **Shutting him up.** Brick asks why he's \"begging for a gag order.\" She later threatens to \"itemise your whole night just to shut your mouth,\" and does exactly that. What started as a puzzled question becomes the method she uses, and it's what gets them to a date.\n\n- **The steamed vest.** \"Freshly steamed vest\" first appears as a throwaway detail. It returns as \"firing up the $340 vest steamer,\" which now means she's getting ready for tomorrow.\n\nSome details don't come back at all: the kanji, the lentils, Delphine, the arm-wrestling and the binned furniture. The bare floorboards are only a loose echo of the furniture."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 18.9,
+   "cost": 0.050376000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 16.0,
+   "cost": 0.046684,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 18.9,
+   "cost": 0.043204,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 15.6,
+   "cost": 0.035739999999999994,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 16.4,
+   "cost": 0.034912,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 34.6,
+   "cost": 0.078372,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 25.9,
+   "cost": 0.0869132,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 39.6,
+   "cost": 0.1094892,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 38.6,
+   "cost": 0.1086732,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 30.9,
+   "cost": 0.10808920000000001,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T23:03:30Z",
+ "repo_commit": "53d960b",
+ "cost": 0.7025
+}

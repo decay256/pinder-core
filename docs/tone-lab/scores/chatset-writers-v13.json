@@ -1,0 +1,53 @@
+{
+ "id": "chatset-writers-v13",
+ "kind": "chat",
+ "label": "Run 13 · all 3 chats",
+ "version": "run 13",
+ "order": 113,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v13/chat-reuben-brick/",
+ "note": "Every chat of run 13 (run 12 with the turn no longer fixed at one message from each): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "when": null,
+ "writer": null,
+ "writers_run": 13,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 12150,
+   "words": 2003
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "All three chats run the same skeleton in the same order. Reuben opens with a pre-emptive disclosure and Brick allots a slot. Brick's backstory (Marguerite's calendared fights, the cab guy's \"sometime\") comes out next. Reuben then live-narrates his own collapse, Brick gives a 'stop narrating or we're done' ultimatum, and every chat ends on a calendar invite being accepted. Lines recur across far more than two chats: the shared calendar with hard stop-times and sobbing in a cab appear in all three; \"four seconds flat\", \"dishwasher-safe\", the boxed-rosé monocle and \"leaving the top hat at home\" appear in two; \"sixty seconds\" and the monocle fogging recur in pairs. The differences are real but are details inside the same scene, not separate nights. Booster's Brick names both acts (\"Same mirror, different hat\") and Reuben's real sentence lands; Wong's Reuben admits to being an eleven-day shut-in with a ring light; Carr's Reuben never fully drops the act.",
+   "evidence": [
+    "my ex, who bailed because I put our fights on a shared Google Calendar with hard end-times",
+    "My ex Marguerite dumped me for putting our fights on a shared calendar with hard stop-times",
+    "Invite sent in four seconds flat—leaving the top hat at home."
+   ],
+   "raise": "Let at least one chat break the shared spine: a different opener (Brick hunting first, or the night going wrong early) and an ending that is not an accepted calendar invite. Keep profile props like the cab, the steamer and the kanji from recurring as set-piece lines in every chat.",
+   "def": "03d845827225bb57",
+   "material": "a1925fd8bbd79b99",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 22.5,
+   "cost": 0.08768400000000001,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-22T23:01:38Z",
+ "repo_commit": "53d960b",
+ "cost": 0.0877
+}
