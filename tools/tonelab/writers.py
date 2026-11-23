@@ -346,9 +346,11 @@ For each improvisation, I tell you how it goes for {a}. You write what {a} sends
 {turn}
 """)
 TURNS = {"v11", "v12", "v13"}  # versions run with --turns
-PRON = {"he/him": dict(he="he", him="him", his="his", himself="himself"),
-        "she/her": dict(he="she", him="her", his="her", himself="herself"),
-        "they/them": dict(he="they", him="them", his="their", himself="themselves")}
+_SING = dict(s="s", es="es", ies="ies", is_="is", has="has", does="does", s_="'s")
+PRON = {"he/him": dict(he="he", him="him", his="his", himself="himself", **_SING),
+        "she/her": dict(he="she", him="her", his="her", himself="herself", **_SING),
+        "they/them": dict(he="they", him="them", his="their", himself="themselves",
+                          s="", es="", ies="y", is_="are", has="have", does="do", s_="'re")}
 P_FRAME = ("This chat runs on Dungeons & Dragons rules. Each turn, {A} picks one of {a_his} six stats (Charm, Rizz, Honesty, "
            "Chaos, Wit, Self-awareness) and rolls a twenty-sided die against a difficulty. How far {a_he} beats or misses it "
            "decides how well {a_his} message comes off.\n\n"
@@ -359,13 +361,13 @@ P_HEAT = [(1, 3, "Tonight the heat between them is low: neither of them is in a 
           (7, 8, "Tonight the heat between them is high: it's on both their minds."),
           (9, 99, "Tonight the heat between them is very high: neither of them is far from saying it.")]
 P_START = "{A} and {B} have just matched, and the chat is empty. {B}'s interest is {n}. {band}"
-P_BAND = [(0, 0, "{B_He} has unmatched {a_him}."),
-          (1, 4, "{B_He}'s nearly gone: one more wrong message and {b_he} leaves."),
-          (5, 9, "{B_He}'s curious but not convinced, and could drift away."),
-          (10, 15, "{B_He}'s interested, leaning neither way yet."),
-          (16, 20, "{B_He}'s drawn in, but still protecting {b_himself}."),
-          (21, 24, "{B_He}'s close to saying yes to a date, not yet."),
-          (25, 25, "{B_He} agrees to a date, and the chat ends there.")]
+P_BAND = [(0, 0, "{B_He} {b_has} unmatched {a_him}."),
+          (1, 4, "{B_He}{b_s_} nearly gone: one more wrong message and {b_he} leave{b_s}."),
+          (5, 9, "{B_He}{b_s_} curious but not convinced, and could drift away."),
+          (10, 15, "{B_He}{b_s_} interested, leaning neither way yet."),
+          (16, 20, "{B_He}{b_s_} drawn in, but still protecting {b_himself}."),
+          (21, 24, "{B_He}{b_s_} close to saying yes to a date, not yet."),
+          (25, 25, "{B_He} agree{b_s} to a date, and the chat ends there.")]
 STAT_NAME = {"SelfAwareness": "Self-awareness"}
 P_STAT = {"Charm": "Charm means being warm, easy and reassuring.",
           "Rizz": "Rizz means saying plainly that {a_he} wants {b_him}.",
@@ -380,7 +382,7 @@ P_SHADOW = {"Fixation": "the warmth clings: needing to be seen back, too much an
             "Denial": "the honest thing comes out as its own opposite, insisted on.",
             "Madness": "something not quite {a_him} leaks in: a detail that doesn't belong, said calmly.",
             "Overthinking": "it qualifies and explains itself until the joke or the point is dead.",
-            "Dread": "{a_he} sees {a_himself} failing with perfect clarity and narrates it while it happens."}
+            "Dread": "{a_he} see{a_s} {a_himself} failing with perfect clarity and narrate{a_s} it while it happens."}
 P_ROLL = "{A} rolls {stat}. {means} {A_He} rolls {total} against {dc}, {by}. {grade}"
 P_ROLL_NAT = "{A} rolls {stat}. {means} {A_He} rolls a natural {nat}. {grade}"
 P_GRADE = {"success": "That's a success: it works.",
@@ -435,29 +437,30 @@ P_CLOSES = {"v11": "Your improvisation: {A}'s message and {B}'s reply.",
 # v13's pieces. Where a piece is not here, v11's is used unchanged (time and heat, bands, shadow meanings,
 # horniness tiers and reception).
 I_STAT = {"Charm": "It means being warm, easy and reassuring.",
-          "Rizz": "It means saying plainly that {a_he} wants {b_him}.",
-          "Honesty": "It means {a_he} hides nothing: {a_he} shows something real, or asks for it.",
+          "Rizz": "It means saying plainly that {a_he} want{a_s} {b_him}.",
+          "Honesty": "It means {a_he} hide{a_s} nothing: {a_he} show{a_s} something real, or ask{a_s} for it.",
           "Chaos": "It means swerving somewhere unexpected that still makes sense.",
           "Wit": "It means being quick and funny.",
           "SelfAwareness": "It means naming what's actually going on underneath."}
 I_CHOOSE = "{A} chooses {stat}. {means} {grade}"
 I_GRADE = dict(P_GRADE,
-               nat20=("That's the best it could possibly go: by luck or by genius, {a_he} says exactly what {b_he} needed to "
+               nat20=("That's the best it could possibly go: by luck or by genius, {a_he} say{a_s} exactly what {b_he} needed to "
                       "hear, the way {a_he} would at {a_his} very best."),
-               nat1=("That's the worst it could possibly go: by bad luck or by instinct, {a_he} says exactly what {b_he} "
+               nat1=("That's the worst it could possibly go: by bad luck or by instinct, {a_he} say{a_s} exactly what {b_he} "
                      "least needed to hear, the way {a_he} would at {a_his} very worst."))
-I_MISS = "Specifically, {a_he} reacts with {shadow}: {means}"
+I_MISS = "Specifically, {a_he} react{a_s} with {shadow}: {means}"
 TRAP_LENGTH = 2  # the improvisation that sets the trap and the next one
-I_TRAP_SET = "{A_He} is going to do so the next time too."
-I_TRAP_ON = "{A_He} still reacts with {shadow}: {means} After this, it's gone."
+I_TRAP_SET = "{A_He} {a_is_} going to do so the next time too."
+I_TRAP_ON = "{A_He} still react{a_s} with {shadow}: {means} After this, it's gone."
 TRAP_STAT = {"cringe": "Charm", "creep": "Rizz", "overshare": "Honesty", "unhinged": "Chaos", "pretentious": "Wit",
              "spiral": "SelfAwareness"}
-I_SHADOW_CHECK = "{A_He} also can't keep {a_his} {shadow} down, so it leaks in whatever {a_he} does: {means}"
+I_SHADOW_CHECK = "{A_He} also can't keep {a_his} {shadow} down, so it leaks in whatever {a_he} {a_does}: {means}"
 I_HORNY = ("{A_He} also can't control {a_his} horniness: the message slides toward sex, with something inappropriate for "
            "the moment. {tier} {reception}")
-I_STEER = "{A_He} tries to take control of the conversation with a follow-up question."
-I_COMBO = {"The Setup": "Wit, then Charm: the joke set up the charm, and {b_he} gains a little extra interest.",
-           "The Triple": "Three different moves in a row, and the third one worked: {a_he} has momentum now."}
+I_STEER = "{A_He} tr{a_ies} to take control of the conversation with a follow-up question."
+I_COMBO = {"The Setup": "Wit, then Charm: the joke set up the charm, and {b_he} gain{b_s} a little extra interest.",
+           "The Disarm": "Wit, then Honesty: the joke lowered {b_his} guard for the honest thing, and {b_he} gain{b_s} a little extra interest.",
+           "The Triple": "Three different moves in a row, and the third one worked: {a_he} {a_has} momentum now."}
 I_SWING = "{B} {swing}, and {b_his} reply carries that. {band}"
 I_FLAT = "{B}'s interest doesn't move, and {b_his} reply carries that. {band}"
 I_SWINGS = [(-99, -3, "loses a lot of interest"), (-2, -1, "loses a little interest"), (1, 2, "gains a little interest"),
@@ -497,7 +500,8 @@ def turn_texts13(m, a_name, a_pron, b_name, b_pron):
             if r["success"]:  # no shadow line above to carry on: name it here
                 sh = SHADOW_OF[TRAP_STAT[trap]]
                 ps.append(fill(I_MISS, shadow=sh, means=fill(P_SHADOW[sh])))
-            ps.append(fill(I_TRAP_SET))
+            if k < len(m["turns"]) - 1:
+                ps.append(fill(I_TRAP_SET))
         for trap in [x.lower() for x in tn.get("active_traps_before") or []]:
             if trap == (r.get("activated_trap") or "").lower():
                 continue

@@ -13,6 +13,10 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v16", "Run 16: Zyx & Sable, improvised", "writers-v16",
+     'Run 16. Run 15\'s briefs and characters, and the chat as improvisations, as in run 14: one session per comedian, at most 500 words. The game played Zyx_444 and Sable_xo on seed 23, the seed Reuben and Brick were played on; with these two it goes fourteen steps and Sable unmatches Zyx at the end. Two pieces of text are new: verbs agree with they/them ("they try"), and The Disarm, Wit then Honesty, which Reuben never reached. The last step does not say that a shadow carries on.', "run 15"),
+    ("v15", "Run 15: Zyx & Sable, in one go", "writers-v15",
+     "Run 15. The whole of run 11's workflow for two characters the comedians had not written before, drawn at random from the game's other four: Zyx_444 (they/them), who plays, and Sable_xo. Each comedian rewrites Pinder's short brief in their own words, then writes both characters from the game's notes in a new session, then the chat in one go in a third, at most 500 words: run 11's prompts, unchanged.", None),
     ("v14", "Run 14: improvisations, not game rules", "writers-v14",
      "Run 14. Run 13's set-up (run 11's briefs and characters, seed 23, eleven steps in one session, at most 500 words), with the game's language taken out of what the comedian reads. No Dungeons & Dragons frame, no rolls or numbers, and no \"turn\": each step is \"Improvisation n\". Reuben chooses a stat, and the text says what it means and how it comes out; on a miss, which of his shadows he reacts with; a trap is that shadow carrying on into the next improvisation, two in all (it was three before, and in seed 23 that covered six of the eleven). Brick's interest is said in words only. Each step ends \"what Reuben sends, and what Brick sends back\".", "run 11"),
     ("v13", "Run 13: turn by turn, any number of messages", "writers-v13",
@@ -80,10 +84,15 @@ def fold(text, inserts):
 briefs, runs, stats = {}, [], {"brief folded": 0, "brief not found": 0, "profile folded": 0, "profile not found": 0}
 for rid, label, sub, about, profiles_from in RUNS:
     O = os.path.join(BASE, sub)
-    if not os.path.exists(os.path.join(O, "chat-reuben-brick", "run.json")):
+    # the pair is the chat folder's name, chat-<player>-<match>; runs 1 to 14 are Reuben and Brick
+    chs = sorted(d for d in os.listdir(O) if d.startswith("chat-")) if os.path.isdir(O) else []
+    CH = chs[0] if chs else "chat-reuben-brick"
+    pair = CH[len("chat-"):].split("-")
+    pnames = [json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8"))["name"] for s in pair]
+    if not os.path.exists(os.path.join(O, CH, "run.json")):
         print(f"{rid}: no chats yet, left out")
         continue
-    meta = json.load(open(os.path.join(O, "chat-reuben-brick", "run.json"), encoding="utf-8"))
+    meta = json.load(open(os.path.join(O, CH, "run.json"), encoding="utf-8"))
     rec = meta["writers"]
     writers = []
     for wid, name in w.WRITERS:
@@ -96,14 +105,14 @@ for rid, label, sub, about, profiles_from in RUNS:
         else:
             texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
             texts.update(ownbrief=None, characters=None)
-        texts["chat"] = read(os.path.join(O, "chat-reuben-brick", f"{wid}.md"))
-        tj = os.path.join(O, "chat-reuben-brick", f"{wid}.turns.json")
+        texts["chat"] = read(os.path.join(O, CH, f"{wid}.md"))
+        tj = os.path.join(O, CH, f"{wid}.turns.json")
         tlog = json.load(open(tj, encoding="utf-8")) if os.path.exists(tj) else None
-        jp = os.path.join(O, "chat-reuben-brick", f"{wid}.joke.md")
+        jp = os.path.join(O, CH, f"{wid}.joke.md")
         texts["joke"] = read(jp) if os.path.exists(jp) else None
         steps = []
-        order = (("ownbrief", "brief"), ("characters", "characters"), ("chat", "chat-reuben-brick")) if paired else \
-            (("reuben", "reuben"), ("brick", "brick"), ("chat", "chat-reuben-brick"))
+        order = (("ownbrief", "brief"), ("characters", "characters"), ("chat", CH)) if paired else \
+            (("reuben", "reuben"), ("brick", "brick"), ("chat", CH))
         for i, (slug, folder) in enumerate(order):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
             note = None
@@ -165,7 +174,9 @@ for rid, label, sub, about, profiles_from in RUNS:
                  "seed": (meta.get("mechanics") or {}).get("seed"),
                  "nturns": (meta.get("mechanics") or {}).get("turns_played"),
                  "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),
-                 "reasoning": meta.get("reasoning"), "writers": writers})
+                 "reasoning": meta.get("reasoning"), "writers": writers,
+                 "player": pnames[0], "match": pnames[1], "title": " & ".join(s.capitalize() for s in pair),
+                 "pair_text": " and ".join(s.capitalize() for s in pair)})
 data = {"player": NAME["reuben"], "match": NAME["brick"], "names": NAME, "pron": PRON, "briefs": briefs, "runs": runs}
 t = read(os.path.join(os.path.dirname(os.path.abspath(__file__)), "writers_page.html"))
 out = t.replace("__DATA__", json.dumps(data, ensure_ascii=False).replace("</", "<\\/"))

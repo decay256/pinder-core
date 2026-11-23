@@ -83,7 +83,7 @@ summary { cursor: pointer; font-weight: 600; }
 
 <header>
   <div class="wrap">
-    <h1>Reuben &amp; Brick <small>one chat per writer</small></h1>
+    <h1><span id="pair">Reuben &amp; Brick</span> <small>one chat per writer</small></h1>
     <div class="row" id="runs" role="group" aria-label="Run"></div>
     <div class="row" id="writers" role="group" aria-label="Writer"></div>
     <div class="tabs" role="tablist" aria-label="What to read" id="tabs"></div>
@@ -108,8 +108,8 @@ function fromHash() {
 function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 function words(s) { return (s.trim().match(/\S+/g) || []).length; }
 
-function chatHTML(text) {
-  const me = D.player, them = D.match;
+function chatHTML(text, run) {
+  const me = (run && run.player) || D.player, them = (run && run.match) || D.match;
   const re = new RegExp("^\\s*(?:\\*\\*)?(" + me + "|" + them + ")(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.*)$", "i");
   let out = [], last = null;
   for (const raw of text.split("\n")) {
@@ -159,9 +159,9 @@ function segHTML(seg, w) {
 function howHTML(run, w) {
   const from = run.profiles_from ? ` in ${run.profiles_from}` : "";
   const flow = run.turns ? `<ol class="flow">
-    <li>In run 11, ${esc(w.name)} rewrote Pinder's brief (the short one) in their own words, in a session of its own.</li>
-    <li>In run 11, in a new session, they wrote a short take on both characters and how the two clash or click, from their own brief and the game's notes.</li>
-    <li>A new session for the chat, played turn by turn on seed ${esc(String(run.seed))}: the same system prompt, their own brief and that text, then the game's account of turn 1. They answer with what ${esc(D.names.reuben)} sends and what ${esc(D.names.brick)} sends back, and the next turn's account comes in the same session: ${run.nturns} turns in all. Each account is put together from fixed pieces of text by what the dice did.</li>
+    <li>In ${esc(run.profiles_from || "run 11")}, ${esc(w.name)} rewrote Pinder's brief (the short one) in their own words, in a session of its own.</li>
+    <li>In ${esc(run.profiles_from || "run 11")}, in a new session, they wrote a short take on both characters and how the two clash or click, from their own brief and the game's notes.</li>
+    <li>A new session for the chat, played turn by turn on seed ${esc(String(run.seed))}: the same system prompt, their own brief and that text, then the game's account of turn 1. They answer with what ${esc(run.player || D.names.reuben)} sends and what ${esc(run.match || D.names.brick)} sends back, and the next turn's account comes in the same session: ${run.nturns} turns in all. Each account is put together from fixed pieces of text by what the dice did.</li>
   </ol>` : run.paired ? `<ol class="flow">
     <li>${esc(w.name)} rewrites Pinder's brief (the short one: what Pinder is and what the reader should feel) in their own words: a session of its own.</li>
     <li>A new session: the same system prompt, their own brief from step 1, and the game's notes on both characters. They write a short take on each and how the two clash or click.</li>
@@ -200,12 +200,13 @@ function render() {
     const n = v === "how" ? "" : v === "turns" ? `<span>${w.turns.length}</span>` : `<span>${words(w[v]).toLocaleString()}w</span>`;
     return `<button class="tab" role="tab" id="t-${v}" aria-selected="${v === st.v}" data-v="${v}">${label}${n}</button>`;
   }).join("");
+  document.getElementById("pair").textContent = run.title || "Reuben & Brick";
   const view = document.getElementById("view");
   if (st.v === "chat") {
-    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own Reuben and Brick, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat);
+    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own ${esc(run.pair_text || "Reuben and Brick")}, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat, run);
   } else if (st.v === "turns") {
     view.innerHTML = `<p class="meta">Each turn, the game's account of what happened (in grey) was sent to ${esc(w.name)}, in one session; under it is what they wrote back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this writer.</p>` +
-      w.turns.map(x => `<section class="turn"><h2>Turn ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"))}</section>`).join("");
+      w.turns.map(x => `<section class="turn"><h2>Turn ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("");
   } else if (st.v === "joke") {
     view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked it out under its own heading, as the prompt asked (How it was made has the exact wording). The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
   } else if (st.v === "characters") {

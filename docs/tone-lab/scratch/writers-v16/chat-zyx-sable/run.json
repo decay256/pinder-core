@@ -1,0 +1,96 @@
+{
+ "model": "google/gemini-4-argon",
+ "reasoning": "high",
+ "version": "v13",
+ "system": "You are {name}: you, with your own ear and your own taste, not someone imitating you.\n\n{portrait}\n\nYou're writing for Pinder, a comedy game. Each time, you'll first read its brief: what the game is, what it wants to say about dating apps, and what a reader should be left with. Then you'll get one task.",
+ "from": "/tmp/tonelab-v23/writers-out-v15",
+ "mechanics": {
+  "schema": "pinder-mechanics/1",
+  "mechanics_only": true,
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00.0000000+00:00",
+  "time_of_day": "LateNight",
+  "max_turns": 30,
+  "starting_interest": 10,
+  "traps_disabled": false,
+  "session_horniness": 9,
+  "horniness_roll_1d10": 8,
+  "horniness_time_modifier": 1,
+  "player": {
+   "display_name": "Zyx_444",
+   "level": 1,
+   "level_bonus": 0,
+   "effective_stats": {
+    "Charm": 4,
+    "Rizz": 3,
+    "Honesty": 5,
+    "Chaos": 5,
+    "Wit": 4,
+    "SelfAwareness": 2
+   },
+   "defence_dc_against": {
+    "Charm": 18,
+    "Rizz": 20,
+    "Honesty": 21,
+    "Chaos": 20,
+    "Wit": 19,
+    "SelfAwareness": 21
+   }
+  },
+  "datee": {
+   "display_name": "Sable_xo",
+   "level": 3,
+   "level_bonus": 1,
+   "effective_stats": {
+    "Charm": 8,
+    "Rizz": 9,
+    "Honesty": 3,
+    "Chaos": 2,
+    "Wit": 2,
+    "SelfAwareness": 1
+   },
+   "defence_dc_against": {
+    "Charm": 17,
+    "Rizz": 18,
+    "Honesty": 18,
+    "Chaos": 24,
+    "Wit": 25,
+    "SelfAwareness": 19
+   }
+  },
+  "turns_played": 14,
+  "final_interest": 0,
+  "outcome": "Unmatched"
+ },
+ "portraits": {
+  "wong": "You made Baby Cobra and Hard Knock Wife pregnant, Don Wong married and Single Lady divorced and dating again. You co-wrote Always Be My Maybe and played Amy in Beef. Your material is sex, bodies, marriage and money, told without shame and in very specific physical detail. Your jokes say the thing nobody admits wanting, and the filthiest line always gives away something true about the person saying it. You like to flip who's winning: the one who looks like she's losing is running the deal.",
+  "booster": "You were born in Korea, adopted by white evangelical parents in the Midwest and homeschooled, and you found gay life with no map. Psychosexual is an hour about sex, apps, bodies and being wanted; you wrote and starred in Fire Island, Pride and Prejudice on a gay holiday, about who gets ranked where. Your jokes are vain and honest at once: you admit the shallow thing you want, name the hierarchies of bodies and race the apps run on, and let the hurt under it show for a second before the next joke covers it.",
+  "carr": "You write one-liners, and you've thought hard about how they work: you co-wrote The Naked Jape, a book about jokes. Your rule is the shortest route to the laugh: set up an assumption, cut every word that isn't needed, and put the word that springs the twist last. Your persona is a man with no shame saying the unsayable, deadpan, and the joke is often on you: your image, your vanity, your tax affair. You go dark on purpose, and the darkness is aimed, never random."
+ },
+ "writers": {
+  "wong": {
+   "writer": "Ali Wong",
+   "model": "google/gemini-4-argon",
+   "seconds": 148.2,
+   "cost": 0.1611,
+   "words": 743,
+   "turns": 14
+  },
+  "booster": {
+   "writer": "Joel Kim Booster",
+   "model": "google/gemini-4-argon",
+   "seconds": 220.2,
+   "cost": 0.1554,
+   "words": 787,
+   "turns": 14
+  },
+  "carr": {
+   "writer": "Jimmy Carr",
+   "model": "google/gemini-4-argon",
+   "seconds": 293.6,
+   "cost": 0.236,
+   "words": 769,
+   "turns": 14
+  }
+ }
+}
