@@ -322,7 +322,30 @@ Each turn, I tell you how the game goes for {a}. You write {a}'s message and {b}
 PROMPTS["v12"] = dict(PROMPTS["v11"], chat=PROMPTS["v11"]["chat"].replace(
     'Each turn, I tell you how the game goes for {a}. You write {a}\'s message and {b}\'s reply, one message per line, as "{a}: message" or "{b}: message", and nothing else.',
     'Each turn, I tell you how the game goes for {a}. You write what {a} sends and what {b} sends back, however many messages that takes: one message per line, as "{a}: message" or "{b}: message", and nothing else.'))
-TURNS = {"v11", "v12"}  # versions run with --turns
+# v13: improvisation instructions instead of game rules; see turn_texts13.
+PROMPTS["v13"] = dict(PROMPTS["v12"], chat=OWN_BRIEF + """
+# Your task
+
+Here's what you wrote about the two characters.
+
+{characters}
+
+# The chat
+
+Improvise their chat on the app, in {turns} improvisations, no longer than {words} words in all. Set something up early and pay it off at the end, so the last message picks up something from the beginning and the chat feels rounded. End on the laugh.
+
+It's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.
+
+For each improvisation, I tell you how it goes for {a}. You write what {a} sends and what {b} sends back, however many messages that takes: one message per line, as "{a}: message" or "{b}: message", and nothing else.
+
+# Improvisation 1
+
+{turn}
+""", turn="""# Improvisation {n}
+
+{turn}
+""")
+TURNS = {"v11", "v12", "v13"}  # versions run with --turns
 PRON = {"he/him": dict(he="he", him="him", his="his", himself="himself"),
         "she/her": dict(he="she", him="her", his="her", himself="herself"),
         "they/them": dict(he="they", him="them", his="their", himself="themselves")}
@@ -409,6 +432,106 @@ P_CLOSES = {"v11": "Your improvisation: {A}'s message and {B}'s reply.",
             "v12": "Your improvisation: what {A} sends this turn, and what {B} sends back."}
 
 
+# v13's pieces. Where a piece is not here, v11's is used unchanged (time and heat, bands, shadow meanings,
+# horniness tiers and reception).
+I_STAT = {"Charm": "It means being warm, easy and reassuring.",
+          "Rizz": "It means saying plainly that {a_he} wants {b_him}.",
+          "Honesty": "It means {a_he} hides nothing: {a_he} shows something real, or asks for it.",
+          "Chaos": "It means swerving somewhere unexpected that still makes sense.",
+          "Wit": "It means being quick and funny.",
+          "SelfAwareness": "It means naming what's actually going on underneath."}
+I_CHOOSE = "{A} chooses {stat}. {means} {grade}"
+I_GRADE = dict(P_GRADE,
+               nat20=("That's the best it could possibly go: by luck or by genius, {a_he} says exactly what {b_he} needed to "
+                      "hear, the way {a_he} would at {a_his} very best."),
+               nat1=("That's the worst it could possibly go: by bad luck or by instinct, {a_he} says exactly what {b_he} "
+                     "least needed to hear, the way {a_he} would at {a_his} very worst."))
+I_MISS = "Specifically, {a_he} reacts with {shadow}: {means}"
+TRAP_LENGTH = 2  # the improvisation that sets the trap and the next one
+I_TRAP_SET = "{A_He} is going to do so the next time too."
+I_TRAP_ON = "{A_He} still reacts with {shadow}: {means} After this, it's gone."
+TRAP_STAT = {"cringe": "Charm", "creep": "Rizz", "overshare": "Honesty", "unhinged": "Chaos", "pretentious": "Wit",
+             "spiral": "SelfAwareness"}
+I_SHADOW_CHECK = "{A_He} also can't keep {a_his} {shadow} down, so it leaks in whatever {a_he} does: {means}"
+I_HORNY = ("{A_He} also can't control {a_his} horniness: the message slides toward sex, with something inappropriate for "
+           "the moment. {tier} {reception}")
+I_STEER = "{A_He} tries to take control of the conversation with a follow-up question."
+I_COMBO = {"The Setup": "Wit, then Charm: the joke set up the charm, and {b_he} gains a little extra interest.",
+           "The Triple": "Three different moves in a row, and the third one worked: {a_he} has momentum now."}
+I_SWING = "{B} {swing}, and {b_his} reply carries that. {band}"
+I_FLAT = "{B}'s interest doesn't move, and {b_his} reply carries that. {band}"
+I_SWINGS = [(-99, -3, "loses a lot of interest"), (-2, -1, "loses a little interest"), (1, 2, "gains a little interest"),
+            (3, 99, "gains a lot of interest")]
+I_START = "{A} and {B} have just matched, and the chat is empty. {band}"
+I_CLOSE = "Your improvisation: what {A} sends, and what {B} sends back."
+
+
+def turn_texts13(m, a_name, a_pron, b_name, b_pron):
+    """("", [improvisation text, ...]) for a pinder-mechanics/1 record, from v13's pieces alone."""
+    pa, pb = PRON.get(a_pron, PRON["they/them"]), PRON.get(b_pron, PRON["they/them"])
+    f = dict(A=a_name, B=b_name, **{f"a_{k}": v for k, v in pa.items()}, **{f"b_{k}": v for k, v in pb.items()},
+             A_He=pa["he"].capitalize(), B_He=pb["he"].capitalize())
+    fill = lambda s, **kw: s.format(**f, **kw)
+    band = lambda n: fill(_pick(P_BAND, n))
+    out, stage = [], {}
+    for k, tn in enumerate(m["turns"]):
+        r, stat = tn["roll"], tn["chosen_stat"]
+        if r["nat20"]:
+            grade = "nat20"
+        elif r["nat1"]:
+            grade = "nat1"
+        elif r["success"]:
+            d = r["total"] - r["dc"]
+            grade = "exceptional" if d >= 15 else "critical" if d >= 10 else "strong" if d >= 5 else "success"
+        else:
+            grade = r["final_tier"]
+            if grade not in I_GRADE:
+                raise ValueError(f"turn {tn['turn']}: no piece for the result {grade}")
+        ps = [fill(I_CHOOSE, stat=STAT_NAME.get(stat, stat), means=fill(I_STAT[stat]), grade=fill(I_GRADE[grade]))]
+        if not r["success"]:
+            sh = SHADOW_OF[stat]
+            ps.append(fill(I_MISS, shadow=sh, means=fill(P_SHADOW[sh])))
+        if r.get("activated_trap"):
+            trap = r["activated_trap"].lower()
+            stage[trap] = 1
+            if r["success"]:  # no shadow line above to carry on: name it here
+                sh = SHADOW_OF[TRAP_STAT[trap]]
+                ps.append(fill(I_MISS, shadow=sh, means=fill(P_SHADOW[sh])))
+            ps.append(fill(I_TRAP_SET))
+        for trap in [x.lower() for x in tn.get("active_traps_before") or []]:
+            if trap == (r.get("activated_trap") or "").lower():
+                continue
+            stage[trap] = stage.get(trap, 1) + 1
+            if stage[trap] <= TRAP_LENGTH:
+                sh = SHADOW_OF[TRAP_STAT[trap]]
+                ps.append(fill(I_TRAP_ON, shadow=sh, means=fill(P_SHADOW[sh])))
+        s = tn.get("shadow") or {}
+        if s.get("miss"):
+            ps.append(fill(I_SHADOW_CHECK, shadow=s["shadow"], means=fill(P_SHADOW[s["shadow"]])))
+        h = tn.get("horniness") or {}
+        if h.get("miss"):
+            rec = P_HORNY_HIGH if tn["interest_before"] >= HORNY_HIGH_FROM else P_HORNY_LOW
+            ps.append(fill(I_HORNY, tier=P_HORNY_TIER[h["tier"]], reception=fill(rec)))
+        if (tn.get("steering") or {}).get("succeeded"):
+            ps.append(fill(I_STEER))
+        if tn.get("combo"):
+            if tn["combo"] not in I_COMBO:
+                raise ValueError(f"turn {tn['turn']}: no piece for the combo {tn['combo']}")
+            ps.append(fill(I_COMBO[tn["combo"]]))
+        x, y = tn["interest_before"], tn["interest_after"]
+        ps.append(fill(I_FLAT, band=band(y)) if x == y else fill(I_SWING, swing=_pick(I_SWINGS, y - x), band=band(y)))
+        ps.append(fill(I_CLOSE))
+        if k == 0:
+            ps = [fill(P_TIME, clock=m["clock"][11:16], heat=_pick(P_HEAT, m["session_horniness"])),
+                  fill(I_START, band=band(tn["interest_before"]))] + ps
+        out.append("\n\n".join(ps))
+    return "", out
+
+
+def texts_for(m, *a):
+    return (turn_texts13 if VERSION == "v13" else turn_texts)(m, *a)
+
+
 def _pick(table, n):
     return next(s for lo, hi, s in table if lo <= n <= hi)
 
@@ -491,7 +614,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v12")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v13")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -716,7 +839,7 @@ def turns(a, chosen, key):
     ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
     an, bn = ds[x]["name"], ds[y]["name"]
     mech = json.load(open(a.mechanics, encoding="utf-8"))
-    frame, texts = turn_texts(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
+    frame, texts = texts_for(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
     P = PROMPTS[VERSION]
     for folder in ("brief", "characters"):
         os.makedirs(os.path.join(a.out, folder), exist_ok=True)
@@ -806,11 +929,11 @@ def main():
     if a.turns and a.print_turns:
         x, y = a.turns.split(",")
         ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
-        frame, texts = turn_texts(json.load(open(a.mechanics, encoding="utf-8")), ds[x]["name"], ds[x].get("gender_identity", "they/them"),
+        frame, texts = texts_for(json.load(open(a.mechanics, encoding="utf-8")), ds[x]["name"], ds[x].get("gender_identity", "they/them"),
                                   ds[y]["name"], ds[y].get("gender_identity", "they/them"))
         print(frame)
         for i, tx in enumerate(texts, 1):
-            print(f"\n# Turn {i}\n\n{tx}")
+            print(f"\n# {'Improvisation' if VERSION == 'v13' else 'Turn'} {i}\n\n{tx}")
         return
     if not a.key_stdin:
         tl.die("writers: the key comes on stdin (--key-stdin)")

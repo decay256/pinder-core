@@ -13,6 +13,8 @@ BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v14", "Run 14: improvisations, not game rules", "writers-v14",
+     "Run 14. Run 13's set-up (run 11's briefs and characters, seed 23, eleven steps in one session, at most 500 words), with the game's language taken out of what the comedian reads. No Dungeons & Dragons frame, no rolls or numbers, and no \"turn\": each step is \"Improvisation n\". Reuben chooses a stat, and the text says what it means and how it comes out; on a miss, which of his shadows he reacts with; a trap is that shadow carrying on into the next improvisation, two in all (it was three before, and in seed 23 that covered six of the eleven). Brick's interest is said in words only. Each step ends \"what Reuben sends, and what Brick sends back\".", "run 11"),
     ("v13", "Run 13: turn by turn, any number of messages", "writers-v13",
      "Run 13. Run 12 again, with one change: the chat prompt and the end of each turn's account no longer ask for \"Reuben's message and Brick's reply\", which made every turn of run 12 exactly two lines. They now ask for what Reuben sends this turn and what Brick sends back, however many messages that takes. Everything else is run 12's: run 11's briefs and characters, seed 23's dice, the same pieces, eleven turns in one session, at most 500 words in all.", "run 11"),
     ("v12", "Run 12: turn by turn on the dice", "writers-v12",
@@ -152,7 +154,7 @@ for rid, label, sub, about, profiles_from in RUNS:
                     else:
                         stats["profile not found"] += 1
             steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
-        turns = [{"n": e["turn"], "game": (e["prompt"].split("# Turn 1\n\n", 1)[1] if e["turn"] == 1 else e["prompt"].split("\n\n", 1)[1]).strip(),
+        turns = [{"n": e["turn"], "game": ((e["prompt"].split("# Turn 1\n\n", 1) if "# Turn 1\n\n" in e["prompt"] else e["prompt"].split("# Improvisation 1\n\n", 1))[1] if e["turn"] == 1 else e["prompt"].split("\n\n", 1)[1]).strip(),
                   "lines": e["lines"]} for e in tlog["turns"]] if tlog else None
         writers.append({"id": wid, "name": name, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
                         "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps,

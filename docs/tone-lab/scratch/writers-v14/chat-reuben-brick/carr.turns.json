@@ -1,0 +1,174 @@
+{
+ "writer": "Jimmy Carr",
+ "system": "You are Jimmy Carr: you, with your own ear and your own taste, not someone imitating you.\n\nYou write one-liners, and you've thought hard about how they work: you co-wrote The Naked Jape, a book about jokes. Your rule is the shortest route to the laugh: set up an assumption, cut every word that isn't needed, and put the word that springs the twist last. Your persona is a man with no shame saying the unsayable, deadpan, and the joke is often on you: your image, your vanity, your tax affair. You go dark on purpose, and the darkness is aimed, never random.\n\nYou're writing for Pinder, a comedy game. Each time, you'll first read its brief: what the game is, what it wants to say about dating apps, and what a reader should be left with. Then you'll get one task.",
+ "turns": [
+  {
+   "turn": 1,
+   "prompt": "Here's Pinder's brief, as you put it in your own words.\n\nHere\u2019s the brief, stripped down to the chassis.\n\n### What Pinder is\n\nPinder looks exactly like a dating app\u2014profiles, matches, a chat window, dice rolls, and a live meter tracking how interested they are\u2014except everyone on it is a dick. Not metaphorically. A literal, sentient penis with a smartphone, an ill-advised outfit or accessory, and a body it\u2019s been apologising for since puberty. Because everyone on the app is a set of genitals, length, girth, curve, vein-work, and which testicle hangs lower aren't dirty talk. They're small talk. It\u2019s R-rated, and it is filthy. \n\nThe joke is that we\u2019ve barely exaggerated anything. \n\nReal dating apps take lonely, terrified, hopeful human beings and reduce them to three photos, a two-line bio, and an algorithm. They turn the basic human need for love into a game with a scoreboard, run by a casino that only makes money if you leave empty-handed and come back tomorrow. So at one in the morning, people who are hurt, horny, and desperate put on a front they think a stranger might want, paste an opener they\u2019ve already used forty times, and know that the next option is one thumb-twitch away. Nobody has to stay.\n\nPinder just makes the subtext literal. The app treats you like a piece of meat, so we made you a piece of meat. The gamification is right there on the screen, and as in real life, you are probably losing.\n\n### Where the joke is aimed\n\nI like a dark joke\u2014as my accountant and several high court judges will tell you\u2014but a joke only works if it\u2019s aimed at the right target. \n\nPinder is a farce. It\u2019s fast, absurd, and deeply cynical about the app. It is never cynical about the people using it. We make fun of the machine, and we make fun of the ridiculous armour people build to survive the machine. We never make fun of the fact that they want to be loved. If the reader doesn't believe these two talking penises are real people hiding real damage, the filth is just admin.\n\n### What happens to the reader\n\nA player reads one chat on their phone, and in a few minutes they get to know two people. The laugh has to change shape three times:\n\n1. **The Act:** First, you laugh at them. Each character has a specific, weird routine they\u2019re doing to get through the conversation. \n2. **The Tell:** Then you find out *why* they\u2019re doing it. You don't stop laughing, but now the laugh is warm, or it stings, because you can see the bruise under the outfit.\n3. **The Collision:** You watch their two routines crash into each other.\n\n**If they connect:** It has to be earned. We know what both of them are frightened of, and we watch them put the act down anyway. It\u2019s still funny, it\u2019s unexpectedly tender, and the reader knows why it had to be *these* two and nobody else.\n\n**If they don't:** Nobody is the villain. The reader should see two people who genuinely could have worked, and watch in horror as each one\u2019s defence mechanism lands squarely on the other one\u2019s sore spot. You laugh, you wince, and you think: *yes, that is why dating is fucked.* Blame the act, the fear, and the app.\n\nWinning the game doesn't matter. A chat that ends in a date and leaves the reader feeling nothing has failed. An unmatch that makes them laugh and ache for a week has done its job.\n\n### The test\n\nI love a good one-liner, obviously. It paid for my teeth. But if a gag gets in the way of the character, cut it. \n\nWhen the chat is over, a reader who has seen *only* that chat has to be able to answer four questions about **both** characters:\n\n1. What are they afraid of?\n2. What is the act they put on so they don't have to feel it?\n3. Where did that come from?\n4. What did they do at the end?\n\nIf the reader can\u2019t answer all four for both of them, the chat failed. No matter how good the dick jokes were.\n\n# Your task\n\nHere's what you wrote about the two characters.\n\n## Reuben_404\n\nHe\u2019s four-and-a-half inches with a hard left curve, a top hat that cost more than his rent, and a kanji tattoo that means *dishwasher-safe*. His act is the effortless, off-the-grid raconteur\u2014*\"only on here when it rains\"*\u2014except he replies in four seconds flat because he\u2019s been indoors for eleven days eating lentils out of a pot. He\u2019s an out-of-work coder whose only finished product is a Pinder clone with one user\u2014himself\u2014and his own algorithm rejected him at 3am.\n\nHe\u2019s terrified of a quiet room. His first time ended under two minutes with a woman saying *\"oh\u2014okay\"* with devastating kindness; his last ex, Delphine, left because he couldn\u2019t say one sentence that wasn't a bit. He rehearses his \"spontaneous\" banter and curvature disclaimer in the bathroom mirror because if he stops tap-dancing for ten seconds, he thinks he disappears.\n\n## Brick_haus\n\nShe\u2019s a dick in skyscraper heels, a monocle, and one of two vests she maintains with a $340 industrial steamer. She has her daily schedule tattooed on her skin so nobody can accuse her of drifting. She\u2019s a contract dispute-ender who treats flirting like a hostile merger: dissecting your word choice and delivering a pre-emptive audit of her own bump and shorter-than-expected tip before you\u2019ve said hello. Behind the \"curated minimalist\" bio, her flat is empty because she binned everything her ex touched, and she fishes her monocle out of boxed ros\u00e9 with a plastic cocktail sword.\n\nShe\u2019s terrified of *\"let\u2019s do this again sometime.\"* Her ex Marguerite left because she put their arguments in a shared calendar with hard stop-times. She cries in taxis over unscheduled second dates, because if love isn't locked into a calendar slot with travel buffers, she assumes she\u2019s already been left.\n\n## The two of them\n\nOn paper, it\u2019s a car crash: a fake-spontaneous bullshitter meets a woman with a timetable tattooed on her shaft. He\u2019ll try his rehearsed, hat-tipping charm; she\u2019ll clock his four-second reply time and dissect his syntax like a coroner. They\u2019ll play pre-emptive-strike chicken over whose curve is worse.\n\nThe bit to build on is **contractual spontaneity**. Reuben\u2019s secret kink is having his mouth taken away so he can't do the voice or the joke; Brick_haus\u2019s is someone actually sticking to the schedule. When she aggressively itemises their hypothetical night to call his bluff\u2014*20:00 drinks, 20:14 he loses at arm-wrestling, 21:00 sex, 21:05 ten minutes where he is contractually forbidden to speak or be funny*\u2014it accidentally becomes the dirtiest talk he\u2019s ever heard. She gives him an order to shut up and just exist; he gives her a calendar invite with an actual time on it. Their neuroses interlock like Lego.\n\n# The chat\n\nImprovise their chat on the app, in 11 improvisations, no longer than 500 words in all. Set something up early and pay it off at the end, so the last message picks up something from the beginning and the chat feels rounded. End on the laugh.\n\nIt's a text chat, read on a phone, not performed: nobody hears your voice or your timing, so the timing has to be in what they type and where each message ends.\n\nFor each improvisation, I tell you how it goes for Reuben_404. You write what Reuben_404 sends and what Brick_haus sends back, however many messages that takes: one message per line, as \"Reuben_404: message\" or \"Brick_haus: message\", and nothing else.\n\n# Improvisation 1\n\nIt's 23:30. Tonight the heat between them is very high: neither of them is far from saying it.\n\nReuben_404 and Brick_haus have just matched, and the chat is empty. She's interested, leaning neither way yet.\n\nReuben_404 chooses Charm. It means being warm, easy and reassuring. That's a strong success: it works better than he meant.\n\nBrick_haus gains a lot of interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Only on here when it rains, obviously\u2014but a timetable tattooed down your shaft is the most reassuring thing I\u2019ve seen all week. Tipping my top hat to your 23:30.\nBrick_haus: Dry since Tuesday. Four-second reply.\nBrick_haus: 23:30 was \"fish monocle from boxed ros\u00e9 with a plastic sword,\" but I\u2019ve just pencilled you in.",
+   "lines": [
+    "Reuben_404: Only on here when it rains, obviously\u2014but a timetable tattooed down your shaft is the most reassuring thing I\u2019ve seen all week. Tipping my top hat to your 23:30.",
+    "Brick_haus: Dry since Tuesday. Four-second reply.",
+    "Brick_haus: 23:30 was \"fish monocle from boxed ros\u00e9 with a plastic sword,\" but I\u2019ve just pencilled you in."
+   ],
+   "stray": [],
+   "seconds": 41.5,
+   "cost": 0.03403,
+   "completion_tokens": 2970,
+   "from_a": 1,
+   "from_b": 2
+  },
+  {
+   "turn": 2,
+   "prompt": "# Improvisation 2\n\nReuben_404 chooses Wit. It means being quick and funny. That's a success: it works.\n\nHe tries to take control of the conversation with a follow-up question.\n\nBrick_haus gains a little interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Caught. Look, when you\u2019re four-and-a-half inches with a hard left curve and a kanji tattoo that means \"dishwasher-safe,\" you don't make a woman wait five seconds. What\u2019s inked in for 23:32\u2014do you audit my hat, or do I get your specs?\nBrick_haus: That disclaimer sounded rehearsed in a bathroom mirror. Specs: shorter-than-expected tip, mid-shaft bump, skyscraper heels, vest maintained with a $340 steamer. Now\u2014did the hat cost more than your rent?",
+   "lines": [
+    "Reuben_404: Caught. Look, when you\u2019re four-and-a-half inches with a hard left curve and a kanji tattoo that means \"dishwasher-safe,\" you don't make a woman wait five seconds. What\u2019s inked in for 23:32\u2014do you audit my hat, or do I get your specs?",
+    "Brick_haus: That disclaimer sounded rehearsed in a bathroom mirror. Specs: shorter-than-expected tip, mid-shaft bump, skyscraper heels, vest maintained with a $340 steamer. Now\u2014did the hat cost more than your rent?"
+   ],
+   "stray": [],
+   "seconds": 24.6,
+   "cost": 0.01729,
+   "completion_tokens": 1256,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 3,
+   "prompt": "# Improvisation 3\n\nReuben_404 chooses Honesty. It means he hides nothing: he shows something real, or asks for it. That's a fumble: nearly, but it slips, slightly.\n\nSpecifically, he reacts with Denial: the honest thing comes out as its own opposite, insisted on.\n\nHe tries to take control of the conversation with a follow-up question.\n\nBrick_haus loses a little interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: I definitely do not rehearse in the mirror, and I certainly haven\u2019t been indoors for eleven days eating lentils out of a pot. Hat was barely 110% of rent. Why the $340 steamer\u2014where\u2019s the rest of your stuff?\nBrick_haus: \"Definitely do not\" is a confession in contract law. I own two vests and an empty flat\u2014binned everything my ex Marguerite touched when she walked out. Drop the raconteur bit.",
+   "lines": [
+    "Reuben_404: I definitely do not rehearse in the mirror, and I certainly haven\u2019t been indoors for eleven days eating lentils out of a pot. Hat was barely 110% of rent. Why the $340 steamer\u2014where\u2019s the rest of your stuff?",
+    "Brick_haus: \"Definitely do not\" is a confession in contract law. I own two vests and an empty flat\u2014binned everything my ex Marguerite touched when she walked out. Drop the raconteur bit."
+   ],
+   "stray": [],
+   "seconds": 25.5,
+   "cost": 0.015826,
+   "completion_tokens": 1056,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 4,
+   "prompt": "# Improvisation 4\n\nReuben_404 chooses Wit. It means being quick and funny. That's the best it could possibly go: by luck or by genius, he says exactly what she needed to hear, the way he would at his very best.\n\nBrick_haus gains a lot of interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Fair. I\u2019m an unemployed coder whose own Pinder-clone algorithm rejected him at 3am. Honestly, an empty flat with a binding itinerary and hard stop-times sounds like foreplay.\nBrick_haus: Careful. Marguerite left because I put our arguments in a shared calendar with hard stop-times. If you\u2019re a \"let\u2019s do this again sometime\" guy, unmatch now and save me crying in a taxi.",
+   "lines": [
+    "Reuben_404: Fair. I\u2019m an unemployed coder whose own Pinder-clone algorithm rejected him at 3am. Honestly, an empty flat with a binding itinerary and hard stop-times sounds like foreplay.",
+    "Brick_haus: Careful. Marguerite left because I put our arguments in a shared calendar with hard stop-times. If you\u2019re a \"let\u2019s do this again sometime\" guy, unmatch now and save me crying in a taxi."
+   ],
+   "stray": [],
+   "seconds": 22.8,
+   "cost": 0.0152684,
+   "completion_tokens": 1067,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 5,
+   "prompt": "# Improvisation 5\n\nReuben_404 chooses Self-awareness. It means naming what's actually going on underneath. That's a catastrophe: it comes out cringe, embarrassing or inappropriate, in a funny way.\n\nSpecifically, he reacts with Dread: he sees himself failing with perfect clarity and narrates it while it happens.\n\nHe is going to do so the next time too.\n\nBrick_haus loses a lot of interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Watch me torpedo this in real time: you said something real, I panicked at the silence, and now I\u2019m tap-dancing because my ex Delphine left me for making everything a bit\u2014and look, I\u2019m already oversharing how my first time lasted ninety seconds and ended with a devastatingly kind \"oh\u2014okay.\" Still typing. Can't stop.\nBrick_haus: That isn't candour, it\u2019s a filibuster to avoid committing to a calendar slot. I end contract disputes for a living\u2014I know a man drafting his exit clause.",
+   "lines": [
+    "Reuben_404: Watch me torpedo this in real time: you said something real, I panicked at the silence, and now I\u2019m tap-dancing because my ex Delphine left me for making everything a bit\u2014and look, I\u2019m already oversharing how my first time lasted ninety seconds and ended with a devastatingly kind \"oh\u2014okay.\" Still typing. Can't stop.",
+    "Brick_haus: That isn't candour, it\u2019s a filibuster to avoid committing to a calendar slot. I end contract disputes for a living\u2014I know a man drafting his exit clause."
+   ],
+   "stray": [],
+   "seconds": 32.1,
+   "cost": 0.0153685,
+   "completion_tokens": 1071,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 6,
+   "prompt": "# Improvisation 6\n\nReuben_404 chooses Wit. It means being quick and funny. That's a success: it works.\n\nHe still reacts with Dread: he sees himself failing with perfect clarity and narrates it while it happens. After this, it's gone.\n\nHe tries to take control of the conversation with a follow-up question.\n\nBrick_haus gains a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Watch me turn my terror of a quiet room into a stand-up set just to blow my shot\u2014if I sign, what\u2019s your penalty clause for talking?\nBrick_haus: Tomorrow: 20:00 drinks, 20:14 you lose at arm-wrestling, 21:00 sex, 21:05 ten minutes where you\u2019re contractually forbidden to speak or be funny.",
+   "lines": [
+    "Reuben_404: Watch me turn my terror of a quiet room into a stand-up set just to blow my shot\u2014if I sign, what\u2019s your penalty clause for talking?",
+    "Brick_haus: Tomorrow: 20:00 drinks, 20:14 you lose at arm-wrestling, 21:00 sex, 21:05 ten minutes where you\u2019re contractually forbidden to speak or be funny."
+   ],
+   "stray": [],
+   "seconds": 25.5,
+   "cost": 0.0154065,
+   "completion_tokens": 1068,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 7,
+   "prompt": "# Improvisation 7\n\nReuben_404 chooses Honesty. It means he hides nothing: he shows something real, or asks for it. That's a misfire: it comes out wrong.\n\nSpecifically, he reacts with Denial: the honest thing comes out as its own opposite, insisted on.\n\nBrick_haus loses a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Ten minutes without doing a bit definitely doesn\u2019t terrify me, I am completely fine existing in silence without disappearing, and that schedule is NOT the hottest thing I\u2019ve ever read.\nBrick_haus: Three negatives in one sentence. If you can\u2019t sign the 21:05 silence clause without hiding behind sarcasm, I\u2019m going back to my boxed ros\u00e9.\n\nReuben_404: Five whole minutes for sex\u2014flatterer. What\u2019s your email for the calendar invite?\nBrick_haus: Two minutes plus travel buffer. brick@haus.law\u2014lock in the second date too.",
+   "lines": [
+    "Reuben_404: Ten minutes without doing a bit definitely doesn\u2019t terrify me, I am completely fine existing in silence without disappearing, and that schedule is NOT the hottest thing I\u2019ve ever read.",
+    "Brick_haus: Three negatives in one sentence. If you can\u2019t sign the 21:05 silence clause without hiding behind sarcasm, I\u2019m going back to my boxed ros\u00e9.",
+    "Reuben_404: Five whole minutes for sex\u2014flatterer. What\u2019s your email for the calendar invite?",
+    "Brick_haus: Two minutes plus travel buffer. brick@haus.law\u2014lock in the second date too."
+   ],
+   "stray": [],
+   "seconds": 41.9,
+   "cost": 0.0271907,
+   "completion_tokens": 2252,
+   "from_a": 2,
+   "from_b": 2
+  },
+  {
+   "turn": 8,
+   "prompt": "# Improvisation 8\n\nReuben_404 chooses Self-awareness. It means naming what's actually going on underneath. That's a catastrophe: it comes out cringe, embarrassing or inappropriate, in a funny way.\n\nSpecifically, he reacts with Dread: he sees himself failing with perfect clarity and narrates it while it happens.\n\nHe is going to do so the next time too.\n\nBrick_haus loses a lot of interest, and her reply carries that. She's interested, leaning neither way yet.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Watch me panic at being wanted and book our second date for 2038.\nBrick_haus: That\u2019s \"sometime\" with numbers. Back to the ros\u00e9.",
+   "lines": [
+    "Reuben_404: Watch me panic at being wanted and book our second date for 2038.",
+    "Brick_haus: That\u2019s \"sometime\" with numbers. Back to the ros\u00e9."
+   ],
+   "stray": [],
+   "seconds": 22.6,
+   "cost": 0.0158268,
+   "completion_tokens": 1102,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 9,
+   "prompt": "# Improvisation 9\n\nReuben_404 chooses Wit. It means being quick and funny. That's a success: it works.\n\nHe still reacts with Dread: he sees himself failing with perfect clarity and narrates it while it happens. After this, it's gone.\n\nThree different moves in a row, and the third one worked: he has momentum now.\n\nBrick_haus gains a little interest, and her reply carries that. She's drawn in, but still protecting herself.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Watch me fumble the rescue\u2014sent Thursday 20:00, notarised and gagged.\nBrick_haus: Accepted\u2014under protest.",
+   "lines": [
+    "Reuben_404: Watch me fumble the rescue\u2014sent Thursday 20:00, notarised and gagged.",
+    "Brick_haus: Accepted\u2014under protest."
+   ],
+   "stray": [],
+   "seconds": 21.4,
+   "cost": 0.0148926,
+   "completion_tokens": 1025,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 10,
+   "prompt": "# Improvisation 10\n\nReuben_404 chooses Charm. It means being warm, easy and reassuring. That's the best it could possibly go: by luck or by genius, he says exactly what she needed to hear, the way he would at his very best.\n\nWit, then Charm: the joke set up the charm, and she gains a little extra interest.\n\nBrick_haus gains a lot of interest, and her reply carries that. She's close to saying yes to a date, not yet.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: Added travel buffers, recurring weekly. No hat, no bits\u2014I\u2019m staying.\nBrick_haus: Buffers and recurring? Careful, I only cry in taxis. Nearly sold.",
+   "lines": [
+    "Reuben_404: Added travel buffers, recurring weekly. No hat, no bits\u2014I\u2019m staying.",
+    "Brick_haus: Buffers and recurring? Careful, I only cry in taxis. Nearly sold."
+   ],
+   "stray": [],
+   "seconds": 37.7,
+   "cost": 0.0239548,
+   "completion_tokens": 1930,
+   "from_a": 1,
+   "from_b": 1
+  },
+  {
+   "turn": 11,
+   "prompt": "# Improvisation 11\n\nReuben_404 chooses Charm. It means being warm, easy and reassuring. That's a critical success: it comes out really, really well.\n\nBrick_haus gains a lot of interest, and her reply carries that. She agrees to a date, and the chat ends there.\n\nYour improvisation: what Reuben_404 sends, and what Brick_haus sends back.\n",
+   "answer": "Reuben_404: No taxis\u2014I\u2019m yours at 20:00, rain or shine. Put down the plastic sword.\nBrick_haus: Deal. Don\u2019t be four seconds late\u2014I\u2019m upgrading you from pencil to tattoo.",
+   "lines": [
+    "Reuben_404: No taxis\u2014I\u2019m yours at 20:00, rain or shine. Put down the plastic sword.",
+    "Brick_haus: Deal. Don\u2019t be four seconds late\u2014I\u2019m upgrading you from pencil to tattoo."
+   ],
+   "stray": [],
+   "seconds": 31.1,
+   "cost": 0.0196327,
+   "completion_tokens": 1503,
+   "from_a": 1,
+   "from_b": 1
+  }
+ ]
+}
