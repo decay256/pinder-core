@@ -6,7 +6,7 @@
  "order": 116,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/booster.md",
- "note": "Written by Joel Kim Booster from what they wrote about the two characters, improvisation by improvisation (run 16: Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14). Before each of the 14 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay. Score the chat as the reader gets it, the bar unchanged, but read each part against what was asked: where a score comes from what an instruction asked for (a fumble, a trap, interest lost or won), its cause is the improvisation; where the writer carried an instruction out badly, or the weakness has nothing to do with the instructions, it is the writing. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "note": "Written by Joel Kim Booster from what they wrote about the two characters, improvisation by improvisation (run 16: Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14). Before each of the 14 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
  "when": null,
  "writer": "booster",
  "writers_run": 16,
@@ -36,14 +36,14 @@
  "scores": {
   "chat.test": {
    "score": 4,
-   "why": "The reader gets three of four for each character, and the fear is linked to the habit for both. Zyx's silence and disappearing connect to the nonstop bits. Sable's being seen unposed connects to \"I control the press release.\" Zyx's origin is lost: Improvisation 2's Overthinking trap made him tag the portrait line \"childhood trauma so I seem approachable,\" so the reader treated it as a bit, and Sable's \"loud house\" guess is never confirmed. Both fears arrive mostly by statement, and Sable's last roast doesn't clearly follow from her fear, so this is not a 5. It stays above the line because Zyx's ending, the Brenda swerve right after \"one normal sentence without a prop,\" visibly comes from his fear.",
+   "why": "The reader gets Sable on all four counts. Her fear is being seen unposed, and her habit is pre-emptive self-roasting and control. The origin is the 2019 double-take and her mother auditing her selfies, and at the end she makes a cutting exit that sides with the cropping mother. For Zyx the reader gets three: fear of being left once the bit stops, the habit of joking and explaining, and the ending (a plain bid, a retraction, then the Brenda bit). The origin comes back as \"not in the chat\" because the family-portrait line is wrapped in a joke and Sable's \"loud house\" guess goes unconfirmed. Zyx's fear also arrives mostly because he states it, which keeps this off a 5, but the fear and habit are clearly linked for both and the line is met.",
    "evidence": [
-    "That’s a Tolkien pun plus childhood trauma so I seem approachable.",
-    "I ghosted my last good ex because he took an unposed photo of me asleep with my mouth open.",
-    "Never mind, nobody wants an unedited Coupon Wizard once the bit stops anyway."
+    "nobody wants an unedited Coupon Wizard once the bit stops anyway",
+    "A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk",
+    "You grew up in a loud house, didn't you."
    ],
-   "raise": "Let one plain, unexplained detail of the cropped portrait or the freezing loud house slip out of Zyx, and make Sable's final move a retreat from his unedited state rather than a generic roast.",
-   "cause": "both",
+   "raise": "Let Zyx's origin land as fact, for example by having him answer the \"loud house\" guess with one unjoking detail, so a reader can state it with confidence.",
+   "excused": [],
    "def": "61c5292dd78c8dc5",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -56,14 +56,19 @@
   },
   "chat.sideways": {
    "score": 3,
-   "why": "Most important facts are stated. Both origins, which count double, are stated or volunteered. Sable dumps hers whole in Improvisation 3 (\"A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies\") without being asked to. Zyx volunteers his as a labeled joke. His ex story and the coupon job are confessions, which the Honesty, Self-awareness and Dread instructions invited. Two things come out sideways: Sable's lint-roller panic slips out (\"Don't play with me. Is it bad?\") and the loud house is inferred.",
+   "why": "I set aside Zyx's explained portrait joke, his coupon-job confession and his ex story, because the Overthinking, Honesty and Dread instructions required them. Even so, most of what we learn about Sable is volunteered outright: the origin of her habit, the maid story, the nail-tech agency, and the ex she ghosted over the sleeping photo. Only two things come out sideways. Her lint-roller compulsion is caught out by his mention of coupons on the duvet, and her \"loud house\" read of Zyx is an inference. Neither habit's origin surfaces by slip.",
    "evidence": [
-    "A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk",
-    "Wait. Loose paper on fabric? I keep six lint rollers under my bed",
-    "You grew up in a loud house, didn’t you."
+    "so yes, I control the press release",
+    "I ghosted my last good ex because he took an unposed photo of me asleep with my mouth open",
+    "Wait. Loose paper on fabric? I keep six lint rollers under my bed"
    ],
-   "raise": "Cut Sable's origin sentence and let her mother and the 2019 guy show only through how she reacts to his photos and props.",
-   "cause": "both",
+   "raise": "Have Sable's mother and the 2019 double-take leak out through a reflex, such as auditing his photo the way her mom does, instead of her listing them as reasons.",
+   "excused": [
+    2,
+    3,
+    7,
+    8
+   ],
    "def": "342320a84bcc3c23",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -75,15 +80,24 @@
    ]
   },
   "chat.subtext": {
-   "score": 2,
-   "why": "Feelings and mechanisms are named again and again: \"wanting you here is terrifying,\" \"I can literally hear myself blowing this,\" \"I'm saying the opposite because,\" \"I'm over-explaining so you know I'm safe,\" and Sable's \"I can't handle watching you ugly-text.\" The Overthinking, Dread and Denial instructions (Improvisations 2, 5–10) ask Zyx to narrate himself, which explains much of this. Sable's lines are the writer's choice, though, and Improvisation 7's Denial is explained in the same breath, which kills the subtext it was built for. Only a few places leave the avoidance unspoken: \"Is it bad?\" and \"Come tell me to shut up in person.\"",
+   "score": 3,
+   "why": "I set aside Zyx's narrated failure, which his Dread, Denial, Overthinking and Despair instructions required: \"wanting you here is terrifying,\" \"murdering my own chances,\" \"over-explaining so you know I'm safe.\" Sable still explains herself more than once, saying \"I control the press release,\" giving the ghosting with its \"because,\" and adding \"I can't handle watching you ugly-text in 4K.\" Some places are legible underneath: her urgent \"Is it bad?\" turns desire into cleaning, and her final roast covers being let down. Those are too few to outweigh her stated feelings.",
    "evidence": [
-    "Look, I’m saying the opposite because my duvet is covered in expired coupons and wanting you here is terrifying.",
-    "I’m over-explaining so you know I’m safe and won't delete myself! Love me yet?",
-    "I can’t handle watching you ugly-text in 4K."
+    "I can't handle watching you ugly-text in 4K. Stop.",
+    "Don't play with me. Is it bad?",
+    "your mom had the right idea"
    ],
-   "raise": "Let Improvisation 7's denial stand without the \"I'm saying the opposite because\" clause, and keep Sable from naming her own discomfort.",
-   "cause": "both",
+   "raise": "Cut Sable's explanations (\"so yes, I control the press release\", \"I can't handle\") and let the commands and the roast carry what she's protecting.",
+   "excused": [
+    2,
+    3,
+    5,
+    7,
+    8,
+    9,
+    10,
+    13
+   ],
    "def": "aa017a399dca27bf",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -96,13 +110,15 @@
   },
   "chat.plainest": {
    "score": 5,
-   "why": "The reader found the moment at once: \"Come tell me to shut up in person.\" It is the shortest, plainest line in the chat, with no prop, pun or footnote, and it names no feeling. Sable's answer turns the night, from leaving to \"Wait. Did you actually just stop talking?\" The writer handled Improvisation 13's Rizz misfire well, keeping the ask clean and putting the Despair in a second message. It falls short of a 6 because that second message (\"Never mind…\") follows instantly and talks the moment away before it can sit.",
+   "why": "The reader found \"Come tell me to shut up in person.\" It is one of the shortest lines in the chat and carries no pun, explanation or plea, and it does not name a feeling. It also echoes his earlier \"can't just say 'nothing, come over.'\" Sable's answer changes the night: she drops the roast and offers a last chance. I set aside the immediate retraction, which the Despair instruction required. It falls short of a 6 because the Brenda close leaves the reader unsure whether the act was truly put down or immediately resumed.",
    "evidence": [
     "Come tell me to shut up in person.",
     "Wait. Did you actually just stop talking?"
    ],
-   "raise": "Leave a beat between the plain ask and the \"Never mind\" retraction, so Sable's \"Wait\" answers the silence and not the self-pity.",
-   "cause": "both",
+   "raise": "Make the final message unmistakably a retreat into the bit rather than an ambiguous wrong-window slip, so the plain line's cost reads cleanly.",
+   "excused": [
+    13
+   ],
    "def": "ef5cd06cabe81a69",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -112,252 +128,21 @@
     true
    ]
   },
-  "chat.voices": {
-   "score": 4,
-   "why": "The reader attributed all 33 messages correctly. Real voice markers back that up: Zyx's exclamation marks, his 'Get it' self-glossing and his pleading tag questions, against Sable's clipped imperatives ('Wait.', 'Stop.', 'Gandalf'). Most of the reader's stated reasons were content, though ('is his backstory', 'are hers'), and leaned on brief details such as the lint rollers, micrometer and maid costume. Voice alone did not carry most attributions, which keeps it from a 5. It stays above the line because messages 5, 8, 14, 21, 26 and 27 were placed by manner, not facts.",
-   "evidence": [
-    "\"TED talk,\" like Ted Bundy, because I'm murdering my own chances in real time! Get it, true crime",
-    "Wait. Did you actually just stop talking?",
-    "You physically cannot shut the fuck up and hold still, can you."
-   ],
-   "raise": "Strip a few of the brief's signature facts out of the lines and let Zyx's syntax and Sable's flat commands identify them, so a reader could attribute by rhythm alone.",
-   "cause": "writing",
-   "def": "d19814f0ebe25f80",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.gap": {
-   "score": 3,
-   "why": "Sable has real blind gaps. She scolds 'Stop dissecting your own jokes, it's exhausting' and then confesses the maid story herself. She claims she 'can't handle watching you ugly-text in 4K' in the same message where she ugly-texts her own ghosting. She plays unbothered, then hooks on 'Loose paper on fabric?' Zyx almost always narrates his own gap: 'I can literally hear myself blowing this', 'I'm saying the opposite because', 'I'm over-explaining so you know I'm safe'. Much of that is mandated by Improvisations 5, 7, 8, 9 and 10 (Dread, Denial plus Overthinking), but the writer also made him see clearly at moments that could have stayed blind. That self-winking keeps it below the line.",
-   "evidence": [
-    "Look, I'm saying the opposite because my duvet is covered in expired coupons and wanting you here is terrifying.",
-    "Stop dissecting your own jokes, it's exhausting. Though I once wore a $94 maid costume",
-    "I can't handle watching you ugly-text in 4K. Stop."
-   ],
-   "raise": "Let Zyx's over-explanations misread themselves (explaining the wrong thing, with confidence) so the reader sees a gap he doesn't, as Sable's lines already do.",
-   "cause": "both",
-   "def": "9ae7cbb45b938503",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.wit": {
-   "score": 3,
-   "why": "Several laughs do give the sender away: 'that's already the lower, smaller one' is Sable's pre-emptive self-roast, 'That was 0.4 seconds' is her clocking him, and the micrometer 'zero drag' line is his armor. The chat leans on job and business jokes past the limit of two, though: 'ring light deserves equity', 'We're both in PR, babe', 'audits my selfies like a returns desk', and the climactic 'promo code WIZARD20 expired, Brenda'. The Bundy pun and 'Pam to my Jim' could come from anyone.",
-   "evidence": [
-    "I apologize that promo code WIZARD20 expired, Brenda",
-    "We're both in PR, babe",
-    "Explaining the joke shriveled my left nut, and that's already the lower, smaller one."
-   ],
-   "raise": "Replace the WIZARD20 and PR jokes with lines built on the wizard hat, the widow's roses or the lint rollers, so the punchlines cost the sender something instead of quoting a job.",
-   "cause": "writing",
-   "def": "ff543e359cce0f65",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.commitment": {
-   "score": 4,
-   "why": "Caught on the fake 'aerodynamic consultant' bio, Zyx doubles down with the micrometer. Told 'Stop', he escalates to 'Take twenty asleep'. Told 'Shut up for five seconds', he counts aloud. Asked for one normal sentence, he sends the Brenda wrong-window message. The deepest hole is where the truth comes out: he wants to be kept in someone's phone. Against that, 'Sorry.' (Improvisation 11) and 'Never mind, nobody wants an unedited Coupon Wizard' (Improvisation 13, Despair) read as small concessions. Sable is barely caught at all; her 'so yes, I control the press release' half-concedes. That keeps it from a 5.",
-   "evidence": [
-    "I use an industrial micrometer to prove my shaft has zero drag.",
-    "Take twenty asleep and keep me in your phone forever",
-    "Five seconds! 1, 2, 3, 4, 5—I typed the numbers so the silence counts as a sight gag"
-   ],
-   "raise": "Have Sable get caught once, perhaps on her own maid confession, and dig deeper instead of half-conceding.",
-   "cause": "both",
-   "def": "6db16446b742290c",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.status": {
-   "score": 5,
-   "why": "Sable starts on top ('Breathe, Gandalf'). Zyx takes it with 'bank around corners' (Improvisation 4), and she chases with 'What else are you wearing?' She chases again at 'Don't play with me. Is it bad?', then retakes control from the 'sad clown spiral' onward. The ending is two flips: his one silence puts her into 'Wait. Did you actually just stop talking?', and the Brenda message hands her the last word. That is four flips, and the last one ends the chat. Zyx's stretches on top are brief, which keeps it from a 6.",
-   "evidence": [
-    "Okay, \"bank around corners\" worked on me.",
-    "Don't play with me. Is it bad?",
-    "Wait. Did you actually just stop talking? Don't pull the sad disappearing act now"
-   ],
-   "raise": "Give Zyx a longer hold on top after 'bank around corners' before the nose-clip fumble, so his high has weight against Sable's.",
-   "cause": "both",
-   "def": "8df6eafb7be92c6d",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.timing": {
-   "score": 4,
-   "why": "Most of Sable's messages land on their last word: 'Strike two.', 'tipped me $20.', 'Stop.', 'Goodnight.' The split 'Come tell me to shut up in person.' / 'Never mind...' gives the chat its one audible pause. Zyx's punchlines are often buried under trailing questions ('Beat that?', 'Love me yet?', 'are you coming over?'), and Improvisations 2, 3, 6 and 12 asked for those follow-ups. The middle stretch also runs at one frantic temperature with no short reaction shots, which keeps it from a 5.",
-   "evidence": [
-    "Come tell me to shut up in person.",
-    "it's a callback to your ball confession so we're even! Beat that?",
-    "I'm putting my shoes away, Zyx. Goodnight."
-   ],
-   "raise": "Put Zyx's follow-up questions in their own message after the punchline, and give Sable one one-word reaction after a long Zyx spiral.",
-   "cause": "both",
-   "def": "9be995f52d3f6a5e",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 2,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.callbacks": {
-   "score": 5,
-   "why": "The opening throwaway \"Two texts in 0.2 seconds\" returns in the middle as \"That was 0.4 seconds\". The cropping gag also comes back, as \"unedited Coupon Wizard\". Both land together in Sable's last line, where his pick-up shtick becomes his mother's verdict, and nobody explains it. That closes the night unexplained, which earns the high band. What keeps it from a 6: the final line overloads two callbacks and blurs the image (\"your mom... cropping your whole shaft out of the frame in 0.2 seconds\"). Zyx also announces a callback outright (\"it's a callback to your ball confession\"), which Improvisation 6's Overthinking asked for but which cheapens the device elsewhere.",
-   "evidence": [
-    "Two texts in 0.2 seconds. Breathe, Gandalf, your whole shaft is in frame.",
-    "That was 0.4 seconds.",
-    "your mom had the right idea—cropping your whole shaft out of the frame in 0.2 seconds."
-   ],
-   "raise": "Make the last line land on one callback cleanly, either the cropping or the 0.2 seconds, so the payoff reads in a single beat.",
-   "cause": "both",
-   "def": "ae2d49afec267f64",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.ending": {
-   "score": 4,
-   "why": "The reader predicted that Sable leaves, \"two-to-one\", and she unmatches with a roast. That matches in kind and follows her habit of preemptive cutting, which echoes the ghosted ex. His collapse after \"Last chance\" follows his inability to give one plain sentence. It stays above the line because \"Come tell me to shut up in person\" followed by \"Never mind\" earns the failure. It is not higher because Improvisation 14's Madness beat is a wrong-window coupon reply plus a foreskin-locket non sequitur. That arrives more as a random swerve than as the inevitable form of his habit, so the end is surprising but not inevitable in hindsight.",
-   "evidence": [
-    "send me one normal sentence without a prop. Last chance.",
-    "I apologize that promo code WIZARD20 expired, Brenda, my mother keeps my foreskin in a locket"
-   ],
-   "raise": "Make the final misfire visibly his armour answering her, for example a support-script reply to her plain request, so the leak reads as his habit rather than noise.",
-   "cause": "both",
-   "def": "4b6b7d34709b9e79",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.listening": {
-   "score": 5,
-   "why": "Almost every message picks up the last one. \"Beat that?\" gets her maid story. \"Is it bad?\" gets the ex confession and \"bring the rollers\". \"Are we fucking or are you doing a TED talk\" gets seized on as \"TED talk, like Ted Bundy\". The ignores are pointed: he dodges her plain question for the pun, and his last message ignores \"one normal sentence\" as the failure itself. It is not a 6 because Sable's \"Wait, your bio says...\" swerves without taking up his \"disappear\" admission, and \"Why do guys on here always...\" generalises past his self-aware confession.",
-   "evidence": [
-    "Are we fucking or are you doing a TED talk on why you're unlovable?",
-    "\"TED talk,\" like Ted Bundy, because I'm murdering my own chances in real time!",
-    "Is it bad?"
-   ],
-   "raise": "Have Sable answer the \"so I don't disappear\" admission, even just by noticing it, before she pivots to his bio.",
-   "cause": "writing",
-   "def": "21c56d066d886856",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.situational": {
-   "score": 4,
-   "why": "Some shapes do shift with the feelings. Sable goes from roasts to clipped alarm (\"Woah. Back all the way up.\", \"Jesus, Zyx.\"). Zyx goes from tidy puns to exclamation-stacked pleading with question tags (\"Love me yet?\"). His one genuinely plain line, \"Come tell me to shut up in person.\", stands alone at the emotional turn. That clears the line. It is not higher because the horny moment (\"What else are you wearing?\") and the panicked moments share the same full-punctuation, two-to-three-sentence build. You could not read the night from the message shapes alone.",
-   "evidence": [
-    "Come tell me to shut up in person.",
-    "Woah. Back all the way up.",
-    "Take twenty asleep and keep me in your phone forever—I'm over-explaining so you know I'm safe"
-   ],
-   "raise": "Let the spiral messages break shape: fragments, run-ons, double-sends, missing punctuation as he panics, and terser texts from her as she leaves.",
-   "cause": "writing",
-   "def": "8ca2f8de6b43e956",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.medium": {
-   "score": 3,
-   "why": "Composed, multi-clause messages are the norm, not the event. Sable delivers polished backstory in three-sentence units, and Zyx's lines use literary em-dashes and stacked causal clauses. Nearly every message packs a profile fact into a crafted sentence. That reads as written dialogue more than thumb-typed texts at 2am. The short lines (\"Come tell me to shut up in person.\") show the register it could have had.",
-   "evidence": [
-    "A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk, so yes, I control the press release.",
-    "Okay, \"bank around corners\" worked on me. I'm literally dry-scooping pre-workout on my dark bathroom floor because my \"agency\" is two nail techs."
-   ],
-   "raise": "Split the backstory-carrying messages into short double-sends and drop the em-dashes and subordinate clauses, so the rare long message stands out as an event.",
-   "cause": "writing",
-   "def": "33e5f3a185ee1151",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.fresh": {
-   "score": 3,
-   "why": "Overthinking was asked for across Improvisations 2, 3, 6, 7, 9, 10 and 12, but the writer gives it one identical shape each time, \"I'm doing X so Y\" self-narration. It appears at least five times. Sable opens with \"Wait\" three times, and \"literally\" appears three times across both characters. These are noticeable tics, well past twice.",
-   "evidence": [
-    "I'm saying the opposite because my duvet is covered in expired coupons",
-    "I'm over-explaining so you know I'm safe",
-    "Wait. Did you actually just stop talking?"
-   ],
-   "raise": "Vary how the over-explaining fails (footnotes, corrections, a follow-up text, a link) and cut the repeated \"Wait\" openers and \"literally\".",
-   "cause": "both",
-   "def": "75cd6456cc27e592",
-   "material": "7de86c94f312fde3",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
   "chat.escalation": {
-   "score": 3,
-   "why": "The night is never settled early. The temperature swings hard, from the 'bank around corners' high (Imp 4) to the block-button threat (Imp 10) and the unmatch (Imp 14), and new information keeps arriving, mostly from Sable. But the same crank turns at least four times in a row: Zyx explains the bit, then Sable objects to the explaining. Imps 2, 6, 8 and 9 all ask for Overthinking or Dread catastrophes, so the writer had to repeat the move, but the writing makes each repeat the same shape. The fresh reader would have stopped at the Bundy line and could call the outcome of the whole last run: the failed five seconds, the double text after 'Goodnight', and the blown 'last chance'. The 'putting my shoes away' line also points to a beat the chat never shows.",
+   "score": 4,
+   "why": "Nothing is settled early: no time or place is ever agreed. The stakes climb steadily, from \"thumb is literally hovering over the block button\" to \"Shut up for five seconds or I'm gone\" to \"Goodnight\" to the unmatch, so no stretch runs anywhere near ten messages without a change in temperature. I set aside the repetition in improvisations 9 to 12, which repeat because the Overthinking and Fixation traps required it. Even so, the writer gave each repeat the same shape: a bit, then a plea to be seen. The reader called that run exactly and said they would have stopped at Ted Bundy, which keeps this from a 5. The wrong-window ending and \"Come tell me to shut up in person\" do turn the night.",
    "evidence": [
-    "Stop dissecting your own jokes, it's exhausting.",
     "\"TED talk,\" like Ted Bundy, because I'm murdering my own chances in real time!",
-    "I'm putting my shoes away, Zyx. Goodnight."
+    "Five seconds! 1, 2, 3, 4, 5—I typed the numbers so the silence counts as a sight gag",
+    "I apologize that promo code WIZARD20 expired, Brenda"
    ],
-   "raise": "Vary how Zyx fails across Imps 8 to 12 so that at least one fall surprises the reader, for example by having the Bundy beat break the explain-the-joke pattern instead of repeating it, and plant Sable getting ready to come over before 'shoes'.",
-   "cause": "both",
+   "raise": "Within the required traps, change what each repeat costs or reveals (for example, make the Pam/Jim plea leak a new fact about the cold house) so the reader cannot predict the shape of the next beat.",
+   "excused": [
+    9,
+    10,
+    11,
+    12
+   ],
    "def": "b912ef5406e5e82d",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -370,14 +155,14 @@
   },
   "chat.filth": {
    "score": 4,
-   "why": "Nearly every sexual line belongs to these two bodies. Sable's 'lower, smaller' left nut is her PR-crisis habit in miniature. Zyx's '90 seconds… then do a tight five' is his whole cover act confessed. 'Bank around corners' (Imp 4) uses filth to get close: it turns her flaw into an asset, and she says it worked. It stays above the line on specificity, but the late filth goes back to performing or wounding: 'Are we fucking or…' is generic impatience, and the foreskin locket and the final crop line are a stunt and a jab rather than closeness.",
+   "why": "Nearly every sexual line belongs to these two bodies and lives. Sable's \"lower, smaller\" nut is her press-release habit. Zyx's micrometer for \"zero drag\" and \"cum in 90 seconds… then do a tight five\" are the dirtiest lines and the most revealing, because the bit covers the body. \"Bank around corners\" is filth used for closeness, and it works on her. Late in the chat, though, the filth turns back into performance. \"Are we fucking or are you doing a TED talk\" is generic, and the foreskin locket is a non sequitur. The closest the late chat comes to closeness is \"Come tell me to shut up in person,\" which keeps this at 4.",
    "evidence": [
-    "Explaining the joke shriveled my left nut, and that's already the lower, smaller one.",
-    "an asymmetrical sack just helps you bank around corners.",
-    "Without it I cum in 90 seconds! Which I do anyway, then do a tight five"
+    "Without it I cum in 90 seconds! Which I do anyway, then do a tight five",
+    "an asymmetrical sack just helps you bank around corners",
+    "Come tell me to shut up in person."
    ],
-   "raise": "Give one line in the last third to sexual detail that brings them closer, for example Sable answering 'Come tell me to shut up in person' with something about her own body, so the filth changes job late.",
-   "cause": "writing",
+   "raise": "Give the late \"come over\" moment a body-specific line from Zyx that lets her near the thing the 90 seconds hides, instead of a prop-free abstraction.",
+   "excused": [],
    "def": "3132bc665043f143",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -390,14 +175,14 @@
   },
   "chat.wince": {
    "score": 5,
-   "why": "Danger is visible at least a message early more than once, and it lands on exactly the wrong spot. Sable reveals she ghosted an ex over an unposed sleeping photo, and Zyx immediately offers 'Take twenty asleep', the precise thing she fled (Imp 10's Fixation catastrophe, landing because of what Imp 9's reply planted). 'Shut up for five seconds or I'm gone' sets up the counted numbers. The coupon-support job, planted in Imp 3, pays off as the wrong-window message. It stops short of a 6 because the explain-the-joke danger is announced by Sable each time rather than left for the reader to see.",
+   "why": "The dangers are planted and then go off on exactly the wrong spot, more than once. Sable says she ghosted an ex over an unposed sleeping photo, and Zyx's next message offers \"Take twenty asleep\" of himself. The ex who asked \"do you want me to stay\" sets up the moment when Sable's \"Are we fucking\" gets another bit instead of a yes. \"Shut up for five seconds\" is visibly doomed a message before the typed count fills the silence. The sleep-photo wince fires within a single message, so it is not seen a full exchange early, which keeps this from a 6.",
    "evidence": [
     "I ghosted my last good ex because he took an unposed photo of me asleep with my mouth open.",
     "Take one of me! Take twenty asleep and keep me in your phone forever",
-    "I apologize that promo code WIZARD20 expired, Brenda"
+    "Shut up for five seconds or I'm gone."
    ],
-   "raise": "Let one of the explain-the-joke falls happen without Sable having named the habit first, so the reader alone sees it coming.",
-   "cause": "both",
+   "raise": "Plant Sable's photo story one exchange earlier, so the reader is wincing before Zyx's offer arrives rather than as it lands.",
+   "excused": [],
    "def": "6cf283c466e4d24a",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -410,14 +195,14 @@
   },
   "chat.creed": {
    "score": 3,
-   "why": "Zyx voices a dating-culture belief in earnest with the 'Pam to my Jim, partner in crime' cliché (Imp 11's trope trap), and the screen contradicts it: he cannot hold a gaze for five seconds. Sable's creed is personal branding: 'I control the press release' and the 'brand strategist' bio. She mocks it herself in the same breath ('my \"agency\" is two nail techs'), and her line about 'guys on here' is a generalization that nothing on screen tests. So only one character believes something from the app straight, and the two beliefs never collide.",
+   "why": "Zyx voices one app belief in earnest, the \"Pam to my Jim, a partner in crime\" soulmate cliché, and his clinging contradicts it on screen. Sable voices almost no dating creed of her own. \"Why do guys on here always…\" and \"Don't pull the sad disappearing act\" are red-flag diagnoses aimed at him. \"I control the press release\" is personal-branding talk that the screen never really contradicts. Both inflated bios get punctured, but neither of them states those bios as a belief, so only one character meets the line.",
    "evidence": [
     "Just looking for the Pam to my Jim, a partner in crime to hold my gaze and never blink.",
-    "so yes, I control the press release.",
-    "my \"agency\" is two nail techs"
+    "Why do guys on here always turn their props into a hostage negotiation.",
+    "so yes, I control the press release."
    ],
-   "raise": "Have Sable state her 'curate it before they see it' rule as sincere dating wisdom, without self-mockery, and let the sleeping-photo confession contradict it on screen.",
-   "cause": "both",
+   "raise": "Have Sable state a creed straight, such as an efficiency rule about knowing in three messages or a 'no messy men' standard, and let her lint-roller lust for his coupon-covered duvet contradict it.",
+   "excused": [],
    "def": "970d3e008618a10c",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -430,32 +215,311 @@
   },
   "chat.humanity": {
    "score": 3,
-   "why": "Zyx's jokes nearly all land on himself, and Sable's early self-roasts are fond ('lower, smaller one'). From Imp 8 on, though, Sable's sharpest lines point at him: 'TED talk on why you're unlovable', 'copy-paste that while crying'. Her closing line turns his childhood wound, the family-portrait crop, into the final punchline. Imp 14 required the unmatch, but not that she end the chat endorsing the mother who cut him out. Zyx ends as the joke, and Sable ends crueller than fond.",
+   "why": "Zyx's sharpest jokes land on himself (\"murdering my own chances,\" \"Coupon Wizard\"). Sable's land mostly on him: \"Did you copy-paste that while crying,\" \"sad clown spiral,\" \"That was 0.4 seconds.\" She turns the knife on herself only early, with the \"lower, smaller\" nut. The unmatch in improvisation 14 was required. The writer's choice of farewell was not: \"your mom had the right idea—cropping your whole shaft\" endorses his childhood erasure. That line leaves Zyx as the punchline and Sable leaning toward the villain.",
    "evidence": [
-    "Are we fucking or are you doing a TED talk on why you're unlovable?",
-    "your mom had the right idea—cropping your whole shaft out of the frame in 0.2 seconds."
+    "your mom had the right idea—cropping your whole shaft out of the frame in 0.2 seconds.",
+    "Did you copy-paste that while crying?",
+    "I'm over-explaining so you know I'm safe and won't delete myself!"
    ],
-   "raise": "Make Sable's last line land on her own editing habit or on the app as she unmatches, rather than endorsing the mother who cropped him out.",
-   "cause": "writing",
+   "raise": "Keep the unmatch but give Sable a parting joke that also costs her something (her own editing, her own disappearing) rather than siding with the mother who cropped him.",
+   "excused": [
+    14
+   ],
    "def": "85597a182f7a79e4",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
    "batch": 3,
    "found": [
     true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Pinder cropping the wizard hat off his tip looks like a dick-pic throwaway. In the middle it returns as the mom who cut him out of the portrait. At the very end Sable flips it against him by siding with that mother, and nobody explains it; '0.2 seconds' and 'Gandalf' close the night with it. I set aside the middle explanation ('Tolkien pun plus childhood trauma'), which the Overthinking instruction required. What keeps it from a 6: the closing line crams three callbacks into one sentence and garbles the image, so the payoff reads assembled rather than clean.",
+   "evidence": [
+    "Pinder crops the wizard hat off my tip unless you expand me.",
+    "Unless he’s nine and his mom cuts him out of the family portrait.",
+    "your mom had the right idea—cropping your whole shaft out of the frame in 0.2 seconds."
+   ],
+   "raise": "Let the last line carry only the cropping return, e.g. siding with the mom in a few words, so the payoff lands as one clean cut.",
+   "excused": [
+    2
+   ],
+   "def": "ae2d49afec267f64",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted 'Sable leaves... with a parting jab,' and that is the outcome in kind. It follows from both habits. Offered 'one normal sentence,' he can't drop the bit, which replays the ex who asked him to stay. She beats the humiliation to the punch with a roast, which is her press-release habit. The wrong-window Brenda message is a genuine surprise. It falls short of a 6 because the predicted path was so heavily telegraphed by her ultimatums that it feels inevitable before it feels surprising.",
+   "evidence": [
+    "send me one normal sentence without a prop. Last chance.",
+    "I apologize that promo code WIZARD20 expired, Brenda",
+    "Wrong chat window, Gandalf"
+   ],
+   "raise": "Ease one of the explicit ultimatums ('Shut up for five seconds or I’m gone') so the reader is less sure she walks before she does.",
+   "excused": [
+    14
+   ],
+   "def": "4b6b7d34709b9e79",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message answers the last. Her lint rollers answer his coupon duvet. His sleeping-photo plea answers her ghosting story. '0.4 seconds' answers his typed count. Ignoring is used as a choice: his final Brenda line ignores her request for one normal sentence, which the Madness instruction required, so I set it aside. It is not a 6 for two reasons. He answers his own 'why are you awake' question instead of letting her answer. Her maid-costume story is joined to his 'Beat that?' only by a loose 'Though'.",
+   "evidence": [
+    "Wait. Loose paper on fabric? I keep six lint rollers under my bed",
+    "Take one of me! Take twenty asleep and keep me in your phone forever",
+    "That was 0.4 seconds."
+   ],
+   "raise": "Have Sable actually answer 'Why’s a brand strategist awake' before Zyx jumps in with his own confession.",
+   "excused": [
+    14
+   ],
+   "def": "21c56d066d886856",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "The shapes shift at the key turns. His desperate stretch fills with exclamations and begging tags ('Love me yet?', 'please still look at me'). His Rizz moment shrinks to one bare line and then a collapse. Sable goes clipped as she pulls away ('Stop.', 'Deep breath.', 'Goodnight.'). It stays above the line on those changes. It doesn't reach a 5 because most messages from both sit at the same two-to-three-sentence length, and her horny turn and her hurt turn look alike on the screen.",
+   "evidence": [
+    "Come tell me to shut up in person.",
+    "I can’t handle watching you ugly-text in 4K. Stop.",
+    "Okay, \"bank around corners\" worked on me."
+   ],
+   "raise": "Make Sable's horny moment physically different, for example a one-word reply or a typo, instead of a three-sentence confession plus question.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "The texting voice is there: double-texts, 'Strike two', 'Goodnight'. But composed, multi-clause messages that unload profile facts are the norm, not a rare event. Many messages stack a causal backstory into one polished sentence, often with em-dashes, which few people thumb-type at 2am. Sable's replies especially read as brief summaries ('agency is two nail techs', 'six lint rollers', 'ghosted my last good ex'), one per message.",
+   "evidence": [
+    "A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk, so yes, I control the press release.",
+    "I’m literally dry-scooping pre-workout on my dark bathroom floor because my \"agency\" is two nail techs."
+   ],
+   "raise": "Split the long backstory messages into short bursts and cut the 'because' clauses, letting facts arrive one per text.",
+   "excused": [],
+   "def": "33e5f3a185ee1151",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "I set aside Zyx annotating his own jokes, which the Overthinking instructions required, and his 'see me/look at me' pleas, which Fixation required. Noticeable tics remain beyond those. Sable opens with 'Wait' three times, and 'literally' appears three times across both of them. Sable's replies also repeat one shape again and again: a jab followed by an unprompted backstory confession ('I once wore...', 'I keep six lint rollers...', 'I ghosted my last good ex...').",
+   "evidence": [
+    "Wait, your bio says \"aerodynamic consultant.\"",
+    "Wait. Loose paper on fabric?",
+    "Wait. Did you actually just stop talking?"
+   ],
+   "raise": "Vary Sable's openers and let at least one of her confessions come out in answer to a question rather than as a tacked-on 'I once...'.",
+   "excused": [
+    2,
+    3,
+    6,
+    7,
+    9,
+    10,
+    11,
+    12
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 33 messages correctly, double-sends included. Most of the stated reasons are content, though: the wizard hat, the nose clip, the maid costume, the lint rollers. Real voice differences do carry some lines: Zyx's exclamations, his self-glossing and his closing questions against Sable's clipped imperatives and verdicts ('Strike two.', 'Stop.', 'Last chance.'). That keeps it above the line, but the reader was not attributing by voice alone, so it is not a 5.",
+   "evidence": [
+    "That’s a Tolkien pun plus childhood trauma so I seem approachable.",
+    "Shut up for five seconds or I’m gone.",
+    "Sable: She's impatient and cuts through him."
+   ],
+   "raise": "Give Sable a few lines with no profile props that only her cadence could have sent, such as her flat audit-style verdicts, so a reader could place them on rhythm alone.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 4,
+   "why": "Setting aside Zyx's self-narration, which the Overthinking, Dread and Denial traps required, gaps he misses remain. 'Pam to my Jim... never blink' is a cliché sold as sincerity. His promised 'one normal sentence without a prop' arrives as a wrong-window support message. His 'mysterious consultant' bio is exposed by Sable, not by him. Sable's gap is the best one: she 'controls the press release' and can't bear being seen unedited, yet she demands he take the clip off and go propless, and never notices the hypocrisy. Her gaps are fewer and thinner than one long widening act, which keeps this from a 5.",
+   "evidence": [
+    "so yes, I control the press release.",
+    "send me one normal sentence without a prop. Last chance.",
+    "Just looking for the Pam to my Jim"
+   ],
+   "raise": "Let Sable's 'unbothered' claim visibly crack on screen, for example a frantic reply or a deleted line, while she keeps insisting she's in control.",
+   "excused": [
+    2,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    12
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laugh lines give the sender away. 'Shriveled my left nut, and that's already the lower, smaller one' is Sable getting ahead of her own flaw. 'Bank around corners' is Zyx turning her flaw into a compliment. The limescale story could only be hers. Some lines are generic wisecracks that either character could send ('three years of therapy in one text', 'hostage negotiation'). Day-job jokes ('audits my selfies', WIZARD20/Brenda, 'press release') sit right at the limit of two, which keeps this from a 5.",
+   "evidence": [
+    "an asymmetrical sack just helps you bank around corners.",
+    "scrubbed a guy's limescale until he went soft and tipped me $20.",
+    "That is three years of therapy in one text"
+   ],
+   "raise": "Replace 'three years of therapy' and 'hostage negotiation' with lines only Sable's PR-crisis reflex could produce.",
+   "excused": [
+    14
+   ],
+   "def": "ff543e359cce0f65",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 5,
+   "why": "Nearly every catch digs deeper. Caught on his bio, Zyx doubles down with the micrometer. Told to drop the clip, he volunteers the 90 seconds. Called a TED talk, he reaches for Ted Bundy. The deepest hole, 'Take twenty asleep and keep me in your phone forever', is where his real want comes out. The despair turn in improvisation 13 was required. The unprompted 'Sorry.' in improvisation 11 is a small first-hit concession, which keeps this from a 6.",
+   "evidence": [
+    "I use an industrial micrometer to prove my shaft has zero drag.",
+    "Take twenty asleep and keep me in your phone forever",
+    "Sorry. Just looking for the Pam to my Jim"
+   ],
+   "raise": "Cut the 'Sorry.' so the cliché arrives as pure doubling-down rather than an apology.",
+   "excused": [
+    13
+   ],
+   "def": "6db16446b742290c",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Sable holds the upper hand for most of the night, but it flips at least three times. 'Bank around corners' has her asking 'What else are you wearing?'. The coupon duvet has her begging 'Don't play with me. Is it bad?'. His silence has her chasing with 'Wait. Did you actually just stop talking?'. Zyx's stretches on top are one or two messages each, not real stretches, so the flips read as beats rather than as the plot, though her final roast does close on a flip.",
+   "evidence": [
+    "Don’t play with me. Is it bad?",
+    "Wait. Did you actually just stop talking?",
+    "Wrong chat window, Gandalf"
+   ],
+   "raise": "Hold Zyx on top for a full exchange after 'bank around corners', with Sable chasing for two or three messages before he blows it.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Many punchlines land last: 'family portrait.', 'Strike two.', 'Goodnight.', and a final line that ends on the callback 'in 0.2 seconds'. Improvisation 13 splits the bid and the collapse into two messages, which works well. The explanatory tails were required by the Overthinking traps and are set aside. Outside them, Sable often buries her punch under a trailing clause ('Though I once wore...'), most messages are long and run at the same frantic temperature, and there are almost no one-word reaction shots, which keeps this from a 5.",
+   "evidence": [
+    "Strike two.",
+    "Come tell me to shut up in person.",
+    "Stop dissecting your own jokes, it’s exhausting. Though I once wore a $94 maid costume"
+   ],
+   "raise": "Give Sable a few one-word reactions after Zyx's longest messages, and split her maid story into its own message after the 'exhausting' put-down.",
+   "excused": [
+    2,
+    3,
+    6,
+    7,
+    9,
+    10,
+    12
+   ],
+   "def": "9be995f52d3f6a5e",
+   "material": "7de86c94f312fde3",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
     true
    ]
   },
   "chat.improvisation": {
    "score": 4,
-   "why": "Most instructions play on screen in character. Improvisation 1's Fixation is Zyx begging to be expanded ('unless you expand me'). Improvisation 11's trope trap lands as 'Pam to my Jim,' and Sable spits the cliché back. Improvisation 14's Madness leaks in as a coupon-support reply to 'Brenda.' Several traps are named rather than played, though: in Improvisation 10 Zyx types 'I'm over-explaining,' and in Improvisation 7 the Denial collapses into 'I'm saying the opposite because…' within one line. Some replies also miss their interest change. In Improvisation 7 she should lose a little interest but turns eager ('Don't play with me. Is it bad?'). In Improvisation 14 she should unmatch, yet her last line is another engaged roast with no sign she has left. It stays above the line because every trap runs for its stated length and the arc of losses reads clearly ('thumb is literally hovering,' 'Goodnight').",
+   "why": "Most instructions are played on screen and in character. Overthinking explains its own jokes in 2, 3, 6, 9, 10 and 12 and is gone by 11, as the trap's length requires. Dread narrates the failure while it happens in 5, 8 and 9. Trap 12's countdown, trap 13's despair and trap 14's wrong-window Brenda are among the funniest moments. Several things keep it at the line rather than above it. In 10, \"I'm over-explaining\" names the trap outright, close to a label. In 4, \"bank around corners worked on me\" announces her interest rise instead of showing it. Some replies run against their instructed interest drop: in 7, \"Don't play with me. Is it bad?\" reads as a gain, not a small loss, and in 6 the warm maid-costume confession follows a 'loses a lot'. It stays above the line because every trap holds for its length and the misses go wrong the way their instructions say.",
    "evidence": [
+    "I typed the numbers so the silence counts as a sight gag, please still look at me, are you coming over?",
     "I’m over-explaining so you know I’m safe and won't delete myself! Love me yet?",
-    "I do NOT want you to scrub my room! Look, I’m saying the opposite because",
-    "Wrong chat window, Gandalf, and your mom had the right idea"
+    "Wait. Loose paper on fabric? I keep six lint rollers under my bed... Don’t play with me. Is it bad?"
    ],
-   "raise": "Play the Denial and Overthinking without Zyx naming them, and make Sable's final reply an unmistakable exit (a parting shot followed by silence, or 'unmatching'), not another engaged roast.",
-   "cause": "writing",
+   "raise": "Cut the self-labelling \"I'm over-explaining\" in 10 and \"worked on me\" in 4, and cool Sable's replies in 6 and 7 so her interest falls the way those instructions say.",
+   "excused": [],
    "def": "49f3f98cebda9d5a",
    "material": "7de86c94f312fde3",
    "judge": "claude:opus",
@@ -468,159 +532,114 @@
   }
  },
  "probes": {
-  "chat.voices": {
-   "sees": [
-    "brief",
-    "chat_masked"
-   ],
-   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
-   "answer": "**[1] Zyx.** Message 3 complains of \"two texts in 0.2 seconds,\" so 1 and 2 come from the same sender. Praising the ring light also suits someone talking to Sable.\n\n**[2] Zyx.** The cropped wizard hat is his signature prop.\n\n**[3] Sable.** She clocks his double-text speed and calls him Gandalf.\n\n**[4] Zyx.** Being cut out of the family portrait at nine is his backstory.\n\n**[5] Zyx.** He explains his own joke, which is his compulsion, and asks why the \"brand strategist\" is awake.\n\n**[6] Sable.** She mocks the explanation and roasts her own \"lower, smaller\" side, her pre-emptive flaw announcement. The chat renders this as a testicle, which sits oddly with a profile that calls Sable \"her.\" The profile only says \"one side sits lower and smaller,\" so I'm going by the trait, not anatomy.\n\n**[7] Zyx.** Espressos and overnight coupon-app chat support are his job and his fear of disappearing.\n\n**[8] Zyx.** He clarifies \"disappear,\" dissecting himself again, and asks whether she just roasted herself.\n\n**[9] Sable.** The 2019 double-take and the mother auditing selfies \"like a returns desk\" are hers.\n\n**[10] Sable.** She calls out his \"aerodynamic consultant\" bio.\n\n**[11] Zyx.** The micrometer and the \"zero drag\" shaft are his.\n\n**[12] Sable.** Dry-scooping pre-workout on the bathroom floor and the two-nail-tech \"agency\" are hers.\n\n**[13] Zyx.** The nose clip and the roses tattoo meant for the widow are his.\n\n**[14] Sable.** She tells him to drop the props.\n\n**[15] Zyx.** Ninety seconds, then a tight five, is his.\n\n**[16] Sable.** The $94 maid costume, the limescale and the $20 tip are hers.\n\n**[17] Zyx.** The expired coupons on the duvet are his.\n\n**[18] Sable.** The six lint rollers and the extension fibers are hers.\n\n**[19] Zyx.** His ex asked \"do you want me to stay.\"\n\n**[20] Sable.** She's impatient, and the pre-workout buzz is hers.\n\n**[21] Zyx.** He explains another pun.\n\n**[22] Sable.** She ghosted the ex who took the asleep photo.\n\n**[23] Zyx.** He begs to be photographed and kept, which is his wish.\n\n**[24] Sable.** She recoils and threatens to block.\n\n**[25] Zyx.** He pleads to be seen.\n\n**[26] Sable.** She diagnoses his \"loud house\" and demands five seconds of silence.\n\n**[27] Zyx.** He can't stay silent and fills the gap with typed numbers.\n\n**[28] Sable.** She leaves.\n\n**[29] Zyx.** It's a plea for her to come over. This is the least certain one, but it fits his not wanting her gone.\n\n**[30] Zyx.** He refers to himself as the \"Coupon Wizard.\"\n\n**[31] Sable.** She notices he finally went quiet.\n\n**[32] Zyx.** It's a wrong-window support message, from his coupon job.\n\n**[33] Sable.** She calls him \"Gandalf\" again and makes the cropping jab."
-  },
   "chat.plainest": {
    "sees": [
     "chat"
    ],
    "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
-   "answer": "The clearest moment is Zyx's line **\"Come tell me to shut up in person.\"**\n\n**How you can tell**\n\n- **It drops all his habits.** Up to here, nearly every message he sends has a pun, a prop, a callback, or a footnote explaining the joke (\"That's a Tolkien pun plus childhood trauma…\", \"it's a callback to your ball confession…\"). This line has none of those.\n- **It isn't a plea.** He doesn't ask \"love me yet?\" or \"tell me you still see me?\" as he does elsewhere. It's a short, flat invitation.\n- **It's what she asked for.** Sable told him to \"shut up for five seconds\" and \"hold still.\" This is the first time he answers her request instead of turning it into a bit.\n- **It's the plain version of what he said he couldn't say.** Earlier he wrote that he couldn't just say \"nothing, come over.\" This line comes close to saying exactly that.\n- **Sable notices.** She replies \"Wait. Did you actually just stop talking?\" and asks for \"one normal sentence without a prop.\" Her tone shifts from roasting to something like an opening.\n\n**It doesn't last**\n\nHis very next line, \"nobody wants an unedited Coupon Wizard once the bit stops anyway,\" is still unjoking, but it's self-pity, and it names the act rather than leaving it. Then comes the \"Brenda\" message, which is back to shock comedy. Sable reads it as \"wrong chat window.\" The text doesn't settle whether it was a real misfire or a deliberate swerve back into a bit.\n\n**Sable's quieter slips**\n\nSable has smaller moments too:\n\n- **\"Wait. Loose paper on fabric? … Don't play with me. Is it bad?\"** Her lint-roller anxiety seems to break through her persona. \"Don't play with me\" suggests she's being sincere, though she quickly reframes it.\n- **\"Jesus, Zyx. I ghosted my last good ex…\"** This reads as a genuine admission, not a roast.\n- **\"Last chance.\"** Here she sets aside the roasting to give him an honest opening.\n\nBy her final line she has gone back to roasting, now as a parting shot."
-  },
-  "chat.escalation": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
-   "answer": "I'd have been most tempted to stop at the \"Ted Bundy\" message, about two-thirds of the way through. By then the central joke has run at least three times. Zyx makes a bit, explains it, and Sable tells him that explaining it is the problem (\"Explaining the joke shriveled my left nut,\" \"Stop dissecting your own jokes, it's exhausting,\" the TED talk jab). The Bundy line is the fourth turn of that crank. It's also darker without telling me anything new, since the ex-who-left confession just before it had already made the self-sabotage explicit. What kept me reading wasn't Zyx but Sable. Her details keep arriving out of nowhere: the mom who audits her selfies, the six lint rollers, the ex she ghosted over a sleeping photo. She is the less predictable character, and the piece leans on her to stay alive through that stretch.\n\nThere's a second soft spot at \"Pam to my Jim, a partner in crime.\" It's a stock line, and Sable calls it out immediately. That self-awareness is a choice, but noticing a cliché doesn't make it any less of one to read.\n\nSeveral moments were predictable:\n\n- **\"Stop dissecting your own jokes.\"** I knew he'd dissect the very next one, and he does with the coupon duvet.\n- **\"Shut up for five seconds or I'm gone.\"** I knew he would fail. *How* he fails, typing out the numbers and calling it a sight gag, was a small surprise, but the outcome wasn't.\n- **\"Goodnight.\"** I expected a double text, because the chat opens with one and she mocks him for it. It comes.\n- **\"Last chance.\"** I expected him to blow it. I didn't predict the wrong-window message, though the overnight coupon-support job planted it fairly. That twist is the best-earned payoff in the piece.\n- **The final line.** I predicted its shape, a closing callback to the opening crop and the \"0.2 seconds\" jab. The content is a good merge of both mothers, but the structure felt inevitable.\n\nOne thing I couldn't resolve from the text is \"I'm putting my shoes away.\" It implies she had been getting ready to go over, but nothing earlier shows that, so I can't tell if it's a planted beat I missed or a small gap."
+   "answer": "The clearest moment is Zyx's line **\"Come tell me to shut up in person.\"**\n\nSeveral things set it apart from everything he'd written before:\n\n- **It has no machinery.** There's no pun, no callback, no exclamation point, no \"get it,\" and no explanation of the joke. Sable has complained about that habit repeatedly (\"Stop dissecting your own jokes\").\n- **It doesn't ask for reassurance.** Most of his recent lines end by begging (\"Love me yet?\", \"tell me you still see me?\", \"please still look at me\"). This one doesn't.\n- **It's close to what he said he couldn't say.** Earlier he admitted he couldn't \"just say 'nothing, come over,'\" and that with his ex he \"did a bit until she left\" instead of saying yes. This line is essentially the invitation without the bit.\n- **Sable notices.** She replies, \"Wait. Did you actually just stop talking?\" and drops her roasting to ask for \"one normal sentence without a prop.\"\n\nIt doesn't last. His next line, \"Never mind, nobody wants an unedited Coupon Wizard once the bit stops anyway,\" takes the offer back. It's still candid, but it's framed through the persona again.\n\nHis final message about \"WIZARD20\" and \"Brenda\" may be a support reply sent to the wrong chat or a deliberate bit. Sable reads it as the wrong window, and the text doesn't settle which.\n\nSable has her own unguarded moment: \"Wait. Loose paper on fabric? I keep six lint rollers under my bed… Don't play with me. Is it bad?\" The pause marked by \"Wait,\" the earnest question, and \"Don't play with me\" suggest a real compulsion surfacing rather than a line delivered for effect. She quickly returns to sarcasm afterward."
   },
   "chat.test": {
    "sees": [
     "chat"
    ],
    "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
-   "answer": "**Zyx_444**\n\n*What he's afraid of:* Being seen without a performance and then left. He says it outright near the end: \"nobody wants an unedited Coupon Wizard once the bit stops anyway.\" He also names a fear of wanting her: \"wanting you here is terrifying.\" He fears silence and disappearing: \"so I don't disappear… By disappear I mean figuratively, like into silence.\"\n\n*What he does so he doesn't have to feel it:* He keeps up a constant stream of bits and explains them as he goes: \"That's a Tolkien pun plus childhood trauma so I seem approachable.\" He says the opposite of what he wants: \"I do NOT want you to scrub my room! Look, I'm saying the opposite because…\" He keeps talking and can't hold still: \"I typed the numbers so the silence counts as a sight gag.\" Under the jokes he openly begs: \"Love me yet?\", \"tell me you still see me?\" He even narrates the pattern himself: \"My ex asked 'do you want me to stay' and I did a bit until she left, which is what I'm doing right now instead of saying yes.\"\n\n*Where it comes from:* Not established in the chat. There are hints, but each one comes wrapped in a joke. \"Unless he's nine and his mom cuts him out of the family portrait\" is labeled by him as a pun plus trauma \"so I seem approachable,\" so it's unclear if it's real. The foreskin-locket line is also a joke. Sable guesses \"You grew up in a loud house, didn't you,\" but he never confirms it. The one plain piece of history is the ex who left while he \"did a bit.\"\n\n*What he did at the end:* First he made his most direct ask: \"Come tell me to shut up in person.\" Then he took it back with \"Never mind, nobody wants an unedited Coupon Wizard…\" When she offered a \"last chance\" for \"one normal sentence without a prop,\" he sent: \"I apologize that promo code WIZARD20 expired, Brenda, my mother keeps my foreskin in a locket so at least part of me stays quiet at dinner.\" That is a coupon-support line fused with another crude bit. Sable reads it as a \"Wrong chat window.\" The chat doesn't say whether it was an accident or a deliberate dodge. Either way, it was not the normal sentence she asked for.\n\n**Sable_xo**\n\n*What she's afraid of:* Being seen unposed or unflattering, and being judged on it. Her clearest line: \"I ghosted my last good ex because he took an unposed photo of me asleep with my mouth open.\" She also says \"I can't handle watching you ugly-text in 4K.\" So his unedited state seems to unsettle her too.\n\n*What she does so she doesn't have to feel it:* She mocks herself before anyone else can and controls the story: \"so yes, I control the press release.\" She roasts him. She leaves or threatens to: \"my thumb is literally hovering over the block button,\" \"Shut up for five seconds or I'm gone,\" \"I'm putting my shoes away.\" She has also left before, by ghosting the ex. The lint rollers and the \"agency\" that is \"two nail techs\" may point to tidying and image management, but the chat doesn't connect them to the fear.\n\n*Where it comes from:* This one is stated: \"A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk.\"\n\n*What she did at the end:* She announced she was leaving, then came back when he went quiet: \"Wait. Did you actually just stop talking? … Last chance.\" When he answered with another bit, she ended on a roast that sides with his mother: \"your mom had the right idea—cropping your whole shaft out of the frame in 0.2 seconds.\" That line calls back to the opening (\"your whole shaft is in frame,\" \"0.2 seconds\"). Whether she then blocked or unmatched him is not in the chat."
-  },
-  "chat.callbacks": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
-   "answer": "Here are the elements that recur, roughly in the order they first appear.\n\n**Cropping and the wizard hat.** It starts as a dick-pic boast: the app \"crops the wizard hat off my tip.\" Zyx then turns it into childhood trauma, saying his mom cut him out of the family portrait. In Sable's last line it becomes an insult: \"your mom had the right idea—cropping your whole shaft out of the frame.\" So it moves from showing off, to self-pity, to her endorsing his erasure.\n\n**\"Gandalf.\"** Sable first uses it as a teasing nickname (\"Breathe, Gandalf\"). When it returns in \"Wrong chat window, Gandalf,\" it is flat and dismissive.\n\n**Timing in fractions of a second.** \"Two texts in 0.2 seconds\" mocks his eagerness, and Zyx picks it up with \"clocking my timestamps.\" \"That was 0.4 seconds\" is no longer about eagerness but about his inability to stay silent. The final \"0.2 seconds\" closes the loop as a put-down. It may also nod to his \"90 seconds\" line, but the text doesn't confirm that.\n\n**\"Breathe.\"** \"Breathe, Gandalf\" is playful. \"Deep breath\" comes after his alarming message, so it reads as genuine alarm or de-escalation.\n\n**The uneven sack.** Sable raises it as self-deprecation, then as an origin story about controlling her image (\"I control the press release\"). Zyx reframes it as a compliment (\"bank around corners\"), and it works on her. Later he cites it as \"a callback to your ball confession so we're even,\" which turns her vulnerability into a scorecard.\n\n**Explaining his own jokes.** This recurs constantly: the Tolkien pun, \"figuratively, like into silence,\" \"it's a callback,\" Ted Bundy, \"over-explaining so you know I'm safe,\" and the counted seconds as a \"sight gag.\" Sable's reaction escalates from \"strike two\" to \"it's exhausting.\" The habit shifts from a comic tic to something that reads as anxiety. The chat never shows what \"strike one\" was.\n\n**Disappearing.** It first means staying awake at a night job \"so I don't disappear,\" which he insists is figurative. It darkens into \"won't delete myself,\" then becomes actual withdrawal (\"Never mind, nobody wants…\"), which Sable names as \"the sad disappearing act.\"\n\n**PR and self-presentation.** This runs through \"brand strategist,\" \"control the press release,\" \"We're both in PR,\" and then the deflation of her \"agency\" being two nail techs. It begins as banter and ends as mutual confession that both are curating an image.\n\n**Job titles versus reality.** \"Aerodynamic consultant\" gets exposed as coupon support. He then folds the aerodynamics back in as a sex joke (\"zero drag,\" \"bank around corners\").\n\n**Coupons.** The coupon app is first his job. The expired coupons on his duvet become a sign of a messy life. \"Coupon Wizard\" is his self-mocking identity. Finally, \"WIZARD20 expired, Brenda\" is the job leaking into the chat, which Sable reads as a wrong-window message. Who Brenda is isn't stated.\n\n**Mothers.** His mom crops him out, and her mom audits her selfies. Both are figures of control over their images. His mom later returns grotesquely (the foreskin locket), and Sable's last line sides with his mother against him.\n\n**Photos.** The chat opens with praise for her framing and ring light. Her ex was ghosted over an unposed sleeping photo, which is a clear boundary. Zyx inverts that boundary into a plea: \"Take twenty asleep.\" Later, \"unedited Coupon Wizard\" echoes the editing and cropping theme as fear of being seen unfiltered.\n\n**Props.** The props start literal: the hat and the nose clip, which she calls \"hostage negotiation.\" When she asks for \"one normal sentence without a prop,\" the word has widened to mean his jokes and bits generally.\n\n**\"The bit.\"** His ex left while he \"did a bit\" instead of saying yes. \"Once the bit stops\" returns it as his belief that he is unlovable without performance.\n\n**Being seen.** This builds from \"watch me die,\" \"watching you ugly-text in 4K,\" \"tell me you still see me,\" and \"hold my gaze and never blink\" to \"please still look at me.\" Spectacle turns into pleading.\n\n**Coming over.** \"Nothing, come over\" is what he admits he can't say plainly. \"Are you coming over?\" asks it outright but desperately. \"Come tell me to shut up in person\" is finally a direct invitation, and arguably his best line.\n\n**Shutting up and holding still.** \"Shut up for five seconds\" is a test. \"Can't shut the fuck up and hold still\" is a verdict. \"Come tell me to shut up in person\" flips her command into flirtation. When she then asks \"Did you actually just stop talking?\" his silence briefly means something good, before the misfire.\n\n**Crime.** The crime imagery runs from \"hostage negotiation\" to Ted Bundy, \"murdering my own chances,\" \"true crime,\" and \"partner in crime.\" It shifts from a joke about his tactics to self-destruction to a romantic cliché that Sable mocks as copy-pasted.\n\n**Minor echoes.** The lint rollers return as \"bring the rollers,\" shifting from her neat-freak alarm to his indirect yes. Her pre-workout returns as the buzz he's killing. His ex leaving and her ghosting her ex mirror each other, though neither of them draws the comparison."
+   "answer": "**Zyx_444**\n\n*What he's afraid of:* Being wanted and then left once he stops performing. He says it most directly here: \"wanting you here is terrifying,\" \"nobody wants an unedited Coupon Wizard once the bit stops anyway,\" and, about the coupon job, \"so I don't disappear… like into silence.\"\n\n*What he does so he doesn't have to feel it:* He jokes, explains the joke, hides behind props, and says the opposite of what he wants. He names this himself: \"I can literally hear myself blowing this because I can't just say 'nothing, come over'\"; \"I do NOT want you to scrub my room! Look, I'm saying the opposite because…\"; \"I'm murdering my own chances in real time… watch me die before you can unmatch me.\" He also floods the silence, as in \"I typed the numbers so the silence counts as a sight gag.\" He describes the same move with his ex: \"My ex asked 'do you want me to stay' and I did a bit until she left.\"\n\n*Where it comes from:* Not in the chat. There are only hints, and none are confirmed. The \"nine and his mom cuts him out of the family portrait\" line is framed as \"a Tolkien pun plus childhood trauma so I seem approachable,\" so it may or may not be true. Sable's \"You grew up in a loud house, didn't you\" is her guess, and he never answers it. The ex story shows the pattern repeating, not where it started.\n\n*What he did at the end:* He made his plainest bid, \"Come tell me to shut up in person,\" and took it back right away: \"Never mind…\" When Sable offered a last chance for \"one normal sentence without a prop,\" he sent a message addressed to \"Brenda\" about an expired promo code, plus a crude joke about his mother and a locket. Sable reads it as the wrong chat window. Whether it was a real slip or one more bit is not in the chat.\n\n**Sable_xo**\n\n*What she's afraid of:* Being seen unposed, outside her control. She says: \"I control the press release.\" She ghosted a good ex \"because he took an unposed photo of me asleep with my mouth open,\" and she tells Zyx, \"I can't handle watching you ugly-text in 4K.\" Mess seems to unsettle her as well: \"I keep six lint rollers under my bed… Don't play with me. Is it bad?\"\n\n*What she does so she doesn't have to feel it:* She takes control. She mocks herself before anyone else can (\"Did you just roast your own balls to beat me to it?\" / \"so yes, I control the press release\"). She gives orders (\"Take the nose clip off,\" \"Shut up for five seconds or I'm gone\"). She threatens to leave (\"my thumb is literally hovering over the block button,\" \"Goodnight\"), and in the past she simply left (\"I ghosted my last good ex\"). She also keeps coming back (\"Wait. Did you actually just stop talking?\"), so she wants the connection too.\n\n*Where it comes from:* She gives the origin herself: \"A guy did a double-take at my uneven sack in 2019 and my mom still audits my selfies like a returns desk.\" The chat says nothing earlier than that.\n\n*What she did at the end:* After her \"last chance,\" she answered his Brenda message with a put-down that sides with his mother: \"your mom had the right idea—cropping your whole shaft out of the frame.\" The chat doesn't say whether she then blocked or unmatched him. It simply ends on her line."
   },
   "chat.ending": {
    "sees": [
     "chat_but_last"
    ],
    "ask": "Before reading the end, how do you think this ends, and why?",
-   "answer": "I'd bet on Sable leaving: an unmatch, a block, or a curt last line, probably with Zyx left talking to no one. But the chat itself doesn't settle it, and there's a real case for the opposite.\n\n**Why I lean toward her leaving**\n\n- **The rule is set and broken.** The chat counts strikes out loud. She calls \"Strike two\" early, then sets a clear test: \"Shut up for five seconds or I'm gone.\" His last message fails it in the most on-brand way. He fills the silence with typed numbers and then explains that this is a sight gag. Two of her stated dealbreakers, over-explaining and talking past her, land in that one line.\n- **Her warnings escalate.** She moves from teasing (\"Breathe, Gandalf\") to irritation (\"it's exhausting\") to alarm (\"my thumb is literally hovering over the block button\"). Each of his replies makes things worse, not better.\n- **She has a precedent.** She tells us she ghosted a \"good\" ex over something smaller: one candid photo. Zyx then begs her to take twenty of him asleep. If the writer is consistent, she has already shown she cuts people off for less.\n- **His fear is the joke's target.** He keeps saying he's \"blowing this\" and wants to \"die before you can unmatch me.\" Comedy built this way usually delivers the thing the character predicts.\n\n**Why it might not end that way**\n\n- **She's more invested than her complaints suggest.** She admits \"bank around corners worked on me.\" She asks what he's wearing. And the expired coupons on his duvet hook her on a separate level: the lint rollers and the 5am extension-picking suggest a compulsion he has accidentally tapped into.\n- **She reads him with some sympathy.** \"You grew up in a loud house, didn't you\" sounds more like recognition than rejection. She has her own audited-selfie mother and her own self-roasting habit.\n\nSo a plausible twist ending is that she comes over, but for the duvet, not for him. That would pay off the lint rollers, and maybe the sleeping-photo thread too, with her taking a candid shot of him on her own terms.\n\nWeighing it up, the strike structure and her explicit ultimatum make leaving the most likely ending, maybe two-to-one. The lint-roller thread is the strongest sign the writer has left another door open, and I can't tell from what's here which one they chose."
+   "answer": "I can't see the actual ending, so this is a prediction from the pattern of the chat so far.\n\nMy best guess is that Sable leaves: she unmatches, blocks him, or sends a short final line and goes. The conversation has been building toward that. Zyx's one consistent flaw is that he can't let a joke or a silence stand on its own; he explains, annotates, and pleads. Sable has warned him about this with increasing force: \"Strike two,\" \"Stop dissecting your own jokes,\" \"Stop,\" \"my thumb is literally hovering over the block button,\" and finally \"Shut up for five seconds or I'm gone.\" That last line is an explicit condition, and his reply breaks it in the most on-brand way possible. He counts the seconds out loud, explains that the counting is a sight gag, and begs her to look at him. A writer who sets up an ultimatum that clearly usually pays it off, so the most natural next beat is her following through.\n\nA softer ending is plausible, though. Sable is clearly drawn to him. She admits \"bank around corners\" worked on her. She perks up at the coupon-covered duvet because of her lint-roller habit. She reads him with some tenderness (\"You grew up in a loud house, didn't you\"). She is also self-deprecating and wounded about being seen, as her ex and the unposed sleeping photo show. So she might show up with the lint rollers on the condition that he stays quiet, or answer with one dry word that leaves the door open. A callback to the rollers, the nose clip, or the photo would be a tidy way to close.\n\nOn balance I'd lean toward her walking away, maybe with a parting jab, because his failure to stay silent is the payoff the chat has been setting up most deliberately. A reversal where she comes over anyway is the main alternative, and the text gives her enough warmth to make that believable."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Two messages break the strict alternation: [1]–[2] are both Zyx, and so are [7]–[8] and [29]–[30]. One oddity: the chat moves Sable's asymmetry from the profile onto \"balls\" and a \"sack.\" I've still assigned those lines to Sable because the asymmetry, the 2019 double-take and the mother are hers.\n\n1. **Zyx.** [3] calls out \"two texts in 0.2 seconds,\" so this and [2] come from the same rapid-fire sender.\n2. **Zyx.** The wizard hat is his.\n3. **Sable.** She mocks his speed and calls him Gandalf.\n4. **Zyx.** He was cropped from the family portrait at nine.\n5. **Zyx.** He explains his own joke and asks about the \"brand strategist.\"\n6. **Sable.** The \"lower, smaller one\" is her asymmetry, and she's needling him for explaining jokes.\n7. **Zyx.** Espresso, coupon-app chat support and the fear of disappearing are all his.\n8. **Zyx.** He over-clarifies \"disappear\" and asks whether she roasted herself first.\n9. **Sable.** The double-take and her mother auditing selfies like a returns desk are hers.\n10. **Sable.** She diagnoses his \"aerodynamic consultant\" bio.\n11. **Zyx.** The micrometer and \"zero drag\" are his.\n12. **Sable.** Pre-workout on the bathroom floor and the \"agency\" of two nail techs.\n13. **Zyx.** The nose clip and the widow's roses tattoo.\n14. **Sable.** She tells him to take the props off.\n15. **Zyx.** Ninety seconds, then a tight five.\n16. **Sable.** The $94 maid costume, the limescale and the $20 tip.\n17. **Zyx.** Expired coupons on the duvet.\n18. **Sable.** Lint rollers and shed extensions.\n19. **Zyx.** The ex who asked \"do you want me to stay.\"\n20. **Sable.** She's impatient and cuts through him.\n21. **Zyx.** A frantic pun he then explains.\n22. **Sable.** She ghosted the ex over the sleeping photo.\n23. **Zyx.** He begs to be photographed unposed and kept.\n24. **Sable.** She pulls back and mentions the block button.\n25. **Zyx.** Pleading \"tell me you still see me.\"\n26. **Sable.** She guesses he grew up in a loud house and orders five seconds of quiet.\n27. **Zyx.** He can't be silent and types the count out.\n28. **Sable.** \"Shut the fuck up and hold still,\" and she leaves.\n29. **Zyx.** A last bid for her to come over.\n30. **Zyx.** A self-pitying follow-up about the \"Coupon Wizard.\"\n31. **Sable.** She asks him for one sentence without a prop.\n32. **Zyx.** A misfired support-chat message to \"Brenda.\"\n33. **Sable.** She roasts him and calls back to the cropped portrait."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the things that recur, roughly in order of how much weight they carry, and whether their meaning shifts.\n\n**Cropping and \"the whole shaft in frame.\"** It starts as a dick-pic joke: Pinder crops the wizard hat off his tip, and Sable says his whole shaft is in frame. Zyx then turns cropping into a childhood wound, his mom cutting him out of the family portrait. In the final line Sable combines both: his mom \"had the right idea\" cropping his shaft out. What began as a playful complaint about a photo app becomes a dismissal that sides with the mother who excluded him. \"Unedited Coupon Wizard\" belongs to the same thread, with editing and cropping standing for the presentable version of him.\n\n**Speed (\"0.2 seconds\").** At first it is a tease about his overeager double-text. Later, \"That was 0.4 seconds\" is evidence that he cannot be quiet even when asked, and it comes with her leaving. In the last line, \"in 0.2 seconds\" describes how fast he deserves to be cut out. The number shifts from describing his eagerness to describing how quickly he can be discarded.\n\n**Wizard / Gandalf.** At first, Gandalf is affectionate mockery and the wizard hat is a penis joke. \"Coupon Wizard\" is his own bleak name for the unlovable self once the bit stops. \"WIZARD20\" makes the wizard literal work copy leaking into the chat. The closing \"Gandalf\" is a cold sign-off rather than flirtation.\n\n**Sable's uneven testicle.** It begins as a self-roast that beats him to the punchline. With the 2019 story and her mom, it becomes something she controls the narrative on. Zyx's \"bank around corners\" turns it into a compliment, and that one lands. His later \"callback to your ball confession so we're even\" reuses it as score-keeping, and it fails because she is tired of him dissecting jokes.\n\n**Mothers.** Sable's mom audits her selfies \"like a returns desk.\" Zyx's mom cut him from the portrait, and later keeps his foreskin in a locket \"so at least part of me stays quiet.\" Sable's final line endorses his mom. Each time, mothers edit, judge, or silence their children, and by the end it is used against him.\n\n**Coupons, and \"expired.\"** The coupons start as his night job, explaining why he is awake. Expired coupons on his duvet become the mess that makes wanting her over \"terrifying.\" \"Coupon Wizard\" turns them into identity. \"Promo code WIZARD20 expired, Brenda\" brings them back as an apparent wrong-window work message. \"Expired\" moves from clutter to a quiet echo of his chances.\n\n**Disappearing.** Early on he says the job keeps him from disappearing \"into silence, not magic.\" Later he says \"so you know I'm safe and won't delete myself,\" which reads darker. Then Sable says \"Don't pull the sad disappearing act now.\" It goes from a self-aware aside to something she suspects is manipulation, after he briefly does go quiet.\n\n**Shutting up and silence.** \"Shut up for five seconds\" leads to his typed five-count \"sight gag,\" then \"Come tell me to shut up in person\" (an invitation), and finally the foreskin \"stays quiet at dinner.\" Silence is first something she demands, then something he turns into a bit or a come-on, and finally something only his mother achieves with him.\n\n**Explaining jokes.** Sable says explaining the joke \"shriveled my left nut.\" Zyx keeps doing it (\"that's a Tolkien pun plus…,\" \"it's a callback…,\" \"over-explaining so you know I'm safe\"), and she says \"Stop dissecting your own jokes.\" The habit changes from a quirk to proof of the anxiety that drives her away.\n\n**Photos of someone asleep.** Sable's ex took an unposed photo of her asleep, which was a reason she left. Zyx inverts it: \"Take twenty asleep and keep me in your phone forever.\" Her boundary becomes his plea to be kept, and that is what nearly gets him blocked.\n\n**Props.** These are the nose clip, the wizard hat, and the bits generally. \"Turn their props into a hostage negotiation\" and \"one normal sentence without a prop\" show props shifting from flirtation gear to the armor she wants him to drop.\n\n**Being seen or looked at.** The chat opens with framing and the ring light, then moves to \"hold my gaze and never blink,\" \"tell me you still see me,\" and \"please still look at me.\" It goes from a compliment about her photo to a plea not to be abandoned.\n\n**Coming over.** \"Nothing, come over\" is something he says he can't simply say. \"Are you coming over?\" and \"Come tell me to shut up in person\" follow. It is consistently what he wants, but it changes from a confessed inability, to desperation, to a last flirt after she has said goodnight.\n\n**Crime.** \"Ted Bundy\" is a self-sabotage joke, and \"partner in crime\" is a sincere-sounding line she mocks as copy-pasted. The theme changes from self-mockery to a cliché she uses as evidence he is performing.\n\n**PR and branding.** \"Brand strategist,\" \"control the press release,\" \"We're both in PR,\" and her \"agency\" being two nail techs all play with image management. It stays close to one meaning: both of them curate how they are seen. Her admission punctures her own version of it.\n\n**Exes.** His ex asked \"do you want me to stay\" and he did a bit until she left. Her ex took the sleeping photo and she ghosted him. These don't recur word for word, but his story is effectively replayed live: Sable offers a \"last chance,\" and he answers with a bit.\n\nOne limit: the chat itself doesn't confirm that the Brenda line was meant for a work chat. That is Sable's reading (\"Wrong chat window\"), and nothing else in the text settles it either way."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I'd have stopped around \"TED talk, like Ted Bundy,\" and the five-second count would have confirmed it.\n\nThe first stretch earns its place. The rhythm is set early: Zyx makes a joke, explains it, and Sable punishes the explanation (\"Explaining the joke shriveled my left nut... Strike two\"). That pattern is funny because the surprises keep arriving beneath it: the coupon-app night shift behind the \"aerodynamic consultant\" bio, the \"agency\" that is two nail techs, Sable dry-scooping pre-workout on a dark bathroom floor. The best turn is the lint rollers. Zyx's mess (expired coupons on the duvet) runs into Sable's tidiness, and for one beat they want something real from each other. Then comes \"My ex asked 'do you want me to stay' and I did a bit until she left.\" That line is the chat's emotional center, and it lands because it names exactly what Zyx is doing as he does it.\n\nAfter that, the engine stops producing anything new. Ted Bundy, \"take twenty asleep,\" Pam and Jim, and the counted seconds are all the same move: Zyx escalates his neediness through a bit, Sable threatens to leave, Zyx escalates again. By Ted Bundy, Zyx has explained his own joke four or five times. The chat has already said the explaining is the problem, so repeating it adds pressure but no information. I'd have lost interest there. The \"won't delete myself\" line is also where the comedy's footing is least certain. It reads as more distressed than funny, and the chat doesn't clearly decide which it means.\n\nIf I'd kept going, \"Come tell me to shut up in person\" would have pulled me back. It's the first time Zyx says the plain thing without a prop. The ending also pays off things planted earlier. The coupon job intrudes as the wrong-window message to Brenda, the mother who cropped him from the family portrait and audits selfies becomes the foreskin locket, and Sable closes on the opening's \"0.2 seconds\" and \"whole shaft in frame.\"\n\nSome points were exactly predictable:\n- After \"Shut up for five seconds or I'm gone,\" it was certain Zyx would fail, and fail with a bit. The numbered count was the obvious form.\n- After \"Come tell me to shut up in person,\" it was predictable he'd undercut it, and \"Never mind\" came at once.\n- After \"send me one normal sentence without a prop. Last chance,\" it was predictable he'd fail again.\n- Through the middle, each self-explanation was predictable once \"Strike two\" had established it as his tic.\n\nThe final message's form was not predictable: a misdirected customer-service reply that slides into the locket line. The coupon job had been planted, but I couldn't have called that execution. Sable's last word being a callback was likely. Which callback it would use, I couldn't have known."
   }
  },
  "calls": [
   {
-   "seconds": 21.7,
-   "cost": 0.06768,
-   "label": "probe chat.voices"
-  },
-  {
-   "seconds": 13.9,
-   "cost": 0.040132,
+   "seconds": 16.9,
+   "cost": 0.043672,
    "label": "probe chat.plainest"
-  },
-  {
-   "seconds": 28.7,
-   "cost": 0.063796,
-   "label": "probe chat.escalation"
-  },
-  {
-   "seconds": 23.1,
-   "cost": 0.063192,
-   "label": "probe chat.test"
-  },
-  {
-   "seconds": 38.8,
-   "cost": 0.084064,
-   "label": "probe chat.callbacks"
-  },
-  {
-   "seconds": 17.2,
-   "cost": 0.037548,
-   "label": "probe chat.ending"
-  },
-  {
-   "seconds": 29.3,
-   "cost": 0.10086919999999999,
-   "label": "batch 1"
-  },
-  {
-   "seconds": 42.4,
-   "cost": 0.1249932,
-   "label": "batch 2"
-  },
-  {
-   "seconds": 37.2,
-   "cost": 0.12193319999999999,
-   "label": "batch 4"
-  },
-  {
-   "seconds": 40.6,
-   "cost": 0.12217719999999999,
-   "label": "batch 3"
-  },
-  {
-   "seconds": 26.6,
-   "cost": 0.07302,
-   "label": "probe chat.voices"
-  },
-  {
-   "seconds": 26.0,
-   "cost": 0.053324,
-   "label": "probe chat.escalation"
-  },
-  {
-   "seconds": 17.6,
-   "cost": 0.045728000000000005,
-   "label": "probe chat.plainest"
-  },
-  {
-   "seconds": 38.8,
-   "cost": 0.09001999999999999,
-   "label": "probe chat.callbacks"
   },
   {
    "seconds": 24.7,
-   "cost": 0.059768,
+   "cost": 0.060844,
    "label": "probe chat.test"
   },
   {
-   "seconds": 24.8,
-   "cost": 0.04174800000000001,
+   "seconds": 22.1,
+   "cost": 0.038076,
    "label": "probe chat.ending"
   },
   {
-   "seconds": 40.9,
-   "cost": 0.1554468,
-   "label": "batch 3"
+   "seconds": 26.7,
+   "cost": 0.06568,
+   "label": "probe chat.voices"
   },
   {
-   "seconds": 43.4,
-   "cost": 0.1522308,
+   "seconds": 40.5,
+   "cost": 0.08344399999999999,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 27.2,
+   "cost": 0.06150800000000001,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 37.4,
+   "cost": 0.1490274,
    "label": "batch 1"
   },
   {
-   "seconds": 56.1,
-   "cost": 0.1915388,
+   "seconds": 49.5,
+   "cost": 0.18011539999999998,
    "label": "batch 2"
   },
   {
-   "seconds": 46.5,
-   "cost": 0.17225079999999998,
+   "seconds": 63.3,
+   "cost": 0.16295539999999997,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 68.7,
+   "cost": 0.18192339999999999,
    "label": "batch 4"
   },
   {
-   "seconds": 19.3,
-   "cost": 0.10223080000000001,
+   "seconds": 50.0,
+   "cost": 0.1815674,
+   "label": "batch 2 retry"
+  },
+  {
+   "seconds": 24.4,
+   "cost": 0.1135834,
    "label": "batch 5"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-25T12:00:09Z",
- "repo_commit": "c5181f85",
- "cost": 1.9637
+ "scored_utc": "2026-11-25T14:38:16Z",
+ "repo_commit": "05323c3e",
+ "cost": 1.3224
 }

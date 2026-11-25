@@ -68,7 +68,7 @@ For each dimension return:
 - "why": two to four sentences: what earned this score, and what kept it from the next one up (for a 4, also what keeps it above the line)
 - "evidence": one to three short verbatim quotes from the material (under 25 words each) that the score rests on
 - "raise": one sentence: the change that would raise the score by one
-- "cause": only when the material includes IMPROVISATIONS: "writing" when the score comes from how the chat is written, "improvisation" when it comes from what an instruction asked for, "both" when the two decide it together; in "why", name the improvisation
+- "excused": only when the material includes IMPROVISATIONS: the numbers (from their headings) of the improvisations whose instruction required what this dimension would otherwise mark down, for example an instruction to say a failure out loud, for a dimension about saying less than you mean; [] when none. Score the dimension in context: what an instruction required is the design working there, not a failure, so it is not held against the score; judge the dimension on the rest of the work, and say in "why" what you set aside. Set aside only what the instruction required: how it is written, and everything in the other improvisations, still counts. When nothing is left that can show the dimension, the score is null
 
 Return only JSON, one entry per dimension in the order given:
 {{"scores": [{{"id": "...", "score": 4, "why": "...", "evidence": ["..."], "raise": "..."}}]}}"""
@@ -361,7 +361,7 @@ def writer_messages(text, names):
 
 _FIRST_STEP = re.compile(r"^# (?:Turn|Improvisation) 1\s*$", re.M)
 _ASK = re.compile(r"\n*Your improvisation: what .*$", re.S)
-CAUSES = ("writing", "improvisation", "both")
+_STEP_HEAD = re.compile(r"^# (?:Turn|Improvisation) (\d+)\s*$", re.M)
 
 
 def improvisations(path):
@@ -433,11 +433,13 @@ def writer_targets():
                         "wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) "
                         "and how the other's interest moves. "
                         "IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part "
-                        "of the design and stay. Score the chat as the reader gets it, the bar unchanged, but read each part "
-                        "against what was asked: where a score comes from what an instruction asked for (a fumble, a trap, "
-                        "interest lost or won), its cause is the improvisation; where the writer carried an instruction out "
-                        "badly, or the weakness has nothing to do with the instructions, it is the writing. The reader sees "
-                        "no dice and no plan: where a dimension speaks of turns, read improvisations.")
+                        "of the design and stay, so every dimension is judged in their context. Where an instruction "
+                        "required something a dimension would otherwise mark down (a trap that makes a character narrate "
+                        "their own failure, a fumble played as asked, interest lost, the night ending), that moment did "
+                        "what it had to and is not held against the dimension: list the improvisation under excused and "
+                        "judge the dimension on the rest. How the writer carried the instruction out still counts, and so "
+                        "does everything the instructions did not ask for. The reader sees no dice and no plan: where a "
+                        "dimension speaks of turns, read improvisations.")
             else:
                 note = (f"Written in one go by {w['writer']} from {source} (run {n}: {about}). "
                         "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.")
@@ -455,7 +457,8 @@ def writer_targets():
                 material["improvisations"] = improvisations_text(imp, written=False)
                 note += (" All of them were written improvisation by improvisation to the same instructions, under "
                          "IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest "
-                         "moves) is shared by design and is not a template; only what the writers made of it can differ.")
+                         "moves) is shared by design and is not a template, and is not held against the set: list the "
+                         "improvisations it decides under excused and judge only what the writers made of it.")
             out.append({"id": f"chatset-{folder}", "kind": "chat", "set": True, "label": f"Run {n} · all {len(done)} chats",
                         "version": f"run {n}", "order": 100 + n, "writers_run": n,
                         "source": f"docs/tone-lab/scratch/{folder}/{chat_dir}/",
@@ -590,6 +593,9 @@ def judge_prompt(cat, t, dims, probes):
         parts.append("=== READER PROBES ===\n" + "\n\n".join(pr))
     parts.append(f"=== DIMENSIONS: score {cat['families'][t['kind']]['artefact']} ===\n\n"
                  + "\n\n".join(dim_text(d) for d in dims))
+    if "improvisations" in t["material"]:
+        parts.append('Every entry in your answer carries "excused": the improvisation numbers set aside for that '
+                     'dimension, or [] when none, also for a dimension no instruction touches.')
     return "\n\n".join(parts)
 
 
@@ -599,7 +605,9 @@ def judge_system(cat, kind=None):
                                scale="\n".join(f"{k}. {v}" for k, v in sorted(cat["scale"].items())))
 
 
-def parse_scores(text, dims, need_cause=False):
+def parse_scores(text, dims, steps=None):
+    """`steps`: the improvisation numbers when the material has improvisations; every score then needs
+    an `excused` list drawn from them."""
     a, b = text.find("{"), text.rfind("}")
     if a < 0 or b < a:
         raise ValueError("no JSON object in the answer")
@@ -617,11 +625,18 @@ def parse_scores(text, dims, need_cause=False):
             raise ValueError(f"{d['id']}: no reason given")
         ev = [str(e) for e in (s.get("evidence") or []) if str(e).strip()][:3]
         out[d["id"]] = {"score": sc, "why": s["why"].strip(), "evidence": ev, "raise": str(s.get("raise") or "").strip()}
-        cause = str(s.get("cause") or "").strip().lower()
-        if cause in CAUSES:
-            out[d["id"]]["cause"] = cause
-        elif need_cause and sc is not None:
-            raise ValueError(f"{d['id']}: no cause (writing, improvisation or both)")
+        if steps:
+            ex = s.get("excused")
+            if not isinstance(ex, list):
+                raise ValueError(f"{d['id']}: no excused list (improvisation numbers, or [])")
+            try:
+                ex = sorted({int(x) for x in ex})
+            except (TypeError, ValueError):
+                raise ValueError(f"{d['id']}: excused must hold improvisation numbers, not {s.get('excused')!r}")
+            bad = [x for x in ex if x not in steps]
+            if bad:
+                raise ValueError(f"{d['id']}: excused names improvisations that do not exist: {bad}")
+            out[d["id"]]["excused"] = ex
     return out
 
 
@@ -702,7 +717,7 @@ def score_target(t, cat, caller, judge_id, force=False):
             with lock:
                 rec["calls"].append(dict(meta, label=f"batch {b}" + (" retry" if attempt == 2 else "")))
             try:
-                got = parse_scores(text, ds, need_cause="improvisations" in t["material"])
+                got = parse_scores(text, ds, steps={int(m) for m in _STEP_HEAD.findall(t["material"].get("improvisations", ""))})
                 break
             except (ValueError, json.JSONDecodeError) as e:
                 if attempt == 2:

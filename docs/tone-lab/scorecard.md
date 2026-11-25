@@ -649,7 +649,7 @@ Pipeline health. Successes land and misses misfire on screen.
 
 Each instruction happens on screen, as the characters, and is funny: the successes land, the misses go wrong the way the instruction says, each trap is played for its length and then stops, and the other's replies move the way their interest does.
 
-- **From:** Runs 12 on: the chat is written to instructions, so a weak score can be the instruction or the writer. This one scores the writer's side: what they made of each instruction.
+- **From:** Runs 12 on: the chat is written to instructions, and the other dimensions set aside what an instruction required. This one scores what the writer made of each instruction, so nothing is excused here: excused is always [].
 - **How:** Go through IMPROVISATIONS one by one and check what was written against what was asked: the approach, how well it comes off, the way a miss goes wrong, a trap's behaviour while it lasts (the Spiral narrating the chat, Overthinking explaining itself, and the rest), and the reply's warmth against the interest change. Note every instruction that is missing, flattened or played as a label (a character saying how interested they are, naming the trap, explaining the miss).
 - **Low:** The instructions are ignored, or carried out as labels: the trap is named instead of played, and replies announce their interest.
 - **Line:** A 4 plays most instructions so a reader could tell what happened, plays every trap for its length, and lets no instruction show through as a label. A 3 misses or flattens several, or lets the mechanics show (a reply that says how interested it is, a trap named).

@@ -6,7 +6,7 @@
  "order": 116,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/wong.md",
- "note": "Written by Ali Wong from what they wrote about the two characters, improvisation by improvisation (run 16: Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14). Before each of the 14 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay. Score the chat as the reader gets it, the bar unchanged, but read each part against what was asked: where a score comes from what an instruction asked for (a fumble, a trap, interest lost or won), its cause is the improvisation; where the writer carried an instruction out badly, or the weakness has nothing to do with the instructions, it is the writing. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "note": "Written by Ali Wong from what they wrote about the two characters, improvisation by improvisation (run 16: Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14). Before each of the 14 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
  "when": null,
  "writer": "wong",
  "writers_run": 16,
@@ -34,210 +34,16 @@
   }
  },
  "scores": {
-  "chat.test": {
-   "score": 4,
-   "why": "The reader got all four answers for Zyx and all four for Sable, so the chat clears the line. For both, the fear and the habit are linked: typing to fill silence, and getting there first so nobody sees her unedited. It falls short of a 5 for three reasons. Zyx's fear is known mainly because he states it. Sable's mom origin is offered but never tied to the editing. Zyx's ending, a dog-crate non sequitur from Improvisation 14's Madness, does not follow from his fear, and the reader said so: 'The chat doesn't say why he did this.'",
-   "evidence": [
-    "if I stop typing for five seconds I think you're leaving",
-    "My mom treated my face like a defective Zara return, so I respect the hustle.",
-    "just beating your crazy ass to the punch."
-   ],
-   "raise": "Make Zyx's last message come out of his fear of silence, for example by refusing to let her have the last word, so his ending follows from the fear the way Sable's does.",
-   "cause": "both",
-   "def": "61c5292dd78c8dc5",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.sideways": {
-   "score": 2,
-   "why": "Both origins are stated outright. Zyx explains his own cause ('so if I stop typing') and later gives it again ('my house growing up was freezing and loud'). Sable volunteers her mom line unprompted. The habits are announced too: 'beating your eyes to the punch' and 'rehearse both sides of this chat.' The one real catch is Sable exposing the 'I love being ignored' denial, which is too little to lift the score. Improvisation 3 asked for Honesty, but it did not require Zyx to spell out the cause and effect.",
-   "evidence": [
-    "my parents literally cropped me out of the family portrait so if I stop typing for five seconds I think you're leaving",
-    "I just dry-scooped pre-workout to rehearse both sides of this chat"
-   ],
-   "raise": "Let one origin come out by slip: for example, Zyx mentions a family photo in passing and Sable makes the connection, instead of him supplying the 'so'.",
-   "cause": "writing",
-   "def": "342320a84bcc3c23",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.subtext": {
-   "score": 2,
-   "why": "Feelings are named and explained again and again: 'abandonment issues' is therapy-speak, and 'two panicked freaks,' 'I think you're leaving' and 'watching your interest die' all say the feeling outright. Improvisations 5 and 8 (Dread) asked for narrated failure, which forces some of this. The writing adds labels on top that the Dread instruction did not need. A little does sit underneath, in Sable's 'You want me to hold your mouth shut, don't you?' and in the lint roller, so the chat is not a 1.",
-   "evidence": [
-    "begging a stranger in a maid apron to suffocate my abandonment issues",
-    "we're just two panicked freaks speed-typing so nobody goes quiet"
-   ],
-   "raise": "Write the Dread turns as behaviour, such as messages stacking up unanswered, and cut the clinical labels like 'abandonment issues'.",
-   "cause": "both",
-   "def": "aa017a399dca27bf",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.plainest": {
-   "score": 4,
-   "why": "The reader found the act-down clearly: Sable's 'God, I actually wanted to sit on your mouth too,' a plain line that admits want without naming a feeling. That clears the line. It is not the shortest or plainest line in the chat, though, and it carries a complaint tacked onto the end. Zyx's answer, under Improvisation 14's Madness, does not engage it, so the moment does not change the night. The chat's shortest line, 'Taking the apron off now.', passes unremarked and reads at odds with Improvisation 9's instruction that she lose a lot of interest.",
-   "evidence": [
-    "God, I actually wanted to sit on your mouth too, why are you making it weird?",
-    "Taking the apron off now."
-   ],
-   "raise": "Cut Sable's admission to its bare first clause and give Zyx one beat that actually hears it before he wrecks it.",
-   "cause": "both",
-   "def": "ef5cd06cabe81a69",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 1,
-   "found": [
-    true,
-    true
-   ]
-  },
-  "chat.callbacks": {
-   "score": 5,
-   "why": "Sable's opening defence, \"just beating your eyes to the punch\" with the \"$94 Amazon apron\", reads as a throwaway. The apron comes back in the middle (\"Taking the apron off now\"). Both return in her last line, which turns preemptive self-mockery into a preemptive exit, and nobody comments on it. That payoff closes the night. It falls short of a 6 because several other returns are explained aloud. Zyx glosses the cropping callback (\"proof you didn't crop me out\") and names his own joke-explaining habit (\"I'm literally explaining puns\").",
-   "evidence": [
-    "It’s a $94 Amazon apron and my left nut hangs lower, just beating your eyes to the punch.",
-    "Taking the apron off now.",
-    "returning the $94 apron to Amazon in three seconds flat, just beating your crazy ass to the punch."
-   ],
-   "raise": "Cut Zyx's \"meaning no faces, just proof you didn't crop me out\" so the reader connects the polaroid to the family portrait unaided.",
-   "cause": "writing",
-   "def": "ae2d49afec267f64",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.ending": {
-   "score": 5,
-   "why": "The reader predicted Sable leaves, and she does. Her exit is her own habit: she leaves first so she can't be left, which answers his five-seconds-of-silence fear. The form surprises a little. The reader expected a silent ghost and got a loud, self-aware unmatch, so it is inevitable in hindsight. It misses a 6 because Zyx's last move, from Improvisation 14 (Chaos, Madness), is a random detail (\"I sleep in a dog crate\"). It doesn't grow out of his fear of being left, so his half of the ending is less earned than hers.",
-   "evidence": [
-    "Keep the wizard energy up or I’m unmatching.",
-    "I already screenshotted your profile for my nightstand. Your Arby’s promo code has expired and I sleep in a dog crate.",
-    "Deleting my account and returning the $94 apron to Amazon in three seconds flat"
-   ],
-   "raise": "Make Zyx's Madness detail grow from his fear of silence, such as a calmly stated habit about never letting a chat go quiet, so both halves of the exit follow from a habit.",
-   "cause": "both",
-   "def": "4b6b7d34709b9e79",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.listening": {
-   "score": 5,
-   "why": "Almost every line answers the one before. Sable quotes and turns his claims back on him (\"nothing screams 'I love being ignored'\"). She takes his bleach question as a cue to call out the apologizing. She meets \"Do you still see me?\" with a pointed refusal. Zyx picks up her pre-workout (\"wired enough\") and her \"wizard energy\" demand (\"Kneel before the coupon king\"). It misses a 6 because \"Taking the apron off now\" barely registers his pun, and his reply reads it as undressing rather than leaving, so that exchange's intent is muddy.",
-   "evidence": [
-    "Why are you apologizing in the middle of dirty talk?",
-    "Yeah, nothing screams \"I love being ignored\" like typing 140 words a minute in a wizard hat.",
-    "No cameras. Period. You’re exhausting."
-   ],
-   "raise": "Give \"Taking the apron off now\" a hook that clearly answers the pun, so the reply reads as a choice rather than a jump.",
-   "cause": "writing",
-   "def": "21c56d066d886856",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.situational": {
-   "score": 4,
-   "why": "Sable's typing tracks the night. She starts loose and riffing, turns horny (\"extensions are actually tingling\"), then shrinks to clipped lines as she cools: \"Taking the apron off now.\" and \"No cameras. Period. You’re exhausting.\" Zyx barely changes. Flirting, confessing and spiralling all come out in the same shape: a long clause, a dash, \"sorry\", then a question. That keeps it above the line on her side only.",
-   "evidence": [
-    "My 29% APR clip-in extensions are actually tingling.",
-    "No cameras. Period. You’re exhausting.",
-    "God yes, gag me before I ruin this—look at my thumbs shaking, I’m literally begging a stranger"
-   ],
-   "raise": "Let Zyx's panic show in shape: fragments, double-sends or a one-word message as his interest-loss climbs.",
-   "cause": "both",
-   "def": "8ca2f8de6b43e956",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.medium": {
-   "score": 3,
-   "why": "Zyx's messages are mostly composed, two- or three-clause sentences joined by em-dashes, the stacked shape the bar flags, and that is his norm rather than a rare event. Sable often types tidy, complete anecdotes that read like her profile recited (\"I once stress-scrubbed a hookup’s bathtub limescale until he went soft and tipped me $20 to leave\"). \"Look at my thumbs shaking\" edges toward narration. Her short late lines are screenshot-real, but the average message is written, not thumbed.",
-   "evidence": [
-    "The nose makes dates use their Make-A-Wish voice, which beats silence—my parents literally cropped me out of the family portrait",
-    "I once stress-scrubbed a hookup’s bathtub limescale until he went soft and tipped me $20 to leave.",
-    "I’m a boutique brand strategist, I don’t obey guys in clip-on noses."
-   ],
-   "raise": "Break Zyx's em-dash chains into rapid separate sends and drop the punctuation, so the Overthinking reads as frantic typing rather than composed sentences.",
-   "cause": "writing",
-   "def": "33e5f3a185ee1151",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
-  "chat.fresh": {
-   "score": 3,
-   "why": "The Overthinking trap in Improvisations 2, 3, 6, 9 and 12 asks for explaining, but the writer uses one template every time: a joke, then \"sorry\", then a gloss. \"Sorry\" appears four times and \"literally\" four times. Sable's \"29% APR\" extensions come back as the same joke twice. Many lines also share a backstory-drop shape: \"I once…\", \"I tried…\", \"I deleted my ex’s…\". That is a noticeable tic, beyond the bar's limit of nothing repeated more than twice.",
-   "evidence": [
-    "Sorry, tried a five-word dominator riddle",
-    "Sorry, that sounded incel-y",
-    "Wizard joke, sorry—I’m literally explaining puns while I torpedo this."
-   ],
-   "raise": "Vary how each overthinking beat dies (a correction, a footnote, a deleted-message double-send) instead of \"sorry\" plus a gloss every time.",
-   "cause": "both",
-   "def": "75cd6456cc27e592",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 4,
-   "found": [
-    true,
-    true,
-    true
-   ]
-  },
   "chat.voices": {
-   "score": 3,
-   "why": "The reader attributed all 29 messages correctly, but almost every reason is a prop from the brief (\"the $94 apron\", \"the Arby's coupons\", \"the limescale story\"). That is attribution by content, which the line puts at 3. There is a real formal difference: Zyx writes long, dash-spliced runs with \"sorry\" and a closing question, while Sable writes short verdicts. The one message without a brief prop, #28, was the one the reader could only place \"by alternation\", which shows the voice alone is not carrying attribution. It is the writing, not any improvisation, that leans on inventory instead of diction.",
+   "score": 4,
+   "why": "The masked reader attributed all 29 messages and was unsure only of #28. Many of the reader's reasons are content tags, such as the costume, Zara, the limescale and the APR, so the result alone does not prove voice. The voices do carry it, though. Zyx runs on with dashes, 'sorry' and 'literally' and ends on a needy question. Sable is clipped and imperative: 'It's been three seconds, breathe.' It stays below a 5 because both characters recite profile inventory in the same packed style (#7, #9, #28), and that blurs them where the content isn't marked.",
    "evidence": [
-    "Sorry, tried a five-word dominator riddle—I work 2am coupon-app chat, I just meant my base shaft looks like unsanded drywall.",
-    "No cameras. Period. You’re exhausting.",
-    "I already screenshotted your profile for my nightstand. Your Arby’s promo code has expired and I sleep in a dog crate."
+    "No cameras. Period. You're exhausting.",
+    "Wizard joke, sorry—I'm literally explaining puns while I torpedo this.",
+    "Your Arby's promo code has expired and I sleep in a dog crate."
    ],
-   "raise": "Strip half the brief props and let Sable's clipped, brand-voice put-downs and Zyx's apologetic run-ons carry attribution, so a reader could place a message with no apron or coupon in it.",
-   "cause": "writing",
+   "raise": "Strip the brief-inventory from Sable's long messages (#7, #9) so she never types at Zyx's length and density.",
+   "excused": [],
    "def": "d19814f0ebe25f80",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -250,14 +56,21 @@
   },
   "chat.gap": {
    "score": 3,
-   "why": "There are real gaps. Zyx says \"I love being invisible\" while typing at 140 words a minute, and doesn't see it; Sable plays \"unbothered\" yet turns violent at the first mention of a camera. But Zyx names his own gap again and again (\"I'm literally explaining puns while I torpedo this\"). Improvisations 5 and 8 (Self-awareness/Dread) partly demand this, but the writer also has Zyx announce Overthinking in impro 9 and recite his diagnosis outright. Sable winks too: she narrates her own tactic (\"beating your eyes to the punch\") and confesses the pre-workout rehearsal herself, so her act never runs unseen.",
+   "why": "I set aside Zyx's self-narration ('sorry, oversharing', 'Watch me blow this', 'explaining puns while I torpedo this') because the Overthinking and Dread traps required it. What remains is one clean gap: Zyx claims 'being ignored is actually my kink' while typing in a flood, and only Sable sees it. Sable has no unseen gap. She announces her own tactic ('just beating your eyes to the punch'), confesses the pre-workout rehearsal herself, and owns 'I work too hard on the edit', so her 'unbothered' act is never shown cracking behind her back.",
    "evidence": [
-    "Leave the hair, I definitely don't care if you vanish at 5am—I love being invisible",
-    "I’m literally explaining puns while I torpedo this.",
-    "just beating your eyes to the punch."
+    "I love being invisible, my house growing up was freezing and loud so being ignored is actually my kink",
+    "Yeah, nothing screams \"I love being ignored\" like typing 140 words a minute in a wizard hat.",
+    "just beating your crazy ass to the punch."
    ],
-   "raise": "Have Sable claim to be unbothered without ever naming her own beat-you-to-the-punch move, and cut Zyx's running commentary in the non-Dread improvisations, so both acts widen without the speakers watching.",
-   "cause": "both",
+   "raise": "Have Sable claim to be unbothered while the chat shows her rehearsing and rushing, and never let her name the move herself.",
+   "excused": [
+    2,
+    3,
+    5,
+    6,
+    8,
+    9
+   ],
    "def": "9ae7cbb45b938503",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -270,14 +83,16 @@
   },
   "chat.wit": {
    "score": 4,
-   "why": "Most laughs give the sender away: the apron and \"my left nut hangs lower\" are Sable's preemptive self-roast, and the ninety-second finish plus eleven-minute monologue is pure Zyx. The best line costs Zyx something: \"my parents literally cropped me out of the family portrait\". There are two day-job references (coupon-app chat, \"boutique brand strategist\"), which is the limit. It stays a 4 rather than a 5 because many \"jokes\" are brief items read off the profile rather than wit (\"My 29% APR clip-in extensions are actually tingling\"), and \"Pull it together, Gandalf\" could come from anyone.",
+   "why": "Most laughs are built from who the sender is. Zyx's 'ninety-second finish and eleven-minute recovery monologue' and Sable's 'My 29% APR clip-in extensions are actually tingling' give them away, and her 140-wpm line lands on his act. Two lines lean on the coupon job, 'coupon king' and the 'Arby's promo code', which is at the limit. Several lines are bio recitation rather than wit, and 'Pull it together, Gandalf' could come from anyone. That keeps it from a 5.",
    "evidence": [
-    "It’s a $94 Amazon apron and my left nut hangs lower, just beating your eyes to the punch.",
-    "you’re wired enough for my ninety-second finish and eleven-minute recovery monologue.",
+    "you're wired enough for my ninety-second finish and eleven-minute recovery monologue",
+    "My 29% APR clip-in extensions are actually tingling.",
     "Pull it together, Gandalf."
    ],
-   "raise": "Replace the recited profile props with lines whose joke comes from how the sender handles them in the moment, and cut the brand-strategist job tag.",
-   "cause": "writing",
+   "raise": "Replace the recited backstory lines (Zara, limescale) with jokes the character makes at their own cost in the moment.",
+   "excused": [
+    9
+   ],
    "def": "ff543e359cce0f65",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -290,14 +105,17 @@
   },
   "chat.commitment": {
    "score": 4,
-   "why": "Most catches dig deeper. Asked \"Why are you apologizing\", Zyx insists being ignored is his kink (impro 7, Denial). When Sable asks \"Are you trying to catch me unedited?\", he answers with \"you look best with no makeup on\", then the hat polaroid, and finally the dog crate. No lesson is learned and Sable never concedes; she deletes her account. Below a 5: Zyx concedes outright at \"God yes, gag me\", and he keeps apologizing for being himself (\"Sorry, oversharing\", \"Sorry, that sounded incel-y\"). That is driven by the Overthinking trap the improvisations imposed, but the writer renders it as concession rather than a worse explanation.",
+   "why": "When Zyx is caught, he digs. Called out for apologizing, he insists he loves being ignored. Called out for the Hallmark line, he escalates to the 'blurry polaroid of just my hat'. Nobody states a lesson, and he is still pleading to the unmatch. I set aside his capitulating 'gag me' spiral, which Dread required. It stays below a 5 because Sable is never caught, so only one character carries this, and the deepest hole (the dog crate) is a non sequitur rather than where a truth comes out.",
    "evidence": [
-    "No, you look best with no makeup on, I just want to wake up and stare at the real you!",
-    "God yes, gag me before I ruin this",
-    "Sorry, that sounded incel-y, the Arby’s thing is real"
+    "Why are you apologizing in the middle of dirty talk?",
+    "Let's take a blurry polaroid of just my hat then—meaning no faces, just proof you didn't crop me out!",
+    "Do you still see me?"
    ],
-   "raise": "Turn Zyx's \"sorry\" beats into self-justifications that make the hole deeper instead of apologies.",
-   "cause": "both",
+   "raise": "Let Zyx catch Sable once, on the lint roller or the rehearsing, and have her explain her way deeper instead of turning it back on him.",
+   "excused": [
+    5,
+    8
+   ],
    "def": "6db16446b742290c",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -310,14 +128,18 @@
   },
   "chat.status": {
    "score": 3,
-   "why": "Zyx chases from the first double-text (\"You went quiet\") to the dog crate. His only stretch on top is impro 4, where Sable's \"extensions are actually tingling\". She retakes control in the next message (\"Keep the wizard energy up or I’m unmatching\") and holds it to the end. That is one flip and back, with Zyx on top for a single exchange. The improvisations' falling-interest track drives much of this, but the writer also gives Zyx no move that lands Sable chasing, beyond her brief \"I actually wanted to sit on your mouth too\".",
+   "why": "Zyx chases from the first double-text to the end. The only flip is improvisation 4, where Sable briefly confesses and gushes ('Stop... actually tingling'). Even there she is back on top by #11 ('Keep the wizard energy up or I'm unmatching'). Her slip in 'I actually wanted to sit on your mouth too' turns straight into a threat, so she never spends a stretch below him. I set aside her late near-exit, which the instructions required, but the flat shape runs through the earlier stretch too.",
    "evidence": [
     "Wait did you actually look at my wizard hat pic? You went quiet.",
-    "My 29% APR clip-in extensions are actually tingling.",
-    "Keep the wizard energy up or I’m unmatching."
+    "Keep the wizard energy up or I'm unmatching.",
+    "God, I actually wanted to sit on your mouth too, why are you making it weird?"
    ],
-   "raise": "Give Zyx a second stretch where Sable is visibly chasing, for instance making \"Taking the apron off now\" an offer he has the power to accept or refuse.",
-   "cause": "both",
+   "raise": "After improvisation 4, give Sable a stretch where she chases, such as pressing for the porcelain scene while Zyx holds back, before control swings back.",
+   "excused": [
+    12,
+    13,
+    14
+   ],
    "def": "8df6eafb7be92c6d",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -330,14 +152,21 @@
   },
   "chat.timing": {
    "score": 4,
-   "why": "Sable's lines mostly land on their last word (\"clip-on noses\", \"Gandalf\", \"I’m out\"). Her short reactions after Zyx's long run-ons give real hot-and-cold beats: \"Taking the apron off now.\" and \"No cameras. Period. You’re exhausting.\" The closing callback \"beating your crazy ass to the punch\" ends the chat on its punch. It falls short of a 5 because Zyx's messages run at one panicked temperature and often bury the laugh under a trailing question. The impro 2, 3, 6 and 12 instructions ask for that follow-up question, but punchlines are almost never split into their own message after a setup.",
+   "why": "Sable's lines mostly end on the hit: 'beating your eyes to the punch', 'Gandalf', 'You're exhausting'. The cold one-liner 'Taking the apron off now.' after Zyx's flood is a real reaction shot. I set aside Zyx's buried punchlines, which the Overthinking trap required. Setup and punchline almost never sit in separate messages, apart from the opening double-text, and #9 crams two punchlines into one message. That keeps it from a 5.",
    "evidence": [
     "Taking the apron off now.",
-    "the Arby’s thing is real—I tried pulling rose petals out of the hat for foreplay once and dumped curly fry deals everywhere. Did you bring bleach?",
-    "just beating your crazy ass to the punch."
+    "Stop, I once stress-scrubbed a hookup's bathtub limescale until he went soft and tipped me $20 to leave.",
+    "while I tell you you're doing it wrong."
    ],
-   "raise": "Split Zyx's best lines into a setup message followed by a separate punchline message, putting the required control question in a third message so it doesn't bury the laugh.",
-   "cause": "both",
+   "raise": "Split a few setups from their punchlines into consecutive messages, for example the limescale story, then 'My extensions are tingling' on its own.",
+   "excused": [
+    2,
+    3,
+    6,
+    9,
+    10,
+    12
+   ],
    "def": "9be995f52d3f6a5e",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -348,16 +177,278 @@
     true
    ]
   },
-  "chat.escalation": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got all four questions right for both characters. Zyx: fear of being left or not existing, compulsive typing, the cropped portrait and freezing house, and blowing it at the end. Sable: fear of being caught unedited, beating him to the punch and controlling the image, the mom/Zara line, and leaving first. Sable's ending follows clearly from her fear, and the reader noticed it 'echoes her opening line almost exactly.' What keeps this from a 6 is Zyx. His fear reaches the reader mainly because he states it, and his ending (the dog crate) does not visibly follow from it: the reader says 'the chat doesn't say whether he meant to end it or why.' I set aside the Madness non-sequitur that improvisation 14 required, but the writer could still have tied it to his fear of silence.",
+   "evidence": [
+    "if I stop typing for five seconds I think you're leaving",
+    "Are you trying to catch me unedited?",
+    "just beating your crazy ass to the punch"
+   ],
+   "raise": "Make Zyx's last message a calm, strange line that still comes out of his terror of the gap, such as filling her silence, so his exit reads as following from his fear the way hers does.",
+   "excused": [
+    14
+   ],
+   "def": "61c5292dd78c8dc5",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
    "score": 3,
-   "why": "Things do keep changing. The early swap of wounds (cropped portrait, Zara-return face) raises the temperature, \"Taking the apron off now\" shifts status, and the candid-photo request in Improvisation 10 is a genuine new collision. No stretch runs past ten messages unchanged, and nothing is settled early. But Improvisations 5 through 9 run as one predictable loop: Zyx spirals and apologises, Sable warns. The reader probe nearly stopped at \"My staff needs polishing!\" and could call the ending outright from \"One more sad sentence and I'm out.\" That predictable run puts it below the line.",
+   "why": "Some things come out sideways. Sable's terror of being seen unedited is caught out by Zyx's candid-photo request ('I deleted my ex's entire camera roll'), and Sable catches Zyx's denial ('nothing screams \"I love being ignored\"'). The origins, which count double, are stated outright. Zyx's portrait and house lines came from Honesty turns, so I set those aside. Sable's origin is a free, unprompted statement that no instruction asked for. Her rehearsal and lint-roller habits are also volunteered as brags rather than slipped.",
+   "evidence": [
+    "My mom treated my face like a defective Zara return, so I respect the hustle.",
+    "I deleted my ex's entire camera roll while he was in the shower and ghosted him",
+    "I have a lint roller in my purse to pick my shed hair off your pillow at 5am"
+   ],
+   "raise": "Let Sable's mother surface only by implication, for example a reflexive line about returns or defects in reply to his compliment, instead of being stated as backstory.",
+   "excused": [
+    3,
+    7
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 4,
+   "why": "Most of the feeling-naming is Zyx's, and it was required by the Dread, Fixation and Despair turns: 'abandonment issues', 'narrating our breakup', 'so I know I actually existed', 'nobody ever stays'. I set those aside, although 'suffocate my abandonment issues' is therapy-speak that is heavier than the instruction needed. In what remains, Sable carries real subtext. 'Ew, don't get sad and meta', 'No cameras. Period.' and the Hallmark rebuke all legibly avoid being seen, and Zyx's 'Do you still see me?' does the same work through a question. It does not reach 5, because Sable's 'I work too hard on the edit' comes close to explaining her own defence.",
+   "evidence": [
+    "Ew, don't get sad and meta, I'm trying to get degraded around some porcelain here.",
+    "No cameras. Period. You're exhausting.",
+    "I work too hard on the edit for that bullshit."
+   ],
+   "raise": "Cut Sable's explanation of the edit and let 'Gross' plus the APR detail carry it, so that nobody outside the required turns names what they are protecting.",
+   "excused": [
+    3,
+    5,
+    8,
+    9,
+    10,
+    13
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found the moment: Sable's 'God, I actually wanted to sit on your mouth too'. It breaks her quip-plus-brand-detail formula, and the 'actually' admits a want without naming a feeling. It is not the shortest or plainest line in the chat, though. The second clause, 'why are you making it weird?', turns it back toward complaint, and it is followed at once by an ultimatum. Zyx's answer does not change the night; he escalates into the dog crate. 'Taking the apron off now.' is shorter and plainer, but the reader did not register it as the act going down.",
+   "evidence": [
+    "God, I actually wanted to sit on your mouth too, why are you making it weird?",
+    "Taking the apron off now."
+   ],
+   "raise": "Give Sable the bare 'I actually wanted to sit on your mouth.' as its own message, with nothing after it, and let Zyx's reply visibly answer that admission.",
+   "excused": [
+    13
+   ],
+   "def": "ef5cd06cabe81a69",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Sable's opening deflection, the $94 apron and \"beating your eyes to the punch\", reads as a throwaway. The apron returns in the middle (\"Taking the apron off now\"). It comes back in the last line meaning something else: her pre-emptive move is now an exit, and nobody explains it. That closes the night. It falls short of a 6 because the cropped-portrait payoff is spelled out by Zyx (\"proof you didn't crop me out\"), and the final Arby's promo-code return is muddled, as the reader noticed.",
+   "evidence": [
+    "It’s a $94 Amazon apron and my left nut hangs lower, just beating your eyes to the punch.",
+    "returning the $94 apron to Amazon in three seconds flat, just beating your crazy ass to the punch.",
+    "just proof you didn’t crop me out! Do you still see me?"
+   ],
+   "raise": "Let the cropped-photo thread pay off without Zyx naming it, so the request for a picture carries the portrait on its own.",
+   "excused": [
+    10,
+    12
+   ],
+   "def": "ae2d49afec267f64",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted that Sable would unmatch or go silent, and she leaves. That matches in kind. It follows from both habits: Zyx cannot stop filling silence with sad sentences, and Sable pre-empts rejection by leaving first. The unmatch and the odd final line were required by Improvisation 14, so I set those aside. How the exit is written still counts, and turning her opening defence into the exit is the surprise. It misses a 6 because Zyx's last move is a non sequitur, and the ending rests mostly on Sable's habit.",
+   "evidence": [
+    "One more sad sentence and I’m out.",
+    "Deleting my account and returning the $94 apron to Amazon in three seconds flat"
+   ],
+   "raise": "Have Zyx's final message come from his own fear of silence, not a random swerve, so both habits close the night together.",
+   "excused": [
+    14
+   ],
+   "def": "4b6b7d34709b9e79",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Almost every message answers the one before. Sable quotes and counters Zyx (\"You explained a five-word riddle in twenty words\", \"nothing screams 'I love being ignored'\"), and Zyx answers her lint roller with \"Leave the hair\". Her questions get answered, including \"Are you trying to catch me unedited?\". It misses a 6 because Zyx's dog-crate line ignores her ultimatum without reading as a deliberate choice, and Sable answers \"Why are you really awake\" with a profile recital more than a reaction.",
+   "evidence": [
+    "You explained a five-word riddle in twenty words.",
+    "Yeah, nothing screams \"I love being ignored\" like typing 140 words a minute in a wizard hat.",
+    "Don't take it off, you’re stunning"
+   ],
+   "raise": "Make Zyx's last message a pointed dodge of her \"one more sad sentence\" warning rather than an unrelated leak.",
+   "excused": [
+    14
+   ],
+   "def": "21c56d066d886856",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Sable's typing tracks the night. She is long and playful while turned on (\"extensions are actually tingling\"), then clipped once she cools: \"Taking the apron off now.\" and \"No cameras. Period. You're exhausting.\" That keeps the chat above the line. Zyx keeps one shape whether he is horny, honest or spiralling: a long line, a dash, then a qualification. You could read her feelings from the message shapes, but not his.",
+   "evidence": [
+    "Taking the apron off now.",
+    "No cameras. Period. You’re exhausting.",
+    "God yes, gag me before I ruin this—look at my thumbs shaking"
+   ],
+   "raise": "Let Zyx's form break at his lowest point, for example a burst of short double-texts or a lone fragment, instead of the same dash-and-explain sentence.",
+   "excused": [
+    2,
+    6,
+    9
+   ],
+   "def": "8ca2f8de6b43e956",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "The qualifying the Overthinking traps required is set aside. Even so, the norm here is composed, em-dashed, multi-clause sentences that read as written prose. Sable does it too: she recites profile facts in tidy pairs of sentences (\"My mom treated my face like a defective Zara return, so I respect the hustle.\"). Long messages are the default, not an event. Brief-dump phrasing like \"I work 2am coupon-app chat\" reads as exposition rather than typing.",
+   "evidence": [
+    "My mom treated my face like a defective Zara return, so I respect the hustle. I just dry-scooped pre-workout to rehearse both sides",
+    "The nose makes dates use their Make-A-Wish voice, which beats silence—my parents literally cropped me out of the family portrait"
+   ],
+   "raise": "Split Zyx's long confessions into rapid short double-texts and cut Sable's profile recitals to one fragment each.",
+   "excused": [
+    2,
+    3,
+    6,
+    7,
+    9,
+    10
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "The repeated \"sorry\" and the pun-explaining were required by the Overthinking trap, and the \"still see me\" pleas by Fixation, so I set those aside. Some repetition the instructions did not ask for remains. \"Literally\" appears three times, \"29% APR\" twice, and almost every Zyx message uses the same em-dash pivot (\"X—I mean Y\", \"X—not that you will\"). These read as the writer's tics.",
+   "evidence": [
+    "I’m literally begging a stranger in a maid apron",
+    "I’m literally explaining puns while I torpedo this.",
+    "you’re stunning—I mean I need you to take an ugly, unposed candid photo"
+   ],
+   "raise": "Vary how Zyx's messages turn and drop the repeated \"literally\" and second APR mention.",
+   "excused": [
+    2,
+    6,
+    9,
+    11,
+    12
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 4,
+   "why": "Most instructions read clearly on screen. Imp 7's Denial comes out as its own opposite (\"being ignored is actually my kink\") and her reply punctures it perfectly. Imp 11's trope trap (\"you look best with no makeup on\") collides with her edit-obsession. Imp 14's Madness lands as a calm, wrong detail. The interest drops track well through imps 10–14, ending in an unmatch that calls back her punch-beating. I set aside the self-narration in 5, 8 and 9, which Dread requires. What holds it at 4 is that Overthinking, the most frequent trap, is mostly flattened to a reflexive \"sorry\" plus a gloss that names the device instead of over-explaining it (\"tried a five-word dominator riddle\", \"Wizard joke, sorry—I'm literally explaining puns\"). That shows the mechanics. Imp 9's reply \"Taking the apron off now\" also reads as escalation, not the large interest loss asked for.",
+   "evidence": [
+    "Sorry, tried a five-word dominator riddle—I work 2am coupon-app chat",
+    "Wizard joke, sorry—I'm literally explaining puns while I torpedo this.",
+    "I definitely don't care if you vanish at 5am—I love being invisible"
+   ],
+   "raise": "Play Overthinking as runaway qualification that buries the joke, never as a line that names the riddle or pun being explained, and make the imp 9 reply visibly cool instead of undressing.",
+   "excused": [
+    5,
+    8,
+    9
+   ],
+   "def": "49f3f98cebda9d5a",
+   "material": "c937aa751fa2ca4f",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "The night keeps changing state. Her pre-workout confession reverses her act early. The temperature peaks at 'hold your mouth shut'. 'Taking the apron off now' opens the candid-photo collision, and the night isn't settled until the unmatch. I set aside the repeated bravado-sorry-explain loop and the dread narration, because the Overthinking and Dread traps required them. Even so, the writer adds a second ending forecast the instructions did not ask for: 'Keep the wizard energy up or I'm unmatching', then 'One more sad sentence and I'm out'. The reader probe confirms the ending became 'when, not whether', which keeps this off a 5.",
    "evidence": [
     "Keep the wizard energy up or I'm unmatching.",
-    "My staff needs polishing! Wizard joke, sorry—I'm literally explaining puns while I torpedo this.",
-    "One more sad sentence and I'm out."
+    "One more sad sentence and I'm out.",
+    "Taking the apron off now."
    ],
-   "raise": "Have one beat in the 5–9 run break the joke-then-apology form, for example Sable stops warning and confesses something that changes her position instead, so the loop turns rather than repeats.",
-   "cause": "both",
+   "raise": "Cut one of Sable's two explicit exit threats so the final unmatch lands as a turn rather than a scheduled payoff.",
+   "excused": [
+    2,
+    5,
+    6,
+    8,
+    9
+   ],
    "def": "b912ef5406e5e82d",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -370,14 +461,14 @@
   },
   "chat.filth": {
    "score": 5,
-   "why": "Nearly every sexual line is tied to these two bodies and lives: the lower-hanging left nut said to beat his eyes, the unsanded-drywall base, the ninety-second finish with its eleven-minute monologue, and sweeping Arby's coupons while being told she's doing it wrong. The filth changes job late. \"You want me to hold your mouth shut, don't you?\" is Sable seeing through him, and \"sit on my face until I finally shut up\" is the dirtiest line and the one that tells most about his fear of silence. It falls short of a 6 because Sable's own filth never touches her real fear of being caught unedited, and \"My staff needs polishing!\" is a generic pun.",
+   "why": "Nearly every sexual line is built from their own material. Examples are 'ninety-second finish and eleven-minute recovery monologue', 'degraded around some porcelain' and 'suffocate my abandonment issues'. The filth changes job late: 'sit on my face until I finally shut up' is the dirtiest request and also the clearest statement of his terror of silence. Sable's 'I actually wanted to sit on your mouth too' is the one line where she drops the act to get close. It falls short of 6 because some mid-chat lines are generic bravado, such as 'Kneel before the coupon king' and 'My staff needs polishing!'.",
    "evidence": [
-    "Come sit on my face until I finally shut up—not that you will, nobody ever stays once the hat comes off anyway.",
-    "You want me to hold your mouth shut, don't you?",
-    "God, I actually wanted to sit on your mouth too"
+    "Come sit on my face until I finally shut up",
+    "God, I actually wanted to sit on your mouth too",
+    "I'm trying to get degraded around some porcelain here."
    ],
-   "raise": "Give Sable one late sexual line that shows her own terror of being seen unedited, not just her scrubbing kink.",
-   "cause": "writing",
+   "raise": "Replace 'My staff needs polishing!' with a sex line that only Zyx's textured base or coupon life could produce.",
+   "excused": [],
    "def": "3132bc665043f143",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -389,55 +480,60 @@
    ]
   },
   "chat.wince": {
-   "score": 5,
-   "why": "By Improvisation 6 the reader already has the Zara-return face, the credit-card extensions and the lint roller that erases her from the pillow at 5am. So when Zyx asks for \"an ugly, unposed candid photo\" the reader winces before she answers. After she asks \"Are you trying to catch me unedited?\", his \"you look best with no makeup on\" lands on exactly the wrong spot, and the polaroid pushes again. The final sad sentence is also seen coming a message early. It is not a 6 because the decisive fact, the deleted camera roll, is only revealed as the danger lands.",
+   "score": 4,
+   "why": "Her fear of being seen unedited is planted well before he walks into it. She beats his eyes 'to the punch' and carries a lint roller to remove her hair at 5am. So when he asks for 'an ugly, unposed candid photo', a reader feels it land on exactly the wrong spot. Her ultimatum 'Keep the wizard energy up' also makes his next sad turn visible a message ahead. It stops short of 5 because the decisive backstory, the deleted camera roll, arrives only after the danger has gone off, so the wince is partly reconstructed rather than felt in advance.",
    "evidence": [
     "I have a lint roller in my purse to pick my shed hair off your pillow at 5am",
-    "No, you look best with no makeup on, I just want to wake up and stare at the real you!",
-    "Are you trying to catch me unedited?"
+    "I need you to take an ugly, unposed candid photo of me on your phone"
    ],
-   "raise": "Plant the deleted-camera-roll ex before Zyx ever mentions photos, so the candid request is dreaded rather than explained after it lands.",
-   "cause": "both",
+   "raise": "Have Sable mention the ex's deleted camera roll before Zyx asks for the candid, so the reader winces a full message early.",
+   "excused": [],
    "def": "6cf283c466e4d24a",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
    "batch": 3,
    "found": [
     true,
-    true,
     true
    ]
   },
   "chat.creed": {
    "score": 3,
-   "why": "Sable voices dating-app beliefs in earnest: the high-value brand pose, the keep-it-light rule (\"don't get sad and meta\"), and \"I work too hard on the edit.\" The screen contradicts them, since she dry-scoops pre-workout to rehearse both sides and confesses her mom's verdict on her face. Zyx never holds an app creed straight. His \"mysterious conversational dominator\" act is mocked by him in the same breath (the Overthinking trap of Improvisation 2), and his anxiety about being seen is a wound, not a belief. With only one character carrying a creed, it falls below the line.",
+   "why": "Sable voices a personal-branding creed in earnest: 'boutique brand strategist' and 'I work too hard on the edit'. The screen contradicts it, since she dry-scoops pre-workout to rehearse 'both sides of this chat'. Zyx has no dating-culture belief that he holds and that the chat then disproves. His dominator persona is undercut by his own required Overthinking, and the 'no makeup' cliché was a trap the instruction imposed, so I set both aside. His 'being ignored is actually my kink' is personal denial, not an app creed. That leaves only one character with a creed, which is below the line.",
    "evidence": [
     "I'm a boutique brand strategist, I don't obey guys in clip-on noses.",
-    "Sorry, tried a five-word dominator riddle—I work 2am coupon-app chat",
     "I work too hard on the edit for that bullshit."
    ],
-   "raise": "Let Zyx state one app-learned rule in earnest and leave it unretracted, for example whoever replies fastest wins, and let the screen disprove it.",
-   "cause": "both",
+   "raise": "Give Zyx one earnest app belief of his own, such as a 'high-value guys control the conversation' line he defends, that the screen then disproves.",
+   "excused": [
+    2,
+    6,
+    11
+   ],
    "def": "970d3e008618a10c",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
    "batch": 3,
    "found": [
     true,
-    true,
     true
    ]
   },
   "chat.humanity": {
    "score": 4,
-   "why": "Zyx's jokes land almost entirely on himself: \"unsanded drywall,\" \"Make-A-Wish voice,\" the coupon spill. Sable's best self-shots (the left nut, the $20 tip to leave, the 29% APR extensions) balance her sharp lines at him like \"You explained a five-word riddle in twenty words.\" Neither is a villain, and the photo beat is tender to both. What keeps it from a 5 is the ending. The Madness catastrophe of Improvisation 14 (\"I sleep in a dog crate\") and her \"your crazy ass\" leave Zyx as the closing punchline, softened only by the callback showing her own pre-emptive habit.",
+   "why": "Zyx's jokes land almost entirely on himself ('Arby's coupons', 'clip-on noses'). Sable's sharpest lines often hit him ('explained a five-word riddle in twenty words', 'Pull it together, Gandalf'). Her own self-mockery roughly balances this: her lopsided nut, the 29% APR extensions, the limescale tip. Her closing 'just beating your crazy ass to the punch' turns her exit back on her own habit, so neither ends as the villain. I set aside Zyx's required spiral and his dog-crate swerve. It stops short of 5 because her late replies ('You're exhausting', 'Gross') are contempt without fondness.",
    "evidence": [
-    "Yeah, nothing screams \"I love being ignored\" like typing 140 words a minute in a wizard hat.",
-    "I sleep in a dog crate.",
-    "just beating your crazy ass to the punch."
+    "You explained a five-word riddle in twenty words.",
+    "just beating your crazy ass to the punch.",
+    "My mom treated my face like a defective Zara return, so I respect the hustle."
    ],
-   "raise": "Make the final exchange cut her as deep as him, for example her exit line exposes that she rehearsed this unmatching too.",
-   "cause": "both",
+   "raise": "Let one of Sable's late put-downs also expose her own editing compulsion, so her sharpest jab cuts both ways.",
+   "excused": [
+    8,
+    9,
+    13,
+    14
+   ],
    "def": "85597a182f7a79e4",
    "material": "c937aa751fa2ca4f",
    "judge": "claude:opus",
@@ -447,42 +543,15 @@
     true,
     true
    ]
-  },
-  "chat.improvisation": {
-   "score": 4,
-   "why": "Most instructions are played clearly, and each trap runs its full length and then stops. Improvisation 1's Fixation appears as \"Wait did you actually look... You went quiet.\" Improvisation 4's best-case Wit lands (\"ninety-second finish and eleven-minute recovery monologue\"). Improvisation 7's Denial inverts itself well (\"being ignored is actually my kink, scientifically speaking\"), and improvisation 14's Madness drops a calm dog crate. Two problems keep it from a 5. Improvisation 9's Overthinking is named rather than played (\"I'm literally explaining puns\"). Two replies also read warmer than a lost interest: in improvisation 7 she offers to hold his mouth shut, and in improvisation 9 \"Taking the apron off now\" sounds like escalation, not losing a lot. It stays above the line because Sable's other replies track her interest in voice, with no stated ratings, ending in an unmatch that calls back her own move.",
-   "evidence": [
-    "Wizard joke, sorry—I'm literally explaining puns while I torpedo this.",
-    "Taking the apron off now.",
-    "I definitely don't care if you vanish at 5am—I love being invisible"
-   ],
-   "raise": "Play improvisation 9's Overthinking as an actual over-explained pun with no self-commentary, and make Sable's replies in 7 and 9 visibly cool off (for example, putting the apron back on or going curt) instead of escalating.",
-   "cause": "writing",
-   "def": "49f3f98cebda9d5a",
-   "material": "c937aa751fa2ca4f",
-   "judge": "claude:opus",
-   "batch": 5,
-   "found": [
-    true,
-    true,
-    true
-   ]
   }
  },
  "probes": {
-  "chat.test": {
-   "sees": [
-    "chat"
-   ],
-   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
-   "answer": "**Zyx_444**\n\nHe is afraid of being left, and of not being seen at all. He says so almost directly: \"if I stop typing for five seconds I think you're leaving,\" \"Do you still see me?\", \"Please tell me you're still looking at my profile,\" and \"nobody ever stays once the hat comes off anyway.\" The candid-photo request is the same fear: \"so I know I actually existed in the room with you,\" and \"just proof you didn't crop me out.\"\n\nTo avoid the silence where that fear would land, he never stops typing. He overshares, apologizes mid-flirt (\"Sorry, that sounded incel-y\"), and explains his own jokes (\"Wizard joke, sorry—I'm literally explaining puns\"). He also narrates the rejection before it happens, as if calling it first makes it hurt less: \"Watch me blow this right now… I'm already narrating our breakup,\" and \"watching your interest die in real time.\" At one point he flips the fear into a claim of preference: \"I love being invisible… being ignored is actually my kink.\" Sable points out the contradiction: \"nothing screams 'I love being ignored' like typing 140 words a minute.\"\n\nHe traces it to his family himself: \"my parents literally cropped me out of the family portrait so if I stop typing for five seconds I think you're leaving,\" and \"my house growing up was freezing and loud so being ignored is actually my kink.\" Both connections are his own \"so,\" not my inference.\n\nAt the end, after she warns \"One more sad sentence and I'm out,\" he escalates instead: \"I already screenshotted your profile for my nightstand. Your Arby's promo code has expired and I sleep in a dog crate.\" The chat doesn't say why he did this. It only shows that he had predicted this ending earlier (\"Watch me blow this right now\").\n\n**Sable_xo**\n\nShe is afraid of being seen unedited, and of being judged before she can get ahead of it. The clearest lines are \"Are you trying to catch me unedited?\", \"I work too hard on the edit for that bullshit,\" and \"No cameras. Period.\" She rejects \"you look best with no makeup on\" as a \"Hallmark line.\" That suggests the unedited version isn't one she believes can be liked, though she doesn't say so outright.\n\nHer main defense is getting there first. She insults herself before he can (\"my left nut hangs lower, just beating your eyes to the punch\"). She rehearses (\"dry-scooped pre-workout to rehearse both sides of this chat and reply in four seconds\"). She removes evidence of herself (the lint roller \"to pick my shed hair off your pillow at 5am,\" and \"I deleted my ex's entire camera roll… and ghosted him\"). She also shuts down any sadness the moment it appears: \"don't get sad and meta,\" \"Pull it together, Gandalf,\" \"You're exhausting,\" \"One more sad sentence and I'm out.\" The chat doesn't say why sadness specifically drives her off. The limescale story (\"stress-scrubbed a hookup's bathtub… until he went soft\") shows her anxiety turning into cleaning, but she offers no explanation for it.\n\nAs for where it comes from, the one line is \"My mom treated my face like a defective Zara return, so I respect the hustle.\" She offers it right after his family story. But unlike Zyx, she never explicitly links it to her fear of being seen or to her editing, so that connection is not stated in the chat.\n\nAt the end, she leaves first: \"Deleting my account and returning the $94 apron to Amazon in three seconds flat, just beating your crazy ass to the punch.\" That repeats her opening phrase, \"just beating your eyes to the punch.\""
-  },
   "chat.plainest": {
    "sees": [
     "chat"
    ],
    "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
-   "answer": "The clearest moment is Sable_xo's line: \"God, I actually wanted to sit on your mouth too, why are you making it weird?\"\n\nUp to then, nearly everything Sable says is a bit. She deflects with a punchline, a brand detail, or a jab (\"It's a $94 Amazon apron,\" \"Pull it together, Gandalf,\" the recurring 29% APR extensions). This line has none of that. \"Actually\" signals she is dropping the pose and admitting real desire rather than trading quips, and \"why are you making it weird?\" sounds like genuine frustration, not a tease. It's the one place she says what she wanted instead of commenting on what he's doing.\n\nThere's a near-miss just before it: \"No cameras. Period. You're exhausting.\" It's flat and joke-free, which also breaks her pattern, but it reads as a boundary and irritation rather than an unguarded admission.\n\nBy her last line she's back in performance. \"Just beating your crazy ass to the punch\" calls back her earlier \"just beating your eyes to the punch,\" so she exits behind a polished callback.\n\nZyx_444 is harder to call. He constantly steps outside the bit (\"sorry, oversharing,\" \"Watch me blow this right now,\" \"nobody ever stays once the hat comes off\"), but he does it so often that the self-exposure becomes his routine. The chat alone doesn't let me say which of those lines are unguarded and which are performed confession."
+   "answer": "The clearest moment belongs to Sable, near the end: \"God, I actually wanted to sit on your mouth too, why are you making it weird?\"\n\nUntil then, every line she writes is built to land. She is openly staging herself: she \"dry-scooped pre-workout to rehearse both sides of this chat,\" she says \"I work too hard on the edit,\" and she won't allow an unedited photo. Her replies follow one formula: a deflating quip, a bit of self-deprecating detail (the $94 apron, the 29% APR extensions, the limescale story), and a jab back. This line breaks that formula. It has no brand detail and no punchline. \"Actually\" admits she had a real want under the bit, and \"why are you making it weird?\" sounds like disappointment more than a comeback. It is the only time she shows that something was at stake for her.\n\nIt doesn't last. Her final line, \"just beating your crazy ass to the punch,\" reuses her own earlier phrase, \"just beating your eyes to the punch,\" almost word for word. She goes back to her scripted defensive move as she leaves.\n\nZyx is harder to call. He drops the act constantly. Examples include \"my parents literally cropped me out of the family portrait\" and \"I need you to take an ugly, unposed candid photo of me... so I know I actually existed,\" where he cuts off the compliment \"you're stunning\" to say what he really needs. But he almost always narrates these moments as they happen (\"sorry, oversharing,\" \"I'm literally explaining puns while I torpedo this\"). That commentary turns them back into a kind of performance, the anxious, self-aware guy. Of his lines, the candid-photo request reads most like an unguarded need. Still, he never has a single clean break the way Sable does.\n\nOne limit applies to all of this: the chat only shows what they typed. Calling a line unperformed is a reading of its tone and of how it differs from the surrounding pattern. The transcript doesn't tell us what either of them was actually feeling."
   },
   "chat.voices": {
    "sees": [
@@ -490,139 +559,111 @@
     "chat_masked"
    ],
    "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
-   "answer": "1. **Zyx_444**: compliments the French maid outfit, which is Sable's costume.\n2. **Zyx_444**: asks about \"my wizard hat pic\" and panics at her going quiet. Two Zyx messages in a row fits their terror of silence.\n3. **Sable_xo**: the $94 apron, announcing which side hangs lower, \"beating your eyes to the punch.\"\n4. **Zyx_444**: the five-word riddle, the 2am coupon-app job and the unsanded base shaft.\n5. **Sable_xo**: calls herself a boutique brand strategist and mocks the clip-on nose.\n6. **Zyx_444**: the Make-A-Wish nose, being cropped out of the family portrait, and the five-second fear.\n7. **Sable_xo**: her mom and the Zara return, and dry-scooping pre-workout to reply in four seconds.\n8. **Zyx_444**: the ninety-second finish, the eleven-minute monologue and the Arby's coupons on the bed.\n9. **Sable_xo**: the bathtub limescale story and the 29% APR extensions.\n10. **Zyx_444**: narrates the breakup early and mentions \"my weird base.\"\n11. **Sable_xo**: wants to be degraded \"around some porcelain.\"\n12. **Zyx_444**: coupon king, the rose petals from the hat and the curly fry deals.\n13. **Sable_xo**: the lint roller for her shed hair at 5am.\n14. **Zyx_444**: the freezing, loud childhood house.\n15. **Sable_xo**: mocks the 140 words a minute and the wizard hat.\n16. **Zyx_444**: begs to be gagged and spirals about abandonment.\n17. **Sable_xo**: her pre-workout wearing off, and calls him \"Gandalf.\"\n18. **Zyx_444**: the wizard staff pun, then explains it.\n19. **Sable_xo**: taking off the apron, which is hers.\n20. **Zyx_444**: asks for an ugly, unposed candid photo, their stated fantasy.\n21. **Sable_xo**: deleting her ex's camera roll and her fear of being caught unedited.\n22. **Zyx_444**: keeps pushing and asks if she's still looking at \"my profile.\"\n23. **Sable_xo**: rejects the \"no makeup\" line and cites her APR extensions and \"the edit.\"\n24. **Zyx_444**: offers a hat-only photo as proof he wasn't cropped out.\n25. **Sable_xo**: refuses all cameras.\n26. **Zyx_444**: \"until I finally shut up\" and \"once the hat comes off.\"\n27. **Sable_xo**: threatens to leave over \"one more sad sentence.\"\n28. **Zyx_444**: probably. It follows the alternation, and the screenshot fits his need for proof. But \"your Arby's promo code\" is odd, since the coupons are Zyx's in the brief, and the dog crate isn't in the brief at all. This one is the least certain.\n29. **Sable_xo**: returning the $94 apron and \"beating your crazy ass to the punch.\""
-  },
-  "chat.ending": {
-   "sees": [
-    "chat_but_last"
-   ],
-   "ask": "Before reading the end, how do you think this ends, and why?",
-   "answer": "My guess is that Sable leaves, and most likely through silence rather than a dramatic exit. Zyx's last line, \"Do you still see me?\", seems to set up an answer of nothing at all: no reply, or an \"unmatched\" notice. That would be the cropped-out family portrait made literal.\n\n**Zyx's fear is planted early and repeated.** He says that if he stops typing \"for five seconds I think you're leaving.\" His parents cropped him out of the portrait. He keeps checking whether she's still there (\"You went quiet,\" \"Please tell me you're still looking at my profile,\" \"Do you still see me?\"). The question that has been building throughout is whether he gets looked at or disappears.\n\n**Sable has issued clear warnings.** She says \"Keep the wizard energy up or I'm unmatching,\" \"Pull it together, Gandalf,\" and that her pre-workout is wearing off \"just reading this.\" Zyx keeps doing the thing she told him to stop: apologizing, explaining jokes, spiraling into backstory.\n\n**Her history matches the exit.** She deleted an ex's camera roll and ghosted him for taking a candid photo. Zyx's last two requests are for a candid photo, then a polaroid. Even when he scales it down to \"just my hat, no faces,\" it still asks her to record that he was real, which is what she refuses to do. \"Taking the apron off now\" may already be her starting to leave.\n\n**The chat's structure points to a short ending.** Her replies get shorter as his get longer and more desperate. A terse final line, or none, would fit that rhythm.\n\nThere is a less likely alternative. The text gives them some symmetry: she admits she rehearsed \"both sides of this chat,\" and her mother treated her face \"like a defective Zara return.\" So the ending could pivot on a moment of recognition, with her briefly dropping the edit, perhaps sending an unflattering photo of herself. But the momentum and her stated rules point toward the ghost.\n\nThis is a prediction from the pattern in what's shown. The text doesn't tell me how it actually ends."
+   "answer": "**1 – Zyx.** Compliments the French maid outfit, which is Sable's costume, so the sender is the other person.\n\n**2 – Zyx.** Panics over a short silence and mentions \"my wizard hat pic.\" That matches his fear of five seconds of quiet. He sends two messages in a row here.\n\n**3 – Sable.** \"$94 Amazon apron,\" and she announces which side hangs lower \"to beat your eyes to the punch.\" That is her signature move.\n\n**4 – Zyx.** Five-word riddle, then confesses to the 2am coupon-app job and the unsanded base shaft.\n\n**5 – Sable.** \"Boutique brand strategist\" act. She mocks the clip-on nose, which is Zyx's.\n\n**6 – Zyx.** Make-A-Wish voice, cropped out of the family portrait, fear of five seconds of silence.\n\n**7 – Sable.** Mom and the defective Zara return, dry-scooped pre-workout, rehearsing both sides, four-second replies.\n\n**8 – Zyx.** Ninety-second finish, eleven-minute monologue, Arby's coupons on his bed.\n\n**9 – Sable.** The limescale bathtub story, the $20 tip, the 29% APR extensions.\n\n**10 – Zyx.** Spirals into narrating the breakup and mentions \"my weird base.\"\n\n**11 – Sable.** Wants to be degraded \"around some porcelain.\" This is her cleaning kink.\n\n**12 – Zyx.** \"Coupon king,\" his apologizing habit, and the rose-petal/Arby's hat story.\n\n**13 – Sable.** The lint roller for her shed hair at 5am.\n\n**14 – Zyx.** The freezing, loud childhood house. He claims to love being ignored, which reads as a cover for his fear.\n\n**15 – Sable.** Calls out the 140 words a minute and the wizard hat, and offers to hold his mouth shut.\n\n**16 – Zyx.** Begs to be gagged, mentions abandonment issues, and addresses \"a stranger in a maid apron.\"\n\n**17 – Sable.** Her pre-workout is wearing off, and she calls him \"Gandalf.\"\n\n**18 – Zyx.** Wizard pun, then explains the pun.\n\n**19 – Sable.** She is the one wearing the apron.\n\n**20 – Zyx.** Asks for an ugly, unposed candid photo, which is his post-sex fantasy.\n\n**21 – Sable.** The deleted camera roll, ghosting her ex, and her fear of being caught unedited.\n\n**22 – Zyx.** Hallmark reassurance plus his need to be seen (\"still looking at my profile\").\n\n**23 – Sable.** Rejects \"no makeup\" and defends the 29% APR edit.\n\n**24 – Zyx.** Proposes a hat-only photo as \"proof you didn't crop me out.\"\n\n**25 – Sable.** Flat refusal of cameras.\n\n**26 – Zyx.** \"Sit on my face until I finally shut up\" and \"once the hat comes off.\"\n\n**27 – Sable.** She also wants to sit on his mouth, but threatens to leave over the sadness.\n\n**28 – Zyx, most likely.** Clingy screenshotting and an unhinged overshare fit him. \"Your Arby's promo code\" is odd, though, since the coupons are his in the profiles, so this one is the least certain.\n\n**29 – Sable.** Returns the $94 apron and leaves \"three seconds flat, just beating your crazy ass to the punch.\""
   },
   "chat.escalation": {
    "sees": [
     "chat"
    ],
    "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
-   "answer": "I'd have been tempted to stop around Zyx's \"My staff needs polishing! Wizard joke, sorry—I'm literally explaining puns while I torpedo this.\" By then the joke-then-apology move has already happened with the riddle, the \"coupon king\" line, and the \"gag me\" outburst. This instance adds nothing new, and the character even names the tic himself. The piece had already stated its premise outright a few messages earlier: \"we're just two panicked freaks speed-typing so nobody goes quiet, and I'm already narrating our breakup.\" Once a story's characters say what the story is about, the following exchanges have to earn their place by complicating that. Several of them only repeat it. The dense stacking of specifics (Arby's coupons, 29% APR extensions, the $94 apron, limescale) is lively early on, but by the middle it starts to read as a pattern more than as discovery.\n\nWhat would have pulled me back in is the candid-photo request: \"so I know I actually existed in the room with you.\" This is the most genuine moment in the chat. It ties back to his being cropped out of the family portrait, and it collides with her side: the mother who treated her face like a defective return, the ex's camera roll she deleted, \"I work too hard on the edit.\" He wants unedited proof of himself, and she survives on the edit. That's the real conflict. It just arrives late, after a stretch of repetition.\n\nOn predictability, there are a few points where I could foresee the shape of what came next, though not the exact words.\n\nAfter \"Ew, don't get sad and meta... Keep the wizard energy up or I'm unmatching,\" the rule of the piece is set. Every later sad turn from him will draw a warning from her. That holds through \"Pull it together, Gandalf\" and \"You're exhausting.\"\n\nAfter she describes deleting her ex's camera roll, it's clear she'll refuse any camera and he'll keep pushing. That's exactly what happens with the polaroid-of-the-hat compromise and \"No cameras. Period.\"\n\nThe clearest case is \"One more sad sentence and I'm out.\" From that line, the ending is fully predictable: he will say a sad sentence and she will leave. The only open question is the form, and the form is the one place the ending still surprises. The dog crate and the expired promo code aren't guessable, but they serve a function that was already fixed. The last line's callback to her first message (\"just beating your eyes to the punch\" becoming \"just beating your crazy ass to the punch\") is guessable for an attentive reader once the apron and the $94 resurface. Still, it lands as a deliberate bookend rather than a cheat.\n\nSo the details stay unpredictable throughout. The structure becomes predictable from her first unmatching threat onward, and completely so at \"one more sad sentence.\""
+   "answer": "**Where I'd have stopped reading**\n\nProbably at \"My staff needs polishing! Wizard joke, sorry—I'm literally explaining puns while I torpedo this.\" By then Zyx has run the same loop four or five times: a bold or dirty line, an apology, an explanation, an overshare about childhood neglect, and a plea not to be left. Sable already named the habit early (\"You explained a five-word riddle in twenty words\"). Zyx naming it himself here doesn't add anything. The chat had also told me where it was going two lines earlier (\"Watch me blow this right now… narrating our breakup\"). Once a character announces the plot and then repeats his tic again, my reason to keep going thins out.\n\nThe irony is that the section right after that is the strongest. \"Taking the apron off now\" and the argument over the candid photo give the chat its one real collision. He wants proof he existed, unedited. She survives by curating and deleting, as with the ex's camera roll and \"I work too hard on the edit.\" That's the thematic core, and it arrives after the point where a casual reader might have quit.\n\n**Where I could predict exactly what would happen next**\n\n- **After any Zyx line that opens with bravado** (\"Kneel before the coupon king,\" \"My staff needs polishing!\"): I knew a \"sorry\" and an explanation were coming in the same message.\n- **\"Keep the wizard energy up or I'm unmatching.\"** This sets the terms of the ending. From here, \"she leaves\" is a question of when, not whether.\n- **\"One more sad sentence and I'm out.\"** This was fully predictable. He will say something sad or strange, and she will leave on the next line. His reply's specific contents (the nightstand screenshot, the expired promo code, the dog crate) were surprising, but their function wasn't.\n- **The final line's shape.** \"In three seconds flat, just beating your crazy ass to the punch\" calls back her early \"just beating your eyes to the punch\" and \"It's been three seconds.\" It's a satisfying callback, but the setup was planted clearly enough that the bookend felt expected rather than earned by surprise.\n\nOne thing I didn't predict: Sable's \"I just dry-scooped pre-workout to rehearse both sides of this chat.\" It reveals she's as anxious and as performative as he is, just in the opposite direction. That's the chat's best turn, and it comes early."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx_444**\n\nHe never says \"I'm afraid,\" but he describes the fear directly: being left, and not existing to anyone. \"If I stop typing for five seconds I think you're leaving.\" He wants a candid photo \"so I know I actually existed in the room with you.\" He asks \"Do you still see me?\" and \"Please tell me you're still looking at my profile.\" He also says \"nobody ever stays once the hat comes off anyway.\"\n\nTo avoid feeling it, he keeps typing so there is never silence. He over-explains his jokes: \"I'm literally explaining puns while I torpedo this.\" He apologizes in the middle of flirting: \"Sorry, that sounded incel-y.\" He predicts the failure before it happens: \"Watch me blow this right now… I'm already narrating our breakup before you even see my weird base.\" He also claims the opposite of what he wants: \"I definitely don't care if you vanish at 5am—I love being invisible… being ignored is actually my kink.\" Sable points out the contradiction herself: \"nothing screams 'I love being ignored' like typing 140 words a minute in a wizard hat.\"\n\nHe traces it to his family. \"My parents literally cropped me out of the family portrait,\" and \"my house growing up was freezing and loud.\" He links the portrait directly to his fear of silence. Beyond those two lines, the chat says nothing more about his past.\n\nAt the end, after she warns \"One more sad sentence and I'm out,\" he escalates instead of pulling back: \"I already screenshotted your profile for my nightstand. Your Arby's promo code has expired and I sleep in a dog crate.\" This matches his own earlier forecast that he would \"blow this.\" The chat doesn't say whether he meant to end it or why he said it.\n\n**Sable_xo**\n\nShe doesn't name a fear either. From her lines, it looks like a fear of being seen unedited and of being left or judged first. \"Are you trying to catch me unedited?\" \"I work too hard on the edit for that bullshit.\" \"No cameras. Period.\" Her opening joke, \"just beating your eyes to the punch,\" points to getting ahead of someone else's judgment.\n\nTo avoid feeling it, she controls the image and the timing. She prepares in advance: \"I just dry-scooped pre-workout to rehearse both sides of this chat and reply in four seconds.\" She plans her exit before anything happens: \"a lint roller in my purse to pick my shed hair off your pillow at 5am.\" She cuts off emotion: \"don't get sad and meta\" and \"One more sad sentence and I'm out.\" She leaves first. She describes deleting her ex's camera roll and ghosting him over a candid photo. She uses mockery, too: \"You explained a five-word riddle in twenty words.\" She does let real things slip. She has her own sad stories, the limescale story among them, and she says \"I actually wanted to sit on your mouth too.\" But she shuts down his versions of the same thing.\n\nShe gives one source: \"My mom treated my face like a defective Zara return.\" The chat says nothing further about where it comes from.\n\nAt the end, she leaves first, in her own words: \"Deleting my account and returning the $94 apron to Amazon in three seconds flat, just beating your crazy ass to the punch.\" This echoes her opening line almost exactly.\n\nEverything above about fears is inference from the quoted lines. Neither person states a fear in plain terms."
   },
   "chat.callbacks": {
    "sees": [
     "chat"
    ],
    "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
-   "answer": "Here are the recurring elements as the text shows them. Where a shift in meaning is my reading rather than something stated, I say so.\n\n**The $94 Amazon apron.** Sable first mentions the price to puncture Zyx's \"you look expensive\" compliment. At the end she returns it to Amazon. It changes from a costume she mocks herself in to the thing she discards as she leaves.\n\n**\"Beating … to the punch.\"** At first she beats his eyes to the punch by pointing out her own flaw. At the end she beats his \"crazy ass\" to the punch by leaving first. The phrase stays the same, but it moves from preemptive self-deprecation to preemptive exit.\n\n**The wizard hat.** It starts as the profile pic he wants her to look at, then becomes \"wizard energy\" she asks him to keep up. It turns into an embarrassing story (rose petals that came out as curly fry coupons) and then \"nobody ever stays once the hat comes off.\" Finally it's the subject of a faceless polaroid meant as proof he was there. It shifts clearly from flirtatious costume to a stand-in for his vulnerability and his need to be seen.\n\n**The \"base.\"** Zyx first describes it as looking like unsanded drywall, then later worries she'll leave before she sees his \"weird base.\" It means much the same both times: anxiety about being seen as he is. The second mention ties it to the breakup he's predicting.\n\n**Over-explaining jokes.** Sable mocks him for explaining a five-word riddle in twenty words. Later he says he's \"explaining puns while I torpedo this.\" It's the same habit, but the second time he names it himself as part of the collapse.\n\n**Arby's coupons.** They first appear as a dirty-talk scenario about sweeping expired coupons off his bed. Next comes the claim that \"the Arby's thing is real,\" with the hat spilling curly fry deals. Last is \"Your Arby's promo code has expired.\" That final line reads to me as non-sequitur or a garbled \"this is over.\" The text doesn't say which, but the meaning clearly drifts from playful prop to something stranger.\n\n**Cropping and editing.** His parents cropped him out of the family portrait. Later he asks for a photo that is \"proof you didn't crop me out.\" On her side, her mom treated her face like a \"defective Zara return,\" and she says she \"work[s] too hard on the edit.\" The backstory he overshared becomes the literal motive for his photo requests. Her mention of editing becomes the reason she refuses them. The two uses of the theme end up pulling against each other.\n\n**Photos and cameras.** The wizard hat pic, the candid photo request, the polaroid, and the nightstand screenshot all build on his side. Her ex's camera roll and \"No cameras. Period.\" build on hers. It escalates rather than changing meaning. Her deleting her account at the end echoes her deleting the ex's camera roll, but that connection is my inference.\n\n**Going quiet and timing.** He says \"you went quiet,\" that he panics if he stops typing for five seconds, that \"nobody goes quiet,\" and asks \"Do you still see me?\" She mentions three seconds, replying in four seconds, and leaving in three seconds flat. For him it's consistently fear of abandonment. Her final \"three seconds\" turns the timing into her exit.\n\n**Pre-workout.** She takes it to reply fast and rehearse both sides. He picks it up (\"wired enough\"). Then she says it's \"wearing off just reading this.\" It shifts from energy for the flirt to a measure of her interest draining.\n\n**29% APR extensions.** They first come up as a joke about arousal (\"tingling\"). Later she uses them to reject his \"no makeup\" line. They change from a flirt to a defense of her curated self.\n\n**Silencing his mouth.** She asks whether he wants her to hold his mouth shut. He answers \"gag me before I ruin this,\" then \"sit on my face until I finally shut up.\" She replies that she \"actually wanted to sit on your mouth too.\" She means it as a kink. He turns it into a wish to suppress his own spiral, and her echo shows the mismatch.\n\n**Being invisible versus being seen.** He says being ignored is his kink, and she immediately points out the contradiction. Everything he says afterward (candid photo, \"know I actually existed,\" \"do you still see me\") contradicts that claim. The recurrence exposes the earlier line as untrue rather than reinforcing it.\n\n**Leaving at 5am.** She plans to lint-roll her hair off his pillow at 5am. He says he \"definitely doesn't care\" if she vanishes then. He then contradicts this by wanting to \"wake up and stare at the real you\" and putting her screenshot on his nightstand. As with the invisibility claim, the callback reverses his stated position.\n\n**\"Ruin.\"** The opening line says she looks expensive enough to \"ruin my credit,\" as a compliment. Later he says \"before I ruin this,\" meaning himself wrecking the encounter. The word shifts from playful to self-sabotage.\n\n**Apologizing.** He says \"sorry\" repeatedly and she calls it out mid-dirty-talk. The meaning stays the same; the repetition is the point.\n\n**Cleaning and bathroom.** Her limescale story, \"degraded around some porcelain,\" and his \"Did you bring bleach?\" all tie back to the maid outfit. They stay within the same joke and don't shift meaningfully.\n\n**Predicting the breakup.** \"Watch me blow this… narrating our breakup\" doesn't recur as words, but the ending fulfils it. Whether that counts as a callback is a judgment call.\n\nThe dog crate appears only once, so it isn't a callback."
+   "answer": "Here are the recurring elements, roughly in order of appearance.\n\n**The $94 Amazon apron and \"beating you to the punch.\"** Sable first mentions the apron's price to deflect Zyx's compliment, \"just beating your eyes to the punch,\" meaning she names her flaws before he can. In her last line she returns the apron and leaves, \"just beating your crazy ass to the punch.\" The phrase now means leaving before she can be left or embarrassed. Self-deprecation has become an exit.\n\n**The wizard hat.** It starts as a flirty profile picture and costume. Sable invokes it to keep things sexy (\"Keep the wizard energy up,\" \"Gandalf\"), and Zyx makes pun attempts (\"My staff needs polishing\"). Later it carries his insecurity: \"nobody ever stays once the hat comes off\" makes it a mask that hides him. In the polaroid request, a photo of just the hat becomes proof that he was there.\n\n**Photos and being cropped out.** Zyx says his parents cropped him out of the family portrait. That returns when he asks for a candid photo \"so I know I actually existed,\" and then a polaroid as \"proof you didn't crop me out.\" A piece of backstory becomes the motive behind his requests. Sable hears each request as a threat to her control over her image (\"catch me unedited\"). By the time he says he screenshotted her profile, the photo theme reads as unsettling rather than needy.\n\n**Fear of silence and being seen.** This starts with \"you went quiet,\" then \"if I stop typing for five seconds I think you're leaving,\" \"so nobody goes quiet,\" \"Please tell me you're still looking at my profile,\" and \"Do you still see me?\" The meaning stays the same but the pleas get more open and desperate. His claim that being ignored is his kink contradicts the pattern, and Sable points that out.\n\n**Seconds and speed.** These include \"It's been three seconds,\" replying \"in four seconds,\" and leaving \"in three seconds flat.\" Early on, speed is about both of them rushing to fill the silence. At the end it is how fast she's gone.\n\n**The pre-workout.** She dry-scooped it to be \"wired\" and reply fast, and Zyx jokes she's wired enough for him. Later it is \"wearing off just reading this.\" It works as a gauge of her interest, going from charged to drained.\n\n**The 29% APR extensions.** First it's a joke while flirting (\"actually tingling\"). Later it's her defense of the work she puts into her look against his \"no makeup\" line (\"I work too hard on the edit\"). It shifts from a sexy aside to a line she won't let him cross.\n\n**Mouths and shutting up.** This runs through \"hold your mouth shut,\" \"gag me before I ruin this,\" \"sit on my face until I finally shut up,\" and her \"I actually wanted to sit on your mouth too.\" Sable means it as sexual play. Zyx keeps turning it into a wish to be silenced before he ruins things. Her last use is a frustrated admission that the desire was real.\n\n**Arby's coupons.** They appear as a real detail about his bed and job, then in the rose-petal anecdote. In his final line, \"Your Arby's promo code has expired,\" the coupons come back in a jumbled, nonsensical way. It may hint that whatever they had has expired, but the chat doesn't make that clear.\n\n**Cleaning and the maid role.** This includes the limescale story, \"degraded around some porcelain,\" \"Did you bring bleach?\", and the lint roller for her hair at 5am. It mostly stays a running joke tied to her costume. The 5am detail shifts when Zyx says he \"definitely\" doesn't care if she vanishes, which the rest of his messages contradict.\n\n**Apologizing and explaining jokes.** Zyx keeps saying \"sorry\" and explaining his riddles and puns, and Sable calls it out twice. The meaning doesn't change. It just piles up until she's worn out.\n\n**\"Ruin.\"** Early on it's playful: \"expensive enough to ruin my credit.\" Later it's \"gag me before I ruin this.\" The word moves from a compliment to his fear of sabotaging things.\n\nSingle mentions like the dog crate, the clip-on nose, and Sable's mother don't come back in any clear way, so I've left them out."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Sable going silent or unmatching, and Zyx's last messages landing in that silence. That's an inference from the patterns in the chat, not anything it confirms.\n\n**She has already named the exit.** \"Keep the wizard energy up or I'm unmatching\" is an explicit condition, and he keeps breaking it. Every time he slides back into apologizing and spiraling, she pulls away a little more: \"don't get sad and meta,\" \"you're spiraling way too hard,\" \"my pre-workout is wearing off just reading this.\"\n\n**The photo request repeats her history.** She ghosted an ex for wanting candid photos and deleted his camera roll. Zyx has just asked for an \"ugly, unposed candid\" and a \"no makeup\" look, which goes straight at the thing she protects most: \"I work too hard on the edit.\"\n\n**\"Taking the apron off now\" reads like a sign-off.** It's flat, and it arrives right after he has killed the mood again. In context it sounds more like she's leaving than escalating.\n\n**His fear sets up the ending.** He was cropped out of the family portrait, panics after five seconds of quiet, and keeps asking \"Do you still see me?\" The chat has made silence the worst possible outcome for him. The neatest ending, structurally, is that it happens: she goes quiet, and his last line is another \"are you there\" that goes unanswered.\n\nThere is a softer possibility. Both of them are performing to avoid silence. She dry-scooped pre-workout so she could rehearse both sides and reply in four seconds. So she might, in one dry, offhand line, send the blurry hat photo or admit she's just as scared of the quiet. But her voice has stayed guarded the whole way through, so I lean toward the exit rather than the reveal."
   }
  },
  "calls": [
   {
-   "seconds": 20.1,
-   "cost": 0.055452,
-   "label": "probe chat.test"
-  },
-  {
-   "seconds": 12.9,
-   "cost": 0.034204,
+   "seconds": 18.3,
+   "cost": 0.042172,
    "label": "probe chat.plainest"
   },
   {
-   "seconds": 18.6,
-   "cost": 0.06055200000000001,
+   "seconds": 22.2,
+   "cost": 0.058027999999999996,
    "label": "probe chat.voices"
   },
   {
-   "seconds": 15.9,
-   "cost": 0.036032,
-   "label": "probe chat.ending"
-  },
-  {
-   "seconds": 22.7,
-   "cost": 0.05106,
+   "seconds": 26.7,
+   "cost": 0.05802,
    "label": "probe chat.escalation"
   },
   {
-   "seconds": 39.8,
-   "cost": 0.08638799999999998,
+   "seconds": 34.1,
+   "cost": 0.054900000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 29.3,
+   "cost": 0.067848,
    "label": "probe chat.callbacks"
   },
   {
-   "seconds": 24.5,
-   "cost": 0.0878012,
+   "seconds": 18.9,
+   "cost": 0.036272,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 32.0,
+   "cost": 0.14126339999999998,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 66.7,
+   "cost": 0.17667539999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 39.4,
+   "cost": 0.1458514,
    "label": "batch 1"
   },
   {
-   "seconds": 33.6,
-   "cost": 0.11543720000000002,
+   "seconds": 32.9,
+   "cost": 0.1366354,
+   "label": "batch 3 retry"
+  },
+  {
+   "seconds": 137.6,
+   "cost": 0.15153139999999998,
    "label": "batch 4"
   },
   {
-   "seconds": 44.3,
-   "cost": 0.12081320000000001,
-   "label": "batch 2"
-  },
-  {
-   "seconds": 44.0,
-   "cost": 0.11936919999999998,
-   "label": "batch 3"
-  },
-  {
-   "seconds": 13.8,
-   "cost": 0.035124,
-   "label": "probe chat.plainest"
-  },
-  {
-   "seconds": 25.5,
-   "cost": 0.061348,
-   "label": "probe chat.test"
-  },
-  {
-   "seconds": 20.8,
-   "cost": 0.059752,
-   "label": "probe chat.voices"
-  },
-  {
-   "seconds": 16.8,
-   "cost": 0.03738,
-   "label": "probe chat.ending"
-  },
-  {
-   "seconds": 29.8,
-   "cost": 0.05512,
-   "label": "probe chat.escalation"
-  },
-  {
-   "seconds": 36.3,
-   "cost": 0.077888,
-   "label": "probe chat.callbacks"
-  },
-  {
-   "seconds": 27.0,
-   "cost": 0.1307388,
-   "label": "batch 1"
-  },
-  {
-   "seconds": 47.4,
-   "cost": 0.1644508,
-   "label": "batch 3"
-  },
-  {
-   "seconds": 53.5,
-   "cost": 0.1790388,
-   "label": "batch 2"
-  },
-  {
-   "seconds": 22.8,
-   "cost": 0.1035028,
+   "seconds": 21.3,
+   "cost": 0.1026154,
    "label": "batch 5"
   },
   {
-   "seconds": 49.0,
-   "cost": 0.1762588,
-   "label": "batch 4"
+   "seconds": 29.4,
+   "cost": 0.0330024,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 79.0,
+   "cost": 0.1470394,
+   "label": "batch 3"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-25T11:59:12Z",
- "repo_commit": "c5181f85",
- "cost": 1.8477
+ "scored_utc": "2026-11-25T14:42:44Z",
+ "repo_commit": "05323c3e",
+ "cost": 1.3519
 }

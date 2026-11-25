@@ -6,7 +6,7 @@
  "order": 114,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v14/chat-reuben-brick/",
- "note": "Every chat of run 14 (run 13 told as improvisation instructions, without the game's language; traps two long): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
+ "note": "Every chat of run 14 (run 13 told as improvisation instructions, without the game's language; traps two long): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
  "when": null,
  "writer": null,
  "writers_run": 14,
@@ -24,14 +24,26 @@
  "scores": {
   "chat.variety": {
    "score": 2,
-   "why": "All three chats run the same night in the same order. Reuben opens by complimenting her look or her shaft-tattooed schedule. She catches the four-second reply. He denies rehearsing in the mirror. She cites the ex who left over calendared fights and the cab after \"sometime.\" Improvisation 5 brings his narrated meltdown naming Delphine, Improvisation 7 brings the \"I definitely do not want you to…\" denial, and it ends on a sent recurring calendar invite. Many lines recur in all three chats, well past the two-chat limit: the four-second reply, the travel buffer, boxed rosé, crying in the cab, the denied mirror rehearsal. Others recur in two: the $340 steamer, \"dishwasher-safe,\" the plastic sword. It stays above a 1 only on texture that belongs to one writer: Ali Wong's empty floor with no chairs and pigs-in-blankets, Joel Kim Booster's ottoman and Q3 overhead, Jimmy Carr's contract-law framing, 21:05 silence clause and \"2038\" booking.",
+   "why": "I set aside the shared move order (charm, wit, denial, dread, rescue, date), which the instructions fix. What the writers built on it is still close to one scene. All three open with Reuben's breezy line about her outfit or schedule tattoo. All three have Brick catch his four-second reply and call his mirror rehearsal. She reveals the ex who left over calendared fights and the cab she cried in after \"sometime\". He confesses that Delphine left because everything was a bit. It closes on an invite with travel buffers. Lines recur across all three chats (four seconds, mirror, cab/sometime, boxed rosé, travel buffer), and more recur in two (dishwasher-safe, $340 steamer, eleven days indoors). What lifts it off a 1 is texture: Carr's contract-law silence clause and 2038 fumble, Ali's chairs and pigs-in-a-blanket, Joel's ottoman and Q3 productivity.",
    "evidence": [
-    "Let's audit the boomerang.",
-    "Also, you replied in four seconds flat, Mr. Barely Online.",
-    "Dry since Tuesday. Four-second reply."
+    "Oddly specific denial, darling. I'm militant because the last dick who said \"let's do this again sometime\" without naming a day left me sobbing in a cab.",
+    "Because \"zero expectations\" is just men's code for saying \"let's do this again\" in a cab without naming a day.",
+    "If you're a \"let's do this again sometime\" guy, unmatch now and save me crying in a taxi."
    ],
-   "raise": "Have at least one writer break the shared beat order: for example, give the four-second catch and the mirror denial to her rather than him, or end on something other than a sent calendar invite. Also drop the brief's stock props (steamer, plastic sword, cab) wherever a writer can find their own.",
-   "cause": "both",
+   "raise": "Let each writer find a different first crack and a different reveal for Brick, instead of the four-second callout followed by the cab-and-calendar-ex story, so that no beat or line appears in all three chats.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
    "def": "eb4c97580d7f148b",
    "material": "ca93a0893066827e",
    "judge": "claude:opus",
@@ -46,18 +58,13 @@
  "probes": {},
  "calls": [
   {
-   "seconds": 19.3,
-   "cost": 0.07876,
-   "label": "batch 0"
-  },
-  {
-   "seconds": 20.5,
-   "cost": 0.0850868,
+   "seconds": 23.5,
+   "cost": 0.0843554,
    "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-25T11:56:25Z",
- "repo_commit": "c5181f85",
- "cost": 0.1638
+ "scored_utc": "2026-11-25T14:33:32Z",
+ "repo_commit": "05323c3e",
+ "cost": 0.0844
 }

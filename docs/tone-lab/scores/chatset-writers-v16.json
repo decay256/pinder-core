@@ -6,7 +6,7 @@
  "order": 116,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/",
- "note": "Every chat of run 16 (Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
+ "note": "Every chat of run 16 (Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
  "when": null,
  "writer": null,
  "writers_run": 16,
@@ -23,15 +23,30 @@
  },
  "scores": {
   "chat.variety": {
-   "score": 2,
-   "why": "All three chats open the same way: Zyx compliments her photo, sends a needy double-text about being looked at, and Sable undercuts it with her uneven ball. The disclosures then follow the same sequence of family-portrait cropping, mother as returns desk, dry-scooped pre-workout, the $94 maid outfit and limescale scrub, the 5am lint roller, and the ex ghosted over an unposed photo. Many lines recur in all three chats, which breaks the bar well beyond 'more than two': '$94', 'went soft', 'pre-workout', 'cropped out of the family photo', 'lint roll' and 'unposed photo'. Others recur in two: 'partner in crime', 'TED talk', '29% APR', '140 wpm', 'Gandalf', 'gag me', and 'ninety seconds / eleven minutes / tight five'. The shared improvisation beats (Improv 1's clinging Charm, Improv 11's trope trap, Improv 14's Madness) explain the matching shape. But the writers also reuse the profile props almost verbatim, so the nights differ mostly in voice and in the last two lines (Ali's account deletion, Joel's 'Brenda' wrong window, Carr's funeral wreath); that is what lifts this above a 1.",
+   "score": 3,
+   "why": "I set aside the arc the instructions fix (clingy opener, overexplained jokes, dread narration, the unmatch at 14), so all 14 improvisations are excused for shape. What the writers built on top of that arc still repeats. In all three, Zyx's first reveal is being cropped out of the family portrait, followed by Sable's mother auditing her looks and the pre-workout dry-scoop. All three also reuse the same anecdotes almost word for word: the limescale scrub that ends with the man going soft, the ninety-second finish with a stand-up set afterwards, the 5am lint roller, and the ex ghosted over an unposed photo. Smaller lines recur too: 'breathe', 'Gandalf', 'partner in crime', 'TED talk' and an expired-promo-code madness line. Each chat does have its own moments: Joel's 'Wait. Did you actually just stop talking?... Last chance' reversal, Jimmy's 'couldn't afford you at retail', and Ali's apron-return callback. That keeps it above a 2, but the shared order of reveals and the lines repeated across all three keep it below the line.",
    "evidence": [
-    "I once stress-scrubbed a hookup’s bathtub limescale until he went soft and tipped me $20 to leave.",
-    "my mom still audits my selfies like a returns desk",
-    "My mother still inspects my selfies like a returns desk."
+    "I once stress-scrubbed a hookup's bathtub limescale until he went soft and tipped me $20 to leave.",
+    "I once wore a $94 maid costume and scrubbed a guy's limescale until he went soft and tipped me $20.",
+    "last bloke I liked got his bathtub scrubbed in a $94 maid outfit until he went soft."
    ],
-   "raise": "Have each writer draw on a different subset of the profile facts and reveal them in a different order, so that no prop (the $94 maid outfit, pre-workout, the unposed-photo ex) appears in more than two chats.",
-   "cause": "both",
+   "raise": "Have each writer draw on a different subset of the profile backstory and reveal it in a different order, so the limescale, ninety-second and family-portrait beats are not used verbatim in every chat.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
    "def": "eb4c97580d7f148b",
    "material": "90256de4fe64f8df",
    "judge": "claude:opus",
@@ -46,18 +61,13 @@
  "probes": {},
  "calls": [
   {
-   "seconds": 18.9,
-   "cost": 0.0739292,
-   "label": "batch 0"
-  },
-  {
-   "seconds": 21.3,
-   "cost": 0.0996068,
+   "seconds": 41.5,
+   "cost": 0.1094754,
    "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-25T11:59:58Z",
- "repo_commit": "c5181f85",
- "cost": 0.1735
+ "scored_utc": "2026-11-25T14:38:21Z",
+ "repo_commit": "05323c3e",
+ "cost": 0.1095
 }

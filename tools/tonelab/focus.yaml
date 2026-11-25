@@ -23,9 +23,10 @@ experiment: >-
   improvisations stay. Run 13 plays Reuben and Brick in the game's language (turns and rolls); run 14
   plays them as improvisation instructions without it. Runs 15 and 16 do the whole workflow for Zyx_444
   and Sable_xo, whom the comedians had not written: in one go (15, no instructions), then as
-  improvisations (16). The judge reads each improvised chat with the instructions it was written to,
-  says for every score whether the writing or the instruction decided it, and scores how well the
-  instructions were played. Every chat is scored on the chat scorecard, and each run as a set. Runs 1
+  improvisations (16). The judge reads each improvised chat with the instructions it was written to
+  and judges every dimension in their context: a moment an instruction required is not held against
+  a dimension, which is scored on the rest; a separate dimension scores how well the instructions
+  were played. Every chat is scored on the chat scorecard, and each run as a set. Runs 1
   to 12, and the profiles and plans, are off this page; the full explorer keeps them.
 gate: Every critical dimension scores 4 or more on a chat, and the run's set scores 4 or more on variety.
 disabled: [profile, plan]
@@ -93,7 +94,7 @@ tiers:
   chat.commitment:  {tier: critical, why: "Caught out, they dig deeper; no lesson. Nothing scored it before."}
   chat.escalation:  {tier: critical, why: "Saunders: every stretch raises the stakes or turns. Replaces pacing, which docked chats for explicit sex the brief asks for."}
   chat.medium:      {tier: critical, why: "Leonard: typed, not written. 3 on every played chat: the chats read like prose."}
-  chat.improvisation: {tier: critical, why: "The improvisations stay, so a weak chat is either a weak instruction or a weak take on one. This scores the take; each score's cause says which."}
+  chat.improvisation: {tier: critical, why: "The improvisations stay, and the other dimensions set aside what an instruction required. This scores the take on each instruction, with nothing set aside."}
   chat.variety:     {tier: critical, why: "Fourteen writers wrote one scene; only a set can show it."}
   chat.sideways:    {tier: watch, why: "Already separates chats (3 to 4); keep it in view."}
   chat.status:      {tier: watch, why: "New: in every run 3 and run 4 opening Brick is on top and stays there."}

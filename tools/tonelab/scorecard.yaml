@@ -1098,8 +1098,9 @@ dimensions:
   name: Plays the improvisations
   priority: core
   source: >-
-    Runs 12 on: the chat is written to instructions, so a weak score can be the instruction or the
-    writer. This one scores the writer's side: what they made of each instruction.
+    Runs 12 on: the chat is written to instructions, and the other dimensions set aside what an
+    instruction required. This one scores what the writer made of each instruction, so nothing is
+    excused here: excused is always [].
   tells: >-
     Each instruction happens on screen, as the characters, and is funny: the successes land, the
     misses go wrong the way the instruction says, each trap is played for its length and then

@@ -6,7 +6,7 @@
  "order": 113,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v13/chat-reuben-brick/",
- "note": "Every chat of run 13 (run 12 with the turn no longer fixed at one message from each): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
+ "note": "Every chat of run 13 (run 12 with the turn no longer fixed at one message from each): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
  "when": null,
  "writer": null,
  "writers_run": 13,
@@ -24,14 +24,23 @@
  "scores": {
   "chat.variety": {
    "score": 2,
-   "why": "All three chats follow the same night in the same order. Each opens with Reuben's hat-and-monocle flattery and a swap of disclosures about the 4.5-inch curve and the bump or ridge. Then come the Marguerite calendar fights and the crying-in-a-cab story, a denial of being a shut-in or of rehearsing (Turn 3, Turn 7), live narration of his own collapse with Brick saying 'stop narrating' (Turn 5 and Turn 8 Spiral), and a timestamped booking with a calendar invite accepted (Turn 11). Specific lines recur well beyond what the shared instructions fix: 'four seconds flat' and 'leaving the top hat at home' close two chats, 'monocle just fogged' appears in two, and 'dishwasher-safe' kanji, the $340 steamer, the plastic cocktail sword and 'eleven days' each appear in two. It sits below a 3 because the endings are near-identical too, and the real differences are local (Booster's explicit fear confession, Wong's early Reuben-led itinerary, Carr's Brick-written schedule) rather than different nights.",
+   "why": "Setting aside what the instructions fix (the Denial lies, the Spiral narration and the agreed date at the end), the three chats still play almost the same night in the same order. Reuben opens with a top-hat compliment and a disclosure or lie. Brick answers with her own disclosure and either clocks his fast reply or hands him a time slot. Then come the Marguerite shared-calendar fights, the 'sometime' cab sob, and Delphine's 'one sentence'. Ali Wong's and Jimmy Carr's chats even share Brick's 'sixty seconds' ultimatum and the itemised itinerary as the come-on. Verbatim lines recur in more than two chats, and several pairs share whole jokes; each chat adds a few of its own (Ali's ring light and pigs-in-a-blanket, Jimmy's 'forbidden to be funny', Joel's plain statement of fear), which keeps this off a 1 but not far enough from one scene to reach a 3.",
    "evidence": [
-    "Invite sent in four seconds flat—leaving the top hat at home.",
-    "Invite sent—and you accepted in four seconds flat.",
-    "My monocle just fogged up. Drop your email for the invite."
+    "Four-second reply says you live here, handsome.",
+    "you replied in four seconds flat.",
+    "My monocle just fogged up."
    ],
-   "raise": "Have at least one chat take a different opening move and turning point (for example, Brick opening, or the cab story surfacing at the end rather than at Turn 3), and drop the profile props and closing phrases that recur verbatim.",
-   "cause": "both",
+   "raise": "Give each chat a different opening move and a different turning device (not the sixty-second ultimatum or the itinerary come-on every time), and stop reusing the 'dishwasher-safe' kanji, rosé-and-cocktail-sword and top-hat-at-home lines across chats.",
+   "excused": [
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
    "def": "eb4c97580d7f148b",
    "material": "02328ce60c12d5b7",
    "judge": "claude:opus",
@@ -46,18 +55,13 @@
  "probes": {},
  "calls": [
   {
-   "seconds": 22.5,
-   "cost": 0.08768400000000001,
-   "label": "batch 0"
-  },
-  {
-   "seconds": 25.0,
-   "cost": 0.10885600000000001,
+   "seconds": 42.2,
+   "cost": 0.109676,
    "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-25T11:51:59Z",
- "repo_commit": "c5181f85",
- "cost": 0.1965
+ "scored_utc": "2026-11-25T14:28:23Z",
+ "repo_commit": "05323c3e",
+ "cost": 0.1097
 }
