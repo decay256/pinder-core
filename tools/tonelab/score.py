@@ -828,10 +828,15 @@ def lean_data(data, focus):
     keep = set(focus.get("reference") or []) | {p["id"] for p in focus.get("planned") or []}
     keep |= {r["id"] for r in data["results"] if r["kind"] in (focus.get("detail") or [])}
     off = set(focus.get("disabled") or [])
+    # runs_from: the focus page shows the writers' runs from this one on; earlier runs and chats from
+    # other pipelines stay in the full explorer and in their score files, not on this page
+    since = focus.get("runs_from")
     slim_keys = ("id", "kind", "label", "version", "order", "run", "source", "when", "note", "summary", "judge")
     results = []
     for r in data["results"]:
         if r["kind"] in off:
+            continue
+        if since is not None and r["kind"] == "chat" and (r.get("writers_run") or 0) < since:
             continue
         if r["id"] in keep:
             results.append(r)

@@ -7,6 +7,7 @@
 # tier: critical = decides the experiment and the gate; watch = scored and shown, not targeted;
 # off = not scored in this experiment. Every entry says why. Quote "off": bare, YAML reads it as false.
 # detail: kinds whose every result the focus page shows in full.
+# disabled: kinds left off the focus page. runs_from: the first writers' run the focus page shows.
 
 title: The writers' chats
 mission: >-
@@ -16,13 +17,19 @@ mission: >-
   were.
 mission_source: Pinder's brief, "What the reader should feel"
 experiment: >-
-  Fourteen writers and comedians each wrote both characters and a chat between them, in four runs;
-  in a fifth and a sixth, the six comedians rewrote their chat in at most 1,000 and then 500 words; in a seventh, three of them, each with a system prompt about their own work, wrote new profiles and a 500-word chat written as a joke; in an eighth, they first worked out the joke, then wrote the chat; in a ninth, from a brief cut to its what and why, one joke with one punchline; in a tenth, new characters and chats from that short brief, with the game's notes unsorted and the chat worked out first as a bit; in an eleventh, each comedian rewrote the brief in their own words, wrote a short take on both characters at once, and wrote a chat that sets something up and pays it off; in a twelfth, the same comedians played that chat turn by turn on the game's dice, told each turn what the roll did; in a thirteenth, the same again without fixing each turn at one message from each; in a fourteenth, the same told as improvisation instructions, without the game's language; in a fifteenth and a sixteenth, the whole workflow for two characters the comedians had not written, Zyx_444 and Sable_xo: in one go, then as improvisations. Score every chat on the rewritten chat scorecard, whose dimensions come from the brief and from
-  what these writers say about their own craft, and score each run as a set: did the writers write
-  different nights, or one scene fourteen times?
+  Three comedians, Ali Wong, Joel Kim Booster and Jimmy Carr, each rewrite Pinder's brief in their own
+  words, write a short take on both characters, and write the chat between them. Run 11 writes it in
+  one go and has it set something up and pay it off. Runs 12 to 14 keep run 11's briefs and characters
+  and play the chat on the game's seed 23 instead: turn by turn, told what each roll did (12); without
+  fixing each turn at one message from each (13); as improvisation instructions, without the game's
+  language (14). Runs 15 and 16 do the whole workflow for two characters the comedians had not
+  written, Zyx_444 and Sable_xo: in one go (15), then as improvisations (16). Every chat is scored on
+  the chat scorecard, and each run as a set: did the comedians write different nights, or one scene
+  three times? Runs 1 to 10, and the profiles and plans, are off this page; the full explorer keeps them.
 gate: Every critical dimension scores 4 or more on a chat, and the run's set scores 4 or more on variety.
-disabled: []
+disabled: [profile, plan]
 detail: [chat]
+runs_from: 11
 
 # Reference columns: the best we have today on the same dimensions.
 reference: [profile-reuben-v22, profile-reuben-v22-panel, profile-reuben-v24, profile-reuben-v24-panel,
