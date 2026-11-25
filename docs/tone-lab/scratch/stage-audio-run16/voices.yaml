@@ -1,0 +1,42 @@
+# Two invented stage voices. No real performer is named or cloned.
+# Each mode is designed with the same base description plus a delivery direction,
+# on a reference sentence of its own (not from the script). The takes that sound
+# most like one person across all four modes are frozen as clone prompts.
+
+zyx:
+  base: >-
+    A stand-up comedian in their late twenties with an androgynous, light mid-range
+    voice and a South London accent. Quick, slightly reedy, hyper-verbal, performing
+    live into a handheld microphone in a comedy club.
+  modes:
+    patter:
+      direction: Fast, eager, chatty patter, words tumbling out, nervous energy under a confident front.
+      text: "Right, okay, so here's the thing. I've had four coffees, I've got opinions about every single one of you, and I'm going to share them whether you like it or not."
+    spiral:
+      direction: Racing, breathless self-correction, speeding up while over-explaining, a little panicked, rushing to the end of the sentence.
+      text: "No, wait, that came out wrong. What I meant was, and I'm saying this as someone who has never been to therapy, which is obvious, you can tell, it's fine, I'm fine."
+    plead:
+      direction: Needy and earnest, softer and slower, the voice slightly cracking, sincerely asking for something.
+      text: "Please, just stay a little longer. I know I talk too much. I just don't want this to be the bit where everybody leaves."
+    smug:
+      direction: Cocky and pleased with themself, landing a punchline with a sly grin, a small pause before the last word.
+      text: "And that, ladies and gentlemen, is why my landlord no longer asks me for the rent. He asks me for advice."
+
+sable:
+  base: >-
+    A female stand-up comedian in her late twenties with a low, slightly husky voice
+    and an Essex accent. Dry, unhurried, cutting, performing live into a handheld
+    microphone in a comedy club.
+  modes:
+    deadpan:
+      direction: Bone-dry deadpan, flat and unimpressed, slow and precise, no smile in the voice.
+      text: "I went on a date last week. He told me he was an entrepreneur. He sells candles. On a market stall. In the rain."
+    withering:
+      direction: Withering and scornful, cutting each word with sharp emphasis, openly contemptuous.
+      text: "Oh, you've got a podcast? Brilliant. Tell me more about how your opinions need a microphone."
+    amused:
+      direction: Grudgingly amused, a suppressed laugh in the voice, warmer, almost smiling despite herself.
+      text: "No, stop it, that's actually quite funny. I hate that. I really hate that you made me laugh."
+    kill:
+      direction: Slow, savouring, triumphant delivery of a killer put-down, leaning on each word and relishing it.
+      text: "Darling, I've seen better comebacks on a shopping trolley. And at least the trolley had direction."

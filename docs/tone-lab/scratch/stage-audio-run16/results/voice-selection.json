@@ -1,0 +1,68 @@
+{
+  "zyx": {
+    "score": 1.2291169141729672,
+    "modes": {
+      "patter": {
+        "take": "take7.wav",
+        "wer": 0.0,
+        "dur": 10.64,
+        "asr": " Right? Okay, so, here's the thing. I've had four coffees, I've got opinions about every single one of you, and I'm going to share them whether you like it or not.",
+        "passing_takes": 8
+      },
+      "spiral": {
+        "take": "take0.wav",
+        "wer": 0.0,
+        "dur": 8.64,
+        "asr": " No, wait, that came out wrong. What I meant was, and I'm saying this as someone who has never been to therapy, which is obvious, you can tell, it's fine, I'm fine.",
+        "passing_takes": 8
+      },
+      "plead": {
+        "take": "take7.wav",
+        "wer": 0.0,
+        "dur": 7.92,
+        "asr": " Please, just stay a little longer. I know I talk too much. I just don't want this to be the bit where everybody leaves.",
+        "passing_takes": 7
+      },
+      "smug": {
+        "take": "take2.wav",
+        "wer": 0.0,
+        "dur": 7.28,
+        "asr": " And that, ladies and gentlemen, is why my landlord no longer asks me for the rent. He asks me for advice.",
+        "passing_takes": 8
+      }
+    }
+  },
+  "sable": {
+    "score": 1.229724111656348,
+    "modes": {
+      "deadpan": {
+        "take": "take7.wav",
+        "wer": 0.0,
+        "dur": 8.64,
+        "asr": " I went on a date last week. He told me he was an entrepreneur. He sells candles on a market stall in the rain.",
+        "passing_takes": 8
+      },
+      "withering": {
+        "take": "take6.wav",
+        "wer": 0.0,
+        "dur": 6.64,
+        "asr": " Oh, you've got a podcast. Brilliant. Tell me more about how your opinions need a microphone.",
+        "passing_takes": 8
+      },
+      "amused": {
+        "take": "take4.wav",
+        "wer": 0.056,
+        "dur": 6.24,
+        "asr": " Oh, stop it. That's actually quite funny. I hate that. I really hate that you made me laugh.",
+        "passing_takes": 8
+      },
+      "kill": {
+        "take": "take5.wav",
+        "wer": 0.0,
+        "dur": 8.16,
+        "asr": " Darling, I've seen better comebacks on a shopping trolley. And at least the trolley had direction.",
+        "passing_takes": 8
+      }
+    }
+  }
+}

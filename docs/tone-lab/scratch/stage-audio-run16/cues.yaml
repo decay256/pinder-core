@@ -1,0 +1,142 @@
+# Stage cue sheet for tone-lab run 16 (writers-v16/chat-zyx-sable/carr.md, Jimmy Carr).
+# Carr's words are kept; only what a reader sees but a listener cannot is rewritten
+# for speech (currency, percentages, units, the em-dash asides). Each message is
+# split into segments where a laugh would land mid-line on stage.
+#
+# mode     - which frozen reference delivery of the speaker's voice renders the segment
+# react    - the audience reaction after the segment:
+#            none | titter | laugh | big | huge | ooh | groan | aww
+#            (huge includes applause)
+# pause    - extra silence in seconds before the segment, for a beat before a twist
+#
+# Zyx modes:   patter (fast, eager), spiral (racing self-correction),
+#              plead (needy), smug (landing a punchline)
+# Sable modes: deadpan, withering, amused, kill (slow, savouring)
+
+opening: applause
+closing: huge
+
+lines:
+  - speaker: zyx
+    segments:
+      - {mode: smug, text: "You don't need that ring light, your glans has natural cheekbones.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: patter, text: "Keep typing, if those dots stop for five seconds I assume you've died.", react: titter}
+  - speaker: sable
+    segments:
+      - {mode: deadpan, text: "The light's two hundred and twelve pounds on credit, to hide a lazy left bollock.", react: laugh}
+      - {mode: withering, text: "Are you always this needy, or is that wizard hat cutting off your circulation?", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: smug, text: "A wizard hat only cuts off circulation if you wear it at the base.", react: groan}
+      - {mode: spiral, text: "That's a cock ring joke, because brims are circular, though velvet isn't actually tight enough, unlike this clip-on nose piece.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: patter, text: "Clock's ticking, my turn to lead: what else is that two hundred and twelve pound shadow hiding?", react: none}
+  - speaker: sable
+    segments:
+      - {mode: withering, pause: 0.4, text: "Did you just dissect your own knob gag like a coroner?", react: big}
+      - {mode: deadpan, text: "The hair's clip-in, on a twenty-nine percent credit card. And you're ten seconds from being blocked.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "Don't block me! I panic-type, because in my house, if you went quiet, you got cropped out of the family photo.", react: ooh}
+      - {mode: spiral, text: "Obviously cameras aren't voice-activated, I'm over-explaining emotional neglect.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: smug, text: "My question: who taught you to audit your own bollocks before a man even unzips?", react: ooh}
+  - speaker: sable
+    segments:
+      - {mode: deadpan, text: "My mother still inspects my selfies like a returns desk.", react: laugh}
+      - {mode: withering, text: "I'm dry-scooping pre-workout on a floor mattress, wizard boy. You can't out-damage me.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: smug, pause: 0.3, text: "Your mum's only playing returns desk because she knows she couldn't afford you at retail.", react: huge}
+      - {mode: patter, text: "Keep the floor mattress, my wizard hat needs the headroom.", react: titter}
+  - speaker: sable
+    segments:
+      - {mode: amused, text: "Okay. That actually made my lazy bollock twitch.", react: big}
+      - {mode: deadpan, text: "Careful though. Last bloke I liked got his bathtub scrubbed in a ninety-four dollar maid outfit, until he went soft.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "You scrub tubs so they can't see you still. I talk at a hundred and forty words a minute so you don't ask me to stay.", react: aww}
+      - {mode: spiral, text: "And there I go, ruining the foreplay with a TED Talk while you reach for the unmatch button.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: withering, text: "Take your finger off the self-destruct, Freud, you're giving me the ick.", react: laugh}
+      - {mode: deadpan, text: "What's a conversational dominance consultant doing awake at midnight anyway?", react: none}
+  - speaker: zyx
+    segments:
+      - {mode: smug, text: "Dominating your inbox with fifteen percent off.", react: titter}
+      - {mode: spiral, text: "Wrong tab, I actually work night-shift chat for a coupon app. I'm not saying my cock's on clearance.", react: big}
+  - speaker: zyx
+    segments:
+      - {mode: patter, text: "My turn: what do you do after you've shagged?", react: ooh}
+  - speaker: sable
+    segments:
+      - {mode: withering, text: "Coupon support? Tragic.", react: laugh}
+      - {mode: deadpan, text: "I wake at five a.m. to lint-roll my shed hair off the pillowcase. And right now, you're not making it to four a.m.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: patter, text: "I've never finished in ninety seconds and done eleven minutes of stand-up so she'd tell her friends I was good.", react: laugh}
+      - {mode: spiral, text: "Which is an oddly specific denial. I'm basically handing you a stopwatch.", react: big}
+  - speaker: sable
+    segments:
+      - {mode: kill, pause: 0.4, text: "A tight five after a loose ninety? Christ.", react: huge}
+      - {mode: withering, text: "Keep spiral-typing like that and you won't even need the ninety seconds.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: spiral, text: "Watch me talk myself out of a shag in real time. I'm so desperate for affection, I got a rose tattoo for a secret admirer's bouquet that actually belonged to the widow upstairs.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: amused, text: "You inked a widow's flowers on your shaft?", react: big}
+      - {mode: deadpan, text: "I dumped a bloke just for taking an unposed photo of me asleep. I don't have the bandwidth for tragic.", react: titter}
+  - speaker: zyx
+    segments:
+      - {mode: smug, text: "At least a widow's rose stays stiff.", react: groan}
+      - {mode: spiral, text: "Sorry, rigor mortis joke, death isn't sexy, and I'm watching my last chance with you die while I explain corpse mechanics.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: deadpan, pause: 0.3, text: "Stiff corpses. In my inbox.", react: laugh}
+      - {mode: amused, text: "I rehearsed three snappy replies in my bathroom mirror, and you just killed all of them.", react: aww}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "You rehearsed for me?", react: ooh}
+      - {mode: patter, text: "I want to watch you delete texts forever. I've already pictured us sharing a charger.", react: titter}
+      - {mode: spiral, text: "Meaning U S B C, not a medieval horse. Please say I'm your favourite match.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: withering, text: "Sharing a charger? We haven't even swapped postcodes and you're moving in.", react: laugh}
+      - {mode: deadpan, text: "Take a breath, cling-film, you're losing me.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "Be my partner in crime. Let's delete this app right now. Say you feel it too?", react: aww}
+  - speaker: sable
+    segments:
+      - {mode: kill, text: "Partner in crime? Keep begging, Hallmark, and my credit card won't be the only thing declining.", react: huge}
+  - speaker: zyx
+    segments:
+      - {mode: patter, text: "Let me clear your twenty-nine percent A P R.", react: titter}
+      - {mode: spiral, text: "That's a consolidation loan joke, not prostitution, please don't leave.", react: laugh}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "Answer me this: what if you didn't have to edit anything?", react: none}
+  - speaker: sable
+    segments:
+      - {mode: withering, text: "Are you offering to pay off my hair extensions if I reply? One more weird flex and I'm gone.", react: titter}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "I want to hold your wrists still on my mattress of expired coupons.", react: ooh}
+      - {mode: spiral, text: "Not that you'd ever touch a dick whose nose piece gets mistaken for a medical device.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: amused, text: "A nest of dead vouchers and a prosthetic hooter?", react: laugh}
+      - {mode: deadpan, text: "I'm a personal brand strategist. My finger is on the block button.", react: titter}
+  - speaker: zyx
+    segments:
+      - {mode: plead, text: "Gag me so I finally shut up, photograph me in bad lighting, and please note: the squirrel in my wall knows how I die.", react: laugh}
+  - speaker: sable
+    segments:
+      - {mode: deadpan, text: "Bad lighting? Count to five, wizard boy.", react: titter}
+      - {mode: withering, text: "The typing dots are stopping forever, so assume I've died.", react: laugh}
+      - {mode: kill, pause: 0.5, text: "And tattoo my funeral wreath on your bellend.", react: huge}

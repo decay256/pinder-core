@@ -1,0 +1,40 @@
+# Audience reaction bank, generated with MOSS-SoundEffect v2 (48 kHz, Apache-2.0).
+# hold: seconds the next performer waits after the punchline before speaking again
+# (they may step on the tail; the crowd is ducked under speech).
+reactions:
+  titter:
+    seconds: 4
+    hold: 0.9
+    prompt: A small comedy club audience giving a brief scattered chuckle, a few people laughing quietly at a joke, indoor live room.
+  laugh:
+    seconds: 6
+    hold: 2.0
+    prompt: A comedy club audience of about one hundred people bursts into laughter at a punchline, then the laughter fades away, indoor live recording.
+  big:
+    seconds: 8
+    hold: 3.0
+    prompt: A packed comedy club audience roars with loud hearty laughter, people cackling and a few clapping, then it slowly dies down, indoor live recording.
+  huge:
+    seconds: 12
+    hold: 4.8
+    prompt: A packed comedy club erupts in huge uproarious laughter, whooping, cheering and loud enthusiastic applause, indoor live recording.
+  ooh:
+    seconds: 4
+    hold: 1.3
+    prompt: A comedy club audience reacting with a collective shocked ooooh, followed by a few people laughing, indoor live room.
+  groan:
+    seconds: 4
+    hold: 1.2
+    prompt: A comedy club audience groaning together at a terrible pun, a collective ugh, then a few chuckles, indoor live room.
+  aww:
+    seconds: 4
+    hold: 1.3
+    prompt: A comedy club audience making a collective sympathetic awww sound, indoor live room.
+  applause:
+    seconds: 10
+    hold: 0
+    prompt: A comedy club audience applauding, cheering and whistling as two comedians walk onto the stage, indoor live recording.
+  murmur:
+    seconds: 30
+    hold: 0
+    prompt: Room tone of a busy comedy club, quiet crowd murmur, glasses clinking, indistinct chatter, air conditioning hum.
