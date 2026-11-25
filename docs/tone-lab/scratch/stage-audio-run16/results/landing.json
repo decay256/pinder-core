@@ -1,0 +1,719 @@
+{
+ "per-line clones": {
+  "n": 46,
+  "measured": 40,
+  "lands": 32,
+  "lifts": 4,
+  "median_st": -4.9,
+  "rows": [
+   {
+    "id": "00_zyx_0",
+    "text": "ight, your glans has natural cheekbones.",
+    "st": -11.7
+   },
+   {
+    "id": "01_zyx_0",
+    "text": "p for five seconds I assume you've died.",
+    "st": 0.3
+   },
+   {
+    "id": "02_sable_0",
+    "text": " on credit, to hide a lazy left bollock.",
+    "st": -5.9
+   },
+   {
+    "id": "03_zyx_0",
+    "text": " circulation if you wear it at the base.",
+    "st": null
+   },
+   {
+    "id": "03_zyx_1",
+    "text": " enough, unlike this clip-on nose piece.",
+    "st": -12.4
+   },
+   {
+    "id": "05_sable_1",
+    "text": "d you're ten seconds from being blocked.",
+    "st": -0.6
+   },
+   {
+    "id": "06_zyx_0",
+    "text": "you got cropped out of the family photo.",
+    "st": -8.0
+   },
+   {
+    "id": "06_zyx_1",
+    "text": ", I'm over-explaining emotional neglect.",
+    "st": -3.0
+   },
+   {
+    "id": "08_sable_0",
+    "text": "inspects my selfies like a returns desk.",
+    "st": -17.4
+   },
+   {
+    "id": "08_sable_1",
+    "text": "ss, wizard boy. You can't out-damage me.",
+    "st": -6.8
+   },
+   {
+    "id": "09_zyx_0",
+    "text": "knows she couldn't afford you at retail.",
+    "st": 2.5
+   },
+   {
+    "id": "09_zyx_1",
+    "text": "tress, my wizard hat needs the headroom.",
+    "st": -13.5
+   },
+   {
+    "id": "10_sable_0",
+    "text": "at actually made my lazy bollock twitch.",
+    "st": null
+   },
+   {
+    "id": "10_sable_1",
+    "text": " dollar maid outfit, until he went soft.",
+    "st": -4.9
+   },
+   {
+    "id": "11_zyx_0",
+    "text": "ds a minute so you don't ask me to stay.",
+    "st": -7.1
+   },
+   {
+    "id": "11_zyx_1",
+    "text": " while you reach for the unmatch button.",
+    "st": -10.0
+   },
+   {
+    "id": "12_sable_0",
+    "text": "struct, Freud, you're giving me the ick.",
+    "st": null
+   },
+   {
+    "id": "13_zyx_0",
+    "text": "ing your inbox with fifteen percent off.",
+    "st": 5.4
+   },
+   {
+    "id": "13_zyx_1",
+    "text": ". I'm not saying my cock's on clearance.",
+    "st": -1.3
+   },
+   {
+    "id": "15_sable_0",
+    "text": "Coupon support? Tragic.",
+    "st": -5.6
+   },
+   {
+    "id": "15_sable_1",
+    "text": "t now, you're not making it to four a.m.",
+    "st": -7.2
+   },
+   {
+    "id": "16_zyx_0",
+    "text": "up so she'd tell her friends I was good.",
+    "st": null
+   },
+   {
+    "id": "16_zyx_1",
+    "text": ". I'm basically handing you a stopwatch.",
+    "st": -10.2
+   },
+   {
+    "id": "17_sable_0",
+    "text": "tight five after a loose ninety? Christ.",
+    "st": null
+   },
+   {
+    "id": "17_sable_1",
+    "text": " you won't even need the ninety seconds.",
+    "st": -5.8
+   },
+   {
+    "id": "18_zyx_0",
+    "text": "actually belonged to the widow upstairs.",
+    "st": 0.4
+   },
+   {
+    "id": "19_sable_1",
+    "text": ". I don't have the bandwidth for tragic.",
+    "st": -4.0
+   },
+   {
+    "id": "20_zyx_0",
+    "text": "At least a widow's rose stays stiff.",
+    "st": -0.5
+   },
+   {
+    "id": "20_zyx_1",
+    "text": "ou die while I explain corpse mechanics.",
+    "st": null
+   },
+   {
+    "id": "21_sable_0",
+    "text": "Stiff corpses. In my inbox.",
+    "st": -3.7
+   },
+   {
+    "id": "21_sable_1",
+    "text": "mirror, and you just killed all of them.",
+    "st": -3.9
+   },
+   {
+    "id": "22_zyx_1",
+    "text": "e already pictured us sharing a charger.",
+    "st": -2.9
+   },
+   {
+    "id": "22_zyx_2",
+    "text": "se. Please say I'm your favourite match.",
+    "st": -6.0
+   },
+   {
+    "id": "23_sable_0",
+    "text": " swapped postcodes and you're moving in.",
+    "st": -6.3
+   },
+   {
+    "id": "23_sable_1",
+    "text": " a breath, cling-film, you're losing me.",
+    "st": 1.2
+   },
+   {
+    "id": "25_sable_0",
+    "text": " card won't be the only thing declining.",
+    "st": -3.4
+   },
+   {
+    "id": "26_zyx_0",
+    "text": "me clear your twenty-nine percent A P R.",
+    "st": -5.6
+   },
+   {
+    "id": "26_zyx_1",
+    "text": "e, not prostitution, please don't leave.",
+    "st": -2.7
+   },
+   {
+    "id": "28_sable_0",
+    "text": "reply? One more weird flex and I'm gone.",
+    "st": -4.9
+   },
+   {
+    "id": "29_zyx_0",
+    "text": "still on my mattress of expired coupons.",
+    "st": -13.0
+   },
+   {
+    "id": "29_zyx_1",
+    "text": "iece gets mistaken for a medical device.",
+    "st": -12.0
+   },
+   {
+    "id": "30_sable_1",
+    "text": "egist. My finger is on the block button.",
+    "st": -5.1
+   },
+   {
+    "id": "31_zyx_0",
+    "text": "the squirrel in my wall knows how I die.",
+    "st": -4.2
+   },
+   {
+    "id": "32_sable_0",
+    "text": "Bad lighting? Count to five, wizard boy.",
+    "st": -4.6
+   },
+   {
+    "id": "32_sable_1",
+    "text": "e stopping forever, so assume I've died.",
+    "st": -1.0
+   },
+   {
+    "id": "32_sable_2",
+    "text": "attoo my funeral wreath on your bellend.",
+    "st": 5.5
+   }
+  ]
+ },
+ "one-pass MOSS-TTSD": {
+  "n": 46,
+  "measured": 39,
+  "lands": 30,
+  "lifts": 6,
+  "median_st": -2.7,
+  "rows": [
+   {
+    "id": "00_zyx_0",
+    "text": "ight, your glans has natural cheekbones.",
+    "st": -4.3
+   },
+   {
+    "id": "01_zyx_0",
+    "text": "p for five seconds I assume you've died.",
+    "st": 1.0
+   },
+   {
+    "id": "02_sable_0",
+    "text": " on credit, to hide a lazy left bollock.",
+    "st": -5.6
+   },
+   {
+    "id": "03_zyx_0",
+    "text": " circulation if you wear it at the base.",
+    "st": null
+   },
+   {
+    "id": "03_zyx_1",
+    "text": " enough, unlike this clip-on nose piece.",
+    "st": null
+   },
+   {
+    "id": "05_sable_1",
+    "text": "d you're ten seconds from being blocked.",
+    "st": -3.1
+   },
+   {
+    "id": "06_zyx_0",
+    "text": "you got cropped out of the family photo.",
+    "st": -0.4
+   },
+   {
+    "id": "06_zyx_1",
+    "text": ", I'm over-explaining emotional neglect.",
+    "st": -4.8
+   },
+   {
+    "id": "08_sable_0",
+    "text": "inspects my selfies like a returns desk.",
+    "st": -2.0
+   },
+   {
+    "id": "08_sable_1",
+    "text": "ss, wizard boy. You can't out-damage me.",
+    "st": -2.7
+   },
+   {
+    "id": "09_zyx_0",
+    "text": "knows she couldn't afford you at retail.",
+    "st": 5.2
+   },
+   {
+    "id": "09_zyx_1",
+    "text": "tress, my wizard hat needs the headroom.",
+    "st": -4.2
+   },
+   {
+    "id": "10_sable_0",
+    "text": "at actually made my lazy bollock twitch.",
+    "st": -1.9
+   },
+   {
+    "id": "10_sable_1",
+    "text": " dollar maid outfit, until he went soft.",
+    "st": 1.6
+   },
+   {
+    "id": "11_zyx_0",
+    "text": "ds a minute so you don't ask me to stay.",
+    "st": null
+   },
+   {
+    "id": "11_zyx_1",
+    "text": " while you reach for the unmatch button.",
+    "st": -8.6
+   },
+   {
+    "id": "12_sable_0",
+    "text": "struct, Freud, you're giving me the ick.",
+    "st": -2.3
+   },
+   {
+    "id": "13_zyx_0",
+    "text": "ing your inbox with fifteen percent off.",
+    "st": -5.4
+   },
+   {
+    "id": "13_zyx_1",
+    "text": ". I'm not saying my cock's on clearance.",
+    "st": -7.3
+   },
+   {
+    "id": "15_sable_0",
+    "text": "Coupon support? Tragic.",
+    "st": -3.6
+   },
+   {
+    "id": "15_sable_1",
+    "text": "t now, you're not making it to four a.m.",
+    "st": -4.8
+   },
+   {
+    "id": "16_zyx_0",
+    "text": "up so she'd tell her friends I was good.",
+    "st": null
+   },
+   {
+    "id": "16_zyx_1",
+    "text": ". I'm basically handing you a stopwatch.",
+    "st": null
+   },
+   {
+    "id": "17_sable_0",
+    "text": "tight five after a loose ninety? Christ.",
+    "st": null
+   },
+   {
+    "id": "17_sable_1",
+    "text": " you won't even need the ninety seconds.",
+    "st": -2.6
+   },
+   {
+    "id": "18_zyx_0",
+    "text": "actually belonged to the widow upstairs.",
+    "st": null
+   },
+   {
+    "id": "19_sable_1",
+    "text": ". I don't have the bandwidth for tragic.",
+    "st": -2.2
+   },
+   {
+    "id": "20_zyx_0",
+    "text": "At least a widow's rose stays stiff.",
+    "st": 1.8
+   },
+   {
+    "id": "20_zyx_1",
+    "text": "ou die while I explain corpse mechanics.",
+    "st": 5.7
+   },
+   {
+    "id": "21_sable_0",
+    "text": "Stiff corpses. In my inbox.",
+    "st": -1.9
+   },
+   {
+    "id": "21_sable_1",
+    "text": "mirror, and you just killed all of them.",
+    "st": -2.8
+   },
+   {
+    "id": "22_zyx_1",
+    "text": "e already pictured us sharing a charger.",
+    "st": 1.0
+   },
+   {
+    "id": "22_zyx_2",
+    "text": "se. Please say I'm your favourite match.",
+    "st": -7.2
+   },
+   {
+    "id": "23_sable_0",
+    "text": " swapped postcodes and you're moving in.",
+    "st": -2.7
+   },
+   {
+    "id": "23_sable_1",
+    "text": " a breath, cling-film, you're losing me.",
+    "st": -2.1
+   },
+   {
+    "id": "25_sable_0",
+    "text": " card won't be the only thing declining.",
+    "st": -0.9
+   },
+   {
+    "id": "26_zyx_0",
+    "text": "me clear your twenty-nine percent A P R.",
+    "st": -0.6
+   },
+   {
+    "id": "26_zyx_1",
+    "text": "e, not prostitution, please don't leave.",
+    "st": -3.0
+   },
+   {
+    "id": "28_sable_0",
+    "text": "reply? One more weird flex and I'm gone.",
+    "st": -3.9
+   },
+   {
+    "id": "29_zyx_0",
+    "text": "still on my mattress of expired coupons.",
+    "st": -3.7
+   },
+   {
+    "id": "29_zyx_1",
+    "text": "iece gets mistaken for a medical device.",
+    "st": -6.7
+   },
+   {
+    "id": "30_sable_1",
+    "text": "egist. My finger is on the block button.",
+    "st": -2.4
+   },
+   {
+    "id": "31_zyx_0",
+    "text": "the squirrel in my wall knows how I die.",
+    "st": -1.9
+   },
+   {
+    "id": "32_sable_0",
+    "text": "Bad lighting? Count to five, wizard boy.",
+    "st": -2.9
+   },
+   {
+    "id": "32_sable_1",
+    "text": "e stopping forever, so assume I've died.",
+    "st": -2.8
+   },
+   {
+    "id": "32_sable_2",
+    "text": "attoo my funeral wreath on your bellend.",
+    "st": -4.0
+   }
+  ]
+ },
+ "directed turns": {
+  "n": 46,
+  "measured": 44,
+  "lands": 41,
+  "lifts": 1,
+  "median_st": -3.9,
+  "rows": [
+   {
+    "id": "01_0",
+    "text": "ight, your glans has natural cheekbones.",
+    "st": -4.6
+   },
+   {
+    "id": "01_1",
+    "text": " for five seconds, I assume you've died.",
+    "st": null
+   },
+   {
+    "id": "02_0",
+    "text": " on credit. To hide a lazy left bollock.",
+    "st": -4.1
+   },
+   {
+    "id": "03_0",
+    "text": " circulation if you wear it at the base.",
+    "st": -9.3
+   },
+   {
+    "id": "03_1",
+    "text": " enough, unlike this clip-on nose piece.",
+    "st": -4.5
+   },
+   {
+    "id": "04_1",
+    "text": "d you're ten seconds from being blocked.",
+    "st": -5.1
+   },
+   {
+    "id": "05_0",
+    "text": "you got cropped out of the family photo.",
+    "st": -3.4
+   },
+   {
+    "id": "05_1",
+    "text": ". I'm over-explaining emotional neglect.",
+    "st": 2.9
+   },
+   {
+    "id": "06_0",
+    "text": "inspects my selfies like a returns desk.",
+    "st": -7.1
+   },
+   {
+    "id": "06_1",
+    "text": "ss, wizard boy. You can't out-damage me.",
+    "st": -3.1
+   },
+   {
+    "id": "07_0",
+    "text": "knows she couldn't afford you at retail.",
+    "st": -5.9
+   },
+   {
+    "id": "07_1",
+    "text": "tress. My wizard hat needs the headroom.",
+    "st": -9.7
+   },
+   {
+    "id": "08_0",
+    "text": "at actually made my lazy bollock twitch.",
+    "st": -3.0
+   },
+   {
+    "id": "08_1",
+    "text": " dollar maid outfit, until he went soft.",
+    "st": -5.2
+   },
+   {
+    "id": "09_0",
+    "text": "ds a minute so you don't ask me to stay.",
+    "st": -4.0
+   },
+   {
+    "id": "09_1",
+    "text": " while you reach for the unmatch button.",
+    "st": -7.7
+   },
+   {
+    "id": "10_0",
+    "text": "struct, Freud. You're giving me the ick.",
+    "st": -3.7
+   },
+   {
+    "id": "11_0",
+    "text": "ing your inbox with fifteen percent off.",
+    "st": 0.2
+   },
+   {
+    "id": "11_1",
+    "text": ". I'm not saying my cock's on clearance.",
+    "st": -5.2
+   },
+   {
+    "id": "12_0",
+    "text": "Coupon support? Tragic.",
+    "st": -2.7
+   },
+   {
+    "id": "12_1",
+    "text": "t now, you're not making it to four a.m.",
+    "st": -2.5
+   },
+   {
+    "id": "13_0",
+    "text": "up so she'd tell her friends I was good.",
+    "st": -1.6
+   },
+   {
+    "id": "13_1",
+    "text": ". I'm basically handing you a stopwatch.",
+    "st": -3.5
+   },
+   {
+    "id": "14_0",
+    "text": "tight five after a loose ninety? Christ.",
+    "st": null
+   },
+   {
+    "id": "14_1",
+    "text": " you won't even need the ninety seconds.",
+    "st": -0.9
+   },
+   {
+    "id": "15_0",
+    "text": "actually belonged to the widow upstairs.",
+    "st": -1.5
+   },
+   {
+    "id": "16_1",
+    "text": ". I don't have the bandwidth for tragic.",
+    "st": -1.6
+   },
+   {
+    "id": "17_0",
+    "text": "At least a widow's rose stays stiff.",
+    "st": -3.6
+   },
+   {
+    "id": "17_1",
+    "text": "ou die while I explain corpse mechanics.",
+    "st": -6.7
+   },
+   {
+    "id": "18_0",
+    "text": "Stiff corpses. In my inbox.",
+    "st": -3.8
+   },
+   {
+    "id": "18_1",
+    "text": "mirror, and you just killed all of them.",
+    "st": -5.1
+   },
+   {
+    "id": "19_1",
+    "text": "e already pictured us sharing a charger.",
+    "st": -3.1
+   },
+   {
+    "id": "19_2",
+    "text": "se. Please say I'm your favourite match.",
+    "st": -1.5
+   },
+   {
+    "id": "20_0",
+    "text": " swapped postcodes and you're moving in.",
+    "st": -3.3
+   },
+   {
+    "id": "20_1",
+    "text": " a breath, cling-film. You're losing me.",
+    "st": -3.7
+   },
+   {
+    "id": "22_0",
+    "text": " card won't be the only thing declining.",
+    "st": -2.4
+   },
+   {
+    "id": "23_0",
+    "text": "me clear your twenty-nine percent A P R.",
+    "st": -5.5
+   },
+   {
+    "id": "23_1",
+    "text": "e, not prostitution. Please don't leave.",
+    "st": -4.0
+   },
+   {
+    "id": "24_0",
+    "text": "reply? One more weird flex and I'm gone.",
+    "st": -4.4
+   },
+   {
+    "id": "25_0",
+    "text": "still on my mattress of expired coupons.",
+    "st": -9.2
+   },
+   {
+    "id": "25_1",
+    "text": "iece gets mistaken for a medical device.",
+    "st": -7.4
+   },
+   {
+    "id": "26_1",
+    "text": "egist. My finger is on the block button.",
+    "st": -2.6
+   },
+   {
+    "id": "27_0",
+    "text": "the squirrel in my wall knows how I die.",
+    "st": -7.5
+   },
+   {
+    "id": "28_0",
+    "text": "Bad lighting? Count to five, wizard boy.",
+    "st": -3.0
+   },
+   {
+    "id": "28_1",
+    "text": "e stopping forever, so assume I've died.",
+    "st": -8.1
+   },
+   {
+    "id": "28_2",
+    "text": "attoo my funeral wreath on your bellend.",
+    "st": -12.1
+   }
+  ]
+ }
+}

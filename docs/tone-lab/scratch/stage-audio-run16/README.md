@@ -34,7 +34,29 @@ a room. Experiment only, rendered on the workstation RTX 4090 at Daniel's instru
    `ttsd_segment.py` cut it into the same 57 segments and check each segment's voice;
    `mix.py out/ttsd/picks.json run16-ttsd-stage` stages it with the same audience.
 
-Outputs (workstation `out/`, not committed): `run16-stage.mp3` (per-line, 6.7 min),
+7. Directed iteration (Daniel's listening notes: acting does not hold even in one pass,
+   two messages from one speaker sound like two restarts, pacing and tone are off, pauses
+   and intonation are what a comedian works with):
+   - `performance.yaml`: 28 turns, consecutive messages from one speaker merged into one
+     turn, each with an acting note written the way a comedian would play it and markup
+     for beats (`/ // ///`), the operative word (`*word*`), laugh points (`{laugh}`) and
+     genuinely rising questions (`^`). `direct.py` checks the words still equal
+     `cues.yaml` exactly.
+   - `direct.py`: Qwen3-TTS VoiceDesign renders each turn as one utterance from the
+     voice description plus the acting note (VoiceDesign is the only mode that takes
+     direction; clones ignore it), 14 takes per turn. Gates: Whisper WER ≤ 0.1, and
+     speaker embedding at least 0.008 closer to the frozen voice than to the other one.
+     Among passing takes the winner is chosen on measured delivery: phrase breaks where
+     the script asks for a beat, articulation rate against the turn's pace, pitch at the
+     end of each landing phrase (falling, or rising for `^`), and stress on operative
+     words. The winner's silences are then set to the marked beat lengths at
+     word boundaries, and it is cut at the laugh points for the stage mix.
+   - `mix.py out/direct/picks.json run16-directed-stage` stages it; `--dry` gives room
+     and mic with no audience and a half-second beat at each laugh point.
+   - `compare_landing.py`: the same landing check over all three renders' punchlines.
+
+Outputs (workstation `out/`, not committed): `run16-directed-dry.mp3` (5.3 min),
+`run16-directed-stage.mp3` (7.1 min), `run16-stage.mp3` (per-line, 6.7 min),
 `run16-ttsd-stage.mp3` (one-pass, staged, 6.6 min), `run16-ttsd-raw.mp3` (one-pass,
 no audience, 4.3 min), `voice-audition.mp3`.
 
@@ -56,9 +78,24 @@ no audience, 4.3 min), `voice-audition.mp3`.
 - CLAP scores the "huge laugh with applause" takes lowest of all reactions (≈0.26 vs
   ≈0.5); that category is the weakest output of the sound-effect model.
 
+- Directed iteration: the delivery of a punchline varies enormously between takes of
+  the same instruction. In one pilot turn, "retail" ended anywhere from 10 semitones up to
+  10 semitones down across 8 takes, so choosing among takes does most of the directing;
+  the instruction only moves the distribution. Statement punchlines ending
+  ≥1 semitone below their phrase: directed 41 of 44 measured, per-line clones 32 of 40,
+  one-pass 30 of 39; lifts 1, 4 and 6. The directed number is partly circular, since takes
+  were chosen on this measure. Its value is that no punchline now goes up at the end
+  unnoticed. Slow turns still come out faster than a stand-up delivers them (Sable's
+  "slow" turns average about 2.7 words/s against 2.4 asked), so the beats are set in the
+  edit rather than left to the model. About a third of takes fail the voice gate
+  (VoiceDesign re-imagines the voice from the description on every call). Staged, no
+  segment is masked by the crowd; 6 of 57 segments are above 10% WER, all word-level
+  slips that are in the dry mix too ("knob gag" heard as one word, "ring light" as
+  "ring like").
+
 ## Environments (workstation, `third_party/`, not committed)
 
-`venv-tts` torch 2.9 + qwen-tts 0.1.1 (design, render, mix); `venv-sfx`
+`venv-tts` torch 2.9 + qwen-tts 0.1.1 + faster-whisper (design, render, direct, mix); `venv-sfx`
 MOSS-SoundEffect v2; `venv-ttsd` MOSS-TTS with transformers 5. The older
 qwen3-tts-server venv picks up miniconda's torch 2.3, which breaks the Qwen3-TTS
 decoder under transformers 4.57. Models download to plain folders (`models/`) because

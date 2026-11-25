@@ -1,0 +1,354 @@
+# Performance script for run 16: one entry per turn on stage.
+#
+# Consecutive messages from the same speaker are one turn: on stage nobody stops and
+# restarts between two texts, they keep the thought going. Each turn is rendered as one
+# utterance, so intonation runs through it; laughs are cut in afterwards at the {react}
+# points while the speaker holds.
+#
+# Script markup (stripped before synthesis; the words are Carr's):
+#   /  //  ///   a beat of about 0.25, 0.5, 0.9 s. The edit sets the silence there to that
+#                length; the synthesis text gets a comma or a full stop so the model
+#                phrases it.
+#   *word*       the operative word: the one the line turns on, stressed.
+#   {react}      a laugh point: the crowd reaction after it (titter laugh big huge ooh
+#                groan aww). The phrase before it should land, pitch falling.
+#   ^            after a question: it genuinely asks, pitch rises. Without it a question
+#                is rhetorical or withering and falls like a statement.
+#
+# pre    silence before the turn starts (taking a moment before replying)
+# pace   slow | measured | brisk | racing  (target speaking rate over the turn)
+# act    the acting note, read by the voice model after the voice description
+#
+# Read as a two-hander: Zyx is the fast, needy one who wins the crowd with honesty and
+# then ruins it by explaining; Sable is the slow one who never raises her voice, lets the
+# silence do the work and puts the knife in on the last word.
+
+turns:
+  - id: t01
+    speaker: zyx
+    pace: brisk
+    act: >-
+      Opening the set, cocky and charming. Say "You don't need that ring light" quickly and
+      casually, then slow down for the compliment and land the word "cheekbones" with a
+      grin, pitch falling. Then a quicker, needier aside, and throw away "I assume you've
+      died" lightly.
+    script: >-
+      You don't need that ring light, / your glans has natural *cheekbones*. {laugh}
+      Keep typing. If those dots stop for five seconds, / I assume you've *died*. {titter}
+
+  - id: t02
+    speaker: sable
+    pace: slow
+    act: >-
+      Bone dry and unimpressed. Read the price like a receipt, pause, then say "to hide a
+      lazy left bollock" slower and completely level, dropping low on the last word. Then
+      a withering question that does not rise at the end: flat at first, a small pause,
+      then scornful on "wizard hat".
+    script: >-
+      The light's two hundred and twelve pounds on credit. // To hide a lazy left
+      *bollock*. {laugh} Are you always this *needy*, / or is that wizard hat cutting off
+      your *circulation*? {laugh}
+
+  - id: t03
+    speaker: zyx
+    pace: racing
+    act: >-
+      Smug, slow setup, pleased with the pun, landing "at the base". Then, hearing a groan,
+      panic: blurt "That's a cock ring joke" and over-explain faster and faster, trailing
+      off on "clip-on nose piece". Then regroup with a breath and push back, brisk and
+      challenging, on the question.
+    script: >-
+      A wizard hat only cuts off circulation / if you wear it at the *base*. {groan}
+      That's a cock ring joke. Because brims are circular, though velvet isn't actually
+      tight enough, unlike this clip-on nose piece. {laugh} // Clock's ticking. My turn to
+      lead: / what else is that two hundred and twelve pound shadow *hiding*?^
+
+  - id: t04
+    speaker: sable
+    pre: 0.5
+    pace: slow
+    act: >-
+      Let the silence sit first. Then, in flat disbelief and contempt, "Did you just
+      dissect your own knob gag", a tiny pause, "like a coroner", slow and low. Then a dry,
+      bored confession of her own, and after a pause the threat, quiet and level, with no
+      rise at all.
+    script: >-
+      Did you just dissect your own knob gag / like a *coroner*? {big} The hair's clip-in.
+      On a twenty-nine percent credit card. // And you're ten seconds from being
+      *blocked*. {laugh}
+
+  - id: t05
+    speaker: zyx
+    pace: brisk
+    act: >-
+      Sudden panic on "Don't block me!", then a rushed confession that slows and goes soft
+      and genuinely sad on "you got cropped out of the family photo". Then catch yourself,
+      quick and embarrassed. Then recover into a cheeky, pointed question, leaning on
+      "audit" and "unzips".
+    script: >-
+      Don't block me! I panic-type, because in my house, if you went quiet, // you got
+      cropped out of the family *photo*. {ooh} Obviously cameras aren't voice-activated.
+      I'm over-explaining emotional *neglect*. {laugh} My question: / who taught you to
+      *audit* your own bollocks / before a man even *unzips*?^ {ooh}
+
+  - id: t06
+    speaker: sable
+    pace: slow
+    act: >-
+      A sad fact stated flatly, as if it is nothing; "like a returns desk" thrown away,
+      low. Then a bleak boast, matter-of-fact, "wizard boy" dismissive, and "You can't
+      out-damage me" slow and proud, the stress on "damage".
+    script: >-
+      My mother still inspects my selfies / like a returns *desk*. {laugh} I'm dry-scooping
+      pre-workout on a floor mattress, / wizard boy. / You can't out-*damage* me. {laugh}
+
+  - id: t07
+    speaker: zyx
+    pre: 0.4
+    pace: measured
+    act: >-
+      The best line of the night and they know it. Slower than usual, sly and controlled,
+      hold a beat before "she couldn't afford you at retail", then place each word,
+      "retail" landing warm and low like a compliment. After that a light, quick
+      throwaway tag.
+    script: >-
+      Your mum's only playing returns desk / because she knows // she couldn't afford you
+      at *retail*. {huge} Keep the floor mattress. My wizard hat needs the *headroom*.
+      {titter}
+
+  - id: t08
+    speaker: sable
+    pace: measured
+    act: >-
+      Caught off guard. A reluctant "Okay." then a long pause, then grudgingly amused, a
+      smile breaking through on "twitch". Then back to dry: tell the story flatly, pause,
+      and drop "until he went soft" low and quick, as a throwaway.
+    script: >-
+      Okay. /// That actually made my lazy bollock *twitch*. {big} Careful though. Last
+      bloke I liked got his bathtub scrubbed in a ninety-four dollar maid outfit, // until
+      he went *soft*. {laugh}
+
+  - id: t09
+    speaker: zyx
+    pace: measured
+    act: >-
+      A sudden honest moment: slower and quieter, sincere, the jokes dropped, the voice
+      catching slightly on "so you don't ask me to stay". Then a self-aware sigh, back up
+      to speed, mocking yourself and accelerating to "unmatch button".
+    script: >-
+      You scrub tubs so they can't see you *still*. // I talk at a hundred and forty words
+      a minute / so you don't ask me to *stay*. {aww} And there I go. Ruining the foreplay
+      with a TED Talk / while you reach for the unmatch *button*. {laugh}
+
+  - id: t10
+    speaker: sable
+    pace: measured
+    act: >-
+      Withering, impatient with all the sincerity: "Freud" sneered, "the ick" flat and
+      final. Then a pause and a dry, suspicious question, "anyway" tossed off at the end.
+    script: >-
+      Take your finger off the self-destruct, / *Freud*. You're giving me the *ick*.
+      {laugh} // What's a conversational dominance consultant doing awake at midnight,
+      anyway?
+
+  - id: t11
+    speaker: zyx
+    pace: brisk
+    act: >-
+      Slick and smug, like reading an advert. Then deflate: a quick, embarrassed
+      confession. A pause, then a denial that gives it all away, said a bit too fast.
+      Then brazen and cheeky on the question.
+    script: >-
+      Dominating your inbox / with fifteen percent *off*. {titter} Wrong tab. I actually
+      work night-shift chat for a coupon app. // I'm not saying my cock's on *clearance*.
+      {big} My turn: / what do you do after you've *shagged*?^ {ooh}
+
+  - id: t12
+    speaker: sable
+    pace: slow
+    act: >-
+      "Coupon support?" with disdain, then a pause, then "Tragic." as one low, flat word.
+      Then a bleak routine described matter-of-factly, a pause, and the threat delivered
+      quietly and slower, "four a.m." falling.
+    script: >-
+      Coupon support? // *Tragic*. {laugh} I wake at five a.m. to lint-roll my shed hair
+      off the pillowcase. // And right now, / you're not making it to *four* a.m. {laugh}
+
+  - id: t13
+    speaker: zyx
+    pace: racing
+    act: >-
+      A defensive denial blurted out in one breath, too fast. Then the realisation: a
+      pause, slower and self-aware for "Which is an oddly specific denial", then resigned
+      and flat for "I'm basically handing you a stopwatch".
+    script: >-
+      I've never finished in ninety seconds and done eleven minutes of stand-up so she'd
+      tell her friends I was *good*. {laugh} // Which is an oddly specific *denial*. / I'm
+      basically handing you a *stopwatch*. {big}
+
+  - id: t14
+    speaker: sable
+    pre: 0.5
+    pace: slow
+    act: >-
+      The kill. Savour it: slow and precise, "a tight five" and "a loose ninety" balanced
+      against each other, then a long pause, then "Christ." as a low, exhausted verdict.
+      Then a quicker, withering follow-up.
+    script: >-
+      A tight *five* / after a loose *ninety*? /// *Christ*. {huge} Keep spiral-typing like
+      that and you won't even need the ninety *seconds*. {laugh}
+
+  - id: t15
+    speaker: zyx
+    pace: racing
+    act: >-
+      Narrating your own disaster, racing and confessional, building speed through the
+      story, then a hitch before the reveal: "that actually belonged to the widow
+      upstairs" a little slower, wincing.
+    script: >-
+      Watch me talk myself out of a shag in real time. / I'm so desperate for affection, I
+      got a rose tattoo for a secret admirer's bouquet // that actually belonged to the
+      widow *upstairs*. {laugh}
+
+  - id: t16
+    speaker: sable
+    pace: measured
+    act: >-
+      Incredulous, a laugh escaping her, appalled delight on "on your shaft". Then flat
+      again for a dry story, and "I don't have the bandwidth for tragic" brisk and
+      dismissive.
+    script: >-
+      You inked a widow's flowers / on your *shaft*? {big} I dumped a bloke just for taking
+      an unposed photo of me asleep. / I don't have the bandwidth for *tragic*. {titter}
+
+  - id: t17
+    speaker: zyx
+    pace: racing
+    act: >-
+      A smug little pun, pleased, landing "stiff". Then, hearing the groan, an immediate
+      panicked apology and over-explanation, fast, with a note of despair at the end.
+    script: >-
+      At least a widow's rose / stays *stiff*. {groan} Sorry, rigor mortis joke. Death
+      isn't sexy, and I'm watching my last chance with you die / while I explain corpse
+      *mechanics*. {laugh}
+
+  - id: t18
+    speaker: sable
+    pre: 0.4
+    pace: slow
+    act: >-
+      Deadpan repetition, flat, as if reading out an awful headline, a pause between the
+      two phrases. Then an unexpected admission, softer and warmer, half amused, "killed
+      all of them" with a rueful smile.
+    script: >-
+      Stiff *corpses*. // In my *inbox*. {laugh} I rehearsed three snappy replies in my
+      bathroom mirror, / and you just *killed* all of them. {aww}
+
+  - id: t19
+    speaker: zyx
+    pace: brisk
+    act: >-
+      Genuinely touched: soft and delighted, "You rehearsed for me?" rising. Then gushing
+      too fast, oversharing the fantasy. Then a quick clarification and a needy plea at
+      the end.
+    script: >-
+      You *rehearsed* for me?^ {ooh} I want to watch you delete texts forever. I've
+      already pictured us sharing a *charger*. {titter} Meaning U S B C, not a medieval
+      *horse*. Please say I'm your favourite match. {laugh}
+
+  - id: t20
+    speaker: sable
+    pace: measured
+    act: >-
+      Withering disbelief: "Sharing a charger?" flat, then cutting, "moving in" landing
+      hard. Then cold and slow, "cling-film" as a sneer, and "You're losing me" quiet and
+      final.
+    script: >-
+      Sharing a *charger*? / We haven't even swapped postcodes and you're moving *in*.
+      {laugh} Take a breath, / *cling-film*. / You're losing me. {laugh}
+
+  - id: t21
+    speaker: zyx
+    pace: measured
+    act: >-
+      Earnest and romantic, slower, building like a big declaration. Then a pause, and a
+      soft, hopeful question.
+    script: >-
+      Be my partner in *crime*. Let's delete this app right *now*. // Say you feel it
+      too?^ {aww}
+
+  - id: t22
+    speaker: sable
+    pre: 0.4
+    pace: slow
+    act: >-
+      The kill. Flat repetition of "Partner in crime?", a long pause, then slow and
+      savouring, "Hallmark" sneered, a pause before the last word, and "declining" placed
+      low and final.
+    script: >-
+      Partner in crime? // Keep begging, *Hallmark*, / and my credit card won't be the
+      only thing / *declining*. {huge}
+
+  - id: t23
+    speaker: zyx
+    pace: brisk
+    act: >-
+      Slick, a smooth offer. Then a panicked clarification, fast, "please don't leave"
+      genuinely scared. Then a long pause, and a quiet, sincere question.
+    script: >-
+      Let me clear your twenty-nine percent A P R. {titter} That's a consolidation loan
+      joke, not *prostitution*. Please don't leave. {laugh} /// Answer me this: / what if
+      you didn't have to edit *anything*?^
+
+  - id: t24
+    speaker: sable
+    pace: measured
+    act: >-
+      Suspicious and dry, the question flat, not rising. Then a pause and a level, final
+      warning.
+    script: >-
+      Are you offering to pay off my hair *extensions* if I reply? // One more weird flex
+      and I'm *gone*. {titter}
+
+  - id: t25
+    speaker: zyx
+    pace: measured
+    act: >-
+      An intense, slow seduction attempt, low and earnest, which is absurd. Then
+      immediately self-sabotage: a fast, muttered aside.
+    script: >-
+      I want to hold your wrists still / on my mattress of expired *coupons*. {ooh} Not
+      that you'd ever touch a dick whose nose piece gets mistaken for a medical *device*.
+      {laugh}
+
+  - id: t26
+    speaker: sable
+    pace: slow
+    act: >-
+      Amused despite herself, listing the absurd details slowly, "prosthetic hooter"
+      relished. Then cool and professional, and the threat flat and quiet.
+    script: >-
+      A nest of dead vouchers / and a prosthetic *hooter*? {laugh} I'm a personal brand
+      strategist. / My finger is on the block *button*. {titter}
+
+  - id: t27
+    speaker: zyx
+    pace: racing
+    act: >-
+      A desperate list, faster with each item. Then a strange pause, and drop the last
+      line confidentially, quiet and ominous: "the squirrel in my wall knows how I die".
+    script: >-
+      Gag me so I finally shut up, photograph me in bad lighting, and please note: // the
+      squirrel in my wall knows how I *die*. {laugh}
+
+  - id: t28
+    speaker: sable
+    pace: slow
+    act: >-
+      The closer. "Bad lighting?" flat, then a slow, cold countdown, "wizard boy"
+      dismissive. Then dead level for the typing dots. Then a long pause and the final
+      kill, slow and savouring, the last word "bellend" placed low and final.
+    script: >-
+      Bad lighting? / Count to five, wizard boy. {titter} The typing dots are stopping
+      forever, / so assume I've *died*. {laugh} /// And tattoo my funeral wreath / on your
+      *bellend*. {huge}

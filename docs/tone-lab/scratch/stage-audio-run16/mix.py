@@ -25,8 +25,10 @@ rng = np.random.default_rng(16)
 import sys
 
 # argv: [picks.json] [output stem]; default is the per-line render
-PICKS = Path(sys.argv[1]) if len(sys.argv) > 1 else OUT / "lines" / "picks.json"
-STEM = sys.argv[2] if len(sys.argv) > 2 else "run16-stage"
+DRY = "--dry" in sys.argv  # the room and the mic, no audience: half-second beat at laugh points
+argv = [a for a in sys.argv[1:] if a != "--dry"]
+PICKS = Path(argv[0]) if argv else OUT / "lines" / "picks.json"
+STEM = argv[1] if len(argv) > 1 else "run16-stage"
 picks = json.loads(PICKS.read_text(encoding="utf-8"))
 cues = yaml.safe_load((ROOT / "src" / "cues.yaml").read_text(encoding="utf-8"))
 reactions = yaml.safe_load((ROOT / "src" / "laughs.yaml").read_text(encoding="utf-8"))["reactions"]
@@ -150,14 +152,19 @@ def take_reaction(name):
 # --- timeline --------------------------------------------------------------------------
 events = []  # (start_s, stereo, kind, label)
 t = 0.0
-opening, _ = take_reaction(cues.get("opening", "applause"))
-events.append((1.0, opening, "crowd", "opening"))
-t = 1.0 + min(opening.shape[1] / SR, 6.0)
+if DRY:
+    t = 0.8
+else:
+    opening, _ = take_reaction(cues.get("opening", "applause"))
+    events.append((1.0, opening, "crowd", "opening"))
+    t = 1.0 + min(opening.shape[1] / SR, 6.0)
 
 prev_speaker, prev_line = None, None
 for p in picks:
     line_no = int(p["id"].split("_")[0])
-    if prev_speaker is None:
+    if "gap" in p:  # directed render: gaps and beats are already set per turn
+        gap = p["gap"]
+    elif prev_speaker is None:
         gap = 0.0
     elif p["speaker"] != prev_speaker:
         gap = 0.3
@@ -172,7 +179,9 @@ for p in picks:
     events.append((t, voice, "speech", p["id"]))
     end = t + mono.shape[0] / SR
     react = p["react"]
-    if react != "none":
+    if react != "none" and DRY:
+        t = end + 0.5
+    elif react != "none":
         rw, hold = take_reaction(react)
         events.append((end + 0.18, rw, "crowd", f"{p['id']}:{react}"))
         t = end + 0.18 + hold
@@ -180,9 +189,12 @@ for p in picks:
         t = end
     prev_speaker, prev_line = p["speaker"], line_no
 
-closing, _ = take_reaction("applause")
-events.append((t + 1.2, closing, "crowd", "closing applause"))
-total = t + 1.2 + closing.shape[1] / SR + 2.0
+if DRY:
+    total = t + 2.0
+else:
+    closing, _ = take_reaction("applause")
+    events.append((t + 1.2, closing, "crowd", "closing applause"))
+    total = t + 1.2 + closing.shape[1] / SR + 2.0
 
 n = int(total * SR) + SR
 speech_bus = np.zeros((2, n), np.float32)
@@ -202,7 +214,7 @@ crowd_bus *= 1 - 0.7 * act
 mm = [load(p, trim_db=None).mean(0) for p in sorted((OUT / "laughs" / "murmur").glob("take*.wav"))[:2]]
 murmur = np.stack([mm[0], mm[-1][: len(mm[0])] if len(mm[-1]) >= len(mm[0]) else np.pad(mm[-1], (0, len(mm[0]) - len(mm[-1])))])
 reps = int(np.ceil(n / murmur.shape[1]))
-bed = np.tile(murmur, (1, reps))[:, :n] * db(-26)
+bed = np.tile(murmur, (1, reps))[:, :n] * db(-26 if not DRY else -40)
 bed *= 1 - 0.6 * act
 
 mix = reverb(speech_bus, 0.15)[:, :n] + reverb(crowd_bus, 0.08)[:, :n] + bed
