@@ -184,6 +184,14 @@ th.refcol .w { color: var(--ink-2); }
 .tierbox { margin: 10px 0; padding: 8px 10px; border-radius: 6px; background: var(--page); font-size: 13px; }
 .tierbox p { margin: 2px 0 0; color: var(--ink-2); }
 .tierbox.critical { border-left: 3px solid var(--s6); } .tierbox.watch { border-left: 3px solid var(--axis); } .tierbox.off { border-left: 3px solid var(--grid); }
+/* One run at a time: the grid is a few columns wide, so the score's details sit beside it. */
+.runbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 0 0 10px; }
+.runbar .label { color: var(--muted); font-size: 12px; margin-right: 2px; }
+.runbar .chip { font-size: 12.5px; padding: 4px 12px; }
+.runnote { color: var(--ink-2); font-size: 13px; margin: 0 0 12px; max-width: 900px; }
+.layout.onerun { grid-template-columns: fit-content(560px) minmax(360px, 1fr); }
+.layout.onerun.reading { grid-template-columns: fit-content(560px) minmax(360px, 1fr); }
+@media (max-width: 860px) { .layout.onerun, .layout.onerun.reading { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) {
   header, main, nav { padding-left: 16px; padding-right: 16px; }
   table.m th.dim { min-width: 170px; max-width: 190px; }
@@ -228,8 +236,14 @@ const TIER_LABEL = { critical: "Critical", watch: "Watch", off: "Off" };
 const TIER_NOTE = { critical: "drives the generator and the gate", watch: "scored and shown, not targeted", off: "not scored in this experiment" };
 const tierOf = id => FOC?.tiers?.[id]?.tier || null;
 const isOff = f => !!FOC?.disabled?.includes(f);
+// The writers' runs among the chats, newest last; "game" stands for the chats the game itself played.
+const CHAT_RUNS = [...new Set(DATA.results.filter(r => r.kind === "chat").map(r => r.writers_run || "game"))]
+  .sort((a, b) => a === "game" ? -1 : b === "game" ? 1 : a - b);
 const state = { tab: FOC ? "focus" : "profile", pri: { core: true, useful: true, diagnostic: true },
-  tiers: { critical: true, watch: true, off: false }, all: false, order: "catalogue", sel: null, view: "scores" };
+  tiers: { critical: true, watch: true, off: false }, all: false, order: "catalogue", sel: null, view: "scores",
+  run: CHAT_RUNS.length > 1 ? CHAT_RUNS[CHAT_RUNS.length - 1] : null };
+const runOf = r => r.writers_run || "game";
+const runLabel = k => k === "game" ? "The game's chats" : "Run " + k;
 const dims = DATA.dimensions;
 const byFam = f => dims.filter(d => d.family === f);
 const results = f => DATA.results.filter(r => r.kind === f).sort((a, b) =>
@@ -259,7 +273,8 @@ function tabs() {
 
 // The columns of a family's grid: the planned work first, then what we compare it with.
 function columns(f) {
-  const rs = results(f);
+  let rs = results(f);
+  if (f === "chat" && state.run != null) rs = rs.filter(r => runOf(r) === state.run);
   if (!FOC) return rs;
   if ((FOC.detail || []).includes(f)) return rs;  // the experiment's own kind: every piece of it
   const planned =(FOC.planned || []).filter(p => p.kind === f).map(p => ({ ...p, planned: true, scores: {} }));
@@ -312,6 +327,33 @@ function focusPage() {
     w.append(box);
   }
   return w;
+}
+
+// The run selector: one run's chats and its set in the grid, or every run side by side.
+function runBar() {
+  const pickRun = k => {
+    // keep the selection on the same writer (or the set) and the same score in the new run
+    const old = state.sel && findCol(state.sel.r);
+    state.run = k;
+    if (old && k != null) {
+      const same = columns("chat").find(r => old.set ? r.set : r.writer && r.writer === old.writer);
+      state.sel = same ? { ...state.sel, r: same.id } : null;
+    }
+    render();
+  };
+  const bar = $("div", { class: "runbar", role: "group", "aria-label": "Run" }, $("span", { class: "label", text: "Run" }));
+  for (const k of CHAT_RUNS) bar.append($("button", { class: "chip", "aria-pressed": String(state.run === k),
+    text: runLabel(k), onclick: () => pickRun(k) }));
+  bar.append($("button", { class: "chip", "aria-pressed": String(state.run == null), text: "All runs", onclick: () => pickRun(null) }));
+  return bar;
+}
+// What the selected run changed, from its set's note (or a chat's, where the run has no set).
+function runNote() {
+  if (state.run == null) return null;
+  const rs = results("chat").filter(r => runOf(r) === state.run);
+  const set = rs.find(r => r.set), any = rs.find(r => r.note);
+  const m = (set?.note || "").match(/^Every chat of run \d+ \((.*)\): /) || (any?.note || "").match(/\(run \d+: (.*)\)\./);
+  return m ? $("p", { class: "runnote" }, $("strong", { text: runLabel(state.run) + ": " }), document.createTextNode(m[1] + ".")) : null;
 }
 
 function legend() {
@@ -664,13 +706,17 @@ function render() {
   const f = state.tab;
   if (isOff(f)) { m.append($("div", { class: "card offfam" }, $("h2", { text: DATA.families[f].title + " · off for now" }),
     $("p", { text: FOC.disabled_note }), $("p", { class: "def", text: "The chat scores from v18 to v22 stay in the data and come back when this tab is switched on." }))); return; }
-  const left = $("div", {}, $("p", { class: "fam-intro", text: FOC ? FOC_NOTE[f] : FAM_NOTE[f] }));
+  const oneRun = f === "chat" && state.run != null;
+  // with one run on screen the details panel is never empty: it starts on the run's first chat
+  if (oneRun && !state.sel && columns(f).length) state.sel = { r: columns(f)[0].id, auto: true };
+  if (f === "chat" && CHAT_RUNS.length > 1) m.append(runBar(), runNote() || "");
+  const left = $("div", {}, oneRun ? null : $("p", { class: "fam-intro", text: FOC ? FOC_NOTE[f] : FAM_NOTE[f] }));
   if (f === "plan" && (!FOC || state.all)) { const c = trend(f); if (c) left.append(c); }
   left.append($("div", { class: "card" }, controls(), matrix(f)));
   const pn = panel(f), reading = !!pn.querySelector(".reader, .made");
-  m.append($("div", { class: "layout" + (reading ? " reading" : "") }, left, pn));
+  m.append($("div", { class: "layout" + (oneRun ? " onerun" : "") + (reading ? " reading" : "") }, left, pn));
   // One column on narrow screens: the panel sits under the grid, so bring it into view.
-  if (state.sel && innerWidth <= 1100) requestAnimationFrame(() => pn.scrollIntoView({ block: "start" }));
+  if (state.sel && !state.sel.auto && innerWidth <= (oneRun ? 860 : 1100)) requestAnimationFrame(() => pn.scrollIntoView({ block: "start" }));
   if (reading) { const mk = pn.querySelector("mark"); const hd = pn.querySelector(".readhead");
     pn.scrollTop = mk ? Math.max(0, mk.offsetTop - hd.offsetHeight - 60) : 0; }
 }
