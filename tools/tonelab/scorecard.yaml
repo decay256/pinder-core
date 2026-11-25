@@ -33,8 +33,8 @@ families:
   chat:
     title: The chat
     artefact: >-
-      the chat as the reader sees it, played turn by turn as the game's dice fall, or written in
-      one go by a writer
+      the chat as the reader sees it, played turn by turn as the game's dice fall, written in one
+      go by a writer, or written by a writer improvisation by improvisation
     context: >-
       The lab makes Pinder's chats. Pinder looks like a dating app and is a satire of one: everyone
       on it is a sentient penis with a phone, a profile and a life, so bodies are small talk, and it
@@ -46,7 +46,11 @@ families:
       can say, for each of the two, what they are afraid of, what they do so they don't have to
       feel it, where that comes from, and what they did at the end. Some chats were played turn by
       turn with the game's dice and a plan; others were written in one go by a writer from two
-      character profiles that writer wrote, with no plan, no dice and no turns.
+      character profiles that writer wrote, with no plan, no dice and no turns; others again were
+      written by a writer improvisation by improvisation, told before each one how it goes for the
+      first character (the approach, how well it comes off, any trap, how the other's interest
+      moves). Those instructions are part of the design: the reader never sees them, and the work
+      is how well the chat plays them.
 
 materials:
   profile: the profile being scored
@@ -61,11 +65,14 @@ materials:
   chats: every chat in the set, each under its writer's name
   chat_masked: the chat with the speakers' names replaced by message numbers
   dice: what the game rolled each turn, and what it did to interest
+  improvisations: >-
+    what the writer was told before each improvisation, each followed by what they wrote for it; for
+    a set, the instructions alone, the same for every chat in it
 
 sees:
   profile: [profile, game, cast]
   plan: [brief, plan]
-  chat: [chat, plan, brief, dice]
+  chat: [chat, plan, brief, dice, improvisations]
 
 dimensions:
 
@@ -1083,6 +1090,34 @@ dimensions:
   low: The dice are invisible.
   line: A 4 makes most successes and misses visible in the text. A 3 hides them.
   high: Every roll visible, and the misses are the funniest turns.
+
+- id: chat.improvisation
+  family: chat
+  batch: 5
+  needs: [improvisations]
+  name: Plays the improvisations
+  priority: core
+  source: >-
+    Runs 12 on: the chat is written to instructions, so a weak score can be the instruction or the
+    writer. This one scores the writer's side: what they made of each instruction.
+  tells: >-
+    Each instruction happens on screen, as the characters, and is funny: the successes land, the
+    misses go wrong the way the instruction says, each trap is played for its length and then
+    stops, and the other's replies move the way their interest does.
+  method: >-
+    Go through IMPROVISATIONS one by one and check what was written against what was asked: the
+    approach, how well it comes off, the way a miss goes wrong, a trap's behaviour while it lasts
+    (the Spiral narrating the chat, Overthinking explaining itself, and the rest), and the reply's warmth against
+    the interest change. Note every instruction that is missing, flattened or played as a label
+    (a character saying how interested they are, naming the trap, explaining the miss).
+  low: >-
+    The instructions are ignored, or carried out as labels: the trap is named instead of played,
+    and replies announce their interest.
+  line: >-
+    A 4 plays most instructions so a reader could tell what happened, plays every trap for its
+    length, and lets no instruction show through as a label. A 3 misses or flattens several, or
+    lets the mechanics show (a reply that says how interested it is, a trap named).
+  high: Every instruction is visible in what they type, and the misses and traps are among the funniest moments.
 
 - id: chat.variety
   family: chat

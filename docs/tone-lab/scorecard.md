@@ -403,7 +403,7 @@ The same pair on different seeds gets different stories.
 
 ## The chat
 
-Scored: the chat as the reader sees it, played turn by turn as the game's dice fall, or written in one go by a writer. The judge sees: the chat, the plan, what the chat was written from: for a chat the game played, everything the planner was given about the two characters and tonight; for a writer's chat, the two profiles that writer wrote, what the game rolled each turn, and what it did to interest.
+Scored: the chat as the reader sees it, played turn by turn as the game's dice fall, written in one go by a writer, or written by a writer improvisation by improvisation. The judge sees: the chat, the plan, what the chat was written from: for a chat the game played, everything the planner was given about the two characters and tonight; for a writer's chat, the two profiles that writer wrote, what the game rolled each turn, and what it did to interest, what the writer was told before each improvisation, each followed by what they wrote for it; for a set, the instructions alone, the same for every chat in it.
 
 ### The brief's test (core)
 
@@ -644,6 +644,16 @@ Pipeline health. Successes land and misses misfire on screen.
 - **Low:** The dice are invisible.
 - **Line:** A 4 makes most successes and misses visible in the text. A 3 hides them.
 - **High:** Every roll visible, and the misses are the funniest turns.
+
+### Plays the improvisations (core, only where there is a improvisations)
+
+Each instruction happens on screen, as the characters, and is funny: the successes land, the misses go wrong the way the instruction says, each trap is played for its length and then stops, and the other's replies move the way their interest does.
+
+- **From:** Runs 12 on: the chat is written to instructions, so a weak score can be the instruction or the writer. This one scores the writer's side: what they made of each instruction.
+- **How:** Go through IMPROVISATIONS one by one and check what was written against what was asked: the approach, how well it comes off, the way a miss goes wrong, a trap's behaviour while it lasts (the Spiral narrating the chat, Overthinking explaining itself, and the rest), and the reply's warmth against the interest change. Note every instruction that is missing, flattened or played as a label (a character saying how interested they are, naming the trap, explaining the miss).
+- **Low:** The instructions are ignored, or carried out as labels: the trap is named instead of played, and replies announce their interest.
+- **Line:** A 4 plays most instructions so a reader could tell what happened, plays every trap for its length, and lets no instruction show through as a label. A 3 misses or flattens several, or lets the mechanics show (a reply that says how interested it is, a trap named).
+- **High:** Every instruction is visible in what they type, and the misses and traps are among the funniest moments.
 
 ### One night, not a template (core, scored on a set of chats or runs at once, not per artefact)
 

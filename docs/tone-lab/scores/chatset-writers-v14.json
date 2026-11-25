@@ -6,7 +6,7 @@
  "order": 114,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v14/chat-reuben-brick/",
- "note": "Every chat of run 14 (run 13 told as improvisation instructions, without the game's language; traps two long): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "note": "Every chat of run 14 (run 13 told as improvisation instructions, without the game's language; traps two long): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
  "when": null,
  "writer": null,
  "writers_run": 14,
@@ -15,20 +15,25 @@
   "chats": {
    "chars": 11366,
    "words": 1866
+  },
+  "improvisations": {
+   "chars": 4331,
+   "words": 716
   }
  },
  "scores": {
   "chat.variety": {
    "score": 2,
-   "why": "All three chats run the same night in the same order. Each opens with Reuben flattering the schedule tattoo, monocle or vest while posing as casual. Brick then discloses her body and names a time slot, calls out the 'four-second' reply, and tells the story of the ex who left over calendared fights, ending in 'sometime' and crying in a cab. Reuben has an 'in real time' meltdown about Delphine and the bit, then a 'definitely do not want' denial of wanting to be silenced, and every chat closes on a recurring calendar invite with travel buffers. Many lines recur in all three (top hat costs more than rent, boxed rosé, travel buffer, the cab) or in two ('dishwasher-safe', monocle fished out with a plastic sword, the $340 steamer). Carr's 21:05 silence clause and the 2038 relapse, and Wong's pigs-in-a-blanket and 08:00 'still there' itinerary, are the only real departures, and they are why this is not a 1.",
+   "why": "All three chats run the same night in the same order. Reuben opens by complimenting her look or her shaft-tattooed schedule. She catches the four-second reply. He denies rehearsing in the mirror. She cites the ex who left over calendared fights and the cab after \"sometime.\" Improvisation 5 brings his narrated meltdown naming Delphine, Improvisation 7 brings the \"I definitely do not want you to…\" denial, and it ends on a sent recurring calendar invite. Many lines recur in all three chats, well past the two-chat limit: the four-second reply, the travel buffer, boxed rosé, crying in the cab, the denied mirror rehearsal. Others recur in two: the $340 steamer, \"dishwasher-safe,\" the plastic sword. It stays above a 1 only on texture that belongs to one writer: Ali Wong's empty floor with no chairs and pigs-in-blankets, Joel Kim Booster's ottoman and Q3 overhead, Jimmy Carr's contract-law framing, 21:05 silence clause and \"2038\" booking.",
    "evidence": [
-    "the last dick who said \"let's do this again sometime\" without naming a day left me sobbing in a cab",
+    "Let's audit the boomerang.",
     "Also, you replied in four seconds flat, Mr. Barely Online.",
-    "Watch me torpedo this in real time: you said something real, I panicked at the silence"
+    "Dry since Tuesday. Four-second reply."
    ],
-   "raise": "Give each writer a different opening move and turning point, and stop each chat from working through the same list of profile facts (four seconds, cab, travel buffer, dishwasher-safe, steamer) in the same order.",
-   "def": "03d845827225bb57",
-   "material": "2782805874704e59",
+   "raise": "Have at least one writer break the shared beat order: for example, give the four-second catch and the mirror denial to her rather than him, or end on something other than a sent calendar invite. Also drop the brief's stock props (steamer, plastic sword, cab) wherever a writer can find their own.",
+   "cause": "both",
+   "def": "eb4c97580d7f148b",
+   "material": "ca93a0893066827e",
    "judge": "claude:opus",
    "batch": 0,
    "found": [
@@ -44,10 +49,15 @@
    "seconds": 19.3,
    "cost": 0.07876,
    "label": "batch 0"
+  },
+  {
+   "seconds": 20.5,
+   "cost": 0.0850868,
+   "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-23T00:18:18Z",
- "repo_commit": "5068254",
- "cost": 0.0788
+ "scored_utc": "2026-11-25T11:56:25Z",
+ "repo_commit": "c5181f85",
+ "cost": 0.1638
 }

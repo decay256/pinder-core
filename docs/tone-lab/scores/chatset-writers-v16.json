@@ -6,7 +6,7 @@
  "order": 116,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v16/chat-zyx-sable/",
- "note": "Every chat of run 16 (Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "note": "Every chat of run 16 (Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
  "when": null,
  "writer": null,
  "writers_run": 16,
@@ -15,20 +15,25 @@
   "chats": {
    "chars": 13234,
    "words": 2321
+  },
+  "improvisations": {
+   "chars": 6695,
+   "words": 1110
   }
  },
  "scores": {
   "chat.variety": {
    "score": 2,
-   "why": "All three chats play the same night in the same order. Zyx opens with a photo compliment plus a needy follow-up. Sable says 'breathe' or 'needy' and roasts her own low nut. Then come the cropped-family-portrait reveal, the mother who audits selfies like a returns desk, the $94 maid limescale story, the 90-second finish with the stand-up set, the ghosted ex over an unposed photo, a 'partner in crime/Hallmark' plea and 'gag me'. Every chat ends with Sable leaving. Many lines recur in all three, not just two: the family-portrait crop, the returns desk or Zara return, the 29% APR extensions, the dry-scooped pre-workout and the 5am lint roller. The differences are in texture only: Carr's British register, Booster's 'bank around corners' thaw and last-chance beat, Wong's account deletion. That lifts it off a 1, but it is far below the line, which forbids even shared openings.",
+   "why": "All three chats open the same way: Zyx compliments her photo, sends a needy double-text about being looked at, and Sable undercuts it with her uneven ball. The disclosures then follow the same sequence of family-portrait cropping, mother as returns desk, dry-scooped pre-workout, the $94 maid outfit and limescale scrub, the 5am lint roller, and the ex ghosted over an unposed photo. Many lines recur in all three chats, which breaks the bar well beyond 'more than two': '$94', 'went soft', 'pre-workout', 'cropped out of the family photo', 'lint roll' and 'unposed photo'. Others recur in two: 'partner in crime', 'TED talk', '29% APR', '140 wpm', 'Gandalf', 'gag me', and 'ninety seconds / eleven minutes / tight five'. The shared improvisation beats (Improv 1's clinging Charm, Improv 11's trope trap, Improv 14's Madness) explain the matching shape. But the writers also reuse the profile props almost verbatim, so the nights differ mostly in voice and in the last two lines (Ali's account deletion, Joel's 'Brenda' wrong window, Carr's funeral wreath); that is what lifts this above a 1.",
    "evidence": [
+    "I once stress-scrubbed a hookup’s bathtub limescale until he went soft and tipped me $20 to leave.",
     "my mom still audits my selfies like a returns desk",
-    "My mother still inspects my selfies like a returns desk.",
-    "scrubbed a guy's limescale until he went soft and tipped me $20"
+    "My mother still inspects my selfies like a returns desk."
    ],
-   "raise": "Give each writer a different opening move and order of reveals, for example Sable leading or Zyx withholding, and keep the backstory props out of the shared prompt so they cannot all recur.",
-   "def": "03d845827225bb57",
-   "material": "db1fb4ef0050e199",
+   "raise": "Have each writer draw on a different subset of the profile facts and reveal them in a different order, so that no prop (the $94 maid outfit, pre-workout, the unposed-photo ex) appears in more than two chats.",
+   "cause": "both",
+   "def": "eb4c97580d7f148b",
+   "material": "90256de4fe64f8df",
    "judge": "claude:opus",
    "batch": 0,
    "found": [
@@ -44,10 +49,15 @@
    "seconds": 18.9,
    "cost": 0.0739292,
    "label": "batch 0"
+  },
+  {
+   "seconds": 21.3,
+   "cost": 0.0996068,
+   "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-23T00:45:23Z",
- "repo_commit": "6709700",
- "cost": 0.0739
+ "scored_utc": "2026-11-25T11:59:58Z",
+ "repo_commit": "c5181f85",
+ "cost": 0.1735
 }

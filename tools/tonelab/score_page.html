@@ -75,6 +75,10 @@ td.cell { width: 44px; height: 30px; text-align: center; border-radius: 4px; cur
   outline-offset: 1px; }
 td.cell:hover, td.cell.sel { outline: 2px solid var(--ink); }
 td.cell.na { background: var(--na); color: var(--muted); font-weight: 400; }
+td.cell.imp { background-image: linear-gradient(135deg, transparent 0 calc(100% - 9px), var(--ink) calc(100% - 9px)); }
+.box.impmark { background: linear-gradient(135deg, var(--na) 0 calc(100% - 7px), var(--ink) calc(100% - 7px)); color: var(--muted); }
+p.cause { font-size: 13px; margin: 6px 0 0; color: var(--ink-2); }
+p.cause.improvisation, p.cause.both { color: var(--ink); font-weight: 600; }
 tr.sum th.dim { color: var(--ink-2); font-weight: 600; }
 tr.sum td { text-align: center; font-size: 12px; color: var(--ink); font-variant-numeric: tabular-nums; height: 26px; }
 tr.gap td, tr.gap th { height: 8px; }
@@ -229,6 +233,10 @@ const $ = (t, a = {}, ...kids) => { const e = document.createElement(t);
     else if (k.startsWith("on")) e.addEventListener(k.slice(2), v); else e.setAttribute(k, v); }
   for (const k of kids) if (k != null) e.append(k); return e; };
 const lean = s => s == null ? "not scored" : s >= 4 ? "leans pass" : "leans fail";
+const CAUSE_SHORT = { writing: "the writing", improvisation: "the improvisation", both: "improvisation and writing" };
+const CAUSE = { writing: "Decided by the writing: the instructions did not ask for this.",
+  improvisation: "Decided by the improvisation: an instruction asked for what this score reflects.",
+  both: "Decided by the improvisation and the writing together." };
 const fill = s => s == null ? "na" : "f" + s;
 const FOC = DATA.focus;
 const TIERS = ["critical", "watch", "off"];
@@ -361,6 +369,8 @@ function legend() {
   for (let s = 1; s <= 6; s++) l.append($("span", { class: "sw" }, $("span", { class: "box " + fill(s), text: String(s) }),
     $("span", { text: s === 3 ? "leans fail" : s === 4 ? "leans pass" : "" })));
   l.append($("span", { class: "sw" }, $("span", { class: "box na", text: "–" }), $("span", { text: "n/a" })));
+  if (DATA.results.some(r => Object.values(r.scores || {}).some(s => s.cause === "improvisation" || s.cause === "both")))
+    l.append($("span", { class: "sw" }, $("span", { class: "box impmark", text: "" }), $("span", { text: "decided by the improvisation" })));
   return l;
 }
 
@@ -414,6 +424,9 @@ function matrix(f) {
     const crit = r => byFam(f).filter(d => tierOf(d.id) === "critical").map(d => r.scores?.[d.id]?.score);
     sumRow("Critical mean", r => mean(crit(r).filter(x => x != null)), v => v.toFixed(1));
     sumRow("Critical below the line (≤3)", r => crit(r).filter(x => x != null && x <= 3).length, v => String(v));
+    if (rs.some(r => Object.values(r.scores || {}).some(s => s.cause)))
+      sumRow("of which the improvisation", r => { const ss = byFam(f).filter(d => tierOf(d.id) === "critical").map(d => r.scores?.[d.id]);
+        return ss.some(s => s?.cause) ? ss.filter(s => s && s.score != null && s.score <= 3 && (s.cause === "improvisation" || s.cause === "both")).length : null; }, v => String(v));
     sumRow("Passes the gate", r => { const c = crit(r); return c.some(x => x == null) ? "not all scored" : c.every(x => x >= 4) ? "yes" : "no"; }, v => v);
   } else {
     sumRow("Core mean", r => mean(sc(r, d => d.priority === "core")), v => v.toFixed(1));
@@ -439,12 +452,13 @@ function matrix(f) {
           "aria-label": `${d.name}, ${r.label}: not written yet`, onclick: () => { state.sel = { r: r.id, d: d.id }; render(); } }));
         continue;
       }
-      const td = $("td", { class: "cell " + (v === undefined ? "na" : fill(v)) + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : ""),
+      const td = $("td", { class: "cell " + (v === undefined ? "na" : fill(v)) + (state.sel?.r === r.id && state.sel?.d === d.id ? " sel" : "")
+          + (s && (s.cause === "improvisation" || s.cause === "both") ? " imp" : ""),
         text: v === undefined ? "" : v == null ? "–" : String(v), tabindex: "0",
         "aria-label": `${d.name}, ${r.label}: ${v == null ? "not scored" : v}`,
         onclick: () => pick(r.id, d.id),
         onkeydown: e => { if (e.key === "Enter") pick(r.id, d.id); } });
-      if (s) { td.addEventListener("mousemove", e => tip(e, `${d.name} · ${r.label}`, `${v ?? "n/a"} · ${lean(v)}`));
+      if (s) { td.addEventListener("mousemove", e => tip(e, `${d.name} · ${r.label}`, `${v ?? "n/a"} · ${lean(v)}` + (s.cause ? ` · ${CAUSE_SHORT[s.cause]}` : "")));
         td.addEventListener("mouseleave", untip); }
       tr.append(td);
     }
@@ -545,7 +559,8 @@ function panel(f) {
       const s = r.scores[d.id];
       ul.append($("li", { onclick: () => pick(r.id, d.id) },
         $("span", { class: "s " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
-        $("span", {}, $("span", { class: "n", text: d.name }), $("div", { class: "y", text: s.why || "" }))));
+        $("span", {}, $("span", { class: "n", text: d.name + (s.cause === "improvisation" || s.cause === "both" ? " · " + CAUSE_SHORT[s.cause] : "") }),
+          $("div", { class: "y", text: s.why || "" }))));
     });
     p.append(ul);
     if (r.slim) p.append($("p", { class: "def", text: SLIM_NOTE }));
@@ -557,6 +572,7 @@ function panel(f) {
   if (!s) { p.append($("p", { class: "empty", text: "Not scored yet." })); return p; }
   p.append($("div", { class: "head" }, $("span", { class: "big " + fill(s.score), text: s.score == null ? "–" : String(s.score) }),
     $("span", { class: "lean", text: s.score == null ? "Not applicable to this material" : DATA.scale[s.score] })));
+  if (s.cause) p.append($("p", { class: "cause " + s.cause, text: CAUSE[s.cause] }));
   if (r.slim) p.append($("p", { class: "def", text: SLIM_NOTE }));
   else p.append($("h3", { text: "Why" }), $("p", { text: s.why }));
   if (s.evidence?.length) { p.append($("h3", { text: "Rests on" }));

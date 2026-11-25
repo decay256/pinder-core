@@ -6,7 +6,7 @@
  "order": 113,
  "run": null,
  "source": "docs/tone-lab/scratch/writers-v13/chat-reuben-brick/",
- "note": "Every chat of run 13 (run 12 with the turn no longer fixed at one message from each): the same pair, the same brief and the same prompt, each written by a different writer.",
+ "note": "Every chat of run 13 (run 12 with the turn no longer fixed at one message from each): the same pair, the same brief and the same prompt, each written by a different writer. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template; only what the writers made of it can differ.",
  "when": null,
  "writer": null,
  "writers_run": 13,
@@ -15,20 +15,25 @@
   "chats": {
    "chars": 12150,
    "words": 2003
+  },
+  "improvisations": {
+   "chars": 6801,
+   "words": 1189
   }
  },
  "scores": {
   "chat.variety": {
    "score": 2,
-   "why": "All three chats run the same skeleton in the same order. Reuben opens with a pre-emptive disclosure and Brick allots a slot. Brick's backstory (Marguerite's calendared fights, the cab guy's \"sometime\") comes out next. Reuben then live-narrates his own collapse, Brick gives a 'stop narrating or we're done' ultimatum, and every chat ends on a calendar invite being accepted. Lines recur across far more than two chats: the shared calendar with hard stop-times and sobbing in a cab appear in all three; \"four seconds flat\", \"dishwasher-safe\", the boxed-rosé monocle and \"leaving the top hat at home\" appear in two; \"sixty seconds\" and the monocle fogging recur in pairs. The differences are real but are details inside the same scene, not separate nights. Booster's Brick names both acts (\"Same mirror, different hat\") and Reuben's real sentence lands; Wong's Reuben admits to being an eleven-day shut-in with a ring light; Carr's Reuben never fully drops the act.",
+   "why": "All three chats follow the same night in the same order. Each opens with Reuben's hat-and-monocle flattery and a swap of disclosures about the 4.5-inch curve and the bump or ridge. Then come the Marguerite calendar fights and the crying-in-a-cab story, a denial of being a shut-in or of rehearsing (Turn 3, Turn 7), live narration of his own collapse with Brick saying 'stop narrating' (Turn 5 and Turn 8 Spiral), and a timestamped booking with a calendar invite accepted (Turn 11). Specific lines recur well beyond what the shared instructions fix: 'four seconds flat' and 'leaving the top hat at home' close two chats, 'monocle just fogged' appears in two, and 'dishwasher-safe' kanji, the $340 steamer, the plastic cocktail sword and 'eleven days' each appear in two. It sits below a 3 because the endings are near-identical too, and the real differences are local (Booster's explicit fear confession, Wong's early Reuben-led itinerary, Carr's Brick-written schedule) rather than different nights.",
    "evidence": [
-    "my ex, who bailed because I put our fights on a shared Google Calendar with hard end-times",
-    "My ex Marguerite dumped me for putting our fights on a shared calendar with hard stop-times",
-    "Invite sent in four seconds flat—leaving the top hat at home."
+    "Invite sent in four seconds flat—leaving the top hat at home.",
+    "Invite sent—and you accepted in four seconds flat.",
+    "My monocle just fogged up. Drop your email for the invite."
    ],
-   "raise": "Let at least one chat break the shared spine: a different opener (Brick hunting first, or the night going wrong early) and an ending that is not an accepted calendar invite. Keep profile props like the cab, the steamer and the kanji from recurring as set-piece lines in every chat.",
-   "def": "03d845827225bb57",
-   "material": "a1925fd8bbd79b99",
+   "raise": "Have at least one chat take a different opening move and turning point (for example, Brick opening, or the cab story surfacing at the end rather than at Turn 3), and drop the profile props and closing phrases that recur verbatim.",
+   "cause": "both",
+   "def": "eb4c97580d7f148b",
+   "material": "02328ce60c12d5b7",
    "judge": "claude:opus",
    "batch": 0,
    "found": [
@@ -44,10 +49,15 @@
    "seconds": 22.5,
    "cost": 0.08768400000000001,
    "label": "batch 0"
+  },
+  {
+   "seconds": 25.0,
+   "cost": 0.10885600000000001,
+   "label": "batch 0"
   }
  ],
  "judge": "claude:opus",
- "scored_utc": "2026-11-22T23:01:38Z",
- "repo_commit": "53d960b",
- "cost": 0.0877
+ "scored_utc": "2026-11-25T11:51:59Z",
+ "repo_commit": "c5181f85",
+ "cost": 0.1965
 }

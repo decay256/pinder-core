@@ -68,6 +68,7 @@ For each dimension return:
 - "why": two to four sentences: what earned this score, and what kept it from the next one up (for a 4, also what keeps it above the line)
 - "evidence": one to three short verbatim quotes from the material (under 25 words each) that the score rests on
 - "raise": one sentence: the change that would raise the score by one
+- "cause": only when the material includes IMPROVISATIONS: "writing" when the score comes from how the chat is written, "improvisation" when it comes from what an instruction asked for, "both" when the two decide it together; in "why", name the improvisation
 
 Return only JSON, one entry per dimension in the order given:
 {{"scores": [{{"id": "...", "score": 4, "why": "...", "evidence": ["..."], "raise": "..."}}]}}"""
@@ -358,6 +359,34 @@ def writer_messages(text, names):
     return out
 
 
+_FIRST_STEP = re.compile(r"^# (?:Turn|Improvisation) 1\s*$", re.M)
+_ASK = re.compile(r"\n*Your improvisation: what .*$", re.S)
+CAUSES = ("writing", "improvisation", "both")
+
+
+def improvisations(path):
+    """[(instruction, lines written)] for a chat written improvisation by improvisation (runs 12 on, the
+    <writer>.turns.json beside the chat): what the writer was told before each one, without the brief and
+    the characters that open the first prompt and without the closing ask, and what they wrote for it."""
+    if not path.exists():
+        return []
+    out = []
+    for k, st in enumerate(json.loads(path.read_text(encoding="utf-8")).get("turns") or []):
+        p = (st.get("prompt") or "").strip()
+        if k == 0:
+            heads = list(_FIRST_STEP.finditer(p))
+            if not heads:
+                raise SystemExit(f"{path}: the first prompt has no first improvisation")
+            p = p[heads[-1].start():]
+        out.append((_ASK.sub("", p).strip(), list(st.get("lines") or [])))
+    return out
+
+
+def improvisations_text(steps, written=True):
+    return "\n\n".join(ins + ("\n\nWhat the writer wrote for it:\n" + ("\n".join(lines) or "(nothing)") if written else "")
+                       for ins, lines in steps)
+
+
 def writer_targets():
     """A target for every writer's chat, and one set target per run that holds all of that run's chats."""
     out = []
@@ -372,7 +401,7 @@ def writer_targets():
         pair = tuple(chat_dir[len("chat-"):].split("-"))
         names = [char_name(s) for s in pair]
         writers = json.loads(rec.read_text(encoding="utf-8")).get("writers") or {}
-        done = []
+        done, imp = [], []
         for wid, w in writers.items():
             if w.get("error"):
                 continue
@@ -391,22 +420,46 @@ def writer_targets():
             masked_text = "\n".join(f"[{k}] {m}" for k, (_, _, m) in enumerate(msgs, 1))
             brief = (f"=== {names[0]} and {names[1]}, as {w['writer']} wrote them ===\n{profiles[0]}" if paired else
                      "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles)))
+            source = 'what they wrote about the two characters' if paired else 'the two profiles they wrote'
+            material = {"chat": text, "brief": brief, "chat_masked": masked_text,
+                        "chat_but_last": "\n".join(lines[:msgs[cut][0]]).strip()}
+            steps = improvisations(base / chat_dir / f"{wid}.turns.json")
+            if steps:
+                imp = steps
+                material["improvisations"] = improvisations_text(steps)
+                note = (f"Written by {w['writer']} from {source}, improvisation by improvisation (run {n}: {about}). "
+                        f"Before each of the {len(steps)} improvisations the writer was told how it goes for {names[0]}: "
+                        "the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going "
+                        "wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) "
+                        "and how the other's interest moves. "
+                        "IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part "
+                        "of the design and stay. Score the chat as the reader gets it, the bar unchanged, but read each part "
+                        "against what was asked: where a score comes from what an instruction asked for (a fumble, a trap, "
+                        "interest lost or won), its cause is the improvisation; where the writer carried an instruction out "
+                        "badly, or the weakness has nothing to do with the instructions, it is the writing. The reader sees "
+                        "no dice and no plan: where a dimension speaks of turns, read improvisations.")
+            else:
+                note = (f"Written in one go by {w['writer']} from {source} (run {n}: {about}). "
+                        "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.")
             out.append({"id": f"chat-{folder}-{wid}", "kind": "chat", "label": f"Run {n} · {w['writer']}",
                         "version": f"run {n}", "order": 100 + n, "writer": wid, "writers_run": n,
                         "source": f"docs/tone-lab/scratch/{folder}/{chat_dir}/{wid}.md",
-                        "note": (f"Written in one go by {w['writer']} from {'what they wrote about the two characters' if paired else 'the two profiles they wrote'} (run {n}: {about}). "
-                                 "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges."),
-                        "speakers": [s for _, s, _ in msgs],
-                        "material": {"chat": text, "brief": brief, "chat_masked": masked_text,
-                                     "chat_but_last": "\n".join(lines[:msgs[cut][0]]).strip()}})
+                        "note": note, "speakers": [s for _, s, _ in msgs], "material": material})
             done.append((w["writer"], text))
         if len(done) >= 2:
+            material = {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}
+            note = (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
+                    "each written by a different writer.")
+            if imp:
+                # every writer of a run plays the same mechanics, so the instructions are the same for all
+                material["improvisations"] = improvisations_text(imp, written=False)
+                note += (" All of them were written improvisation by improvisation to the same instructions, under "
+                         "IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest "
+                         "moves) is shared by design and is not a template; only what the writers made of it can differ.")
             out.append({"id": f"chatset-{folder}", "kind": "chat", "set": True, "label": f"Run {n} · all {len(done)} chats",
                         "version": f"run {n}", "order": 100 + n, "writers_run": n,
                         "source": f"docs/tone-lab/scratch/{folder}/{chat_dir}/",
-                        "note": (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
-                                 "each written by a different writer."),
-                        "material": {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}})
+                        "note": note, "material": material})
     return out
 
 
@@ -500,7 +553,7 @@ def sees_of(cat, t):
     """What the judge reads for this target: a set target reads its chats; the rest read their family's
     materials, without the ones this target has none of (a writer's chat has no plan and no dice)."""
     if t.get("set"):
-        return ["chats"]
+        return ["chats"] + (["improvisations"] if "improvisations" in t["material"] else [])
     return [m for m in cat["sees"][t["kind"]] if m in t["material"]]
 
 
@@ -546,7 +599,7 @@ def judge_system(cat, kind=None):
                                scale="\n".join(f"{k}. {v}" for k, v in sorted(cat["scale"].items())))
 
 
-def parse_scores(text, dims):
+def parse_scores(text, dims, need_cause=False):
     a, b = text.find("{"), text.rfind("}")
     if a < 0 or b < a:
         raise ValueError("no JSON object in the answer")
@@ -564,6 +617,11 @@ def parse_scores(text, dims):
             raise ValueError(f"{d['id']}: no reason given")
         ev = [str(e) for e in (s.get("evidence") or []) if str(e).strip()][:3]
         out[d["id"]] = {"score": sc, "why": s["why"].strip(), "evidence": ev, "raise": str(s.get("raise") or "").strip()}
+        cause = str(s.get("cause") or "").strip().lower()
+        if cause in CAUSES:
+            out[d["id"]]["cause"] = cause
+        elif need_cause and sc is not None:
+            raise ValueError(f"{d['id']}: no cause (writing, improvisation or both)")
     return out
 
 
@@ -644,7 +702,7 @@ def score_target(t, cat, caller, judge_id, force=False):
             with lock:
                 rec["calls"].append(dict(meta, label=f"batch {b}" + (" retry" if attempt == 2 else "")))
             try:
-                got = parse_scores(text, ds)
+                got = parse_scores(text, ds, need_cause="improvisations" in t["material"])
                 break
             except (ValueError, json.JSONDecodeError) as e:
                 if attempt == 2:

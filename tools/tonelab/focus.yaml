@@ -18,18 +18,19 @@ mission: >-
 mission_source: Pinder's brief, "What the reader should feel"
 experiment: >-
   Three comedians, Ali Wong, Joel Kim Booster and Jimmy Carr, each rewrite Pinder's brief in their own
-  words, write a short take on both characters, and write the chat between them. Run 11 writes it in
-  one go and has it set something up and pay it off. Runs 12 to 14 keep run 11's briefs and characters
-  and play the chat on the game's seed 23 instead: turn by turn, told what each roll did (12); without
-  fixing each turn at one message from each (13); as improvisation instructions, without the game's
-  language (14). Runs 15 and 16 do the whole workflow for two characters the comedians had not
-  written, Zyx_444 and Sable_xo: in one go (15), then as improvisations (16). Every chat is scored on
-  the chat scorecard, and each run as a set: did the comedians write different nights, or one scene
-  three times? Runs 1 to 10, and the profiles and plans, are off this page; the full explorer keeps them.
+  words, write a short take on both characters, and write the chat between them improvisation by
+  improvisation on the game's seed 23, told before each one how it goes for the first character. The
+  improvisations stay. Run 13 plays Reuben and Brick in the game's language (turns and rolls); run 14
+  plays them as improvisation instructions without it. Runs 15 and 16 do the whole workflow for Zyx_444
+  and Sable_xo, whom the comedians had not written: in one go (15, no instructions), then as
+  improvisations (16). The judge reads each improvised chat with the instructions it was written to,
+  says for every score whether the writing or the instruction decided it, and scores how well the
+  instructions were played. Every chat is scored on the chat scorecard, and each run as a set. Runs 1
+  to 12, and the profiles and plans, are off this page; the full explorer keeps them.
 gate: Every critical dimension scores 4 or more on a chat, and the run's set scores 4 or more on variety.
 disabled: [profile, plan]
 detail: [chat]
-runs_from: 11
+runs_from: 13
 
 # Reference columns: the best we have today on the same dimensions.
 reference: [profile-reuben-v22, profile-reuben-v22-panel, profile-reuben-v24, profile-reuben-v24-panel,
@@ -92,6 +93,7 @@ tiers:
   chat.commitment:  {tier: critical, why: "Caught out, they dig deeper; no lesson. Nothing scored it before."}
   chat.escalation:  {tier: critical, why: "Saunders: every stretch raises the stakes or turns. Replaces pacing, which docked chats for explicit sex the brief asks for."}
   chat.medium:      {tier: critical, why: "Leonard: typed, not written. 3 on every played chat: the chats read like prose."}
+  chat.improvisation: {tier: critical, why: "The improvisations stay, so a weak chat is either a weak instruction or a weak take on one. This scores the take; each score's cause says which."}
   chat.variety:     {tier: critical, why: "Fourteen writers wrote one scene; only a set can show it."}
   chat.sideways:    {tier: watch, why: "Already separates chats (3 to 4); keep it in view."}
   chat.status:      {tier: watch, why: "New: in every run 3 and run 4 opening Brick is on top and stays there."}
