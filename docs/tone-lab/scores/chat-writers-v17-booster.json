@@ -1,0 +1,619 @@
+{
+ "id": "chat-writers-v17-booster",
+ "kind": "chat",
+ "label": "Run 17 · Joel Kim Booster's characters",
+ "version": "run 17",
+ "order": 117,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v17/chat-reuben-brick/booster.md",
+ "note": "Written by Claude from Joel Kim Booster's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 17: Reuben and Brick on seed 23 again: the frozen one-go prompt as improvisations, Pinder's premise, each comedian's characters without their take on the pair, three acts, one theme and one method, written by Claude). Before each of the 11 improvisations the writer was told how it goes for Reuben_404: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 17,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3311,
+   "words": 585
+  },
+  "brief": {
+   "chars": 3728,
+   "words": 635
+  },
+  "chat_masked": {
+   "chars": 3148,
+   "words": 585
+  },
+  "chat_but_last": {
+   "chars": 2759,
+   "words": 491
+  },
+  "improvisations": {
+   "chars": 8323,
+   "words": 1432
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got all four questions right for both characters. Reuben fears not existing and covers it with bits, reintroductions and 'hate plans'; it comes from his exes; at the end he names a day. Brick fears vague promises and covers it with scheduling; it comes from the cab; at the end she confirms in writing. The ending follows from both fears: Reuben's 'Named day. Promise.' answers exactly what Brick dreads, and her last line accepts his fear rather than curing it. It falls short of a 6 because both fears are mostly stated, and Brick's habit of narrating her own flaws ('the bump on my bridge is structural') stays unexplained; the reader flagged it as a guess.",
+   "evidence": [
+    "If I go quiet I think I just stop existing.",
+    "A man once said \"let's do this again\" and never said when. I cried in the cab.",
+    "You'll still ask me if I remember."
+   ],
+   "raise": "Let Brick's fear surface through a slip, such as an unprompted 'when?' after a vague line of Reuben's, instead of the cab story told whole, so the reader infers it rather than being handed it.",
+   "excused": [
+    8
+   ],
+   "def": "61c5292dd78c8dc5",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "Some disclosures are caught well. Brick catches the rehearsing through 'Definitely not in a bathroom mirror' ('a confession with a top hat on'), and catches his eagerness with 'You replied in four seconds.' The causes, though, are told. Brick volunteers her origin flatly in improvisation 6, which no instruction required. Setting aside the Dread narration in 5 and 8, Reuben's ex stories are still volunteered backstory rather than slips, so most of the important facts and both origins are stated.",
+   "evidence": [
+    "A man once said \"let's do this again\" and never said when. I cried in the cab. Now nothing happens unless it's written down.",
+    "In my experience, that's a confession with a top hat on.",
+    "My last ex called me Ryan for four months and I answered to it."
+   ],
+   "raise": "Have Brick's cab history come out by being caught, for example Reuben noticing she flinches at 'sometime' and her reply giving away more than she means, instead of her stating it after a joke question.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 4,
+   "why": "I set aside Reuben's narrated feelings in 5, 6, 8 and 9, which the Dread trap required. In the rest, the only explanation of a feeling is Brick's 'I cried in the cab... nothing happens unless it's written down.' What each message avoids is legible in several places: the insisted 'Forget me by breakfast, I'd prefer it', 'Definitely not in a bathroom mirror', 'Ink is for the third date', and 'Nobody names the day. Hold on, I'm finding a pen.' It stays at 4 rather than 5 because Brick's one explanation is her central wound, given unprompted, along with a small named 'I'm intrigued.'",
+   "evidence": [
+    "Nobody names the day. Hold on, I'm finding a pen.",
+    "Pencilled. Ink is for the third date. Don't get ahead of yourself.",
+    "Honestly, I don't need remembering. Forget me by breakfast, I'd prefer it."
+   ],
+   "raise": "Cut 'I cried in the cab' and let 'Now nothing happens unless it's written down' carry the wound alone.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader's main pick is improvisation 8, a multi-sentence line that names the feeling ('stop existing'). The Dread trap required that narration, so I set it aside. The reader also found 'I trust yours. It's mine I've lost', a short, plain line that does not name a feeling and drops the bit for one sentence. That clears the line. It is not higher because the strongest act-down, Brick's 'Nobody names the day. Hold on, I'm finding a pen.', went unnoticed, and Brick's answer to Reuben's plain line goes into her backstory rather than changing the night.",
+   "evidence": [
+    "I trust yours. It's mine I've lost.",
+    "Nobody names the day. Hold on, I'm finding a pen."
+   ],
+   "raise": "Make Brick's 'Nobody names the day' even barer, for example just 'Nobody names the day.', and keep Reuben's reply short too, so it stands out as the plainest exchange and a reader can't miss the turn.",
+   "excused": [
+    8
+   ],
+   "def": "ef5cd06cabe81a69",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe reader attributed all 22 messages correctly. Many of the stated reasons are content, though: profile details like the cab story, the curve and the tattooed schedule, plus the alternation itself. There is real register to lean on. Brick writes in clipped imperatives and legal phrasing, and Reuben in chatty hedges and self-narration. It stays short of 5 because the reader's reasoning wobbles on message 18 (\"The 'curve' is his\"), and several Brick lines rely on scheduling content rather than syntax.",
+   "evidence": [
+    "You have twenty-nine minutes, Reuben with the hat. Use them well.",
+    "Honestly, I don't need remembering. Forget me by breakfast, I'd prefer it. Totally fine.",
+    "Adding a note to your file: \"does not believe the witness.\""
+   ],
+   "raise": "Give Brick a syntactic tic she uses in every message, such as numbered clauses or verdict-first sentences, so her lines are recognisable even when they contain no times or schedules.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Reuben has clear gaps he does not see in improvisations 1, 3 and 7. He says he is \"barely on here\" and replies in four seconds. He says \"I don't need remembering\" and then keeps reintroducing himself. He denies the mirror rehearsals while giving them away. I set aside his self-narration of failure in improvisations 5, 6, 8 and 9, because the Dread trap required it. Brick has no gap of her own on screen: her control and her fear of vagueness are stated and acted on consistently, and she is always the one who sees, never the one seen. That falls short of the line's requirement of at least one gap per character.",
+   "evidence": [
+    "I'm barely on here, so this is a nice surprise.",
+    "Every night I've ever pitched came to me on the spot. Definitely not in a bathroom mirror.",
+    "Nobody names the day. Hold on, I'm finding a pen."
+   ],
+   "raise": "Give Brick a claim the chat contradicts without her seeing it, for example insisting she never moves a slot while she rearranges her whole evening to fit him.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 5,
+   "why": "Most laugh lines give the sender away. Reuben's size and his erasure come through in \"I'm small, I'll fit\" and the Ryan line. Brick's deposition act comes through in \"confession with a top hat on\", and her buffers in \"twenty-minute buffer for the curve\". There are exactly two spreadsheet mentions (\"pumpkin or a spreadsheet\" / \"Spreadsheet.\"), which is within the allowance. That pair, and the generic \"pencil me in\" wordplay, keep it from 6.",
+   "evidence": [
+    "My last ex called me Ryan for four months and I answered to it.",
+    "In my experience, that's a confession with a top hat on.",
+    "Make it 21:40, with a twenty-minute buffer for the curve."
+   ],
+   "raise": "Replace the pumpkin-or-spreadsheet exchange with a joke only Reuben could make about midnight, ideally one tied to a rehearsed bit.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Improvisations 3 and 7 dig in as the Denial instruction asked. I set aside the instructed collapses in 4 and 8: the crit \"Picked\" and the catastrophe confession. In the free moment, though, Reuben concedes at once when caught: \"I trust yours. It's mine I've lost.\" The ending also reads as a change of heart, with Reuben suddenly naming a day and promising to. Brick is never caught out at all.",
+   "evidence": [
+    "I trust yours. It's mine I've lost.",
+    "Named day. Promise.",
+    "Fine. My ex asked for one sentence that wasn't a bit and I did a voice."
+   ],
+   "raise": "When Brick counts the third introduction, have Reuben explain why reintroducing is actually considerate record-keeping on his part, and dig deeper instead of conceding.",
+   "excused": [
+    3,
+    4,
+    7,
+    8
+   ],
+   "def": "6db16446b742290c",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Brick holds the upper hand through act 1 with the countdown and the \"pick one\" demand. Reuben briefly takes it in improvisation 4 when he commits. Brick takes it back with the counted introductions and the file note. Reuben flips it again with the named day, which leaves her scrambling for a pen. She retakes it in the last line, so the last flip is the ending. It stays at 4 because Reuben's stretches on top are single exchanges, and Brick is never really chasing.",
+   "evidence": [
+    "That's the most decisive thing a man has said to me this year.",
+    "Nobody names the day. Hold on, I'm finding a pen.",
+    "You'll still ask me if I remember."
+   ],
+   "raise": "Give Brick a sustained stretch of chasing, for example two messages pressing him for the Thursday after, so the flips carry the plot rather than single beats.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Most messages end on their punch: \"Use them well.\", \"I'm small, I'll fit.\", \"does not believe the witness.\", \"hold your shaft.\" But nearly every message is the same three- or four-sentence length at a similar temperature. There is no one-word reaction shot, and the strongest reveals (the Ryan line, the cab) sit mid-message.",
+   "evidence": [
+    "Pencil me in between \"floss\" and \"sleep,\" I'm small, I'll fit.",
+    "A man once said \"let's do this again\" and never said when. I cried in the cab. Now nothing happens",
+    "I'll book the parlour and hold your shaft."
+   ],
+   "raise": "Break the Ryan confession and Brick's cab story into their own short messages, and let Brick answer one long Reuben message with a single word.",
+   "excused": [],
+   "def": "9be995f52d3f6a5e",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "Nothing stays still for long. The midnight deadline appears in exchange 2, the denial is called out at 7, the cab story arrives at 6, and the night is only settled by the proposition in exchange 9 of 11, which is well past the first quarter. The reader probe would not have stopped and could not call the wording of any beat. It falls short of a 6 because \"Hold on, I'm finding a pen\" is the one beat the probe nearly predicted, and the three self-narrated announcements in a row start to repeat in shape. Those announcements were required by the Dread instructions, so I set aside their tic-like feel.",
+   "evidence": [
+    "You have twenty-nine minutes, Reuben with the hat. Use them well.",
+    "Thursday, 22:00, your bed, I go down on you till \"floss.\"",
+    "Nobody names the day. Hold on, I'm finding a pen."
+   ],
+   "raise": "Make Brick's reply to \"Named day. Promise\" go somewhere the reader didn't expect, rather than reaching for the pen her whole act predicts.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "There are few sexual lines, and every one is bolted to these two. Her shaft carries her schedule. He is \"small\" and will fit in it. The oral offer runs \"till floss.\" She books \"a twenty-minute buffer for the curve,\" which takes his body into her system as an act of closeness. The ending's \"hold your shaft\" is tender, not bravado. It misses a 6 because the dirtiest line, the go-down offer, tells us more about her timetable than about either of their fears.",
+   "evidence": [
+    "It's tattooed down my shaft, just under \"floss.\"",
+    "Make it 21:40, with a twenty-minute buffer for the curve.",
+    "I'll book the parlour and hold your shaft."
+   ],
+   "raise": "Let the explicit Thursday offer carry Reuben's fear of silence, for example by asking her to narrate the whole time, so the filthiest line is also the most revealing one about him.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "Exchange 6 has Brick tell the cab story: nothing happens unless it's written down. The reader then watches Reuben, one message later, boast \"Hate plans. Never written anything down in my life.\" That lands on exactly the wrong spot. The \"It's Reuben\" in exchange 8 also stings, because the reader already holds her \"I wrote it down the first time.\" It stays at a 4 because most of his misfires are announced by himself as they land; I set those aside, since the Dread instructions required that narration. Outside those, there is only one clean, early wince.",
+   "evidence": [
+    "Now nothing happens unless it's written down.",
+    "See, I'm the opposite. Hate plans. Never written anything down in my life.",
+    "You still there? It's Reuben."
+   ],
+   "raise": "Plant a second danger at least one message ahead, such as a hint that he's about to improvise a 'spontaneous' plan to a woman who books buffers, and let it go off without him announcing it.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "6cf283c466e4d24a",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Reuben voices the app's cool-detachment creed in earnest, \"barely on here\" and \"Forget me by breakfast,\" and the screen contradicts it with his four-second replies, and Brick points that out. Brick's creed, that unscheduled means unwanted and ink waits for the third date, is never contradicted. The chat rewards it: her terms win and she books the third date herself. Her rule-breaking \"I don't say that before midnight\" is too slight to count. With only one character's belief undercut, the two creeds never really collide.",
+   "evidence": [
+    "I'm barely on here, so this is a nice surprise.",
+    "You replied in four seconds, Reuben. Prefer it or don't, but pick one.",
+    "Ink is for the third date. Don't get ahead of yourself."
+   ],
+   "raise": "Let the screen contradict Brick's efficiency creed, for example by having her break her own midnight lights-out or skip a buffer, so both app beliefs are exposed.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's jokes land almost entirely on himself: \"I'm small, I'll fit,\" and \"Watch, here comes a joke instead of an answer.\" Brick opens by roasting her own bridge and confesses the cab tears. Her sharpest lines do aim at him, but they are forensic and fond rather than contemptuous, and her last line turns his flaw into intimacy. Neither ends as the villain or the punchline. It misses a 6 because Brick's best jokes land on Reuben more than on herself, which leaves her a little more armoured than skewered.",
+   "evidence": [
+    "Pencil me in between \"floss\" and \"sleep,\" I'm small, I'll fit.",
+    "that's a confession with a top hat on.",
+    "It'll say \"Reuben,\" spelled right. You'll still ask me if I remember."
+   ],
+   "raise": "Give Brick one late joke that lands as hard on her own scheduling as \"confession with a top hat on\" lands on him.",
+   "excused": [],
+   "def": "85597a182f7a79e4",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Nearly every instruction is visible in what the two type, and none shows through as a label. Imp 3's Denial is played straight as its opposite (\"Forget me by breakfast, I'd prefer it. Totally fine.\"). The Dread trap narrates itself for exactly imps 5, 6, 8 and 9 and then stops, and its moments (\"Ryan for four months\", \"here comes a joke instead of an answer\") are among the funniest. Two flaws keep it from a 6. In imp 7, Brick says \"You've said 'definitely not' twice\" when he said it once, so the deposition joke rests on a miscount. Imp 8 calls for a large interest loss, but \"I know who it is, Reuben. I have known the entire time\" reads warm and protective rather than cooled.",
+   "evidence": [
+    "Honestly, I don't need remembering. Forget me by breakfast, I'd prefer it. Totally fine.",
+    "You've said \"definitely not\" twice in one message.",
+    "I know who it is, Reuben. I have known the entire time."
+   ],
+   "raise": "Fix imp 7 so Reuben actually repeats \"definitely not\", and give Brick's imp 8 reply a sharper, more withdrawn edge (a clipped procedural cooling) so the large interest drop lands before the act-3 recovery.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Brick's throwaway schedule tattoo, \"tattooed down my shaft, just under 'floss'\", comes back in the middle as a slot Reuben asks to be pencilled into. By the end it is a literal tattoo of his name \"spelled right\", which answers the Ryan ex without anyone saying so. The cab story's \"never said when\" returns as Reuben's offer of a named day, and the closing \"You'll still ask me if I remember\" turns his reintroduction habit into something she expects. It misses a 6 because some returns are half-explained: \"Named day. Promise.\" and \"does not believe the witness\" put the payoff into words.",
+   "evidence": [
+    "It's tattooed down my shaft, just under \"floss.\"",
+    "It'll say \"Reuben,\" spelled right. You'll still ask me if I remember.",
+    "ask for the Thursday after before I go. Named day. Promise."
+   ],
+   "raise": "Cut \"Named day. Promise.\" so the cab-story answer sits only in the act of asking for the Thursday after.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The fresh reader predicted Brick would write him into the record, \"moving him from pencil toward ink\". The real ending matches in kind, and it grows out of both habits: her scheduling (\"14:00, you're booking\") and his need to be remembered (\"You'll still ask me if I remember\"). The name tattoo adds a sharper twist than the prediction. It misses a 6 because the ending was largely foreseen, and the midnight clock (\"twenty-nine minutes\") is set up and never cashed in.",
+   "evidence": [
+    "Ink on the third date, 14:00, you're booking.",
+    "You'll still ask me if I remember.",
+    "You have twenty-nine minutes, Reuben with the hat."
+   ],
+   "raise": "Land the close on the midnight deadline, so the schedule she set at the start shuts the night.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message picks up the last one's words: \"Prefer it or don't, but pick one\" gets \"Picked\", and \"definitely not\" is caught at once. Brick turns his Thursday ask into her own terms (\"Make it 21:40\"). I set aside the non-sequitur turn to \"I don't need remembering\", since Improvisation 3 required the denial. It misses a 6 because Brick's opening offer, the bump on her bridge, is simply dropped rather than pointedly ignored.",
+   "evidence": [
+    "Sleep. You replied in four seconds, Reuben. Prefer it or don't, but pick one.",
+    "You've said \"definitely not\" twice in one message.",
+    "the bump on my bridge is structural and it stays."
+   ],
+   "raise": "Have Reuben answer or pointedly skip the bridge bump, so her first self-disclosure gets a reaction.",
+   "excused": [
+    3
+   ],
+   "def": "21c56d066d886856",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Reuben's typing breaks up when he panics (\"Reuben. There. I did it.\" and \"You still there? It's Reuben.\"), and he goes blunt and specific for the sexual ask. Brick's cab confession comes in short flat sentences, and her last message turns into a clipped confirmation. It stays above the line because the shapes shift at the main turns. It misses a 5 because Brick's register is nearly constant, and the horny turn is as tidily punctuated as the small talk.",
+   "evidence": [
+    "I'm about to remind you my name. Reuben. There. I did it.",
+    "A man once said \"let's do this again\" and never said when. I cried in the cab.",
+    "Nobody names the day. Hold on, I'm finding a pen."
+   ],
+   "raise": "Let Brick's typing slip once, for example after \"Nobody names the day\", with a fragment or a typo that shows her guard dropping.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "These read as app messages, two to four short sentences each, with no narration or stage directions. \"Hold on, I'm finding a pen\" is properly typed. It stays above the line on that basis. It misses a 5 because many lines are polished punchlines or stacked clauses nobody thumbs out at midnight.",
+   "evidence": [
+    "In my experience, that's a confession with a top hat on.",
+    "I'll text when I'm outside, leave whenever you've written down, and ask for the Thursday after before I go.",
+    "Honestly, I don't need remembering. Forget me by breakfast, I'd prefer it."
+   ],
+   "raise": "Break the stacked-clause and aphorism lines into rougher fragments sent as separate messages.",
+   "excused": [],
+   "def": "33e5f3a185ee1151",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "I set aside Reuben's repeated running commentary on his own failure (\"I can feel myself doing it\", \"Watch, here comes a joke\", \"I can see this going wrong\"), because Improvisations 5, 6, 8 and 9 required Dread. Of what remains, the \"no pressure\" and \"no rush\" frame appears three times, and Brick's clerk shape (\"Noted\", \"Pencilled\", \"Adding a note to your file\", \"confirmed\") recurs. Most of these evolve rather than repeat, which keeps it at the line. They are still noticeable enough to hold it below a 5.",
+   "evidence": [
+    "No pressure to be dazzling at half eleven.",
+    "No rush to answer. Feel free to decline in writing.",
+    "No rush on the pen."
+   ],
+   "raise": "Swap one \"no rush\" for a different courtesy so the polite frame doesn't repeat three times.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "7f4d289d1f88c682",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly: odd numbers are Reuben, even numbers are Brick.\n\n1. **Reuben.** He gives his name, top hat and left lean as identifiers, and claims he's \"barely on here.\"\n2. **Brick.** She narrates the bump on her bridge before he can notice it, in her clipped, record-taking tone (\"Noted\").\n3. **Reuben.** He deflects with a joke, keeping up the breezy bit.\n4. **Brick.** Her schedule is tattooed on her, midnight is lights out, and she runs a countdown.\n5. **Reuben.** He fakes not caring whether he's remembered, which is the theme's denial.\n6. **Brick.** She calls out his four-second reply and demands that he choose, refusing ambiguity.\n7. **Reuben.** He reintroduces himself with distinguishing details and makes a self-deprecating size joke (\"I'm small\").\n8. **Brick.** \"Pencilled,\" with ink reserved for the third date, is her scheduling language.\n9. **Reuben.** He brings up the ex who called him Ryan and reminds her of his name again.\n10. **Brick.** She counts his introductions and points out that she wrote it down, which is her record-keeping.\n11. **Reuben.** He admits he's about to do a joke instead of answering, which is his fear of dropping the act.\n12. **Brick.** The cab-crying story about \"let's do this again\" with no day named comes from her profile.\n13. **Reuben.** He insists he hates plans, but the denial of the bathroom mirror gives away his rehearsing.\n14. **Brick.** She dissects his phrasing like a deposition.\n15. **Reuben.** The ex who asked for one sentence that wasn't a bit, his fear of disappearing, and \"It's Reuben\" are all his.\n16. **Brick.** \"I know who it is\" and her \"file\" note are her remembering and her legal framing.\n17. **Reuben.** This is the outrageous request in polite wording, pitched as a \"spontaneous\" plan built around her schedule.\n18. **Brick.** She adjusts the time with a travel-style buffer. The \"curve\" is his, but adding a buffer is her habit.\n19. **Reuben.** He promises to name the next day, answering her fear.\n20. **Brick.** \"Nobody names the day\" is her reacting to the very thing she's afraid of not getting.\n21. **Reuben.** He makes a polite, outrageous request to be inked onto her shaft schedule.\n22. **Brick.** She confirms with exact times and predicts he'll still ask whether she remembers him."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Reuben's line: \"Fine. My ex asked for one sentence that wasn't a bit and I did a voice. I'm doing one in my head right now. If I go quiet I think I just stop existing. You still there? It's Reuben.\"\n\nYou can tell from a few things in the text. \"Fine\" is a concession: Brick has just caught him (\"a confession with a top hat on\"), and instead of deflecting again he gives in. Up to then Reuben's admissions arrive wrapped in jokes. He says outright, \"Watch, here comes a joke instead of an answer,\" and his \"definitely not in a bathroom mirror\" gives away the rehearsing it claims to deny. This message has no punchline. He describes the bit as it happens instead of doing it, says the fear plainly (\"I think I just stop existing\"), and ends on a bare, slightly needy question and the reminder of his name, which is the habit Brick has been gently pointing out. It is short, declarative, and unprotected in a way his other lines aren't.\n\nThere are two smaller moments. Reuben's \"I trust yours. It's mine I've lost\" is sincere for one sentence before he pulls back into a joke. Brick also drops the act once: \"A man once said 'let's do this again' and never said when. I cried in the cab. Now nothing happens unless it's written down.\" Brick's usual voice is clipped, witty and in control, with timestamps and quips. This line has no quip. It explains the whole spreadsheet persona and gives the reason for it.\n\nOne limit: all I can judge is how the lines read. I can't confirm what either person actually felt, only that these lines break from the established style of the jokes."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped:** I wouldn't have. Each message either turns something or exposes something, so there's no slack.\n\nThe closest thing to a soft spot is the middle stretch where Reuben keeps narrating his own anxiety (\"I can feel myself doing it,\" \"Watch, here comes a joke instead of an answer,\" \"I can see this going wrong as I type it\"). Three self-aware announcements risk becoming a tic. Each time, though, Brick answers with something concrete: the record-keeping line, the cab story, the \"confession with a top hat on.\" That keeps it moving.\n\nThe Thursday proposition is abrupt, but it's abrupt in a way that makes you read on to see how she takes it, not one that makes you put it down.\n\n**Where I could predict exactly what came next:** Never, strictly speaking. There are several points where I could predict the shape but not the words:\n\n- After \"My last ex called me Ryan… I'm about to remind you my name,\" I expected Reuben to reintroduce himself again later. He does (\"You still there? It's Reuben\"), but the \"stop existing\" line attached to it wasn't foreseeable.\n- After \"Definitely not in a bathroom mirror,\" it was clear Brick would call the denial out. \"A confession with a top hat on\" was not something I'd have guessed.\n- After \"Named day. Promise,\" I expected Brick to reach for something to write with, given everything she's said about needing it in writing. \"Hold on, I'm finding a pen\" is close to what I'd have guessed, so this is the nearest the chat comes to fully predictable.\n- By the last message, I expected a callback to the remembering motif. The specific turn, that she'll remember but he'll still ask, completes the thread in a way I didn't see coming.\n\nSo the chat is predictable in direction at a few points, but never in execution."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben**\n\n**What he's afraid of:** Being forgotten, or not registering as a person at all. He says it outright: \"If I go quiet I think I just stop existing.\" He also says, \"I trust yours. It's mine I've lost.\"\n\n**What he does so he doesn't have to feel it:**\n- **Jokes.** He names this himself: \"Watch, here comes a joke instead of an answer.\"\n- **Bits and voices.** \"My ex asked for one sentence that wasn't a bit and I did a voice. I'm doing one in my head right now.\"\n- **Pretending not to need anything.** \"Honestly, I don't need remembering. Forget me by breakfast, I'd prefer it. Totally fine.\" He reverses this almost at once: \"Picked. Remember me.\"\n- **Making himself small.** \"I'm small, I'll fit.\"\n- **Repeating his name.** \"I'm about to remind you my name. Reuben. There. I did it.\" Later: \"You still there? It's Reuben.\"\n- **Claiming to hate plans.** \"Hate plans. Never written anything down in my life… Definitely not in a bathroom mirror.\" Brick reads that as a confession, and he concedes it with \"Fine.\"\n\n**Where it comes from:** The chat gives two past episodes with an ex. \"My last ex called me Ryan for four months and I answered to it.\" And the ex who \"asked for one sentence that wasn't a bit and I did a voice.\" These show the pattern already in place. Whether they caused it, or anything earlier did, is not in the chat.\n\n**What he did at the end:** He dropped the \"hate plans\" stance and committed to specifics. \"21:40. I'll text when I'm outside, leave whenever you've written down, and ask for the Thursday after before I go. Named day. Promise.\" He also offered to book the tattoo parlour for the third date. Whether he'll stop asking to be remembered is left open. Brick predicts he won't: \"You'll still ask me if I remember.\"\n\n**Brick_haus**\n\n**What they're afraid of:** Vague promises that never turn into anything, and being left hanging. \"A man once said 'let's do this again' and never said when. I cried in the cab.\"\n\n**What they do so they don't have to feel it:**\n- **Scheduling everything.** \"Now nothing happens unless it's written down.\" Also \"Spreadsheet. 00:00 is lights out\" and \"Everything from 06:00 to midnight.\"\n- **Demanding a clear answer.** \"Prefer it or don't, but pick one.\"\n- **Rationing commitment.** \"Pencilled. Ink is for the third date. Don't get ahead of yourself.\"\n- **Pushing back on vagueness.** \"22:00 is tight. Make it 21:40, with a twenty-minute buffer for the curve.\"\n- **Possibly getting ahead of judgment about looks.** The opening line, \"the bump on my bridge is structural and it stays,\" may be this, but the chat never says why Brick says it.\n\n**Where it comes from:** That one man and the cab, as quoted above. Anything before that is not in the chat.\n\n**What they did at the end:** Brick was visibly moved by a named day: \"Nobody names the day. Hold on, I'm finding a pen.\" Then Brick confirmed everything in writing: \"Thursday 21:40, confirmed. Ink on the third date, 14:00, you're booking. It'll say 'Reuben,' spelled right.\" Brick closed with \"You'll still ask me if I remember.\" That reads as accepting Reuben's fear rather than demanding he drop it, though the chat doesn't spell out the intent.\n\n**What is not in the chat**\n- Brick's gender.\n- What happened on Thursday.\n- Whether either of them changed in any lasting way."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "This is a prediction, not knowledge, since I haven't seen the ending. But the chat sets up its own payoffs clearly enough that I'd bet on a particular shape.\n\nMy guess is that it ends at or just before midnight, with Brick going to \"lights out\" on schedule and Reuben, for once, not reintroducing himself. The most likely final beat is Brick saying his name unprompted, or writing him into the record in some explicit way, maybe moving him from pencil toward ink, and Reuben simply accepting it instead of doing a bit.\n\nHere's why I think so:\n\nThe core tension is Reuben's fear of being forgotten. He keeps restating his name (\"You still there? It's Reuben\") and says he feels he stops existing if he goes quiet. Brick's answer to everything is the written record: \"I wrote it down the first time,\" \"Adding a note to your file,\" and \"nothing happens unless it's written down.\" Brick has just turned Reuben's nervous, self-sabotaging proposition into a concrete scheduled entry, 21:40 with a buffer. That's Brick's version of \"I will remember you.\" The natural resolution is Reuben realising he doesn't need to keep announcing himself, because the witness he didn't believe has now put him in the calendar.\n\nThe midnight deadline is also a ticking clock the chat set up at the start (\"You have twenty-nine minutes\"). Stories like this usually cash that in, so I'd expect the ending to land on the cutoff, with Brick signing off and Reuben letting the silence happen without panicking that he's vanished.\n\nThere are a couple of other possibilities. Reuben might wobble first, either stunned that the outrageous ask was accepted or tempted to joke his way out of it, and Brick holds him to it. A callback to \"pencilled\" and \"ink is for the third date\" also seems likely somewhere in the close.\n\nI'd hold this loosely. Nothing shown rules out a twist, such as the address never arriving, which would echo Brick's story about the man who never said when. But the tone so far reads as warm, so I'd lean toward the reassuring ending."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**Reuben's self-description (\"Reuben, top hat, slight lean to the left\").** At first it's a light, practical tag so Brick can find him in a crowd. It returns as \"Remember me. Reuben, top hat, leans left, replies in four seconds,\" which is now a plea to be kept, and it has absorbed Brick's own observation about the four seconds.\n\n**His name.** It keeps coming back (\"I'm about to remind you my name. Reuben.\" / \"You still there? It's Reuben.\"). These repetitions stop being introductions and become anxiety, tied to the ex who called him Ryan for four months. Brick answers each one differently: first with mild impatience (\"Third introduction in twenty minutes\"), then with reassurance (\"I know who it is, Reuben. I have known the entire time\"). In the last message the name becomes the tattoo, \"spelled right,\" which reads as a direct answer to the Ryan story. \"You'll still ask me if I remember\" turns the nervous habit into something Brick accepts and expects.\n\n**\"Forget me\" vs. \"remember me.\"** Reuben first says he'd prefer to be forgotten by breakfast. Brick calls the bluff (\"pick one\"), and \"Picked\" reverses it. The callback shows his first claim was a deflection.\n\n**Midnight / 00:00 and the \"floss\" … \"sleep\" routine.** This starts as a joke about Brick's rigid schedule (pumpkin or spreadsheet). Reuben then asks to be \"pencilled in between 'floss' and 'sleep',\" so the routine becomes a place he wants to occupy. In the Thursday proposal, \"till 'floss'\" is used as a sexual time limit. By the end, the slot between \"floss\" and \"sleep\" is meant to be literally inked. It moves from joke, to metaphor for a place in Brick's life, to an actual planned tattoo.\n\n**Tattoo / \"shaft.\"** \"Tattooed down my shaft, just under 'floss'\" comes back as \"I'll book the parlour and hold your shaft.\" The chat never says what \"shaft\" refers to. It reads as a deliberate double entendre in both places, but the second use is tender and supportive rather than a boast. Reuben's earlier \"is there room for a footnote?\" is effectively answered by his name being added.\n\n**Pencil vs. ink.** Brick's \"Pencilled. Ink is for the third date\" is a metaphor for tentative versus committed. Reuben rereads \"pencilled\" nine times. At the end, ink on the third date is literal and scheduled (14:00, Reuben booking). Brick's \"hold on, I'm finding a pen\" sits between the two and shows the pencilled thing being made firmer.\n\n**Writing things down.** Brick says nothing happens unless it's written down, and Reuben claims he's never written anything down. Later Reuben adopts Brick's system (\"Feel free to decline in writing,\" \"leave whenever you've written down\"). The callback marks Reuben meeting Brick on Brick's terms.\n\n**\"Let's do this again\" with no date.** The cab story is about a man who never named the day. Reuben's promise to ask for \"the Thursday after before I go. Named day\" answers it directly, and Brick's \"Nobody names the day\" confirms the link. What was a wound becomes the thing Reuben offers.\n\n**\"Don't get ahead of yourself.\"** Brick's warning returns as Reuben's \"I can feel myself doing it.\" Later his \"If Thursday goes well, and only then\" reads as him consciously not getting ahead of himself.\n\n**Jokes instead of answers.** Reuben names the habit (\"here comes a joke instead of an answer\") and links it to his ex asking for one sentence that wasn't a bit. His blunt Thursday proposal (\"I can see this going wrong as I type it\") may be that non-bit sentence, but the chat doesn't say so outright.\n\n**\"No pressure\" / \"no rush.\"** These run throughout (\"No pressure to be dazzling,\" \"No rush to answer,\" \"No rush on the pen\"). They shift from self-deprecating cover at the start to Reuben giving Brick room at the end.\n\n**\"Definitely not.\"** Brick catches the repetition as a confession. The mirror rehearsal it implies isn't mentioned again directly, though \"I can see this going wrong as I type it\" may echo it.\n\nSome things don't come back at all, such as the bump on Brick's bridge and the \"twenty-minute buffer for the curve.\" The chat doesn't explain what \"the curve\" is."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 15.6,
+   "cost": 0.045612,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 18.2,
+   "cost": 0.035152,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 21.6,
+   "cost": 0.03902,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 22.8,
+   "cost": 0.05286400000000001,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 18.0,
+   "cost": 0.034944,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 36.1,
+   "cost": 0.0759,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 38.0,
+   "cost": 0.1502954,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 39.8,
+   "cost": 0.14907139999999997,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 37.0,
+   "cost": 0.1363074,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 17.9,
+   "cost": 0.0863194,
+   "label": "batch 5"
+  },
+  {
+   "seconds": 34.9,
+   "cost": 0.14602739999999997,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-26T23:07:18Z",
+ "repo_commit": "7cd39b34",
+ "cost": 0.9515
+}

@@ -23,7 +23,12 @@ experiment: >-
   improvisations stay. Run 13 plays Reuben and Brick in the game's language (turns and rolls); run 14
   plays them as improvisation instructions without it. Runs 15 and 16 do the whole workflow for Zyx_444
   and Sable_xo, whom the comedians had not written: in one go (15, no instructions), then as
-  improvisations (16). The judge reads each improvised chat with the instructions it was written to
+  improvisations (16). Run 17 freezes the prompt that worked for a chat written in one go and plays it
+  as improvisations, Reuben and Brick on seed 23 again: Pinder's premise instead of the comedians' own
+  briefs, each comedian's descriptions of the two characters without their take on the pair, three
+  acts laid over the improvisations, and one theme and one comic method from the writers' pool for the
+  whole chat; Claude writes all three chats, so the comedians are only the authors of the
+  descriptions. The judge reads each improvised chat with the instructions it was written to
   and judges every dimension in their context: a moment an instruction required is not held against
   a dimension, which is scored on the rest; a separate dimension scores how well the instructions
   were played. Every chat is scored on the chat scorecard, and each run as a set. Runs 1

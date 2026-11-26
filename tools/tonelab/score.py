@@ -337,6 +337,9 @@ WRITER_RUNS = [
     ("writers-v14", 14, "run 13 told as improvisation instructions, without the game's language; traps two long"),
     ("writers-v15", 15, "Zyx and Sable, new to the comedians: run 11's workflow, own brief, both characters, the chat in one go"),
     ("writers-v16", 16, "Zyx and Sable: run 15's briefs and characters; the chat as improvisations on seed 23, as in run 14"),
+    ("writers-v17", 17, "Reuben and Brick on seed 23 again: the frozen one-go prompt as improvisations, Pinder's premise, "
+                        "each comedian's characters without their take on the pair, three acts, one theme and one method, "
+                        "written by Claude"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first; runs 1 to 14
 
@@ -400,7 +403,10 @@ def writer_targets():
         chat_dir = rec.parent.name
         pair = tuple(chat_dir[len("chat-"):].split("-"))
         names = [char_name(s) for s in pair]
-        writers = json.loads(rec.read_text(encoding="utf-8")).get("writers") or {}
+        run_rec = json.loads(rec.read_text(encoding="utf-8"))
+        writers = run_rec.get("writers") or {}
+        # run 17 on: one author on every comedian's characters, on a template with a theme and a method
+        draw = run_rec.get("draw") if run_rec.get("template") else None
         done, imp = [], []
         for wid, w in writers.items():
             if w.get("error"):
@@ -421,13 +427,21 @@ def writer_targets():
             brief = (f"=== {names[0]} and {names[1]}, as {w['writer']} wrote them ===\n{profiles[0]}" if paired else
                      "\n\n".join(f"=== {nm}, as {w['writer']} wrote them ===\n{p}" for nm, p in zip(names, profiles)))
             source = 'what they wrote about the two characters' if paired else 'the two profiles they wrote'
+            author = w["writer"]
+            if draw:
+                author = w.get("author") or "Claude"
+                source = (f"{w.get('sheets_by', w['writer'])}'s descriptions of the two characters (without their take on "
+                          "the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole "
+                          "chat (under BRIEF)")
+                brief += ("\n\n=== The theme the whole chat was built on ===\n" + draw["theme_text"] +
+                          "\n\n=== The comic method the whole chat was built on ===\n" + draw["method_text"])
             material = {"chat": text, "brief": brief, "chat_masked": masked_text,
                         "chat_but_last": "\n".join(lines[:msgs[cut][0]]).strip()}
             steps = improvisations(base / chat_dir / f"{wid}.turns.json")
             if steps:
                 imp = steps
                 material["improvisations"] = improvisations_text(steps)
-                note = (f"Written by {w['writer']} from {source}, improvisation by improvisation (run {n}: {about}). "
+                note = (f"Written by {author} from {source}, improvisation by improvisation (run {n}: {about}). "
                         f"Before each of the {len(steps)} improvisations the writer was told how it goes for {names[0]}: "
                         "the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going "
                         "wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) "
@@ -441,7 +455,7 @@ def writer_targets():
                         "does everything the instructions did not ask for. The reader sees no dice and no plan: where a "
                         "dimension speaks of turns, read improvisations.")
             else:
-                note = (f"Written in one go by {w['writer']} from {source} (run {n}: {about}). "
+                note = (f"Written in one go by {author} from {source} (run {n}: {about}). "
                         "There is no plan, no dice and no turns: where a dimension speaks of turns, read exchanges.")
             out.append({"id": f"chat-{folder}-{wid}", "kind": "chat", "label": f"Run {n} · {w['writer']}",
                         "version": f"run {n}", "order": 100 + n, "writer": wid, "writers_run": n,
@@ -449,9 +463,14 @@ def writer_targets():
                         "note": note, "speakers": [s for _, s, _ in msgs], "material": material})
             done.append((w["writer"], text))
         if len(done) >= 2:
-            material = {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}
-            note = (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
-                    "each written by a different writer.")
+            if draw:
+                material = {"chats": "\n\n".join(f"=== The chat on {nm} ===\n{tx}" for nm, tx in done)}
+                note = (f"Every chat of run {n} ({about}): the same pair, premise, prompt, theme and method, the same "
+                        "author, each on a different comedian's descriptions of the two characters.")
+            else:
+                material = {"chats": "\n\n".join(f"=== The chat by {nm} ===\n{tx}" for nm, tx in done)}
+                note = (f"Every chat of run {n} ({about}): the same pair, the same brief and the same prompt, "
+                        "each written by a different writer.")
             if imp:
                 # every writer of a run plays the same mechanics, so the instructions are the same for all
                 material["improvisations"] = improvisations_text(imp, written=False)

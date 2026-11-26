@@ -1,0 +1,70 @@
+{
+ "id": "chatset-writers-v17",
+ "kind": "chat",
+ "label": "Run 17 · all 3 chats",
+ "version": "run 17",
+ "order": 117,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v17/chat-reuben-brick/",
+ "note": "Every chat of run 17 (Reuben and Brick on seed 23 again: the frozen one-go prompt as improvisations, Pinder's premise, each comedian's characters without their take on the pair, three acts, one theme and one method, written by Claude): the same pair, premise, prompt, theme and method, the same author, each on a different comedian's descriptions of the two characters. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
+ "when": null,
+ "writer": null,
+ "writers_run": 17,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 10286,
+   "words": 1791
+  },
+  "improvisations": {
+   "chars": 4670,
+   "words": 781
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "I set aside the move sequence that all eleven improvisations fix: the denial beats in 3 and 7, the dread narration in 5, 6, 8 and 9, and the date in 11. What the writer added is still largely one night told three times. All three chats open the same way: Reuben gives his name, the top hat and the leftward lean, says he's rarely on here, and adds 'no pressure'. All three use an ex who got his name wrong (Ryan, Rupert, Ruben). All three end with Brick insisting she will know him at the door. Chats 1 and 2 share Brick's backstory almost word for word. Lines recur across chats: 'four seconds' (1 and 3), 'pencilled/inked' and 'tattooed' (1 and 3), 'travel buffer' (2 and 3), 'doing a voice' (1 and 2), 'Delphine' (2 and 3), and 'going wrong as I type it' (1 and 3). Only chat 3's Marguerite and its eleven-days-indoors lie make it a different night, which keeps the set above a 1.",
+   "evidence": [
+    "A man once said \"let's do this again\" and never said when. I cried in the cab.",
+    "A woman who said \"let's do this again\" and never named a day. I cried in a cab.",
+    "My last ex called me Ryan for four months and I answered to it."
+   ],
+   "raise": "Give each chat its own wound for both characters and its own last line, so that no misnamed ex or 'I'll know you' ending appears in more than one chat.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "def": "eb4c97580d7f148b",
+   "material": "35b89b729275ab63",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 17.6,
+   "cost": 0.08962400000000001,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-26T23:04:54Z",
+ "repo_commit": "7cd39b34",
+ "cost": 0.0896
+}

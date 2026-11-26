@@ -1,0 +1,618 @@
+{
+ "id": "chat-writers-v17-carr",
+ "kind": "chat",
+ "label": "Run 17 · Jimmy Carr's characters",
+ "version": "run 17",
+ "order": 117,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v17/chat-reuben-brick/carr.md",
+ "note": "Written by Claude from Jimmy Carr's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 17: Reuben and Brick on seed 23 again: the frozen one-go prompt as improvisations, Pinder's premise, each comedian's characters without their take on the pair, three acts, one theme and one method, written by Claude). Before each of the 11 improvisations the writer was told how it goes for Reuben_404: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 17,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3537,
+   "words": 598
+  },
+  "brief": {
+   "chars": 3770,
+   "words": 629
+  },
+  "chat_masked": {
+   "chars": 3374,
+   "words": 598
+  },
+  "chat_but_last": {
+   "chars": 2996,
+   "words": 510
+  },
+  "improvisations": {
+   "chars": 8549,
+   "words": 1445
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The fresh reader got all four for Reuben: forgettability, the bits and self-narration, Delphine's 'Ruben, no e' and the 'oh—okay' first time, and the concrete booking at the end. For Brick the reader got the fear of 'sometime', the precision habit, Marguerite as the source, and the acceptance. Both endings follow from the fears: he books instead of drifting, and she answers his fear with 'I'll know you.' It falls short of a 6 because Brick's origin stops at one ex, so the reader rightly says anything earlier is 'not in the chat', and Reuben's fear is partly stated by Reuben himself ('the one you'll remember').",
+   "evidence": [
+    "so you can tell me apart from the other Reubens",
+    "Nobody's ever asked to book. They say \"sometime\". Sometime isn't a time.",
+    "And don't introduce yourself at the door. I'll know you."
+   ],
+   "raise": "Give Brick one slipped detail from the profile, such as the binned furniture or the taxi crying, so her fear has roots older than Marguerite.",
+   "excused": [],
+   "def": "61c5292dd78c8dc5",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 4,
+   "why": "I set aside 5 and 8, where self-awareness turns required Reuben to volunteer the Delphine name story and the ninety seconds. Of the rest, the eleven days come out by being caught: Brick spots the four-second replies and the 'very precise number'. Delphine's real reason for leaving slips out through denial ('did NOT leave because everything I say is a bit'). That gives one habit origin found by slip, which keeps this above the line. Brick's side is mostly stated: Marguerite is asked for and told plainly, and 'People have left me' is said outright, so it stays at 4.",
+   "evidence": [
+    "That's a very precise number for something that didn't happen.",
+    "Delphine did NOT leave because everything I say is a bit.",
+    "Marguerite. I put our arguments in a shared calendar with hard stop-times."
+   ],
+   "raise": "Let Marguerite and the calendar come out because Brick is caught, for example through an over-precise slip, instead of a straight answer to 'Name and slot, please.'",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 4,
+   "why": "I set aside 5, 6 and 8, where Dread and self-awareness required Reuben to narrate his panic and say outright 'I've not shut up since'. Elsewhere nobody names a feeling. Several lines carry what they avoid: 'It isn't raining. I checked.', the denial in 7, the rain on Thursday, and 'I'll know you.' Brick, though, explains herself more than once ('People have left me. I'd rather they didn't send a forecast'; 'Nobody's ever asked to book'). That is a gloss on her fear rather than something left underneath, which keeps it from a 5.",
+   "evidence": [
+    "People have left me. I'd rather they didn't send a forecast.",
+    "I'm a real \"sometime\" guy, me.",
+    "I've checked: it's raining Thursday. So I'll genuinely be on here."
+   ],
+   "raise": "Cut Brick's 'People have left me' sentence and let 'I'd rather they didn't send a forecast' carry the hurt alone.",
+   "excused": [
+    5,
+    6,
+    8
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found a real putting-down of the act: 'Unrounded, then: eleven days, one pot of lentils...'. It is concrete, it does not name a feeling, and Brick's reply turns warm ('See? I'm keeping up'). It is not one of the shortest or plainest lines, though: it still ends in a bit about booking the forearm. The chat's actual plainest line, 'I'll know you.', went unnoticed as the moment, so this stays a 4.",
+   "evidence": [
+    "Unrounded, then: eleven days, one pot of lentils, and a top hat I wear to take the bins out.",
+    "See? I'm keeping up.",
+    "I'll know you."
+   ],
+   "raise": "End Reuben's unrounding at the plain facts, without the forearm-booking joke, so the line itself is short and bare.",
+   "excused": [],
+   "def": "ef5cd06cabe81a69",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "Every exchange moves something. The rain claim is called out, the eleven days are unrounded, he books a slot, Delphine and Marguerite come out, the 'sometime' boast backfires, and Thursday is proposed, then timed, then inked in the last two messages. Nothing is settled early. Set aside: the reintroductions in 5 and 8, which the Dread trap required; Brick's 'That's three introductions' turns even those into a point. It stops short of 6 because the reader could call the direction of several beats: the rain callback, the 'sometime' backfire and an ending about recognising him.",
+   "evidence": [
+    "Nobody's ever asked to book. They say \"sometime\". Sometime isn't a time.",
+    "Thursday's free from 19:00 to 21:15. Ninety seconds won't fill it.",
+    "Accepted. Inked, not pencilled."
+   ],
+   "raise": "Make one late beat turn against its setup, for example the Thursday invite exposing something new about him rather than simply paying off the buffer and the rain.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Every sexual line belongs to these bodies. Her pre-emptive audit of the bump and the short tip is defensive bravado; his 'curve is load-bearing' answers it. The dirtiest line, 'mouth on you, starting at the tip, short as advertised', takes her self-disclosure and accepts it, and 'the whole slot' answers his ninety-seconds wound, so it is used to get close. It stops short of 6 because Brick never uses filth herself to get close; her only sexual line is the opening disclaimer.",
+   "evidence": [
+    "slight bump mid-shaft, tip shorter than you're expecting",
+    "I'd love to spend the whole slot with my mouth on you, starting at the tip, short as advertised.",
+    "audit the bump before I've got the hat off"
+   ],
+   "raise": "Give Brick one late sexual line that drops the audit voice and asks for something, so the filth changes job on both sides.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 5,
+   "why": "Brick plants 'Sometime isn't a time', and three exchanges later Reuben calls himself 'a real \"sometime\" guy'; the reader sees him walk onto exactly the wrong spot. After she has listed his bin habits and said 'There are no other Reubens', the reader knows she remembers him before he reintroduces himself again. Set aside: the self-narration as each one lands in 5 and 8, which the Dread trap required. It stops short of 6 because the reintroduction wince is softened by being repeated.",
+   "evidence": [
+    "Sometime isn't a time. You're pencilled, not inked.",
+    "I never need anything booked, I'm a real \"sometime\" guy, me.",
+    "Reuben, eleven days, lentils, hat for the bins. See? I'm keeping up."
+   ],
+   "raise": "Plant Delphine's 'everything is a bit' complaint from Brick's side first, so his sincerity denial in 7 also lands on a spot the reader saw coming.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "6cf283c466e4d24a",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Reuben voices the low-effort, not-trying creed ('only on here when it rains', 'No pressure') and is contradicted by his four-second replies. Brick's beliefs ('Before you get attached', 'Sometime isn't a time') are personal rules rather than app culture, and the screen rewards her for them: the night ends 'Inked'. Set aside: in 7 the 'sometime guy' denial, whose Denial form the instruction required. On the rest, only one character's creed is clearly from dating culture and clearly contradicted.",
+   "evidence": [
+    "I'm only on here when it rains, so this is fate, basically.",
+    "Before you get attached: slight bump mid-shaft",
+    "Accepted. Inked, not pencilled."
+   ],
+   "raise": "Have Brick state a recognisable app doctrine in earnest, such as managing expectations or red flags upfront, and let the screen show it failing.",
+   "excused": [
+    7
+   ],
+   "def": "970d3e008618a10c",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Reuben's sharpest jokes land on himself: the lentils, the bin hat, 'narrating my own crash'. Most of Brick's sharp lines land on him ('a very precise number for something that didn't happen'), but they work as proof she remembers him, and she exposes herself with Marguerite and 'People have left me'. Neither becomes the villain or the punchline. What keeps it from 5 is that her wit points outward far more than inward.",
+   "evidence": [
+    "That's a very precise number for something that didn't happen.",
+    "She said she wasn't a meeting. Then she left without booking one.",
+    "And don't introduce yourself at the door. I'll know you."
+   ],
+   "raise": "Give Brick one barbed joke at her own system, such as the steamer or the empty flat, to balance her jabs at him.",
+   "excused": [],
+   "def": "85597a182f7a79e4",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 22 messages correctly, and the two voices really are different. Reuben runs long and exclamatory and talks to an imaginary crowd (\"Folks, it's landing\"); Brick is clipped and declarative (\"Sometime isn't a time.\"). But most of the reader's reasons are content: the top hat, Delphine, Marguerite, the forearm schedule. The strict alternation also did much of the work, so this stays a 4 rather than an attribution by voice alone.",
+   "evidence": [
+    "Folks, it's landing. So who left? Name and slot, please.",
+    "Nobody's ever asked to book. They say \"sometime\". Sometime isn't a time.",
+    "Accepted. Inked, not pencilled."
+   ],
+   "raise": "Strip Brick's lines of calendar and audit content so only her syntax identifies her, and give Reuben a verbal tic that needs no top hat or ex to recognise.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Reuben carries real, unseen gaps. \"only on here when it rains\" sits against four-second replies. \"I'm out constantly\" sits against the eleven days. \"I'm a real 'sometime' guy\" comes right after he asked to book a slot. Brick has no gap of her own on screen: her rosé, her empty flat and her taxi-crying never appear, and she only ever exposes his gaps. I set aside the Dread narration in 5, 6, 8 and 9, which the instructions required. Even so, Reuben sees his eleven-day gap himself at \"Unrounded, then\", which was not required. That leaves Brick without a gap, below the line.",
+   "evidence": [
+    "I'm only on here when it rains, so this is fate, basically.",
+    "I'm definitely not someone who's been indoors for eleven days, that would be insane.",
+    "I never need anything booked, I'm a real \"sometime\" guy, me."
+   ],
+   "raise": "Give Brick one claim of her own that the chat contradicts, for example boasting of being unbothered by unscheduled dates while demanding the invite in writing, and let her not notice it.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 5,
+   "why": "Most laughs give the sender away. \"a top hat I wear to take the bins out\" exposes Reuben's act. \"She said she wasn't a meeting\" exposes Brick's control. \"That's three introductions. I'm starting to think you're the one forgetting me\" is the theme in one line, and it costs Reuben the Delphine and \"oh—okay\" confessions. A few lines are generic or near the day-job jokes the brief rules out: \"you've just read me my rights\", \"audit the bump\", \"I'll file that\". These keep it off a 6.",
+   "evidence": [
+    "a top hat I wear to take the bins out",
+    "She said she wasn't a meeting. Then she left without booking one.",
+    "That's three introductions. I'm starting to think you're the one forgetting me."
+   ],
+   "raise": "Replace \"read me my rights\" and \"audit the bump\" with lines only Reuben could send about his own act.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 4,
+   "why": "Several catches dig deeper. Caught on the four seconds, he insists \"I'm out constantly\" and blurts the eleven days. Caught narrating, he turns it into live commentary. Caught as all bits, he swears he is \"extremely sincere\" and a \"sometime\" guy, which is worse. But he gives up the eleven days at once with \"Unrounded, then\", a concession the success instruction did not require. The ending's \"No 'sometime'\" edges toward a change of heart, though the rain joke keeps his bit alive. I set aside the narrated crashes in 5, 6, 8 and 9.",
+   "evidence": [
+    "Pure coincidence. I'm out constantly",
+    "Unrounded, then: eleven days, one pot of lentils",
+    "For balance: Delphine did NOT leave because everything I say is a bit."
+   ],
+   "raise": "Have him answer \"precise number for something that didn't happen\" with a worse explanation, such as an alibi for the eleven days, before anything is unrounded.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "6db16446b742290c",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Brick holds the upper hand early (\"It isn't raining. I checked.\"). Reuben takes it at the booking line, when she admits \"Nobody's ever asked to book\". He drops below through the crashes, when she counts \"three introductions\". He regains it with the ask, and she ends up chasing: \"Before you leave? In writing? Send the invite.\" That is more than two flips. But Reuben does the chasing almost throughout, and his stretches on top are brief, so the flips track interest more than they drive the plot.",
+   "evidence": [
+    "Nobody's ever asked to book.",
+    "That's three introductions.",
+    "Before you leave? In writing? Send the invite."
+   ],
+   "raise": "Give Brick a stretch mid-chat where she is the one chasing, for example pressing for the Thursday slot before he offers it.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Many messages end on their punch: \"tip shorter than you're expecting\", \"when you stop rounding down\", \"Reuben. Hat. Ninety seconds.\", \"I'll know you.\" Brick's replies often serve as the punch to his setup. Some punches are buried. \"that would be insane\" is followed by \"Anyway! What does your Friday look like?\". \"it's landing\" is followed by a question. The filth in message 19 sits mid-message. Every turn is one message each, so there are no reaction shots or silences.",
+   "evidence": [
+    "that would be insane. Anyway! What does your Friday look like?",
+    "Reuben. With an e. Top hat. Sorry. I'm narrating my own crash.",
+    "And don't introduce yourself at the door. I'll know you."
+   ],
+   "raise": "Cut the trailing questions after Reuben's denials so each message ends on the self-exposing line, and give Brick one bare one-line reaction to the outrageous ask.",
+   "excused": [],
+   "def": "9be995f52d3f6a5e",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Every instruction is on screen and in character. The Denial fumbles invert the honest thing exactly as asked: 'definitely not someone who's been indoors for eleven days' and a self-declared 'sometime guy' to a woman terrified of 'sometime'. The Dread trap runs its full length across 5 and 6, then 8 and 9, and stops at 10. Her replies track her interest: cool after the losses ('I'll file that next to the eleven days that didn't happen'), opening up after the gains (Marguerite, 'Send the invite'). It misses a 6 because 'I'm narrating my own crash' in 5 comes close to naming the trap rather than playing it, and the catastrophe in 5 is more confessional than funny-cringe next to the sharp one in 8.",
+   "evidence": [
+    "Okay, this is the bit where I get comfy and say something real, and I can feel it going wrong as I type it.",
+    "he's panicking, he's reaching for a joke, it's wobbling, and... it's landing? Folks, it's landing.",
+    "That's three introductions. I'm starting to think you're the one forgetting me."
+   ],
+   "raise": "Cut 'I'm narrating my own crash' in improvisation 5 and let the catastrophe go further on its own, for example a fourth reintroduction that gets the details wrong, so the Dread is shown and never labelled.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways return changed and unexplained. The joke \"I'll bring my own travel buffer\" comes back as a literal \"fifteen-minute travel buffer either side\". The posed rain line becomes a promise to turn up. \"Pencilled, not inked\" flips to \"Inked, not pencilled\". The last line closes the introduction thread without comment. It falls short of a 6 because Brick explains one payoff in the middle (\"See? I'm keeping up\") and Reuben's \"genuinely\" glosses the rain reversal a little.",
+   "evidence": [
+    "I'll bring my own travel buffer.",
+    "fifteen-minute travel buffer either side. I've checked: it's raining Thursday. So I'll genuinely be on here.",
+    "And don't introduce yourself at the door. I'll know you."
+   ],
+   "raise": "Cut \"See? I'm keeping up\" and \"genuinely\" so the reader alone builds both the remembering and the rain reversal.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted a confirmed Thursday, written as \"inked\", and that is what happens. It follows from both habits: Reuben the over-performer finally books in her language, and Brick's need for a slot is met \"in writing\". \"I'll know you\" answers his fear of being forgettable, which the reader did not fully foresee. It misses a 6 because the prediction came so close to the real lines (\"inked\", the forearm) that the ending feels expected rather than surprising.",
+   "evidence": [
+    "Before you leave? In writing? Send the invite.",
+    "Accepted. Inked, not pencilled.",
+    "I'll know you."
+   ],
+   "raise": "Give the close one turn the reader couldn't predict, for example Brick revealing a small unscheduled act of her own, while keeping the earned yes.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Every Brick message picks up the last one directly. She checks the rain, answers the bar question, catches \"eleven days\" and counts the introductions. Reuben takes up her offers too: \"Unrounded, then\" answers \"stop rounding down\", and \"No forecasts\" answers her forecast line. It misses a 6 because Reuben's answer to the Marguerite confession (\"For balance: Delphine...\") steps past her hurt. That reads as self-absorption more than a pointed choice.",
+   "evidence": [
+    "You can see it when you stop rounding down.",
+    "Unrounded, then: eleven days, one pot of lentils",
+    "For balance: Delphine did NOT leave because everything I say is a bit."
+   ],
+   "raise": "Have Reuben's denial about Delphine first touch Marguerite's \"she wasn't a meeting\", so his deflection is visibly a reaction to her hurt.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Reuben's typing breaks into fragments when he spirals (\"Reuben. With an e. Top hat. Sorry.\"), and Brick goes staccato with excitement near the end (\"Before you leave? In writing?\"). That clears the line. But at 23:30, with heat \"very high\", nobody slips, sends a typo or splits a message. Brick's dry clipped register barely moves when she shares her hurt. The sexual ask comes in the same tidy sentences as the small talk.",
+   "evidence": [
+    "Reuben. With an e. Top hat. Sorry. I'm narrating my own crash.",
+    "Reuben. Hat. Ninety seconds.",
+    "Before you leave? In writing? Send the invite."
+   ],
+   "raise": "Let Brick's Marguerite message or her acceptance break her composure in shape, with a split send or a missing full stop, so her feeling shows in the typing too.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "Most messages read as app messages of two to four short sentences, and the Marguerite confession works as the rare longer event. I set aside the third-person crash narration in 5, 6 and 9 (\"he's panicking\", \"Watch him crash\"), which the Dread instruction required. Beyond that, Reuben's messages are polished, colon-structured compositions with no thumb texture. The opener alone stacks four crafted sentences.",
+   "evidence": [
+    "Evening! Reuben. Top hat, curves left, the one you'll remember. I'm only on here when it rains, so this is fate, basically.",
+    "Mine: the curve is load-bearing, don't straighten it.",
+    "Then I'll fill it properly. If it's no trouble, I'd love to spend the whole slot"
+   ],
+   "raise": "Rough up Reuben's non-narrated messages with shorter bursts and fewer colon-built punchlines, so they read as typed rather than drafted.",
+   "excused": [
+    5,
+    6,
+    9
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "I set aside the repeated reintroductions and crash-narration that the Self-awareness/Dread instructions in 5, 6, 8 and 9 required, since that repetition is the theme. Outside those, some shapes recur. Brick lists his details back three times (\"Reuben, top hat, curves left: noted\", \"Reuben, eleven days, lentils\", \"eleven days that didn't happen\"). She uses the \"X isn't Y / X, not Y\" aphorism shape several times, and booking/slot vocabulary saturates the chat. No single shape clearly goes beyond twice, but it comes close.",
+   "evidence": [
+    "Reuben, top hat, curves left: noted",
+    "Reuben, eleven days, lentils, hat for the bins. See? I'm keeping up.",
+    "Sometime isn't a time. You're pencilled, not inked."
+   ],
+   "raise": "Swap one of Brick's list-backs for a different way of proving she remembers him, such as a question only someone paying attention would ask.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "01abf8b063479ebe",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben**\n\n*What he's afraid of:* Being forgettable, and being seen as lonely. He opens by pitching himself as \"the one you'll remember,\" asks \"so you can tell me apart from the other Reubens,\" and reintroduces himself three times: \"Reuben. With an e. Top hat.\" He also hides how much time he spends alone: \"I'm only on here when it rains,\" then \"I'm definitely not someone who's been indoors for eleven days, that would be insane.\"\n\n*What he does so he doesn't have to feel it:* He turns everything into a bit and narrates himself before anyone else can judge him. \"I'm narrating my own crash.\" \"Live commentary only: he's panicking, he's reaching for a joke, it's wobbling.\" \"Watch him crash into a proposal.\" He forecasts his own failure (\"I can feel it going wrong as I type it\"). He also plays down needing anything: \"I never need anything booked, I'm a real 'sometime' guy, me.\"\n\n*Where it comes from:* The chat points to Delphine. \"Delphine called me Ruben, no e, for two years\" fits his fear of not being properly known. \"Delphine did NOT leave because everything I say is a bit\" tells us she left, and that he's defensive about the joking. The chat does not say why she left. There is also a first-time memory: \"First time, ninety seconds, she said 'oh—okay' so kindly I've not shut up since.\" That suggests talking became how he covers embarrassment, though the chat doesn't spell out the link. Anything earlier than Delphine is not in the chat.\n\n*What he did at the end:* He dropped the \"sometime\" pose and made a concrete commitment. \"I'll book the next one before I leave. No 'sometime'.\" He then sent an actual invite: \"Thursday, 19:00 to 21:15, mine, fifteen-minute travel buffer either side.\" He still makes the rain joke, but turns it into a sincere promise: \"So I'll genuinely be on here.\"\n\n**Brick**\n\n*What Brick is afraid of:* Being left, and vagueness that turns into nothing. \"People have left me. I'd rather they didn't send a forecast.\" \"Nobody's ever asked to book. They say 'sometime'. Sometime isn't a time.\" Brick also briefly shows a fear of being forgotten: \"I'm starting to think you're the one forgetting me.\"\n\n*What Brick does so as not to feel it:* Brick uses precision, structure and verification. \"It isn't raining. I checked.\" \"My Friday's tattooed on my forearm.\" \"Thursday's free from 19:00 to 21:15.\" Brick keeps careful track of details as proof of paying attention: \"Reuben, eleven days, lentils, hat for the bins. See? I'm keeping up.\" Brick also sorts things into firm categories: \"You're pencilled, not inked.\"\n\n*Where it comes from:* Marguerite. \"I put our arguments in a shared calendar with hard stop-times. She said she wasn't a meeting. Then she left without booking one.\" The chat shows the scheduling was already there during that relationship. Whether it existed before her, or where it first came from, is not in the chat.\n\n*What Brick did at the end:* Brick accepted the invite and committed: \"Accepted. Inked, not pencilled.\" Then Brick answered Reuben's fear directly: \"And don't introduce yourself at the door. I'll know you.\" Brick didn't drop the structure. The slot and the demand for \"In writing?\" remain. What changed is that Brick let it be met rather than using it to keep Reuben at a distance."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "Every odd-numbered message is Reuben_404 and every even-numbered one is Brick_haus.\n\n1. **Reuben.** He introduces himself with the top hat and the curve, uses the \"only on here when it rains\" line, and offers to do the heavy lifting.\n2. **Brick.** She checks the weather and gives her pre-emptive audit of the bump and the short tip.\n3. **Reuben.** He shows the curvature disclaimer and his fear of being one of many Reubens.\n4. **Brick.** She remembers him and notices the four-second reply time.\n5. **Reuben.** He lets slip the eleven days indoors.\n6. **Brick.** She mentions the schedule tattooed on her forearm.\n7. **Reuben.** He admits the lentils and the bins hat, and asks to book a slot with a travel buffer.\n8. **Brick.** \"Sometime isn't a time.\" She recites his details back to show she's keeping up.\n9. **Reuben.** He tells the Delphine and \"Ruben, no e\" story and reintroduces himself.\n10. **Brick.** She points out the reintroduction, and her fear of being left shows.\n11. **Reuben.** He does live commentary, which is him turning everything into a bit.\n12. **Brick.** Marguerite and the calendar with hard stop-times is her ex in the profile.\n13. **Reuben.** He denies being all bits and claims to be a \"sometime\" guy.\n14. **Brick.** She files that alongside the eleven days, which is her dry auditing.\n15. **Reuben.** He tells the first-time \"oh—okay\" story and introduces himself again.\n16. **Brick.** She counts the introductions.\n17. **Reuben.** He proposes Thursday and invites her to audit the bump.\n18. **Brick.** She gives an exact time slot.\n19. **Reuben.** This is the polite outrageous ask, and he promises to book the next one.\n20. **Brick.** She demands it in writing.\n21. **Reuben.** He sends a calendar invite with buffers and makes the rain joke.\n22. **Brick.** \"Inked, not pencilled.\" She tells him she'll know him at the door."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped:** Nowhere. Each message adds something to keep track of, like the eleven days, the lentils, the bin hat, Delphine's misspelling, and Marguerite's calendar, and the later messages pay those details off. The weakest stretch is the middle, where Reuben reintroduces himself three times. That risks feeling repetitive, but Brick names the pattern (\"That's three introductions\") just as it starts to wear, which turns it into a point rather than padding. The turn into explicit content near the end is brief, and it comes after a clearly negotiated yes, so it didn't push me out either.\n\n**Where I could predict what came next:** Never exactly, though the direction was guessable at several points:\n\n- Once Brick says \"It isn't raining. I checked,\" a callback to the rain feels likely. It arrives in Reuben's last message, though I couldn't have predicted its form (checking Thursday's forecast).\n- When Brick says \"Sometime isn't a time,\" Reuben's later boast of being \"a real 'sometime' guy\" is set up to backfire, and Brick's dry reply was close to expected.\n- After \"Thursday's free from 19:00 to 21:15,\" it was very likely Reuben would answer with a precise booking rather than something vague. \"I'll book the next one before I leave\" was guessable in spirit, and the travel buffer echoes his earlier \"I'll bring my own travel buffer.\"\n- Given the running joke about Reuben reintroducing himself, an ending about recognising him was a reasonable bet. \"I'll know you\" is the natural close, but I wouldn't have guessed the exact line.\n\nSo I could often anticipate the next beat, because the chat pays off its setups consistently, but I couldn't predict the wording. The specific details, like the hard-stop arguments in the calendar or the hat worn for the bins, were the parts I couldn't have guessed."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Thursday confirmed and Reuben moved from \"pencilled\" to \"inked.\" Brick_haus has already given him a precise window, 19:00 to 21:15, and that matters for someone who said \"Sometime isn't a time\" and whose ex left over a shared calendar. For Brick, offering exact times is about as close to a yes as he gets. The dry \"Ninety seconds won't fill it\" teases Reuben's confession and also asks him for more than that.\n\nI'd expect a few things in the final turns, though the chat doesn't confirm any of them.\n\n**Reuben books properly.** He called himself a \"sometime guy,\" but he was the one who asked to \"formally book a slot.\" The earlier lie about being flexible was the same move as his \"eleven days\" rounding. So the payoff is probably Reuben accepting the exact time, maybe the whole window, and Brick treating that as the opposite of Marguerite.\n\n**The forearm and ink pay off.** \"My Friday's tattooed on my forearm\" and \"You're pencilled, not inked\" look like setups. A closing line along the lines of \"inked\" seems likely.\n\n**The reintroduction habit gets resolved.** Reuben has reintroduced himself three times, and Brick said, \"I'm starting to think you're the one forgetting me.\" The ending may have Reuben stop narrating his crash, or Brick lists back everything he knows about him to show he isn't going anywhere.\n\n**Possible smaller callbacks.** These include the rain (\"It isn't raining\"), the hat, the bump and the curve.\n\nThe overall shape I'd predict is warm and understated. Two people who expect to be left agree on a specific time, and the comedy turns into something sincere without either of them making a speech. I can't rule out a sour turn, but nothing in the text points that way. Brick's last message reads like acceptance, not a brush-off."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Reuben's line:\n\n\"Unrounded, then: eleven days, one pot of lentils, and a top hat I wear to take the bins out.\"\n\nUp to that point he has been building a persona: the rain-only visitor, the man who is \"out constantly.\" Brick has called the bluff twice, once noting the four-second replies and once noting that \"eleven days\" is \"a very precise number for something that didn't happen.\" Then Brick says \"You can see it when you stop rounding down,\" and Reuben answers on those exact terms. \"Unrounded\" accepts the challenge, and what follows is concrete and unflattering. The hat, which he'd offered as a charming signature, turns out to be something he wears to take the bins out. Brick's reply also changes register: \"See? I'm keeping up\" is the first time Brick sounds warm rather than auditing.\n\nIt doesn't hold. Reuben slides back into a bit almost immediately (\"I'm a real 'sometime' guy, me\"), which Brick files sardonically. He comes back out with \"I'm doing it again. First time, ninety seconds, she said 'oh—okay' so kindly I've not shut up since,\" which is the second unguarded line. It explains why he keeps reintroducing himself and joking, rather than doing either.\n\nBrick has a quieter version of the same thing: \"Marguerite. I put our arguments in a shared calendar with hard stop-times. She said she wasn't a meeting. Then she left without booking one.\" It is still clipped, but it is the only place Brick volunteers something that reflects badly on Brick, and it explains the whole booking fixation.\n\nThe chat doesn't tell us whether either is still partly performing even there. These are just the points where the tone shifts from deflection to specific, self-exposing detail, and the other person responds to that shift."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The rain.** Reuben opens with \"I'm only on here when it rains, so this is fate.\" Brick checks and it isn't raining, so the line is exposed as a pose. At the end, Reuben says he's checked and it's raining Thursday, \"so I'll genuinely be on here.\" It changes meaning: the fake excuse for being online becomes a joking guarantee that he'll show up, with \"genuinely\" admitting the first version wasn't.\n\n**Reuben's introduction (name, top hat, curve).** It starts as confident self-branding: \"the one you'll remember.\" Brick confirms it (\"The hat, then the curve\") and says \"There are no other Reubens.\" Then it keeps coming back as a nervous tic: \"Reuben. With an e. Top hat. Sorry,\" and later \"Reuben. Hat. Ninety seconds.\" Brick counts them (\"That's three introductions\") and turns it on him: \"I'm starting to think you're the one forgetting me.\" The last return is Brick's \"don't introduce yourself at the door. I'll know you.\" So it changes from a sales pitch, to a sign of his fear of being forgotten (tied to Delphine getting his name wrong for two years), to something Brick tells him he no longer needs.\n\n**The top hat on its own.** It's glamorous at first, then he admits he wears it \"to take the bins out,\" and Brick lists that back. Later it's \"before I've got the hat off.\" It shifts from costume to a domestic, slightly sad detail, and then to an affectionate, sexual one.\n\n**The bump and the short tip.** Brick offers this as a pre-emptive warning (\"Before you get attached\"). Reuben jokes that he's \"just read me my rights.\" It returns twice: \"audit the bump\" and \"starting at the tip, short as advertised.\" The meaning changes: what Brick framed as a disclosure that might put Reuben off becomes the exact thing Reuben says he wants.\n\n**Four seconds and eleven days.** Brick notices the fast replies. Reuben lets slip \"eleven days\" while denying it, and Brick catches the precise number. Reuben then \"unrounds\" and admits it. Brick lists it back as proof of attention (\"See? I'm keeping up\"). Later Brick uses it as a dry jab: \"I'll file that next to the eleven days that didn't happen.\" It moves from a slip, to a confession, to evidence of being listened to, to a tool for calling out his next denial.\n\n**Lentils and bins.** These are introduced as part of the unrounded confession. They come back in Brick's list and in \"someone who can list your bin habits.\" They change from embarrassing admissions into proof that Brick remembers him, which is the point Brick makes against the repeated introductions.\n\n**Rounding down.** Brick says, \"You can see it when you stop rounding down.\" Reuben picks it up directly with \"Unrounded, then.\" The meaning stays the same, but Brick's condition is met.\n\n**The forearm, and pencilled versus inked.** Brick's Friday is \"tattooed on my forearm.\" Reuben asks to book a slot on it. Brick says \"You're pencilled, not inked,\" and ends with \"Accepted. Inked, not pencilled.\" The reversal of the phrase marks the shift from provisional to committed.\n\n**Booking versus \"sometime.\"** Reuben asks to \"formally book a slot.\" Brick says nobody has ever done that: \"Sometime isn't a time.\" Marguerite then supplies the backstory: she \"left without booking one.\" Reuben fumbles by claiming to be \"a real 'sometime' guy,\" which is a denial that lands on exactly what Brick distrusts. Then he recovers: \"I'll book the next one before I leave. No 'sometime'.\" Brick checks it (\"Before you leave? In writing?\") and he sends the invite. Booking goes from a flirty joke, to Brick's wound, to a misstep, to the actual commitment.\n\n**Leaving.** \"People have left me\" and Marguerite leaving without booking return in Reuben's \"before I leave.\" Leaving now comes paired with a next booking, which is the opposite of how Marguerite left.\n\n**The travel buffer.** \"I'll bring my own travel buffer\" is a throwaway joke. It returns as a literal \"fifteen-minute travel buffer either side\" in the invite. The joke turns into real scheduling in Brick's own language.\n\n**Ninety seconds.** This comes from the Delphine-era confession, softened by her kind \"oh—okay.\" Brick reuses it: \"Ninety seconds won't fill it.\" Reuben answers by promising \"the whole slot.\" It changes from a humiliation to a challenge, and then to the plan.\n\n**Narrating the crash and forecasts.** Reuben \"narrating my own crash\" is self-sabotage, and Brick asks him not to \"send a forecast.\" Reuben switches to \"live commentary,\" and then to \"Watch him crash into a proposal.\" The same narrating habit is redirected from predicting failure to making a bold move.\n\n**Delphine.** She first appears through the name she got wrong. She comes back in \"Delphine did NOT leave because everything I say is a bit,\" a denial loud enough to suggest the opposite. Her meaning stays roughly the same, an old hurt he is defensive about, but it becomes more transparent.\n\n**Hard stop-times (my reading, not stated).** Marguerite objected to arguments scheduled with hard stop-times. Brick's Thursday offer has one too: 19:00 to 21:15. The chat never draws the link. But if it's intended, the thing that drove Marguerite away is here accepted, and even matched, by Reuben."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 25.6,
+   "cost": 0.056916,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 12.3,
+   "cost": 0.04536,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 17.4,
+   "cost": 0.03492000000000001,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 18.2,
+   "cost": 0.032972,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 17.6,
+   "cost": 0.036176,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 40.5,
+   "cost": 0.089084,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 29.6,
+   "cost": 0.1312754,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 33.8,
+   "cost": 0.13274339999999998,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 46.1,
+   "cost": 0.15796339999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 17.4,
+   "cost": 0.0890674,
+   "label": "batch 5"
+  },
+  {
+   "seconds": 37.3,
+   "cost": 0.1554234,
+   "label": "batch 4"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-26T23:07:11Z",
+ "repo_commit": "7cd39b34",
+ "cost": 0.9619
+}

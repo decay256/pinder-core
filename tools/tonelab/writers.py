@@ -12,6 +12,15 @@ between them would go on Pinder, with no constraints: no dice, no turns, no leng
     python3 -I tools/tonelab/writers.py --key-stdin --only reuben          # profiles
     python3 -I tools/tonelab/writers.py --key-stdin --chat reuben,brick    # chats from the profiles
     python3 -I tools/tonelab/writers.py --key-stdin --only reuben --chat reuben,brick
+
+Improvised chats on the frozen one-go prompt (v14, the default; Claude on the subscription login, no key):
+
+    python3 -I tools/tonelab/writers.py --turns reuben,brick --from docs/tone-lab/scratch/writers-v14 \
+        --mechanics docs/tone-lab/scratch/writers-v14/mechanics.json --writers carr,booster,wong \
+        [--theme T42 --method M10] [--print-turns] --out docs/tone-lab/scratch/writers-v17
+
+The improvisation version before v14 (comedian personas on OpenRouter, own brief and characters) is
+TONELAB_WRITERS_VERSION=v13 with --key-stdin, and is pinned as the tag tonelab-impro-v13.
 """
 import argparse, json, os, random, re, sys, threading, time
 
@@ -533,7 +542,228 @@ def turn_texts13(m, a_name, a_pron, b_name, b_pron):
 
 
 def texts_for(m, *a):
-    return (turn_texts13 if VERSION == "v13" else turn_texts)(m, *a)
+    return (turn_texts13 if VERSION in ("v13", "v14") else turn_texts)(m, *a)
+
+
+# v14 (--turns): the one-go prompt that worked by hand on 2026-11-26 (templates/chat-one-pair.v1.md,
+# frozen) woven into the improvisations, as templates/chat-improvised.v1.md: Pinder's premise
+# (templates/premise.v1.md) instead of the writer's own brief, one comedian's descriptions of the two
+# characters from --from without their take on the pair ("The two of them"), three acts laid over the
+# improvisations, one theme and one method from the writers' pool for the whole chat, and the frozen
+# task. v13's improvisation pieces are used unchanged; each improvisation opens with the act it is in.
+# The frozen prompt was written for and tested on Claude with no persona, so v14 is written by Claude
+# through the subscription CLI, one resumed session per chat, and the comedian is only the author of
+# the descriptions. The improvisation version before this one is pinned as the tag tonelab-impro-v13.
+TEMPLATES = os.path.join(REPO, "tools", "tonelab", "templates")
+POOL = os.path.join(REPO, "docs", "tone-lab", "scratch", "pool", "pool.json")
+V14 = dict(template="chat-improvised.v1.md", premise="premise.v1.md", model="opus",
+           system="You write chats for Pinder, a comedy game.")
+PROMPTS["v14"] = dict(PROMPTS["v13"], system=V14["system"])
+TURNS.add("v14")
+ACTS = [(1, "the opening"), (2, "the match"), (3, "the closing")]
+ACT_SHARE = (0.3, 0.5, 0.2)  # of the chat's words, as in the frozen one-go prompt
+POOL_STAGES = {"act", "middle", "why"}
+
+
+def pool_entries():
+    """The writers' pool, each entry with its display id (T01.. for themes, M01.. for methods, counted in
+    family order) and its kind."""
+    out, counts = [], {"theme": 0, "method": 0}
+    for fam in json.load(open(POOL, encoding="utf-8")):
+        kind = fam["family"]["kind"]
+        for e in fam["entries"]:
+            counts[kind] += 1
+            out.append(dict(e, uid=("T" if kind == "theme" else "M") + f"{counts[kind]:02d}", kind=kind))
+    return out
+
+
+def pool_eligible(kind):
+    """Entries tagged for at least two of act / middle / why, and not for "any": only T01 has all three,
+    and the "any" methods are craft rules rather than comic devices."""
+    return [e for e in pool_entries() if e["kind"] == kind and "any" not in (e.get("stage") or [])
+            and len(set(e.get("stage") or []) & POOL_STAGES) >= 2]
+
+
+def pool_render(e):
+    lines = [f"**{e['name']}**", "", e["summary"], "",
+             ("What it is: " if e["kind"] == "theme" else "How it works: ") + (e.get("meaning") or e.get("how_it_works") or ""),
+             "", "In Pinder: " + e["in_pinder"]]
+    if e.get("test"):
+        lines += ["", "Test: " + e["test"]]
+    if e.get("goes_wrong"):
+        lines += ["", "Goes wrong when: " + e["goes_wrong"]]
+    return "\n".join(lines)
+
+
+def fill_template(text, values):
+    missing = set(re.findall(r"\{([a-z0-9_]+)\}", text)) - values.keys()
+    if missing:
+        raise ValueError(f"template placeholders without a value: {sorted(missing)}")
+    for k, v in values.items():
+        text = text.replace("{" + k + "}", str(v))
+    return text
+
+
+def act_split(n):
+    """How many of n improvisations each act gets: act 3 three (fewer for short chats), act 1 three
+    eighths of the rest, as the frozen prompt's 4-5 / 6-8 / 3 exchanges."""
+    a3 = 3 if n >= 9 else 2 if n >= 5 else 1
+    a1 = max(1, round((n - a3) * 3 / 8))
+    return [a1, n - a3 - a1, a3]
+
+
+def act_lines(n):
+    """(the length line of each act, the act line that opens each improvisation)."""
+    spans, opening, k = [], [], 1
+    for (num, title), size in zip(ACTS, act_split(n)):
+        lo, hi = k, k + size - 1
+        spans.append(f"improvisation {lo}" if lo == hi else f"improvisations {lo} to {hi}")
+        for i in range(lo, hi + 1):
+            opening.append(f"This is where act {num}, {title}, starts." if i == lo else f"Act {num}, {title}.")
+        k = hi + 1
+    opening[-1] += " It's the last improvisation: the chat ends with it."
+    return spans, opening
+
+
+def sheets_of(path):
+    """A comedian's descriptions of the two characters, without their take on the pair."""
+    text = open(path, encoding="utf-8").read()
+    cut = text.find("\n## The two of them")
+    return (text[:cut] if cut >= 0 else text).strip()
+
+
+def draw14(a):
+    rng = random.SystemRandom()
+    by_uid = {e["uid"]: e for e in pool_entries()}
+    theme = by_uid[a.theme] if a.theme else rng.choice(pool_eligible("theme"))
+    method = by_uid[a.method] if a.method else rng.choice(pool_eligible("method"))
+    return theme, method
+
+
+def first14(sheets, an, bn, texts, theme, method, words):
+    spans, opening = act_lines(len(texts))
+    shares = {f"act{i}_words": round(words * s / 10) * 10 for i, s in enumerate(ACT_SHARE, 1)}
+    values = dict(premise=open(os.path.join(TEMPLATES, V14["premise"]), encoding="utf-8").read().strip(),
+                  characters=sheets, player=an, match=bn, improvisations=len(texts),
+                  act1_span=spans[0], act2_span=spans[1], act3_span=spans[2], theme=pool_render(theme),
+                  method=pool_render(method), words=words, max_words=round(words * 1.1),
+                  first=opening[0] + "\n\n" + texts[0], **shares)
+    return fill_template(open(os.path.join(TEMPLATES, V14["template"]), encoding="utf-8").read(), values).strip() + "\n", opening
+
+
+def call_claude_session(prompt, session, first, cwd):
+    """One turn of a print-mode Claude CLI session on the subscription login: no tools, no settings
+    files, a neutral working directory that holds the session; the first turn starts it with a given
+    id, the others resume it."""
+    import subprocess
+    cmd = ["claude", "-p", "--model", V14["model"], "--output-format", "json", "--tools", "", "--setting-sources", "",
+           "--system-prompt", V14["system"]] + (["--session-id", session] if first else ["--resume", session])
+    started = time.time()
+    res = subprocess.run(cmd, input=prompt, capture_output=True, text=True, cwd=cwd, env=tl.model_free_env(), timeout=1800)
+    if res.returncode != 0:
+        raise RuntimeError(f"claude exited {res.returncode}: {res.stderr[-1000:]}{res.stdout[-1000:]}")
+    data = json.loads(res.stdout)
+    if data.get("is_error"):
+        raise RuntimeError("claude reported an error: " + str(data.get("result"))[:1000])
+    return data, round(time.time() - started, 1)
+
+
+def turns14(a, chosen):
+    """v14: per comedian, their two character descriptions on the frozen prompt, played improvisation by
+    improvisation by Claude in one session. Every comedian's chat gets the same theme, method and seed."""
+    import shutil, tempfile, uuid
+    x, y = a.turns.split(",")
+    ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
+    an, bn = ds[x]["name"], ds[y]["name"]
+    mech = json.load(open(a.mechanics, encoding="utf-8"))
+    _, texts = texts_for(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
+    theme, method = draw14(a)
+    premise = open(os.path.join(TEMPLATES, V14["premise"]), encoding="utf-8").read().strip()
+    sheets = {w: sheets_of(os.path.join(a.src, "characters", f"{w}.md")) for w, _ in chosen}
+    if a.print_turns:
+        prompt, opening = first14(sheets[chosen[0][0]], an, bn, texts, theme, method, a.words)
+        print(prompt)
+        for i, tx in enumerate(texts[1:], 2):
+            print(PROMPTS[VERSION]["turn"].format(n=i, turn=opening[i - 1] + "\n\n" + tx))
+        return True
+    for folder in ("brief", "characters"):
+        os.makedirs(os.path.join(a.out, folder), exist_ok=True)
+    for w, _ in chosen:
+        with open(os.path.join(a.out, "brief", f"{w}.md"), "w", encoding="utf-8") as f:
+            f.write(premise + "\n")
+        with open(os.path.join(a.out, "characters", f"{w}.md"), "w", encoding="utf-8") as f:
+            f.write(sheets[w] + "\n")
+    shutil.copy(a.mechanics, os.path.join(a.out, "mechanics.json"))
+    out = os.path.join(a.out, f"chat-{x}-{y}")
+    os.makedirs(out, exist_ok=True)
+    line_re = re.compile(rf"^\s*\**\s*`?({re.escape(an)}|{re.escape(bn)})\s*\**\s*:\s*(.*?\S)`?\s*$")
+    results = {}
+
+    def run(w, n):
+        prompt0, opening = first14(sheets[w], an, bn, texts, theme, method, a.words)
+        session, cwd = str(uuid.uuid4()), tempfile.mkdtemp(prefix="tonelab-cwd-")
+        log, chat, cost, secs = [], [], 0.0, 0.0
+        for i, tx in enumerate(texts, 1):
+            prompt = prompt0 if i == 1 else PROMPTS[VERSION]["turn"].format(n=i, turn=opening[i - 1] + "\n\n" + tx)
+            try:
+                data, seconds = call_claude_session(prompt, session, i == 1, cwd)
+            except Exception as e:  # no retry: the session may already hold the turn
+                results[w] = {"writer": f"{n}'s characters", "author": "Claude", "sheets_by": n, "session": session,
+                              "error": f"improvisation {i}: {e}", "turns_done": i - 1}
+                print(f"turns {w}: improvisation {i} failed: {e}", flush=True)
+                break
+            session = data.get("session_id") or session
+            text = (data.get("result") or "").strip()
+            cost += data.get("total_cost_usd") or 0
+            secs += seconds
+            lines, stray = [], []
+            for ln in text.splitlines():
+                mm = line_re.match(ln)
+                if mm:
+                    lines.append(f"{mm.group(1)}: {mm.group(2)}")
+                elif ln.strip():
+                    stray.append(ln.strip())
+            log.append({"turn": i, "prompt": prompt, "answer": text, "lines": lines, "stray": stray, "seconds": seconds,
+                        "cost": data.get("total_cost_usd"), "model": list((data.get("modelUsage") or {}).keys()),
+                        "from_a": sum(l.startswith(an + ":") for l in lines), "from_b": sum(l.startswith(bn + ":") for l in lines)})
+            if not lines:
+                results[w] = {"writer": f"{n}'s characters", "author": "Claude", "sheets_by": n, "session": session,
+                              "error": f"improvisation {i}: no chat lines in the answer", "turns_done": i - 1}
+                print(f"turns {w}: improvisation {i} gave no chat lines", flush=True)
+                break
+            chat += lines
+            print(f"turns {w}: improvisation {i}, {len(lines)} lines, {len(' '.join(lines).split())} words, {seconds}s", flush=True)
+        else:
+            results[w] = {"writer": f"{n}'s characters", "author": "Claude", "sheets_by": n, "model": V14["model"],
+                          "session": session, "seconds": round(secs, 1), "cost": round(cost, 4),
+                          "words": len(" ".join(l.split(":", 1)[1] for l in chat).split()), "turns": len(log)}
+        shutil.rmtree(cwd, ignore_errors=True)
+        with open(os.path.join(out, f"{w}.turns.json"), "w", encoding="utf-8") as f:
+            json.dump({"writer": f"{n}'s characters", "system": V14["system"], "session": session, "turns": log}, f, indent=1)
+        with open(os.path.join(out, f"{w}.prompt.md"), "w", encoding="utf-8") as f:
+            f.write(f"<!-- system prompt -->\n{V14['system']}\n\n" + "\n\n".join(
+                f"<!-- user prompt, improvisation {e['turn']} -->\n{e['prompt']}\n\n<!-- answer, improvisation {e['turn']} -->\n{e['answer']}"
+                for e in log))
+        if "error" not in results[w]:
+            with open(os.path.join(out, f"{w}.md"), "w", encoding="utf-8") as f:
+                f.write("\n".join(chat) + "\n")
+            print(f"turns {w}: done, {results[w]['words']} words, {results[w]['seconds']}s, ${results[w]['cost']}", flush=True)
+
+    threads = [threading.Thread(target=run, args=c) for c in chosen]
+    for th in threads:
+        th.start()
+        time.sleep(1)
+    for th in threads:
+        th.join()
+    spans, _ = act_lines(len(texts))
+    with open(os.path.join(out, "run.json"), "w", encoding="utf-8") as f:
+        json.dump({"model": V14["model"], "runtime": "claude CLI, subscription login", "version": VERSION,
+                   "system": V14["system"], "template": V14["template"], "premise": V14["premise"], "from": a.src,
+                   "words": a.words, "acts": spans,
+                   "draw": {"theme": [theme["uid"], theme["name"]], "method": [method["uid"], method["name"]],
+                            "theme_text": pool_render(theme), "method_text": pool_render(method)},
+                   "mechanics": {k: v for k, v in mech.items() if k != "turns"}, "writers": results}, f, indent=1)
+    return not any("error" in r for r in results.values())
 
 
 def _pick(table, n):
@@ -618,7 +848,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v13")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v14")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -929,7 +1159,12 @@ def main():
     ap.add_argument("--writers", default="")
     ap.add_argument("--words", type=int, default=500, help="the chat's word limit, for prompt versions that have one")
     ap.add_argument("--out", default=os.path.join(REPO, "docs/tone-lab/scratch/writers"))
+    ap.add_argument("--theme", default="", help="v14: the pool theme for the whole chat (T01..), else drawn")
+    ap.add_argument("--method", default="", help="v14: the pool method for the whole chat (M01..), else drawn")
     a = ap.parse_args()
+    if a.turns and VERSION == "v14":  # Claude on the subscription login: no key
+        chosen = [w for w in WRITERS if not a.writers or w[0] in a.writers.split(",")]
+        sys.exit(0 if turns14(a, chosen) else 1)
     if a.turns and a.print_turns:
         x, y = a.turns.split(",")
         ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
