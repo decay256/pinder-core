@@ -560,6 +560,23 @@ V14 = dict(template="chat-improvised.v1.md", premise="premise.v1.md", model="opu
            system="You write chats for Pinder, a comedy game.")
 PROMPTS["v14"] = dict(PROMPTS["v13"], system=V14["system"])
 TURNS.add("v14")
+# The tone lab's own score for the player's moves, not the game's: a move that lands is +1, one that does
+# nothing is 0, one that backfires is -1. The balance starts at 0 and can go below it; where it stands after
+# the last improvisation decides the ending: above 0 is a date, 0 or below is not.
+LANDS = {"Fumble": 0}  # every success lands; a fumble (nearly, but it slips) does nothing; every other miss backfires
+
+
+def tally(m):
+    """([(points, balance), ...] per improvisation, whether it ends in a date) by the tone lab's rule."""
+    out, bal = [], 0
+    for tn in m["turns"]:
+        r = tn["roll"]
+        p = 1 if r["success"] else LANDS.get(r["final_tier"], -1)
+        bal += p
+        out.append((p, bal))
+    return out, bal > 0
+
+
 ACTS = [(1, "the opening"), (2, "the match"), (3, "the closing")]
 ACT_SHARE = (0.3, 0.5, 0.2)  # of the chat's words, as in the frozen one-go prompt
 POOL_STAGES = {"act", "middle", "why"}
@@ -676,6 +693,10 @@ def turns14(a, chosen):
     ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
     an, bn = ds[x]["name"], ds[y]["name"]
     mech = json.load(open(a.mechanics, encoding="utf-8"))
+    score, date = tally(mech)
+    if date != (mech.get("outcome") == "DateSecured"):  # the improvisations tell the writer the game's ending
+        raise SystemExit(f"{a.mechanics}: the balance ends at {score[-1][1]} ({'a date' if date else 'no date'}), "
+                         f"but the game ended {mech.get('outcome')}; the last improvisation would tell the other ending")
     _, texts = texts_for(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
     theme, method = draw14(a)
     premise = open(os.path.join(TEMPLATES, V14["premise"]), encoding="utf-8").read().strip()
@@ -762,7 +783,9 @@ def turns14(a, chosen):
                    "words": a.words, "acts": spans,
                    "draw": {"theme": [theme["uid"], theme["name"]], "method": [method["uid"], method["name"]],
                             "theme_text": pool_render(theme), "method_text": pool_render(method)},
-                   "mechanics": {k: v for k, v in mech.items() if k != "turns"}, "writers": results}, f, indent=1)
+                   "mechanics": {k: v for k, v in mech.items() if k != "turns"},
+                   "tally": {"points": [p for p, _ in score], "balance": [b for _, b in score], "date": date},
+                   "writers": results}, f, indent=1)
     return not any("error" in r for r in results.values())
 
 

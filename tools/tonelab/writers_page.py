@@ -180,7 +180,13 @@ for rid, label, sub, about, profiles_from in RUNS:
         writers.append({"id": wid, "name": name, "by": by, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
                         "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps,
                         "turns": turns})
-    runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
+    mp = os.path.join(O, "mechanics.json")
+    tally = None
+    if os.path.exists(mp):  # the tone lab's balance, worked out from the game's results for every improvised run
+        mech = json.load(open(mp, encoding="utf-8"))
+        score, date = w.tally(mech)
+        tally = {"points": [s for s, _ in score], "balance": [b for _, b in score], "date": date, "game": mech.get("outcome")}
+    runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from, "tally": tally,
                  "paired": os.path.isdir(os.path.join(O, "characters")),
                  "turns": os.path.exists(os.path.join(O, "mechanics.json")),
                  "seed": (meta.get("mechanics") or {}).get("seed"),

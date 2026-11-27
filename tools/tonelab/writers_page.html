@@ -76,6 +76,12 @@ details.raw summary { font: 500 .82rem var(--body); color: var(--muted); }
 .turn { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 12px 16px 4px; margin: 0 0 18px; }
 .turn h2 { font: 700 1rem/1.25 var(--display); margin: 0 0 6px; }
 .turn .game { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; margin: 0 0 10px; }
+/* the tone lab's balance: next to the player's name, once per improvisation */
+.score { font-weight: 500; letter-spacing: 0; text-transform: none; margin-left: .5em; padding: 1px 7px; border-radius: 999px; background: var(--them); color: var(--fg); }
+.score.up { background: #d7efe0; color: #1d5c37; } .score.down { background: #f6dada; color: #7c1f1f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .score.up { background: #1d3a29; color: #9fe0b8; } :root:not([data-theme="light"]) .score.down { background: #3e2020; color: #f0a8a8; } }
+:root[data-theme="dark"] .score.up { background: #1d3a29; color: #9fe0b8; } :root[data-theme="dark"] .score.down { background: #3e2020; color: #f0a8a8; }
+.verdict { text-align: center; font: 600 .9rem var(--body); margin: 18px 0 0; }
 .arrow { text-align: center; color: var(--muted); font-size: .85rem; margin: -8px 0 10px; }
 summary { cursor: pointer; font-weight: 600; }
 @media (prefers-reduced-motion: no-preference) { .b, .note { animation: none; } }
@@ -108,17 +114,44 @@ function fromHash() {
 function esc(s) { return s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c])); }
 function words(s) { return (s.trim().match(/\S+/g) || []).length; }
 
+const signed = n => n > 0 ? "+" + n : n < 0 ? "\u2212" + -n : "0";
+const WHAT = { 1: "landed", 0: "did nothing", "-1": "backfired" };
+function scoreHTML(t, i) {
+  const p = t.points[i];
+  return `<span class="score ${p > 0 ? "up" : p < 0 ? "down" : ""}">${WHAT[p]} ${signed(p)} \u00b7 balance ${signed(t.balance[i])}</span>`;
+}
+function verdictHTML(t) {
+  const end = t.balance[t.balance.length - 1], date = end > 0;
+  const game = (t.game === "DateSecured") === date ? "" : ` The game itself ended ${t.game}.`;
+  return `<p class="verdict">Balance at the end: ${signed(end)}. ${date ? "Above 0: a date." : "0 or below: no date."}${game}</p>`;
+}
+// the chat improvisation by improvisation, with the player's result and balance next to their name each time
+function tallyChatHTML(w, run) {
+  const t = run.tally, st = { last: null }, out = [];
+  w.turns.forEach((x, i) => {
+    if (i >= t.points.length) return;
+    const items = chatItems(x.lines.join("\n"), run, st, scoreHTML(t, i));
+    out.push(...items);
+  });
+  return `<div class="thread">${out.join("")}</div>` + verdictHTML(t);
+}
 function chatHTML(text, run) {
+  return `<div class="thread">${chatItems(text, run, { last: null }, null).join("")}</div>`;
+}
+function chatItems(text, run, st, badge) {
   const me = (run && run.player) || D.player, them = (run && run.match) || D.match;
   const re = new RegExp("^\\s*(?:\\*\\*)?(" + me + "|" + them + ")(?:\\*\\*)?\\s*:\\s*(?:\\*\\*)?\\s*(.*)$", "i");
-  let out = [], last = null;
+  let out = [], last = st.last;
   for (const raw of text.split("\n")) {
     const line = raw.replace(/\s+$/, "");
     if (!line.trim()) continue;
     const m = line.match(re);
     if (m) {
       const who = m[1].toLowerCase() === me.toLowerCase() ? "me" : "them";
-      if (who !== last) out.push(`<div class="who ${who}">${esc(who === "me" ? me : them)}</div>`);
+      if (who !== last || (badge && who === "me")) {
+        out.push(`<div class="who ${who}">${esc(who === "me" ? me : them)}${badge && who === "me" ? badge : ""}</div>`);
+        if (who === "me") badge = null;
+      }
       out.push(`<div class="b ${who}">${esc(m[2].replace(/\*\*$/, ""))}</div>`);
       last = who;
     } else if (/^\s*(---|\*\*\*)\s*$/.test(line)) {
@@ -128,7 +161,9 @@ function chatHTML(text, run) {
       last = null;
     }
   }
-  return `<div class="thread">${out.join("")}</div>`;
+  if (badge) out.unshift(`<div class="who me">${esc(me)}${badge}</div>`);  // the player sent nothing this time
+  st.last = last;
+  return out;
 }
 function docHTML(md) {
   try { return `<div class="doc">${marked.parse(md)}</div>`; }
@@ -207,11 +242,14 @@ function render() {
   document.getElementById("pair").textContent = run.title || "Reuben & Brick";
   const view = document.getElementById("view");
   if (st.v === "chat") {
-    view.innerHTML = run.template ? `<p class="meta">Claude's chat on ${esc(w.by)}'s ${esc(run.pair_text)}, written improvisation by improvisation from Pinder's premise, those two descriptions, and one theme and one method for the whole chat.</p>` + chatHTML(w.chat, run) : `<p class="meta">${esc(w.name)}: the chat between their own ${esc(run.pair_text || "Reuben and Brick")}, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat, run);
+    const tallied = run.tally && w.turns;
+    const TALLY_NOTE = tallied ? ` Next to ${esc(run.player)}'s name, each improvisation: whether the move landed (+1), did nothing (0) or backfired (\u22121), and the balance, which starts at 0. Where it stands at the end decides the date.` : "";
+    const body = tallied ? tallyChatHTML(w, run) : chatHTML(w.chat, run);
+    view.innerHTML = run.template ? `<p class="meta">Claude's chat on ${esc(w.by)}'s ${esc(run.pair_text)}, written improvisation by improvisation from Pinder's premise, those two descriptions, and one theme and one method for the whole chat.${TALLY_NOTE}</p>` + body : `<p class="meta">${esc(w.name)}: the chat between their own ${esc(run.pair_text || "Reuben and Brick")}, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.${TALLY_NOTE}</p>` + body;
   } else if (st.v === "turns") {
     view.innerHTML = run.template ? `<p class="meta">Each improvisation, the game's account of what happened (in grey) was sent to Claude, in one resumed session; under it is what came back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this chat.</p>` +
-      w.turns.map(x => `<section class="turn"><h2>Improvisation ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("") : `<p class="meta">Each turn, the game's account of what happened (in grey) was sent to ${esc(w.name)}, in one session; under it is what they wrote back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this writer.</p>` +
-      w.turns.map(x => `<section class="turn"><h2>Turn ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("");
+      w.turns.map(x => `<section class="turn"><h2>Improvisation ${x.n}${run.tally && run.tally.points[x.n - 1] !== undefined ? scoreHTML(run.tally, x.n - 1) : ""}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("") + (run.tally ? verdictHTML(run.tally) : "") : `<p class="meta">Each turn, the game's account of what happened (in grey) was sent to ${esc(w.name)}, in one session; under it is what they wrote back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this writer.</p>` +
+      w.turns.map(x => `<section class="turn"><h2>Turn ${x.n}${run.tally && run.tally.points[x.n - 1] !== undefined ? scoreHTML(run.tally, x.n - 1) : ""}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("") + (run.tally ? verdictHTML(run.tally) : "");
   } else if (st.v === "joke") {
     view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked it out under its own heading, as the prompt asked (How it was made has the exact wording). The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
   } else if (st.v === "characters") {
