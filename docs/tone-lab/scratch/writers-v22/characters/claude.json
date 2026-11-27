@@ -1,0 +1,9 @@
+{
+ "by": "Claude",
+ "model": "opus",
+ "system": "You write chats for Pinder, a comedy game.",
+ "session": "ba5ee3cf-0414-4a1b-a7da-17c3512571de",
+ "seconds": 29.2,
+ "cost": 0.11421200000000001,
+ "notes_seed": "7-characters"
+}

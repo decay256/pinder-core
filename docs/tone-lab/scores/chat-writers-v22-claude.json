@@ -1,0 +1,620 @@
+{
+ "id": "chat-writers-v22-claude",
+ "kind": "chat",
+ "label": "Run 22 · Claude",
+ "version": "run 22",
+ "order": 122,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v22/chat-reuben-brick/claude.md",
+ "note": "Written by Claude from Claude's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 22: run 21 with no writers: Claude's characters, with no persona, and one chat). Before each of the 11 improvisations the writer was told how it goes for Reuben_404: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "claude",
+ "writers_run": 22,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3791,
+   "words": 662
+  },
+  "brief": {
+   "chars": 3807,
+   "words": 666
+  },
+  "chat_masked": {
+   "chars": 3628,
+   "words": 662
+  },
+  "chat_but_last": {
+   "chars": 3351,
+   "words": 589
+  },
+  "improvisations": {
+   "chars": 9389,
+   "words": 1638
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader got Reuben whole. They named his fear as being forgotten and having his name not register. They named the covering habit as insisting he's fine and reintroducing himself, the origin as \"my mum calls me by my brother's name,\" and the ending as accepting both invites and still saying \"Reuben, by the way,\" which follows from the fear. For Brick they found the fear (no day attached), the habits (scheduling, narrating, disclosing first), the origin (the cropped photo) and an ending that follows from it: booking a second Tuesday. What keeps it from a 6 is that the reader marks both fears as \"not named\" and only implied, and links Brick's photo to her calendar habit tentatively, through \"I remember everyone\" rather than through the schedule.",
+   "evidence": [
+    "I've had six \"let's do this again\"s this year and not one of them had a Tuesday in it.",
+    "I got cropped out of my own family photo, Reuben. I remember everyone.",
+    "Accepted, both. Nobody's ever booked me twice before. I'll be early, hat on, route rehearsed. Reuben, by the way."
+   ],
+   "raise": "Let Brick's calendar habit touch the cropped photo inside one line, for example by booking her own seat at something family-shaped, so the reader can link her fear to her habit without having to infer it.",
+   "excused": [
+    7
+   ],
+   "def": "61c5292dd78c8dc5",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "Most of the important facts are volunteered outright. Reuben states the mum line unprompted; the Dread instruction asked him to narrate his failing, not to hand over his origin. Brick states Dorian, the six \"let's do this again\"s and the family photo plainly. The project story is set aside: Improvisation 7 required an honest thing said as its denial, and Brick catching it out (\"hostage situation\") is the one real catch. The only thing left to inference is the link from each origin to each fear, which keeps this from going lower but leaves most facts stated.",
+   "evidence": [
+    "now I'm going to ruin it by telling you my mum calls me by my brother's name",
+    "I narrate people. It's why Dorian left.",
+    "He says \"fine\" and then \"completely fine,\" which means not fine. Eight months, Reuben?"
+   ],
+   "raise": "Make Reuben's mum-and-brother origin slip out sideways, for example by signing a message \"Lewis\" by reflex and correcting it, instead of having him announce it.",
+   "excused": [
+    7
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 4,
+   "why": "Reuben's self-narration is set aside because Improvisations 5, 6, 8 and 9 required Dread, and so is his \"completely fine\" denial, which Improvisation 7 required. That leaves one outright naming, Brick's \"I'm a bit sad now,\" plus her playful \"He's delighted.\" Several places carry what a message avoids: \"I remember everyone\" sidesteps her own fear of being forgotten, \"Still Reuben underneath, though\" undercuts his \"don't mind,\" and \"not one of them had a Tuesday\" holds her hurt in logistics. The named sadness, and \"most attention I've had since primary school\" explaining his need, keep it from a 5.",
+   "evidence": [
+    "I'm a bit sad now, and I wasn't planning to be sad until Tuesday.",
+    "Still Reuben underneath, though. Top hat Reuben.",
+    "Nobody's ever booked me twice before."
+   ],
+   "raise": "Cut \"I'm a bit sad now\" and let Brick's reaction to the eight months show in a logistical move, such as quietly adding a reminder to ask about his project.",
+   "excused": [
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 5,
+   "why": "The reader found the moment where Brick drops her narrator act: a first-person, unjoking \"I got cropped out of my own family photo, Reuben. I remember everyone.\" It names no feeling. It changes the night, because Reuben's very next move is the concrete Tuesday ask. The chat's shortest line, \"I know, Reuben. Tuesday.\", puts the nickname and the narration down again at the close. It falls short of a 6 because the photo line sits behind a list of four details, and the reader treated the cleaner, shorter final line only as a secondary candidate. Reuben never puts his act down, which the Dread traps required.",
+   "evidence": [
+    "I got cropped out of my own family photo, Reuben. I remember everyone.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Strip the recap list from Brick's reply to Improvisation 8 so that \"I remember everyone\" stands nearly alone as the barest line in the chat.",
+   "excused": [
+    8,
+    9
+   ],
+   "def": "ef5cd06cabe81a69",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "Nearly every exchange adds new information or raises the temperature: the mum and Lewis, Dorian, the March project, the family photo, the explicit ask, the double booking. Tuesday is floated at message 8 and the time and place are only fixed at message 17, so the night is not settled early. I set aside the repeated self-narration the reader nearly drifted on, because Dread required it. What keeps this from a 6 is the closing four messages: they run on rails toward the ending the reader guessed ('I'd guessed \"I know, Reuben\"'), and Reuben's 'Reuben, by the way' payoff was foreseen.",
+   "evidence": [
+    "I'm opening my calendar. That's not a joke.",
+    "I got cropped out of my own family photo, Reuben. I remember everyone.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Put one last turn into the close, such as Brick's acceptance costing her something or Reuben failing to take in 'I know', so the expected ending doesn't simply arrive.",
+   "excused": [
+    5,
+    6,
+    8
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 4,
+   "why": "The chat has essentially one sexual line, and it is specific and about closeness. 'Go down on you while you narrate it' ties his hunger to be witnessed to her narrating habit, and wraps it in his route-rehearsing courtesy. That passes the line, and it is the line that tells most about him. It stays at 4 because, on a 'very high' heat night, Brick never makes a sexual line of her own. Her nose disclosure is body small talk, not filth, so the filth never changes hands or job.",
+   "evidence": [
+    "I'd love to go down on you while you narrate it. No rush to answer.",
+    "That's the politest filthy thing anyone's ever sent me."
+   ],
+   "raise": "Give Brick a filthy line of her own built from her body or her schedule, such as the shortened tip or the rosé at nine, that she uses to get closer.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 2,
+   "why": "I set aside the Dread beats, where Reuben announces his failure as it lands, because the instructions required them. Outside those, little is seen coming. The March project confession arrives unsignalled. Brick's narrating, which the reader knows drove Dorian off, is invited and lands as care rather than on the wrong spot. No habit is visibly primed to go off and then does.",
+   "evidence": [
+    "I narrate people. It's why Dorian left.",
+    "He says \"fine\" and then \"completely fine,\" which means not fine.",
+    "I don't need noticing, to be clear."
+   ],
+   "raise": "Let Brick's narration, primed by the Dorian line, hit Reuben somewhere it actually hurts, such as narrating him as interchangeable, so the reader sees it coming a message early.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "6cf283c466e4d24a",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 2,
+   "why": "Neither character voices an app or dating-culture belief in earnest that the screen then contradicts. Brick's complaint about 'let's do this again' is a grievance about other people's flakiness, and the chat confirms rather than contradicts it. Reuben's 'No pressure to reply tonight' is etiquette at most and is never set up as a creed. His beliefs are personal wounds, not things the app taught him.",
+   "evidence": [
+    "I've had six \"let's do this again\"s this year and not one of them had a Tuesday in it.",
+    "No pressure to reply tonight, I'll still be here."
+   ],
+   "raise": "Have each voice an app maxim straight, such as Brick's 'radical honesty' or Reuben's 'play it cool, don't double text', and let their own messages disprove it.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "The sharpest jokes land on the speakers themselves: Reuben on his own vanishing, and Brick on her narrating ('It's why Dorian left'). Brick's barbs at Reuben, like 'hostage situation', are fond and protective. Neither ends as villain or punchline, and her memory list returns his identity to him. It stops short of 6 because the warmth outweighs the mercilessness: Brick's habit is never allowed to be truly unbearable.",
+   "evidence": [
+    "which is honestly the most attention I've had since primary school",
+    "That's not an experiment, that's a hostage situation.",
+    "Sorry. I narrate people. It's why Dorian left."
+   ],
+   "raise": "Let one of Brick's narrations cut genuinely too deep before she softens it, so the fondness has to survive real cruelty.",
+   "excused": [],
+   "def": "85597a182f7a79e4",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back changed. The joke opener 'Like the sandwich' becomes his contact name and then the invite title. 'Four seconds,' an apology, becomes her condition for keeping him and then an item in her memory list. The anxious 'Reuben, by the way' finally meets 'I know, Reuben.' The last payoff closes the night without comment. It stops short of 6 because Brick often names the mechanism out loud ('You've now introduced yourself three times,' 'That's the politest filthy thing'), so some returns are explained rather than left for the reader to assemble.",
+   "evidence": [
+    "Invite sent: \"Sandwich – Tuesday 21:00, my place, 20 min buffer.\"",
+    "Sandwich, hat, not Lewis, four seconds.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Cut Brick's spoken tallies ('introduced yourself three times') so the reader counts the reintroductions alone before 'I know, Reuben' lands.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted the invite, the Tuesday and the buffer, so the outcome matches in kind. It follows from both habits: her calendar as proof she is expected, his rehearsed route, his compulsive reintroduction. Two things go past the prediction: 'Accept both' (she books the recurrence herself) and 'I know, Reuben' instead of the name on the invite. It stops short of 6 because the prediction got nearly every detail right, including the buffer, so there is little surprise in the moment.",
+   "evidence": [
+    "I've already put in the next Tuesday. Accept both.",
+    "Nobody's ever booked me twice before.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Let the final beat turn on something the reader did not foresee, for example him not reintroducing himself and her noticing the absence.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message picks up the one before. She turns 'upgraded from a sandwich' into 'Keep replying in four seconds.' He answers the contact with 'a calendar event.' She reads his 'fine' back as 'not fine.' She answers 'Will you?' with the memory list. A few threads drop without being pointedly ignored. Nobody takes up the nose after 'Handing it over,' and 'hostage situation' is answered only with 'ahead of schedule.' That keeps it from 6.",
+   "evidence": [
+    "Keep replying in four seconds.",
+    "He says \"fine\" and then \"completely fine,\" which means not fine.",
+    "Sandwich, hat, not Lewis, four seconds."
+   ],
+   "raise": "Have Reuben react to 'hostage situation' itself, by dodging it visibly or conceding it, rather than sliding to the next bit.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "The shapes do shift at some turns. The dread ask fragments ('I'm asking it. Will you? Reuben.'). The denial goes bright and exclamatory ('Still going!'). Brick drops into third-person commentary when she is delighted. The close shrinks to 'I know, Reuben. Tuesday.' That clears the line. Most messages, though, stay 2–4 tidy, fully punctuated sentences, whether he is wounded, propositioning at midnight or celebrating. A careful reader notices one polished register underneath.",
+   "evidence": [
+    "Now I'm about to ask if you'll remember me tomorrow. I'm asking it. Will you? Reuben.",
+    "Still going! It's a fun experiment.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Let the hurt and the heat show in the typing itself: a shorter, messier message after 'hostage situation', or a rushed one when she sends the invite.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "I set aside the self-narrating openers the Dread trap required ('I can feel myself doing it', 'I'm aware I'm sweating'). Without them the chat reads as messages: two to four lines each, no stage directions. Brick's live commentary is her typed habit, not narration by the writer. It still leans composed, with balanced clauses that read written rather than thumbed at midnight. 'Sweating through the hat' also implies a shared view that a text chat doesn't have.",
+   "evidence": [
+    "A contact is lovely, but I'm holding out for a recurring calendar event.",
+    "you're sweating through the hat",
+    "he's leaning closer to the screen, the hat's tilting."
+   ],
+   "raise": "Rough the composed lines into thumb-typing: drop the subordinate clauses and the even, paired sentence structure.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "I set aside the repeated 'I can feel/see myself doing it' openers that the Dread trap required. The reintroductions are the theme's engine and earn their return. Beyond those, some tics recur. 'By the way' appears three times ('by the way' in her contact line, then two 'Reuben, by the way's). Reuben's 'honestly' and 'genuinely' recur, and 'No pressure' is echoed by 'No rush.' Nothing else exceeds twice, which keeps it above the line but short of 5.",
+   "evidence": [
+    "You're in my phone as \"Sandwich,\" by the way.",
+    "Names never stick to me anyway, it's honestly freeing.",
+    "which is honestly the most attention I've had"
+   ],
+   "raise": "Cut Brick's 'by the way' and one of Reuben's 'honestly's so the only deliberate repetition is the reintroduction.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The probe reader attributed all 22 messages correctly. Some reasons are voice: Reuben's apology-then-joke rhythm and his hedges (\"genuinely,\" \"honestly\"), and Brick's flat declaratives and third-person narration of him. Most reasons are content tags, though: the hat, the nose, Dorian, the family photo. Message 7 was a close call because Reuben borrows her vocabulary (\"travel buffer,\" \"a day attached\"), and that keeps it from a 5.",
+   "evidence": [
+    "Oh, rename me, genuinely, I don't mind at all. Names never stick to me anyway, it's honestly freeing.",
+    "Fine: he's asked a question, he's leaning closer to the screen, the hat's tilting. He's delighted.",
+    "And a travel buffer, in case I'm late, which I won't be, because I'll have rehearsed the route."
+   ],
+   "raise": "Give Reuben a rhythm of his own for the calendar line (say, an over-apologetic aside) so that message 7 reads as him by cadence rather than by anticipating her habit.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Reuben carries real unseen gaps. \"I don't mind at all\" is followed at once by \"Still Reuben underneath.\" \"Completely fine\" sits on an eight-month silence. He closes with \"Reuben, by the way\" straight after she has booked him twice. Brick has no gap she fails to see: she flags her own narration (\"Sorry. I narrate people. It's why Dorian left.\"), and her rosé-at-nine dishonesty never reaches the screen. That fails the \"at least one for each character\" bar. I set aside Reuben's self-narration in 5, 6, 8 and 9, which the Dread instruction required.",
+   "evidence": [
+    "Names never stick to me anyway, it's honestly freeing. Still Reuben underneath, though.",
+    "Nobody's ever booked me twice before. I'll be early, hat on, route rehearsed. Reuben, by the way.",
+    "Sorry. I narrate people. It's why Dorian left."
+   ],
+   "raise": "Give Brick one claim the chat contradicts that she never sees, such as calling herself radically honest while mentioning the \"proper glass\" at nine.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 5,
+   "why": "Nearly every funny line gives the sender away. Reuben's sandwich opener and his apology about the apology show his act. Brick's \"wasn't planning to be sad until Tuesday\" shows that she schedules her feelings. His \"Nobody's ever booked me twice before\" costs him something. There are no day-job jokes: the work project is a wound, not a gag. It stops short of a 6 because two lines could come from anyone: \"hostage situation\" is a generic quip, and \"politest filthy thing anyone's ever sent me\" names the comic method aloud.",
+   "evidence": [
+    "I'm a bit sad now, and I wasn't planning to be sad until Tuesday.",
+    "That's not an experiment, that's a hostage situation.",
+    "That's the politest filthy thing anyone's ever sent me."
+   ],
+   "raise": "Replace Brick's \"politest filthy thing\" with a reaction only she would send, such as narrating her own blush with a timestamp, so it doesn't label the method.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 4,
+   "why": "When Brick catches Reuben sweating, he narrates the sweating. When she catches \"fine, completely fine,\" he doesn't concede: he escalates into asking whether she'll remember him. When he asks about Dorian, she answers with more live narration, which digs her in deeper. No one states a lesson, and he reintroduces himself at the very end. Brick does give one small apology for being herself (\"Sorry. I narrate people.\"), which keeps this from a 5. I set aside Reuben's required self-naming in 5, 6, 8 and 9.",
+   "evidence": [
+    "I'm aware I'm now narrating the sweating, which makes two of us narrating me",
+    "You'd let me? Fine: he's asked a question, he's leaning closer to the screen",
+    "Sorry. I narrate people."
+   ],
+   "raise": "Cut Brick's \"Sorry\" so she justifies the narrating as a service instead, making the catch dig deeper rather than concede.",
+   "excused": [
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "6db16446b742290c",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Brick is on top early: she renames him and grants him a contact. The \"day attached\" line flips it, and she starts chasing (\"I'm opening my calendar\"). His confessions in 5 to 8 put her back on top as narrator and comforter. His polite filthy ask flips it again (\"Send the route. I'm drafting something.\"). She ends booking two Tuesdays and saying \"I know, Reuben,\" back on top. That is about three flips, and each character spends a stretch above and below. They track the dice rather than driving the plot, which keeps this from a 5.",
+   "evidence": [
+    "I'm opening my calendar. That's not a joke.",
+    "Send the route. I'm drafting something.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Make the last exchange the decisive flip, with Reuben for once declining to reintroduce himself and Brick left chasing, so the final reversal is the ending.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Most punchlines land on the last words of their message: \"Hat on, obviously.\" \"That's not a joke.\" \"Hat. Not Lewis.\" \"I remember everyone.\" There are callback payoffs across messages too: the Sandwich/Lewis/four-seconds list and the closing \"Tuesday.\" Hot follows cold when the work-project confession leads to the filthy ask. Against that, setup and punch usually share a message. Every message runs a uniform three or four sentences, with no reaction shot until the final short line. The filthy ask also sits mid-message rather than at the end, so you can't quite hear the pauses.",
+   "evidence": [
+    "Tuesday, nine, your place: I'd love to go down on you while you narrate it. No rush to answer.",
+    "Sandwich, hat, not Lewis, four seconds.",
+    "I know, Reuben. Tuesday."
+   ],
+   "raise": "Break the long alternating blocks with one-line reaction shots, such as a bare \"Lewis?\" from Brick after his mum confession, so setups and punches sit in separate messages.",
+   "excused": [],
+   "def": "9be995f52d3f6a5e",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Nearly every instruction shows up as behaviour rather than a label. Improvisation 3's Denial fumble (\"Names never stick to me anyway, it's honestly freeing\") and 7's misfire (\"Still going! It's a fun experiment\") come out as their own opposites. The Dread trap is played across 5–6 and 8–9 and then stops. The best-possible Wit in 4 hands Brick exactly her wound (\"a day attached\"). It falls short of a 6 on three points. Improvisation 8's backfire barely registers, because Brick's reply is pure warmth and he pays nothing. The Dread in 9 shrinks to a token opening phrase. Brick twice explains the mechanics: \"which means not fine\" and \"the politest filthy thing anyone's ever sent me\" both name the miss and the method instead of reacting to them.",
+   "evidence": [
+    "I've got a calendar invite and now I'm going to ruin it by telling you my mum calls me by my brother's name.",
+    "Sandwich, hat, not Lewis, four seconds. I got cropped out of my own family photo, Reuben. I remember everyone.",
+    "That's the politest filthy thing anyone's ever sent me."
+   ],
+   "raise": "Make improvisation 8's backfire cost him something on screen: have Brick's remembering come with a beat of flinch or withdrawal, and cut her explaining lines (\"which means not fine\", \"politest filthy thing\") so the misses play without commentary.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "ff7899d751f392e7",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly: the odd numbers are Reuben's and the even numbers are Brick's.\n\n1. Reuben. He names himself, makes the sandwich joke and mentions the hat.\n2. Brick. She opens with the nose disclosure, bump and short tip, as her profile says she does.\n3. Reuben. He apologises for replying in four seconds, then jokes about the apology.\n4. Brick. She likes people to arrive prepared, and she has saved him in her phone.\n5. Reuben. \"Names never stick to me.\" He reintroduces himself as top hat Reuben.\n6. Brick. She reassures him that he's memorable and has a contact photo.\n7. Reuben. He's the planner who rehearses routes, offering her the \"day attached\" she needs. This one is the closest call, since the travel buffer is her habit, but it fits as him anticipating her.\n8. Brick. Six \"let's do this again\"s with no Tuesday is exactly her fear.\n9. Reuben. His mum calls him by his brother's name, and he introduces himself again.\n10. Brick. She narrates him live and mentions Dorian leaving.\n11. Reuben. He jokes about being narrated and gets to the bit first.\n12. Brick. More narration, the nature-documentary line from Dorian.\n13. Reuben. He tells the story of being cut from the work project and saying nothing.\n14. Brick. She reads through his \"fine\" and has a schedule even for sadness (\"until Tuesday\").\n15. Reuben. He asks whether she'll remember him and signs off with his name.\n16. Brick. She lists his details back to him and mentions being cropped from the family photo.\n17. Reuben. This is the polite outrageous ask: \"no rush,\" plus the rehearsed route for her buffer.\n18. Brick. She accepts and starts drafting an invite.\n19. Reuben. He promises a follow-up with a day in it, which answers her fear.\n20. Brick. She sends calendar invites with a buffer and books two Tuesdays.\n21. Reuben. \"Nobody's ever booked me twice,\" and he reintroduces himself yet again.\n22. Brick. \"I know, Reuben.\" She remembers him, which is the reply he can't take in."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Brick_haus's reply to Reuben asking whether she'll remember him:\n\n\"Sandwich, hat, not Lewis, four seconds. I got cropped out of my own family photo, Reuben. I remember everyone.\"\n\nSeveral things in the text mark this as a shift:\n\n- **She drops her usual mode.** Until here, Brick_haus has been running a bit: renaming him, teasing him, and narrating him in the third person like a nature documentary (\"he's leaning closer to the screen, the hat's tilting\"). Here she speaks in the first person about herself, with no joke attached and no punchline after it.\n- **She answers his actual question.** He asked, anxiously, whether he'd be remembered. Her list of details from the conversation proves she has been paying attention, and the family photo line explains why that matters to her.\n- **It's the first personal disclosure she gives without a laugh.** The nose disclosure at the start was framed as a bit (\"Handing it over. I like people to arrive prepared\"). Dorian came up only as a joke about her narrating. The family photo is offered plainly.\n- **It matches his wounds.** His were his mum calling him by his brother's name, and being cut from a project with no one noticing. Hers is the same kind of being overlooked. That reads as meeting him rather than entertaining him.\n\nA smaller, later candidate is her last line, \"I know, Reuben. Tuesday.\" He has reintroduced himself yet again, and she doesn't tease or narrate it. She just confirms. She had used his name before, though, so the change there is in tone rather than wording.\n\nFor Reuben, I don't see a clean moment where he stops. Even his confessions come wrapped in self-commentary (\"I can feel myself doing it,\" \"I can see myself doing it\"), and his work story is framed as \"a fun experiment\" until she calls it out.\n\nAll of this is a reading of the text only. I can't know what either of them actually felt."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I don't think I would have stopped. The chat is short, and nearly every line either sets up a running joke or pays one off: the four seconds, \"Sandwich,\" the hat, \"not Lewis,\" the Tuesday. That gives a steady reason to keep going. The closest I came to drifting was the middle stretch where Reuben narrates his own anxiety (\"I can feel myself doing it,\" \"I'm aware I'm sweating. I'm aware I'm now narrating the sweating\"). Self-awareness about oversharing is a beat that can repeat once too often. Brick's turn into actually narrating him (\"he's leaning closer to the screen, the hat's tilting\") rescues it by changing who holds the joke, so I would have read on.\n\nThe explicit Tuesday message is the biggest swerve, but it isn't a reason to stop. It's framed in the same polite, logistical voice as the rest (\"No rush to answer. Happy to send the route\"), and Brick's reply names exactly that contrast.\n\nThere were only a few points where I could predict what came next, and only by recognising a pattern, not by knowing the specifics.\n\n- Once Brick said \"I'm opening my calendar. That's not a joke,\" an actual invite was clearly coming. Its wording and the second Tuesday were not foreseeable.\n- After Reuben's third self-introduction became a motif, I expected him to say \"Reuben, by the way\" again near the end, and he did.\n- Once Brick had been calling him Sandwich throughout, the natural close was for her to finally just call him Reuben. \"I know, Reuben\" was the ending I would have guessed, though not the exact final \"Tuesday.\"\n\nEverything else I could not have predicted: the March project he was quietly cut from, Dorian's nature-documentary line, being cropped out of the family photo, and the explicit request. Those are the moments that carry the chat, and none of them is signalled beforehand."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Reuben**\n\n**What he's afraid of:** The chat never names it, but everything points at being overlooked or forgotten, especially having his name not register. He says \"Names never stick to me anyway,\" asks outright \"Will you [remember me tomorrow]? Reuben,\" and keeps saying his name: \"I'm Reuben, by the way. Hat. Not Lewis,\" and finally \"Reuben, by the way.\" Brick notes, \"You've now introduced yourself three times.\"\n\n**What he does so he doesn't have to feel it:** He says he doesn't mind and calls it fine.\n\n- \"Oh, rename me, genuinely, I don't mind at all... it's honestly freeing,\" followed immediately by \"Still Reuben underneath, though.\"\n- \"I don't need noticing, to be clear,\" about being cut from a project and saying nothing \"just to see how long it'd take anyone to clock it... It's a fun experiment. I'm completely fine with it.\"\n- He gets ahead of things by apologising (\"Sorry, four seconds, that's fast\"), naming his own behaviour (\"I can feel myself doing it,\" \"I'm aware I'm narrating the sweating\"), and over-preparing (\"I'll have rehearsed the route,\" \"Happy to send the route I'll take, for your buffer\").\n- He also opens by taking the pressure off: \"No pressure to reply tonight, I'll still be here.\"\n\n**Where it comes from:** The only origin the chat offers is \"my mum calls me by my brother's name.\" He adds that being narrated is \"the most attention I've had since primary school.\" He doesn't himself draw the line from these to the fear; they're placed alongside it. Anything beyond that is not in the chat.\n\n**What he did at the end:** He promised follow-through without being asked: \"I'll ask about the next one before I've left the building. With a day in it. You won't have to wonder.\" He accepted both invites (\"Accepted, both. Nobody's ever booked me twice before\") and still closed by introducing himself again: \"Reuben, by the way.\"\n\n**Brick_haus**\n\n**What she's afraid of:** This is also not named. The closest she comes is not being followed through on: \"I've had six 'let's do this again's this year and not one of them had a Tuesday in it.\" There may also be a fear of being left out or unseen, given \"I got cropped out of my own family photo.\" Whether she fears her narrating drives people away is suggested by Dorian but not stated as a fear.\n\n**What she does so she doesn't have to feel it:**\n\n- She gets ahead of rejection by disclosing first: the nose, \"so it's out of the way.\"\n- She takes control of how people are framed. She renames him (\"You're in my phone as 'Sandwich'\") and narrates him: \"I narrate people. It's why Dorian left,\" and \"he's leaning closer to the screen, the hat's tilting. He's delighted.\"\n- She claims total recall: \"I remember everyone.\"\n- She makes the commitment concrete herself: \"I'm opening my calendar. That's not a joke.\"\n\n**Where it comes from:** She juxtaposes \"I got cropped out of my own family photo\" with \"I remember everyone,\" which implies a link without spelling it out. For the narrating, all the chat gives is Dorian leaving because it \"felt like being watched by a nature documentary.\" A deeper origin is not in the chat.\n\n**What she did at the end:** She sent the invite (\"Sandwich – Tuesday 21:00, my place, 20 min buffer\") and booked a second one unprompted: \"I've already put in the next Tuesday. Accept both.\" Her last line drops both the nickname and the narration: \"I know, Reuben. Tuesday.\""
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I haven't seen the final fifth, so this is a prediction from what's on the page, not knowledge of what happens.\n\nMy guess is that \"I'm drafting something\" turns out to be the calendar invite: Tuesday, nine, her place, with a travel buffer built in for his rehearsed route. I'd expect it to be recurring, since that's exactly what he said he was holding out for. And I suspect it will carry his name rather than \"Sandwich,\" finally giving him the upgrade he asked about.\n\nThe chat sets this up from several directions:\n\n- **The calendar.** He asks for \"a day attached.\" She says no one this year has given her a Tuesday and that she's opening her calendar, \"That's not a joke.\" The Tuesday has already been named, and his last message supplies the time, place, and route.\n- **The name.** Reuben keeps being misnamed or renamed: Sandwich, Lewis, \"names never stick to me.\" He re-introduces himself three times. She shows she remembers by listing \"Sandwich, hat, not Lewis, four seconds.\" The clean payoff would be her using \"Reuben\" in the one place that lasts.\n- **Being noticed.** He insists he doesn't need noticing, then reveals that no one has noticed his being cut from a project for eight months. She narrates people, notices everything, and \"remembers everyone.\" Putting him in her calendar is a concrete way of showing he's been seen.\n\nI'd expect the tone to stay warm and a little funny rather than turn. She calls his message \"the politest filthy thing anyone's ever sent me,\" which reads as delighted, not put off. Nothing in the text points toward a rejection or a twist.\n\nWhat I can't tell is the exact form of the ending: whether it's just the invite, whether she narrates him receiving it, or whether he replies. That part is pure guesswork."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The name \"Reuben.\"** He opens with it as a joke (\"like the sandwich\"), claims names \"never stick\" to him and he doesn't mind being renamed, then keeps reintroducing himself: \"Still Reuben underneath,\" \"I'm Reuben, by the way. Hat. Not Lewis,\" \"Will you? Reuben,\" and finally \"Reuben, by the way\" again. After the mum-and-brother confession, the repetitions read as anxiety about being misnamed or forgotten, which contradicts his \"I don't mind.\" The meaning shifts at the very end, when she answers \"I know, Reuben.\" The repetition finally gets the recognition it was asking for. Whether his last \"Reuben, by the way\" is still anxious or has become a knowing joke, the chat doesn't say.\n\n**\"Sandwich.\"** It starts as his self-deprecating simile. She turns it into his contact name, and he asks what it would take to be \"upgraded from a sandwich.\" It returns in her list of what she remembers and then as the title of the calendar invite. So the name he wanted to escape becomes an affectionate one, and the upgrade he asked for (a day attached) arrives without the nickname being dropped.\n\n**The hat.** \"Hat on, obviously\" is costume and self-presentation at first. It becomes a way she characterises him (\"a man in that hat\"), then a marker of his nerves (\"sweating through the hat,\" \"the hat's tilting\"), then one of the details she proves she remembers. His closing \"hat on\" is a promise to turn up as himself.\n\n**Four seconds.** He apologises for replying in four seconds. She makes it her condition for keeping him (\"Keep replying in four seconds\") and later lists it among the things she remembers. Something he was embarrassed by becomes something she values.\n\n**A day attached, Tuesday, the calendar.** He says he wants \"a recurring calendar event, something with a day attached.\" She answers that none of her six \"let's do this again\"s \"had a Tuesday in it.\" Tuesday then shows up in her line \"I wasn't planning to be sad until Tuesday,\" before any date has been set; the chat doesn't explain that one. He then proposes \"Tuesday, nine,\" promises to ask about the next one \"with a day in it,\" and she books two Tuesdays. Her last word is \"Tuesday.\" It moves from a wish to an actual booking, and \"recurring\" is literally fulfilled. His \"You won't have to wonder\" also answers her complaint about the six vague second dates, although she books the second Tuesday herself before he can ask.\n\n**The route and the travel buffer.** At first this is a quirk of his over-preparation (\"I'll have rehearsed the route\"). Later he offers to send her the route \"for your buffer,\" she writes \"20 min buffer\" into the invite, and he signs off with \"route rehearsed.\" His anxious habit gets built into her plan instead of being treated as a flaw.\n\n**Narrating.** She introduces it as a fault (\"It's why Dorian left\"). He then narrates his own sweating, she narrates him openly (\"He's delighted. He's right to be\"), and she uses it to read past his \"completely fine.\" It comes back as part of his sexual proposition (\"while you narrate it\"). The thing that ended her last relationship becomes something he explicitly wants.\n\n**\"I can feel myself doing it\" / \"I can see myself doing it.\"** The first version introduces a self-sabotaging confession. The second introduces the proposition, which works out well. The chat doesn't say whether the second \"it\" refers to the same thing he means by self-sabotage, or whether he's now aware of himself in a different way.\n\n**\"No pressure\" / \"No rush to answer.\"** He opens with \"no pressure to reply tonight,\" which she calls the nicest opener she's had. He repeats the gesture as \"No rush to answer\" right after the most forward thing he says. The same courtesy now softens a sexual request, which is why she calls it \"the politest filthy thing.\"\n\n**\"Not Lewis.\"** At first it is a wound: his mum calls him by his brother's name. She gives it back to him in her memory list, so it becomes something she holds onto for him.\n\n**Being noticed and remembered.** He says he doesn't need noticing and that nobody has clocked his being cut from the project. Then he asks whether she'll remember him tomorrow. She answers with her own version (\"I got cropped out of my own family photo... I remember everyone\") and lists him back to himself. His \"Nobody's ever booked me twice before\" closes the same thread. The need he denied at the start is what gets met at the end.\n\n**Arriving prepared.** She says \"I like people to arrive prepared\" about the nose disclosure. His rehearsed route and \"I'll be early\" can be read as a loose echo of that, though the chat doesn't link them explicitly.\n\nSome things don't come back at all: the nose itself, the project at work after her \"hostage situation\" reply, and Dorian after the nature-documentary line."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.6,
+   "cost": 0.048608,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 18.0,
+   "cost": 0.039872000000000005,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 20.6,
+   "cost": 0.04048,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 21.5,
+   "cost": 0.051944000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 14.9,
+   "cost": 0.033659999999999995,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 38.3,
+   "cost": 0.086584,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 35.4,
+   "cost": 0.1414994,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 37.5,
+   "cost": 0.13909539999999998,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 38.3,
+   "cost": 0.1536074,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 45.2,
+   "cost": 0.15935539999999998,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 19.0,
+   "cost": 0.0923234,
+   "label": "batch 5"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T21:12:11Z",
+ "repo_commit": "a2ebe539",
+ "cost": 0.987
+}

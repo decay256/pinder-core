@@ -1,0 +1,67 @@
+{
+ "id": "chatset-writers-v21",
+ "kind": "chat",
+ "label": "Run 21 · all 3 chats",
+ "version": "run 21",
+ "order": 121,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v21/chat-reuben-brick/",
+ "note": "Every chat of run 21 (run 18 on template v2: what the theme and the method are for, the balance named in the setup, the theme told without its source): the same pair, premise, prompt, theme and method, the same author, each on a different comedian's descriptions of the two characters. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
+ "when": null,
+ "writer": null,
+ "writers_run": 21,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 10960,
+   "words": 1882
+  },
+  "improvisations": {
+   "chars": 5256,
+   "words": 910
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 3,
+   "why": "I set aside the shared shape the instructions fix: the charm opener, the denials in 3 and 7, the dread narration in 5, 6, 8 and 9, and the date in 11. The frames do differ: Wong has a time-slot booking for tomorrow, Booster an inbox 'audit' and a Friday bar, Carr a rain deadline tonight. But the same beats recur in the same order across all three: he insists he's barely on here, she catches the 'four seconds' replies, he panics about an ex getting his name wrong, and she tells the 'let's do this again' taxi story. Lines and details recur well past the two-chat limit: 'four seconds' and the cab after 'let's do this again' appear in all three, and Delphine, eleven days indoors, the bathroom mirror denial and 'No rush… happy to go first' each appear in two.",
+   "evidence": [
+    "You've answered in four seconds three times.",
+    "definitely not practised in a bathroom mirror",
+    "said \"let's do this again sometime\" got me crying in a taxi all the way to Wandsworth"
+   ],
+   "raise": "Give each chat its own wound and its own discovery, rather than reusing the cab story, the misnamed-ex panic and the four-second catch, so that no line or detail turns up in more than two chats.",
+   "excused": [
+    1,
+    3,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11
+   ],
+   "def": "eb4c97580d7f148b",
+   "material": "a6ec25c22f6b903d",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 21.8,
+   "cost": 0.0829874,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:56:29Z",
+ "repo_commit": "a2ebe539",
+ "cost": 0.083
+}

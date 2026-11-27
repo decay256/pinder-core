@@ -17,6 +17,10 @@ SHOWN_FROM = 16  # Daniel, 2026-11-27: run 16 and later only
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v22", "Run 22: no writers", "writers-v22",
+     "Run 22. Run 21 again (Reuben and Brick on seed 23, the balance, T42 and M10, template v2) with no writers: Claude writes the two characters once, with no persona, from Pinder's premise and the game's notes, and one chat is written from them. The premise loses its two lines in one comedian's voice.", ""),
+    ("v21", "Run 21: the theme and the method, explained", "writers-v21",
+     "Run 21. Run 18 again (Reuben and Brick on seed 23, the balance, T42 and M10, each comedian's characters), on template v2: the setup says what the theme and the method are for (two tools, so the chat adds up to one comic idea; how they apply to these two and where they meet is the writer's call), and names the balance where it named the game's interest. The theme's explanation no longer cites its source.", "run 11"),
     ("v20", "Run 20: Zyx & Sable, five in a row", "writers-v20",
      "Run 20. " + "Run 17's prompt with the tone lab's balance in the improvisations instead of the game's interest: each move of the player's lands (+1), does nothing (0) or backfires (-1); every improvisation says which, and where the balance stands, in words, and the other one's reply follows it. Five in a row that land are a date, five that backfire an unmatch, and four in a row are announced as one more; otherwise the chat has eleven improvisations and the balance after the last decides. Theme T42 and method M10, as in run 17." + " Zyx and Sable on another seed (34): the first two moves land, then five in a row backfire, and Sable unmatches Zyx after seven improvisations.", "run 15"),
     ("v19", "Run 19: Zyx & Sable, the balance", "writers-v19",
@@ -109,8 +113,9 @@ for rid, label, sub, about, profiles_from in RUNS:
     meta = json.load(open(os.path.join(O, CH, "run.json"), encoding="utf-8"))
     tpl = bool(meta.get("template"))  # run 17 on: Claude writes from a frozen template on a comedian's characters
     rec = meta["writers"]
+    neutral = meta.get("characters_by") == w.NEUTRAL_NAME  # v17 on: no writers, Claude's characters and one chat
     writers = []
-    for wid, name in w.WRITERS:
+    for wid, name in ([(w.NEUTRAL_ID, w.NEUTRAL_NAME)] if neutral else w.WRITERS):
         if wid not in rec or "error" in rec[wid]:
             continue
         paired = os.path.isdir(os.path.join(O, "characters"))
@@ -123,7 +128,7 @@ for rid, label, sub, about, profiles_from in RUNS:
         by = name
         if tpl:  # the brief folder holds Pinder's premise, not the comedian's own brief
             premise, texts["ownbrief"] = texts["ownbrief"], None
-            name = f"{name}'s characters"
+            name = name if neutral else f"{name}'s characters"
         texts["chat"] = read(os.path.join(O, CH, f"{wid}.md"))
         tj = os.path.join(O, CH, f"{wid}.turns.json")
         tlog = json.load(open(tj, encoding="utf-8")) if os.path.exists(tj) else None
@@ -133,11 +138,11 @@ for rid, label, sub, about, profiles_from in RUNS:
         order = (("ownbrief", "brief"), ("characters", "characters"), ("chat", CH)) if paired else \
             (("reuben", "reuben"), ("brick", "brick"), ("chat", CH))
         if tpl:  # the characters' sessions are run 11's, described on the How it was made tab
-            order = (("chat", CH),)
+            order = (("characters", "characters"), ("chat", CH)) if neutral else (("chat", CH),)
         for i, (slug, folder) in enumerate(order):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
             note = None
-            if tlog and slug != "chat":  # run 12: these two sessions are run 11's
+            if tlog and slug != "chat" and not neutral:  # run 12: these two sessions are run 11's
                 src = meta["from"].rstrip("/").split("/")[-1]  # the scratch name, or the repo's name without "-out"
                 src = src if os.path.isdir(os.path.join(BASE, src)) else src.replace("-out", "")
                 pp = os.path.join(BASE, src, folder, f"{wid}.prompt.md")
@@ -204,7 +209,7 @@ for rid, label, sub, about, profiles_from in RUNS:
                  "nturns": (meta.get("mechanics") or {}).get("turns_played"),
                  "model": FIRST if "argon" in (meta.get("model") or "") else
                  "Claude (opus) through the Claude CLI" if tpl else meta.get("model"),
-                 "template": tpl,
+                 "template": tpl, "neutral": neutral,
                  "reasoning": meta.get("reasoning"), "writers": writers,
                  "player": pnames[0], "match": pnames[1], "title": " & ".join(s.capitalize() for s in pair),
                  "pair_text": " and ".join(s.capitalize() for s in pair)})

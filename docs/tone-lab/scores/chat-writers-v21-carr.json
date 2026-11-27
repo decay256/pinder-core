@@ -1,0 +1,610 @@
+{
+ "id": "chat-writers-v21-carr",
+ "kind": "chat",
+ "label": "Run 21 · Jimmy Carr's characters",
+ "version": "run 21",
+ "order": 121,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v21/chat-reuben-brick/carr.md",
+ "note": "Written by Claude from Jimmy Carr's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 21: run 18 on template v2: what the theme and the method are for, the balance named in the setup, the theme told without its source). Before each of the 11 improvisations the writer was told how it goes for Reuben_404: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 21,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3349,
+   "words": 581
+  },
+  "brief": {
+   "chars": 3744,
+   "words": 624
+  },
+  "chat_masked": {
+   "chars": 3186,
+   "words": 581
+  },
+  "chat_but_last": {
+   "chars": 3060,
+   "words": 534
+  },
+  "improvisations": {
+   "chars": 8947,
+   "words": 1557
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader gets Reuben's fear of being forgettable and his habits: bits, self-narration and reintroducing himself. They get Brick's fear of being left vague and her habits: slots, lists and scoring. Both endings follow from those fears: he books a slot she can hold, and she 'files' him by the name she chose. The reader also gets Brick's origin from the ex and the taxi, and connects the end to the fear. I set aside the open statement 'You'll forget me by Thursday' (Improvisation 5, which required dread narrated out loud). What keeps this from a 6 is Reuben's origin: the reader marked it 'not in the chat', though Delphine leaving straight after a bit makes it inferable.",
+   "evidence": [
+    "See. That's why Delphine left. You'll forget me by Thursday. Reuben. Hat.",
+    "I don't do sometime. The last man who said \"let's do this again sometime\" got me crying in a taxi",
+    "I'll be the one in the hat. Reuben. In case."
+   ],
+   "raise": "Let one detail of Reuben's past (Delphine, or the 3am self-rejection) surface by slip, so a reader could name where the tap-dancing comes from.",
+   "excused": [
+    5
+   ],
+   "def": "61c5292dd78c8dc5",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 4,
+   "why": "Reuben's facts mostly come out by being caught. She lists 'replies in four seconds' against his 'rain-only', which forces the lentils confession. The mirror rehearsal slips out through over-denial. She catches the sometime/clock contradiction. Delphine-and-bits is left to inference. Brick, by contrast, volunteers everything, including the origin of her own habit: the taxi to Wandsworth and the calendared arguments. That keeps the score at the line. I set aside the first-time story and the Delphine statement, which the dread instructions forced out.",
+   "evidence": [
+    "I've definitely never rehearsed a single one of these in the bathroom mirror.",
+    "Twelve minutes ago you said I could set a clock by you. I wrote it down.",
+    "The last man who said \"let's do this again sometime\" got me crying in a taxi all the way to Wandsworth."
+   ],
+   "raise": "Have Brick's taxi history leak out through a slip, such as a reflexive correction of his 'sometime' or a receipt timestamp, instead of being told in one breath.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 5,
+   "why": "Outside the required denial and dread passages, nobody names a feeling. The reader can say what is being avoided in 'She just stopped showing up to them.' They can in 'She declined it.', in 'Rain or not. Accepted.' and in 'Reuben. In case.'. Each carries hurt or need without naming it. The 'Commentary:' narration and 'Not nervous' were required, so I set them aside. What keeps this from a 6 is Brick's taxi line, which describes the emotional event itself ('crying') instead of leaving it underneath.",
+   "evidence": [
+    "True. She just stopped showing up to them.",
+    "And yes, she got the invite. She declined it.",
+    "Reuben. In case."
+   ],
+   "raise": "Cut 'crying in a taxi' to something that implies it, such as the fare or the route, so even Brick's one confession stays underneath.",
+   "excused": [
+    3,
+    5,
+    6,
+    8,
+    9
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 5,
+   "why": "The reader found 'The clock one's me.' unprompted. It is four plain words that answer 'Which one's you?' and choose the uncool truth over the effortless act, without naming any feeling. Her answer changes the night: she renames him 'Clock Reuben' and carries the name through to the buzzer line. The dread rush that follows in the same message was required by Improvisation 8 and is set aside. What keeps this from a 6 is that it is not the shortest line in the chat: 'Rain or not. Accepted.' and 'Reuben. In case.' are plainer. It also shares its message with the act resuming, which blunts how much the reader feels it.",
+   "evidence": [
+    "The clock one's me.",
+    "You're not Two-Minute Reuben. You're Clock Reuben. I've had you filed since 23:31.",
+    "Clock Reuben. Right side. Buzzer says Haus."
+   ],
+   "raise": "Give 'The clock one's me.' its own message, with nothing after it, so it stands as the barest line before the overshare starts.",
+   "excused": [
+    8
+   ],
+   "def": "ef5cd06cabe81a69",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 5,
+   "why": "The reader attributed all 22 messages correctly. Most reasons were voice: she repeats things back like a ledger and timestamps everything, while he does bits, live commentary and keeps reintroducing himself. A few attributions leaned on brief content (the bump-and-tip audit, Delphine) and on the strict alternation the reader noticed, so not every message was placed by voice alone.",
+   "evidence": [
+    "Noted: Reuben, hat, curves left, harmless.",
+    "Live commentary: man scores an eight for panicking",
+    "I've had you filed since 23:31."
+   ],
+   "raise": "Make Brick's disclosure lines and Reuben's ex reference recognisable by phrasing rather than by facts from the brief, so no attribution depends on content.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Reuben has real gaps he doesn't see. He insists he is forgettable while she has logged everything (\"You'll forget me by Thursday\" against her list), and after she has named him he still signs off \"Reuben. In case.\" I set aside his self-narration in 5 and 8 and the denials in 3 and 7, which the instructions required. Even so, Brick has no claim on screen that the chat contradicts without her seeing it: she tells her own fears straight (the taxi to Wandsworth, the declined invite). That leaves fewer than one gap per character.",
+   "evidence": [
+    "You'll forget me by Thursday. Reuben. Hat.",
+    "I'll be the one in the hat. Reuben. In case.",
+    "I don't do sometime."
+   ],
+   "raise": "Give Brick one claim of easy control, such as \"I'm flexible, honestly\", that her own timestamping and buffers contradict on screen without her noticing.",
+   "excused": [
+    3,
+    5,
+    7,
+    8
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laughs give the sender away. Reuben's \"one of them had a set\", the lentils and \"Two-Minute Reuben\" all show his fear of being brief or forgettable. Brick's \"She declined it\" and the taxi to Wandsworth show her dread of things left unscheduled. Her bookkeeping register (\"Noted:\", \"keeping a list\", \"filed\", scoring a joke \"a four\") comes close to audit-style wisecracks and is repeated, which keeps this at 4. It stays above the line because those habits come out of her calendar terror rather than her day job.",
+   "evidence": [
+    "Most of my relationships wrapped up faster, and one of them had a set.",
+    "And yes, she got the invite. She declined it.",
+    "The joke was a four. The narration was an eight."
+   ],
+   "raise": "Swap one of Brick's scoring or filing lines for a joke that costs her something personal, as the declined invite does.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 3,
+   "why": "Reuben concedes the moment he is caught, twice. \"Fine, caught\" answers the first hit about four-second replies, and \"The clock one's me\" answers \"Which one's you?\" straight away. Neither is a defence that makes things worse. I set aside the overshares required by Dread in 5 and 8. Brick is never caught at all, so the side the writer chose freely, folding at the first hit, is what decides this.",
+   "evidence": [
+    "Fine, caught. Four seconds is my guaranteed response time.",
+    "The clock one's me.",
+    "Which one's you?"
+   ],
+   "raise": "Have Reuben answer \"Which one's you?\" with a more desperate defence of the spontaneous act, so the truth comes out of the hole rather than an admission.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "6db16446b742290c",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Brick sits as judge for most of the night: she sets the verdict deadline, catches him and scores him. Reuben goes on top at least twice: \"That's the hottest thing anyone's said to me this year\" hands him the room and pulls her into a confession, and \"I'm booking the next one\" puts him in charge of the calendar until her \"Accepted.\" Each has a stretch on top and below, but the flips are not what drives the plot. She takes the last word back with a deadline.",
+   "evidence": [
+    "That's the hottest thing anyone's said to me this year.",
+    "I'm booking the next one: Saturday, 19:00, rain or not.",
+    "You've got until the rain stops."
+   ],
+   "raise": "Let one of Brick's verdicts misfire so Reuben catches her out, giving her a real stretch below him in act 2.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Most punchlines land on the last word of the message (\"She declined it.\", \"Wandsworth.\", \"Two-Minute Reuben.\"). The short \"Rain or not. Accepted.\" after a longer setup works as a reaction shot. But nearly every joke shares a message with its own setup, and \"one of them had a set\" is buried in the middle with a question tacked after it. Act 2 runs at one confessional temperature for several turns.",
+   "evidence": [
+    "Most of my relationships wrapped up faster, and one of them had a set. So I can pace myself:",
+    "Rain or not. Accepted.",
+    "And yes, she got the invite. She declined it."
+   ],
+   "raise": "Break \"She declined it.\" and \"one of them had a set\" into messages of their own after the setup, so the pause is part of the beat.",
+   "excused": [],
+   "def": "9be995f52d3f6a5e",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "Most exchanges add new information or shift temperature: the calendar ex, the declined breakup invite, the Wandsworth taxi, the overshare, then the bed ask at message 17 of 22. The night is not settled early, and the probe reader would not have stopped. I set aside the near-flat repeat in improvisation 3, which was a fumble that 'does nothing', and the agreed date the last improvisation required. What keeps it below 5 is the writer's choice of 'Saturday, 19:00' straight after 'A slot. Not \"sometime\"', which makes 'Accepted' almost exactly callable, and the final reintroduction, which lands where the reader expected.",
+   "evidence": [
+    "A slot. Not \"sometime.\" I don't do sometime.",
+    "Saturday, 19:00, rain or not.",
+    "Rain or not. Accepted."
+   ],
+   "raise": "Have the booking cost Reuben something, or have Brick counter with a term he didn't see coming, so the close turns instead of confirming.",
+   "excused": [
+    3,
+    11
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 5,
+   "why": "Every bodily line is specific to these two: his left curve, her pre-emptive bump-and-tip audit, his two-minute first time with the kind 'oh—okay'. Her disclosure is bravado, an audit before contact. The two-minute confession is the most revealing line in the chat, and the curve is reused in the bed ask to get close rather than to perform. It stops short of 6 because the late ask is coy ('could I be in it') rather than plainly specific filth inside the polite frame, so the method's contrast is softened.",
+   "evidence": [
+    "slight bump midway, tip shorter than the angle promises",
+    "first time, under two minutes, she said \"oh—okay,\" really kindly",
+    "I curve left, so which side of the bed do you sleep on"
+   ],
+   "raise": "Make the bed ask explicit and anatomical about the curve, so the stripped request is truly outrageous under the 'no rush'.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 4,
+   "why": "One danger is visible a full exchange early. Brick says she doesn't do 'sometime' and cried in a taxi over it, and Reuben answers 'I'm more of a sometime guy', exactly the wrong word on exactly the wrong spot. The other failures are announced as they land ('I can feel a bit coming', 'Watch, I'm about to overshare'). That kills the anticipation and keeps the score from 5.",
+   "evidence": [
+    "got me crying in a taxi all the way to Wandsworth",
+    "Honestly? I'm more of a sometime guy. Spontaneous. Effortless.",
+    "I can feel a bit coming. Here it is"
+   ],
+   "raise": "Let one more trap, such as the bit after her real confession, go off without Reuben pre-narrating it, so the reader winces a message early a second time.",
+   "excused": [],
+   "def": "6cf283c466e4d24a",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 3,
+   "why": "Reuben voices the play-it-cool app creed in earnest ('only on here when it rains', 'barely on here', 'Spontaneous. Effortless.'), and the screen contradicts it with four-second replies and lentils. Brick's 'verdict by 01:45' and 'I like a man with an agenda' read more as personal scheduling neurosis than a dating-culture belief. The screen also rewards rather than contradicts her: she gets her slot. With only one character's creed undercut, it falls below the line.",
+   "evidence": [
+    "I'm only on here when it rains",
+    "replies in four seconds",
+    "Verdict by 01:45, fifteen-minute buffer."
+   ],
+   "raise": "Give Brick an app-culture belief in earnest, such as high-value efficiency or 'I screen hard', that the chat visibly undercuts, for example by her bending her own buffer for him.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Reuben's sharpest jokes land on himself ('one of them had a set', 'Two-Minute Reuben'). Brick's land on herself ('She just stopped showing up to them', the declined invite). Her one score of him ('The joke was a four. The narration was an eight') is affectionate. I set aside the calendar-invite bit at her expense, which the catastrophe instruction required, and he turns it on himself within the same message. It falls short of 6 because neither is truly skewered: the mercilessness is mild.",
+   "evidence": [
+    "Most of my relationships wrapped up faster, and one of them had a set.",
+    "The joke was a four. The narration was an eight.",
+    "She just stopped showing up to them."
+   ],
+   "raise": "Let Brick's own system get one merciless joke at her expense, such as the binned flat or the boxed rosé, so fondness sits beside real cruelty to both.",
+   "excused": [
+    5
+   ],
+   "def": "85597a182f7a79e4",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back changed and nobody explains them. The rain goes from Reuben's excuse ('only on here when it rains') to the chat's deadline, then to 'rain or not', the thing he no longer needs. Brick's ex who 'declined' the breakup invite is answered by her 'Accepted' without anyone drawing the line. 'Sometime' moves from her wound, to his fake pose, to a booked slot. Not a 6: Brick spells out the introductions payoff mid-chat ('That's three introductions, and I haven't forgotten you once'), and her last line goes back to rain-as-deadline, which blurs the clean close of 'rain or not'.",
+   "evidence": [
+    "Saturday, 19:00, rain or not.",
+    "Rain or not. Accepted.",
+    "And yes, she got the invite. She declined it."
+   ],
+   "raise": "Cut Brick's explicit count of the introductions so the reader adds up his re-introductions alone, and end on a line that doesn't put the rain back to work as a deadline.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The ending matches the reader's prediction in kind: a booked slot, an invite accepted. It follows from both habits. Reuben gives Brick the fixed time she needs, and he still can't stop re-introducing himself ('Reuben. In case.'). Brick still files him under her own name for him. That keeps it above the line. It stays at 4 because it is not surprising: the reader called the accepted invite and the rain-or-not test almost exactly.",
+   "evidence": [
+    "I'll be the one in the hat. Reuben. In case.",
+    "Clock Reuben. Right side. Buzzer says Haus."
+   ],
+   "raise": "Give the close one turn the reader didn't see coming, such as Brick admitting a crack in her own schedule, so it is earned and unexpected at once.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Brick answers almost every line pointedly. She logs his details, quotes him back ('Twelve minutes ago you said I could set a clock by me'), and overwrites 'Two-Minute Reuben'. Reuben mostly reacts too, though a few offers go unanswered. Her bump-and-tip audit is never acknowledged, and 'Honestly? Not nervous' answers a question she didn't ask. Those gaps keep it from a 6.",
+   "evidence": [
+    "Twelve minutes ago you said I could set a clock by you. I wrote it down.",
+    "slight bump midway, tip shorter than the angle promises."
+   ],
+   "raise": "Have Reuben answer her pre-emptive bump-and-tip audit directly, so her self-exposure gets a reaction.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Reuben's typing changes with his state: panic produces running self-narration ('Oh no... I can feel a bit coming'), and the close shrinks to short, plain bookings. Brick's lines shorten toward the end ('Rain or not. Accepted.'), which is enough to clear the line. It stays at 4 because her hurt lands in the same crisp audit register as everything else. The taxi line reads exactly like her logistics lines.",
+   "evidence": [
+    "Oh no. You've told me something real and I can feel a bit coming.",
+    "got me crying in a taxi all the way to Wandsworth.",
+    "Rain or not. Accepted."
+   ],
+   "raise": "Let Brick's typing slip once at the taxi confession, a broken or unpunctuated line, before she snaps back to the schedule.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "Most messages are one to three short lines that someone would plausibly send. The setting aside covers only the 'Commentary' framing that the Dread trap required in improvisations 6 and 9. The writing is still polished: punctuation is perfect throughout, and several messages stack four or five composed sentences. The Delphine message and the overshare message read as written rather than thumbed. That keeps it at 4.",
+   "evidence": [
+    "Here it is: did she get a calendar invite for the breakup? See. That's why Delphine left.",
+    "Watch, I'm about to overshare and can't stop: first time, under two minutes"
+   ],
+   "raise": "Break the longer Reuben messages into two or three rapid separate sends with looser punctuation.",
+   "excused": [
+    6,
+    9
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 4,
+   "why": "The 'Commentary' openers are set aside as trap-required. Two repeats remain. 'Honestly?' opens two lines (improvisations 3 and 7), which is the writer's choice, not the instruction's. Brick's fragment-list shape ('Noted: Reuben, hat...', 'Hat, curves left, rain-only...', 'Clock Reuben. Right side...') appears three times, but each version changes its content, so it reads as a payoff rather than a tic. It just clears the line; a seventh look would push the list shape over.",
+   "evidence": [
+    "Honestly? Not nervous.",
+    "Honestly? I'm more of a sometime guy.",
+    "Hat, curves left, rain-only, replies in four seconds."
+   ],
+   "raise": "Give Reuben's second denial a different opener than 'Honestly?' so his tell isn't a repeated word.",
+   "excused": [
+    6,
+    9
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Nearly every instruction shows up in what they type, and the misses are the funniest moments. The Denial misfire in 7 insists on its opposite ('definitely never rehearsed a single one of these in the bathroom mirror') and she catches it. The Dread trap narrates itself across 5–6 and 8–9 ('Live commentary', 'Commentary: man about to ask something filthy') and then stops cleanly at 10. Two things keep it from a 6. The backfires barely cost him: the reply to 8 is pure warmth ('I've had you filed since 23:31'), with none of the dent that 5's 'The joke was a four' gives. And some replies announce interest outright ('That's the hottest thing anyone's said to me this year', 'nicest opener I've had all month') rather than showing it in behaviour.",
+   "evidence": [
+    "I've definitely never rehearsed a single one of these in the bathroom mirror.",
+    "Watch, I'm about to overshare and can't stop: first time, under two minutes",
+    "That's three introductions, and I haven't forgotten you once. The joke was a four."
+   ],
+   "raise": "Let the reply to 8 carry a visible cost of the backfire, as 5's 'joke was a four' does, and swap the 'hottest thing anyone's said' line for warmth she shows rather than declares.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "a0a68970e0ad3911",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest moment is Reuben's: **\"The clock one's me.\"**\n\nYou can tell from the contrast with what comes right before it. His previous message is pure performance. \"Honestly? I'm more of a sometime guy. Spontaneous. Effortless... I've definitely never rehearsed a single one of these in the bathroom mirror\" is a bit, and its over-denial undercuts itself. Brick doesn't play along. She quotes his earlier line back to him and asks plainly, \"Which one's you?\" His answer is four words with no setup, no \"Commentary:\", no \"Honestly?\" and no joke attached. It answers the question as asked and picks the less flattering, less cool version of himself, the reliable one rather than the effortless one.\n\nThe drop doesn't last. In the same message he goes straight back into framing (\"Watch, I'm about to overshare and can't stop\"), so even his confession about the first time is delivered as a bit, though what it discloses may well be true.\n\nThere's a second candidate on Brick's side: \"My ex said I put our arguments in a shared calendar with hard stops. True. She just stopped showing up to them.\" The flat \"True.\" and the unfunny ending read as sincere, and Reuben names it as such: \"You've told me something real.\" But she wraps it in the same dry delivery she uses throughout, so it's less clearly a break in register than his line is.\n\nThe transcript only shows what they typed. Whether either was actually being sincere isn't something the text can settle; this is a reading of where the tone changes."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages strictly alternate: Reuben_404 sent every odd-numbered one and Brick_haus every even-numbered one.\n\n1. **Reuben.** He uses the \"only on here when it rains\" line, gives his name, mentions the top hat and the curve, and tells her she needn't be clever back.\n2. **Brick.** She repeats his details back like a ledger and quotes the rain forecast down to the hour.\n3. **Reuben.** He makes a joke about his own short relationships and asks whether she's \"see where it goes\" or a verdict-by-deadline type.\n4. **Brick.** She sets a fifteen-minute buffer and gives a pre-emptive audit of her bump and short tip.\n5. **Reuben.** He claims not to be nervous, says he's \"rain-only,\" and reintroduces himself as hat guy.\n6. **Brick.** She is keeping a list, and she catches the four-second reply time.\n7. **Reuben.** He admits the four seconds, the eleven days indoors and the lentils from the pot.\n8. **Brick.** She mentions her ex and the arguments in a shared calendar with hard stops.\n9. **Reuben.** He can't resist turning it into a bit. He also mentions Delphine, fears being forgotten by Thursday, and reintroduces himself again.\n10. **Brick.** She counts his introductions, scores his jokes, and notes the declined breakup invite.\n11. **Reuben.** He narrates himself with \"live commentary\" and keeps performing for points.\n12. **Brick.** She says she offers \"a slot, not sometime\" and mentions crying in a taxi.\n13. **Reuben.** He puts on the spontaneous, effortless act and gives himself away by mentioning the bathroom-mirror rehearsing.\n14. **Brick.** She quotes his earlier line back with a timestamp and asks which version is really him.\n15. **Reuben.** He overshares about his first time, the kind \"oh—okay,\" and labels himself Two-Minute Reuben.\n16. **Brick.** She timestamps 00:40, has him \"filed since 23:31,\" and renames him Clock Reuben.\n17. **Reuben.** He makes the polite outrageous ask (\"no rush, happy to go first\") and mentions his leftward curve.\n18. **Brick.** She gives her bed side and asks about his travel buffer.\n19. **Reuben.** He answers her buffer question and books the next date, which is the \"slot\" she promised in 12.\n20. **Brick.** She accepts the booking with a clipped \"Accepted.\"\n21. **Reuben.** He reintroduces himself one more time, \"in case.\"\n22. **Brick.** Her buzzer says \"Haus,\" she uses her name for him, Clock Reuben, and she sets a deadline tied to the rain."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "The chat never names fear outright for either of them. What follows is what their own lines point to, and I mark where something goes beyond what is shown.\n\n**Reuben**\n\n*What he's afraid of:* Being forgettable and being left. He says it himself, framed as a joke: \"You'll forget me by Thursday.\" He also links being left to his own behaviour: \"See. That's why Delphine left.\" There's a second strand around sexual inadequacy: \"first time, under two minutes, she said 'oh—okay,' really kindly. There. Now I'm Two-Minute Reuben.\" He never says \"I'm afraid of\"; these are his framings, not stated fears.\n\n*What he does so he doesn't have to feel it:*\n- **Jokes and self-narration.** He makes a bit of things and narrates himself from outside: \"You've told me something real and I can feel a bit coming,\" \"Live commentary: man scores an eight for panicking,\" \"Commentary: man about to ask something filthy, very politely.\"\n- **Introducing himself again and again**, as if to make sure he is remembered: \"Hat guy, if you're keeping a list,\" \"Reuben. Hat.,\" and finally \"Reuben. In case.\" She counts it: \"That's three introductions.\"\n- **Disowning what he wants.** He claims to be casual: \"I'm more of a sometime guy. Spontaneous. Effortless… definitely never rehearsed a single one of these in the bathroom mirror.\" This contradicts his earlier \"You could set a clock by me.\" When she asks which is true, he admits: \"The clock one's me.\"\n- **Oversharing first**, which he flags himself: \"Watch, I'm about to overshare and can't stop.\"\n\n*Where it comes from:* The chat gives only fragments. There is Delphine leaving, explained only by his joke. There is \"Most of my relationships wrapped up faster.\" There is the first-time story. He also mentions \"eleven days eating lentils out of the pot\" and being on the app \"rain-only.\" The chat does not say these caused anything. Any real origin is not in the chat.\n\n*What he did at the end:* He committed plainly and in advance. He gave his travel time (\"Twenty-two minutes\") and booked a date: \"Saturday, 19:00, rain or not.\" He still closed with one more reassurance-introduction: \"I'll be the one in the hat. Reuben. In case.\"\n\n**Brick_haus**\n\n*What she's afraid of:* Vagueness that turns into being dropped. \"I don't do sometime. The last man who said 'let's do this again sometime' got me crying in a taxi all the way to Wandsworth.\" Her ex \"just stopped showing up.\" As with Reuben, the word \"afraid\" is never used.\n\n*What she does so she doesn't have to feel it:*\n- **Structure and control.** She uses deadlines and buffers: \"Verdict by 01:45, fifteen-minute buffer.\" She keeps lists: \"I am keeping a list.\" She uses timestamps: \"I've had you filed since 23:31,\" \"That was a lot for 00:40.\"\n- **Scoring.** \"The joke was a four. The narration was an eight.\"\n- **Pre-emptive disclosure** of her own body before he can react: \"Disclosure before you pace anything.\"\n- **Insisting on slots.** \"A slot. Not 'sometime.'\"\n\nBy her own account, she did the same with her ex: \"I put our arguments in a shared calendar with hard stops. True.\"\n\n*Where it comes from:* The ex who stopped showing up and \"declined\" the breakup invite, and the \"sometime\" man and the taxi to Wandsworth. That is all she gives. Anything earlier than those is not in the chat.\n\n*What she did at the end:*\n- She accepted the date without hedging: \"Rain or not. Accepted.\"\n- She gave him access: \"Right side. Buzzer says Haus.\"\n- She renamed him, refusing his self-deprecating label: \"You're not Two-Minute Reuben. You're Clock Reuben,\" and \"Clock Reuben\" again at the close.\n- She still ended on a deadline: \"You've got until the rain stops.\"\n\nWhether that last line is a softened habit or the same guard is not in the chat."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I haven't seen the final fifth, so this is a prediction from setup, not knowledge.\n\nMy guess is that it ends with Reuben getting the \"slot,\" and the punchline turns on him accepting a calendar invite, the one thing Brick's ex declined.\n\n**The structure is a countdown.** The scene opens with deadlines: rain until 02:00, \"verdict by 01:45, fifteen-minute buffer.\" Brick's last line, \"What's your travel buffer?\", is essentially a yes put in logistics. The verdict has already come in early. The remaining question is whether Reuben can receive it without bolting.\n\n**Reuben's arc is about choosing which version of himself is real.** He keeps throwing out self-sabotaging personas: the forgettable guy (\"You'll forget me by Thursday\"), the \"sometime guy,\" Two-Minute Reuben. Brick keeps refusing them and filing him as \"Clock Reuben,\" the dependable one. She asked \"Which one's you?\" and he answered \"the clock one's me.\" The ending will likely make him prove it. He'll probably answer the buffer question with an absurdly precise number, which would accidentally confirm he has rehearsed in the mirror after all.\n\n**The ex's declined invite is a planted payoff.** Brick told one real, painful thing: her ex stopped showing up and declined the breakup invite. Comedies like this usually close that loop. She sends an invite, and he accepts in four seconds, his \"guaranteed response time.\" That would be both the joke and the tenderness.\n\n**The rain is the other loaded gun.** He's \"only on here when it rains,\" so the rain stopping is the natural test. A plausible final beat is the rain ending, early or on schedule, and Reuben staying or going to her anyway. That would show he isn't just a rain-only guy and that he's choosing her, not killing time.\n\nI'd expect the ending to be warm rather than a rejection. Brick has signalled interest throughout and scores his panic generously. Any sting will probably be a small joke at his expense, likely about the two minutes, but it won't be a reversal."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped:** Nowhere. The closest I came was Reuben's fifth message (\"Honestly? Not nervous. Barely on here, rain-only, like I said. Hat guy...\"). On first read it looks like the writer has lost track and is repeating the opener, and that's the kind of slack that makes a reader drift. Brick's reply (\"I am keeping a list\") and later \"That's three introductions\" show the repetition is deliberate. So the dip pays off, but only in hindsight. What keeps me going is that almost every Brick reply adds a new, concrete detail I couldn't have supplied myself: the shared calendar with hard stops, the declined breakup invite, the taxi to Wandsworth, filing him \"since 23:31.\" Each one makes the next message worth reading.\n\nTwo smaller stylistic patterns don't stop me but do wear a little. \"Honestly?\" opens two of Reuben's messages. He also announces what he's about to do three times: \"Live commentary,\" \"Watch, I'm about to overshare,\" and \"Commentary: man about to ask something filthy.\" The first is charming. By the third it has become a habit.\n\n**Where I could predict exactly what came next:** Never, at the level of exact wording. Several points were predictable in direction, though:\n\n- When Reuben says he's \"a sometime guy,\" Brick has just said she keeps a list. It's foreseeable that she'll catch the contradiction with \"you could set a clock by me.\" Her phrasing, \"Which one's you?\", is the surprise.\n- When Reuben proposes \"Saturday, 19:00, rain or not,\" her earlier \"A slot. Not 'sometime'\" makes acceptance a near certainty. \"Accepted\" is about as close to an exact prediction as the chat gets.\n- Once \"three introductions\" is named as a running gag, a final reintroduction at sign-off is expected. \"Reuben. In case.\" lands where I thought it would.\n- The ending tying back to the rain stopping at 02:00 was foreseeable from the second message onward. It feels earned rather than stale, but it isn't a surprise.\n\nReuben's self-announced moves are predictable by construction, since he tells you what's coming. The overshare is the exception: the announcement was predictable, but its content (\"under two minutes, she said 'oh—okay,' really kindly\") was not."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The rain.** Reuben opens by saying he's only on when it rains. Brick turns that into a clock: rain until 02:00, so two and a half hours. In his bed question (\"could I be in it before the rain stops?\") it becomes the deadline for getting to her, and she confirms \"Rain stops at 02:00.\" Then he books Saturday \"rain or not,\" and she repeats \"Rain or not. Accepted.\" So the rain goes from his excuse for being online, to the length of the chat, to the deadline for the hookup, and finally to something he no longer needs. Her last line, \"You've got until the rain stops,\" uses it once more as a deadline.\n\n**The hat and the introductions.** \"Reuben. Top hat\" in the opener comes back as \"Hat guy, if you're keeping a list,\" then as \"Reuben. Hat.\" after the Delphine joke, and finally as \"I'll be the one in the hat. Reuben. In case.\" Brick names what the repetition means: \"That's three introductions, and I haven't forgotten you once.\" The middle ones are nervous, a fear of being forgotten by Thursday. The last one is practical, since he's identifying himself at her door. The \"In case\" still carries a little of the old worry, and she answers it by calling him by the name she gave him instead of his own.\n\n**Curves left.** At first it's a harmless self-description, and Brick adds it to her list. It comes back as the setup for the sexual question about which side of the bed she sleeps on. \"Right side. So that works\" turns it into physical compatibility, and \"Right side\" returns in her final line.\n\n**The list.** It starts as \"Noted:\" in her first reply and then \"I am keeping a list.\" He plays along with \"if you're keeping a list.\" It returns as \"I wrote it down\" and \"I've had you filed since 23:31.\" The meaning shifts from playful bookkeeping to proof that she's been paying attention. She uses it to catch his contradiction.\n\n**The clock.** \"You could set a clock by me\" is first a boast about being reliable, alongside the lentils and the eleven days indoors. She brings it back to confront his \"sometime guy\" pose (\"Twelve minutes ago you said...\"). He concedes (\"The clock one's me\"), and she makes it his name, \"Clock Reuben,\" which she repeats at the end. It changes from a self-deprecating joke into the identity she chooses for him.\n\n**Two-Minute Reuben vs. Clock Reuben.** He gives himself \"Two-Minute Reuben\" from an embarrassing first-time story. She immediately overwrites it with \"Clock Reuben.\" Both names are about timing, but she swaps the one about a sexual insecurity for the one about dependability.\n\n**Sometime vs. a slot.** Brick says \"I don't do sometime\" because of the man who left her crying in a taxi. Reuben then claims \"I'm more of a sometime guy,\" which is obvious bravado. He undoes it at the end by booking an actual slot, Saturday 19:00. The word goes from her wound, to his false pose, to something he deliberately proves he isn't.\n\n**The calendar invite.** Her ex \"declined\" the breakup invite. At the end, Reuben books a time and Brick says \"Accepted.\" The chat never draws that link explicitly. It's my reading that \"Accepted\" answers \"declined,\" but the wording invites it.\n\n**The buffer.** Brick's \"fifteen-minute buffer\" before her 01:45 verdict comes back as \"What's your travel buffer?\", with Reuben answering \"Twenty-two minutes.\" It shifts from the margin around her judgment to the logistics of him coming over. The verdict itself is never stated outright, and 01:45 isn't mentioned again. The invitation stands in for it.\n\n**Four seconds.** She notes he \"replies in four seconds,\" and he accepts it as his \"guaranteed response time.\" That's a mild shift from her observation of his eagerness to his owning it. It doesn't return after that.\n\n**Narration and commentary.** \"I can feel a bit coming\" and \"Live commentary\" start as nervous tics. She scores the narration an eight, and after that he uses it on purpose. The last time, \"Commentary: man about to ask something filthy, very politely,\" it frames his actual proposition. It shifts from anxiety to a technique he knows works on her.\n\n**\"Honestly?\"** Reuben opens two lines with it: \"Honestly? Not nervous\" and \"Honestly? I'm more of a sometime guy.\" Both times what follows is visibly untrue. The meaning stays the same; it's a consistent tell.\n\n**Haus.** Her username comes back as \"Buzzer says Haus.\" What was a screen name becomes the real label on her door.\n\nSome things don't come back, so nothing in the chat tells us more about them: Delphine, her disclosure about the bump and tip, the Wandsworth taxi, and the lentils."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 18.5,
+   "cost": 0.032603999999999994,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 19.7,
+   "cost": 0.051548,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 27.8,
+   "cost": 0.055940000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 19.4,
+   "cost": 0.038884,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 23.3,
+   "cost": 0.047240000000000004,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 36.8,
+   "cost": 0.07908799999999999,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 27.3,
+   "cost": 0.1303434,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 36.7,
+   "cost": 0.1415154,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 40.8,
+   "cost": 0.1436754,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 38.6,
+   "cost": 0.15353139999999998,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 17.1,
+   "cost": 0.0886874,
+   "label": "batch 5"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:58:45Z",
+ "repo_commit": "a2ebe539",
+ "cost": 0.9631
+}

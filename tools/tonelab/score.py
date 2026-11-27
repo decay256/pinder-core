@@ -344,6 +344,9 @@ WRITER_RUNS = [
                         "and Brick on seed 23, eleven improvisations, a date"),
     ("writers-v19", 19, "run 18's prompt for Zyx and Sable on run 16's seed 23, eleven improvisations, unmatched"),
     ("writers-v20", 20, "run 18's prompt for Zyx and Sable on seed 34: five backfire in a row, unmatched after seven"),
+    ("writers-v21", 21, "run 18 on template v2: what the theme and the method are for, the balance named in the setup, "
+                        "the theme told without its source"),
+    ("writers-v22", 22, "run 21 with no writers: Claude's characters, with no persona, and one chat"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first; runs 1 to 14
 

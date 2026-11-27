@@ -1,0 +1,144 @@
+{
+ "model": "opus",
+ "runtime": "claude CLI, subscription login",
+ "version": "v17",
+ "system": "You write chats for Pinder, a comedy game.",
+ "template": "chat-improvised.v2.md",
+ "premise": "premise.v2.md",
+ "from": "",
+ "characters_by": "Claude",
+ "words": 500,
+ "acts": [
+  "improvisations 1 to 3",
+  "improvisations 4 to 8",
+  "improvisations 9 to 11"
+ ],
+ "draw": {
+  "theme": [
+   "T42",
+   "Not recognised by your own people"
+  ],
+  "method": [
+   "M10",
+   "The outrageous ask in the politest voice"
+  ],
+  "theme_text": "**Not recognised by your own people**\n\nThe character is sure he's forgettable, keeps reintroducing himself, and can't take it in when the other one remembers.\n\nWhat it is: The self keeps slipping. Someone can win a petty argument about his things and still go unrecognised by the person he lives with, and tell it as if the furniture were the main event. Identity is something the world doesn't confirm.\n\nIn Pinder: The character believes he's forgettable, and he has evidence: exes who called him the wrong name, matches who sent him the same opener twice. He's afraid of being interchangeable, one more dick on a screen of dicks. On the app he repeats distinguishing details, checks that the other one remembers what he said, and introduces himself again mid-chat. The reader sees that the other one did remember, and that he can't take it in.",
+  "method_text": "**The outrageous ask in the politest voice**\n\nA request far over the line, wrapped in the tidiest, most considerate phrasing the character has.\n\nHow it works: The register and the content contradict each other: the manners of a polite note around an insane request. The politeness makes refusing socially awkward, so the reader watches the other person squirm inside their own good manners.\n\nIn Pinder: The character asks for something intimate, premature or logistically mad with a 'no rush' or an offer to go first. The filth goes in plain, specific detail; the courtesy goes in the frame around it. It works best once their act is established, so the politeness reads as how they cope rather than as a writer's trick.\n\nTest: Strip the politeness: is the request outrageous? Read only the politeness: is it a perfectly normal message?\n\nGoes wrong when: Sarcastic politeness is a wink. A generic ask ('wanna fuck') gives nothing away about the character."
+ },
+ "mechanics": {
+  "schema": "pinder-mechanics/1",
+  "mechanics_only": true,
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00.0000000+00:00",
+  "time_of_day": "LateNight",
+  "max_turns": 30,
+  "starting_interest": 10,
+  "traps_disabled": false,
+  "session_horniness": 9,
+  "horniness_roll_1d10": 8,
+  "horniness_time_modifier": 1,
+  "player": {
+   "display_name": "Reuben_404",
+   "level": 7,
+   "level_bonus": 3,
+   "effective_stats": {
+    "Charm": 7,
+    "Rizz": 4,
+    "Honesty": 6,
+    "Chaos": 6,
+    "Wit": 17,
+    "SelfAwareness": -2
+   },
+   "defence_dc_against": {
+    "Charm": 14,
+    "Rizz": 33,
+    "Honesty": 22,
+    "Chaos": 23,
+    "Wit": 20,
+    "SelfAwareness": 22
+   }
+  },
+  "datee": {
+   "display_name": "Brick_haus",
+   "level": 11,
+   "level_bonus": 5,
+   "effective_stats": {
+    "Charm": 10,
+    "Rizz": 11,
+    "Honesty": 14,
+    "Chaos": 9,
+    "Wit": 14,
+    "SelfAwareness": -1
+   },
+   "defence_dc_against": {
+    "Charm": 15,
+    "Rizz": 30,
+    "Honesty": 25,
+    "Chaos": 26,
+    "Wit": 27,
+    "SelfAwareness": 30
+   }
+  },
+  "turns_played": 11,
+  "final_interest": 25,
+  "outcome": "DateSecured"
+ },
+ "tally": {
+  "points": [
+   1,
+   1,
+   0,
+   1,
+   -1,
+   1,
+   -1,
+   -1,
+   1,
+   1,
+   1
+  ],
+  "balance": [
+   1,
+   2,
+   2,
+   3,
+   2,
+   3,
+   2,
+   1,
+   2,
+   3,
+   4
+  ],
+  "date": true,
+  "played": 11,
+  "ending": "date",
+  "why": "last",
+  "runs": [
+   1,
+   2,
+   0,
+   1,
+   -1,
+   1,
+   -1,
+   -2,
+   1,
+   2,
+   3
+  ]
+ },
+ "writers": {
+  "claude": {
+   "writer": "Claude",
+   "author": "Claude",
+   "sheets_by": "Claude",
+   "model": "opus",
+   "session": "21b4cf15-4a0f-40fe-bc72-463cf15d2945",
+   "seconds": 99.7,
+   "cost": 1.2424,
+   "words": 640,
+   "turns": 11
+  }
+ }
+}
