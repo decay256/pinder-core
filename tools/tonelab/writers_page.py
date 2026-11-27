@@ -8,11 +8,16 @@ stores the brief once per run and each profile once.
 import hashlib, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import writers as w  # noqa: E402
+import functools  # noqa: E402
+# the briefs are parsed from YAML on every call, and the page asks for them per session: read each once
+w.brief_full, w.brief_short = functools.cache(w.brief_full), functools.cache(w.brief_short)
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v17", "Run 17: the frozen prompt, improvised", "writers-v17",
+     'Run 17. The one-go prompt that worked by hand on 26 November, frozen and played as improvisations. Claude writes the chat, not the comedians; each of the three chats is written on a different comedian\'s descriptions of Reuben and Brick from run 11, without their take on how the two clash or click. The prompt is Pinder\'s premise, those two descriptions, three acts laid over the improvisations, and one theme and one method from the writers\' pool for the whole chat: T42 "Not recognised by your own people" and M10 "The outrageous ask in the politest voice", the draw of the hand run. Seed 23 as in run 14, eleven improvisations, at most 500 words.', "run 11"),
     ("v16", "Run 16: Zyx & Sable, improvised", "writers-v16",
      'Run 16. Run 15\'s briefs and characters, and the chat as improvisations, as in run 14: one session per comedian, at most 500 words. The game played Zyx_444 and Sable_xo on seed 23, the seed Reuben and Brick were played on; with these two it goes fourteen steps and Sable unmatches Zyx at the end. Two pieces of text are new: verbs agree with they/them ("they try"), and The Disarm, Wit then Honesty, which Reuben never reached. The last step does not say that a shadow carries on.', "run 15"),
     ("v15", "Run 15: Zyx & Sable, in one go", "writers-v15",
@@ -93,6 +98,7 @@ for rid, label, sub, about, profiles_from in RUNS:
         print(f"{rid}: no chats yet, left out")
         continue
     meta = json.load(open(os.path.join(O, CH, "run.json"), encoding="utf-8"))
+    tpl = bool(meta.get("template"))  # run 17 on: Claude writes from a frozen template on a comedian's characters
     rec = meta["writers"]
     writers = []
     for wid, name in w.WRITERS:
@@ -105,6 +111,10 @@ for rid, label, sub, about, profiles_from in RUNS:
         else:
             texts = {s: read(os.path.join(O, s, f"{wid}.md")) for s in ("reuben", "brick")}
             texts.update(ownbrief=None, characters=None)
+        by = name
+        if tpl:  # the brief folder holds Pinder's premise, not the comedian's own brief
+            premise, texts["ownbrief"] = texts["ownbrief"], None
+            name = f"{name}'s characters"
         texts["chat"] = read(os.path.join(O, CH, f"{wid}.md"))
         tj = os.path.join(O, CH, f"{wid}.turns.json")
         tlog = json.load(open(tj, encoding="utf-8")) if os.path.exists(tj) else None
@@ -113,6 +123,8 @@ for rid, label, sub, about, profiles_from in RUNS:
         steps = []
         order = (("ownbrief", "brief"), ("characters", "characters"), ("chat", CH)) if paired else \
             (("reuben", "reuben"), ("brick", "brick"), ("chat", CH))
+        if tpl:  # the characters' sessions are run 11's, described on the How it was made tab
+            order = (("chat", CH),)
         for i, (slug, folder) in enumerate(order):
             pp = os.path.join(O, folder, f"{wid}.prompt.md")
             note = None
@@ -141,7 +153,7 @@ for rid, label, sub, about, profiles_from in RUNS:
                 stats["v1 rebuild matches Reuben's saved prompt"] = stats.get("v1 rebuild matches Reuben's saved prompt", 0) + (rb.rstrip("\n") == ru and rs == system)
             inserts = []
             # the brief: the longest stored brief that occurs in this prompt, else the current one
-            cur = next((x for x in (w.brief_full(), w.brief_short()) if x in user), w.brief_full())
+            cur = premise if tpl else next((x for x in (w.brief_full(), w.brief_short()) if x in user), w.brief_full())
             if cur in user:
                 bid = hashlib.sha256(cur.encode()).hexdigest()[:10]
                 briefs[bid] = cur
@@ -149,7 +161,7 @@ for rid, label, sub, about, profiles_from in RUNS:
                 stats["brief folded"] += 1
             else:
                 stats["brief not found"] += 1
-            if paired and slug != "ownbrief":
+            if paired and slug != "ownbrief" and not tpl:
                 inserts.append((texts["ownbrief"], {"t": "ownbrief"}))
                 stats["own brief folded"] = stats.get("own brief folded", 0) + (texts["ownbrief"] in user)
             if paired and slug == "chat":
@@ -165,7 +177,7 @@ for rid, label, sub, about, profiles_from in RUNS:
             steps.append({"slug": slug, "system": system, "user": fold(user, inserts), "note": note})
         turns = [{"n": e["turn"], "game": ((e["prompt"].split("# Turn 1\n\n", 1) if "# Turn 1\n\n" in e["prompt"] else e["prompt"].split("# Improvisation 1\n\n", 1))[1] if e["turn"] == 1 else e["prompt"].split("\n\n", 1)[1]).strip(),
                   "lines": e["lines"]} for e in tlog["turns"]] if tlog else None
-        writers.append({"id": wid, "name": name, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
+        writers.append({"id": wid, "name": name, "by": by, "chat": texts["chat"], "joke": texts["joke"], "reuben": texts["reuben"],
                         "brick": texts["brick"], "ownbrief": texts["ownbrief"], "characters": texts["characters"], "steps": steps,
                         "turns": turns})
     runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from,
@@ -173,7 +185,9 @@ for rid, label, sub, about, profiles_from in RUNS:
                  "turns": os.path.exists(os.path.join(O, "mechanics.json")),
                  "seed": (meta.get("mechanics") or {}).get("seed"),
                  "nturns": (meta.get("mechanics") or {}).get("turns_played"),
-                 "model": FIRST if "argon" in (meta.get("model") or "") else meta.get("model"),
+                 "model": FIRST if "argon" in (meta.get("model") or "") else
+                 "Claude (opus) through the Claude CLI" if tpl else meta.get("model"),
+                 "template": tpl,
                  "reasoning": meta.get("reasoning"), "writers": writers,
                  "player": pnames[0], "match": pnames[1], "title": " & ".join(s.capitalize() for s in pair),
                  "pair_text": " and ".join(s.capitalize() for s in pair)})

@@ -147,18 +147,22 @@ function segHTML(seg, w) {
   if (seg.t === "md") return docHTML(seg.s);
   if (seg.t === "brief") {
     const b = D.briefs[seg.id];
-    return `<details class="insert"><summary>The brief · ${fmt(words(b))} words</summary>${docHTML(b)}</details>`;
+    return `<details class="insert"><summary>${R().template ? "Pinder's premise" : "The brief"} · ${fmt(words(b))} words</summary>${docHTML(b)}</details>`;
   }
   if (seg.t === "ownbrief")
     return `<details class="insert"><summary>Pinder's brief, as ${esc(w.name)} rewrote it in step 1 · ${fmt(words(w.ownbrief))} words</summary>${docHTML(w.ownbrief)}</details>`;
   if (seg.t === "chars")
-    return `<details class="insert"><summary>The two characters, as ${esc(w.name)} wrote them in step 2 · ${fmt(words(w.characters))} words</summary>${docHTML(w.characters)}</details>`;
+    return `<details class="insert"><summary>The two characters, ${R().template ? "as " + esc(w.by) + " described them in run 11" : "as " + esc(w.name) + " wrote them in step 2"} · ${fmt(words(w.characters))} words</summary>${docHTML(w.characters)}</details>`;
   const n = D.names[seg.who];
   return `<details class="insert"><summary>${esc(n)}, as ${esc(w.name)} wrote ${D.pron[seg.who]} in step ${seg.who === "reuben" ? 1 : 2} ·${fmt(words(w[seg.who]))} words</summary>${docHTML(w[seg.who])}</details>`;
 }
+const FIRST_MODEL = "Gemini 4 Argon";
 function howHTML(run, w) {
   const from = run.profiles_from ? ` in ${run.profiles_from}` : "";
-  const flow = run.turns ? `<ol class="flow">
+  const flow = run.template ? `<ol class="flow">
+    <li>In ${esc(run.profiles_from)}, ${esc(w.by)} rewrote Pinder's brief in their own words, then wrote both characters and how the two clash or click, in two sessions of their own on ${esc(FIRST_MODEL)}. Only the two character descriptions are used here: their brief and their take on the pair are left out.</li>
+    <li>One session with ${esc(run.model)}, played improvisation by improvisation on seed ${esc(String(run.seed))}: a one-line system prompt, then the frozen template filled with Pinder's premise, ${esc(w.by)}'s two descriptions, the three acts, the theme and the method, and the game's account of improvisation 1. The session is resumed for each next improvisation: ${run.nturns} in all. Each account is put together from fixed pieces of text by what the dice did, and opens with the act it is in.</li>
+  </ol>` : run.turns ? `<ol class="flow">
     <li>In ${esc(run.profiles_from || "run 11")}, ${esc(w.name)} rewrote Pinder's brief (the short one) in their own words, in a session of its own.</li>
     <li>In ${esc(run.profiles_from || "run 11")}, in a new session, they wrote a short take on both characters and how the two clash or click, from their own brief and the game's notes.</li>
     <li>A new session for the chat, played turn by turn on seed ${esc(String(run.seed))}: the same system prompt, their own brief and that text, then the game's account of turn 1. They answer with what ${esc(run.player || D.names.reuben)} sends and what ${esc(run.match || D.names.brick)} sends back, and the next turn's account comes in the same session: ${run.nturns} turns in all. Each account is put together from fixed pieces of text by what the dice did.</li>
@@ -171,11 +175,11 @@ function howHTML(run, w) {
     <li>${esc(w.name)} writes ${esc(D.names.brick)}${from}: another session of its own, the same way, at the same time.</li>
     <li>A new session for the chat: the same system prompt, the brief, and the two profiles from steps 1 and 2, pasted in as written. Nothing else from those sessions carries over.</li>
   </ol>`;
-  const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, ownbrief: "Step 1 · Their brief", characters: "Step 2 · The characters", chat: "Step 3 · The chat" };
+  const titles = { reuben: `Step 1 · ${D.names.reuben}`, brick: `Step 2 · ${D.names.brick}`, ownbrief: "Step 1 · Their brief", characters: "Step 2 · The characters", chat: w.steps.length === 1 ? "The chat" : "Step 3 · The chat" };
   const cards = w.steps.map((s, i) => {
     const raw = "<!-- system prompt -->\n" + s.system + "\n\n<!-- user message -->\n" + s.user.map(x => segText(x, w)).join("");
-    const out = s.slug === "chat" && w.turns ? `${w.turns.length} turns in this session; the turn 1 message is above, and every turn's message with what came back is on the Turn by turn tab. The chat, ${fmt(words(w.chat))} words, is on the Chat tab` : s.slug === "chat" ? (w.joke ? `The joke, ${fmt(words(w.joke))} words, on The joke tab; then the chat, ${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w.chat))} words, on the Chat tab`) : `${fmt(words(w[s.slug]))} words, on ${TAB[s.slug]}`;
-    return `<section class="step"><h2>${esc(titles[s.slug])}<small>session ${i + 1} of 3${s.slug !== "chat" ? from : ""}${s.slug === "chat" && w.turns ? ", turn 1 of " + w.turns.length : ""}</small></h2>${s.note ? `<p class="meta">${esc(s.note)}</p>` : ""}
+    const out = s.slug === "chat" && w.turns && run.template ? `${w.turns.length} improvisations in this session; the first is above, and every improvisation's account with what came back is on the Improvisations tab. The chat, ${fmt(words(w.chat))} words, is on the Chat tab` : s.slug === "chat" && w.turns ? `${w.turns.length} turns in this session; the turn 1 message is above, and every turn's message with what came back is on the Turn by turn tab. The chat, ${fmt(words(w.chat))} words, is on the Chat tab` : s.slug === "chat" ? (w.joke ? `The joke, ${fmt(words(w.joke))} words, on The joke tab; then the chat, ${fmt(words(w.chat))} words, on the Chat tab` : `${fmt(words(w.chat))} words, on the Chat tab`) : `${fmt(words(w[s.slug]))} words, on ${TAB[s.slug]}`;
+    return `<section class="step"><h2>${esc(titles[s.slug])}<small>session ${i + 1} of ${w.steps.length}${s.slug !== "chat" ? from : ""}${s.slug === "chat" && w.turns ? (run.template ? ", improvisation 1 of " : ", turn 1 of ") + w.turns.length : ""}</small></h2>${s.note ? `<p class="meta">${esc(s.note)}</p>` : ""}
       <div class="role">System prompt</div>${docHTML(s.system)}
       <div class="role">User message</div>${s.user.map(x => segHTML(x, w)).join("")}
       <div class="role">What came back</div><p class="meta">${out}.</p>
@@ -183,7 +187,7 @@ function howHTML(run, w) {
     </section>`;
   }).join(`<p class="arrow">↓</p>`);
   return `<p class="meta">${esc(run.about)}</p>
-    <p class="meta">Every session is one call to ${esc(run.model || "the model")}, reasoning ${esc(run.reasoning || "default")}. Below is what ${esc(w.name)} read, in the order they read it. The brief and the pasted profiles are folded where they occur; open them to read them in place.</p>
+    <p class="meta">${run.template ? `The chat is one session with ${esc(run.model)}. Below is what Claude read first; every improvisation that followed is on the Improvisations tab. The premise and the two descriptions are folded where they occur; open them to read them in place.` : `Every session is one call to ${esc(run.model || "the model")}, reasoning ${esc(run.reasoning || "default")}. Below is what ${esc(w.name)} read, in the order they read it. The brief and the pasted profiles are folded where they occur; open them to read them in place.`}</p>
     ${flow}${cards}`;
 }
 
@@ -198,19 +202,20 @@ function render() {
     `<button class="chip" id="w-${x.id}" aria-pressed="${x.id === st.w}" data-w="${x.id}">${esc(x.name)}</button>`).join("");
   document.getElementById("tabs").innerHTML = viewsFor(w).map(([v, label]) => {
     const n = v === "how" ? "" : v === "turns" ? `<span>${w.turns.length}</span>` : `<span>${words(w[v]).toLocaleString()}w</span>`;
-    return `<button class="tab" role="tab" id="t-${v}" aria-selected="${v === st.v}" data-v="${v}">${label}${n}</button>`;
+    return `<button class="tab" role="tab" id="t-${v}" aria-selected="${v === st.v}" data-v="${v}">${v === "turns" && run.template ? "Improvisations" : label}${n}</button>`;
   }).join("");
   document.getElementById("pair").textContent = run.title || "Reuben & Brick";
   const view = document.getElementById("view");
   if (st.v === "chat") {
-    view.innerHTML = `<p class="meta">${esc(w.name)}: the chat between their own ${esc(run.pair_text || "Reuben and Brick")}, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat, run);
+    view.innerHTML = run.template ? `<p class="meta">Claude's chat on ${esc(w.by)}'s ${esc(run.pair_text)}, written improvisation by improvisation from Pinder's premise, those two descriptions, and one theme and one method for the whole chat.</p>` + chatHTML(w.chat, run) : `<p class="meta">${esc(w.name)}: the chat between their own ${esc(run.pair_text || "Reuben and Brick")}, ${w.characters ? "written from their own brief and what they wrote about the two characters" : "written from the brief and those two profiles"}.</p>` + chatHTML(w.chat, run);
   } else if (st.v === "turns") {
-    view.innerHTML = `<p class="meta">Each turn, the game's account of what happened (in grey) was sent to ${esc(w.name)}, in one session; under it is what they wrote back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this writer.</p>` +
+    view.innerHTML = run.template ? `<p class="meta">Each improvisation, the game's account of what happened (in grey) was sent to Claude, in one resumed session; under it is what came back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this chat.</p>` +
+      w.turns.map(x => `<section class="turn"><h2>Improvisation ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("") : `<p class="meta">Each turn, the game's account of what happened (in grey) was sent to ${esc(w.name)}, in one session; under it is what they wrote back. The account is assembled from fixed pieces of text by the dice; nothing in it is written for this writer.</p>` +
       w.turns.map(x => `<section class="turn"><h2>Turn ${x.n}</h2><div class="game">${docHTML(x.game)}</div>${chatHTML(x.lines.join("\n"), run)}</section>`).join("");
   } else if (st.v === "joke") {
     view.innerHTML = `<p class="meta">Before writing the chat, ${esc(w.name)} worked it out under its own heading, as the prompt asked (How it was made has the exact wording). The chat's reader never sees this; it is saved apart from the chat, and the chat is scored without it.</p>` + docHTML(w.joke);
   } else if (st.v === "characters") {
-    view.innerHTML = `<p class="meta">${esc(w.name)}'s take on both characters and how the two clash or click, written in one session from their own brief and the game's notes on both.</p>` + docHTML(w.characters);
+    view.innerHTML = run.template ? `<p class="meta">${esc(w.by)}'s descriptions of the two characters from ${esc(run.profiles_from)}, as Claude read them: their take on how the two clash or click is left out.</p>` + docHTML(w.characters) : `<p class="meta">${esc(w.name)}'s take on both characters and how the two clash or click, written in one session from their own brief and the game's notes on both.</p>` + docHTML(w.characters);
   } else if (st.v === "ownbrief") {
     view.innerHTML = `<p class="meta">Pinder's brief, as ${esc(w.name)} rewrote it in their own words from the short brief. It is the brief they read in both later sessions.</p>` + docHTML(w.ownbrief);
   } else if (st.v === "how") {
