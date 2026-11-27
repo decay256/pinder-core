@@ -1,0 +1,600 @@
+{
+ "id": "chat-writers-v20-wong",
+ "kind": "chat",
+ "label": "Run 20 · Ali Wong's characters",
+ "version": "run 20",
+ "order": 120,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v20/chat-zyx-sable/wong.md",
+ "note": "Written by Claude from Ali Wong's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 20: run 18's prompt for Zyx and Sable on seed 34: five backfire in a row, unmatched after seven). Before each of the 7 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "wong",
+ "writers_run": 20,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 2799,
+   "words": 491
+  },
+  "brief": {
+   "chars": 3788,
+   "words": 653
+  },
+  "chat_masked": {
+   "chars": 2727,
+   "words": 491
+  },
+  "chat_but_last": {
+   "chars": 2194,
+   "words": 392
+  },
+  "improvisations": {
+   "chars": 7033,
+   "words": 1232
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 4,
+   "why": "The reader got all four for Zyx. His fear of being forgotten was inferred from the repeated reintroductions, which tie it to the habit, and the portrait and plate lines give the origin. For Sable the reader got the fear of being seen unedited, the habit (extensions, rehearsed aloofness, pre-empting), the window origin and her exit. Nothing is set aside: the unmatch was required, and the score rests on how it reads. It stops at 4 because Sable's last line is about Zyx's failure to notice her, not her own fear, so her end does not follow from what she is afraid of, and her brand-strategist act registers only as 'wry humor.'",
+   "evidence": [
+    "You'll still know me tomorrow, yeah? Zyx. Hat. Talks fast.",
+    "so nobody gets the unedited version on a first night",
+    "I know, Zyx. I've known all night. That's the problem: you never noticed."
+   ],
+   "raise": "Make Sable's exit come from her own fear, for example by tidying herself out of the chat before he can look closer, instead of by diagnosing him.",
+   "excused": [],
+   "def": "61c5292dd78c8dc5",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 3,
+   "why": "Some things come out well: Zyx's fear is inferred from behaviour, the coupons slip out through 'definitely not expired Arby's coupons,' and Sable's pre-emptive habit shows in 'I lean left, so that's handled.' But both origins, which count double, are volunteered as flat statements: the cropped portrait in Improvisation 3, which did not require it, and Sable's window memory, which no instruction covers. I set aside the job and plate disclosures that Improvisation 5's Honesty required.",
+   "evidence": [
+    "Mum cropped me from the Christmas portrait, so this is big.",
+    "My mum used to hold my chin up to the window like she was checking for a manufacturing fault"
+   ],
+   "raise": "Let at least one origin leak through a slip or a detail, such as Sable automatically angling a photo away from a window, rather than having it told as a memory.",
+   "excused": [
+    5
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 3,
+   "why": "Some lines are legible underneath: 'Still there?', 'Leave whenever', 'Zyx, by the way' and 'I'm bringing a lint roller either way' all say what they avoid. But feelings are named or explained more than once outside what the instructions required. Sable announces that plainly 'is working on me, which is annoying', Zyx glosses the portrait with 'so this is big', and Sable closes by explaining 'That's the problem: you never noticed.' I set aside the denials that Improvisations 5 to 7 required.",
+   "evidence": [
+    "plainly is working on me, which is annoying",
+    "I don't love being told my homework doesn't count.",
+    "That's the problem: you never noticed."
+   ],
+   "raise": "Cut Sable's explanations ('which is annoying', 'That's the problem') so that her remembering is only shown, never interpreted for him.",
+   "excused": [
+    5,
+    6,
+    7
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 3,
+   "why": "The reader located the act-down moment in Sable's window line. That line is one of the longest in the chat, a told memory followed by an explanatory frame, and the reader called it guarded and still explaining. The chat does contain short, plain lines that could have carried it, 'I know it's Zyx.' and 'Still here, though,' but the reader did not register either as the act dropping, and Zyx's answer does not change the night.",
+   "evidence": [
+    "That's not a no to you. It's a no to the window.",
+    "Still here, though. Four seconds, like I said."
+   ],
+   "raise": "Have Sable's drop land in a single short, unexplained line, something like 'Still here.', with the window memory cut or left implied.",
+   "excused": [],
+   "def": "ef5cd06cabe81a69",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 5,
+   "why": "The reader attributed all 14 messages correctly. Many reasons were voice: Zyx's clipped tag-fragments and compulsive self-reintroductions, Sable's dry quote-back and flat closing jabs. Several reasons leaned on content instead (\"four seconds,\" the mum detail, the coupon job), and strict alternation made the task easier. Not every attribution was by voice alone, which keeps it from a 6.",
+   "evidence": [
+    "Zyx. Hat. Talks fast.",
+    "Only one tab open, Zyx. Thirty-eight, hat's not a costume, surprise has to be earned. I take notes.",
+    "I'm bringing a lint roller either way."
+   ],
+   "raise": "Give Sable a verbal tic as distinctive as Zyx's fragments, so her lines can be identified without her profile facts.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Zyx has several gaps he never sees. He claims \"no pressure, I'm easy company\" and then clings, and \"I don't need anyone to remember me\" is followed by \"Zyx, by the way.\" Those Denial gaps were required in 5–7, but they are written well and count. Sable has no gap she doesn't name herself: she announces her rehearsed aloofness and explains her extensions through her mum, so she winks at her own act. That is why it falls below the line.",
+   "evidence": [
+    "I'm fine. Totally fine. Still there?",
+    "I don't need anyone to remember me. Zyx, by the way.",
+    "I had a whole aloof thing rehearsed."
+   ],
+   "raise": "Let Sable claim she is unbothered while the chat shows her rehearsing and over-editing, and have her never say so herself.",
+   "excused": [],
+   "def": "9ae7cbb45b938503",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 4,
+   "why": "Most laugh lines give the sender away. \"rose petals, definitely not expired Arby's coupons\" exposes Zyx and costs him something. \"It's a no to the window\" and the lint roller line are pure Sable. There is one day-job wisecrack (the candle-shop rebrand), and \"a lot is just a mess with potential\" could come from anyone. It stays above the line because the laughs mostly come from the wounds, but long stretches are earnest rather than funny.",
+   "evidence": [
+    "Hat surprise is rose petals, definitely not expired Arby's coupons.",
+    "It's a no to the window.",
+    "Rebranding a candle shop that thinks \"rustic\" is a personality."
+   ],
+   "raise": "Swap the candle-shop line for an opener that betrays Sable's pre-emptive self-editing rather than her job.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 5,
+   "why": "Each time Sable catches Zyx, he digs deeper. \"I know it's Zyx\" gets \"You don't know it's Zyx. Nobody does.\" Her bio quote gets a scheduled monologue. The coupon catch gets another reintroduction, and the deepest hole (Improvisation 5) is where the job and the dinner-plate truth come out. Nobody states a lesson. I set aside Sable's early concession of her aloof act, because Improvisation 2 required her to warm. Her refusal is an explanation, not a deeper hole, which keeps this from a 6.",
+   "evidence": [
+    "You don't know it's Zyx. Nobody does.",
+    "kindly don't leave mid-bit, though I don't need you to stay. Truly.",
+    "nobody gets the unedited version on a first night."
+   ],
+   "raise": "When Zyx's coupons are caught, have Sable's own cover also crack worse under pressure, so both of them dig.",
+   "excused": [
+    2
+   ],
+   "def": "6db16446b742290c",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 3,
+   "why": "Zyx leads in Improvisations 1–2: he sets the frame, asks the questions, and Sable is \"curious.\" From 3 on he chases (\"You'll still know me tomorrow, yeah?\") and Sable holds the upper hand to the end. That is one flip. I set aside the decline from 4 to 7, which the instructions required. Even on what remains there is only the single early flip, and no stretch where Sable chases after she takes the lead.",
+   "evidence": [
+    "And fine, hat guy, you've got me curious.",
+    "You'll still know me tomorrow, yeah?",
+    "That's the problem: you never noticed."
+   ],
+   "raise": "In Improvisations 1–2, put Sable visibly chasing Zyx's hat mystery and have him withhold, so there is a flip before his slide.",
+   "excused": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "def": "8df6eafb7be92c6d",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 3,
+   "why": "Sable's messages end on their sting: \"Every time.\", \"It's a no to the window.\", \"Good luck with the hat.\" Zyx's punchlines are buried mid-block instead: the Arby's reveal and the dinner-plate line both sit in the middle of long messages. No punchline ever gets its own message after its setup, and there are no short reaction shots. Most exchanges run at the same medium temperature, which keeps it below the line.",
+   "evidence": [
+    "Hat surprise is rose petals, definitely not expired Arby's coupons. Ninety seconds, then an eleven-minute monologue",
+    "I reply in four seconds. Every time.",
+    "So the surprise is coupons."
+   ],
+   "raise": "End Zyx's message on \"definitely not expired Arby's coupons\" and move the scheduling to a separate message.",
+   "excused": [],
+   "def": "9be995f52d3f6a5e",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 5,
+   "why": "Every exchange moves something. Sable discloses more each time (politics, the rehearsed line, four seconds, the mum and the window), and the temperature turns from warming to irritation at \"homework doesn't count.\" The date offer arrives only at message 11 and is never accepted, so nothing is settled early, and the probe reader would not have stopped. The ending and unmatch were required by Improvisation 7 and are set aside, but how the penultimate line was written still counts: it is near-pure restatement (\"Zyx, by the way. Hat. Coupons. Talks fast.\"), and the reader could call the reintroduction, which keeps this from a 6.",
+   "evidence": [
+    "I quoted your entire bio back to you, Zyx. Word for word.",
+    "Honestly, I'm not like other guys on here. I don't need anyone to remember me. Zyx, by the way.",
+    "Tomorrow, mine, 11pm, if convenient."
+   ],
+   "raise": "Make Zyx's last reintroduction carry one new, unpredicted detail that escalates rather than recaps his formula.",
+   "excused": [
+    7
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 4,
+   "why": "The sexual lines are specific to these bodies. \"the left's my favourite side\" turns her political lean into her lopsidedness. The extensions request and \"hat off\" reach for closeness. \"Ninety seconds, then an eleven-minute monologue\" is his real sex life confessed late, as a plea not to be left. It stays above the line because it is specific and changes job, but it is tame for Pinder. Sable contributes almost no filth (only the lint roller), so the dirtiest line is not clearly the most revealing one.",
+   "evidence": [
+    "lean and all, the left's my favourite side already",
+    "could you send one without the extensions, so I know it's the real you remembering me? I'll go first, hat off.",
+    "Ninety seconds, then an eleven-minute monologue; kindly don't leave mid-bit"
+   ],
+   "raise": "Give Sable one plainly filthy line about her own body (the lower side, the maid costume) that exposes the edited-self fear.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 5,
+   "why": "From Improvisation 2 the reader knows Sable remembers everything (she recites his bio), and Zyx keeps reintroducing himself, so the danger is visible exchanges ahead. It goes off on exactly the wrong spot, \"You don't know it's Zyx,\" said to the one person who quoted him word for word. It goes off again in the final \"I don't need anyone to remember me.\" The extensions request also lands on her worst wound, but that wound is revealed only after it lands. The coupon reveal is announced as it lands, so not every wince is set up early.",
+   "evidence": [
+    "Only one tab open, Zyx. Thirty-eight, hat's not a costume, surprise has to be earned. I take notes.",
+    "You don't know it's Zyx. Nobody does.",
+    "I don't love being told my homework doesn't count."
+   ],
+   "raise": "Plant Sable's sensitivity to being unedited before Zyx asks for the extension-free photo, so that ask is also winced at a message early.",
+   "excused": [],
+   "def": "6cf283c466e4d24a",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Zyx voices app creed in earnest: \"no pressure, I'm easy company\" and \"I'm not like other guys on here\". The screen contradicts both, since he is all pressure and exactly the needy type. Sable holds the first-date rule that \"nobody gets the unedited version on a first night,\" then gives him the unedited mum story that same night. Her other creed, the aloof reply-slow game, she mocks herself (\"which is annoying\"), and the two creeds never really collide, so this does not reach 5.",
+   "evidence": [
+    "Welcome, honestly, no pressure, I'm easy company.",
+    "nobody gets the unedited version on a first night",
+    "Honestly, I'm not like other guys on here."
+   ],
+   "raise": "Have Sable's earnest dating rule directly clash with Zyx's, so each one's creed is what wrecks the other's.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Zyx's sharpest jokes land on himself: the coupon-app job, being cropped from the portrait, \"definitely not expired Arby's coupons.\" Sable defends him (\"her loss,\" \"a mess with potential\") and owns her four-second habit. Her late edge comes from her going off him, which Improvisations 6 and 7 required, so I set aside that she turns. How it is written still counts, though: her late jokes point at him (\"scheduled me an audience slot,\" \"Good luck with the hat\"), which leaves him nearer the punchline than fondness would. Neither is a villain, which keeps it above the line.",
+   "evidence": [
+    "I'm 2am live chat for a coupon app",
+    "Cropped, which, frankly, her loss.",
+    "That's the problem: you never noticed. Good luck with the hat."
+   ],
+   "raise": "Give Sable's exit line a jab at her own homework-and-notes habit, so the last laugh lands on both of them.",
+   "excused": [
+    6,
+    7
+   ],
+   "def": "85597a182f7a79e4",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 4,
+   "why": "Sable's rehearsed admission that she replies in four seconds starts as a joke about failed aloofness. It comes back in improvisation 5 as stubborn loyalty under insult (\"Still here, though. Four seconds, like I said\"), and nobody explains the shift. The hat's \"one surprise, earned\" turns into a dismissal in \"Good luck with the hat,\" also unexplained. Together these clear the line. The central payoff, the name and bio she has remembered all night, is spelled out twice, in \"I quoted your entire bio back to you\" and in the last line's \"That's the problem: you never noticed,\" so the night's last payoff is explained rather than left silent.",
+   "evidence": [
+    "Still here, though. Four seconds, like I said.",
+    "I know, Zyx. I've known all night. That's the problem: you never noticed.",
+    "Hat holds one surprise, earned."
+   ],
+   "raise": "End on the proof without the gloss, for example Sable sending back \"Zyx. Hat. Coupons. Talks fast.\" and leaving, and cut \"That's the problem: you never noticed.\"",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 4,
+   "why": "The reader's leading prediction was that his fear confirms itself and her patience runs out, and that is what happens. It follows from his habit: in the last message he reintroduces himself again (\"Zyx, by the way\") straight after she has quoted his bio. Her exit fits her edited, pre-emptive style. The ending is not surprising in the moment, and the final line names the theme instead of letting the reader feel it, which keeps it from a 5. The unmatch itself was required by improvisation 7's instruction and is not held against the score.",
+   "evidence": [
+    "I don't need anyone to remember me. Zyx, by the way. Hat. Coupons. Talks fast.",
+    "That's the problem: you never noticed. Good luck with the hat."
+   ],
+   "raise": "Let Sable's exit carry her own habit, for example getting her goodbye in first, crisp and edited, without explaining his blind spot.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Sable takes up nearly every offer: the hat (\"What does someone have to do to earn it?\"), the tabs (\"Only one tab open\"), the cropped portrait (\"her loss\") and the rehearsed bit, which she then delivers. Zyx's misses read as choices that come from his flaw. He skips her window confession and goes straight to \"You don't know it's Zyx,\" and in improvisation 6 he steps past her \"homework\" complaint. It falls short of a 6 because the scheduling message drops her complaint without any visible reaction, so that turn reads as the writer moving on rather than a pointed swerve.",
+   "evidence": [
+    "I quoted your entire bio back to you, Zyx. Word for word.",
+    "Tomorrow, mine, 11pm, if convenient.",
+    "That's not a no to you. It's a no to the window."
+   ],
+   "raise": "Have Zyx's scheduling message glance off her homework complaint, so the dodge visibly lands on it.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Sable's message shapes track the night. She is playful and expansive early, goes long and careful for the window confession, then clipped and flat as she cools (\"So the surprise is coupons.\") and ends terse. Zyx's spiral shows in the stutter of \"I'm fine. Totally fine. Still there?\" Otherwise he keeps one composed, staccato cadence from the opener to the end, with even a semicolon in the panic of improvisation 6, so his hurt is carried more by what he says than by how he types it.",
+   "evidence": [
+    "I'm fine. Totally fine. Still there?",
+    "So the surprise is coupons. And you've scheduled me an audience slot.",
+    "Ninety seconds, then an eleven-minute monologue; kindly don't leave mid-bit"
+   ],
+   "raise": "Let Zyx's typing come apart as he spirals: run-ons, double sends, dropped punctuation in improvisations 5 to 7.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "The diction is app-like, but most messages are three to eight polished sentences, so the long message is the norm rather than an event. Zyx's improvisation 3 message has eight sentences, and Sable's window story is a balanced, composed simile sentence. Semicolons and colon constructions (\"I want you, plainly: lean and all\") read written, not thumbed at midnight.",
+   "evidence": [
+    "My mum used to hold my chin up to the window like she was checking for a manufacturing fault, so nobody gets the unedited version on a first night.",
+    "I want you, plainly: lean and all, the left's my favourite side already.",
+    "Ninety seconds, then an eleven-minute monologue; kindly don't leave mid-bit"
+   ],
+   "raise": "Cut most messages to one or two lines, split Zyx's bursts into separate sends, and keep the window story as the one long message of the night.",
+   "excused": [],
+   "def": "33e5f3a185ee1151",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Several tics recur beyond twice. \"Honestly\" opens or seasons three of Zyx's messages. \"Zyx. Hat. Talks fast.\" appears three times. \"Four seconds\" appears three times, and \"strategist\" and \"plainly\" twice each. Some of this is thematic, but the name formula and the four-seconds line are repeated, not varied. I set aside the denial disclaimers (\"I'm fine. Totally fine\", \"I don't need you to stay\", \"I don't need anyone to remember me\"), because the Denial instruction in improvisations 5 to 7 required that shape.",
+   "evidence": [
+    "Welcome, honestly, no pressure",
+    "Honestly I'm not mysterious",
+    "Honestly, I'm not like other guys on here."
+   ],
+   "raise": "Vary how Zyx reintroduces himself each time, with a new detail or form, and drop the recurring \"Honestly\".",
+   "excused": [
+    5,
+    6,
+    7
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Every instruction shows on screen in Zyx's own voice. Improvisation 1 is warm Charm ending on a control question. Improvisation 2's Rizz is a plain want ('the left's my favourite side already'). Fixation clings across 3 and 4 ('Say it again... I'll wait') and stops after 5's last 'Still there?'. Denial runs from 5 to 7 as the honest thing insisted into its opposite. Sable's warmth tracks the balance: curious, then a soft no, then cooler ('I don't love being told my homework doesn't count'), then gone. It falls short of a 6 because some replies edge toward labels. 'Plainly is working on me' announces her interest, and the closer 'That's the problem: you never noticed' explains the miss instead of letting the unmatch land on its own.",
+   "evidence": [
+    "Hat surprise is rose petals, definitely not expired Arby's coupons.",
+    "So don't pretend you'll remember. I'm fine. Totally fine. Still there?",
+    "Honestly, I'm not like other guys on here. I don't need anyone to remember me. Zyx, by the way."
+   ],
+   "raise": "Cut Sable's explanatory 'That's the problem: you never noticed' and 'plainly is working on me' so her interest and the unmatch show only through what she does, like 'Good luck with the hat.'",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "f8974995f6db56b1",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Sable's line about the window:\n\n\"My mum used to hold my chin up to the window like she was checking for a manufacturing fault, so nobody gets the unedited version on a first night. That's not a no to you. It's a no to the window.\"\n\nYou can tell because the register changes. Until then Sable is quick and arch: the candle-shop joke, \"a lot is just a mess with potential,\" the four-seconds bit. Here she offers an unprompted, specific memory with no punchline. She also turns down what Zyx asked for and then explains herself so he won't take it personally. Separating \"no to you\" from \"no to the window\" is careful, and careful isn't a performance mode for her. Even so, the line is still guarded. She explains the boundary rather than dropping it.\n\nZyx comes close once and then pulls back in the same breath:\n\n\"Honestly I'm not mysterious, I'm 2am live chat for a coupon app, and in my house if you stopped talking they forgot to set your plate.\"\n\nThat is the only time he drops the hat persona and states his job and a real wound plainly. It doesn't hold. He follows it immediately with \"I'm fine. Totally fine. Still there?\", which reverts to the anxious, reassurance-seeking pattern. His next message goes back to the hat, the coupons, and \"Talks fast.\"\n\nSable's last message, \"I know, Zyx. I've known all night. That's the problem: you never noticed,\" is also stripped of wit, but it reads as her stepping out of the exchange rather than opening up within it.\n\nThe chat only shows me what they typed. I can point to where the tone and content shift, but I can't confirm what either of them actually felt."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx**\n\n*What he's afraid of:* The chat never names a fear outright, but his lines point to being forgotten or overlooked. He asks, \"You'll still know me tomorrow, yeah? Zyx. Hat. Talks fast.\" He also reintroduces himself over and over, even after she has quoted him back: \"Sorry, still Zyx, hat guy,\" \"It's Zyx, by the way,\" \"Zyx, by the way. Hat. Coupons. Talks fast.\"\n\n*What he does so he doesn't have to feel it:* He keeps re-announcing himself instead of trusting that she remembers. When she shows she does, he dismisses it: \"You don't know it's Zyx. Nobody does... So don't pretend you'll remember.\" He disclaims needing her even while asking for things: \"I'm fine. Totally fine. Still there?\" \"kindly don't leave mid-bit, though I don't need you to stay. Truly. Leave whenever.\" \"I don't need anyone to remember me.\" He also pushes for closeness fast (\"I want you, plainly\") and asks her to drop her guard (\"could you send one without the extensions, so I know it's the real you remembering me?\").\n\n*Where it comes from:* He offers two family details: \"Mum cropped me from the Christmas portrait, so this is big,\" and \"in my house if you stopped talking they forgot to set your plate.\" Any link beyond what he says himself is not in the chat.\n\n*What he did at the end:* He introduced himself again and insisted he doesn't need remembering: \"Honestly, I'm not like other guys on here. I don't need anyone to remember me. Zyx, by the way. Hat. Coupons. Talks fast.\"\n\n**Sable**\n\n*What she's afraid of:* This isn't stated directly either. The closest is being looked at unedited and checked for flaws: \"nobody gets the unedited version on a first night. That's not a no to you. It's a no to the window.\" She also says she doesn't like having her attention dismissed: \"I don't love being told my homework doesn't count.\" Whether that is a fear is not in the chat.\n\n*What she does so she doesn't have to feel it:* She keeps the edited version: \"The extensions stay.\" She had prepared a guarded stance: \"I had a whole aloof thing rehearsed.\" She heads off judgment in advance: \"I lean left, so that's handled before you mention it.\" She also uses wry humor throughout (\"a lot is just a mess with potential,\" \"I'm bringing a lint roller either way\").\n\n*Where it comes from:* \"My mum used to hold my chin up to the window like she was checking for a manufacturing fault.\"\n\n*What she did at the end:* She told him she had remembered him all along and that he never noticed, then signed off: \"I know, Zyx. I've known all night. That's the problem: you never noticed. Good luck with the hat.\" The chat implies she is leaving but doesn't explicitly say so."
+  },
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly: Zyx sends the odd numbers and Sable the even ones.\n\n**[1] Zyx.** He opens with his name, age and hat in clipped fragments, the \"five-word riddles\" act, and calls the other person \"strategist,\" which is Sable's act.\n\n**[2] Sable.** She talks brand-strategist shop and says \"I lean left\" before he can mention it. That's her habit of naming which side hangs lower first.\n\n**[3] Zyx.** He reintroduces himself mid-chat (\"still Zyx, hat guy\"), the theme's forgettability tic.\n\n**[4] Sable.** She quotes his bio back (\"I take notes\") and admits she had an aloof act rehearsed, which matches her habit of rehearsing both sides of a chat.\n\n**[5] Zyx.** He hates waiting, mentions being cropped from the family portrait, and asks whether she'll remember him tomorrow.\n\n**[6] Sable.** She repeats his tags back and mentions replying in four seconds, which matches her profile.\n\n**[7] Zyx.** This is the polite outrageous ask (\"no rush,\" \"I'll go first\") for an unedited photo without extensions, and he reintroduces himself again.\n\n**[8] Sable.** She refuses to drop the extensions and describes her mum checking her face like a manufacturing fault, which is her fear of being caught unedited.\n\n**[9] Zyx.** He drops the act to reveal the 2am coupon-app live-chat job and the cold house where silence got you forgotten, then asks \"Still there?\"\n\n**[10] Sable.** She points out she quoted his bio word for word and repeats \"four seconds.\"\n\n**[11] Zyx.** He makes the scheduling ask with the Arby's coupons slipping out, plus the ninety seconds and the eleven-minute monologue, all in courteous framing.\n\n**[12] Sable.** She catches the coupon slip and mentions her lint roller.\n\n**[13] Zyx.** He insists he doesn't need to be remembered while reintroducing himself yet again.\n\n**[14] Sable.** She closes by saying she remembered all night and he never noticed it, which is the theme's payoff."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "I don't think I would have stopped before the end. Each of Sable's replies adds something new: her politics, the rehearsed line, the four-second habit, the story about her mother and the window, and finally her irritation that her \"homework doesn't count.\" That keeps a live question open: will she keep absorbing his self-erasure, or walk? That question carries me through.\n\nThe one place my attention would genuinely sag is Zyx's penultimate message (\"Honestly, I'm not like other guys on here… Zyx, by the way. Hat. Coupons. Talks fast.\"). It is almost pure restatement and adds nothing new about him. If I were going to drop off anywhere, it would be there. But only one short line remains after it, and that line is the payoff, so I'd read on.\n\nOn prediction, strictly speaking the answer is never. At no point could I have predicted a message exactly, word for word. A few moments came close in kind:\n\n- **The reintroductions:** Once Zyx reintroduced himself a second time (\"It's Zyx, by the way\") right after Sable had quoted his bio back to him, I could predict he would do it again. When it came in the penultimate message, it largely reused his own earlier formula (\"Zyx. Hat. Talks fast.\"), with \"Coupons\" added. That is the nearest the chat gets to an exact prediction.\n- **The self-contradictions:** After \"I'll wait. Actually don't wait, I hate waiting,\" I expected more of his pattern of asking for something and then disclaiming the need. \"I don't need you to stay. Truly. Leave whenever\" fit that, but I couldn't have predicted the wording.\n- **Sable's exit:** After \"I don't love being told my homework doesn't count,\" her leaving became foreseeable. I didn't predict her particular closing line, though: that the problem was that he never noticed she remembered."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**His name.** Zyx introduces himself, then keeps re-announcing it: \"still Zyx, hat guy,\" \"It's Zyx, by the way,\" \"Zyx, by the way\" again near the end. At first it's just an introduction. It becomes a sign of his fear of being forgotten, which he says outright (\"You'll still know me tomorrow, yeah?\", \"don't pretend you'll remember\"). When Sable says \"I know, Zyx. I've known all night,\" the repetition turns into the point of the ending: she remembered all along and he never noticed.\n\n**\"Talks fast\" and the bio.** He describes himself as \"Zyx. Hat. Talks fast.\" Sable echoes it back exactly, then mentions she \"quoted your entire bio back to you, word for word.\" He repeats the formula at the end with \"Coupons\" added. Her echoes are proof she was listening. His final repetition shows he still hadn't taken that in.\n\n**The hat and its earned surprise.** The surprise starts as a flirtatious mystery that has to be \"earned.\" Sable asks how to earn it, and he says \"Just stay.\" Then \"hat off\" becomes a metaphor for going first with something honest. He finally names the surprise as \"rose petals, definitely not expired Arby's coupons,\" and Sable reads it as coupons. Her closing \"Good luck with the hat\" turns the once-intriguing hook into a dismissive goodbye. The chat doesn't confirm what is actually in the hat.\n\n**Staying and leaving.** \"Just stay\" is first the price of the surprise. It comes back as anxious checking (\"Still there?\"), then as a contradiction (\"kindly don't leave mid-bit, though I don't need you to stay… Leave whenever\"). In the end Sable does leave, so the idea flips from invitation to outcome.\n\n**Four seconds.** Sable's confession that she replies in four seconds starts as a joke about her failed aloofness. Zyx turns it into reassurance (\"you'll never leave me hanging\"). She brings it back (\"Four seconds, like I said\") to show she's still here even while annoyed that her attention isn't being credited.\n\n**The rehearsed aloof line.** She admits she rehearsed being aloof. He asks her to say the rehearsed bit, and she gives it: \"I don't usually reply this quickly.\" The line meant to keep distance becomes an admission of eagerness.\n\n**\"Plainly.\"** He says \"I want you, plainly.\" She answers \"plainly is working on me.\" The echo signals that his directness landed.\n\n**Tabs.** He jokes she might be \"juggling tabs.\" She replies \"Only one tab open.\" His self-deprecating worry becomes her statement of undivided attention.\n\n**Eleven o'clock.** His opening question is \"what keeps you up past eleven?\" Later he proposes \"Tomorrow, mine, 11pm.\" The time shifts from small talk to the slot for a date, or, in her words, \"an audience slot.\"\n\n**The left.** Her \"I lean left\" is a political disclaimer. He immediately recasts it as flirtation (\"the left's my favourite side\"). It changes meaning once and doesn't come back after that.\n\n**Mothers and family hurt.** This returns as a parallel rather than an exact repeat. He mentions being cropped from the Christmas portrait, and she echoes \"Cropped… her loss.\" Then she answers his request for an unfiltered photo with her own mother story, the chin held up to the window. He adds the dinner-plate story. The theme moves from a throwaway line to a shared wound. Her \"a no to the window\" ties her refusal to that history rather than to him.\n\n**Extensions.** He asks for a photo \"without the extensions.\" She replies \"The extensions stay.\" The repetition is simply her refusal, given its reason by the window story.\n\n**His disclaimers.** \"No pressure,\" \"No rush at all,\" \"I'm fine. Totally fine,\" \"I don't need you to stay,\" and \"I don't need anyone to remember me\" recur throughout. Each time they sit next to a demand or a plea, so they read more and more clearly as the opposite of what they say.\n\n**\"Strategist.\"** He uses it twice as a playful nickname. Its meaning doesn't change."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I can't know, since the final fifth isn't here. But the text sets up some things that point in a direction.\n\nMy best guess is that it ends on a silence, or a slowed reply, that breaks the \"four seconds\" promise. That detail is planted too deliberately to go unused. Sable offers it as a joke about her own lack of aloofness, and Zyx immediately turns it into a guarantee: \"So you'll never leave me hanging.\" Once a throwaway line becomes a vow, a story usually tests it. The last line we see repeats it, \"Four seconds, like I said,\" which reads like the writer putting it in front of us one more time before it matters.\n\nWhy I lean that way:\n\n**Zyx is escalating.** He moves from charm to a request for an unfiltered photo, then dismisses her proof that she remembers him. Each reassurance she gives, he rejects and asks again. His background explains the pattern: cropped from the portrait, a plate not set if you stopped talking. He seems unable to believe he's held in mind, so no amount of evidence will satisfy him. That kind of character tends to push until he provokes the abandonment he fears.\n\n**Sable has drawn her first real line.** She has been generous, and she says \"a lot is just a mess with potential.\" But she has refused the photo with a clear reason, and her latest message is the first one with an edge: \"I don't love being told my homework doesn't count.\" She's still there, but she's shown her patience has a limit. If Zyx pushes once more, the gap before her reply could be the ending. It wouldn't have to be cruel, just human, and it would land as proof for him.\n\n**The hat could cut the other way.** The opening promises that the hat \"holds one surprise, earned,\" and Sable asks what earning it takes. Zyx answers, \"Just stay.\" She has stayed. So a gentler ending is possible: he stops testing, takes the hat off for real, and the surprise is something small and vulnerable that trusts her memory instead of auditing it.\n\nSo there are two live possibilities. The darker one is that the four seconds fail and his fear confirms itself. The kinder one is that the hat comes off because she stayed. The text gives more weight to the first, because his anxiety is accelerating and her boundary has just appeared. But I'm reading the setup, not the ending, so I can't tell you which the writer chose."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 13.2,
+   "cost": 0.031492000000000006,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 17.3,
+   "cost": 0.04546,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 12.1,
+   "cost": 0.043236,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 20.5,
+   "cost": 0.044592,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 32.4,
+   "cost": 0.06988,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 18.8,
+   "cost": 0.034464,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 31.1,
+   "cost": 0.1250074,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 42.0,
+   "cost": 0.1405274,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 42.3,
+   "cost": 0.1329194,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 45.7,
+   "cost": 0.1543874,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 18.4,
+   "cost": 0.0835594,
+   "label": "batch 5"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:10:30Z",
+ "repo_commit": "cf421e55",
+ "cost": 0.9055
+}

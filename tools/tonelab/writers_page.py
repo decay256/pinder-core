@@ -13,9 +13,16 @@ import functools  # noqa: E402
 w.brief_full, w.brief_short = functools.cache(w.brief_full), functools.cache(w.brief_short)
 
 BASE = os.path.join(w.REPO, "docs/tone-lab/scratch")
+SHOWN_FROM = 16  # Daniel, 2026-11-27: run 16 and later only
 FIRST = "Gemini 4 Argon"
 # newest first: (run id, label, output folder, about, where its profiles were written)
 RUNS = [
+    ("v20", "Run 20: Zyx & Sable, five in a row", "writers-v20",
+     "Run 20. " + "Run 17's prompt with the tone lab's balance in the improvisations instead of the game's interest: each move of the player's lands (+1), does nothing (0) or backfires (-1); every improvisation says which, and where the balance stands, in words, and the other one's reply follows it. Five in a row that land are a date, five that backfire an unmatch, and four in a row are announced as one more; otherwise the chat has eleven improvisations and the balance after the last decides. Theme T42 and method M10, as in run 17." + " Zyx and Sable on another seed (34): the first two moves land, then five in a row backfire, and Sable unmatches Zyx after seven improvisations.", "run 15"),
+    ("v19", "Run 19: Zyx & Sable, the balance", "writers-v19",
+     "Run 19. " + "Run 17's prompt with the tone lab's balance in the improvisations instead of the game's interest: each move of the player's lands (+1), does nothing (0) or backfires (-1); every improvisation says which, and where the balance stands, in words, and the other one's reply follows it. Five in a row that land are a date, five that backfire an unmatch, and four in a row are announced as one more; otherwise the chat has eleven improvisations and the balance after the last decides. Theme T42 and method M10, as in run 17." + " Zyx and Sable on run 16's seed 23, the first eleven of its fourteen moves: the balance ends at -4, and Sable unmatches Zyx.", "run 15"),
+    ("v18", "Run 18: Reuben & Brick, the balance", "writers-v18",
+     "Run 18. " + "Run 17's prompt with the tone lab's balance in the improvisations instead of the game's interest: each move of the player's lands (+1), does nothing (0) or backfires (-1); every improvisation says which, and where the balance stands, in words, and the other one's reply follows it. Five in a row that land are a date, five that backfire an unmatch, and four in a row are announced as one more; otherwise the chat has eleven improvisations and the balance after the last decides. Theme T42 and method M10, as in run 17." + " Reuben and Brick on seed 23, run 17's game: the balance ends at +4, a date.", "run 11"),
     ("v17", "Run 17: the frozen prompt, improvised", "writers-v17",
      'Run 17. The one-go prompt that worked by hand on 26 November, frozen and played as improvisations. Claude writes the chat, not the comedians; each of the three chats is written on a different comedian\'s descriptions of Reuben and Brick from run 11, without their take on how the two clash or click. The prompt is Pinder\'s premise, those two descriptions, three acts laid over the improvisations, and one theme and one method from the writers\' pool for the whole chat: T42 "Not recognised by your own people" and M10 "The outrageous ask in the politest voice", the draw of the hand run. Seed 23 as in run 14, eleven improvisations, at most 500 words.', "run 11"),
     ("v16", "Run 16: Zyx & Sable, improvised", "writers-v16",
@@ -88,6 +95,8 @@ def fold(text, inserts):
 
 briefs, runs, stats = {}, [], {"brief folded": 0, "brief not found": 0, "profile folded": 0, "profile not found": 0}
 for rid, label, sub, about, profiles_from in RUNS:
+    if int(rid[1:]) < SHOWN_FROM:  # the page shows the current runs; older ones stay in the repo
+        continue
     O = os.path.join(BASE, sub)
     # the pair is the chat folder's name, chat-<player>-<match>; runs 1 to 14 are Reuben and Brick
     chs = sorted(d for d in os.listdir(O) if d.startswith("chat-")) if os.path.isdir(O) else []
@@ -186,6 +195,8 @@ for rid, label, sub, about, profiles_from in RUNS:
         mech = json.load(open(mp, encoding="utf-8"))
         score, date = w.tally(mech)
         tally = {"points": [s for s, _ in score], "balance": [b for _, b in score], "date": date, "game": mech.get("outcome")}
+        if (meta.get("tally") or {}).get("why"):  # v15 on: the tone lab's rule ended the chat, not the game
+            tally = dict(meta["tally"], game=None)
     runs.append({"id": rid, "label": label, "about": about, "profiles_from": profiles_from, "tally": tally,
                  "paired": os.path.isdir(os.path.join(O, "characters")),
                  "turns": os.path.exists(os.path.join(O, "mechanics.json")),

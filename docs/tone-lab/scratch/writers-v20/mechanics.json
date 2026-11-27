@@ -1,0 +1,797 @@
+{
+  "schema": "pinder-mechanics/1",
+  "mechanics_only": true,
+  "seed": 34,
+  "clock": "2026-11-14T23:30:00.0000000\u002B00:00",
+  "time_of_day": "LateNight",
+  "max_turns": 30,
+  "starting_interest": 10,
+  "traps_disabled": false,
+  "session_horniness": 6,
+  "horniness_roll_1d10": 5,
+  "horniness_time_modifier": 1,
+  "player": {
+    "display_name": "Zyx_444",
+    "level": 1,
+    "level_bonus": 0,
+    "effective_stats": {
+      "Charm": 4,
+      "Rizz": 3,
+      "Honesty": 5,
+      "Chaos": 5,
+      "Wit": 4,
+      "SelfAwareness": 2
+    },
+    "defence_dc_against": {
+      "Charm": 18,
+      "Rizz": 20,
+      "Honesty": 21,
+      "Chaos": 20,
+      "Wit": 19,
+      "SelfAwareness": 21
+    }
+  },
+  "datee": {
+    "display_name": "Sable_xo",
+    "level": 3,
+    "level_bonus": 1,
+    "effective_stats": {
+      "Charm": 8,
+      "Rizz": 9,
+      "Honesty": 3,
+      "Chaos": 2,
+      "Wit": 2,
+      "SelfAwareness": 1
+    },
+    "defence_dc_against": {
+      "Charm": 17,
+      "Rizz": 18,
+      "Honesty": 18,
+      "Chaos": 24,
+      "Wit": 25,
+      "SelfAwareness": 19
+    }
+  },
+  "turns": [
+    {
+      "turn": 1,
+      "interest_before": 10,
+      "state_before": "Interested",
+      "active_traps_before": [],
+      "options": [
+        "Charm",
+        "Rizz",
+        "SelfAwareness"
+      ],
+      "chosen_stat": "Charm",
+      "roll": {
+        "dice": [
+          16
+        ],
+        "used_die": 16,
+        "stat_modifier": 4,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 20,
+        "dc": 17,
+        "defending_stat": "SelfAwareness",
+        "success": true,
+        "nat1": false,
+        "nat20": false,
+        "tier": "Success",
+        "final_tier": "Success",
+        "miss_margin": 0,
+        "risk_tier": "Hard",
+        "activated_trap": null,
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 5,
+        "modifier": 0,
+        "total": 5,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Madness",
+        "roll": 8,
+        "dc": 3,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": true,
+        "roll": 18,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": 4,
+      "base_interest_delta": 1,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": 1
+        },
+        {
+          "source": "risk_tier",
+          "label": "Risk tier bonus",
+          "delta": 3
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [],
+      "interest_after": 14,
+      "state_after": "Interested",
+      "momentum_after": 1,
+      "active_traps_after": [],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 2,
+      "interest_before": 14,
+      "state_before": "Interested",
+      "active_traps_before": [],
+      "options": [
+        "Chaos",
+        "SelfAwareness",
+        "Rizz"
+      ],
+      "chosen_stat": "Rizz",
+      "roll": {
+        "dice": [
+          17
+        ],
+        "used_die": 17,
+        "stat_modifier": 3,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 20,
+        "dc": 18,
+        "defending_stat": "Wit",
+        "success": true,
+        "nat1": false,
+        "nat20": false,
+        "tier": "Success",
+        "final_tier": "Success",
+        "miss_margin": 0,
+        "risk_tier": "Hard",
+        "activated_trap": null,
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 11,
+        "modifier": 0,
+        "total": 11,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": null,
+      "steering": {
+        "succeeded": false,
+        "roll": 15,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": 4,
+      "base_interest_delta": 1,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": 1
+        },
+        {
+          "source": "risk_tier",
+          "label": "Risk tier bonus",
+          "delta": 3
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [],
+      "interest_after": 18,
+      "state_after": "VeryIntoIt",
+      "momentum_after": 2,
+      "active_traps_after": [],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 3,
+      "interest_before": 18,
+      "state_before": "VeryIntoIt",
+      "active_traps_before": [],
+      "options": [
+        "SelfAwareness",
+        "Charm",
+        "Chaos"
+      ],
+      "chosen_stat": "Charm",
+      "roll": {
+        "dice": [
+          6,
+          3
+        ],
+        "used_die": 6,
+        "stat_modifier": 4,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 10,
+        "dc": 17,
+        "defending_stat": "SelfAwareness",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "TropeTrap",
+        "final_tier": "TropeTrap",
+        "miss_margin": 7,
+        "risk_tier": "Hard",
+        "activated_trap": "Cringe",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 15,
+        "modifier": 0,
+        "total": 15,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Madness",
+        "roll": 13,
+        "dc": 4,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 11,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -2,
+      "base_interest_delta": -2,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -2
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)",
+        "Fixation \u002B1 (Highest-% option picked 3 turns in a row)"
+      ],
+      "interest_after": 16,
+      "state_after": "VeryIntoIt",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "cringe"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 4,
+      "interest_before": 16,
+      "state_before": "VeryIntoIt",
+      "active_traps_before": [
+        "cringe"
+      ],
+      "options": [
+        "Rizz",
+        "Wit",
+        "Charm"
+      ],
+      "chosen_stat": "Charm",
+      "roll": {
+        "dice": [
+          4,
+          17
+        ],
+        "used_die": 4,
+        "stat_modifier": 4,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 8,
+        "dc": 17,
+        "defending_stat": "SelfAwareness",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "TropeTrap",
+        "final_tier": "TropeTrap",
+        "miss_margin": 9,
+        "risk_tier": "Hard",
+        "activated_trap": "Cringe",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 11,
+        "modifier": 0,
+        "total": 11,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Madness",
+        "roll": 7,
+        "dc": 6,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 10,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -2,
+      "base_interest_delta": -2,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -2
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)",
+        "Madness \u002B1 (CHARM used 3\u002B times in one conversation)"
+      ],
+      "interest_after": 14,
+      "state_after": "Interested",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "cringe"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 5,
+      "interest_before": 14,
+      "state_before": "Interested",
+      "active_traps_before": [
+        "cringe"
+      ],
+      "options": [
+        "Chaos",
+        "SelfAwareness",
+        "Honesty"
+      ],
+      "chosen_stat": "Honesty",
+      "roll": {
+        "dice": [
+          1
+        ],
+        "used_die": 1,
+        "stat_modifier": 5,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 6,
+        "dc": 18,
+        "defending_stat": "Chaos",
+        "success": false,
+        "nat1": true,
+        "nat20": false,
+        "tier": "Legendary",
+        "final_tier": "Catastrophe",
+        "miss_margin": 12,
+        "risk_tier": "Hard",
+        "activated_trap": "Overshare",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 7,
+        "modifier": 0,
+        "total": 7,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Denial",
+        "roll": 18,
+        "dc": -1,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 3,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -4,
+      "base_interest_delta": -4,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -4
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Denial \u002B1 (Nat 1 on Honesty)"
+      ],
+      "interest_after": 10,
+      "state_after": "Interested",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "overshare"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 6,
+      "interest_before": 10,
+      "state_before": "Interested",
+      "active_traps_before": [
+        "overshare"
+      ],
+      "options": [
+        "Honesty",
+        "Rizz",
+        "Charm"
+      ],
+      "chosen_stat": "Honesty",
+      "roll": {
+        "dice": [
+          4
+        ],
+        "used_die": 4,
+        "stat_modifier": 5,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 9,
+        "dc": 20,
+        "defending_stat": "Chaos",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "Catastrophe",
+        "final_tier": "Catastrophe",
+        "miss_margin": 11,
+        "risk_tier": "Hard",
+        "activated_trap": "Overshare",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 7,
+        "modifier": 0,
+        "total": 7,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Denial",
+        "roll": 18,
+        "dc": -1,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 10,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -3,
+      "base_interest_delta": -3,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -3
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)",
+        "Fixation \u002B1 (Highest-% option picked 3 turns in a row)"
+      ],
+      "interest_after": 7,
+      "state_after": "Lukewarm",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "overshare"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 7,
+      "interest_before": 7,
+      "state_before": "Lukewarm",
+      "active_traps_before": [
+        "overshare"
+      ],
+      "options": [
+        "Honesty",
+        "SelfAwareness",
+        "Rizz"
+      ],
+      "chosen_stat": "Honesty",
+      "roll": {
+        "dice": [
+          6
+        ],
+        "used_die": 6,
+        "stat_modifier": 5,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 11,
+        "dc": 20,
+        "defending_stat": "Chaos",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "TropeTrap",
+        "final_tier": "TropeTrap",
+        "miss_margin": 9,
+        "risk_tier": "Hard",
+        "activated_trap": "Overshare",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 17,
+        "modifier": 0,
+        "total": 17,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Denial",
+        "roll": 5,
+        "dc": -1,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 2,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -2,
+      "base_interest_delta": -2,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -2
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)",
+        "Fixation \u002B1 (Same stat (Honesty) used 3 turns in a row)"
+      ],
+      "interest_after": 5,
+      "state_after": "Lukewarm",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "overshare"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 8,
+      "interest_before": 5,
+      "state_before": "Lukewarm",
+      "active_traps_before": [
+        "overshare"
+      ],
+      "options": [
+        "Honesty",
+        "Rizz",
+        "Wit"
+      ],
+      "chosen_stat": "Honesty",
+      "roll": {
+        "dice": [
+          2
+        ],
+        "used_die": 2,
+        "stat_modifier": 5,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 7,
+        "dc": 20,
+        "defending_stat": "Chaos",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "Catastrophe",
+        "final_tier": "Catastrophe",
+        "miss_margin": 13,
+        "risk_tier": "Hard",
+        "activated_trap": "Overshare",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 6,
+        "modifier": 0,
+        "total": 6,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Denial",
+        "roll": 14,
+        "dc": -1,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": true,
+        "roll": 20,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -3,
+      "base_interest_delta": -3,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -3
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)"
+      ],
+      "interest_after": 2,
+      "state_after": "Bored",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "overshare"
+      ],
+      "game_over": false,
+      "outcome": null
+    },
+    {
+      "turn": 9,
+      "interest_before": 2,
+      "state_before": "Bored",
+      "active_traps_before": [
+        "overshare"
+      ],
+      "options": [
+        "Wit",
+        "Chaos",
+        "Honesty"
+      ],
+      "chosen_stat": "Honesty",
+      "roll": {
+        "dice": [
+          7,
+          4
+        ],
+        "used_die": 4,
+        "stat_modifier": 5,
+        "level_bonus": 0,
+        "external_bonus": 0,
+        "total": 9,
+        "dc": 20,
+        "defending_stat": "Chaos",
+        "success": false,
+        "nat1": false,
+        "nat20": false,
+        "tier": "Catastrophe",
+        "final_tier": "Catastrophe",
+        "miss_margin": 11,
+        "risk_tier": "Hard",
+        "activated_trap": "Overshare",
+        "consequence": null
+      },
+      "horniness": {
+        "roll": 2,
+        "modifier": 0,
+        "total": 2,
+        "dc": -2,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "shadow": {
+        "shadow": "Denial",
+        "roll": 2,
+        "dc": -1,
+        "miss": false,
+        "tier": "Success",
+        "overlay_applied": false,
+        "consequence": null
+      },
+      "steering": {
+        "succeeded": false,
+        "roll": 12,
+        "modifier": 3,
+        "dc": 20
+      },
+      "interest_delta": -3,
+      "base_interest_delta": -3,
+      "breakdown": [
+        {
+          "source": "base_roll",
+          "label": "Base roll",
+          "delta": -3
+        }
+      ],
+      "combo": null,
+      "trap_cleared": null,
+      "shadow_growth": [
+        "Madness \u002B1 (TropeTrap failure)",
+        "Fixation \u002B1 (Highest-% option picked 3 turns in a row)",
+        "Dread \u002B2 (Interest hit 0 (unmatch))",
+        "Dread \u002B1 (Conversation ended without date)",
+        "Fixation \u002B1 (Never picked Chaos in whole conversation)"
+      ],
+      "interest_after": 0,
+      "state_after": "Unmatched",
+      "momentum_after": 0,
+      "active_traps_after": [
+        "overshare"
+      ],
+      "game_over": true,
+      "outcome": "Unmatched"
+    }
+  ],
+  "turns_played": 9,
+  "final_interest": 0,
+  "outcome": "Unmatched"
+}

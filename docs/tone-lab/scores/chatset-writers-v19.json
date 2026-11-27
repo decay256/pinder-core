@@ -1,0 +1,70 @@
+{
+ "id": "chatset-writers-v19",
+ "kind": "chat",
+ "label": "Run 19 · all 3 chats",
+ "version": "run 19",
+ "order": 119,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v19/chat-zyx-sable/",
+ "note": "Every chat of run 19 (run 18's prompt for Zyx and Sable on run 16's seed 23, eleven improvisations, unmatched): the same pair, premise, prompt, theme and method, the same author, each on a different comedian's descriptions of the two characters. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
+ "when": null,
+ "writer": null,
+ "writers_run": 19,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 10728,
+   "words": 1901
+  },
+  "improvisations": {
+   "chars": 6346,
+   "words": 1071
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 3,
+   "why": "I set aside the shared arc that all eleven improvisations fix: the order of the moves, the overexplained Wit, the narrated Dread, the clinging Charm, the cliché and the unmatch. On what the writers added, each chat has its own centrepiece: Carr's 5am reset that nobody may watch, Booster's midnight rule and the deleted sleeping photo, Wong's Arby's coupons and Rehearsal Sable. But the same invented props recur in all three: the mum who inspects Sable like a returns desk, Zyx cropped out of the family portrait as an elbow, and Sable's closing proof that she remembered. Two chats also share the name-as-roll-call sex request, \"you were listening\", Sable's lower left side and the consultant job, so the set breaks the rule of no line recurring across more than two chats.",
+   "evidence": [
+    "My mum still reviews my profile like a returns desk.",
+    "My mum reviews my selfies like a returns desk",
+    "My mum checked my face like a Zara return past the window."
+   ],
+   "raise": "Give each chat its own wound and its own prop for Sable's mother and Zyx's family, instead of the returns-desk mum and the cropped elbow in every chat, and cut the shared roll-call request and the remembered-the-list goodbye.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "def": "eb4c97580d7f148b",
+   "material": "86588e880fdecf6c",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 15.8,
+   "cost": 0.08485140000000001,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:07:39Z",
+ "repo_commit": "cf421e55",
+ "cost": 0.0849
+}

@@ -1,0 +1,66 @@
+{
+ "id": "chatset-writers-v20",
+ "kind": "chat",
+ "label": "Run 20 · all 3 chats",
+ "version": "run 20",
+ "order": 120,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v20/chat-zyx-sable/",
+ "note": "Every chat of run 20 (run 18's prompt for Zyx and Sable on seed 34: five backfire in a row, unmatched after seven): the same pair, premise, prompt, theme and method, the same author, each on a different comedian's descriptions of the two characters. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
+ "when": null,
+ "writer": null,
+ "writers_run": 20,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 8959,
+   "words": 1605
+  },
+  "improvisations": {
+   "chars": 4016,
+   "words": 699
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "I set aside the beat sequence the instructions fix: Charm opening, Rizz, two Fixation turns, Denial, the backfire run and the unmatch. What the writers built on top of it is still the same night in all three chats. Each one has Zyx reveal being cropped from a family photo at the same point, ask for an unedited picture, and get Sable's mum-inspection story back. Each ends with Zyx saying he's \"not like other guys\" and Sable answering that she remembered him all along and he never noticed. Several lines recur too: the mum \"like a returns desk\" (Carr, Booster), \"mouth open\" asleep (Carr, Booster), \"ninety seconds\" and the lint roller (Wong, Booster), \"I lean left\" (Wong, Carr). Only the set pieces differ (coupons in the hat, a name tag in the dark, signing the pillowcase), which is why this is a 2 and not a 1.",
+   "evidence": [
+    "Mum cropped me from the Christmas portrait, so this is big.",
+    "I remembered it all, Zyx. You're the only one who kept forgetting.",
+    "I had you at hello, babe. You just kept saying it."
+   ],
+   "raise": "Have each writer find a different wound and a different final turn for Sable, rather than the shared cropped-photo reveal and the \"I knew you all along\" ending, so that no beat beyond the instructed ones appears in all three chats.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "def": "eb4c97580d7f148b",
+   "material": "18c695dad3ad0d46",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 21.9,
+   "cost": 0.07307140000000001,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:15:30Z",
+ "repo_commit": "cf421e55",
+ "cost": 0.0731
+}

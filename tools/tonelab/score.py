@@ -340,6 +340,10 @@ WRITER_RUNS = [
     ("writers-v17", 17, "Reuben and Brick on seed 23 again: the frozen one-go prompt as improvisations, Pinder's premise, "
                         "each comedian's characters without their take on the pair, three acts, one theme and one method, "
                         "written by Claude"),
+    ("writers-v18", 18, "run 17 with the tone lab's balance instead of the game's interest in the improvisations; Reuben "
+                        "and Brick on seed 23, eleven improvisations, a date"),
+    ("writers-v19", 19, "run 18's prompt for Zyx and Sable on run 16's seed 23, eleven improvisations, unmatched"),
+    ("writers-v20", 20, "run 18's prompt for Zyx and Sable on seed 34: five backfire in a row, unmatched after seven"),
 ]
 CHAT_PAIR = ("reuben", "brick")  # the player writes first; runs 1 to 14
 

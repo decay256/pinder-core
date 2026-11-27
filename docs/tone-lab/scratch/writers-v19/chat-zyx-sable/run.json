@@ -1,0 +1,165 @@
+{
+ "model": "opus",
+ "runtime": "claude CLI, subscription login",
+ "version": "v15",
+ "system": "You write chats for Pinder, a comedy game.",
+ "template": "chat-improvised.v1.md",
+ "premise": "premise.v1.md",
+ "from": "docs/tone-lab/scratch/writers-v16",
+ "words": 500,
+ "acts": [
+  "improvisations 1 to 3",
+  "improvisations 4 to 8",
+  "improvisations 9 to 11"
+ ],
+ "draw": {
+  "theme": [
+   "T42",
+   "Not recognised by your own people"
+  ],
+  "method": [
+   "M10",
+   "The outrageous ask in the politest voice"
+  ],
+  "theme_text": "**Not recognised by your own people**\n\nThe character is sure he's forgettable, keeps reintroducing himself, and can't take it in when the other one remembers.\n\nWhat it is: In Wright's work the self keeps slipping. The narrator can win a petty argument about his things and still go unrecognised by the person he lives with, and he tells it as if the furniture were the main event. Identity is something the world doesn't confirm.\n\nIn Pinder: The character believes he's forgettable, and he has evidence: exes who called him the wrong name, matches who sent him the same opener twice. He's afraid of being interchangeable, one more dick on a screen of dicks. On the app he repeats distinguishing details, checks that the other one remembers what he said, and introduces himself again mid-chat. The reader sees that the other one did remember, and that he can't take it in.",
+  "method_text": "**The outrageous ask in the politest voice**\n\nA request far over the line, wrapped in the tidiest, most considerate phrasing the character has.\n\nHow it works: The register and the content contradict each other: the manners of a polite note around an insane request. The politeness makes refusing socially awkward, so the reader watches the other person squirm inside their own good manners.\n\nIn Pinder: The character asks for something intimate, premature or logistically mad with a 'no rush' or an offer to go first. The filth goes in plain, specific detail; the courtesy goes in the frame around it. It works best once their act is established, so the politeness reads as how they cope rather than as a writer's trick.\n\nTest: Strip the politeness: is the request outrageous? Read only the politeness: is it a perfectly normal message?\n\nGoes wrong when: Sarcastic politeness is a wink. A generic ask ('wanna fuck') gives nothing away about the character."
+ },
+ "mechanics": {
+  "schema": "pinder-mechanics/1",
+  "mechanics_only": true,
+  "seed": 23,
+  "clock": "2026-11-14T23:30:00.0000000+00:00",
+  "time_of_day": "LateNight",
+  "max_turns": 30,
+  "starting_interest": 10,
+  "traps_disabled": false,
+  "session_horniness": 9,
+  "horniness_roll_1d10": 8,
+  "horniness_time_modifier": 1,
+  "player": {
+   "display_name": "Zyx_444",
+   "level": 1,
+   "level_bonus": 0,
+   "effective_stats": {
+    "Charm": 4,
+    "Rizz": 3,
+    "Honesty": 5,
+    "Chaos": 5,
+    "Wit": 4,
+    "SelfAwareness": 2
+   },
+   "defence_dc_against": {
+    "Charm": 18,
+    "Rizz": 20,
+    "Honesty": 21,
+    "Chaos": 20,
+    "Wit": 19,
+    "SelfAwareness": 21
+   }
+  },
+  "datee": {
+   "display_name": "Sable_xo",
+   "level": 3,
+   "level_bonus": 1,
+   "effective_stats": {
+    "Charm": 8,
+    "Rizz": 9,
+    "Honesty": 3,
+    "Chaos": 2,
+    "Wit": 2,
+    "SelfAwareness": 1
+   },
+   "defence_dc_against": {
+    "Charm": 17,
+    "Rizz": 18,
+    "Honesty": 18,
+    "Chaos": 24,
+    "Wit": 25,
+    "SelfAwareness": 19
+   }
+  },
+  "turns_played": 14,
+  "final_interest": 0,
+  "outcome": "Unmatched"
+ },
+ "tally": {
+  "points": [
+   0,
+   -1,
+   1,
+   1,
+   0,
+   -1,
+   0,
+   -1,
+   -1,
+   -1,
+   -1
+  ],
+  "balance": [
+   0,
+   -1,
+   0,
+   1,
+   1,
+   0,
+   0,
+   -1,
+   -2,
+   -3,
+   -4
+  ],
+  "date": false,
+  "played": 11,
+  "ending": "unmatched",
+  "why": "last",
+  "runs": [
+   0,
+   -1,
+   1,
+   2,
+   0,
+   -1,
+   0,
+   -1,
+   -2,
+   -3,
+   -4
+  ]
+ },
+ "writers": {
+  "carr": {
+   "writer": "Jimmy Carr's characters",
+   "author": "Claude",
+   "sheets_by": "Jimmy Carr",
+   "model": "opus",
+   "session": "92e63e2c-af78-4ce1-9d2f-4eab098e73f3",
+   "seconds": 113.4,
+   "cost": 1.224,
+   "words": 619,
+   "turns": 11
+  },
+  "booster": {
+   "writer": "Joel Kim Booster's characters",
+   "author": "Claude",
+   "sheets_by": "Joel Kim Booster",
+   "model": "opus",
+   "session": "11a16c98-33d5-4f40-873d-87534f4fdc24",
+   "seconds": 122.2,
+   "cost": 1.4095,
+   "words": 686,
+   "turns": 11
+  },
+  "wong": {
+   "writer": "Ali Wong's characters",
+   "author": "Claude",
+   "sheets_by": "Ali Wong",
+   "model": "opus",
+   "session": "158414b2-c91d-4ba5-a565-2c1675b34b6d",
+   "seconds": 126.5,
+   "cost": 1.3534,
+   "words": 505,
+   "turns": 11
+  }
+ }
+}

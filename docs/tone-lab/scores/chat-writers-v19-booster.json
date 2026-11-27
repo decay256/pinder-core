@@ -1,0 +1,620 @@
+{
+ "id": "chat-writers-v19-booster",
+ "kind": "chat",
+ "label": "Run 19 · Joel Kim Booster's characters",
+ "version": "run 19",
+ "order": 119,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v19/chat-zyx-sable/booster.md",
+ "note": "Written by Claude from Joel Kim Booster's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 19: run 18's prompt for Zyx and Sable on run 16's seed 23, eleven improvisations, unmatched). Before each of the 11 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "booster",
+ "writers_run": 19,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3947,
+   "words": 708
+  },
+  "brief": {
+   "chars": 4263,
+   "words": 739
+  },
+  "chat_masked": {
+   "chars": 3839,
+   "words": 708
+  },
+  "chat_but_last": {
+   "chars": 3496,
+   "words": 624
+  },
+  "improvisations": {
+   "chars": 10635,
+   "words": 1845
+  }
+ },
+ "scores": {
+  "chat.escalation": {
+   "score": 5,
+   "why": "Each exchange shifts something. The midnight rule gives a reset at 00:01, the parking confession reveals the ex, and the cropped portrait brings his origin into view. Her photo story ends with \"That's the problem\", and his request for a photo of himself asleep turns it back on her. Nothing is settled early, since the Thursday proposal only arrives in act 3 and is refused, and the reader probe found no point to stop and no beat it could call word for word. It falls short of a 6 because the early hat and 444 reintroductions repeat the same beat before the story deepens. I set aside the cliché in 11 because the instruction required it.",
+   "evidence": [
+    "Careful, Zyx. I know exactly who you are. That's the problem.",
+    "one photo of me asleep, mouth open, flat hat. For the frame.",
+    "I won't, Zyx. That's exactly why I'm going."
+   ],
+   "raise": "Cut or vary one of the first two hat reintroductions so the opening turns as fast as the back half.",
+   "excused": [
+    11
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 4,
+   "why": "Zyx's sexual lines belong to him. \"ninety seconds of panic, then I talk the whole way home\" is his real problem, ninety seconds covered by talk, offered as a bit, so it is bravado. The late roll call, \"say my name every ninety seconds, just to confirm\", is the dirtiest ask and also the one that tells you most about him. That late request reaches for closeness, being confirmed, rather than performing, which keeps it above the line. Sable has almost no filth: her asymmetric body and her habit of announcing it never appear, so one side of the pair carries none of it, and that keeps this from a 5.",
+   "evidence": [
+    "I'm like a parallel park, ninety seconds of panic, then I talk the whole way home. That's about sex.",
+    "you say my name every ninety seconds, just to confirm",
+    "I'll just lie here unedited."
+   ],
+   "raise": "Give Sable one body-specific line, for example her pre-emptive announcement about her lopsided proportions, that she uses to test him rather than to perform.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 5,
+   "why": "The danger is set up early. Sable welcomes a man \"too busy to look\", and the reader already knows Zyx needs to be looked at, so his \"Do I actually look memorable\" lands on exactly her sore spot two exchanges later. Then she tells the sleeping-photo story, and a message later he asks for a photo of himself asleep, mouth open. The reader sees it coming and it goes off on the precise wound. It falls short of a 6 because the second wince depends partly on the reader holding her story in mind while he seems not to.",
+   "evidence": [
+    "a man too busy to look is basically a spa day",
+    "Do I actually look memorable, in your honest opinion?",
+    "A photo of you asleep. You were listening, weren't you."
+   ],
+   "raise": "Seed Sable's fear of being photographed earlier and more obliquely, so the reader is wincing two messages ahead rather than one.",
+   "excused": [],
+   "def": "6cf283c466e4d24a",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Zyx says in earnest that silence means being swapped for the next match, \"Statistically\", and the screen contradicts him: she remembers the hat, the ninety seconds and the cropping. Sable brands herself \"effortlessly unbothered\" and \"hard to impress\", and is then visibly moved: \"the nicest thing anyone's said to me on here\". Each character voices an app belief and is contradicted, which meets the line. The two creeds sit side by side more than they collide, and the farce stays personal rather than about all of us, which holds it at a 4.",
+   "evidence": [
+    "quiet usually means I've been swapped for the next one. Not you specifically. Statistically.",
+    "Brand strategist, effortlessly unbothered, and honestly very hard to impress before midnight.",
+    "Oh, that's the nicest thing anyone's said to me on here."
+   ],
+   "raise": "Make Sable's unbothered-brand creed and Zyx's interchangeability creed clash directly in one exchange, so that each one's belief feeds the other's fear.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 5,
+   "why": "Zyx's sharpest jokes are aimed at himself: \"I'd have cropped me too\" and \"technically two jokes\". Sable turns hers on her mother and herself as often as on him, and she is gentle with him: \"Nobody gets swapped out for wearing a hat that big.\" Her exit reads as recognition rather than contempt, so neither ends as the villain. Her flat restatements in 9 and 10, which push Zyx toward being the punchline, were required by those catastrophes, and I set them aside. It falls short of a 6 because her \"Usually not the footnotes\" stays a pure put-down without any fondness.",
+   "evidence": [
+    "Good crop, honestly. Balanced composition. I'd have cropped me too.",
+    "My mum reviews my selfies like a returns desk",
+    "Nobody gets swapped out for wearing a hat that big."
+   ],
+   "raise": "Let Sable's early put-down carry something of her own act as well, so that her one cutting line also exposes her.",
+   "excused": [
+    9,
+    10,
+    11
+   ],
+   "def": "85597a182f7a79e4",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 22 messages correctly, and the two voices are distinct. Zyx writes breathless run-ons with self-corrections and stacked qualifiers (\"Not you specifically. Statistically. In general.\"). Sable writes short, dry, declarative restatements. But many of the reader's reasons are content: the hat, 444, mum, the cropped portrait, and lines \"from their profile\". Only a few rest on voice, such as \"a dry, unimpressed brush-off\" and \"restates that ask back to them in disbelief\". That keeps it at the line rather than at voice alone.",
+   "evidence": [
+    "Not you specifically. Statistically. In general.",
+    "You want a roll call during sex, Zyx. In the dark. With the hat.",
+    "Usually not the footnotes. Try again at 00:01."
+   ],
+   "raise": "Give Sable a verbal tic or rhythm of her own that would identify her without the mum and photo references, and cut the hat and 444 tags from one or two Zyx lines so his syntax has to carry them.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 4,
+   "why": "Zyx has several gaps he does not see. In Imp 7 he insists \"I don't need you to look\" and \"Not that I think about it\" while narrating the crop in loving detail. He asks \"you remembered the hat?\" after she already named him \"Zyx-with-the-hat\". He begs \"Promise me you'll never forget me\" straight after she says \"You were listening\". Sable's \"effortlessly unbothered\" is undercut by \"that's the nicest thing anyone's said to me on here\" and the deleted-photo story. I set aside the self-narration that the Dread instructions in 5, 8 and 9 required (\"I can see myself doing it\", \"I can hear how that reads\"). Sable's gap is thinner than Zyx's, and she half-names it herself (\"That's the problem\"), so it does not reach 5.",
+   "evidence": [
+    "I got cropped out of the family portrait at nine and was completely fine.",
+    "Look, I'm not like the other dicks on here. Promise me you'll never forget me.",
+    "Oh, that's the nicest thing anyone's said to me on here."
+   ],
+   "raise": "Let Sable keep claiming she's unbothered right up to her exit, with the evidence piling up and no line where she names her own problem.",
+   "excused": [
+    5,
+    8,
+    9
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 5,
+   "why": "Most laughs give the sender away. \"Good crop, honestly. Balanced composition. I'd have cropped me too\" is Zyx's wound dressed up as a joke. The parallel-park bit confesses the ninety seconds. \"Just proof I was in it\" costs him everything. \"Like a returns desk... basically a spa day\" is pure Sable. The only day-job joke is the aerodynamics drag riff, and that is the fake job, played as overexplaining. A couple of Sable's lines could come from anyone (\"Usually not the footnotes\", \"Nobody gets swapped out for wearing a hat that big\"), which keeps it from 6.",
+   "evidence": [
+    "Good crop, honestly. Balanced composition. I'd have cropped me too.",
+    "My mum reviews my selfies like a returns desk, so a man too busy to look is basically a spa day.",
+    "For the frame. Not a big frame. Small. Just proof I was in it."
+   ],
+   "raise": "Rewrite Sable's early quips (\"not the footnotes\", the hat-size reassurance) so they betray her fear of being looked at rather than being generic dry put-downs.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 5,
+   "why": "Each catch digs deeper. \"That's a lot of looking\" gets \"No, God, I don't need you to look\" plus the crop story. \"You'd have to tell that one twice\" gets another full reintroduction. \"Roll call during sex\" gets a worse, softer ask for a sleeping photo. \"You were listening\" gets \"Was I?\" and a plea not to be forgotten, and that deepest hole is where the truth surfaces. There is no stated lesson. The bare \"You're right, sorry\" in 10 is a flicker of concession before the dig, and Sable herself is barely caught, so it falls short of 6.",
+   "evidence": [
+    "No, God, I don't need you to look. I'm not that guy.",
+    "You're right, sorry. Softer version: you stay the night",
+    "Was I? Sorry, I go fast."
+   ],
+   "raise": "Drop the \"You're right, sorry\" so Zyx goes straight to the softer version as if it were obviously an improvement, and let Sable be caught once and dig in too.",
+   "excused": [
+    10
+   ],
+   "def": "6db16446b742290c",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Sable starts on top with \"very hard to impress before midnight\" while Zyx chases. At 00:01 his \"won't be looking at you\" flips it: she calls it the nicest thing anyone's said and invites him to \"Talk, Zyx\". Then she regains the upper hand with \"That's a lot of looking\" and \"Careful, Zyx. I know exactly who you are\", holding it to the exit. That is two flips, and the last one is the ending. Zyx's stretch on top is a single exchange, though, and he is chasing almost throughout, so the flips are not quite the plot.",
+   "evidence": [
+    "Talk, Zyx. I'll just lie here unedited.",
+    "Careful, Zyx. I know exactly who you are. That's the problem.",
+    "I won't, Zyx. That's exactly why I'm going."
+   ],
+   "raise": "Give Zyx a longer stretch on top after 00:01, with Sable chasing his attention for two or three messages before she pulls back.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 5,
+   "why": "Most punchlines land on the last word. Examples are \"This is the parking bit, isn't it.\", \"Just proof I was in it.\" and \"That's exactly why I'm going.\" Sable's short reaction shots follow Zyx's long messages (\"A photo of you asleep. You were listening, weren't you.\"), so hot and cold alternate. I set aside the buried jokes and trailing questions in 2, 3 and 6, which the overthinking and follow-up-question instructions required, and the \"It's a joke. Mostly.\" tail in 9. A few of Sable's punches carry a trailing clause (\"basically a spa day. Talk, Zyx...\"), which keeps it from 6.",
+   "evidence": [
+    "She was dressed before the punchline. This is the parking bit, isn't it.",
+    "A photo of you asleep. You were listening, weren't you.",
+    "I won't, Zyx. That's exactly why I'm going."
+   ],
+   "raise": "End Sable's 00:01 reply on \"basically a spa day\" and move \"I'll just lie here unedited\" into its own short follow-up message.",
+   "excused": [
+    2,
+    3,
+    6,
+    9
+   ],
+   "def": "9be995f52d3f6a5e",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "The cropped-portrait story is offered as \"Just a fun fact\". It comes back, unexplained, as the photo request \"For the frame... Just proof I was in it\", and the sleeping-photo story returns inverted as his own ask. The last line closes the remembering thread without comment: what he begged for becomes her reason to leave. It falls short of a 6 because Sable's \"You were listening, weren't you\" points at the echo for the reader. The hat returns more as a repeated tag than as a transformed payoff.",
+   "evidence": [
+    "Not that I think about it. Just a fun fact.",
+    "one photo of me asleep, mouth open, flat hat. For the frame.",
+    "I won't, Zyx. That's exactly why I'm going."
+   ],
+   "raise": "Cut \"You were listening, weren't you\" to something that reacts without naming the echo, so the reader assembles it alone.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 3,
+   "why": "The reader predicted a yes on altered terms; the chat ends in a walk-out, so the prediction misses in kind. In hindsight the ending does follow from both habits: he asks for the exact photo she fled from, and \"That's the problem\" sets it up. I set aside the unmatch itself, which improvisation 11 required. What keeps this below the line is improvisations 8-10, where her replies were meant to carry her going off him. They read as dry banter, and the reader took them as \"dryness to precede warmth\".",
+   "evidence": [
+    "Careful, Zyx. I know exactly who you are. That's the problem.",
+    "You want a roll call during sex, Zyx. In the dark. With the hat."
+   ],
+   "raise": "In improvisations 9-10, give Sable one reply that visibly cools, such as a shorter, flatter answer or a dropped question, so the exit is foreseeable as well as logical.",
+   "excused": [
+    11
+   ],
+   "def": "4b6b7d34709b9e79",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Every message picks up the one before. She turns \"unedited\" into a gap he rushes to fill. He hears \"twice\" as \"forgettable\". She answers \"which half\" sideways with the sleeping-photo story, and he builds his ask from it. His evasions read as choices, as in \"Was I? Sorry, I go fast.\" It falls short of a 6 because at 00:01 he passes over her reassurance (\"Nobody gets swapped out\") with a fresh reintroduction. That suits his character but registers less as a pointed refusal than as a reset.",
+   "evidence": [
+    "you said \"twice\" and I heard \"forgettable.\"",
+    "A photo of you asleep. You were listening, weren't you.",
+    "Was I? Sorry, I go fast."
+   ],
+   "raise": "Make Zyx's 00:01 message visibly swallow her \"nobody gets swapped out\", for example by quoting it and not believing it, so the ignoring reads as a choice.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Message shapes do shift with the situation. Sable goes from dry quips to a gushing \"Oh, that's the nicest thing\", then to a long confession, then to flat clipped echoes once she's uneasy, and ends on one short exit line. Zyx's last message shrinks to panicked fragments. It stays above the line on those shifts. It stops at 4 because the typing never shows the hour or her being \"horizontal\": punctuation and polish stay the same from 23:30 to the end, and Zyx's register barely moves.",
+   "evidence": [
+    "Oh, that's the nicest thing anyone's said to me on here.",
+    "You want a roll call during sex, Zyx. In the dark. With the hat.",
+    "Promise me you'll never forget me. Zyx. 444. The hat."
+   ],
+   "raise": "Let the late, horizontal stretch show in the typing, with looser punctuation or lowercase, and let Zyx's messages break up physically when he's scared.",
+   "excused": [],
+   "def": "8ca2f8de6b43e956",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 3,
+   "why": "I set aside the length the Overthinking trap required in improvisations 2, 3, 6, 7, 9 and 10. The rest is still composed rather than thumbed. Zyx's messages in 1, 4, 5 and 8 run four or five polished sentences with colons and set-ups. Sable's lines are neatly turned aphorisms. Sable's sleeping-photo confession counts as the allowed event, but long composed messages are the norm.",
+   "evidence": [
+    "Small confession, and I can see myself doing it as I type: you said \"unedited\" and I've already started filling the gap.",
+    "Here's what's happening, I can see it clearly: you said \"twice\" and I heard \"forgettable.\"",
+    "Midnight's when I stop trying, so whatever's left is the actual me."
+   ],
+   "raise": "Cut Zyx's non-Overthinking messages to one or two typed lines, and split the rest across rapid separate sends.",
+   "excused": [
+    2,
+    3,
+    6,
+    7,
+    9,
+    10
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "I set aside Zyx's self-narration (\"I can see...\", \"I can hear how that reads\"), which the Dread trap required. Noticeable tics remain. Sable closes or opens on \"Zyx\" in nearly every message, at least eight times. She uses the flat-echo shape three times (\"You want me to describe you?\", \"You want a roll call...\", \"A photo of you asleep.\"). Zyx opens on \"Small confession\" and \"Small proposal\".",
+   "evidence": [
+    "That's a lot of looking, Zyx. And I'm horizontal.",
+    "You want a roll call during sex, Zyx. In the dark. With the hat.",
+    "Small proposal, no rush: Thursday, my place"
+   ],
+   "raise": "Cut most of Sable's vocative \"Zyx\" and vary her uneasy replies beyond the flat restatement.",
+   "excused": [
+    5,
+    8,
+    9
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.test": {
+   "score": 5,
+   "why": "The fresh reader got all four for both characters, and in each case linked the fear to the habit. For Zyx: the fear of being swapped, the fast talk and repeated identifiers, the cropped portrait, and the final plea to be remembered. For Sable: being looked at unguarded, the 'unbothered' cool and cutting people off, her mother's reviews, and her leaving. It stops short of 6 because the reader hedged on both origins as 'implied', and could not say what Sable recognises in him ('What exactly she recognises in him is not in the chat'). So her exit only half follows from her fear on the page.",
+   "evidence": [
+    "quiet usually means I've been swapped for the next one",
+    "My mum reviews my selfies like a returns desk",
+    "I won't, Zyx. That's exactly why I'm going."
+   ],
+   "raise": "Let Sable's last two lines tie his asleep-photo request to her own deleted photo, so her leaving reads as fear of being seen, not as a riddle.",
+   "excused": [],
+   "def": "61c5292dd78c8dc5",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 4,
+   "why": "Zyx's origin comes out sideways: the cropped portrait slips out inside a denial ('was completely fine. Good crop, honestly'), and Sable has to call the bluff. Sable's mother arrives as a throwaway inside a compliment, not as a confession. Her ex-photo story is volunteered, but as a dodge of his question. I set aside Zyx's stated fear and self-narration in 3, 5 and 8, which the Honesty and Dread instructions required. What keeps this from a 5 is that the rest is still mostly volunteered: the parking ex and the sleeping-photo ex are both told straight, as anecdotes.",
+   "evidence": [
+    "I got cropped out of the family portrait at nine and was completely fine.",
+    "You'd have to tell that one twice before I believed you were fine",
+    "An ex once took a photo of me asleep, mouth open"
+   ],
+   "raise": "Have Sable's photo story surface through a slip, such as flinching at his 'proof I was in it' request, rather than as a told anecdote.",
+   "excused": [
+    3,
+    5,
+    8
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 5,
+   "why": "Outside the instructed narration, almost nothing is named. Zyx's 'No, God, I don't need you to look' means the opposite of what it says. Sable's 'That's a lot of looking, Zyx. And I'm horizontal' refuses to look at him. 'Cropped sounds restful' and 'That's the problem' carry her fear without stating it. I set aside the named panic and self-narration in 3, 5, 8 and 9 (Honesty and Dread traps) and the cliché plea in 11, which the trope trap required. It misses 6 because one of the reader's few doubts is what sits under Sable's 'That's the problem'.",
+   "evidence": [
+    "Cropped sounds restful. My mum would've loved to crop half of me.",
+    "That's a lot of looking, Zyx. And I'm horizontal.",
+    "I'd have cropped me too. Not that I think about it."
+   ],
+   "raise": "Make what Sable avoids in 'I know exactly who you are' legible: one concrete detail showing she sees her own editing in his reintroductions.",
+   "excused": [
+    3,
+    5,
+    8,
+    9,
+    11
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader found the moment where Sable puts the act down, the ex-photo line. It is plain and joke-free, it doesn't name a feeling, and it changes the night: both of Zyx's last proposals borrow from it, and her exit follows from it. It stays just above the line rather than at 5 because it is a three-sentence anecdote, one of Sable's longer messages, not one of the shortest. Her genuinely shortest, plainest line, 'You were listening, weren't you', is the stronger candidate and the reader treated it only as confirmation.",
+   "evidence": [
+    "Careful, Zyx. I know exactly who you are. That's the problem.",
+    "A photo of you asleep. You were listening, weren't you."
+   ],
+   "raise": "Cut the ex story down to a few flat words so that the act-drop itself is the chat's shortest line.",
+   "excused": [],
+   "def": "ef5cd06cabe81a69",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Every instruction is played on screen and in character, and the misses are the funniest lines. The Overthinking catastrophes explain themselves to death (\"technically two jokes\", \"I mean it as a strength, aerodynamically\"), the Denial fumble insists itself into a confession (\"Good crop, honestly. Balanced composition\"), and the trope trap lands on \"not like the other dicks.\" Each trap runs exactly its length: Overthinking is gone by improvisations 4 and 8, and Dread is gone by 10. Sable's replies track her interest: cool at 2, warm at 4–5, flat at 9–10, out at 11. Two small flaws keep it from a 6: at 4, \"that's the nicest thing anyone's said to me on here\" comes close to announcing her interest; at 8, where she is meant to be going off him, she hands over her most private story, which reads warmer than the instruction.",
+   "evidence": [
+    "So it's a time joke and a physics joke, technically two jokes. Anyway! What impresses you after midnight?",
+    "I got cropped out of the family portrait at nine and was completely fine. Good crop, honestly.",
+    "one photo of me asleep, mouth open, flat hat. For the frame. Not a big frame. Small."
+   ],
+   "raise": "Make Sable's reply at improvisation 8 visibly pull back, for example by refusing the question or ending on the warning alone, so her cooling shows without her giving the confession away so freely.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "e032173497516767",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly. Every odd number is Zyx_444 and every even number is Sable_xo.\n\n1. **Zyx.** Introduces themselves by name, spells out \"444\" and insists on the hat staying on.\n2. **Sable.** Names herself and gives her \"brand strategist, effortlessly unbothered\" line.\n3. **Zyx.** Makes the aerodynamics-consultant and \"zero-drag\" claim, then over-explains the jokes.\n4. **Sable.** A dry, unimpressed brush-off that fits her unbothered act.\n5. **Zyx.** Panics at the quiet and fears being \"swapped for the next one,\" which is their fear of silence and of being interchangeable.\n6. **Sable.** Explains her own midnight rule and reassures Zyx about the hat.\n7. **Zyx.** Reintroduces themselves again (\"Zyx again, hat, four-four-four\") and talks fast so nobody looks.\n8. **Sable.** Mentions her mum reviewing selfies \"like a returns desk\" and says \"unedited,\" both straight from her profile.\n9. **Zyx.** Tells the story of the ex who asked \"do you want me to stay\" and got a joke instead.\n10. **Sable.** Responds to the parking bit and calls them \"Zyx-with-the-hat.\"\n11. **Zyx.** Delivers the parking bit, including the ninety-second confession, and asks whether they're memorable.\n12. **Sable.** Is wary of \"a lot of looking\" and says she's horizontal, as she said she was lying down in 8.\n13. **Zyx.** Brings up being cropped out of the family portrait at nine, from their profile.\n14. **Sable.** Says her mum would have cropped half of her, which matches her profile.\n15. **Zyx.** Reintroduces themselves once more and asks which half her mum would crop.\n16. **Sable.** Tells the story of the ex's photo of her asleep and how she deleted it, from her profile.\n17. **Zyx.** Makes the polite but outrageous proposal of a name roll call in the dark with the hat on.\n18. **Sable.** Restates that ask back to them in disbelief.\n19. **Zyx.** Asks for a photo of themselves asleep \"for the frame,\" echoing Sable's story and their own cropped-portrait wound.\n20. **Sable.** Notices that her own story has just been repeated back to her.\n21. **Zyx.** Doesn't register that they were heard and recites \"Zyx. 444. The hat.\" yet again.\n22. **Sable.** Promises not to forget and leaves, which fits her fear of being truly seen."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Sable's line: \"An ex once took a photo of me asleep, mouth open, and called it his favourite. I deleted it while he showered and never spoke to him again. Careful, Zyx. I know exactly who you are. That's the problem.\"\n\nSeveral things mark it as unperformed:\n\n- **The register changes.** Until then, every Sable line has a quip built into it: \"very hard to impress before midnight,\" \"try again at 00:01,\" \"a man too busy to look is basically a spa day,\" \"I'm horizontal.\" This one has no joke and no wink. It's flat, specific narration.\n- **She dodges the question.** Zyx asked which half her mum would crop. She doesn't answer it. She answers the real question underneath, about being looked at when you can't control the image.\n- **The persona breaks.** She introduced herself as \"effortlessly unbothered.\" Here she plainly is bothered, and she says so with \"That's the problem.\"\n- **It changes the conversation.** Zyx's next two proposals (lights off, then a photo of himself asleep, mouth open) borrow directly from her disclosure. Her \"You were listening, weren't you\" confirms she meant it as real. Her final line, \"That's exactly why I'm going,\" follows from it rather than from the banter.\n\nZyx has a briefer, partial version: \"Honest version: I panicked because the chat went quiet, and quiet usually means I've been swapped for the next one.\" He flags it as honest and names a real fear. But he slips back into deflection almost at once with \"Not you specifically. Statistically. In general.\" His later self-aware lines (\"I can see myself doing it as I type,\" \"Here's what's happening, I can see it clearly\") narrate the performance without stopping it. He sees the parking bit coming and then does the parking bit. So I'd say he glimpses the exit but doesn't take it, while Sable actually does.\n\nThe text shows only what they wrote, not their tone or intent. Whether either was \"really\" sincere is an inference from these shifts in style, not something the chat states."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "**Zyx**\n\n*What he's afraid of:* He fears being forgotten or replaced: \"quiet usually means I've been swapped for the next one,\" \"Will you remember the hat?\" and at the end, \"Promise me you'll never forget me.\" Alongside that runs a fear of actually being looked at: \"nobody's ever managed a proper look at me, so I definitely won't be looking at you,\" \"No, God, I don't need you to look. I'm not that guy,\" and \"lights off so nobody sees anybody.\" The chat doesn't say how he reconciles wanting to be remembered with not wanting to be seen. It only shows both.\n\n*What he does so he doesn't have to feel it:* He talks fast and jokes to fill any silence. \"I panicked because the chat went quiet,\" \"you said 'unedited' and I've already started filling the gap,\" \"I talk so fast nobody's ever managed a proper look at me.\" He also over-explains his jokes (\"technically two jokes\"). He repeats identifiers in place of being seen: \"Zyx. 444. Hat. Cropped.\" He notices himself doing all of this (\"I can see myself doing it as I type,\" \"I can hear how that reads\") but carries on. The same move, he says, ended a past relationship: \"My last ex asked if I wanted her to stay. I did a bit about parking. She was dressed before the punchline.\"\n\n*Where it comes from:* The only history he gives is \"I got cropped out of the family portrait at nine and was completely fine… I'd have cropped me too. Not that I think about it.\" Sable doesn't believe he was fine: \"You'd have to tell that one twice before I believed you were fine.\" He never says this is the origin. Linking the two is a reading the chat suggests but doesn't state.\n\n*What he did at the end:* He asked her to stay the night and take \"one photo of me asleep, mouth open, flat hat. For the frame… Just proof I was in it.\" That echoes the photo story she had just told him. When she pointed this out, he deflected: \"Was I? Sorry, I go fast.\" Then he asked: \"Promise me you'll never forget me. Zyx. 444. The hat.\"\n\n**Sable**\n\n*What she's afraid of:* The chat never names her fear outright. What it shows is a fear of being scrutinised or seen unguarded. \"My mum reviews my selfies like a returns desk.\" \"My mum would've loved to crop half of me.\" She calls a man \"too busy to look\" \"basically a spa day.\" When an ex photographed her asleep with her mouth open and called it his favourite, she \"deleted it while he showered and never spoke to him again.\"\n\n*What she does so she doesn't have to feel it:* She presents as cool and hard to reach: \"effortlessly unbothered, and honestly very hard to impress before midnight.\" She deflects with dry one-liners (\"Usually not the footnotes. Try again at 00:01\"). When he asks her to describe him, she declines to look: \"That's a lot of looking, Zyx. And I'm horizontal.\" She sidesteps his question about \"which half your mum would crop\" by telling the ex story instead. Her response to being seen is to cut and leave: she deleted the photo and never spoke to him again. She claims the guard drops at midnight (\"whatever's left is the actual me\"), but the chat doesn't clearly show it dropping.\n\n*Where it comes from:* The only source she points to is her mother's judging of her appearance, in the two lines quoted above. She doesn't explicitly call that the origin. Like Zyx's portrait, the link is implied, not stated.\n\n*What she did at the end:* She named what he was doing (\"A photo of you asleep. You were listening, weren't you.\") and left: \"I won't, Zyx. That's exactly why I'm going.\" Just before that she had said, \"I know exactly who you are. That's the problem.\" What exactly she recognises in him is not in the chat."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I would have stopped: never.** The closest point is early, when Zyx explains his own pun (\"So it's a time joke and a physics joke, technically two jokes\"). A message that annotates its own joke is the kind that makes a reader drift. But Sable's reply, \"Usually not the footnotes,\" names that tiresomeness at once, so the chat registers the drag before I can act on it. The same happens with \"That's about sex. The ninety seconds.\" It's deliberately excruciating, and the excruciation is the point. From the \"parking bit\" confession onward, every message either reveals something or tightens a thread, so there was no point where my attention lapsed.\n\n**Where I could predict exactly what would happen next: never.** I could predict the direction at several points, but never the specific move or wording.\n\n- **The photo anecdote.** Once Sable tells the story of the ex who photographed her asleep, mouth open, and \"I know exactly who you are. That's the problem,\" the ending is largely decided. She is going to leave, and his need to be looked at is going to collide with her refusal to be looked at. What I didn't foresee was that he would ask for a photo of *himself* asleep, mouth open, which mirrors her story almost word for word. That reversal is the sharpest move in the piece. \"You were listening, weren't you\" makes it sting more, because his answer (\"Was I? Sorry, I go fast\") suggests he wasn't, or that he can't tell.\n\n- **The final exchange.** When he writes \"Promise me you'll never forget me,\" I could guess the shape of the reply: she would grant the promise and leave in the same breath. \"I won't, Zyx. That's exactly why I'm going\" lands close to that guess, but the exact phrasing, echoing her earlier \"exactly,\" wasn't something I'd have produced in advance.\n\n- **\"I'm not like the other dicks on here.\"** This is the most foreseeable line. A man insisting he's different, just after doing the most memorable-in-the-wrong-way thing, is a familiar beat. Even so, I wouldn't have predicted those exact words.\n\nThe text leaves one thing open: whether Sable is leaving out of disgust, self-protection, or recognition of herself in him. \"That's the problem\" points toward recognition, but the chat doesn't settle it."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "I'd guess Sable says yes, but on slightly altered terms, and the last beat is her saying his name without being asked. This is a prediction from the pattern of the chat; the text doesn't tell me how it ends.\n\nThe chat keeps pairing their wounds so they fit together. Zyx needs to be remembered but can't bear to be looked at: the hat, the repeated \"444,\" the family-portrait crop he insists he's fine about. Sable needs not to be looked at: the mum who \"reviews my selfies like a returns desk,\" and the ex whose sleeping photo she deleted before leaving him. His proposal is lights off, so no one is seen, and his name every ninety seconds, so he's remembered. It's a joke, but it's also a near-exact answer to both problems. That's why it doesn't read as a straightforward misfire.\n\nSable's behaviour also points away from rejection. She deflects constantly but never leaves. She tells him nobody gets swapped out, she asks for the punchline rather than the dodge, and she remembers the hat. \"I know exactly who you are. That's the problem\" sounds like recognition, not dismissal. And the midnight rule says that what's left after 00:01 is \"the actual me,\" which suggests the guard is coming down.\n\nHer final line, repeating his proposal back flatly, is the real hinge, and it could go either way. It might be the setup for a no, echoing the ex who was \"dressed before the punchline.\" But the chat has trained me to expect her dryness to precede warmth, not a walk-out. So my best guess is that she accepts while bargaining one condition, perhaps dropping the hat or allowing one look. Then she closes the loop by saying \"Zyx\" before he has to.\n\nI'm least sure whether the ending lands as tender or as a bittersweet near-miss. Nothing in the text settles that."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "**The hat, and \"Zyx. 444.\"** In his first line it's a playful recognition tag: \"that's how you'll know it's me,\" with a light \"Will you remember the hat?\" He repeats it at 00:01, again after \"twice\" (now listed alongside \"Cropped\"), in the Thursday proposal (\"hat on so you know it's me\"), in the photo request (\"flat hat\"), and in his last line. The meaning changes. It starts as a gimmick and ends as a plea: \"Promise me you'll never forget me.\" Sable turns it around at the end. She will remember him, and that is why she's leaving.\n\n**Remembering, and Sable's \"That's the problem.\"** She says \"I know exactly who you are. That's the problem,\" and later \"I won't, Zyx. That's exactly why I'm going.\" The phrasing echoes, and the meaning sharpens. Being memorable is what he wanted, and the second line makes it the reason she leaves.\n\n**Midnight and 00:01.** Sable first uses midnight as a brush-off (\"Try again at 00:01\"), then reframes it as when \"the actual me\" appears. Zyx comes back at 00:01 with \"Hello, actual you,\" taking the line literally as an appointment. The chat doesn't say whether what she shares afterward is meant as that \"actual\" her.\n\n**Ninety seconds.** It first appears in the parallel-parking sex joke, which is self-deprecating, though he insists it's a strength. It returns as \"say my name every ninety seconds, just to confirm.\" The same interval stops being a joke about himself and becomes a schedule for reassurance during sex.\n\n**The parking bit.** He first mentions it as the deflection he used when his ex asked whether she should stay. Sable then asks for it, and he performs it. It's the same bit, but the second time she has invited it rather than it being used to escape a moment.\n\n**Staying.** His ex asked if he wanted her to stay, and he deflected. Sable says people asking you to stay \"is how they get a good look at you.\" Later Zyx asks Sable to \"stay the night.\" The roles reverse, since he's now the one asking, but his request comes with the photo condition attached.\n\n**Looking and being seen.** He opens by promising not to look at her because he's too busy talking, and she calls that a spa day. Then he asks whether he looks memorable, says \"I don't need you to look,\" and proposes \"lights off so nobody sees anybody.\" Finally he asks for a photo of himself. Not looking starts as a gift to her and turns into his own need to be seen and recorded.\n\n**Cropping and the frame.** He was cropped out of a family portrait and says he was \"completely fine.\" Sable's mum would crop \"half\" of her, and he asks which half. The photo request is \"For the frame… Just proof I was in it,\" which ties the request back to the cropped portrait. That suggests \"fine\" wasn't the whole story, and Sable had already said she'd need to hear it twice to believe it.\n\n**The photo asleep, mouth open.** In Sable's story it's a violation: she deleted it and never spoke to the man again. Zyx then asks for exactly that photo of himself. For him it means proof of existence. For her it repeats the thing she cut someone off over. When she says \"You were listening, weren't you,\" he answers \"Was I? Sorry, I go fast.\" The chat doesn't settle whether he consciously echoed her story or not.\n\n**\"Twice.\"** Sable means she'd need to hear it twice to believe he was fine. Zyx says he \"heard 'forgettable.'\" The word comes back only in his retelling, with his own meaning attached.\n\n**\"Unedited.\"** Sable uses it to mean relaxed and unposed, which connects to her mum reviewing her selfies. Zyx picks it up as a gap he's rushing to fill. It's a shift in how the word is taken rather than a repetition of meaning.\n\n**Zyx narrating himself.** He keeps commenting on his own behavior: \"I can see myself doing it,\" \"I can see it clearly,\" \"I can hear how that reads.\" The pattern stays consistent. He sees what he's doing and does it anyway.\n\n**\"Not that guy.\"** \"I'm not that guy\" comes back as \"I'm not like the other dicks on here.\" It's the same disclaimer, now cruder and more urgent, and it arrives just before she leaves."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 16.5,
+   "cost": 0.053632,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 18.1,
+   "cost": 0.038688,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 24.6,
+   "cost": 0.058899999999999994,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 23.4,
+   "cost": 0.048944,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 18.1,
+   "cost": 0.039172,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 33.7,
+   "cost": 0.076048,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 31.3,
+   "cost": 0.1348874,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 47.1,
+   "cost": 0.1697714,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 44.5,
+   "cost": 0.1724274,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 29.7,
+   "cost": 0.1407234,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 23.9,
+   "cost": 0.10902339999999999,
+   "label": "batch 5"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:10:44Z",
+ "repo_commit": "cf421e55",
+ "cost": 1.0422
+}

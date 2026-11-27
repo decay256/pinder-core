@@ -1,0 +1,14 @@
+Zyx_444: Hi! Zyx. Z-Y-X, four fours, the one in the wizard hat. It stays on, house rule, so you'll always spot me in a lineup. Easy question, zero pressure: what's the most effortless thing about you? Take your time. (I won't, I type fast.)
+Sable_xo: Honestly? Everything. I don't really do "trying." The hat's very committed though, I respect that. Does it come off for anything?
+Zyx_444: Nothing. Not weather, not funerals, not the airport. For you I'd consider it, and that's huge. Plainly: I want you. Not a general you, you you. Zyx, by the way. Hat guy. In case your screen's crowded.
+Sable_xo: You said, hat guy. I was there. Wanting me is allowed, go on. Just know I don't stay over, I'm up at dawn. Busy. Effortlessly.
+Zyx_444: Dawn's fine, I'm up anyway, I work nights. Quick check, zero pressure: what's my name? Not a test. Slightly a test. Exes have gone with Rick, Zack and once just "the hat." I'd love to be what you think about at dawn. Or 4am. Or now. What would you remember about me if I vanished?
+Sable_xo: Zyx. Four fours. Hat. Nights. You've told me three times in four messages, babe, I'm not a goldfish. That's a lot of homework for 23:40. And I'm not reachable at 4, I'm resting. Very peacefully.
+Zyx_444: Three times and you still got it right? That's never happened. Fluke, probably. Sorry. Honest bit: I got cropped out of the family photo at nine. Actual scissors, mantelpiece, gone. So, no rush at all and totally fine to say no: could you send one picture right now, no filter, just you as you are, so I know we're both really here? Happy to go first. Hat on, obviously.
+Sable_xo: Scissors? God. I'm sorry, that's grim. But no. My mum reviews my selfies like a returns desk. Nothing leaves this phone unfinished. You get me done or you get nothing.
+Zyx_444: No, totally fine. Honestly, I don't need to be seen, I'm the least needy hat on this app, ask anyone, they won't remember me. But for the record, finished is overrated. I'd take you unfinished. Asleep, mouth open, hair flat, no light. That'd be my favourite picture of you. Zyx, by the way. Still here.
+Sable_xo: Someone said that to me once. Almost word for word. I deleted it off his phone while he was in the shower. I pick my favourite picture, Zyx. Not you.
+Zyx_444: Forget photos, I hate being looked at anyway. Proposal, no rush: mine, tomorrow, 2am after my shift. Hat on, lights off, ninety glorious seconds. Then, only if convenient, write my name on the pillowcase before you sneak off at dawn. Biro's fine. Not so you'll remember me. Obviously.
+Sable_xo: I spend dawn picking every trace of myself off pillowcases, Zyx. I own six lint rollers. You want me to sign one?
+Zyx_444: No, ignore that, I'm not like other guys, I don't need remembering. Forget me, honestly, everyone does, it's fine. Zyx. Four fours. The hat. In case.
+Sable_xo: Zyx. Four fours. Hat. Nights. Ninety seconds. I had you at hello, babe. You just kept saying it. Unmatching now. Effortlessly.

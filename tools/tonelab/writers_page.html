@@ -121,7 +121,11 @@ function scoreHTML(t, i) {
   return `<span class="score ${p > 0 ? "up" : p < 0 ? "down" : ""}">${WHAT[p]} ${signed(p)} \u00b7 balance ${signed(t.balance[i])}</span>`;
 }
 function verdictHTML(t) {
-  const end = t.balance[t.balance.length - 1], date = end > 0;
+  const end = t.balance[t.balance.length - 1], date = t.ending ? t.ending === "date" : end > 0;
+  if (t.why === "streak")
+    return `<p class="verdict">Five in a row that ${date ? "landed: a date" : "backfired: unmatched"}, after ${t.played} improvisations. Balance ${signed(end)}.</p>`;
+  if (t.why)
+    return `<p class="verdict">Balance after the last improvisation: ${signed(end)}. ${date ? "Above 0: a date." : "0 or below: unmatched."}</p>`;
   const game = (t.game === "DateSecured") === date ? "" : ` The game itself ended ${t.game}.`;
   return `<p class="verdict">Balance at the end: ${signed(end)}. ${date ? "Above 0: a date." : "0 or below: no date."}${game}</p>`;
 }

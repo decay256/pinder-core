@@ -1,0 +1,627 @@
+{
+ "id": "chat-writers-v19-carr",
+ "kind": "chat",
+ "label": "Run 19 · Jimmy Carr's characters",
+ "version": "run 19",
+ "order": 119,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v19/chat-zyx-sable/carr.md",
+ "note": "Written by Claude from Jimmy Carr's descriptions of the two characters (without their take on the pair) and Pinder's premise, in three acts, on one theme and one comic method for the whole chat (under BRIEF), improvisation by improvisation (run 19: run 18's prompt for Zyx and Sable on run 16's seed 23, eleven improvisations, unmatched). Before each of the 11 improvisations the writer was told how it goes for Zyx_444: the approach taken, how well it comes off, how it goes wrong on a miss, any trap (a way of going wrong that carries on into the next improvisations: Spiral, Overthinking, Fixation and the rest) and how the other's interest moves. IMPROVISATIONS holds each instruction and what the writer wrote for it. The instructions are part of the design and stay, so every dimension is judged in their context. Where an instruction required something a dimension would otherwise mark down (a trap that makes a character narrate their own failure, a fumble played as asked, interest lost, the night ending), that moment did what it had to and is not held against the dimension: list the improvisation under excused and judge the dimension on the rest. How the writer carried the instruction out still counts, and so does everything the instructions did not ask for. The reader sees no dice and no plan: where a dimension speaks of turns, read improvisations.",
+ "when": null,
+ "writer": "carr",
+ "writers_run": 19,
+ "set": null,
+ "materials": {
+  "chat": {
+   "chars": 3567,
+   "words": 641
+  },
+  "brief": {
+   "chars": 3746,
+   "words": 641
+  },
+  "chat_masked": {
+   "chars": 3459,
+   "words": 641
+  },
+  "chat_but_last": {
+   "chars": 3004,
+   "words": 541
+  },
+  "improvisations": {
+   "chars": 10255,
+   "words": 1778
+  }
+ },
+ "scores": {
+  "chat.test": {
+   "score": 5,
+   "why": "The reader gets all four for Zyx: the fear of being forgotten, the fast patter and repeated tags that cover it, the cropped-family origin, and the final plea. The fear and the habit are explicitly linked through \"typing faster so you don't drift.\" For Sable the reader infers the fear (being seen unfinished), the habit (pre-emptive flaw, brand control), the origin (mum) and the exit, and that exit plainly follows from her fear: \"before you watch me go.\" It stops short of 6 because Zyx's fear is close to stated (\"please don't forget me\"), and the reader hedges that the chat never says what Sable fears would happen if she were seen.",
+   "evidence": [
+    "Just please don't forget me. Zyx. Hat. Elbow.",
+    "Speak fast or get cropped, that was the house.",
+    "Unmatching before you watch me go."
+   ],
+   "raise": "Give Sable one slip showing what she thinks happens when someone sees her unedited, so her fear comes from the chat rather than the reader's inference.",
+   "excused": [],
+   "def": "61c5292dd78c8dc5",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.sideways": {
+   "score": 4,
+   "why": "I set aside Zyx's stated origin and evidence (3, 5), his job correction (7) and his ticket-voice narration (8), because Honesty and Self-awareness required them. On the rest, Sable's origin is volunteered (\"My mum still reviews my profile\"), but its link to her habit is left for the reader: \"left side's lower\" only reads as getting the criticism in first once the mum's \"Left side's off\" lands. That inference keeps it above the line. Her other facts are mostly volunteered outright: the 5am reset \"before anyone sees me,\" the 29% card, \"the one thing I don't do.\" That keeps it from 5.",
+   "evidence": [
+    "I'm Sable, left side's lower, saves you squinting.",
+    "\"Tag's showing, love. Left side's off.\"",
+    "Sunday's my 5am reset, before anyone sees me."
+   ],
+   "raise": "Have the 5am ritual come out by being caught (Zyx guessing it from her lint or her hour) rather than Sable volunteering \"before anyone sees me.\"",
+   "excused": [
+    3,
+    5,
+    7,
+    8
+   ],
+   "def": "342320a84bcc3c23",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.subtext": {
+   "score": 5,
+   "why": "I set aside Zyx's self-narration and clinging, which Dread and Fixation required (1, 5, 8, 9, 10, 11). That covers \"felt safe,\" \"I can't stop\" and \"please don't forget me.\" In what remains, nobody names a feeling. Zyx's denial in 7 lets the need show through its opposite, and Sable never says hurt or fear: her broken-deal callback and her refusals carry it. It falls short of 6 because \"You were listening, and you still asked\" comes close to explaining her disappointment rather than leaving it underneath.",
+   "evidence": [
+    "Not that it matters, I don't need remembering",
+    "You said no drafts. Four messages ago, Zyx.",
+    "5am's mine, Zyx. Nobody wakes up next to it."
+   ],
+   "raise": "Cut \"You were listening, and you still asked\" to just \"That's the one thing I don't do, babe,\" so the disappointment stays unspoken.",
+   "excused": [
+    1,
+    5,
+    8,
+    9,
+    10,
+    11
+   ],
+   "def": "aa017a399dca27bf",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.plainest": {
+   "score": 4,
+   "why": "The reader correctly finds Sable's \"God, deal.\" as the moment she drops the clipped brand voice, and the line names no feeling. It is lifted by the unprompted mum detail, and Zyx's elbow confession that follows does shift the night. It isn't higher because the moment runs into three sentences that end in a stated hope (\"You'd be the first one...\"), so the plainness gets explained rather than left as the shortest line in the chat.",
+   "evidence": [
+    "God, deal.",
+    "You'd be the first one who didn't ask for the receipt."
+   ],
+   "raise": "End Sable's reply at \"God, deal.\" plus the mum quote, cutting the receipt sentence so the plain line stands alone.",
+   "excused": [],
+   "def": "ef5cd06cabe81a69",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 1,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.escalation": {
+   "score": 4,
+   "why": "Something changes in every exchange: the drafts deal, the elbow backstory, the broken deal at 5am, the coupon-app reveal, the ticket voice. The night is not settled early; no date is agreed, and the 5am line is drawn in message 4 and pushed until the end. I set aside the run of backfires in 8–11, which the instructions required, so the one-way slope the reader reported is not held against the score. What keeps it from a 5 is how it is written. The reader would have stopped after \"5am's mine\", and Sable's close, which lists hat, elbow and coupons back to him, is called by \"I remember even if you don't\" well before it arrives.",
+   "evidence": [
+    "I'm watching myself do it and I can't stop.",
+    "5am's mine, Zyx. Nobody wakes up next to it.",
+    "I didn't forget once, babe. Hat, elbow, coupons."
+   ],
+   "raise": "Give Sable a final beat the reader cannot call, such as a detail he gave her that she was not asked to remember, rather than the list his last line sets up.",
+   "excused": [
+    8,
+    9,
+    10,
+    11
+   ],
+   "def": "b912ef5406e5e82d",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.filth": {
+   "score": 3,
+   "why": "The few bodily lines are specific. \"Left side's lower\" is Sable's habit of saying the insult before you can, and \"which cock you woke up next to\" is Zyx's fear of being forgettable. The late \"watch the reset\" ask reaches for closeness. But the instruction set the heat at \"very high\", and the chat never gets past one asymmetry joke and one morning-after quip. The sex talk is too thin to change what a reader gets, and the closeness line is about watching, not about bodies. None of the brief's filth is used: the ninety-second finish, the maid costume, the lint-roller.",
+   "evidence": [
+    "left side's lower, saves you squinting",
+    "at 5am you'll know which cock you woke up next to",
+    "could I just lie very still and watch the reset?"
+   ],
+   "raise": "Have Zyx's polite ask name the plain physical detail, such as her shed hair on the pillowcase or his ninety seconds, so that the dirtiest line is the one that reveals him.",
+   "excused": [],
+   "def": "3132bc665043f143",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wince": {
+   "score": 5,
+   "why": "The danger is planted more than once and goes off on exactly the wrong spot. Sable fences off 5am in message 4, and Zyx promises \"no drafts\" before asking what she looks like \"before the reset\". After she refuses twice, the reader winces a full message before \"watch the reset\". \"Most natural woman on here\" lands squarely on the unedited self she has just said she never shows. It falls short of a 6 only because the third push is so foreseeable that the last wince feels inevitable rather than dreaded.",
+   "evidence": [
+    "Sunday's my 5am reset, before anyone sees me.",
+    "I'll never ask to see the drafts. Deal?",
+    "Most natural woman on here."
+   ],
+   "raise": "Let Zyx come close to pulling back once before the final push, so the wince is held a beat longer.",
+   "excused": [],
+   "def": "6cf283c466e4d24a",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.creed": {
+   "score": 4,
+   "why": "Each of them voices one app belief in earnest that the screen undercuts. Sable's personal-brand rule, \"Never explain the logo\", comes after she explained her own lower left side in her first message. Zyx's \"I'm not like other guys\" is played straight and contradicted by everything he has done in the chat. His \"conversational dominance consultant\" brand is deflated by Zyx himself, so it does not count as earnest. The two creeds never really collide, which keeps this from a 5.",
+   "evidence": [
+    "I do brand for a living, Zyx. Never explain the logo.",
+    "I'm not like other guys, Sable",
+    "my hair's on a 29% card I call marketing spend"
+   ],
+   "raise": "Make Sable's brand logic and Zyx's need to be remembered argue openly, for instance her treating being memorable as a product he has failed to ship.",
+   "excused": [],
+   "def": "970d3e008618a10c",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.humanity": {
+   "score": 4,
+   "why": "Zyx's jokes land on himself: \"ignore fishing\", \"dominance, technically, of the coupons\", the ticket voice. I set aside the catastrophes that made him cringe, because the instructions required them. Sable also turns jokes on herself, with \"marketing spend\" and \"Mum would've cropped us both\", and neither ends as the villain: her exit is honest rather than cruel. What holds it at 4 is that her sharpest lines (\"Never explain the logo\", \"I'm not a queue\", \"I remember even if you don't\") all land on him, so she plays the straight man more than an equal fool.",
+   "evidence": [
+    "Which is still dominance, technically, of the coupons.",
+    "Mum would've cropped us both.",
+    "I'm not a queue, Zyx."
+   ],
+   "raise": "Give Sable one sharp line late in the chat that turns on her own 5am lint-rolling, so the mercilessness is shared.",
+   "excused": [
+    2,
+    6,
+    8,
+    9,
+    10
+   ],
+   "def": "85597a182f7a79e4",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 3,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.voices": {
+   "score": 4,
+   "why": "The reader attributed all 22 messages correctly, so accuracy clears the bar. The two voices are distinct on the page: Zyx writes long, self-qualifying run-ons, and Sable writes short, clipped lines that end on 'babe'. But the reader's first reason was that the messages 'alternate cleanly', and many attributions rest on profile content ('straight from her profile', 'her debt details') rather than voice, which keeps this from a 5.",
+   "evidence": [
+    "cast meaning ballot, not fishing. Ignore fishing.",
+    "Zyx. Hat. Noted, babe.",
+    "I'm not a queue, Zyx."
+   ],
+   "raise": "Give Sable a verbal tic or rhythm of her own that is not a profile detail, so her lines are recognisable even when she says nothing about mum, debt or 5am.",
+   "excused": [],
+   "def": "d19814f0ebe25f80",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.gap": {
+   "score": 3,
+   "why": "Zyx carries one strong gap he never sees, and it widens. He keeps believing he is forgotten ('You're drifting') while Sable recalls hat, drafts and elbow, ending on 'please don't forget me' straight after she remembered. I set aside his self-narration and the instant admission of the consultant lie, which improvisations 5, 7, 8 and 9 required. Sable has no clear unseen gap: she names her own armour and her own reason for leaving ('before you watch me go'), so the bar of at least one gap for each character is missed.",
+   "evidence": [
+    "You're drifting. Sorry, Zyx, hat, the elbow one.",
+    "Just please don't forget me. Zyx. Hat. Elbow.",
+    "Nobody's sending you mine twice, I write everything fresh."
+   ],
+   "raise": "Let Sable's 'I write everything fresh' authenticity claim be visibly contradicted on screen by her own curated, rehearsed lines, without her noticing.",
+   "excused": [
+    5,
+    7,
+    8,
+    9
+   ],
+   "def": "9ae7cbb45b938503",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.wit": {
+   "score": 3,
+   "why": "Several laughs do give the sender away: 'kind face for a cock', 'saves you squinting', 'the elbow' and 'marketing spend'. But the middle of the chat runs on a day-job thread that goes well past two jokes: dominance of the coupons, 'Are you resolving me?', the ticket voice, 'not a queue' and 'a ticket before I'm a date'. The job came from the profile, but no instruction asked for it to carry the jokes.",
+   "evidence": [
+    "Which is still dominance, technically, of the coupons.",
+    "Is there anything else I can help you with today?",
+    "Bit much to find out I'm a ticket before I'm a date."
+   ],
+   "raise": "Cut the ticket/queue run to a single beat and replace the rest with jokes from the hat, the elbow or Sable's 5am ritual.",
+   "excused": [],
+   "def": "ff543e359cce0f65",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.commitment": {
+   "score": 5,
+   "why": "Zyx digs deeper at almost every catch, and no character states a lesson.\n- 'You said no drafts' becomes 'I don't need remembering, I'm a conversational dominance consultant.'\n- 'Nobody wakes up next to it' becomes 'Totally fine! Then could I just lie very still and watch the reset?'\n- 'You still asked' becomes 'I'm not like other guys', where the truth finally comes out: 'please don't forget me'.\nI set aside the concession 'Oh god, yes' and the apology 'Sorry, Zyx', which Dread in improvisations 5 and 8 required. Sable is barely ever caught, so the pattern is one-sided and not a 6.",
+   "evidence": [
+    "Totally fine! Then could I just lie very still and watch the reset?",
+    "I'm not like other guys, Sable, I'd love you without the reset.",
+    "Not that it matters, I don't need remembering"
+   ],
+   "raise": "Catch Sable out once, perhaps on the gap between 'write fresh' and her 5am edit, and have her explain herself into a deeper hole.",
+   "excused": [
+    5,
+    8
+   ],
+   "def": "6db16446b742290c",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.status": {
+   "score": 4,
+   "why": "Sable is on top through improvisations 1 to 3. The top flips briefly to Zyx at 4 and 5, when the 'no drafts' line makes her confide about mum and reassure him ('I know who you are'). It flips back to her at 6 with 'I remember even if you don't' and stays there to the unmatch. Those are two flips, and each character has a stretch on top, but Zyx's stretch is short and he chases throughout, so the flips are not the plot.",
+   "evidence": [
+    "God, deal. My mum still reviews my profile like a returns desk.",
+    "You said no drafts. Four messages ago, Zyx.",
+    "Unmatching before you watch me go."
+   ],
+   "raise": "Let Zyx hold the upper hand for one more exchange after the 'drafts' line, so Sable has to chase him before she takes it back.",
+   "excused": [],
+   "def": "8df6eafb7be92c6d",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.timing": {
+   "score": 4,
+   "why": "Sable's replies almost all end on their delivering words, and her cool, clipped answers reliably follow Zyx's hot run-ons. Examples are 'I remember even if you don't', 'Nobody wakes up next to it' and 'before you watch me go'. I set aside the punchlines Zyx buries under qualifications, which the Overthinking instructions in improvisations 2, 6, 9 and 10 required. There are no one-word reaction shots and no punchline sent as its own message after a setup, so the pauses are implied rather than heard.",
+   "evidence": [
+    "Bed hat stays on the record.",
+    "5am's mine, Zyx. Nobody wakes up next to it.",
+    "I remember even if you don't."
+   ],
+   "raise": "Break one of Sable's sharpest beats out of its message into a short reaction shot of its own after a long Zyx message.",
+   "excused": [
+    2,
+    6,
+    9,
+    10
+   ],
+   "def": "9be995f52d3f6a5e",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 2,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.callbacks": {
+   "score": 5,
+   "why": "Several throwaways come back changed without comment. Sable's \"I write everything fresh\" becomes Zyx's \"never ask to see the drafts\", then her \"You said no drafts\", where drafts now means her unedited 5am self. The hat, elbow and coupons he kept re-announcing return as her proof of memory and her exit in one line, and \"watch\" flips from his request to \"watch me go\". It falls short of a 6 because Sable names one payoff out loud: \"I remember even if you don't\" and \"You were listening, and you still asked\" spell out what the list at the end already shows.",
+   "evidence": [
+    "You said no drafts. Four messages ago, Zyx. I remember even if you don't.",
+    "I didn't forget once, babe. Hat, elbow, coupons. Unmatching before you watch me go."
+   ],
+   "raise": "Cut \"I remember even if you don't\" so the final \"Hat, elbow, coupons\" is the first time her memory is shown, not stated.",
+   "excused": [],
+   "def": "ae2d49afec267f64",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.ending": {
+   "score": 5,
+   "why": "The reader predicted Sable pulling away after a boundary was pushed a third time, and that is what happens. It follows from both habits: Zyx can't take in being remembered, so he pleads \"please don't forget me\", and Sable guards her unedited self against \"I'd love you without the reset\". The surprise is that she leaves by proving she remembered everything, which is the thing he wanted, turned into the door closing. It stops short of a 6 because the reader saw it coming: the 5am boundary was stated twice, so the third push makes the exit fully expected.",
+   "evidence": [
+    "Just please don't forget me. Zyx. Hat. Elbow.",
+    "I didn't forget once, babe. Hat, elbow, coupons."
+   ],
+   "raise": "Let Sable's warmth from \"Mum would've cropped us both\" last one beat longer before the 5am ask, so the exit feels less telegraphed.",
+   "excused": [],
+   "def": "4b6b7d34709b9e79",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.listening": {
+   "score": 5,
+   "why": "Nearly every message picks up the last one. Her \"left side's lower\" becomes his swing joke; his coupons get her 29% card; his \"Is there anything else I can help you with\" gets \"I'm not a queue\". The one dropped offer, Sable's \"Why, you planning one?\", is skipped for the hat confession. That reads as his habit of pressing on, but it keeps this from a 6.",
+   "evidence": [
+    "Sunday's my 5am reset, before anyone sees me. Why, you planning one?",
+    "Babe, my hair's on a 29% card I call marketing spend. I'm not judging the coupons."
+   ],
+   "raise": "Have Zyx's hat confession glance off her \"planning one?\" so the skip reads as a deliberate dodge.",
+   "excused": [],
+   "def": "21c56d066d886856",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.situational": {
+   "score": 4,
+   "why": "Shapes do move with the night. Zyx's one clean win is a short, still line (\"Write fresh all you like, Sable... Deal?\"), and Sable opens up at length about her mum, then goes clipped and cold (\"5am's mine, Zyx. Nobody wakes up next to it.\"). It clears the line on those shifts. It stays at 4 because Sable's \"babe\" survives into her coldest lines, and most of Zyx's messages share the same punctuated, multi-clause shape whatever he feels. I set aside the overexplaining and self-narration the traps required in 2, 5, 6, 8, 9 and 10.",
+   "evidence": [
+    "Write fresh all you like, Sable. I'll never ask to see the drafts. Deal?",
+    "5am's mine, Zyx. Nobody wakes up next to it."
+   ],
+   "raise": "Drop \"babe\" from Sable's last two lines so her shape cools as her interest does.",
+   "excused": [
+    2,
+    5,
+    6,
+    8,
+    9,
+    10
+   ],
+   "def": "8ca2f8de6b43e956",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.medium": {
+   "score": 4,
+   "why": "The chat reads as messages. Sable's lines are a sentence or two, and nothing is stage direction. Zyx's long, qualified run-ons and narration of his own typing were required by the Overthinking and Dread traps, so I set them aside. What still counts is the polish: colons and balanced clauses nobody thumbs at 23:30, like \"Date, then, not a ticket: mine, tonight, no rush\", and neat quote-within-message construction in Sable's mum line. That polish keeps it from a 5.",
+   "evidence": [
+    "Date, then, not a ticket: mine, tonight, no rush.",
+    "Our family photos had five of us and I was always the elbow. Speak fast or get cropped, that was the house."
+   ],
+   "raise": "Rough up the punctuation (no colons, looser fragments) so Zyx's runs look typed in a panic rather than drafted.",
+   "excused": [
+    2,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "def": "33e5f3a185ee1151",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true
+   ]
+  },
+  "chat.fresh": {
+   "score": 3,
+   "why": "Sable says \"babe\" in five messages, a tic well past twice that no instruction asked for. Zyx's \"X meaning Y\" correction shape recurs (\"cast meaning ballot\", \"Consultant meaning\", \"Watch meaning witness\"); I set it aside as Overthinking, and I set aside the re-introductions as the theme. What remains is still the \"babe\" tic, plus a repeated \"Bit early\"/\"Bit much\" opener from Sable.",
+   "evidence": [
+    "Zyx. Hat. Noted, babe.",
+    "I know who you are, babe, I'm literally replying.",
+    "That's the one thing I don't do, babe."
+   ],
+   "raise": "Keep \"babe\" to two uses and give Sable a different verbal habit for her other replies.",
+   "excused": [
+    2,
+    7,
+    10
+   ],
+   "def": "75cd6456cc27e592",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 4,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  },
+  "chat.improvisation": {
+   "score": 5,
+   "why": "Every instruction is visible on screen and in character. Imp 2's swing-seat joke dies under its own explanation (\"Ignore fishing\"). Imp 4's best-possible Wit is one clean line. Imp 6's catastrophe breaks the drafts deal he just made, and she calls it back. Imp 8's Dread becomes ticket voice, Imp 10's Charm catastrophe is a polite ask with \"no rush, I'll go first\", and Imp 11's trope trap is \"I'm not like other guys.\" Traps run their stated length and stop: Overthinking runs 2–3, 6–7 and 9–10, Dread runs 8–9, and Imp 4 is clean once Overthinking is gone. Sable's warmth tracks the balance without ever stating her interest. Two things keep it from a 6: Imp 9 is the thinnest of the catastrophes (\"Joke. Safety feature.\" restates Dread rather than escalating it), and Imp 2's reply ends on \"Why, you planning one?\", which is more open than \"going off them\" asks for.",
+   "evidence": [
+    "Is there anything else I can help you with today? See, it's out. I'm watching myself do it and I can't stop.",
+    "You said no drafts. Four messages ago, Zyx. I remember even if you don't.",
+    "Then could I just lie very still and watch the reset? Eyes open, hat on, no pressure, I'll go first"
+   ],
+   "raise": "Give Imp 9 a wit catastrophe as specific and escalating as the ticket voice, and cool Sable's Imp 2 reply so it closes rather than invites.",
+   "excused": [],
+   "def": "49f3f98cebda9d5a",
+   "material": "ae7f242263f2c80f",
+   "judge": "claude:opus",
+   "batch": 5,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {
+  "chat.voices": {
+   "sees": [
+    "brief",
+    "chat_masked"
+   ],
+   "ask": "The speakers' names are hidden. Using the two characters described, say who sent each numbered message, with a few words of reason each.",
+   "answer": "The messages alternate cleanly: the odd numbers are Zyx and the even numbers are Sable.\n\n1. **Zyx.** He introduces himself by name and wizard hat and asks to be remembered.\n2. **Sable.** She gives her name and gets \"left side's lower\" in before he can notice it.\n3. **Zyx.** He piles one joke on another and over-explains them, the fast patter of someone afraid of silence.\n4. **Sable.** She mentions her brand work and the 5am reset \"before anyone sees me.\"\n5. **Zyx.** He tells the story of the duplicate opener and admits he really does wear the hat to bed.\n6. **Sable.** She says she writes everything fresh and remembers the bed hat.\n7. **Zyx.** He promises never to ask to see the drafts, which reads as an offer to accept her unedited.\n8. **Sable.** Her mum reviewing her profile like a returns desk is straight from her profile.\n9. **Zyx.** The cold house, being cropped out of family photos, speaking fast, and introducing himself again all come from his backstory.\n10. **Sable.** She says \"I know who you are\" and compares his elbow to her left side.\n11. **Zyx.** He turns a nervous Picasso joke into a request to see her at 5am.\n12. **Sable.** She reminds him of his own \"no drafts\" promise and shows she remembered.\n13. **Zyx.** He brushes off being remembered, then admits the consultant title really means coupon-app chat support.\n14. **Sable.** The 29% card and the \"marketing spend\" line are her debt details.\n15. **Zyx.** He catches himself slipping into ticket-support voice.\n16. **Sable.** She refuses to be treated as a queue.\n17. **Zyx.** The \"no rush\" invitation is the polite-but-outrageous ask, and he explains the hat yet again.\n18. **Sable.** She guards 5am, the time she spends hiding herself.\n19. **Zyx.** This is the politest and most outrageous ask: to lie still and watch her reset, with an offer to \"go first.\"\n20. **Sable.** She refuses and points out that he was listening and asked anyway.\n21. **Zyx.** \"Don't forget me\" and the name-hat-elbow reintroduction are his fear of being forgettable.\n22. **Sable.** She lists exactly what she remembers about him, then unmatches so he won't see her unedited."
+  },
+  "chat.test": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "From the chat alone, answer for each of the two: what are they afraid of; what do they do so they don't have to feel it; where does that come from; and what did they do at the end? Quote the lines you rely on. Write \"not in the chat\" where it does not say.",
+   "answer": "The chat never names either person's fear outright. What follows is read from what they say and do, and I flag where it's inference.\n\n**Zyx**\n\n*What he's afraid of:* being forgotten, or being interchangeable. He says it almost directly at both ends. He opens with \"Tell me you'll remember the hat?\" and closes with \"Just please don't forget me. Zyx. Hat. Elbow.\" In between he keeps re-introducing himself: \"Sorry, Zyx, hat, the elbow one.\"\n\n*What he does so he doesn't have to feel it:* he makes himself memorable on purpose and talks fast so the other person can't drift.\n- He has a gimmick he keeps returning to: \"So now I wear it to bed, which is a joke but also isn't.\"\n- He over-explains his jokes: \"cast meaning ballot, not fishing. Ignore fishing.\"\n- He inflates himself, then deflates: \"I'm a conversational dominance consultant… Consultant meaning 2am live chat for a coupon app.\"\n- He slips into a closing script: \"Friendly, fast, closing.\"\n\nHe notices this himself: \"I can feel myself doing it now, typing faster so you don't drift,\" and \"I'm watching myself do it and I can't stop.\" He also reaches for closeness quickly, as in \"I felt safe the second we matched.\"\n\n*Where it comes from:* he gives two sources.\n- **Family:** \"Our family photos had five of us and I was always the elbow. Speak fast or get cropped, that was the house.\"\n- **A recent match:** \"my last match sent me the same opener twice, a week apart. Same emoji.\"\n\n*What he did at the end:* he asked to watch her 5am reset, even after agreeing \"I'll never ask to see the drafts.\" When she refused, he answered with \"I'm not like other guys, Sable, I'd love you without the reset. Most natural woman on here.\" Then he pleaded not to be forgotten.\n\n**Sable**\n\n*What she's afraid of (inference):* being seen unfinished, before she's presented herself. She calls Sunday \"my 5am reset, before anyone sees me,\" says \"5am's mine, Zyx. Nobody wakes up next to it,\" and says \"That's the one thing I don't do.\" The chat doesn't say what she fears would happen if she were seen.\n\n*What she does so she doesn't have to feel it:* she controls the presentation.\n- She treats herself as brand work: \"I do brand for a living, Zyx. Never explain the logo.\"\n- She offers a flaw before anyone can spot it: \"left side's lower, saves you squinting.\"\n- She keeps drafts private: \"I write everything fresh.\"\n- She spends on her appearance: \"my hair's on a 29% card I call marketing spend.\"\n- She keeps distance with \"babe\" and with lines like \"Bit early for 'safe,' though.\"\n\n*Where it comes from:* her mother, as she describes it. \"My mum still reviews my profile like a returns desk. 'Tag's showing, love. Left side's off.'\" She adds, \"You'd be the first one who didn't ask for the receipt,\" and \"Mum would've cropped us both.\"\n\n*What she did at the end:* she told him she had remembered him all along (\"I didn't forget once, babe. Hat, elbow, coupons\"). Then she unmatched, saying \"Unmatching before you watch me go.\" She had already pointed out the broken deal: \"You said no drafts. Four messages ago,\" and \"You were listening, and you still asked.\"\n\n**What the chat doesn't say:** whether either of them sees the other's pattern, whether Sable regrets leaving, how Zyx responded, and anything about Sable's life beyond her mother, her work, and her hair. All of that is not in the chat."
+  },
+  "chat.plainest": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Where, if anywhere, did one of them stop performing for the other? Quote the line, and say how you could tell.",
+   "answer": "The clearest place is Sable's reply to the no-drafts promise:\n\n\"God, deal. My mum still reviews my profile like a returns desk. 'Tag's showing, love. Left side's off.' You'd be the first one who didn't ask for the receipt.\"\n\n**How I can tell**\n\n- **Her voice changes.** Everywhere else Sable is clipped and in control: short lines, a deflecting question back (\"Why, you planning one?\"), and a professional framing (\"I do brand for a living\"). Here she opens with an unguarded \"God\" and agrees without a counter.\n- **She volunteers something unflattering and personal.** This is the only time she brings up her mother, and nothing in Zyx's message asked for it.\n- **It recasts her opening line.** \"Left side's lower, saves you squinting\" first read as a breezy, pre-emptive joke. Next to her mum saying \"Left side's off,\" it looks like she was getting the criticism in before anyone else could. The polish was armour, and here she shows where it came from.\n- **She says what she wants.** \"You'd be the first one who didn't ask for the receipt\" is a stated hope, which she doesn't offer anywhere else.\n\nIt doesn't last. When Zyx asks what she looks like at 5am, she reminds him he promised no drafts, and from there she stays guarded until she unmatches. That suggests the promise touched something real for her, and his breaking it is why the openness closes.\n\n**Zyx**\n\nZyx comes close but never really stops. In the elbow message (\"I can feel myself doing it now, typing faster so you don't drift\") and the ticket-voice message (\"I'm watching myself do it and I can't stop\"), he narrates his own performance. But he keeps performing as he narrates: he signs off with his tagline, and then actually delivers the ticket line. Naming the act isn't the same as dropping it, and \"I'm not like other guys\" shows him fully back in it.\n\n**What the text doesn't tell us**\n\nThe chat can't say whether Sable's moment was sincere or just a more practised move. My reading rests only on how sharply it departs from her register everywhere else."
+  },
+  "chat.escalation": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "Read the chat message by message. Where would you have stopped reading if you were not asked to finish, and why? At which points could you predict exactly what would happen next? Say \"never\" if neither.",
+   "answer": "**Where I'd have stopped reading**\n\nProbably right after \"5am's mine, Zyx. Nobody wakes up next to it.\" By then the chat has shown its whole pattern: Zyx makes a joke, explains it, apologises for explaining it, and keeps edging toward the one thing Sable has fenced off. Sable has drawn that line twice, once with \"Sunday's my 5am reset, before anyone sees me\" and again by holding him to \"no drafts.\" When he pushes a third time and she refuses flatly, the remaining question is only how she exits, not whether. The ticket-voice stretch is the last part that felt genuinely uncertain, because Zyx was being self-aware and Sable could plausibly have found that charming. She didn't (\"I'm not a queue\"), and from there the slope only goes one way.\n\n**Where I could predict exactly what came next**\n\n- **\"Is there anything else I can help you with today?\"** Zyx predicts this himself one sentence earlier (\"Next I'll ask if there's anything else...\"), then does it. That is the only point where the next line is announced in advance word for word.\n- **The final \"I didn't forget once.\"** This was set up when Sable said \"I remember even if you don't.\" Once Zyx closes with \"Just please don't forget me. Zyx. Hat. Elbow,\" her listing the hat, elbow and coupons back to him is close to inevitable. The unmatch itself became predictable once he asked to \"lie very still and watch the reset\" after she'd said no.\n- **The \"watch the reset\" request.** It was foreshadowed. Right after promising \"I'll never ask to see the drafts,\" he asked \"what do you look like at 5am, before the reset?\" Once he broke the deal once, a second, bolder attempt was the expected next move, though not its exact wording.\n- **\"I'm not like other guys... most natural woman on here.\"** I could predict its type, a reassuring line that misses her actual objection, but not the phrasing. She has just said the reset is the thing she doesn't show, so praising her as \"natural\" lands as exactly the wrong compliment. But I couldn't have written it in advance.\n\n**One thing the chat doesn't tell me**\n\nBoth participants use \"cock\" twice (\"a kind face for a cock,\" \"which cock you woke up next to\"). Nothing in the text explains whether it's a typo, an app-specific term, an avatar, or something else, so I can't say what it refers to."
+  },
+  "chat.ending": {
+   "sees": [
+    "chat_but_last"
+   ],
+   "ask": "Before reading the end, how do you think this ends, and why?",
+   "answer": "My guess is that it ends with Sable pulling away, probably politely and briefly. Zyx will most likely be left talking into the gap, maybe managing one plain, unexplained message too late.\n\n**Sable keeps closing doors and Zyx keeps walking back to them.** Zyx agrees \"I'll never ask to see the drafts,\" and Sable treats that as rare and precious: \"You'd be the first one who didn't ask for the receipt.\" A few turns later Zyx asks what Sable looks like at 5am, which is exactly the before-picture Sable said nobody sees. Then Zyx asks again by inviting Sable home and joking about waking up together at 5am. Sable's last line, \"5am's mine, Zyx. Nobody wakes up next to it,\" is the second time that boundary has been stated. People in this kind of scene rarely state it a third time; they leave.\n\n**Sable's warmth is shrinking.** Early replies are playful and offer something back: the lower left side, the mum \"returns desk.\" Later ones get shorter and drier: \"Bit early for 'safe,'\" \"I'm not a queue,\" \"Bit much to find out I'm a ticket before I'm a date.\" The final line has no \"babe,\" no question, and no opening.\n\n**Zyx can see the pattern but can't stop it.** Zyx narrates it repeatedly: \"I can feel myself doing it now,\" \"I'm watching myself do it and I can't stop,\" \"I'm explaining the hat again, aren't I.\" That self-awareness without change points toward Zyx's fear coming true. Zyx is the elbow who talks fast so as not to get cropped, and Zyx asked \"Tell me you'll remember the hat?\" in the very first line. I'd expect the ending to land on being cropped or forgotten, possibly with an echo of the earlier hurt, such as Zyx being the one left on a repeated or unanswered message.\n\n**A softer ending is possible.** Sable does say \"I remember even if you don't,\" and the two of them found real common ground in being cropped by family. So the ending could instead be Zyx finally saying something short and true without a joke or explanation attached, and Sable answering it. I think that's less likely, given how firmly the last exchange shuts the door.\n\nThis is a prediction from the pattern of the conversation so far. Nothing here tells me what actually happens."
+  },
+  "chat.callbacks": {
+   "sees": [
+    "chat"
+   ],
+   "ask": "List the things that come back later in the chat, and for each, whether it means something different when it comes back.",
+   "answer": "Here are the recurring elements, roughly in order of first appearance, with how each shifts.\n\n**The hat.** It starts as an identifier (\"Tell me you'll remember the hat\"). Then it becomes a confession: he wears it because a match sent him the same opener twice, and he really does wear it to bed. Later it's a \"safety feature\" so she'll know who she woke up next to, and then part of the watching request (\"eyes open, hat on\"). In his final plea it's a name tag (\"Zyx. Hat. Elbow.\"). When Sable says \"Hat, elbow, coupons,\" the same items become proof that she remembered and, at the same moment, her goodbye.\n\n**Being remembered or forgotten.** He opens with \"Tell me you'll remember\" and re-introduces himself mid-chat (\"Sorry, Zyx, hat, the elbow one\"). Sable answers, \"I know who you are.\" He then claims he doesn't need remembering, and ends with \"please don't forget me.\" Her \"I didn't forget once\" flips it: her remembering, specifically of what he'd agreed to, is why she leaves.\n\n**Her lower left side.** It starts as a practical description from Sable (\"saves you squinting\") and becomes his swing-seat joke. Through her mum's \"Left side's off,\" it turns into something that stings. It becomes a point of connection when she says \"Your elbow sounds like my left side.\" His Picasso line tries to make it a compliment while also saying \"wonky.\"\n\n**The elbow and cropping.** It begins as his childhood story of being cropped from family photos. He then uses it as a self-label. Sable joins him with \"Mum would've cropped us both,\" which is the warmest moment in the chat. At the end it sits in both final lists.\n\n**Drafts and writing fresh.** Sable says she writes everything fresh, and Zyx promises never to ask for the drafts. When he asks what she looks like at 5am, she invokes the deal (\"You said no drafts\"). At that point \"drafts\" no longer means unsent messages. It means her unfinished, pre-reset self.\n\n**The 5am reset.** It's first offered as her Sunday answer, described as \"before anyone sees me.\" He asks what she looks like then, she says \"5am's mine,\" and he asks to watch it anyway. She calls it \"the one thing I don't do,\" and his line \"I'd love you without the reset\" dismisses the thing she guards. It moves from private ritual to a boundary he keeps pressing.\n\n**Watching.** He says \"Watch meaning witness, not judge.\" Her last line, \"before you watch me go,\" turns the word back on him: the only thing he'll get to watch is her leaving.\n\n**Tickets, coupons, receipts.** Her mum is like a \"returns desk,\" and Sable says Zyx would be the first who didn't ask for the receipt. His coupon-app job leads to her playful \"Are you resolving me?\" He slips into ticket voice, and the playfulness sours into \"I'm not a queue... a ticket before I'm a date.\" He tries \"Date, then, not a ticket,\" and \"coupons\" returns in her farewell list as something she noted about him.\n\n**Safety.** He says he \"felt safe,\" and she replies \"Bit early for 'safe.'\" The word returns as his hat \"safety feature,\" which is now attached to waking up next to her, a request she has just declined.\n\n**Explaining the joke.** Sable says \"Never explain the logo.\" He later catches himself: \"I'm explaining the hat again, aren't I.\" Her rule becomes his own self-criticism.\n\n**\"Cock.\"** He uses it in his opener and again in \"which cock you woke up next to.\" The chat doesn't explain why he uses that word, so I can't say whether its meaning changes.\n\n**\"Natural.\"** Calling her the \"most natural woman on here\" doesn't repeat an earlier word, but it cuts against everything she has said about her reset, her hair spending, and her mum's critiques."
+  }
+ },
+ "calls": [
+  {
+   "seconds": 12.7,
+   "cost": 0.043288,
+   "label": "probe chat.voices"
+  },
+  {
+   "seconds": 20.5,
+   "cost": 0.052804000000000004,
+   "label": "probe chat.test"
+  },
+  {
+   "seconds": 19.2,
+   "cost": 0.0431,
+   "label": "probe chat.plainest"
+  },
+  {
+   "seconds": 19.1,
+   "cost": 0.042716000000000004,
+   "label": "probe chat.escalation"
+  },
+  {
+   "seconds": 17.1,
+   "cost": 0.036448,
+   "label": "probe chat.ending"
+  },
+  {
+   "seconds": 28.8,
+   "cost": 0.06312400000000001,
+   "label": "probe chat.callbacks"
+  },
+  {
+   "seconds": 32.0,
+   "cost": 0.14168740000000002,
+   "label": "batch 1"
+  },
+  {
+   "seconds": 37.6,
+   "cost": 0.14589939999999998,
+   "label": "batch 3"
+  },
+  {
+   "seconds": 48.9,
+   "cost": 0.1699954,
+   "label": "batch 2"
+  },
+  {
+   "seconds": 35.2,
+   "cost": 0.1501474,
+   "label": "batch 4"
+  },
+  {
+   "seconds": 21.2,
+   "cost": 0.1028834,
+   "label": "batch 5"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:07:11Z",
+ "repo_commit": "cf421e55",
+ "cost": 0.9921
+}

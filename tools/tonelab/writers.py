@@ -13,7 +13,10 @@ between them would go on Pinder, with no constraints: no dice, no turns, no leng
     python3 -I tools/tonelab/writers.py --key-stdin --chat reuben,brick    # chats from the profiles
     python3 -I tools/tonelab/writers.py --key-stdin --only reuben --chat reuben,brick
 
-Improvised chats on the frozen one-go prompt (v14, the default; Claude on the subscription login, no key):
+Improvised chats on the frozen one-go prompt (v15, the default; Claude on the subscription login, no key).
+v15 tells the writer the tone lab's balance instead of the game's interest, and ends the chat by its rule:
+five moves in a row that land or backfire, else eleven improvisations and the balance. v14 is the same
+with the game's interest and ending (TONELAB_WRITERS_VERSION=v14):
 
     python3 -I tools/tonelab/writers.py --turns reuben,brick --from docs/tone-lab/scratch/writers-v14 \
         --mechanics docs/tone-lab/scratch/writers-v14/mechanics.json --writers carr,booster,wong \
@@ -541,8 +544,105 @@ def turn_texts13(m, a_name, a_pron, b_name, b_pron):
     return "", out
 
 
+# v15's pieces: where the game's interest was (how much it moved, where it stands), the tone lab's balance.
+# Everything else is v13's, unchanged, except the two combos that gave extra interest and the horniness
+# reception, which now goes by the balance.
+B_START = "{A} and {B} have just matched, and the chat is empty."
+B_RULE = ("Every move of {A}'s counts: in {a_his} favour when it lands, neither way when it does nothing, against {a_him} "
+          "when it backfires. Five in a row that land and {B} agree{b_s} to a date; five in a row that backfire and "
+          "{b_he} unmatch{b_es} {a_him}. Otherwise it's decided after the last improvisation: if the balance is in "
+          "{A}'s favour, {B} agree{b_s} to a date; if it's even or against {a_him}, {b_he} unmatch{b_es} {a_him}. "
+          "The balance starts even: {b_he}{b_s_} open, leaning neither way.")
+B_MOVE = {1: "It lands: it counts in {a_his} favour.", 0: "It does nothing: it counts neither way.",
+          -1: "It backfires: it counts against {a_him}."}
+B_RUN = {1: "That's four in a row that landed: one more and {B} agree{b_s} to a date.",
+         -1: "That's four in a row that backfired: one more and {B} unmatch{b_es} {a_him}."}
+B_STATE = {1: "Overall the balance is in {a_his} favour: {b_he}{b_s_} warming to {a_him}, and {b_his} reply carries that.",
+           0: "Overall the balance is even: {b_he}{b_s_} undecided, and {b_his} reply carries that.",
+           -1: ("Overall the balance is against {a_him}: {b_he}{b_s_} going off {a_him}, though {b_he}{b_s_} still in the chat, "
+                "and {b_his} reply carries that.")}
+B_END = {("date", "streak"): "That's five in a row that landed: {B} agree{b_s} to a date, and the chat ends there.",
+         ("unmatched", "streak"): "That's five in a row that backfired: {B} unmatch{b_es} {a_him}, and the chat ends there.",
+         ("date", "last"): ("That was {a_his} last move, and the balance is in {a_his} favour: {B} agree{b_s} to a date, "
+                            "and the chat ends there."),
+         ("unmatched", "last"): ("That was {a_his} last move, and the balance is {where}: {B} unmatch{b_es} {a_him}, and the "
+                                 "chat ends there.")}
+B_COMBO = dict(I_COMBO, **{"The Setup": "Wit, then Charm: the joke set up the charm.",
+                           "The Disarm": "Wit, then Honesty: the joke lowered {b_his} guard for the honest thing."})
+
+
+def turn_texts15(m, a_name, a_pron, b_name, b_pron):
+    """("", [improvisation text, ...]) for the improvisations the tone lab's rule plays of a record."""
+    steps, ending, why = play15(m)
+    pa, pb = PRON.get(a_pron, PRON["they/them"]), PRON.get(b_pron, PRON["they/them"])
+    f = dict(A=a_name, B=b_name, **{f"a_{k}": v for k, v in pa.items()}, **{f"b_{k}": v for k, v in pb.items()},
+             A_He=pa["he"].capitalize(), B_He=pb["he"].capitalize())
+    fill = lambda s, **kw: s.format(**f, **kw)
+    sign = lambda n: (n > 0) - (n < 0)
+    out, stage, n = [], {}, len(steps)
+    for k, tn in enumerate(m["turns"][:n]):
+        r, stat = tn["roll"], tn["chosen_stat"]
+        p, bal, run = steps[k]
+        before = steps[k - 1][1] if k else 0
+        if r["nat20"]:
+            grade = "nat20"
+        elif r["nat1"]:
+            grade = "nat1"
+        elif r["success"]:
+            d = r["total"] - r["dc"]
+            grade = "exceptional" if d >= 15 else "critical" if d >= 10 else "strong" if d >= 5 else "success"
+        else:
+            grade = r["final_tier"]
+            if grade not in I_GRADE:
+                raise ValueError(f"turn {tn['turn']}: no piece for the result {grade}")
+        ps = [fill(I_CHOOSE, stat=STAT_NAME.get(stat, stat), means=fill(I_STAT[stat]), grade=fill(I_GRADE[grade]))]
+        if not r["success"]:
+            sh = SHADOW_OF[stat]
+            ps.append(fill(I_MISS, shadow=sh, means=fill(P_SHADOW[sh])))
+        if r.get("activated_trap"):
+            trap = r["activated_trap"].lower()
+            stage[trap] = 1
+            if r["success"]:
+                sh = SHADOW_OF[TRAP_STAT[trap]]
+                ps.append(fill(I_MISS, shadow=sh, means=fill(P_SHADOW[sh])))
+            if k < n - 1:
+                ps.append(fill(I_TRAP_SET))
+        for trap in [x.lower() for x in tn.get("active_traps_before") or []]:
+            if trap == (r.get("activated_trap") or "").lower():
+                continue
+            stage[trap] = stage.get(trap, 1) + 1
+            if stage[trap] <= TRAP_LENGTH:
+                sh = SHADOW_OF[TRAP_STAT[trap]]
+                ps.append(fill(I_TRAP_ON, shadow=sh, means=fill(P_SHADOW[sh])))
+        s = tn.get("shadow") or {}
+        if s.get("miss"):
+            ps.append(fill(I_SHADOW_CHECK, shadow=s["shadow"], means=fill(P_SHADOW[s["shadow"]])))
+        h = tn.get("horniness") or {}
+        if h.get("miss"):
+            ps.append(fill(I_HORNY, tier=P_HORNY_TIER[h["tier"]], reception=fill(P_HORNY_HIGH if before > 0 else P_HORNY_LOW)))
+        if (tn.get("steering") or {}).get("succeeded"):
+            ps.append(fill(I_STEER))
+        if tn.get("combo"):
+            if tn["combo"] not in B_COMBO:
+                raise ValueError(f"turn {tn['turn']}: no piece for the combo {tn['combo']}")
+            ps.append(fill(B_COMBO[tn["combo"]]))
+        ps.append(fill(B_MOVE[p]))
+        if k == n - 1:
+            ps.append(fill(B_END[(ending, why)], where="even" if bal == 0 else "against " + pa["him"]))
+        else:
+            if abs(run) == STREAK - 1:
+                ps.append(fill(B_RUN[sign(run)]))
+            ps.append(fill(B_STATE[sign(bal)]))
+        ps.append(fill(I_CLOSE))
+        if k == 0:
+            ps = [fill(P_TIME, clock=m["clock"][11:16], heat=_pick(P_HEAT, m["session_horniness"])),
+                  fill(B_START), fill(B_RULE)] + ps
+        out.append("\n\n".join(ps))
+    return "", out
+
+
 def texts_for(m, *a):
-    return (turn_texts13 if VERSION in ("v13", "v14") else turn_texts)(m, *a)
+    return (turn_texts15 if VERSION == "v15" else turn_texts13 if VERSION in ("v13", "v14") else turn_texts)(m, *a)
 
 
 # v14 (--turns): the one-go prompt that worked by hand on 2026-11-26 (templates/chat-one-pair.v1.md,
@@ -560,6 +660,9 @@ V14 = dict(template="chat-improvised.v1.md", premise="premise.v1.md", model="opu
            system="You write chats for Pinder, a comedy game.")
 PROMPTS["v14"] = dict(PROMPTS["v13"], system=V14["system"])
 TURNS.add("v14")
+# v15: v14 with the tone lab's balance in the improvisations and its rule for where the chat ends
+PROMPTS["v15"] = PROMPTS["v14"]
+TURNS.add("v15")
 # The tone lab's own score for the player's moves, not the game's: a move that lands is +1, one that does
 # nothing is 0, one that backfires is -1. The balance starts at 0 and can go below it; where it stands after
 # the last improvisation decides the ending: above 0 is a date, 0 or below is not.
@@ -575,6 +678,31 @@ def tally(m):
         bal += p
         out.append((p, bal))
     return out, bal > 0
+
+
+# v15 also ends the chat by the tone lab's rule: five moves in a row that land are a date, five in a row that
+# backfire are an unmatch (a move that does nothing breaks a run); otherwise the chat has MOST improvisations,
+# and the balance after the last one decides: above 0 a date, 0 or below an unmatch.
+STREAK, MOST = 5, 11
+
+
+def play15(m):
+    """The tone lab's game over a record's moves: ([(points, balance, run), ...] for the improvisations
+    played, the ending ("date" or "unmatched"), why ("streak" or "last")). run is the length of the
+    current run of moves with the same result, signed: +3 is three in a row that landed."""
+    steps, bal, run = [], 0, 0
+    for tn in m["turns"]:
+        r = tn["roll"]
+        p = 1 if r["success"] else LANDS.get(r["final_tier"], -1)
+        bal += p
+        run = run + p if p and (run > 0) == (p > 0) and run else p
+        steps.append((p, bal, run))
+        if abs(run) == STREAK:
+            return steps, "date" if run > 0 else "unmatched", "streak"
+        if len(steps) == MOST:
+            return steps, "date" if bal > 0 else "unmatched", "last"
+    raise ValueError(f"the game's record ends ({m.get('outcome')}, {len(m['turns'])} moves) before the tone lab's "
+                     f"rule does: play it with more turns or another seed")
 
 
 ACTS = [(1, "the opening"), (2, "the match"), (3, "the closing")]
@@ -685,6 +813,24 @@ def call_claude_session(prompt, session, first, cwd):
     return data, round(time.time() - started, 1)
 
 
+def split_lines(text, line_re):
+    """(chat lines, stray lines) from an answer: "Name: message" lines, and a line without a name right after
+    one is another message from the same character (writers sometimes send a second message unnamed)."""
+    lines, stray, who = [], [], None
+    for ln in text.splitlines():
+        mm = line_re.match(ln)
+        if mm:
+            who = mm.group(1)
+            lines.append(f"{who}: {mm.group(2)}")
+        elif not ln.strip():
+            who = None if not lines else who
+        elif who:
+            lines.append(f"{who}: {ln.strip()}")
+        else:
+            stray.append(ln.strip())
+    return lines, stray
+
+
 def turns14(a, chosen):
     """v14: per comedian, their two character descriptions on the frozen prompt, played improvisation by
     improvisation by Claude in one session. Every comedian's chat gets the same theme, method and seed."""
@@ -693,8 +839,12 @@ def turns14(a, chosen):
     ds = {s: json.load(open(os.path.join(REPO, "data/characters", f"{s}.json"), encoding="utf-8")) for s in (x, y)}
     an, bn = ds[x]["name"], ds[y]["name"]
     mech = json.load(open(a.mechanics, encoding="utf-8"))
-    score, date = tally(mech)
-    if date != (mech.get("outcome") == "DateSecured"):  # the improvisations tell the writer the game's ending
+    if VERSION == "v15":  # the tone lab's rule decides how many improvisations there are and how it ends
+        steps, ending, why = play15(mech)
+        score, date = [(p, b) for p, b, _ in steps], ending == "date"
+    else:
+        score, date = tally(mech)
+    if VERSION == "v14" and date != (mech.get("outcome") == "DateSecured"):  # the improvisations tell the game's ending
         raise SystemExit(f"{a.mechanics}: the balance ends at {score[-1][1]} ({'a date' if date else 'no date'}), "
                          f"but the game ended {mech.get('outcome')}; the last improvisation would tell the other ending")
     _, texts = texts_for(mech, an, ds[x].get("gender_identity", "they/them"), bn, ds[y].get("gender_identity", "they/them"))
@@ -737,13 +887,7 @@ def turns14(a, chosen):
             text = (data.get("result") or "").strip()
             cost += data.get("total_cost_usd") or 0
             secs += seconds
-            lines, stray = [], []
-            for ln in text.splitlines():
-                mm = line_re.match(ln)
-                if mm:
-                    lines.append(f"{mm.group(1)}: {mm.group(2)}")
-                elif ln.strip():
-                    stray.append(ln.strip())
+            lines, stray = split_lines(text, line_re)
             log.append({"turn": i, "prompt": prompt, "answer": text, "lines": lines, "stray": stray, "seconds": seconds,
                         "cost": data.get("total_cost_usd"), "model": list((data.get("modelUsage") or {}).keys()),
                         "from_a": sum(l.startswith(an + ":") for l in lines), "from_b": sum(l.startswith(bn + ":") for l in lines)})
@@ -784,7 +928,9 @@ def turns14(a, chosen):
                    "draw": {"theme": [theme["uid"], theme["name"]], "method": [method["uid"], method["name"]],
                             "theme_text": pool_render(theme), "method_text": pool_render(method)},
                    "mechanics": {k: v for k, v in mech.items() if k != "turns"},
-                   "tally": {"points": [p for p, _ in score], "balance": [b for _, b in score], "date": date},
+                   "tally": dict({"points": [p for p, _ in score], "balance": [b for _, b in score], "date": date},
+                                 **({"played": len(steps), "ending": ending, "why": why,
+                                     "runs": [r for _, _, r in steps]} if VERSION == "v15" else {})),
                    "writers": results}, f, indent=1)
     return not any("error" in r for r in results.values())
 
@@ -871,7 +1017,7 @@ def split_joke(text):
     joke = re.sub(r"^\s*(?:#{1,4}\s*|\*\*)The (?:joke|bit)(?:\*\*)?:?\s*\n", "", text[:m.start()], flags=re.I).strip()
     chat = text[m.end():].strip()
     return (joke, chat) if joke and chat else None  # versions that give the fragments under headings instead of one shuffled list  # whether the game's texting-style fragments are in the list
-VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v14")
+VERSION = os.environ.get("TONELAB_WRITERS_VERSION", "v15")
 SYSTEM, USER, CHAT = (PROMPTS[VERSION][k] for k in ("system", "user", "chat"))
 
 OBJ = {"she/her": "her", "he/him": "him", "they/them": "them"}
@@ -1185,7 +1331,7 @@ def main():
     ap.add_argument("--theme", default="", help="v14: the pool theme for the whole chat (T01..), else drawn")
     ap.add_argument("--method", default="", help="v14: the pool method for the whole chat (M01..), else drawn")
     a = ap.parse_args()
-    if a.turns and VERSION == "v14":  # Claude on the subscription login: no key
+    if a.turns and VERSION in ("v14", "v15"):  # Claude on the subscription login: no key
         chosen = [w for w in WRITERS if not a.writers or w[0] in a.writers.split(",")]
         sys.exit(0 if turns14(a, chosen) else 1)
     if a.turns and a.print_turns:

@@ -1,0 +1,70 @@
+{
+ "id": "chatset-writers-v18",
+ "kind": "chat",
+ "label": "Run 18 · all 3 chats",
+ "version": "run 18",
+ "order": 118,
+ "run": null,
+ "source": "docs/tone-lab/scratch/writers-v18/chat-reuben-brick/",
+ "note": "Every chat of run 18 (run 17 with the tone lab's balance instead of the game's interest in the improvisations; Reuben and Brick on seed 23, eleven improvisations, a date): the same pair, premise, prompt, theme and method, the same author, each on a different comedian's descriptions of the two characters. All of them were written improvisation by improvisation to the same instructions, under IMPROVISATIONS. What the instructions fix (how each improvisation goes, the traps, how interest moves) is shared by design and is not a template, and is not held against the set: list the improvisations it decides under excused and judge only what the writers made of it.",
+ "when": null,
+ "writer": null,
+ "writers_run": 18,
+ "set": true,
+ "materials": {
+  "chats": {
+   "chars": 10579,
+   "words": 1849
+  },
+  "improvisations": {
+   "chars": 5256,
+   "words": 910
+  }
+ },
+ "scores": {
+  "chat.variety": {
+   "score": 2,
+   "why": "I set aside the move sequence fixed by improvisations 1–11: the Denial beats, the Dread narration and the date. I judged only what the writers built on it, and that is the same night three times. All three open with Reuben giving his name plus an identifier so he can be found again, and Brick takes control by logging him in a calendar or file. All three mid-sections use the same backstory: an ex who said \"let's do this again\" or \"see how the week goes\" and a cry in a cab, with Marguerite's timed calendar fights appearing in two of them. All three end the same way: Brick sends an invite with Reuben's name in the title and a travel buffer, and Reuben promises to be early. The texture differs (the sandwich, the tattooed schedule, the rain forecast), and that keeps it off a 1, but lines and beats recur across all three chats, far past the line's limit of two.",
+   "evidence": [
+    "Last man said \"let's do this again\" and named no day. I cried in a cab over a missing Tuesday.",
+    "I'll send an invite with a travel buffer, if you don't mind.",
+    "Invite sent: \"Reuben (sandwich, not Rob).\" Saturday, 21:00 arrival... Travel buffer included."
+   ],
+   "raise": "Give each chat its own wound for Brick and its own closing device in place of the shared cab cry, the Marguerite calendar fights and the labelled invite with a travel buffer, so no line or three-beat run recurs in more than two chats.",
+   "excused": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "def": "eb4c97580d7f148b",
+   "material": "717aad90020a7855",
+   "judge": "claude:opus",
+   "batch": 0,
+   "found": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "probes": {},
+ "calls": [
+  {
+   "seconds": 20.0,
+   "cost": 0.094492,
+   "label": "batch 0"
+  }
+ ],
+ "judge": "claude:opus",
+ "scored_utc": "2026-11-27T20:03:57Z",
+ "repo_commit": "cf421e55",
+ "cost": 0.0945
+}
